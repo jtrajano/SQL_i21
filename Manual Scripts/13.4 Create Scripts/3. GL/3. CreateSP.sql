@@ -735,6 +735,7 @@ BEGIN
 	FROM #ConstructGL
 	
 	UPDATE tblGLFiscalYear SET ysnStatus = 0 WHERE intFiscalYearID = @intFiscalYearID	
+	UPDATE tblGLFiscalYearPeriod SET ysnOpen = 0 where intFiscalYearID = @intFiscalYearID
 END	
 ELSE IF @ysnPost = 0 and @ysnRecap = 0
 BEGIN
@@ -775,6 +776,7 @@ BEGIN
 	
 	UPDATE tblGLDetail SET ysnIsUnposted = 1 WHERE strTransactionID = CAST(@intYear as NVARCHAR(10)) + '-' + @strRetainedAccount and ysnIsUnposted = 0
 	UPDATE tblGLFiscalYear SET ysnStatus = 1 WHERE intFiscalYearID = @intFiscalYearID
+	UPDATE tblGLFiscalYearPeriod SET ysnOpen = 1 where intFiscalYearID = @intFiscalYearID
 END
 
 
