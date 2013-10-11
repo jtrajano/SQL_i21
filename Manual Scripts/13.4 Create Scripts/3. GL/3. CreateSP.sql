@@ -1,6 +1,10 @@
 
 GO
 /****** Object:  StoredProcedure [dbo].[usp_BuildGLAccountTemporary]    Script Date: 10/07/2013 18:00:31 ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_BuildGLAccountTemporary]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].usp_BuildGLAccountTemporary
+GO
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -210,6 +214,10 @@ DELETE tblGLTempAccountToBuild WHERE intUserID = @intUserID
 select 1
 GO
 /****** Object:  StoredProcedure [dbo].[usp_SyncAccounts]    Script Date: 10/07/2013 18:00:31 ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_SyncAccounts]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].usp_SyncAccounts
+GO
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -460,6 +468,10 @@ select 1
 --[usp_SyncAccounts] '130'
 GO
 /****** Object:  StoredProcedure [dbo].[usp_PostFiscalYear]    Script Date: 10/07/2013 18:00:31 ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_PostFiscalYear]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].usp_PostFiscalYear
+GO
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -784,6 +796,10 @@ SELECT * FROM #ConstructGL
 DROP TABLE #ConstructGL
 GO
 /****** Object:  StoredProcedure [dbo].[usp_BuildGLAccount]    Script Date: 10/07/2013 18:00:31 ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_BuildGLAccount]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].usp_BuildGLAccount
+GO
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
