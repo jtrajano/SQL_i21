@@ -287,7 +287,7 @@ BEGIN
 			END
 		ELSE IF @TYPE = 'Equity'
 			BEGIN
-				SET @LegacyType = 'C'
+				SET @LegacyType = 'Q'
 				SET @LegacySide = 'D'
 			END
 		ELSE IF @TYPE = 'Revenue'
@@ -302,7 +302,7 @@ BEGIN
 			END
 		ELSE IF @TYPE = 'Cost of Goods Sold'
 			BEGIN
-				SET @LegacyType = 'E'
+				SET @LegacyType = 'C'
 				SET @LegacySide = 'D'
 			END
 		ELSE IF @TYPE = 'Sales'
@@ -393,7 +393,7 @@ BEGIN
 			END
 		ELSE IF @TYPE_update = 'Equity'
 			BEGIN
-				SET @LegacyType_update = 'C'
+				SET @LegacyType_update = 'Q'
 				SET @LegacySide_update = 'D'
 			END
 		ELSE IF @TYPE_update = 'Revenue'
@@ -408,7 +408,7 @@ BEGIN
 			END
 		ELSE IF @TYPE_update = 'Cost of Goods Sold'
 			BEGIN
-				SET @LegacyType_update = 'E'
+				SET @LegacyType_update = 'C'
 				SET @LegacySide_update = 'D'
 			END
 		ELSE IF @TYPE_update = 'Sales'
