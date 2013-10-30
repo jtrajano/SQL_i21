@@ -24,6 +24,8 @@ SET NOCOUNT ON
 CREATE TABLE #TempResults
 (
 	 strCode					NVARCHAR(50)
+	,strPrimary					NVARCHAR(50)
+	,strSegment					NVARCHAR(50)
 	,strDescription				NVARCHAR(300)
 	,strAccountGroup			NVARCHAR(50)
     ,intAccountGroupID			INT
@@ -35,6 +37,8 @@ CREATE TABLE #TempResults
 CREATE TABLE #PrimaryAccounts
 (
 	 strCode					NVARCHAR(50)
+	,strPrimary					NVARCHAR(50)
+	,strSegment					NVARCHAR(50)
 	,strDescription				NVARCHAR(300)
 	,strAccountGroup			NVARCHAR(50)	
     ,intAccountGroupID			INT
@@ -44,7 +48,7 @@ CREATE TABLE #PrimaryAccounts
 )
 
 INSERT INTO #PrimaryAccounts
-SELECT a.strCode, a.strDescription, b.strAccountGroup, a.intAccountGroupID, x.intAccountSegmentID, a.intAccountStructureID, x.intAccountSegmentID AS strAccountSegmentID
+SELECT a.strCode,'', '', a.strDescription, b.strAccountGroup, a.intAccountGroupID, x.intAccountSegmentID, a.intAccountStructureID, x.intAccountSegmentID AS strAccountSegmentID
 FROM tblGLTempAccountToBuild x
 LEFT JOIN tblGLAccountSegment a 
 ON x.intAccountSegmentID = a.intAccountSegmentID
@@ -57,6 +61,8 @@ WHERE x.intUserID = @intUserID and c.strType = 'Primary'
 CREATE TABLE #ConstructAccount
 (
 	 strCode					NVARCHAR(50) COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL
+	,strPrimary					NVARCHAR(50) COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL
+	,strSegment					NVARCHAR(50) COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL
 	,strDescription				NVARCHAR(300)
 	,strAccountGroup			NVARCHAR(50)
 	,intAccountGroupID			INT
@@ -122,24 +128,23 @@ BEGIN
 			IF NOT EXISTS (SELECT 1 FROM #ConstructAccount)
 			 BEGIN
 				TRUNCATE TABLE #TempResults
-				
+								
 				INSERT INTO #TempResults
-				SELECT *
-				FROM #PrimaryAccounts
-
+				SELECT PA.strCode, REPLICATE('0',(select intStartingPosition from tblGLAccountStructure where strType = 'Primary')) + PA.strCode AS strPrimary, '' as strSegment, PA.strDescription,
+					PA.strAccountGroup, PA.intAccountGroupID, PA.intAccountStructureID, PA.intAccountSegmentID, PA.intAccountSegmentID AS strAccountSegmentID
+				FROM #PrimaryAccounts PA
 			 END
 			ELSE
 			 BEGIN
 				IF EXISTS (SELECT 1 FROM #PrimaryAccounts)
 				BEGIN
-				TRUNCATE TABLE #TempResults
-			
-				INSERT INTO #TempResults
-				SELECT CA.strCode + @strDivider + PA.strCode AS strCode, CA.strDescription + @strDivider + PA.strDescription AS strDescription,
-					PA.strAccountGroup, PA.intAccountGroupID, PA.intAccountStructureID, PA.intAccountSegmentID, PA.intAccountSegmentID AS strAccountSegmentID
-				FROM #ConstructAccount CA, #PrimaryAccounts PA
-				WHERE PA.intAccountStructureID = @iStructureType 
-
+					TRUNCATE TABLE #TempResults
+				
+					INSERT INTO #TempResults
+					SELECT CA.strCode + @strDivider + PA.strCode AS strCode, CA.strPrimary + @strDivider + PA.strCode AS strPrimary, '' as strSegment, CA.strDescription + @strDivider + PA.strDescription AS strDescription,
+						PA.strAccountGroup, PA.intAccountGroupID, PA.intAccountStructureID, PA.intAccountSegmentID, PA.intAccountSegmentID AS strAccountSegmentID
+					FROM #ConstructAccount CA, #PrimaryAccounts PA
+					WHERE PA.intAccountStructureID = @iStructureType
 				END
 			 END
 			DELETE FROM #PrimaryAccounts WHERE intAccountStructureID = @iStructureType
@@ -151,8 +156,8 @@ BEGIN
 				BEGIN
 					IF NOT EXISTS (SELECT 1 FROM #ConstructAccount)
 					 BEGIN
-  						INSERT INTO #TempResults ([strCode], [strDescription], [intAccountStructureID], [intAccountSegmentID], [strAccountSegmentID])
-						SELECT S.strCode, S.strDescription, S.intAccountStructureID, S.intAccountSegmentID, S.intAccountSegmentID AS strAccountSegmentID FROM #Segments S  
+  						INSERT INTO #TempResults ([strCode], [strPrimary], [strSegment], [strDescription], [intAccountStructureID], [intAccountSegmentID], [strAccountSegmentID])
+						SELECT S.strCode, S.strCode, S.strCode, S.strDescription, S.intAccountStructureID, S.intAccountSegmentID, S.intAccountSegmentID AS strAccountSegmentID FROM #Segments S  
 						WHERE S.intAccountStructureID = @iStructureType										
 					 END
 					ELSE
@@ -161,11 +166,11 @@ BEGIN
 						BEGIN
 							TRUNCATE TABLE #TempResults
 
-							INSERT INTO #TempResults ([strCode], [strDescription], [strAccountGroup], [intAccountGroupID], [intAccountStructureID], [intAccountSegmentID], [strAccountSegmentID])
-							SELECT CA.strCode + @strDivider + S.strCode AS strCode, CA.strDescription + @strDivider + S.strDescription AS strDescription
+							INSERT INTO #TempResults ([strCode], [strPrimary], [strSegment], [strDescription], [strAccountGroup], [intAccountGroupID], [intAccountStructureID], [intAccountSegmentID], [strAccountSegmentID])
+							SELECT CA.strCode + @strDivider + S.strCode AS strCode, strPrimary, CA.strSegment + '' + S.strCode AS strSegment, CA.strDescription + @strDivider + S.strDescription AS strDescription
 								 ,CA.strAccountGroup, CA.intAccountGroupID, CA.intAccountStructureID, S.intAccountSegmentID, CA.strAccountSegmentID + ';' + CAST(S.intAccountSegmentID as NVARCHAR(50)) AS strAccountSegmentID
 							FROM #ConstructAccount CA, #Segments S
-							WHERE S.intAccountStructureID = @iStructureType 						
+							WHERE S.intAccountStructureID = @iStructureType  							
 					    END
 					 END
 					DELETE FROM #Segments WHERE intAccountStructureID = @iStructureType
@@ -179,7 +184,7 @@ BEGIN
 	TRUNCATE TABLE #ConstructAccount
 
 	INSERT INTO #ConstructAccount
-	SELECT strCode,strDescription,strAccountGroup,intAccountGroupID,intAccountSegmentID,intAccountStructureID,strAccountSegmentID FROM #TempResults
+	SELECT strCode,strPrimary,strSegment,strDescription,strAccountGroup,intAccountGroupID,intAccountSegmentID,intAccountStructureID,strAccountSegmentID FROM #TempResults
 
 	DELETE FROM #Structure WHERE intAccountStructureID = @iStructureType	
 END
@@ -191,6 +196,8 @@ END
 
 INSERT INTO tblGLTempAccount
 SELECT strCode AS strAccountID, 
+	   strPrimary, 
+	   strSegment,
 	   strDescription,
 	   strAccountGroup,
 	   intAccountGroupID,
@@ -209,7 +216,6 @@ DROP TABLE #Segments
 DROP TABLE #ConstructAccount
 
 DELETE tblGLTempAccountToBuild WHERE intUserID = @intUserID
-
 
 select 1
 GO
@@ -230,145 +236,21 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 
--- +++++ FRESH SYNC +++++ --
 IF NOT EXISTS(SELECT 1 FROM tblGLCOACrossReference)
 BEGIN
-	-- +++++ INSERT ACCOUNT ID +++++ --
-	DELETE tblGLCOACrossReference
-	INSERT INTO tblGLCOACrossReference (
-			inti21ID, 
-			stri21ID, 
-			strExternalID, 
-			strCurrentExternalID, 
-			strCompanyID,
-			intConcurrencyID) 
-	SELECT  intAccountID as inti21ID, 
-			strAccountID as stri21ID, 
-			REPLICATE('0',(select intStartingPosition - 1 from tblGLAccountStructure where strType = 'Primary')) + REPLACE(strAccountID,'-','') as strExternalID, 
-			REPLICATE('0',(select intStartingPosition - 1 from tblGLAccountStructure where strType = 'Primary')) + REPLACE(strAccountID,'-','') as strCurrentExternalID, 
-			'Legacy' as strCompanyID,
-			1
-	FROM tblGLAccount
-
-
-	-- +++++ TO TEMP TABLE +++++ --
-	SELECT * INTO #TempCrossReference
-	FROM tblGLCOACrossReference
-
-
-	-- +++++ SYNC ACCOUNTS +++++ --
-	DELETE glactmst
-
-	WHILE EXISTS(SELECT 1 FROM #TempCrossReference)
-	BEGIN
-		Declare @ID INT = (SELECT TOP 1 inti21ID FROM #TempCrossReference)
-		Declare @ACCOUNT varchar(200) = (SELECT TOP 1 strCurrentExternalID FROM #TempCrossReference)
-		Declare @TYPE varchar(200) = (SELECT TOP 1 strAccountType FROM tblGLAccount LEFT JOIN tblGLAccountGroup ON tblGLAccount.intAccountGroupID = tblGLAccountGroup.intAccountGroupID WHERE intAccountID = @ID)
-		Declare @ACTIVE BIT = (SELECT TOP 1 ysnActive FROM tblGLAccount WHERE intAccountID = @ID)
-		Declare @DESCRIPTION varchar(500) = (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountID = @ID)
-		Declare @LegacyType varchar(200) = ''
-		Declare @LegacySide varchar(200) = ''
-		Declare @LegacyActive varchar(200) = 'N'
-		
-		IF @ACTIVE = 1
-			BEGIN
-				SET @LegacyActive = 'Y'
-			END
-
-		IF @TYPE = 'Asset'
-			BEGIN
-				SET @LegacyType = 'A'
-				SET @LegacySide = 'D'
-			END
-		ELSE IF @TYPE = 'Liability'
-			BEGIN
-				SET @LegacyType = 'L'
-				SET @LegacySide = 'C'
-			END
-		ELSE IF @TYPE = 'Equity'
-			BEGIN
-				SET @LegacyType = 'Q'
-				SET @LegacySide = 'D'
-			END
-		ELSE IF @TYPE = 'Revenue'
-			BEGIN
-				SET @LegacyType = 'I'
-				SET @LegacySide = 'C'
-			END
-		ELSE IF @TYPE = 'Expense'
-			BEGIN
-				SET @LegacyType = 'E'
-				SET @LegacySide = 'D'
-			END
-		ELSE IF @TYPE = 'Cost of Goods Sold'
-			BEGIN
-				SET @LegacyType = 'C'
-				SET @LegacySide = 'D'
-			END
-		ELSE IF @TYPE = 'Sales'
-			BEGIN
-				SET @LegacyType = 'I'
-				SET @LegacySide = 'C'
-			END
-		
-		INSERT INTO glactmst (
-			[glact_acct1_8],
-			[glact_acct9_16],
-			[glact_desc],
-			[glact_type],
-			[glact_normal_value],
-			[glact_saf_cat],
-			[glact_flow_cat],
-			[glact_uom],
-			[glact_verify_flag],
-			[glact_active_yn],
-			[glact_sys_acct_yn],
-			[glact_desc_lookup],
-			[glact_user_fld_1],
-			[glact_user_fld_2],
-			[glact_user_id],
-			[glact_user_rev_dt]
-			)
-		VALUES (
-			CONVERT(INT, SUBSTRING(@ACCOUNT,1,8)),
-			CONVERT(INT, SUBSTRING(@ACCOUNT,9,16)),
-			SUBSTRING(@DESCRIPTION,0,30),
-			@LegacyType,
-			@LegacySide,
-			'',
-			'',
-			'',
-			'',
-			@LegacyActive,
-			'N',
-			'',
-			'',
-			'',
-			@intUserID,
-			CONVERT(INT, CONVERT(VARCHAR(8), GETDATE(), 112))
-			)
-					
-			UPDATE tblGLCOACrossReference SET intLegacyReferenceID = (SELECT TOP 1 A4GLIdentity FROM glactmst ORDER BY A4GLIdentity DESC) WHERE inti21ID = @ID		
-			DELETE FROM #TempCrossReference WHERE inti21ID = @ID
-	END
+	DELETE glactmst	
 END
-ELSE
-BEGIN
-	-- +++++++++++++++++++++++ --
-	-- +++++ UPDATE SYNC +++++ --
-	-- +++++++++++++++++++++++ --
-	
-	
+
+BEGIN	
 	-- +++++ TO TEMP TABLE +++++ --
 	SELECT * INTO #TempUpdateCrossReference
 	FROM tblGLCOACrossReference WHERE intLegacyReferenceID IS NULL
-
 
 	-- +++++ SYNC ACCOUNTS +++++ --
 	WHILE EXISTS(SELECT 1 FROM #TempUpdateCrossReference)
 	BEGIN
 		Declare @ID_update INT = (SELECT TOP 1 inti21ID FROM #TempUpdateCrossReference)
-		Declare @ACCOUNT_update varchar(200) = (SELECT TOP 1 strCurrentExternalID FROM #TempUpdateCrossReference)
+		Declare @ACCOUNT_update varchar(200) = (SELECT TOP 1 REPLACE(strCurrentExternalID,'-','') FROM #TempUpdateCrossReference WHERE inti21ID = @ID_update)
 		Declare @TYPE_update varchar(200) = (SELECT TOP 1 strAccountType FROM tblGLAccount LEFT JOIN tblGLAccountGroup ON tblGLAccount.intAccountGroupID = tblGLAccountGroup.intAccountGroupID WHERE intAccountID = @ID_update)
 		Declare @ACTIVE_update BIT = (SELECT TOP 1 ysnActive FROM tblGLAccount WHERE intAccountID = @ID_update)
 		Declare @DESCRIPTION_update varchar(500) = (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountID = @ID_update)
@@ -456,9 +338,7 @@ BEGIN
 					
 			UPDATE tblGLCOACrossReference SET intLegacyReferenceID = (SELECT TOP 1 A4GLIdentity FROM glactmst ORDER BY A4GLIdentity DESC) WHERE inti21ID = @ID_update		
 			DELETE FROM #TempUpdateCrossReference WHERE inti21ID = @ID_update
-	END
-	
-	
+	END		
 END
 	
 select 1
@@ -827,14 +707,13 @@ ORDER BY strAccountID
 INSERT INTO tblGLCOACrossReference ([inti21ID],[stri21ID],[strExternalID], [strCurrentExternalID], [strCompanyID], [intConcurrencyID])
 SELECT (SELECT intAccountID FROM tblGLAccount A WHERE A.strAccountID = B.strAccountID) as inti21ID,
 	   B.strAccountID as stri21ID,
-	   REPLICATE('0',(select intStartingPosition - 1 from tblGLAccountStructure where strType = 'Primary')) + REPLACE(strAccountID,'-','') as strExternalID, 
-	   REPLICATE('0',(select intStartingPosition - 1 from tblGLAccountStructure where strType = 'Primary')) + REPLACE(strAccountID,'-','') as strCurrentExternalID, 
+	   B.strPrimary + '-' + REPLICATE('0',(select 8 - SUM(intLength) from tblGLAccountStructure where strType = 'Segment')) + B.strSegment as strExternalID , 	   
+	   B.strPrimary + '-' + REPLICATE('0',(select 8 - SUM(intLength) from tblGLAccountStructure where strType = 'Segment')) + B.strSegment as strCurrentExternalID,
 	   'Legacy' as strCompanyID,
 	   1
 FROM tblGLTempAccount B
 WHERE intUserID = @intUserID and strAccountID NOT IN (SELECT stri21ID FROM tblGLCOACrossReference)	
 ORDER BY strAccountID
-
 
 -- +++++ INSERT SEGMENT MAPPING +++++ --
 WHILE EXISTS(SELECT 1 FROM tblGLTempAccount WHERE intUserID = @intUserID)
@@ -880,6 +759,4 @@ EXEC usp_SyncAccounts @intUserID
 
 select 1
 
-
---usp_BuildGLAccount 130
 GO
