@@ -444,31 +444,31 @@ SELECT
 		,intAccountID				= tblGLDetail.intAccountID
 		,strAccountGroup			= (SELECT TOP 1 A.strAccountGroup  FROM tblGLAccountGroup A LEFT JOIN tblGLAccount B 
 											ON A.intAccountGroupID = B.intAccountGroupID WHERE B.intAccountID = tblGLDetail.intAccountID)
-		,dblDebit					=	CASE WHEN C.strAccountType = 'Revenue' THEN (  
+		,dblDebit					=	CASE WHEN C.strAccountType = 'Revenue' or C.strAccountType = 'Sales' THEN (  
 											CASE WHEN SUM((ISNULL(dblCredit,0) - ISNULL(dblDebit,0))) > 0 THEN ABS(SUM(ISNULL(dblCredit,0) - ISNULL(dblDebit,0)))  
 											ELSE 0 END)  
-											WHEN C.strAccountType = 'Expense' THEN (  
+											WHEN C.strAccountType = 'Expense' or C.strAccountType = 'Cost of Goods Sold' THEN (  
 											CASE WHEN SUM((ISNULL(dblDebit,0) - ISNULL(dblCredit,0))) < 0 THEN ABS(SUM(ISNULL(dblDebit,0) - ISNULL(dblCredit,0)))  
 											ELSE 0 END)
 											END 
-		,dblCredit					=	CASE WHEN C.strAccountType = 'Revenue' THEN (  
+		,dblCredit					=	CASE WHEN C.strAccountType = 'Revenue' or C.strAccountType = 'Sales' THEN (  
 											CASE WHEN SUM((ISNULL(dblCredit,0) - ISNULL(dblDebit,0))) < 0 THEN ABS(SUM(ISNULL(dblCredit,0) - ISNULL(dblDebit,0)))  
 											ELSE 0 END)  
-											WHEN C.strAccountType = 'Expense' THEN (  
+											WHEN C.strAccountType = 'Expense' or C.strAccountType = 'Cost of Goods Sold' THEN (  
 											CASE WHEN SUM((ISNULL(dblDebit,0) - ISNULL(dblCredit,0))) > 0 THEN ABS(SUM(ISNULL(dblDebit,0) - ISNULL(dblCredit,0)))  
 											ELSE 0 END)  
 											END
-		,dblDebitUnit				=	CASE WHEN C.strAccountType = 'Revenue' THEN (  
+		,dblDebitUnit				=	CASE WHEN C.strAccountType = 'Revenue' or C.strAccountType = 'Sales' THEN (  
 											CASE WHEN SUM((ISNULL(dblCreditUnit,0) - ISNULL(dblDebitUnit,0))) > 0 THEN ABS(SUM(ISNULL(dblCreditUnit,0) - ISNULL(dblDebitUnit,0)))  
 											ELSE 0 END)  
-											WHEN C.strAccountType = 'Expense' THEN (  
+											WHEN C.strAccountType = 'Expense' or C.strAccountType = 'Cost of Goods Sold' THEN (  
 											CASE WHEN SUM((ISNULL(dblDebitUnit,0) - ISNULL(dblCreditUnit,0))) < 0 THEN ABS(SUM(ISNULL(dblDebitUnit,0) - ISNULL(dblCreditUnit,0)))  
 											ELSE 0 END)
 											END 
-		,dblCreditUnit				=	CASE WHEN C.strAccountType = 'Revenue' THEN (  
+		,dblCreditUnit				=	CASE WHEN C.strAccountType = 'Revenue' or C.strAccountType = 'Sales' THEN (  
 											CASE WHEN SUM((ISNULL(dblCreditUnit,0) - ISNULL(dblDebitUnit,0))) < 0 THEN ABS(SUM(ISNULL(dblCreditUnit,0) - ISNULL(dblDebitUnit,0)))  
 											ELSE 0 END)  
-											WHEN C.strAccountType = 'Expense' THEN (  
+											WHEN C.strAccountType = 'Expense' or C.strAccountType = 'Cost of Goods Sold' THEN (  
 											CASE WHEN SUM((ISNULL(dblDebitUnit,0) - ISNULL(dblCreditUnit,0))) > 0 THEN ABS(SUM(ISNULL(dblDebitUnit,0) - ISNULL(dblCreditUnit,0)))  
 											ELSE 0 END)  
 											END    
@@ -501,7 +501,7 @@ FROM	tblGLDetail  LEFT JOIN tblGLAccount B
 			ON tblGLDetail.intAccountID = B.intAccountID 
 		LEFT JOIN tblGLAccountGroup C
 			ON B.intAccountGroupID = C.intAccountGroupID
-WHERE	C.strAccountType IN ('Revenue', 'Expense') 
+WHERE	C.strAccountType IN ('Revenue','Sales', 'Expense','Cost of Goods Sold') 
 		AND FLOOR(CAST(CAST(dtmDate AS DATETIME) AS NUMERIC(18,6))) BETWEEN  FLOOR(CAST(@dtmDateFrom AS NUMERIC(18,6))) AND FLOOR(CAST(@dtmDateTo AS NUMERIC(18,6)))
 		AND ysnIsUnposted = 0
 		AND strCode <> 'AA' 
@@ -523,7 +523,7 @@ SET @dblRetained =
 						ON tblGLDetail.intAccountID = B.intAccountID  
 						LEFT JOIN tblGLAccountGroup C
 						ON B.intAccountGroupID = C.intAccountGroupID
-			WHERE	C.strAccountType = 'Revenue' 
+			WHERE	C.strAccountType IN ('Revenue','Sales')
 					AND FLOOR(CAST(CAST(dtmDate AS DATETIME) AS NUMERIC(18,6))) BETWEEN  FLOOR(CAST(@dtmDateFrom AS NUMERIC(18,6))) AND FLOOR(CAST(@dtmDateTo AS NUMERIC(18,6)))
 					AND ysnIsUnposted = 0
 					AND strCode <> 'AA'
@@ -534,7 +534,7 @@ SET @dblRetained =
 						ON tblGLDetail.intAccountID = B.intAccountID  
 						LEFT JOIN tblGLAccountGroup C
 						ON B.intAccountGroupID = C.intAccountGroupID
-			WHERE	C.strAccountType = 'Expense' 
+			WHERE	C.strAccountType IN ('Expense','Cost of Goods Sold')
 					AND FLOOR(CAST(CAST(dtmDate AS DATETIME) AS NUMERIC(18,6))) BETWEEN  FLOOR(CAST(@dtmDateFrom AS NUMERIC(18,6))) AND FLOOR(CAST(@dtmDateTo AS NUMERIC(18,6)))
 					AND ysnIsUnposted = 0
 					AND strCode <> 'AA'
