@@ -439,7 +439,7 @@ SELECT TOP 1 @strCurrencyID = ISNULL(strCurrency, 'USD') FROM tblSMCurrency WHER
 
 INSERT INTO #ConstructGL
 SELECT		
-		dtmDate						= GETDATE()
+		dtmDate						= @dtmDateTo
 		,strBatchID					= @strBatchID
 		,intAccountID				= tblGLDetail.intAccountID
 		,strAccountGroup			= (SELECT TOP 1 A.strAccountGroup  FROM tblGLAccountGroup A LEFT JOIN tblGLAccount B 
@@ -546,18 +546,18 @@ SET @dblRetainedCredit = (SELECT SUM(dblCredit) as dblCredit FROM #ConstructGL)
 
 IF @dblRetainedDebit > @dblRetainedCredit
 BEGIN
-	SET @dblRetainedCredit = @dblRetained
+	SET @dblRetainedCredit = ABS(@dblRetained)
 	SET @dblRetainedDebit = 0
 END
 ELSE
 BEGIN
 	SET @dblRetainedCredit = 0
-	SET @dblRetainedDebit = @dblRetained	
+	SET @dblRetainedDebit = ABS(@dblRetained)	
 END
 
 INSERT INTO #ConstructGL
 SELECT			
-		dtmDate				= GETDATE()
+		dtmDate					= @dtmDateTo
 		,strBatchID				= @strBatchID
 		,intAccountID			= @intAccountID
 		,strAccountGroup		= @strRetainedAcctGroup
