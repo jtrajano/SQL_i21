@@ -60,9 +60,9 @@ WHERE x.intUserID = @intUserID and c.strType = 'Primary'
 
 CREATE TABLE #ConstructAccount
 (
-	 strCode					NVARCHAR(50) COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL
-	,strPrimary					NVARCHAR(50) COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL
-	,strSegment					NVARCHAR(50) COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL
+	 strCode					NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+	,strPrimary					NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+	,strSegment					NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
 	,strDescription				NVARCHAR(300)
 	,strAccountGroup			NVARCHAR(50)
 	,intAccountGroupID			INT
@@ -130,7 +130,7 @@ BEGIN
 				TRUNCATE TABLE #TempResults
 								
 				INSERT INTO #TempResults
-				SELECT PA.strCode, REPLICATE('0',(select intStartingPosition from tblGLAccountStructure where strType = 'Primary')) + PA.strCode AS strPrimary, '' as strSegment, PA.strDescription,
+				SELECT PA.strCode, REPLICATE('0',(select 9 - intStartingPosition from tblGLAccountStructure where strType = 'Primary')) + PA.strCode AS strPrimary, '' as strSegment, PA.strDescription,
 					PA.strAccountGroup, PA.intAccountGroupID, PA.intAccountStructureID, PA.intAccountSegmentID, PA.intAccountSegmentID AS strAccountSegmentID
 				FROM #PrimaryAccounts PA
 			 END
@@ -205,7 +205,7 @@ SELECT strCode AS strAccountID,
 	   @intUserID AS intUserID,
 	   dtmCreated = getDate()
 FROM #ConstructAccount
-WHERE strCode COLLATE DATABASE_DEFAULT NOT IN (SELECT strAccountID COLLATE DATABASE_DEFAULT FROM tblGLAccount)	   
+WHERE strCode NOT IN (SELECT strAccountID FROM tblGLAccount)	   
 ORDER BY strCode		
 
 
