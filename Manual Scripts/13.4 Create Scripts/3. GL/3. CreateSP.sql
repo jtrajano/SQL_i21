@@ -276,7 +276,7 @@ BEGIN
 		ELSE IF @TYPE_update = 'Equity'
 			BEGIN
 				SET @LegacyType_update = 'Q'
-				SET @LegacySide_update = 'D'
+				SET @LegacySide_update = 'C'
 			END
 		ELSE IF @TYPE_update = 'Revenue'
 			BEGIN
