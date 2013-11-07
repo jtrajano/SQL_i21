@@ -10,3 +10,22 @@ GO
 /*
 	END CONVERSION Company Setup
 */
+
+
+/*
+	BEGIN CONVERSION Company Preference
+*/
+-- Legacy integration is ON by default
+	insert tblSMPreferences
+	(
+	strPreference
+	,strDescription
+	,strValue
+	,intSort
+	,intConcurrencyID
+	)
+	select 'isLegacyIntegration', 'isLegacyIntegration', 'true', 0, 0
+
+/*
+	BEGIN CONVERSION Company Preference
+*/
