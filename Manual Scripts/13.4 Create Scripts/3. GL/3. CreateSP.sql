@@ -130,7 +130,7 @@ BEGIN
 				TRUNCATE TABLE #TempResults
 								
 				INSERT INTO #TempResults
-				SELECT PA.strCode, REPLICATE('0',(select 9 - intStartingPosition from tblGLAccountStructure where strType = 'Primary')) + PA.strCode AS strPrimary, '' as strSegment, PA.strDescription,
+				SELECT PA.strCode, REPLICATE('0',(select 8 - intLength from tblGLAccountStructure where strType = 'Primary')) + PA.strCode AS strPrimary, '' as strSegment, PA.strDescription,
 					PA.strAccountGroup, PA.intAccountGroupID, PA.intAccountStructureID, PA.intAccountSegmentID, PA.intAccountSegmentID AS strAccountSegmentID
 				FROM #PrimaryAccounts PA
 			 END
