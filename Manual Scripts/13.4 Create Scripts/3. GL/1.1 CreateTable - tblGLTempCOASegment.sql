@@ -1,10 +1,12 @@
 
-IF EXISTS (SELECT *  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tempDASTable') DROP TABLE tempDASTable 
+IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tempDASTable') DROP TABLE tempDASTable 
+IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tblGLTempCOASegment') DROP TABLE tblGLTempCOASegment
+
                                 DECLARE @Segments NVARCHAR(MAX)
                                 SELECT @Segments = SUBSTRING((SELECT '],[' + strStructureName FROM tblGLAccountStructure WHERE strType <> 'Divider' FOR XML PATH('')),3,200000) + ']'
                                 DECLARE @Query NVARCHAR(MAX)
                                 SET @Query = 
-                                'SELECT A.intAccountID, DAS.* INTO tempDASTable FROM tblGLAccount A
+                                'SELECT A.intAccountID, DAS.* INTO tblGLTempCOASegment FROM tblGLAccount A
                                 INNER JOIN (
                                  SELECT *  FROM (
                                    SELECT DISTINCT
@@ -25,5 +27,6 @@ IF EXISTS (SELECT *  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tempDAST
                                  ) AS DAS
                                 ON A.strAccountID = DAS.strAccountID
                                 '
+								--select @Segments
                                 EXEC sp_executesql @Query
                                 
