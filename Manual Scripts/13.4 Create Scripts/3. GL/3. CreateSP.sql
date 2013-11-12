@@ -759,7 +759,7 @@ EXEC usp_SyncAccounts @intUserID
 -- +++++ RECREATE tblGLTempCOASegment  +++++ --
 IF EXISTS (SELECT *  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tblGLTempCOASegment') DROP TABLE tblGLTempCOASegment 
     DECLARE @Segments NVARCHAR(MAX)
-    SELECT @Segments = SUBSTRING((SELECT '],[' + strStructureName FROM tblGLAccountStructure WHERE strType <> 'Divider' FOR XML PATH('')),3,200000) + ']'
+    SELECT @Segments = SUBSTRING((SELECT '],[' + strStructureName FROM tblGLAccountStructure WHERE strType <> 'Divider' ORDER BY intSort FOR XML PATH('')),3,200000) + ']'
     DECLARE @Query NVARCHAR(MAX)
     SET @Query = 
     'SELECT A.intAccountID, DAS.* INTO tblGLTempCOASegment FROM tblGLAccount A
@@ -789,3 +789,71 @@ IF EXISTS (SELECT *  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tblGLTem
 select 1
 
 GO
+/****** Object:  StoredProcedure [dbo].[usp_GLCOARestructure]    Script Date: 11/12/2013 11:12:13 ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_GLCOARestructure]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].usp_GLCOARestructure
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+/*----------------------*/
+/* CREATE THE PROCEDURE */
+/*----------------------*/
+
+CREATE PROCEDURE  [dbo].[usp_GLCOARestructure]
+AS
+
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+
+DECLARE @Divider		NVARCHAR(10)
+DECLARE @Structure		NVARCHAR(200)
+DECLARE @Query NVARCHAR(MAX)
+DECLARE @tblQuery TABLE
+(
+	ID		NVARCHAR(200)
+)
+
+--CALL SP To Recreate tblGLTempCOASegment
+
+SELECT * 
+INTO #TempCOA
+FROM tblGLTempCOASegment
+
+SELECT [name] AS [Column Name] 
+INTO #TempColumnName 
+FROM syscolumns 
+WHERE id = object_id('tblGLTempCOASegment') AND [name] NOT IN ('intAccountID','strAccountID')
+
+SET @Divider   = (SELECT strMask FROM tblGLAccountStructure WHERE strType = 'Divider')
+SET @Structure = (SELECT '[' + [Column Name]  + '] + ''' + @Divider + ''' + ' as 'data()' FROM #TempColumnName for xml path(''))
+SET @Structure = LEFT(@Structure, LEN(@Structure) - 7)
+
+WHILE EXISTS(SELECT 1 FROM #TempCOA)
+BEGIN
+	DECLARE @AccountID INT = (SELECT TOP 1 intAccountID FROM #TempCOA)
+	DECLARE @strAccountID NVARCHAR(200) = (SELECT TOP 1 intAccountID FROM #TempCOA)
+	SET @Query = 'SELECT ' + @Structure + ' as strAccountID FROM #TempCOA WHERE intAccountID = ' + CAST(@AccountID AS NVARCHAR(100))
+	
+	INSERT INTO @tblQuery
+	EXEC sp_executesql @Query	
+	
+	SET @strAccountID = (SELECT TOP 1 ID FROM @tblQuery)
+	
+	UPDATE tblGLAccount SET strAccountID = @strAccountID WHERE intAccountID = @AccountID
+	UPDATE tblGLCOACrossReference SET stri21ID = @strAccountID WHERE inti21ID = @AccountID
+
+	DELETE FROM #TempCOA WHERE intAccountID = @AccountID	
+	DELETE @tblQuery
+END
+
+DROP TABLE #TempColumnName
+DROP TABLE #TempCOA
+
+select 1
+GO
+
+--usp_GLCOARestructure
