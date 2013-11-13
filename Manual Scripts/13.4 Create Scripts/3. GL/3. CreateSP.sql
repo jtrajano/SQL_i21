@@ -675,6 +675,59 @@ END
 SELECT * FROM #ConstructGL
 DROP TABLE #ConstructGL
 GO
+
+/****** Object:  StoredProcedure [dbo].[usp_BuildGLCOASegment]    Script Date: 11/13/2013 18:00:31 ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_BuildGLCOASegment]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].usp_BuildGLCOASegment
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE usp_BuildGLCOASegment
+	
+AS
+BEGIN
+	--CREATE DYNAMIC ACCOUNT STRUCTURE
+	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tempDASTable') DROP TABLE tempDASTable 
+	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tblGLTempCOASegment') DROP TABLE tblGLTempCOASegment
+
+			DECLARE @Segments NVARCHAR(MAX)
+			SELECT @Segments = SUBSTRING((SELECT '],[' + strStructureName FROM tblGLAccountStructure WHERE strType <> 'Divider' FOR XML PATH('')),3,200000) + ']'
+			DECLARE @Query NVARCHAR(MAX)
+			SET @Query = 
+			'SELECT A.intAccountID, DAS.* INTO tblGLTempCOASegment FROM tblGLAccount A
+			INNER JOIN (
+			 SELECT *  FROM (
+			   SELECT DISTINCT
+			   A.strAccountID 
+			   ,C.strCode
+			   ,D.strStructureName
+				from tblGLAccount A INNER JOIN tblGLAccountSegmentMapping B 
+				  ON A.intAccountID = B.intAccountID
+			   INNER JOIN tblGLAccountSegment C
+				ON B.intAccountSegmentID = C.intAccountSegmentID
+			   INNER JOIN  tblGLAccountStructure D 
+				ON C.intAccountStructureID = D.intAccountStructureID
+			  ) AS tempTable
+			 PIVOT
+			 (
+			 MIN(strCode)
+			 FOR strStructureName IN (' + @Segments + ')) AS PVT
+			 ) AS DAS
+			ON A.strAccountID = DAS.strAccountID
+			'
+			--select @Segments
+			EXEC sp_executesql @Query
+END
+GO
+
 /****** Object:  StoredProcedure [dbo].[usp_BuildGLAccount]    Script Date: 10/07/2013 18:00:31 ******/
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_BuildGLAccount]') AND type in (N'P', N'PC'))
 DROP PROCEDURE [dbo].usp_BuildGLAccount
@@ -755,105 +808,87 @@ END
 DELETE FROM tblGLTempAccount WHERE intUserID = @intUserID
 
 EXEC usp_SyncAccounts @intUserID
-
--- +++++ RECREATE tblGLTempCOASegment  +++++ --
-IF EXISTS (SELECT *  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tblGLTempCOASegment') DROP TABLE tblGLTempCOASegment 
-    DECLARE @Segments NVARCHAR(MAX)
-    SELECT @Segments = SUBSTRING((SELECT '],[' + strStructureName FROM tblGLAccountStructure WHERE strType <> 'Divider' ORDER BY intSort FOR XML PATH('')),3,200000) + ']'
-    DECLARE @Query NVARCHAR(MAX)
-    SET @Query = 
-    'SELECT A.intAccountID, DAS.* INTO tblGLTempCOASegment FROM tblGLAccount A
-    INNER JOIN (
-     SELECT *  FROM (
-       SELECT DISTINCT
-       A.strAccountID 
-       ,C.strCode
-       ,D.strStructureName
-        from tblGLAccount A INNER JOIN tblGLAccountSegmentMapping B 
-          ON A.intAccountID = B.intAccountID
-       INNER JOIN tblGLAccountSegment C
-        ON B.intAccountSegmentID = C.intAccountSegmentID
-       INNER JOIN  tblGLAccountStructure D 
-        ON C.intAccountStructureID = D.intAccountStructureID
-      ) AS tempTable
-     PIVOT
-     (
-     MIN(strCode)
-     FOR strStructureName IN (' + @Segments + ')) AS PVT
-     ) AS DAS
-    ON A.strAccountID = DAS.strAccountID
-    '
-    EXEC sp_executesql @Query
+EXEC usp_BuildGLCOASegment
 
 
 select 1
 
 GO
 /****** Object:  StoredProcedure [dbo].[usp_GLCOARestructure]    Script Date: 11/12/2013 11:12:13 ******/
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_GLCOARestructure]') AND type in (N'P', N'PC'))
-DROP PROCEDURE [dbo].usp_GLCOARestructure
-GO
+--IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_GLCOARestructure]') AND type in (N'P', N'PC'))
+--DROP PROCEDURE [dbo].usp_GLCOARestructure
+--GO
 
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-/*----------------------*/
-/* CREATE THE PROCEDURE */
-/*----------------------*/
+--SET ANSI_NULLS ON
+--GO
+--SET QUOTED_IDENTIFIER ON
+--GO
+--/*----------------------*/
+--/* CREATE THE PROCEDURE */
+--/*----------------------*/
 
-CREATE PROCEDURE  [dbo].[usp_GLCOARestructure]
-AS
+--CREATE PROCEDURE  [dbo].[usp_GLCOARestructure]
+--AS
 
-SET QUOTED_IDENTIFIER OFF
-SET ANSI_NULLS ON
-SET NOCOUNT ON
+--SET QUOTED_IDENTIFIER OFF
+--SET ANSI_NULLS ON
+--SET NOCOUNT ON
 
-DECLARE @Divider		NVARCHAR(10)
-DECLARE @Structure		NVARCHAR(200)
-DECLARE @Query NVARCHAR(MAX)
-DECLARE @tblQuery TABLE
-(
-	ID		NVARCHAR(200)
-)
+--DECLARE @Divider		NVARCHAR(10)
+--DECLARE @Structure		NVARCHAR(200)
+--DECLARE @CodeDescription		NVARCHAR(200)
+--DECLARE @Query NVARCHAR(MAX)
+--DECLARE @tblQuery TABLE
+--(
+--	ID					NVARCHAR(200)
+--	,DescriptionID		NVARCHAR(200)
+--)
 
---CALL SP To Recreate tblGLTempCOASegment
+----CREATE DYNAMIC ACCOUNT STRUCTURE
+----EXEC usp_BuildGLCOASegment
 
-SELECT * 
-INTO #TempCOA
-FROM tblGLTempCOASegment
+--SELECT * 
+--INTO #TempCOA
+--FROM tblGLTempCOASegment
 
-SELECT [name] AS [Column Name] 
-INTO #TempColumnName 
-FROM syscolumns 
-WHERE id = object_id('tblGLTempCOASegment') AND [name] NOT IN ('intAccountID','strAccountID')
+--SELECT [name] AS [Column Name] 
+--INTO #TempColumnName 
+--FROM syscolumns 
+--WHERE id = object_id('tblGLTempCOASegment') AND [name] COLLATE Latin1_General_CI_AS IN (SELECT strStructureName FROM tblGLAccountStructure)
 
-SET @Divider   = (SELECT strMask FROM tblGLAccountStructure WHERE strType = 'Divider')
-SET @Structure = (SELECT '[' + [Column Name]  + '] + ''' + @Divider + ''' + ' as 'data()' FROM #TempColumnName for xml path(''))
-SET @Structure = LEFT(@Structure, LEN(@Structure) - 7)
+--SET @Divider   = (SELECT strMask FROM tblGLAccountStructure WHERE strType = 'Divider')
+--SET @Structure = (SELECT '[' + [Column Name]  + '] + ''' + @Divider + ''' + ' as 'data()' FROM #TempColumnName for xml path(''))
+--SET @Structure = LEFT(@Structure, LEN(@Structure) - 7)
+--SET @CodeDescription = (SELECT '[' + [Column Name] + ' CodeDesc' + '] + ''' + @Divider + ''' + ' as 'data()' FROM #TempColumnName for xml path(''))
+--SET @CodeDescription = LEFT(@CodeDescription, LEN(@CodeDescription) - 7)
 
-WHILE EXISTS(SELECT 1 FROM #TempCOA)
-BEGIN
-	DECLARE @AccountID INT = (SELECT TOP 1 intAccountID FROM #TempCOA)
-	DECLARE @strAccountID NVARCHAR(200) = (SELECT TOP 1 intAccountID FROM #TempCOA)
-	SET @Query = 'SELECT ' + @Structure + ' as strAccountID FROM #TempCOA WHERE intAccountID = ' + CAST(@AccountID AS NVARCHAR(100))
+--WHILE EXISTS(SELECT 1 FROM #TempCOA)
+--BEGIN
+--	DECLARE @AccountID INT = (SELECT TOP 1 intAccountID FROM #TempCOA)
+--	DECLARE @strAccountID NVARCHAR(200)
+--	DECLARE @strDescription NVARCHAR(300)
+--	SET @Query = 'SELECT ' + @Structure + ' as strAccountID, ' + @CodeDescription + ' as DescriptionID FROM #TempCOA WHERE intAccountID = ' + CAST(@AccountID AS NVARCHAR(100))
 	
-	INSERT INTO @tblQuery
-	EXEC sp_executesql @Query	
+--	INSERT INTO @tblQuery
+--	EXEC sp_executesql @Query	
 	
-	SET @strAccountID = (SELECT TOP 1 ID FROM @tblQuery)
+--	SET @strAccountID = (SELECT TOP 1 ID FROM @tblQuery)
+--	SET @strDescription = (SELECT TOP 1 DescriptionID FROM @tblQuery)
 	
-	UPDATE tblGLAccount SET strAccountID = @strAccountID WHERE intAccountID = @AccountID
-	UPDATE tblGLCOACrossReference SET stri21ID = @strAccountID WHERE inti21ID = @AccountID
+--	select * from @tblQuery
+	
+--	--UPDATE tblGLAccount SET strAccountID = @strAccountID WHERE intAccountID = @AccountID
+--	--UPDATE tblGLAccount SET strDescription = @strDescription WHERE intAccountID = @AccountID
+--	--UPDATE tblGLCOACrossReference SET stri21ID = @strAccountID WHERE inti21ID = @AccountID		
 
-	DELETE FROM #TempCOA WHERE intAccountID = @AccountID	
-	DELETE @tblQuery
-END
+--	DELETE FROM #TempCOA WHERE intAccountID = @AccountID	
+--	DELETE @tblQuery
+--END
 
-DROP TABLE #TempColumnName
-DROP TABLE #TempCOA
+--DROP TABLE #TempColumnName
+--DROP TABLE #TempCOA
 
-select 1
-GO
+--select 1
+--GO
 
 --usp_GLCOARestructure

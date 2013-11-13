@@ -44,7 +44,7 @@ BEGIN
 	or datasource.strQuery LIKE '%tblGLTempCOASegment%' 
 
 	--CREATE DYNAMIC ACCOUNT STRUCTURE
-	EXEC sp_executesql CreateGLTempCOASegment
+	EXEC usp_BuildGLCOASegment
 
 	--STORE DYNAMIC COLUMNS
 	INSERT INTO @DynamicColumns
