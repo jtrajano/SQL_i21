@@ -1,7 +1,7 @@
 
 SET ANSI_NULLS ON
 GO
-DROP PROCEDURE InsertDynamicParameterFields
+DROP PROCEDURE usp_RMInsertDynamicParameterFields
 
 SET QUOTED_IDENTIFIER ON
 GO
@@ -9,7 +9,7 @@ GO
 -- Create date: <Create Date,,11/12/2013>
 -- Description:	<Description,,This SP insert dynamic fields for report field list and field selection manager base on GL account structure>
 
-CREATE PROCEDURE InsertDynamicParameterFields
+CREATE PROCEDURE usp_RMInsertDynamicParameterFields
 	
 AS
 BEGIN
@@ -44,7 +44,7 @@ BEGIN
 	or datasource.strQuery LIKE '%tblGLTempCOASegment%' 
 
 	--CREATE DYNAMIC ACCOUNT STRUCTURE
-	EXEC usp_BuildGLCOASegment
+	EXEC usp_BuildGLTempCOASegment
 
 	--STORE DYNAMIC COLUMNS
 	INSERT INTO @DynamicColumns

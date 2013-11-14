@@ -676,9 +676,9 @@ SELECT * FROM #ConstructGL
 DROP TABLE #ConstructGL
 GO
 
-/****** Object:  StoredProcedure [dbo].[usp_BuildGLCOASegment]    Script Date: 11/13/2013 18:00:31 ******/
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_BuildGLCOASegment]') AND type in (N'P', N'PC'))
-DROP PROCEDURE [dbo].usp_BuildGLCOASegment
+/****** Object:  StoredProcedure [dbo].[usp_BuildGLTempCOASegment]    Script Date: 11/13/2013 18:00:31 ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_BuildGLTempCOASegment]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].usp_BuildGLTempCOASegment
 GO
 
 SET ANSI_NULLS ON
@@ -690,7 +690,7 @@ GO
 -- Create date: <Create Date,,>
 -- Description:	<Description,,>
 -- =============================================
-CREATE PROCEDURE usp_BuildGLCOASegment
+CREATE PROCEDURE usp_BuildGLTempCOASegment
 	
 AS
 BEGIN
@@ -808,7 +808,7 @@ END
 DELETE FROM tblGLTempAccount WHERE intUserID = @intUserID
 
 EXEC usp_SyncAccounts @intUserID
-EXEC usp_BuildGLCOASegment
+EXEC usp_BuildGLTempCOASegment
 
 
 select 1
