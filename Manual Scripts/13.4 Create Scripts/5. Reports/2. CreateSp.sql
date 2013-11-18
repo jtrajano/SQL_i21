@@ -1,8 +1,11 @@
+GO
+/****** Object:  StoredProcedure [dbo].[usp_RMInsertDynamicParameterFields]    ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_RMInsertDynamicParameterFields]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].usp_RMInsertDynamicParameterFields
+GO
 
 SET ANSI_NULLS ON
 GO
-DROP PROCEDURE usp_RMInsertDynamicParameterFields
-
 SET QUOTED_IDENTIFIER ON
 GO
 
