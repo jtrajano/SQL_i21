@@ -87,6 +87,26 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50003) EXEC sp_dropmessa
 SET @strmessage = 'Debit and credit amounts are not balanced.'
 EXEC sp_addmessage 50003,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50004) EXEC sp_dropmessage 50004, 'us_english'	
+SET @strmessage = 'Cannot find the transaction.'
+EXEC sp_addmessage 50004,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50005) EXEC sp_dropmessage 50005, 'us_english'	
+SET @strmessage = 'Unable to find an open fiscal year period to match the transaction date.'
+EXEC sp_addmessage 50005,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50006) EXEC sp_dropmessage 50006, 'us_english'	
+SET @strmessage = 'The debit and credit amounts are not balanced.'
+EXEC sp_addmessage 50006,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50007) EXEC sp_dropmessage 50007, 'us_english'	
+SET @strmessage = 'The transaction is already posted.'
+EXEC sp_addmessage 50007,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50008) EXEC sp_dropmessage 50008, 'us_english'	
+SET @strmessage = 'The transaction is already unposted.'
+EXEC sp_addmessage 50008,11,@strmessage,'us_english','False'
+
 GO
 
 EXEC PostMessages

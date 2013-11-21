@@ -143,7 +143,7 @@ EXEC PostInitializeTempTables
 
 -- TODO: Validate if the Journal id exists. 
 -- TODO: Validate if the Journal ID is valid (existing and with the proper posting flags). 
--- TODO: Validate the Accountign period date and FY
+-- TODO: Validate the Accounting period date and FY
 -- TODO: Check the Journal balance. 
 -- TODO: Check the affected special books
 

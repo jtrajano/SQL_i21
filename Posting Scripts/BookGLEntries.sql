@@ -69,14 +69,15 @@
  '                      ysnRecap = 1 (Commit the transaction)
  '                      ysnRecap = 0 (Preview/Recap the transaction)
  '
- ' isSuccessful			= Determines whether an error occured. True is no error found. False when error was found. 
+ ' isSuccessful			= A booelan that determines whether an error occured. 
+						Returns TRUE if no error is found. Returns FALSE when error was found. 
  '						OUTPUT 
  '
- ' message      		= A string message returned this stored procedure. 
+ ' message_id      		= A number code returned by this stored procedure. 
  '                      OUTPUT
  '
  ' Example on how to use:      
- '		[dbo].[BookGLEntries] 1, 1, @isSuccessful, @message 
+ '		[dbo].[BookGLEntries] 1, 1, @isSuccessful OUTPUT, @message_id OUTPUT
  '====================================================================================================================================='
    SCRIPT CREATED BY: Feb Montefrio		DATE CREATED: November 19, 2013
   -------------------------------------------------------------------------------------------------------------------------------------						
@@ -107,7 +108,7 @@ CREATE PROCEDURE BookGLEntries
 	@ysnPost		BIT	= 0
 	,@ysnRecap		BIT	= 0
 	,@isSuccessful	BIT = 0 OUTPUT
-	,@message		NVARCHAR(MAX) OUTPUT	
+	,@message_id	INT = NULL OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -140,7 +141,7 @@ END
 
 -- When doing a post or unpost, check for any invalid G/L Account ids. 
 -- When doing a recap, ignore any invalid G/L account id's. 
-IF EXISTS (SELECT TOP 1 1 FROM #tmpGLDetail WHERE intAccount IS NULL AND @ysnRecap = 0)
+IF EXISTS (SELECT TOP 1 1 FROM #tmpGLDetail WHERE intAccountID IS NULL AND @ysnRecap = 0)
 BEGIN 
 	-- 'Failed. Invalid G/L account id found.'
 	RAISERROR (50002,11,1)
@@ -164,7 +165,7 @@ END
 SELECT	@dblDebitCreditBalance = SUM(dblDebit) - SUM(dblCredit) 
 FROM	#tmpGLDetail INNER JOIN tblGLAccount
 			ON #tmpGLDetail.intAccountID = tblGLAccount.intAccountID
-WHERE	ISNULL(tblGLAccount, 0) = 1
+WHERE	ISNULL(tblGLAccount.ysnActive, 0) = 1
 
 IF ISNULL(@dblDebitCreditBalance, 0) <> 0
 BEGIN
@@ -175,7 +176,14 @@ END
 
 -- TODO: Check if the currency is invalid. 
 -- TODO: Check for invalid unit of measure (for unit accounting)
--- TODO: Check for closed period or closed FY. 
+
+-- Validate the date against the FY Periods
+IF EXISTS (SELECT 1 FROM #tmpGLDetail WHERE [dbo].isOpenAccountingDate(#tmpGLDetail.dtmDate) = 0)
+BEGIN 
+	-- Unable to find an open fiscal year period to match the transaction date.
+	RAISERROR(50005, 11, 1)
+	GOTO Post_Rollback
+END
 
 --------------------------------------------------------------------------------------------------------------------------------------
 --  END OF VALIDATION
@@ -204,7 +212,7 @@ SET	dblDebit	= CASE	WHEN dblCredit < 0 THEN ABS(dblCredit)
 --=====================================================================================================================================
 
 --=====================================================================================================================================
--- 	START OF PROCESSING THE G/L ENTRIES. 
+-- 	BOOK THE G/L ENTRIES TO THE tblGLDetail table.
 --------------------------------------------------------------------------------------------------------------------------------------
 
 -- TODO: Account Allocation
@@ -275,33 +283,28 @@ SELECT
 FROM	#tmpGLDetail
 WHERE	@ysnRecap = 0
 
--- UPDATE THE SUMMARY TABLES
+--=====================================================================================================================================
+-- 	UPDATE THE SUMMARY TABLE. 
+---------------------------------------------------------------------------------------------------------------------------------------
+
 UPDATE	tblGLSummary 
 SET		dblDebit = ISNULL(tblGLSummary.dblDebit, 0) + ISNULL(tmpGLDetailGrouped.dblDebit, 0)
 		,dblCredit = ISNULL(tblGLSummary.dblCredit, 0) + ISNULL(tmpGLDetailGrouped.dblCredit, 0)
 		,intConcurrencyID = ISNULL(intConcurrencyID, 0) + 1
 FROM	(
-			SELECT	dblDebit = SUM(
-						CASE	WHEN @ysnPost = 1 THEN ISNULL(B.dblDebit, 0)
-								WHEN @ysnPost = 0 THEN ISNULL(B.dblCredit, 0)
-						END 
-					),
-					dblCredit = SUM(
-						CASE	WHEN @ysnPost = 1 THEN ISNULL(B.dblCredit, 0)
-								WHEN @ysnPost = 0 THEN ISNULL(B.dblDebit, 0)
-						END 
-					),
-					intAccountID = A.intAccountID,
-					dtmDate = ISNULL(CONVERT(VARCHAR(10), B.dmtDate, 112), '') 								
+			SELECT	dblDebit	= SUM(ISNULL(B.dblDebit, 0))
+					,dblCredit	= SUM(ISNULL(B.dblCredit, 0))
+					,A.intAccountID
+					,dtmDate	= ISNULL(CONVERT(VARCHAR(10), B.dtmDate, 112), '') 								
 			FROM	tblGLSummary A INNER JOIN #tmpGLDetail B
 						ON CONVERT(VARCHAR(10), A.dtmDate, 112) = CONVERT(VARCHAR(10), B.dtmDate, 112)
 						AND A.intAccountID = B.intAccountID			
 			WHERE	@ysnRecap = 0 
-			GROUP BY	ISNULL(CONVERT(VARCHAR(10), B.dmtDate, 112), ''), 
+			GROUP BY	ISNULL(CONVERT(VARCHAR(10), B.dtmDate, 112), ''), 
 						A.intAccountID
 		) AS tmpGLDetailGrouped
 WHERE	tblGLSummary.intAccountID = tmpGLDetailGrouped.intAccountID
-		AND ISNULL(CONVERT(VARCHAR(10), tblGLSummary.dmtDate, 112), '') = ISNULL(CONVERT(VARCHAR(10), tmpGLDetailGrouped.dmtDate, 112), '')
+		AND ISNULL(CONVERT(VARCHAR(10), tblGLSummary.dtmDate, 112), '') = ISNULL(CONVERT(VARCHAR(10), tmpGLDetailGrouped.dtmDate, 112), '')
 		AND @ysnRecap = 0
 
 -- INSERT RECORDS TO THE SUMMARY TABLE
@@ -315,29 +318,30 @@ INSERT INTO tblGLSummary (
 		,intConcurrencyID
 )
 SELECT	#tmpGLDetail.intAccountID
-		,#tmpGLDetail.dtmDate
-		,#tmpGLDetail.dblDebit
-		,#tmpGLDetail.dblCredit
-		,#tmpGLDetail.dblDebitUnit
-		,#tmpGLDetail.dblCreditUnit
+		,ISNULL(CONVERT(VARCHAR(10), #tmpGLDetail.dtmDate, 112), '')
+		,SUM(#tmpGLDetail.dblDebit)
+		,SUM(#tmpGLDetail.dblCredit)
+		,SUM(#tmpGLDetail.dblDebitUnit)
+		,SUM(#tmpGLDetail.dblCreditUnit)
 		,1
 FROM	#tmpGLDetail
 WHERE	NOT EXISTS (
 			SELECT	TOP 1 1
 			FROM	tblGLSummary
-			WHERE	ISNULL(CONVERT(VARCHAR(10), #tmpGLDetail.dmtDate, 112), '') = ISNULL(CONVERT(VARCHAR(10), tblGLSummary.dmtDate, 112), '') 
+			WHERE	ISNULL(CONVERT(VARCHAR(10), #tmpGLDetail.dtmDate, 112), '') = ISNULL(CONVERT(VARCHAR(10), tblGLSummary.dtmDate, 112), '') 
 					AND #tmpGLDetail.intAccountID = tblGLSummary.intAccountID
 		)
 		AND @ysnRecap = 0
-GROUP BY	ISNULL(CONVERT(VARCHAR(10), #tmpGLDetail.dmtDate, 112), ''), 
-			A.intAccountID
+GROUP BY	ISNULL(CONVERT(VARCHAR(10), #tmpGLDetail.dtmDate, 112), ''), 
+			#tmpGLDetail.intAccountID
 
---------------------------------------------------------------------------------------------------------------------------------------
---  END OF PROCESSING THE G/L ENTRIES. 
+
 --=====================================================================================================================================
+-- 	EXIT ROUTINES 
+---------------------------------------------------------------------------------------------------------------------------------------
+
 Exit_Successfully:
 	SET @isSuccessful = 1
-	SET @message = 'Success'
 	GOTO Exit_BookGLEntries
 
 Exit_BookGLEntries_WithErrors:

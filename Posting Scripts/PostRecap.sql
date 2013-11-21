@@ -57,108 +57,23 @@ DROP PROCEDURE [dbo].[PostRecap]
 GO
 
 CREATE PROCEDURE PostRecap
-	@ysnPost			BIT = 0
-	,@intTransactionID	INT = NULL
-	,@strTransactionID	NVARCHAR(40) = NULL
+	@RecapTable RecapTableType READONLY 
 AS
 
--- CREATE A TEMPORARY TABLE VARIABLE. 
--- TEMPORARY TABLE VARIABLES ARE UNAFFECTED BY ROLLBACKS. 
-DECLARE @RecapTable TABLE (
-	[strTransactionID]		[nvarchar](40) NULL
-	,[intTransactionID]		[int] NULL
-	,[dtmDate]				[datetime] NOT NULL
-	,[strBatchID]			[nvarchar](20) NULL
-	,[intAccountID]			[int] NULL
-	,[strAccountGroup]		[nvarchar](30) NULL
-	,[dblDebit]				[numeric](18, 6) NULL
-	,[dblCredit]			[numeric](18, 6) NULL
-	,[dblDebitUnit]			[numeric](18, 6) NULL
-	,[dblCreditUnit]		[numeric](18, 6) NULL
-	,[strDescription]		[nvarchar](250) NULL
-	,[strCode]				[nvarchar](40) NULL
-	,[strReference]			[nvarchar](255) NULL
-	,[strJobID]				[nvarchar](40) NULL
-	,[intCurrencyID]		[int] NULL
-	,[dblExchangeRate]		[numeric](38, 20) NOT NULL
-	,[dtmDateEntered]		[datetime] NOT NULL
-	,[dtmTransactionDate]	[datetime] NULL
-	,[ysnIsUnposted]		[bit] NOT NULL
-	,[intConcurrencyID]		[int] NULL
-	,[intUserID]			[int] NULL
-	,[strTransactionForm]	[nvarchar](255) NULL
-	,[strModuleName]		[nvarchar](255) NULL
-	,[strUOMCode]			[char](6) NULL
-)
-
--- INSERT THE DATA FROM #tmpGLDetail TO @RecapTable
-INSERT INTO @RecapTable (
-		[strTransactionID]		
-		,[intTransactionID]		
-		,[dtmDate]				
-		,[strBatchID]			
-		,[intAccountID]			
-		,[strAccountGroup]		
-		,[dblDebit]				
-		,[dblCredit]			
-		,[dblDebitUnit]			
-		,[dblCreditUnit]		
-		,[strDescription]		
-		,[strCode]				
-		,[strReference]			
-		,[strJobID]				
-		,[intCurrencyID]		
-		,[dblExchangeRate]		
-		,[dtmDateEntered]		
-		,[dtmTransactionDate]	
-		,[ysnIsUnposted]		
-		,[intConcurrencyID]		
-		,[intUserID]			
-		,[strTransactionForm]	
-		,[strModuleName]		
-		,[strUOMCode]			
-)	
-SELECT	@strTransactionID
-		,@intTransactionID		
-		,[dtmDate]				
-		,[strBatchID]			
-		,[intAccountID]			
-		,[strAccountGroup]		
-		,[dblDebit]				
-		,[dblCredit]			
-		,[dblDebitUnit]			
-		,[dblCreditUnit]		
-		,[strDescription]		
-		,[strCode]				
-		,[strReference]			
-		,[strJobID]				
-		,[intCurrencyID]		
-		,[dblExchangeRate]		
-		,[dtmDateEntered]		
-		,[dtmTransactionDate]	
-		,[ysnIsUnposted]		
-		,[intConcurrencyID]		
-		,[intUserID]			
-		,[strTransactionForm]	
-		,[strModuleName]		
-		,[strUOMCode]	
-FROM	#tmpGLDetail
-WHERE	#tmpGLDetail.strTransactionID = @strTransactionID OR 
-		#tmpGLDetail.intTransactionID = @intTransactionID
-
--- NOW THAT WE HAVE THE RECAP DATA, CALL THE ROLLBACK. 
-ROLLBACK TRANSACTION
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
 
 -- DELETE OLD RECAP DATA (IF IT EXISTS)
 DELETE tblGLDetailRecap
-FROM	tblGLDetailRecap INNER JOIN #tmpGLDetail
+FROM	tblGLDetailRecap A INNER JOIN @RecapTable B
 			ON (
-				tblGLDetailRecap.strTransactionID = #tmpGLDetail.strTransactionID
-				OR tblGLDetailRecap.intTransactionID = #tmpGLDetail.intTransactionID
+				A.strTransactionID = B.strTransactionID
+				OR A.intTransactionID = B.intTransactionID
 			)
-			AND  tblGLDetailRecap.strCode = #tmpGLDetail.strCode
-WHERE	#tmpGLDetail.strTransactionID = @strTransactionID OR 
-		#tmpGLDetail.intTransactionID = @intTransactionID			
+			AND  A.strCode = B.strCode
 
 -- INSERT THE RECAP DATA. 
 -- THE RECAP DATA WILL BE STORED IN A PERMANENT TABLE SO THAT WE CAN QUERY IT LATER USING A BUFFERED STORE. 
