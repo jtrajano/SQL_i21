@@ -1,0 +1,22 @@
+
+IF EXISTS (SELECT * FROM [dbo].sysobjects WHERE id = OBJECT_ID(N'[dbo].isOpenAccountingDate') AND OBJECTPROPERTY(ID, N'ISScalarFUNCTION') = 1)
+DROP FUNCTION [dbo].isOpenAccountingDate
+GO
+
+CREATE FUNCTION [dbo].isOpenAccountingDate(@dtmDate DATETIME)
+RETURNS BIT 
+AS
+BEGIN
+
+DECLARE @isOpen BIT = 0 
+
+SELECT TOP 1 
+		@isOpen = 1 
+FROM	tblGLFiscalYearPeriod 
+WHERE	CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME) BETWEEN CAST(FLOOR(CAST(dtmStartDate AS FLOAT)) AS DATETIME) AND CAST(FLOOR(CAST(dtmEndDate AS FLOAT)) AS DATETIME)  
+		AND ISNULL(ysnOpen, 0) = 1
+
+RETURN @isOpen
+
+END
+GO
