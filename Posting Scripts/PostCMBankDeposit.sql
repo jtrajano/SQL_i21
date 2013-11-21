@@ -129,7 +129,6 @@ CREATE PROCEDURE PostCMBankDeposit
 	,@strTransactionID		NVARCHAR(40) = NULL 
 	,@isSuccessful			BIT		= 0 OUTPUT 
 	,@message_id			INT		= 0 OUTPUT 
-WITH ENCRYPTION
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -487,15 +486,18 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 Post_Commit:
 	SET @message_id = 10000
+	SET @isSuccessful = 1
 	COMMIT TRANSACTION
 	GOTO Post_Exit
 
 -- If error occured, undo changes to all tables affected
 Post_Rollback:
+	SET @isSuccessful = 0
 	ROLLBACK TRANSACTION		            
 	GOTO Post_Exit
 	
 Recap_Rollback: 
+	SET @isSuccessful = 1
 	ROLLBACK TRANSACTION 
 	EXEC PostRecap @RecapTable
 	GOTO Post_Exit
