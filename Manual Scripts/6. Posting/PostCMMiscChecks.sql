@@ -81,7 +81,7 @@
 ' ysnRecap             - Determines whether the transaction will be committed or previewed/Recapped.
 '                           ysnRecap = 1 (Commit the transaction)
 '                           ysnRecap = 0 (Preview/Recap the transaction)
-' strTransactionID		- The bank deposit transaction ID. 
+' strTransactionID		- The Misc Checks transaction ID. 
 ' isSuccessful			- Returns TRUE when posting is successful. Returns FALSE when it failed. 
 '							OUTPUT
 ' message_id			- Message number returned by the posting process. 
@@ -91,8 +91,8 @@
 
 	DECLARE @successProperty BIT, @message_ID INT 
 	EXEC [dbo].PostCMMiscChecks 
-				@ysnPost = 0, 
-				@ysnRecap = 0, 
+				@ysnPost = 1, 
+				@ysnRecap = 1, 
 				@strTransactionID = 'MCHK-2', 
 				@isSuccessful = @successProperty OUTPUT, 
 				@message_id = @message_ID OUTPUT	
@@ -219,7 +219,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 		
 		
 -- Read the detail table and populate the variables. 
-SELECT	@dblAmountDetailTotal = SUM(ISNULL(dblCredit, 0) - ISNULL(dblDebit, 0))
+SELECT	@dblAmountDetailTotal = SUM(ISNULL(dblDebit, 0) - ISNULL(dblCredit, 0))
 FROM	[dbo].tblCMBankTransactionDetail
 WHERE	strTransactionID = @strTransactionID 
 IF @@ERROR <> 0	GOTO Post_Rollback		
@@ -228,7 +228,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 -- 	VALIDATION 
 ---------------------------------------------------------------------------------------------------------------------------------------
 
--- Validate if the bank deposit id exists. 
+-- Validate if the Misc Checks exists. 
 IF @cntID IS NULL
 BEGIN 
 	-- Cannot find the transaction.
@@ -244,7 +244,7 @@ BEGIN
 	GOTO Post_Rollback
 END
 
--- Check the bank deposit balance. 
+-- Check the amount in Misc Check. See if it is balanced. 
 IF ISNULL(@dblAmountDetailTotal, 0) <> ISNULL(@dblAmount, 0) AND @ysnRecap = 0
 BEGIN
 	-- The debit and credit amounts are not balanced.
@@ -268,6 +268,8 @@ BEGIN
 	GOTO Post_Rollback
 END 
 
+-- TODO: Check for cleared transaction. 
+
 --=====================================================================================================================================
 -- 	PROCESSING OF THE G/L ENTRIES. 
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -278,7 +280,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 
 IF @ysnPost = 1
 BEGIN
-	-- Create the G/L Entries for Bank Deposit. 
+	-- Create the G/L Entries for Misc Checks. 
 	-- 1. DEBIT SIDE
 	INSERT INTO #tmpGLDetail (
 			[strTransactionID]
@@ -312,46 +314,7 @@ BEGIN
 			,[strModuleName]
 			,[strUOMCode]
 	)
-	SELECT	[strTransactionID]		= @strTransactionID
-			,[intTransactionID]		= NULL
-			,[dtmDate]				= @dtmDate
-			,[strBatchID]			= @strBatchID
-			,[intAccountID]			= BankAccnt.intGLAccountID
-			,[strAccountGroup]		= GLAccntGrp.strAccountGroup
-			,[dblDebit]				= A.dblAmount
-			,[dblCredit]			= 0
-			,[dblDebitUnit]			= 0
-			,[dblCreditUnit]		= 0
-			,[strDescription]		= A.strMemo
-			,[strCode]				= @GL_DETAIL_CODE
-			,[strReference]			= A.strPayee
-			,[strJobID]				= NULL
-			,[intCurrencyID]		= A.intCurrencyID
-			,[dblExchangeRate]		= 1
-			,[dtmDateEntered]		= GETDATE()
-			,[dtmTransactionDate]	= A.dtmDate
-			,[strProductID]			= NULL
-			,[strWarehouseID]		= NULL
-			,[strNum]				= CAST(A.intReferenceNo AS NVARCHAR(100))
-			,[strCompanyName]		= NULL
-			,[strBillInvoiceNumber] = NULL 
-			,[strJournalLineDescription] = NULL 
-			,[ysnIsUnposted]		= 0 
-			,[intConcurrencyID]		= 1
-			,[intUserID]			= A.intLastModifiedUserID
-			,[strTransactionForm]	= A.strTransactionID
-			,[strModuleName]		= @MODULE_NAME
-			,[strUOMCode]			= NULL 
-	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankAccount BankAccnt
-				ON A.intBankAccountID = BankAccnt.intBankAccountID
-			INNER JOIN [dbo].tblGLAccount GLAccnt
-				ON BankAccnt.intGLAccountID = GLAccnt.intAccountID
-			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
-				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
-	WHERE	A.strTransactionID = @strTransactionID
 	
-	-- 2. CREDIT SIDE
-	UNION ALL 
 	SELECT	[strTransactionID]			= @strTransactionID
 			,[intTransactionID]		= NULL
 			,[dtmDate]				= @dtmDate
@@ -388,6 +351,46 @@ BEGIN
 				ON B.intGLAccountID = GLAccnt.intAccountID
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID			
+	WHERE	A.strTransactionID = @strTransactionID		
+	
+	-- 2. CREDIT SIDE
+	UNION ALL 
+	SELECT	[strTransactionID]		= @strTransactionID
+			,[intTransactionID]		= NULL
+			,[dtmDate]				= @dtmDate
+			,[strBatchID]			= @strBatchID
+			,[intAccountID]			= BankAccnt.intGLAccountID
+			,[strAccountGroup]		= GLAccntGrp.strAccountGroup
+			,[dblDebit]				= 0
+			,[dblCredit]			= A.dblAmount
+			,[dblDebitUnit]			= 0
+			,[dblCreditUnit]		= 0
+			,[strDescription]		= A.strMemo
+			,[strCode]				= @GL_DETAIL_CODE
+			,[strReference]			= A.strPayee
+			,[strJobID]				= NULL
+			,[intCurrencyID]		= A.intCurrencyID
+			,[dblExchangeRate]		= 1
+			,[dtmDateEntered]		= GETDATE()
+			,[dtmTransactionDate]	= A.dtmDate
+			,[strProductID]			= NULL
+			,[strWarehouseID]		= NULL
+			,[strNum]				= CAST(A.intReferenceNo AS NVARCHAR(100))
+			,[strCompanyName]		= NULL
+			,[strBillInvoiceNumber] = NULL 
+			,[strJournalLineDescription] = NULL 
+			,[ysnIsUnposted]		= 0 
+			,[intConcurrencyID]		= 1
+			,[intUserID]			= A.intLastModifiedUserID
+			,[strTransactionForm]	= A.strTransactionID
+			,[strModuleName]		= @MODULE_NAME
+			,[strUOMCode]			= NULL 
+	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankAccount BankAccnt
+				ON A.intBankAccountID = BankAccnt.intBankAccountID
+			INNER JOIN [dbo].tblGLAccount GLAccnt
+				ON BankAccnt.intGLAccountID = GLAccnt.intAccountID
+			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
+				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
 	WHERE	A.strTransactionID = @strTransactionID
 	
 	IF @@ERROR <> 0	GOTO Post_Rollback

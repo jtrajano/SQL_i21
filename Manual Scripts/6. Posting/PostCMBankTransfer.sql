@@ -81,7 +81,7 @@
 ' ysnRecap             - Determines whether the transaction will be committed or previewed/Recapped.
 '                           ysnRecap = 1 (Commit the transaction)
 '                           ysnRecap = 0 (Preview/Recap the transaction)
-' strTransactionID		- The bank deposit transaction ID. 
+' strTransactionID		- The bank transfer transaction ID. 
 ' isSuccessful			- Returns TRUE when posting is successful. Returns FALSE when it failed. 
 '							OUTPUT
 ' message_id			- Message number returned by the posting process. 
@@ -91,9 +91,9 @@
 
 	DECLARE @successProperty BIT, @message_ID INT 
 	EXEC [dbo].PostCMBankTransfer 
-				@ysnPost = 0, 
-				@ysnRecap = 0, 
-				@strTransactionID = 'MCHK-2', 
+				@ysnPost = 1, 
+				@ysnRecap = 1, 
+				@strTransactionID = 'BTFR-8', 
 				@isSuccessful = @successProperty OUTPUT, 
 				@message_id = @message_ID OUTPUT	
 				
@@ -219,7 +219,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 -- 	VALIDATION 
 ---------------------------------------------------------------------------------------------------------------------------------------
 
--- Validate if the bank deposit id exists. 
+-- Validate if the bank transfer id exists. 
 IF @cntID IS NULL
 BEGIN 
 	-- Cannot find the transaction.
@@ -251,6 +251,8 @@ BEGIN
 	GOTO Post_Rollback
 END 
 
+-- TODO: Check for cleared transaction. 
+
 --=====================================================================================================================================
 -- 	PROCESSING OF THE G/L ENTRIES. 
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -261,7 +263,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 
 IF @ysnPost = 1
 BEGIN
-	-- Create the G/L Entries for Bank Deposit. 
+	-- Create the G/L Entries for Bank Transfer. 
 	-- 1. CREDIT SIDE (SOURCE FUND)
 	INSERT INTO #tmpGLDetail (
 			[strTransactionID]

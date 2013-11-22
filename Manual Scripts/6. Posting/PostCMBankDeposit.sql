@@ -91,7 +91,7 @@
 
 	DECLARE @successProperty BIT, @message_ID INT 
 	EXEC [dbo].PostCMBankDeposit 
-				@ysnPost = 0, 
+				@ysnPost = 1, 
 				@ysnRecap = 0, 
 				@strTransactionID = 'BDEP-2', 
 				@isSuccessful = @successProperty OUTPUT, 
@@ -196,7 +196,7 @@ DECLARE
 	,@ysnTransactionPostedFlag AS BIT
 	
 	-- Table Variables
-	,@RecapTable AS RecapTableType	
+	,@RecapTable AS RecapTableType
 	-- Note: Table variables are unaffected by COMMIT or ROLLBACK TRANSACTION.	
 	
 IF @@ERROR <> 0	GOTO Post_Rollback		
@@ -253,7 +253,7 @@ BEGIN
 END 
 
 -- Check if the transaction is already posted
-IF @ysnPost = 1 AND @ysnTransactionPostedFlag = 1
+IF @ysnPost = 1 AND @ysnTransactionPostedFlag = 1 and @ysnRecap = 0
 BEGIN 
 	-- The transaction is already posted.
 	RAISERROR(50007, 11, 1)
@@ -267,6 +267,8 @@ BEGIN
 	RAISERROR(50008, 11, 1)
 	GOTO Post_Rollback
 END 
+
+-- TODO: Check for cleared transaction. 
 
 --=====================================================================================================================================
 -- 	PROCESSING OF THE G/L ENTRIES. 
