@@ -96,6 +96,8 @@
 				@strTransactionID = 'BTFR-8', 
 				@isSuccessful = @successProperty OUTPUT, 
 				@message_id = @message_ID OUTPUT	
+
+	SELECT Success = @successProperty, MessageID = @message_ID				
 				
 '====================================================================================================================================='
 SCRIPT CREATED BY: Feb Montefrio		DATE CREATED: November 20, 2013

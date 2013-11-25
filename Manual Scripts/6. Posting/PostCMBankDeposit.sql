@@ -91,11 +91,13 @@
 
 	DECLARE @successProperty BIT, @message_ID INT 
 	EXEC [dbo].PostCMBankDeposit 
-				@ysnPost = 1, 
-				@ysnRecap = 0, 
+				@ysnPost = 0, 
+				@ysnRecap = 1, 
 				@strTransactionID = 'BDEP-2', 
 				@isSuccessful = @successProperty OUTPUT, 
 				@message_id = @message_ID OUTPUT	
+				
+	SELECT Success = @successProperty, MessageID = @message_ID				
 				
 '====================================================================================================================================='
 SCRIPT CREATED BY: Feb Montefrio		DATE CREATED: November 20, 2013
@@ -144,40 +146,6 @@ SET ANSI_WARNINGS OFF
 -- Start the transaction 
 BEGIN TRANSACTION
 
--- CREATE THE TEMPORARY TABLE 
-CREATE TABLE #tmpGLDetail (
-	[strTransactionID]			[nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
-	,[intTransactionID]			[int] NULL
-	,[dtmDate]					[datetime] NOT NULL
-	,[strBatchID]				[nvarchar](20)  COLLATE Latin1_General_CI_AS NULL
-	,[intAccountID]				[int] NULL
-	,[strAccountGroup]			[nvarchar](30)  COLLATE Latin1_General_CI_AS NULL
-	,[dblDebit]					[numeric](18, 6) NULL
-	,[dblCredit]				[numeric](18, 6) NULL
-	,[dblDebitUnit]				[numeric](18, 6) NULL
-	,[dblCreditUnit]			[numeric](18, 6) NULL
-	,[strDescription]			[nvarchar](250)  COLLATE Latin1_General_CI_AS NULL
-	,[strCode]					[nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
-	,[strReference]				[nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
-	,[strJobID]					[nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
-	,[intCurrencyID]			[int] NULL
-	,[dblExchangeRate]			[numeric](38, 20) NOT NULL
-	,[dtmDateEntered]			[datetime] NOT NULL
-	,[dtmTransactionDate]		[datetime] NULL
-	,[strProductID]				[nvarchar](50)  COLLATE Latin1_General_CI_AS NULL
-	,[strWarehouseID]			[nvarchar](30)  COLLATE Latin1_General_CI_AS NULL
-	,[strNum]					[nvarchar](100)  COLLATE Latin1_General_CI_AS NULL
-	,[strCompanyName]			[nvarchar](150)  COLLATE Latin1_General_CI_AS NULL
-	,[strBillInvoiceNumber]		[nvarchar](35)  COLLATE Latin1_General_CI_AS NULL
-	,[strJournalLineDescription] [nvarchar](250)  COLLATE Latin1_General_CI_AS NULL
-	,[ysnIsUnposted]			[bit] NOT NULL
-	,[intConcurrencyID]			[int] NULL
-	,[intUserID]				[int] NULL
-	,[strTransactionForm]		[nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
-	,[strModuleName]			[nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
-	,[strUOMCode]				[char](6)  COLLATE Latin1_General_CI_AS NULL
-)
-
 -- Declare the variables 
 DECLARE 
 	-- Constant Variables. 
@@ -185,6 +153,7 @@ DECLARE
 	,@STARTING_NUM_TRANSACTION_TYPE_ID AS INT = 3	-- Starting number for GL Detail table. Ex: 'BATCH-1234',
 	,@GL_DETAIL_CODE AS NVARCHAR(10) = 'BDEP'		-- String code used in GL Detail table. 
 	,@MODULE_NAME AS NVARCHAR(100) = 'Cash Management' -- Module where this posting code belongs. 
+	,@RETURNVALUE AS INT = 0
 	
 	-- Local Variables
 	,@cntID AS INT
@@ -196,8 +165,45 @@ DECLARE
 	,@ysnTransactionPostedFlag AS BIT
 	
 	-- Table Variables
-	,@RecapTable AS RecapTableType
-	-- Note: Table variables are unaffected by COMMIT or ROLLBACK TRANSACTION.	
+	,@RecapTable AS RecapTableType 
+	
+	-- CREATE THE TEMPORARY TABLE 
+	CREATE TABLE #tmpGLDetail (
+		[strTransactionID]			[nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
+		,[intTransactionID]			[int] NULL
+		,[dtmDate]					[datetime] NOT NULL
+		,[strBatchID]				[nvarchar](20)  COLLATE Latin1_General_CI_AS NULL
+		,[intAccountID]				[int] NULL
+		,[strAccountGroup]			[nvarchar](30)  COLLATE Latin1_General_CI_AS NULL
+		,[dblDebit]					[numeric](18, 6) NULL
+		,[dblCredit]				[numeric](18, 6) NULL
+		,[dblDebitUnit]				[numeric](18, 6) NULL
+		,[dblCreditUnit]			[numeric](18, 6) NULL
+		,[strDescription]			[nvarchar](250)  COLLATE Latin1_General_CI_AS NULL
+		,[strCode]					[nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
+		,[strReference]				[nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
+		,[strJobID]					[nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
+		,[intCurrencyID]			[int] NULL
+		,[dblExchangeRate]			[numeric](38, 20) NOT NULL
+		,[dtmDateEntered]			[datetime] NOT NULL
+		,[dtmTransactionDate]		[datetime] NULL
+		,[strProductID]				[nvarchar](50)  COLLATE Latin1_General_CI_AS NULL
+		,[strWarehouseID]			[nvarchar](30)  COLLATE Latin1_General_CI_AS NULL
+		,[strNum]					[nvarchar](100)  COLLATE Latin1_General_CI_AS NULL
+		,[strCompanyName]			[nvarchar](150)  COLLATE Latin1_General_CI_AS NULL
+		,[strBillInvoiceNumber]		[nvarchar](35)  COLLATE Latin1_General_CI_AS NULL
+		,[strJournalLineDescription] [nvarchar](250)  COLLATE Latin1_General_CI_AS NULL
+		,[ysnIsUnposted]			[bit] NOT NULL
+		,[intConcurrencyID]			[int] NULL
+		,[intUserID]				[int] NULL
+		,[strTransactionForm]		[nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
+		,[strModuleName]			[nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
+		,[strUOMCode]				[char](6)  COLLATE Latin1_General_CI_AS NULL
+	)
+	
+-- Note: 
+-- 1. Table variables (such as @RecapTable) are unaffected by COMMIT or ROLLBACK TRANSACTION.
+-- 2. Temp tables (such as #tmpGLDetail) are affected by COMMIT and ROLLBACK TRANSACTION. 
 	
 IF @@ERROR <> 0	GOTO Post_Rollback		
 
@@ -215,8 +221,7 @@ SELECT	TOP 1
 FROM	[dbo].tblCMBankTransaction 
 WHERE	strTransactionID = @strTransactionID 
 		AND intBankTransactionTypeID = @BANK_TRANSACTION_TYPE_ID
-IF @@ERROR <> 0	GOTO Post_Rollback		
-		
+IF @@ERROR <> 0	GOTO Post_Rollback				
 		
 -- Read the detail table and populate the variables. 
 SELECT	@dblAmountDetailTotal = SUM(ISNULL(dblCredit, 0) - ISNULL(dblDebit, 0))
@@ -495,15 +500,16 @@ Post_Commit:
 -- If error occured, undo changes to all tables affected
 Post_Rollback:
 	SET @isSuccessful = 0
-	ROLLBACK TRANSACTION		            
+	ROLLBACK TRANSACTION
 	GOTO Post_Exit
 	
 Recap_Rollback: 
 	SET @isSuccessful = 1
-	ROLLBACK TRANSACTION 
+	ROLLBACK TRANSACTION 		
+	
 	EXEC PostRecap @RecapTable
 	GOTO Post_Exit
-	
+		
 -- Clean-up routines:
 -- Delete all temporary tables used during the post transaction. 
 Post_Exit:

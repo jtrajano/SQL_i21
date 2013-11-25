@@ -152,7 +152,7 @@ END
 SELECT	@dblDebitCreditBalance = SUM(dblDebit) - SUM(dblCredit) 
 FROM	#tmpGLDetail
 
-IF ISNULL(@dblDebitCreditBalance, 0) <> 0
+IF ISNULL(@dblDebitCreditBalance, 0) <> 0 AND @ysnRecap = 0 
 BEGIN
 	-- If not balanced, throw an error. 
 	RAISERROR (50003,11,1)
@@ -182,7 +182,7 @@ IF EXISTS (SELECT 1 FROM #tmpGLDetail WHERE [dbo].isOpenAccountingDate(#tmpGLDet
 BEGIN 
 	-- Unable to find an open fiscal year period to match the transaction date.
 	RAISERROR(50005, 11, 1)
-	GOTO Post_Rollback
+	GOTO Exit_BookGLEntries_WithErrors
 END
 
 --------------------------------------------------------------------------------------------------------------------------------------
@@ -345,8 +345,7 @@ Exit_Successfully:
 	GOTO Exit_BookGLEntries
 
 Exit_BookGLEntries_WithErrors:
-	SET @isSuccessful = 0
-		
+	SET @isSuccessful = 0		
 	GOTO Exit_BookGLEntries	
 	
 Exit_BookGLEntries:
