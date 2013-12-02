@@ -32,10 +32,18 @@
 {                                                                   }
 {*******************************************************************}
 
--- Note: @strSide this is the bank side, not the G/L side. 
-				
+This stored procedure will retrieve the prior bank reconciliation ending-balance as the new beginning balance. 
+
+Parameters:
+	@intBankAccountID	- The PK of the bank account id from the tblCMBankAccount
+	@dtmDate			- The balance of the bank account 'as of' this date. 
+	
+DECLARE @balance NUMERIC(18,6)
+EXEC dbo.GetBankBeginningBalance @intBankAccountID = 2, @dtmDate = '2013-12-02T00:00:00', @dblBalance = @balance OUTPUT
+EXEC dbo.GetBankBeginningBalance NULL
+
 '====================================================================================================================================='
-SCRIPT CREATED BY: Feb Montefrio		DATE CREATED: November 27, 2013
+SCRIPT CREATED BY: Feb Montefrio		DATE CREATED: December 02, 2013
 --------------------------------------------------------------------------------------------------------------------------------------						
 Last Modified By    :	1. 
 						:
@@ -53,18 +61,17 @@ Synopsis            :	1.
 --=====================================================================================================================================
 -- 	DELETE THE STORED PROCEDURE IF IT EXISTS
 ---------------------------------------------------------------------------------------------------------------------------------------
-IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID(N'[dbo].[ApplyCheckChangeBankReconciliation]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
-DROP PROCEDURE [dbo].[ApplyCheckChangeBankReconciliation]
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID(N'[dbo].[GetBankBeginningBalance]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
+DROP PROCEDURE [dbo].[GetBankBeginningBalance]
 GO
 
 --=====================================================================================================================================
 -- 	CREATE THE STORED PROCEDURE AFTER DELETING IT
 ---------------------------------------------------------------------------------------------------------------------------------------
-CREATE PROCEDURE ApplyCheckChangeBankReconciliation
+CREATE PROCEDURE GetBankBeginningBalance
 	@intBankAccountID INT = NULL,
-	@ysnClr BIT = NULL,
-	@strSide AS NVARCHAR(10) = 'DEBIT', 
-	@dtmStatementDate AS DATETIME = NULL
+	@dtmDate AS DATETIME = NULL,
+	@dblBalance AS NUMERIC(18, 6) = NULL OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -83,35 +90,17 @@ DECLARE @BANK_DEPOSIT INT = 1,
 		@CREDIT_CARD_PAYMENTS INT = 8,
 		@BANK_TRANSFER_CREDIT INT = 9,
 		@BANK_TRANSFER_DEBIT INT = 10
+	
+SELECT	TOP 1 
+		@dblBalance = ISNULL(dblStatementEndingBalance, 0)
+FROM	tblCMBankReconciliation
+WHERE	intBankAccountID = @intBankAccountID
+		AND CAST(FLOOR(CAST(dtmDateReconciled AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDateReconciled) AS FLOAT)) AS DATETIME)
+ORDER BY  CAST(FLOOR(CAST(dtmDateReconciled AS FLOAT)) AS DATETIME) DESC 
 
--- Bulk update the ysnClr
-UPDATE	tblCMBankTransaction 
-SET		ysnClr = @ysnClr
-		,intConcurrencyID = intConcurrencyID + 1
-WHERE	ysnPosted = 1
-		AND dtmDateReconciled IS NULL
-		AND intBankAccountID = @intBankAccountID
-		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME)
-		AND 1 = 
-			CASE	WHEN	@strSide = 'DEBIT' 
-							AND (
-								intBankTransactionTypeID = @BANK_WITHDRAWAL
-								OR intBankTransactionTypeID = @MISC_CHECKS
-								OR intBankTransactionTypeID = @BANK_TRANSFER_CREDIT
-								OR ( dblAmount < 0 AND intBankTransactionTypeID = @BANK_TRANSACTION )
-							) THEN 1 					
-					WHEN	@strSide = 'CREDIT' 
-							AND (
-								intBankTransactionTypeID = @BANK_DEPOSIT
-								OR intBankTransactionTypeID = @BANK_TRANSFER_DEBIT
-								OR ( dblAmount > 0 AND intBankTransactionTypeID = @BANK_TRANSACTION )
-							)
-					THEN 1
-					ELSE
-					0
-			END	
+SET @dblBalance = ISNULL(@dblBalance, 0)
+
+SELECT	intBankAccountID = @intBankAccountID,
+		dblBeginningBalance = @dblBalance
 
 GO
-
-
--- SELECT * FROM tblCMBankTransactionType

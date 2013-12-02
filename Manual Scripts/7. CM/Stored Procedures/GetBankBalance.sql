@@ -32,10 +32,18 @@
 {                                                                   }
 {*******************************************************************}
 
--- Note: @strSide this is the bank side, not the G/L side. 
-				
+This stored procedure will retrieve the amount balance of a bank account. 
+Under normal conditions, the bank account balance will match to its G/L account balance. 
+
+Parameters:
+	@intBankAccountID	- The PK of the bank account id from the tblCMBankAccount
+	@dtmDate			- The balance of the bank account 'as of' this date. 
+
+EXEC dbo.GetBankBalance @intBankAccountID = 2, @dtmDate = '2013-12-02T00:00:00'
+EXEC dbo.GetBankBalance @intBankAccountID = null, @dtmDate = null
+
 '====================================================================================================================================='
-SCRIPT CREATED BY: Feb Montefrio		DATE CREATED: November 27, 2013
+SCRIPT CREATED BY: Feb Montefrio		DATE CREATED: November 28, 2013
 --------------------------------------------------------------------------------------------------------------------------------------						
 Last Modified By    :	1. 
 						:
@@ -53,18 +61,16 @@ Synopsis            :	1.
 --=====================================================================================================================================
 -- 	DELETE THE STORED PROCEDURE IF IT EXISTS
 ---------------------------------------------------------------------------------------------------------------------------------------
-IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID(N'[dbo].[ApplyCheckChangeBankReconciliation]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
-DROP PROCEDURE [dbo].[ApplyCheckChangeBankReconciliation]
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID(N'[dbo].[GetBankBalance]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
+DROP PROCEDURE [dbo].[GetBankBalance]
 GO
 
 --=====================================================================================================================================
 -- 	CREATE THE STORED PROCEDURE AFTER DELETING IT
 ---------------------------------------------------------------------------------------------------------------------------------------
-CREATE PROCEDURE ApplyCheckChangeBankReconciliation
+CREATE PROCEDURE GetBankBalance
 	@intBankAccountID INT = NULL,
-	@ysnClr BIT = NULL,
-	@strSide AS NVARCHAR(10) = 'DEBIT', 
-	@dtmStatementDate AS DATETIME = NULL
+	@dtmDate AS DATETIME = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -83,35 +89,26 @@ DECLARE @BANK_DEPOSIT INT = 1,
 		@CREDIT_CARD_PAYMENTS INT = 8,
 		@BANK_TRANSFER_CREDIT INT = 9,
 		@BANK_TRANSFER_DEBIT INT = 10
-
--- Bulk update the ysnClr
-UPDATE	tblCMBankTransaction 
-SET		ysnClr = @ysnClr
-		,intConcurrencyID = intConcurrencyID + 1
+	
+DECLARE @returnBalance AS NUMERIC(18,6)		
+		
+SELECT	@returnBalance = SUM(ISNULL(dblAmount, 0)* -1)
+FROM	tblCMBankTransaction
 WHERE	ysnPosted = 1
-		AND dtmDateReconciled IS NULL
+		AND dblAmount <> 0 
 		AND intBankAccountID = @intBankAccountID
-		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME)
-		AND 1 = 
-			CASE	WHEN	@strSide = 'DEBIT' 
-							AND (
-								intBankTransactionTypeID = @BANK_WITHDRAWAL
-								OR intBankTransactionTypeID = @MISC_CHECKS
-								OR intBankTransactionTypeID = @BANK_TRANSFER_CREDIT
-								OR ( dblAmount < 0 AND intBankTransactionTypeID = @BANK_TRANSACTION )
-							) THEN 1 					
-					WHEN	@strSide = 'CREDIT' 
-							AND (
-								intBankTransactionTypeID = @BANK_DEPOSIT
-								OR intBankTransactionTypeID = @BANK_TRANSFER_DEBIT
-								OR ( dblAmount > 0 AND intBankTransactionTypeID = @BANK_TRANSACTION )
-							)
-					THEN 1
-					ELSE
-					0
-			END	
+		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDate) AS FLOAT)) AS DATETIME)		
+		AND intBankTransactionTypeID IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_CREDIT)
+		
+SELECT	@returnBalance = ISNULL(@returnBalance, 0) + ISNULL(SUM(ISNULL(dblAmount, 0)), 0)
+FROM	tblCMBankTransaction
+WHERE	ysnPosted = 1
+		AND dblAmount <> 0 
+		AND intBankAccountID = @intBankAccountID
+		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDate) AS FLOAT)) AS DATETIME)		
+		AND intBankTransactionTypeID NOT IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_CREDIT)		
+
+SELECT	intBankAccountID = @intBankAccountID,
+		dblBalance = ISNULL(@returnBalance, 0)
 
 GO
-
-
--- SELECT * FROM tblCMBankTransactionType
