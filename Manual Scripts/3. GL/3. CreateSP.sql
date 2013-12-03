@@ -827,7 +827,8 @@ CREATE PROCEDURE  [dbo].[usp_ImportLegacyCOA]
 @ysnStructure	BIT = 0,
 @ysnPrimary		BIT = 0,
 @ysnSegment		BIT = 0,
-@ysnOverride	BIT = 0
+@ysnOverride	BIT = 0,
+@ysnBuild		BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -836,7 +837,7 @@ SET NOCOUNT ON
 
 IF (EXISTS(SELECT glact_acct1_8 FROM glactmst GROUP BY glact_acct1_8 HAVING COUNT(*) > 1) and @ysnOverride = 0)
 BEGIN
-	SELECT 'There are accounts that are classified as an Income and Balance Sheet Type Account. Kindly verify at Legacy GL.' as Result
+	SELECT 'There are accounts that are classified as an Income and Balance Sheet Type account. <br/> Kindly verify at Legacy GL.' as Result
 END
 ELSE
 BEGIN
@@ -848,6 +849,7 @@ BEGIN
 		SET @PrimaryLength = (SELECT MAX(LEN(glact_acct1_8)) glact_acct1_8 FROM glactmst)
 		SET @SegmentLength = (SELECT MAX(LEN(glact_acct9_16)) glact_acct9_16 FROM glactmst)	
 		
+		DELETE tblGLAccountSegment
 		DELETE tblGLAccountStructure
 		
 		INSERT tblGLAccountStructure (intStructureType,strStructureName,strType,intLength,strMask,intSort,ysnBuild,intStartingPosition)
@@ -952,11 +954,28 @@ BEGIN
 		FROM #segments
 		WHERE SegmentCode not in (SELECT strCode FROM tblGLAccountSegment)
 		
+		DROP TABLE #segments		
 	END
 		
-	DROP TABLE #segments
+	IF @ysnBuild = 1
+	BEGIN
+		INSERT INTO tblGLTempAccountToBuild
+		SELECT
+			intAccountSegmentID
+			,0
+			,dtmCreated = getDate()
+		FROM
+		tblGLAccountSegment
+		
+		EXEC usp_BuildGLAccountTemporary 0
+		EXEC usp_BuildGLAccount 0
+		
+		UPDATE tblGLAccountSegment SET ysnBuild = 1
+	END	
+	
+	SELECT '1'
+	
 END
 
 	
 GO
-
