@@ -107,6 +107,10 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50008) EXEC sp_dropmessa
 SET @strmessage = 'The transaction is already unposted.'
 EXEC sp_addmessage 50008,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50009) EXEC sp_dropmessage 50009, 'us_english'	
+SET @strmessage = 'The transaction is already cleared.'
+EXEC sp_addmessage 50009,11,@strmessage,'us_english','False'
+
 GO
 
 EXEC PostMessages

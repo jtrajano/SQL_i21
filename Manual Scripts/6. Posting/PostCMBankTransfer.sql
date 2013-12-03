@@ -91,7 +91,7 @@
 
 	DECLARE @successProperty BIT, @message_ID INT 
 	EXEC [dbo].PostCMBankTransfer 
-				@ysnPost = 1, 
+				@ysnPost = 0, 
 				@ysnRecap = 1, 
 				@strTransactionID = 'BTFR-8', 
 				@isSuccessful = @successProperty OUTPUT, 
@@ -183,10 +183,12 @@ CREATE TABLE #tmpGLDetail (
 -- Declare the variables 
 DECLARE 
 	-- Constant Variables. 
-	@BANK_TRANSACTION_TYPE_ID AS INT = 4 			-- Bank Transfer Type ID is 4 (See tblCMBankTransactionType). 
-	,@STARTING_NUM_TRANSACTION_TYPE_ID AS INT = 3	-- Starting number for GL Detail table. Ex: 'BATCH-1234',
-	,@GL_DETAIL_CODE AS NVARCHAR(10) = 'BTFR'		-- String code used in GL Detail table. 
-	,@MODULE_NAME AS NVARCHAR(100) = 'Cash Management' -- Module where this posting code belongs. 
+	@BANK_TRANSACTION_TYPE_ID AS INT			= 4 -- Bank Transfer Type ID is 4 (See tblCMBankTransactionType). 
+	,@STARTING_NUM_TRANSACTION_TYPE_ID AS INT	= 3	-- Starting number for GL Detail table. Ex: 'BATCH-1234',
+	,@GL_DETAIL_CODE AS NVARCHAR(10)			= 'BTFR' -- String code used in GL Detail table. 
+	,@MODULE_NAME AS NVARCHAR(100)				= 'Cash Management' -- Module where this posting code belongs.
+	,@BANK_TRANSFER_CREDIT AS INT				= 9 -- Transaction code for Bank Transfer Credit.
+	,@BANK_TRANSFER_DEBIT AS INT				= 10 -- Transaction code for Bank Transfer Debit. 
 	
 	-- Local Variables
 	,@cntID AS INT
@@ -195,6 +197,7 @@ DECLARE
 	,@strBatchID AS NVARCHAR(40)
 	,@intUserID AS INT
 	,@ysnTransactionPostedFlag AS BIT
+	,@ysnTransactionClearedFlag AS BIT
 	
 	-- Table Variables
 	,@RecapTable AS RecapTableType	
@@ -252,6 +255,23 @@ BEGIN
 	RAISERROR(50008, 11, 1)
 	GOTO Post_Rollback
 END 
+
+-- Check if the transaction is already reconciled
+IF @ysnPost = 0 AND @ysnRecap = 0
+BEGIN
+	SELECT TOP 1 @ysnTransactionClearedFlag = 1
+	FROM	tblCMBankTransaction 
+	WHERE	strLink = @strTransactionID
+			AND ysnClr = 1
+			AND intBankTransactionTypeID IN (@BANK_TRANSFER_CREDIT, @BANK_TRANSFER_DEBIT)
+			
+	IF @ysnTransactionClearedFlag = 1
+	BEGIN
+		-- 'The transaction is already cleared.'
+		RAISERROR(50009, 11, 1)
+		GOTO Post_Rollback
+	END
+END
 
 -- TODO: Check for cleared transaction. 
 
@@ -382,6 +402,111 @@ BEGIN
 			,intConcurrencyID += 1 
 	WHERE	strTransactionID = @strTransactionID
 	
+	-- Create new records in tblCMBankTransaction	
+	INSERT INTO tblCMBankTransaction (
+		strTransactionID
+		,intBankTransactionTypeID
+		,intBankAccountID
+		,intCurrencyID
+		,dblExchangeRate
+		,dtmDate
+		,strPayee
+		,intPayeeID
+		,strAddress
+		,strZipCode
+		,strCity
+		,strState
+		,strCountry
+		,dblAmount
+		,strAmountInWords
+		,strMemo
+		,intReferenceNo
+		,ysnCheckPrinted
+		,ysnCheckToBePrinted
+		,ysnCheckVoid
+		,ysnPosted
+		,strLink
+		,ysnClr
+		,dtmDateReconciled
+		,intCreatedUserID
+		,dtmCreated
+		,intLastModifiedUserID
+		,dtmLastModified
+		,intConcurrencyID	
+	)
+	-- Bank Transaction Credit
+	SELECT	strTransactionID			= A.strTransactionID + '-CR'
+			,intBankTransactionTypeID	= @BANK_TRANSFER_CREDIT
+			,intBankAccountID			= A.intBankAccountIDFrom
+			,intCurrencyID				= NULL
+			,dblExchangeRate			= 1
+			,dtmDate					= A.dtmDate
+			,strPayee					= ''
+			,intPayeeID					= NULL
+			,strAddress					= ''
+			,strZipCode					= ''
+			,strCity					= ''
+			,strState					= ''
+			,strCountry					= ''
+			,dblAmount					= A.dblAmount
+			,strAmountInWords			= dbo.fn_ConvertNumberToWord(A.dblAmount)
+			,strMemo					= A.strReferenceFrom
+			,intReferenceNo				= 0
+			,ysnCheckPrinted			= 0
+			,ysnCheckToBePrinted		= 0
+			,ysnCheckVoid				= 0
+			,ysnPosted					= 1
+			,strLink					= A.strTransactionID
+			,ysnClr						= 0
+			,dtmDateReconciled			= NULL
+			,intCreatedUserID			= A.intCreatedUserID
+			,dtmCreated					= GETDATE()
+			,intLastModifiedUserID		= A.intLastModifiedUserID
+			,dtmLastModified			= GETDATE()
+			,intConcurrencyID			= 1	
+	FROM	[dbo].tblCMBankTransfer A INNER JOIN [dbo].tblGLAccount GLAccnt
+				ON A.intGLAccountIDFrom = GLAccnt.intAccountID		
+			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
+				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
+	WHERE	A.strTransactionID = @strTransactionID
+	
+	-- Bank Transaction Debit
+	UNION ALL
+	SELECT	strTransactionID			= A.strTransactionID + '-DR'
+			,intBankTransactionTypeID	= @BANK_TRANSFER_DEBIT
+			,intBankAccountID			= A.intBankAccountIDTo
+			,intCurrencyID				= NULL
+			,dblExchangeRate			= 1
+			,dtmDate					= A.dtmDate
+			,strPayee					= ''
+			,intPayeeID					= NULL
+			,strAddress					= ''
+			,strZipCode					= ''
+			,strCity					= ''
+			,strState					= ''
+			,strCountry					= ''
+			,dblAmount					= A.dblAmount
+			,strAmountInWords			= dbo.fn_ConvertNumberToWord(A.dblAmount)
+			,strMemo					= A.strReferenceTo
+			,intReferenceNo				= 0
+			,ysnCheckPrinted			= 0
+			,ysnCheckToBePrinted		= 0
+			,ysnCheckVoid				= 0
+			,ysnPosted					= 1
+			,strLink					= A.strTransactionID
+			,ysnClr						= 0
+			,dtmDateReconciled			= NULL
+			,intCreatedUserID			= A.intCreatedUserID
+			,dtmCreated					= GETDATE()
+			,intLastModifiedUserID		= A.intLastModifiedUserID
+			,dtmLastModified			= GETDATE()
+			,intConcurrencyID			= 1	
+	FROM	[dbo].tblCMBankTransfer A INNER JOIN [dbo].tblGLAccount GLAccnt
+				ON A.intGLAccountIDFrom = GLAccnt.intAccountID		
+			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
+				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
+	WHERE	A.strTransactionID = @strTransactionID	
+	
 END
 ELSE IF @ysnPost = 0
 BEGIN
@@ -395,6 +520,12 @@ BEGIN
 			,intConcurrencyID += 1 
 	WHERE	strTransactionID = @strTransactionID
 	IF @@ERROR <> 0	GOTO Post_Rollback
+	
+	-- Delete the records in tblCMBankTransaction
+	DELETE FROM tblCMBankTransaction
+	WHERE	strLink = @strTransactionID
+			AND ysnClr = 0
+			AND intBankTransactionTypeID IN (@BANK_TRANSFER_CREDIT, @BANK_TRANSFER_DEBIT)
 END
 
 --=====================================================================================================================================

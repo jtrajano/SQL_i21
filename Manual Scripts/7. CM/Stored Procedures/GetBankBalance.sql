@@ -87,8 +87,8 @@ DECLARE @BANK_DEPOSIT INT = 1,
 		@CREDIT_CARD_CHARGE INT = 6,
 		@CREDIT_CARD_RETURNS INT = 7,
 		@CREDIT_CARD_PAYMENTS INT = 8,
-		@BANK_TRANSFER_CREDIT INT = 9,
-		@BANK_TRANSFER_DEBIT INT = 10
+		@BANK_TRANSFER_WD INT = 9,
+		@BANK_TRANSFER_DEP INT = 10
 	
 DECLARE @returnBalance AS NUMERIC(18,6)		
 		
@@ -98,7 +98,7 @@ WHERE	ysnPosted = 1
 		AND dblAmount <> 0 
 		AND intBankAccountID = @intBankAccountID
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDate) AS FLOAT)) AS DATETIME)		
-		AND intBankTransactionTypeID IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_CREDIT)
+		AND intBankTransactionTypeID IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD)
 		
 SELECT	@returnBalance = ISNULL(@returnBalance, 0) + ISNULL(SUM(ISNULL(dblAmount, 0)), 0)
 FROM	tblCMBankTransaction
@@ -106,7 +106,7 @@ WHERE	ysnPosted = 1
 		AND dblAmount <> 0 
 		AND intBankAccountID = @intBankAccountID
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDate) AS FLOAT)) AS DATETIME)		
-		AND intBankTransactionTypeID NOT IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_CREDIT)		
+		AND intBankTransactionTypeID NOT IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD)		
 
 SELECT	intBankAccountID = @intBankAccountID,
 		dblBalance = ISNULL(@returnBalance, 0)
