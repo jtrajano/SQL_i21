@@ -848,6 +848,8 @@ BEGIN
 		SET @PrimaryLength = (SELECT MAX(LEN(glact_acct1_8)) glact_acct1_8 FROM glactmst)
 		SET @SegmentLength = (SELECT MAX(LEN(glact_acct9_16)) glact_acct9_16 FROM glactmst)	
 		
+		DELETE tblGLAccountStructure
+		
 		INSERT tblGLAccountStructure (intStructureType,strStructureName,strType,intLength,strMask,intSort,ysnBuild,intStartingPosition)
 								VALUES (1,'Primary Account','Primary', @PrimaryLength,'0',0,0,9 - @PrimaryLength)							
 		INSERT tblGLAccountStructure (intStructureType,strStructureName,strType,intLength,strMask,intSort,ysnBuild,intStartingPosition)
@@ -898,6 +900,8 @@ BEGIN
 		SET glact_type = (SELECT intAccountGroupID FROM tblGLAccountGroup WHERE strAccountType = 'Equity' and intParentGroupID = 0)
 		WHERE glact_type = 'Q'
 		
+		DELETE tblGLAccountSegment where intAccountStructureID IN (SELECT intAccountStructureID FROM tblGLAccountStructure WHERE strType = 'Primary')		
+		
 		INSERT tblGLAccountSegment
 			(strCode
 			,strDescription
@@ -910,7 +914,7 @@ BEGIN
 		SELECT
 			SegmentCode
 			,CodeDescription
-			,(SELECT intAccountStructureID FROM tblGLAccountStructure WHERE strType = 'Primary')
+			,(SELECT TOP 1 intAccountStructureID FROM tblGLAccountStructure WHERE strType = 'Primary')
 			,glact_type
 			,1
 			,0
@@ -925,6 +929,8 @@ BEGIN
 	BEGIN	
 		SELECT glact_acct9_16 AS SegmentCode INTO #segments FROM glactmst GROUP BY glact_acct9_16
 			
+		DELETE tblGLAccountSegment where intAccountStructureID IN (SELECT intAccountStructureID FROM tblGLAccountStructure WHERE strType = 'Segment')
+		
 		INSERT tblGLAccountSegment
 			(strCode
 			,strDescription
@@ -937,7 +943,7 @@ BEGIN
 		SELECT
 			REPLICATE('0', (select len(max(SegmentCode)) from #segments) - len(SegmentCode)) + '' + CAST(SegmentCode AS NVARCHAR(50)) SegmentCode
 			,''
-			,(SELECT intAccountStructureID FROM tblGLAccountStructure WHERE strType = 'Segment')
+			,(SELECT TOP 1 intAccountStructureID FROM tblGLAccountStructure WHERE strType = 'Segment')
 			,null
 			,1
 			,0
