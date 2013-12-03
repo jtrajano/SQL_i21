@@ -196,6 +196,7 @@ DECLARE
 	,@strBatchID AS NVARCHAR(40)
 	,@intUserID AS INT
 	,@ysnTransactionPostedFlag AS BIT
+	,@ysnTransactionClearedFlag AS BIT	
 	
 	-- Table Variables
 	,@RecapTable AS RecapTableType	
@@ -209,11 +210,12 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 
 -- Read the header table and populate the variables. 
 SELECT	TOP 1 
-		@cntID = cntID,
-		@dtmDate = dtmDate,
-		@dblAmount = dblAmount,
-		@intUserID = intLastModifiedUserID,
-		@ysnTransactionPostedFlag = ysnPosted
+		@cntID = cntID
+		,@dtmDate = dtmDate
+		,@dblAmount = dblAmount
+		,@intUserID = intLastModifiedUserID
+		,@ysnTransactionPostedFlag = ysnPosted
+		,@ysnTransactionClearedFlag = ysnClr		
 FROM	[dbo].tblCMBankTransaction 
 WHERE	strTransactionID = @strTransactionID 
 		AND intBankTransactionTypeID = @BANK_TRANSACTION_TYPE_ID
@@ -270,7 +272,13 @@ BEGIN
 	GOTO Post_Rollback
 END 
 
--- TODO: Check for cleared transaction. 
+-- Check if the transaction is already reconciled
+IF @ysnPost = 0 AND @ysnRecap = 0 AND @ysnTransactionClearedFlag = 1
+BEGIN
+	-- 'The transaction is already cleared.'
+	RAISERROR(50009, 11, 1)
+	GOTO Post_Rollback
+END
 
 --=====================================================================================================================================
 -- 	PROCESSING OF THE G/L ENTRIES. 

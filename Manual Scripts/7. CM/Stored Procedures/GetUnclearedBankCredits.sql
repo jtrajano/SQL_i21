@@ -85,8 +85,8 @@ DECLARE @BANK_DEPOSIT INT = 1,
 		@CREDIT_CARD_CHARGE INT = 6,
 		@CREDIT_CARD_RETURNS INT = 7,
 		@CREDIT_CARD_PAYMENTS INT = 8,
-		@BANK_TRANSFER_CREDIT INT = 9,
-		@BANK_TRANSFER_DEBIT INT = 10
+		@BANK_TRANSFER_WD INT = 9,
+		@BANK_TRANSFER_DEP INT = 10
 		
 SELECT	ISNULL(SUM(ISNULL(dblAmount,0)), 0)
 FROM	tblCMBankTransaction 
@@ -99,7 +99,7 @@ WHERE	ysnPosted = 1
 		AND (
 			-- Filter for all the bank deposits and credits:
 			intBankTransactionTypeID = @BANK_DEPOSIT
-			OR intBankTransactionTypeID = @BANK_TRANSFER_DEBIT
+			OR intBankTransactionTypeID = @BANK_TRANSFER_DEP
 			OR ( dblAmount > 0 AND intBankTransactionTypeID = @BANK_TRANSACTION )
 		)		
 GO
