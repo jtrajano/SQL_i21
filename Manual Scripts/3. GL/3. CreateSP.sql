@@ -812,81 +812,145 @@ EXEC usp_BuildGLTempCOASegment
 select 1
 
 GO
-/****** Object:  StoredProcedure [dbo].[usp_GLCOARestructure]    Script Date: 11/12/2013 11:12:13 ******/
---IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_GLCOARestructure]') AND type in (N'P', N'PC'))
---DROP PROCEDURE [dbo].usp_GLCOARestructure
---GO
 
---SET ANSI_NULLS ON
---GO
---SET QUOTED_IDENTIFIER ON
---GO
---/*----------------------*/
---/* CREATE THE PROCEDURE */
---/*----------------------*/
 
---CREATE PROCEDURE  [dbo].[usp_GLCOARestructure]
---AS
+/****** Object:  StoredProcedure [dbo].[usp_ImportLegacyCOA]    Script Date: 11/06/2013 08:39:35 ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_ImportLegacyCOA]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].usp_ImportLegacyCOA
+GO
 
---SET QUOTED_IDENTIFIER OFF
---SET ANSI_NULLS ON
---SET NOCOUNT ON
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE  [dbo].[usp_ImportLegacyCOA]
+@ysnStructure	BIT = 0,
+@ysnPrimary		BIT = 0,
+@ysnSegment		BIT = 0,
+@ysnOverride	BIT = 0
+AS
 
---DECLARE @Divider		NVARCHAR(10)
---DECLARE @Structure		NVARCHAR(200)
---DECLARE @CodeDescription		NVARCHAR(200)
---DECLARE @Query NVARCHAR(MAX)
---DECLARE @tblQuery TABLE
---(
---	ID					NVARCHAR(200)
---	,DescriptionID		NVARCHAR(200)
---)
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
 
-----CREATE DYNAMIC ACCOUNT STRUCTURE
-----EXEC usp_BuildGLCOASegment
+IF (EXISTS(SELECT glact_acct1_8 FROM glactmst GROUP BY glact_acct1_8 HAVING COUNT(*) > 1) and @ysnOverride = 0)
+BEGIN
+	SELECT 'There are accounts that are classified as an Income and Balance Sheet Type Account. Kindly verify at Legacy GL.' as Result
+END
+ELSE
+BEGIN
+	IF @ysnStructure = 1
+	BEGIN
+		DECLARE  @PrimaryLength		NUMERIC (18,6)
+				,@SegmentLength		NUMERIC (18,6)
+		
+		SET @PrimaryLength = (SELECT MAX(LEN(glact_acct1_8)) glact_acct1_8 FROM glactmst)
+		SET @SegmentLength = (SELECT MAX(LEN(glact_acct9_16)) glact_acct9_16 FROM glactmst)	
+		
+		INSERT tblGLAccountStructure (intStructureType,strStructureName,strType,intLength,strMask,intSort,ysnBuild,intStartingPosition)
+								VALUES (1,'Primary Account','Primary', @PrimaryLength,'0',0,0,9 - @PrimaryLength)							
+		INSERT tblGLAccountStructure (intStructureType,strStructureName,strType,intLength,strMask,intSort,ysnBuild,intStartingPosition)
+								VALUES (2,'Hypen/Separator','Divider', 1,'-',1,0,0)							
+		INSERT tblGLAccountStructure (intStructureType,strStructureName,strType,intLength,strMask,intSort,ysnBuild,intStartingPosition)
+								VALUES (3,'Profit Center','Segment', @SegmentLength,'0',2,0,9 - @SegmentLength)
+	END	
 
---SELECT * 
---INTO #TempCOA
---FROM tblGLTempCOASegment
+	IF @ysnPrimary = 1
+	BEGIN
+		DECLARE @query VARCHAR(500)		
+		SET @query = 'SELECT glact_acct1_8 AS SegmentCode,max(glact_desc) AS CodeDescription,glact_type FROM glactmst GROUP BY glact_acct1_8,glact_type'
+		DECLARE @tblQuery TABLE
+		(
+			 SegmentCode			NVARCHAR(200) COLLATE Latin1_General_CI_AS NOT NULL
+			,CodeDescription		NVARCHAR(300) COLLATE Latin1_General_CI_AS NOT NULL
+			,glact_type				NVARCHAR(200) COLLATE Latin1_General_CI_AS NOT NULL
+		)
+		
+		IF @ysnOverride = 1
+		BEGIN
+			SET @query = 'SELECT glact_acct1_8 AS SegmentCode,max(glact_desc) AS CodeDescription,glact_type = (SELECT TOP 1 glact_type FROM glactmst AS tempType WHERE tempType.glact_acct1_8 = tempCode.glact_acct1_8 GROUP BY glact_type) FROM glactmst AS tempCode GROUP BY glact_acct1_8'
+		END
 
---SELECT [name] AS [Column Name] 
---INTO #TempColumnName 
---FROM syscolumns 
---WHERE id = object_id('tblGLTempCOASegment') AND [name] COLLATE Latin1_General_CI_AS IN (SELECT strStructureName FROM tblGLAccountStructure)
+		INSERT INTO @tblQuery EXEC (@query)			
 
---SET @Divider   = (SELECT strMask FROM tblGLAccountStructure WHERE strType = 'Divider')
---SET @Structure = (SELECT '[' + [Column Name]  + '] + ''' + @Divider + ''' + ' as 'data()' FROM #TempColumnName for xml path(''))
---SET @Structure = LEFT(@Structure, LEN(@Structure) - 7)
---SET @CodeDescription = (SELECT '[' + [Column Name] + ' CodeDesc' + '] + ''' + @Divider + ''' + ' as 'data()' FROM #TempColumnName for xml path(''))
---SET @CodeDescription = LEFT(@CodeDescription, LEN(@CodeDescription) - 7)
+		UPDATE @tblQuery
+		SET glact_type = (SELECT intAccountGroupID FROM tblGLAccountGroup WHERE strAccountType = 'Asset' and intParentGroupID = 0)
+		WHERE glact_type = 'A'
 
---WHILE EXISTS(SELECT 1 FROM #TempCOA)
---BEGIN
---	DECLARE @AccountID INT = (SELECT TOP 1 intAccountID FROM #TempCOA)
---	DECLARE @strAccountID NVARCHAR(200)
---	DECLARE @strDescription NVARCHAR(300)
---	SET @Query = 'SELECT ' + @Structure + ' as strAccountID, ' + @CodeDescription + ' as DescriptionID FROM #TempCOA WHERE intAccountID = ' + CAST(@AccountID AS NVARCHAR(100))
+		UPDATE @tblQuery
+		SET glact_type = (SELECT intAccountGroupID FROM tblGLAccountGroup WHERE strAccountType = 'Expense' and intParentGroupID = 0)
+		WHERE glact_type = 'E'
+
+		UPDATE @tblQuery
+		SET glact_type = (SELECT intAccountGroupID FROM tblGLAccountGroup WHERE strAccountType = 'Liability' and intParentGroupID = 0)
+		WHERE glact_type = 'L'
+
+		UPDATE @tblQuery
+		SET glact_type = (SELECT intAccountGroupID FROM tblGLAccountGroup WHERE strAccountType = 'Cost of Goods Sold' and intParentGroupID = 0)
+		WHERE glact_type = 'C'
+
+		UPDATE @tblQuery
+		SET glact_type = (SELECT intAccountGroupID FROM tblGLAccountGroup WHERE strAccountType = 'Sales' and intParentGroupID = 0)
+		WHERE glact_type = 'I'
+
+		UPDATE @tblQuery
+		SET glact_type = (SELECT intAccountGroupID FROM tblGLAccountGroup WHERE strAccountType = 'Equity' and intParentGroupID = 0)
+		WHERE glact_type = 'Q'
+		
+		INSERT tblGLAccountSegment
+			(strCode
+			,strDescription
+			,intAccountStructureID
+			,intAccountGroupID
+			,ysnActive
+			,ysnSelected
+			,ysnBuild
+			,ysnIsNotExisting)
+		SELECT
+			SegmentCode
+			,CodeDescription
+			,(SELECT intAccountStructureID FROM tblGLAccountStructure WHERE strType = 'Primary')
+			,glact_type
+			,1
+			,0
+			,0
+			,null
+		FROM @tblQuery
+		WHERE SegmentCode not in (SELECT strCode FROM tblGLAccountSegment)
+		
+	END
+		
+	IF @ysnSegment = 1
+	BEGIN	
+		SELECT glact_acct9_16 AS SegmentCode INTO #segments FROM glactmst GROUP BY glact_acct9_16
+			
+		INSERT tblGLAccountSegment
+			(strCode
+			,strDescription
+			,intAccountStructureID
+			,intAccountGroupID
+			,ysnActive
+			,ysnSelected
+			,ysnBuild
+			,ysnIsNotExisting)
+		SELECT
+			REPLICATE('0', (select len(max(SegmentCode)) from #segments) - len(SegmentCode)) + '' + CAST(SegmentCode AS NVARCHAR(50)) SegmentCode
+			,''
+			,(SELECT intAccountStructureID FROM tblGLAccountStructure WHERE strType = 'Segment')
+			,null
+			,1
+			,0
+			,0
+			,null
+		FROM #segments
+		WHERE SegmentCode not in (SELECT strCode FROM tblGLAccountSegment)
+		
+	END
+		
+	DROP TABLE #segments
+END
+
 	
---	INSERT INTO @tblQuery
---	EXEC sp_executesql @Query	
-	
---	SET @strAccountID = (SELECT TOP 1 ID FROM @tblQuery)
---	SET @strDescription = (SELECT TOP 1 DescriptionID FROM @tblQuery)
-	
---	select * from @tblQuery
-	
---	--UPDATE tblGLAccount SET strAccountID = @strAccountID WHERE intAccountID = @AccountID
---	--UPDATE tblGLAccount SET strDescription = @strDescription WHERE intAccountID = @AccountID
---	--UPDATE tblGLCOACrossReference SET stri21ID = @strAccountID WHERE inti21ID = @AccountID		
+GO
 
---	DELETE FROM #TempCOA WHERE intAccountID = @AccountID	
---	DELETE @tblQuery
---END
-
---DROP TABLE #TempColumnName
---DROP TABLE #TempCOA
-
---select 1
---GO
-
---usp_GLCOARestructure
