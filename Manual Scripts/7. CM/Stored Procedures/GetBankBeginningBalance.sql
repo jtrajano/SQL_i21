@@ -95,7 +95,7 @@ SELECT	TOP 1
 		@dblBalance = ISNULL(dblStatementEndingBalance, 0)
 FROM	tblCMBankReconciliation
 WHERE	intBankAccountID = @intBankAccountID
-		AND CAST(FLOOR(CAST(dtmDateReconciled AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDateReconciled) AS FLOAT)) AS DATETIME)
+		AND CAST(FLOOR(CAST(dtmDateReconciled AS FLOAT)) AS DATETIME) < CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDateReconciled) AS FLOAT)) AS DATETIME)
 ORDER BY  CAST(FLOOR(CAST(dtmDateReconciled AS FLOAT)) AS DATETIME) DESC 
 
 SET @dblBalance = ISNULL(@dblBalance, 0)

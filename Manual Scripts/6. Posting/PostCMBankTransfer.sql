@@ -187,8 +187,10 @@ DECLARE
 	,@STARTING_NUM_TRANSACTION_TYPE_ID AS INT	= 3	-- Starting number for GL Detail table. Ex: 'BATCH-1234',
 	,@GL_DETAIL_CODE AS NVARCHAR(10)			= 'BTFR' -- String code used in GL Detail table. 
 	,@MODULE_NAME AS NVARCHAR(100)				= 'Cash Management' -- Module where this posting code belongs.
-	,@BANK_TRANSFER_CREDIT AS INT				= 9 -- Transaction code for Bank Transfer Credit.
-	,@BANK_TRANSFER_DEBIT AS INT				= 10 -- Transaction code for Bank Transfer Debit. 
+	,@BANK_TRANSFER_WD AS INT					= 9 -- Transaction code for Bank Transfer Withdrawal. It also refers to as Bank Transfer FROM.
+	,@BANK_TRANSFER_DEP AS INT					= 10 -- Transaction code for Bank Transfer Deposit. It also refers to as Bank Transfer TO. 
+	,@BANK_TRANSFER_WD_PREFIX AS NVARCHAR(3)	= '-WD'
+	,@BANK_TRANSFER_DEP_PREFIX AS NVARCHAR(4)	= '-DEP'
 	
 	-- Local Variables
 	,@cntID AS INT
@@ -263,7 +265,7 @@ BEGIN
 	FROM	tblCMBankTransaction 
 	WHERE	strLink = @strTransactionID
 			AND ysnClr = 1
-			AND intBankTransactionTypeID IN (@BANK_TRANSFER_CREDIT, @BANK_TRANSFER_DEBIT)
+			AND intBankTransactionTypeID IN (@BANK_TRANSFER_WD, @BANK_TRANSFER_DEP)
 			
 	IF @ysnTransactionClearedFlag = 1
 	BEGIN
@@ -401,6 +403,7 @@ BEGIN
 	SET		ysnPosted = 1
 			,intConcurrencyID += 1 
 	WHERE	strTransactionID = @strTransactionID
+	IF @@ERROR <> 0	GOTO Post_Rollback
 	
 	-- Create new records in tblCMBankTransaction	
 	INSERT INTO tblCMBankTransaction (
@@ -435,8 +438,8 @@ BEGIN
 		,intConcurrencyID	
 	)
 	-- Bank Transaction Credit
-	SELECT	strTransactionID			= A.strTransactionID + '-CR'
-			,intBankTransactionTypeID	= @BANK_TRANSFER_CREDIT
+	SELECT	strTransactionID			= A.strTransactionID + @BANK_TRANSFER_WD_PREFIX
+			,intBankTransactionTypeID	= @BANK_TRANSFER_WD
 			,intBankAccountID			= A.intBankAccountIDFrom
 			,intCurrencyID				= NULL
 			,dblExchangeRate			= 1
@@ -472,8 +475,8 @@ BEGIN
 	
 	-- Bank Transaction Debit
 	UNION ALL
-	SELECT	strTransactionID			= A.strTransactionID + '-DR'
-			,intBankTransactionTypeID	= @BANK_TRANSFER_DEBIT
+	SELECT	strTransactionID			= A.strTransactionID + @BANK_TRANSFER_DEP_PREFIX
+			,intBankTransactionTypeID	= @BANK_TRANSFER_DEP
 			,intBankAccountID			= A.intBankAccountIDTo
 			,intCurrencyID				= NULL
 			,dblExchangeRate			= 1
@@ -506,6 +509,7 @@ BEGIN
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
 	WHERE	A.strTransactionID = @strTransactionID	
+	IF @@ERROR <> 0	GOTO Post_Rollback
 	
 END
 ELSE IF @ysnPost = 0
@@ -525,11 +529,12 @@ BEGIN
 	DELETE FROM tblCMBankTransaction
 	WHERE	strLink = @strTransactionID
 			AND ysnClr = 0
-			AND intBankTransactionTypeID IN (@BANK_TRANSFER_CREDIT, @BANK_TRANSFER_DEBIT)
+			AND intBankTransactionTypeID IN (@BANK_TRANSFER_WD, @BANK_TRANSFER_DEP)
+	IF @@ERROR <> 0	GOTO Post_Rollback
 END
 
 --=====================================================================================================================================
--- 	Book the G/L ENTRIES to tblGLDetail (The G/L Ledger detail table)
+-- 	Book the G/L ENTRIES to tblGLDetail (The General Ledger Detail table)
 ---------------------------------------------------------------------------------------------------------------------------------------
 EXEC [dbo].[BookGLEntries] @ysnPost, @ysnRecap, @isSuccessful OUTPUT, @message_id OUTPUT
 IF @isSuccessful = 0 GOTO Post_Rollback

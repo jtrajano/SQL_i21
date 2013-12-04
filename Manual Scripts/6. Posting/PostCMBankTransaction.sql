@@ -190,6 +190,17 @@ DECLARE
 	,@BANK_TRANSACTION_TYPE_ID AS INT = 5 			-- (Default) Bank Transaction type id is 5 (See tblCMBankTransactionType). 
 	,@GL_DETAIL_CODE AS NVARCHAR(10) = 'BTRN'		-- (Default) String code used in GL Detail table. 
 	
+	,@BANK_DEPOSIT INT = 1
+	,@BANK_WITHDRAWAL INT = 2
+	,@MISC_CHECKS INT = 3
+	,@BANK_TRANSFER INT = 4
+	,@BANK_TRANSACTION INT = 5
+	,@CREDIT_CARD_CHARGE INT = 6
+	,@CREDIT_CARD_RETURNS INT = 7
+	,@CREDIT_CARD_PAYMENTS INT = 8
+	,@BANK_TRANSFER_WD INT = 9
+	,@BANK_TRANSFER_DEP INT = 10	
+	
 	-- Local Variables
 	,@cntID AS INT
 	,@dtmDate AS DATETIME
@@ -224,7 +235,7 @@ WHERE	strTransactionID = @strTransactionID
 IF @@ERROR <> 0	GOTO Post_Rollback				
 		
 -- Read the detail table and populate the variables. 
-SELECT	@dblAmountDetailTotal = SUM(ISNULL(dblCredit, 0) - ISNULL(dblDebit, 0))
+SELECT	@dblAmountDetailTotal = ISNULL(SUM(ISNULL(dblCredit, 0) - ISNULL(dblDebit, 0)), 0)
 FROM	[dbo].tblCMBankTransactionDetail
 WHERE	strTransactionID = @strTransactionID 
 IF @@ERROR <> 0	GOTO Post_Rollback		
@@ -337,7 +348,7 @@ BEGIN
 			,[strBatchID]			= @strBatchID
 			,[intAccountID]			= BankAccnt.intGLAccountID
 			,[strAccountGroup]		= GLAccntGrp.strAccountGroup
-			,[dblDebit]				= A.dblAmount
+			,[dblDebit]				= @dblAmountDetailTotal
 			,[dblCredit]			= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
