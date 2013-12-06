@@ -32,10 +32,19 @@ RETURNS NVARCHAR(4000)
 AS
 BEGIN 
 
-DECLARE @strReturnValue AS NVARCHAR(4000)
+DECLARE @strReturnValue NVARCHAR(4000)
+		,@isNegativeNumber BIT = 0
+		
 SET @strReturnValue = '' 
 
--- INVALid DATA RANGE, GOTO EXIT_SP BLANK
+IF @dblAmount < 0 
+BEGIN 
+	SET @dblAmount = ABS(@dblAmount)
+	SET @isNegativeNumber = 1
+END 
+
+
+-- INVALID DATA RANGE, GOTO EXIT_SP BLANK
 IF @dblAmount > 100000000000000.00 OR @dblAmount < 0.00 RETURN @strReturnValue
 
 DECLARE @intPlaceHolder AS NUMERIC(9, 2)
@@ -110,6 +119,12 @@ SET @strDecimal = CAST(@intDecimalPlace AS NVARCHAR(4))
 IF @intDecimalPlace < 10 
 	BEGIN SET @strDecimal = '0' + CAST(@intDecimalPlace AS NVARCHAR(2)) END
 SET @strReturnValue = @strReturnValue  + ' and ' + @strDecimal + '/100'
+
+-- CHECK IF NUMBER IS NEGATIVE
+IF @isNegativeNumber = 1
+BEGIN 
+	SET @strReturnValue =  'Negative ' + LTRIM(RTRIM(@strReturnValue))
+END
 
 SET @strReturnValue = LTRIM(RTRIM(@strReturnValue))
 
@@ -221,7 +236,7 @@ BEGIN
 								END	
 	SET @intPlaceHolder = @dblAmount - (10 * @intPlaceHolder)
 	SELECT @strAmountChild = dbo.fn_OnesPlaceToWord(@intPlaceHolder)
-	IF @strAmountChild <> '' SELECT @strReturnValue = @strReturnValue + ' ' + @strAmountChild 	
+	IF @strAmountChild <> '' SELECT @strReturnValue = @strReturnValue + '-' + @strAmountChild 	
 END
 
 EXIT_FN:
