@@ -200,6 +200,9 @@ DECLARE
 	,@intUserID AS INT
 	,@ysnTransactionPostedFlag AS BIT
 	,@ysnTransactionClearedFlag AS BIT
+	,@intBankAccountIDFrom AS INT
+	,@intBankAccountIDTo AS INT
+	,@ysnBankAccountIDInactive AS BIT
 	
 	-- Table Variables
 	,@RecapTable AS RecapTableType	
@@ -213,11 +216,13 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 
 -- Read bank transfer table 
 SELECT	TOP 1 
-		@cntID = cntID,
-		@dtmDate = dtmDate,
-		@dblAmount = dblAmount,
-		@intUserID = intLastModifiedUserID,
-		@ysnTransactionPostedFlag = ysnPosted
+		@cntID = cntID
+		,@dtmDate = dtmDate
+		,@dblAmount = dblAmount
+		,@intUserID = intLastModifiedUserID
+		,@ysnTransactionPostedFlag = ysnPosted
+		,@intBankAccountIDFrom = intBankAccountIDFrom
+		,@intBankAccountIDTo = intBankAccountIDTo
 FROM	[dbo].tblCMBankTransfer 
 WHERE	strTransactionID = @strTransactionID 
 IF @@ERROR <> 0	GOTO Post_Rollback		
@@ -258,7 +263,7 @@ BEGIN
 	GOTO Post_Rollback
 END 
 
--- Check if the transaction is already reconciled
+-- Check if the transaction is already cleared or reconciled
 IF @ysnPost = 0 AND @ysnRecap = 0
 BEGIN
 	SELECT TOP 1 @ysnTransactionClearedFlag = 1
@@ -275,7 +280,21 @@ BEGIN
 	END
 END
 
--- TODO: Check for cleared transaction. 
+-- Check if the bank account is inactive
+IF @ysnRecap = 0 
+BEGIN
+	SELECT TOP 1 @ysnBankAccountIDInactive = 1
+	FROM	tblCMBankAccount
+	WHERE	intBankAccountID IN (@intBankAccountIDFrom, @intBankAccountIDTo) 
+			AND ysnActive = 0
+	
+	IF @ysnBankAccountIDInactive = 1
+	BEGIN
+		-- 'The bank account is inactive.'
+		RAISERROR(50010, 11, 1)
+		GOTO Post_Rollback
+	END
+END 
 
 --=====================================================================================================================================
 -- 	PROCESSING OF THE G/L ENTRIES. 

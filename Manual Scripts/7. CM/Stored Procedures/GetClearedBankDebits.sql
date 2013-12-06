@@ -100,7 +100,7 @@ WHERE	ysnPosted = 1
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmStatementDate, dtmDate) AS FLOAT)) AS DATETIME)
 		AND (
 			-- Filter date reconciled. 
-			-- 1. Include only bank transaction is not permanently reconciled. 
+			-- 1. Include only bank transaction if not permanently reconciled. 
 			-- 2. Or if the bank transaction is reconciled on the provided statement date. 
 			dtmDateReconciled IS NULL 
 			OR CAST(FLOOR(CAST(dtmDateReconciled AS FLOAT)) AS DATETIME) = CAST(FLOOR(CAST(ISNULL(@dtmStatementDate, dtmDate) AS FLOAT)) AS DATETIME)

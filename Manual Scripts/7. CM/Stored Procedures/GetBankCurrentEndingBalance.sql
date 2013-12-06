@@ -32,18 +32,21 @@
 {                                                                   }
 {*******************************************************************}
 
-This stored procedure will retrieve the prior bank reconciliation ending-balance as the new beginning balance. 
+This stored procedure will retrieve the current ending balance
 
 Parameters:
 	@intBankAccountID	- The PK of the bank account id from the tblCMBankAccount
-	@dtmDate			- The balance of the bank account 'as of' this date. 
+	@dtmStatementDate   - The bank statement's date. 
 	
-DECLARE @balance NUMERIC(18,6)
-EXEC dbo.GetBankBeginningBalance @intBankAccountID = 2, @dtmDate = '2013-12-05T00:00:00', @dblBalance = @balance OUTPUT
-EXEC dbo.GetBankBeginningBalance NULL
+DECLARE @dblEndingBalance NUMERIC(18,6)
+EXEC dbo.GetBankCurrentEndingBalance @intBankAccountID = 2, @dtmStatementDate = '2013-12-05T00:00:00', @dblEndingBalance = @dblEndingBalance OUTPUT
+
+PRINT @dblEndingBalance
+
+EXEC dbo.GetBankCurrentEndingBalance NULL
 
 '====================================================================================================================================='
-SCRIPT CREATED BY: Feb Montefrio		DATE CREATED: December 02, 2013
+SCRIPT CREATED BY: Feb Montefrio		DATE CREATED: December 05, 2013
 --------------------------------------------------------------------------------------------------------------------------------------						
 Last Modified By    :	1. 
 						:
@@ -61,17 +64,17 @@ Synopsis            :	1.
 --=====================================================================================================================================
 -- 	DELETE THE STORED PROCEDURE IF IT EXISTS
 ---------------------------------------------------------------------------------------------------------------------------------------
-IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID(N'[dbo].[GetBankBeginningBalance]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
-DROP PROCEDURE [dbo].[GetBankBeginningBalance]
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID(N'[dbo].[GetBankCurrentEndingBalance]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
+DROP PROCEDURE [dbo].[GetBankCurrentEndingBalance]
 GO
 
 --=====================================================================================================================================
 -- 	CREATE THE STORED PROCEDURE AFTER DELETING IT
 ---------------------------------------------------------------------------------------------------------------------------------------
-CREATE PROCEDURE GetBankBeginningBalance
+CREATE PROCEDURE GetBankCurrentEndingBalance
 	@intBankAccountID INT = NULL,
-	@dtmDate AS DATETIME = NULL,
-	@dblBalance AS NUMERIC(18, 6) = NULL OUTPUT
+	@dtmStatementDate DATETIME = NULL,	
+	@dblEndingBalance AS NUMERIC(18, 6) = NULL OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -79,17 +82,20 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
+	
+SELECT	TOP 1 
+		@dblEndingBalance = ISNULL(dblStatementEndingBalance, 0)
+FROM	tblCMCurrentBankReconciliation
+WHERE	intBankAccountID = @intBankAccountID
 
 SELECT	TOP 1 
-		@dblBalance = ISNULL(dblStatementEndingBalance, 0)
-FROM	tblCMBankReconciliation
-WHERE	intBankAccountID = @intBankAccountID
-		AND CAST(FLOOR(CAST(dtmDateReconciled AS FLOAT)) AS DATETIME) < CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDateReconciled) AS FLOAT)) AS DATETIME)
-ORDER BY  CAST(FLOOR(CAST(dtmDateReconciled AS FLOAT)) AS DATETIME) DESC 
-
-SET @dblBalance = ISNULL(@dblBalance, 0)
+		@dblEndingBalance = ISNULL(dblStatementEndingBalance, @dblEndingBalance)
+FROM	tblCMBankReconciliation 
+WHERE	intBankAccountID = @intBankAccountID 
+		AND CAST(FLOOR(CAST(dtmDateReconciled AS FLOAT)) AS DATETIME) = CAST(FLOOR(CAST(ISNULL(@dtmStatementDate, dtmDateReconciled) AS FLOAT)) AS DATETIME)
+		AND @dtmStatementDate IS NOT NULL
 
 SELECT	intBankAccountID = @intBankAccountID,
-		dblBeginningBalance = @dblBalance
+		dblEndingBalance = ISNULL(@dblEndingBalance, 0)
 
 GO
