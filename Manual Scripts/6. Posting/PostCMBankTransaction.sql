@@ -210,6 +210,8 @@ DECLARE
 	,@intUserID AS INT
 	,@ysnTransactionPostedFlag AS BIT
 	,@ysnTransactionClearedFlag AS BIT	
+	,@intBankAccountID AS INT
+	,@ysnBankAccountIDInactive AS BIT
 	
 	-- Table Variables
 	,@RecapTable AS RecapTableType	
@@ -230,6 +232,7 @@ SELECT	TOP 1
 		,@ysnTransactionPostedFlag = ysnPosted
 		,@BANK_TRANSACTION_TYPE_ID = intBankTransactionTypeID -- Retrieve the ACTUAL transaction type id used in the transaction. 
 		,@ysnTransactionClearedFlag = ysnClr
+		,@intBankAccountID = intBankAccountID
 FROM	[dbo].tblCMBankTransaction 
 WHERE	strTransactionID = @strTransactionID 
 IF @@ERROR <> 0	GOTO Post_Rollback				
@@ -297,6 +300,22 @@ BEGIN
 	RAISERROR(50009, 11, 1)
 	GOTO Post_Rollback
 END
+
+-- Check if the bank account is inactive
+IF @ysnRecap = 0 
+BEGIN
+	SELECT	@ysnBankAccountIDInactive = 1
+	FROM	tblCMBankAccount
+	WHERE	intBankAccountID = @intBankAccountID
+			AND ysnActive = 0
+	
+	IF @ysnBankAccountIDInactive = 1
+	BEGIN
+		-- 'The bank account is inactive.'
+		RAISERROR(50010, 11, 1)
+		GOTO Post_Rollback
+	END
+END 
 
 --=====================================================================================================================================
 -- 	PROCESSING OF THE G/L ENTRIES. 
