@@ -979,3 +979,58 @@ END
 
 	
 GO
+
+
+/****** Object:  StoredProcedure [dbo].[usp_GLAccountClone]    Script Date: 11/06/2013 08:39:35 ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_GLAccountClone]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].usp_GLAccountClone
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE  [dbo].[usp_GLAccountClone]
+@intUserID INT,
+@intCodes NVARCHAR(200)
+AS
+BEGIN
+
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+
+	DECLARE @query VARCHAR(2000)			
+	DECLARE @tblQuery TABLE
+	(
+		 intAccountSegmentID INT
+	)
+	
+	SET @query = 'SELECT intAccountSegmentID FROM tblGLAccountSegment
+						WHERE intAccountSegmentID IN (
+								SELECT intAccountSegmentID FROM tblGLAccountSegmentMapping 
+									WHERE intAccountID IN (
+											SELECT intAccountID FROM tblGLAccountSegmentMapping 
+												WHERE intAccountSegmentID IN (' + @intCodes + ')
+												GROUP BY intAccountID 
+												HAVING count(*) = (SELECT COUNT(*) FROM tblGLAccountStructure WHERE strType = ''Segment'')))	
+						AND intAccountStructureID = (SELECT intAccountStructureID FROM tblGLAccountStructure WHERE strType = ''Primary'')'
+
+	INSERT INTO @tblQuery EXEC (@query)	
+
+	INSERT INTO tblGLTempAccountToBuild
+	SELECT
+		intAccountSegmentID
+		,@intUserID
+		,dtmCreated = getDate()
+	FROM
+	@tblQuery
+	
+	EXEC usp_BuildGLAccountTemporary @intUserID
+		
+	SELECT '1'
+	
+END
+
+	
+GO
