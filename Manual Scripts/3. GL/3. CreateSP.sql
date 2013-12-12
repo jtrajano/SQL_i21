@@ -835,7 +835,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 
-IF (EXISTS(SELECT glact_acct1_8 FROM glactmst GROUP BY glact_acct1_8 HAVING COUNT(*) > 1) and @ysnOverride = 0)
+IF (EXISTS(SELECT SegmentCode FROM (SELECT glact_acct1_8 AS SegmentCode,max(glact_desc) AS CodeDescription,glact_type FROM glactmst GROUP BY glact_acct1_8,glact_type) tblX group by SegmentCode HAVING COUNT(*) > 1) and @ysnOverride = 0)
 BEGIN
 	SELECT 'There are accounts that are classified as an Income and Balance Sheet Type account. <br/> Kindly verify at Legacy GL.' as Result
 END
@@ -917,7 +917,7 @@ BEGIN
 			SegmentCode
 			,CodeDescription
 			,(SELECT TOP 1 intAccountStructureID FROM tblGLAccountStructure WHERE strType = 'Primary')
-			,glact_type
+			,glact_type = CASE WHEN glact_type = '' THEN NULL ELSE glact_type END
 			,1
 			,0
 			,0
@@ -928,8 +928,21 @@ BEGIN
 	END
 		
 	IF @ysnSegment = 1
-	BEGIN	
-		SELECT glact_acct9_16 AS SegmentCode INTO #segments FROM glactmst GROUP BY glact_acct9_16
+	BEGIN											
+		SELECT glprc_sub_acct AS SegmentCode
+				  ,glprc_desc = ISNULL((SELECT glprc_desc FROM glprcmst WHERE glprc_sub_acct = tblC.glprc_sub_acct),'')
+			INTO #segments
+			 FROM (
+				SELECT * FROM (
+						SELECT glprc_sub_acct FROM glprcmst WHERE LEN(glprc_sub_acct) = (SELECT LEN(MAX(glact_acct9_16)) FROM glactmst)
+						) tblA
+					UNION ALL SELECT * FROM (
+								SELECT glact_acct9_16 as glprc_sub_acct FROM glactmst GROUP BY glact_acct9_16
+								) tblB
+				) tblC
+			WHERE LEN(glprc_sub_acct) <= (SELECT LEN(MAX(glact_acct9_16)) FROM glactmst)
+			GROUP BY glprc_sub_acct									
+									
 			
 		DELETE tblGLAccountSegment where intAccountStructureID IN (SELECT intAccountStructureID FROM tblGLAccountStructure WHERE strType = 'Segment')
 		
@@ -944,7 +957,7 @@ BEGIN
 			,ysnIsNotExisting)
 		SELECT
 			REPLICATE('0', (select len(max(SegmentCode)) from #segments) - len(SegmentCode)) + '' + CAST(SegmentCode AS NVARCHAR(50)) SegmentCode
-			,''
+			,glprc_desc
 			,(SELECT TOP 1 intAccountStructureID FROM tblGLAccountStructure WHERE strType = 'Segment')
 			,null
 			,1
