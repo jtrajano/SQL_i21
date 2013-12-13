@@ -1,11 +1,4 @@
 
--- --------------------------------------------------
--- Entity Designer DDL Script for SQL Server 2005, 2008, and Azure
--- --------------------------------------------------
--- Date Created: 12/09/2013 13:46:04
--- Generated from EDMX file: C:\Users\Feb Montefrio\Documents\[SANDBOX]]\i21 CashManagement\server\iRely.CashManagement.Model\iRely.CashManagement.Model\CMModel.edmx
--- --------------------------------------------------
-
 SET QUOTED_IDENTIFIER OFF;
 
 GO
@@ -116,23 +109,23 @@ GO
 -- Creating table 'tblCMBankAccount'
 CREATE TABLE [dbo].[tblCMBankAccount] (
     [intBankAccountID] int IDENTITY(1,1) NOT NULL,
-    [strBankName] nvarchar(250)  NOT NULL,
+    [strBankName] nvarchar(250) COLLATE Latin1_General_CI_AS NOT NULL,
     [ysnActive] bit  NOT NULL,
     [intGLAccountID] int  NOT NULL,
     [intCurrencyID] int  NULL,
     [intBankAccountType] int  NOT NULL,
-    [strContact] nvarchar(150)  NOT NULL,
-    [strBankAccountNo] nvarchar(20)  NOT NULL,
-    [strRTN] nvarchar(12)  NOT NULL,
-    [strAddress] nvarchar(60)  NOT NULL,
-    [strZipCode] nvarchar(42)  NOT NULL,
-    [strCity] nvarchar(85)  NOT NULL,
-    [strState] nvarchar(60)  NOT NULL,
-    [strCountry] nvarchar(75)  NOT NULL,
-    [strPhone] nvarchar(30)  NOT NULL,
-    [strFax] nvarchar(30)  NOT NULL,
-    [strWebsite] nvarchar(125)  NOT NULL,
-    [strEmail] nvarchar(225)  NOT NULL,
+    [strContact] nvarchar(150) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strBankAccountNo] nvarchar(20) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strRTN] nvarchar(12) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strAddress] nvarchar(60) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strZipCode] nvarchar(42) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strCity] nvarchar(85) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strState] nvarchar(60) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strCountry] nvarchar(75) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strPhone] nvarchar(30) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strFax] nvarchar(30) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strWebsite] nvarchar(125) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strEmail] nvarchar(225) COLLATE Latin1_General_CI_AS NOT NULL,
     [intCheckStartingNo] int  NOT NULL,
     [intCheckEndingNo] int  NOT NULL,
     [intCheckNextNo] int  NOT NULL,
@@ -142,17 +135,17 @@ CREATE TABLE [dbo].[tblCMBankAccount] (
     [intBackupCheckEndingNo] int  NOT NULL,
     [intEFTNextNo] int  NOT NULL,
     [intEFTBankFileFormatID] int  NULL,
-    [strEFTCompanyID] nvarchar(20)  NOT NULL,
-    [strEFTBankName] nvarchar(250)  NOT NULL,
-    [strMICRDescription] nvarchar(500)  NOT NULL,
+    [strEFTCompanyID] nvarchar(20) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strEFTBankName] nvarchar(250) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strMICRDescription] nvarchar(500) COLLATE Latin1_General_CI_AS NOT NULL,
     [intMICRBankAccountSpacesCount] int  NOT NULL,
     [intMICRBankAccountSpacesPosition] int  NOT NULL,
     [intMICRCheckNoSpacesCount] int  NOT NULL,
     [intMICRCheckNoSpacesPosition] int  NOT NULL,
     [intMICRCheckNoLength] int  NOT NULL,
     [intMICRCheckNoPosition] int  NOT NULL,
-    [strMICRLeftSymbol] nvarchar(1)  NOT NULL,
-    [strMICRRightSymbol] nvarchar(1)  NOT NULL,
+    [strMICRLeftSymbol] nvarchar(1) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strMICRRightSymbol] nvarchar(1) COLLATE Latin1_General_CI_AS NOT NULL,
     [intCreatedUserID] int  NULL,
     [dtmCreated] datetime  NULL,
     [intLastModifiedUserID] int  NULL,
@@ -164,7 +157,7 @@ GO
 -- Creating table 'tblCMBankFileFormat'
 CREATE TABLE [dbo].[tblCMBankFileFormat] (
     [intBankFileFormatID] int IDENTITY(1,1) NOT NULL,
-    [strName] nvarchar(250)  NOT NULL,
+    [strName] nvarchar(250) COLLATE Latin1_General_CI_AS NOT NULL,
     [intBankFileType] int  NOT NULL,
     [intFileFormat] int  NOT NULL,
     [intCreatedUserID] int  NULL,
@@ -183,9 +176,9 @@ CREATE TABLE [dbo].[tblCMBankFileFormatDetail] (
     [intFieldNo] int  NOT NULL,
     [intFieldLength] int  NOT NULL,
     [intFieldType] int  NOT NULL,
-    [strFieldDescription] nvarchar(250)  NOT NULL,
-    [strFieldName] nvarchar(100)  NOT NULL,
-    [strFieldFormat] nvarchar(100)  NOT NULL,
+    [strFieldDescription] nvarchar(250) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strFieldName] nvarchar(100) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strFieldFormat] nvarchar(100) COLLATE Latin1_General_CI_AS NOT NULL,
     [intFieldFillerSide] int  NOT NULL,
     [ysnFieldActive] bit  NOT NULL,
     [intCreatedUserID] int  NULL,
@@ -201,7 +194,7 @@ CREATE TABLE [dbo].[tblCMCheckNumberAudit] (
     [intCheckNo] int  NOT NULL,
     [intBankAccountID] int  NOT NULL,
     [intCheckNumberStatus] int  NOT NULL,
-    [strRemarks] nvarchar(200)  NOT NULL,
+    [strRemarks] nvarchar(200) COLLATE Latin1_General_CI_AS NOT NULL,
     [intConcurrencyID] int  NOT NULL
 );
 GO
@@ -211,7 +204,7 @@ CREATE TABLE [dbo].[tblCMEFTACHAudit] (
     [intEFTACHNo] int  NOT NULL,
     [intBankAccountID] int  NOT NULL,
     [intEFTACHStatus] int  NOT NULL,
-    [strRemarks] nvarchar(200)  NOT NULL,
+    [strRemarks] nvarchar(200) COLLATE Latin1_General_CI_AS  NOT NULL,
     [intConcurrencyID] int  NOT NULL
 );
 GO
@@ -219,8 +212,8 @@ GO
 -- Creating table 'tblCMBankTransactionType'
 CREATE TABLE [dbo].[tblCMBankTransactionType] (
     [intBankTransactionTypeID] int  NOT NULL,
-    [strBankTransactionTypeName] nvarchar(20)  NOT NULL,
-    [strTransactionPrefix] nvarchar(5)  NOT NULL,
+    [strBankTransactionTypeName] nvarchar(20) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strTransactionPrefix] nvarchar(5) COLLATE Latin1_General_CI_AS NOT NULL,
     [intTransactionNo] int  NOT NULL,
     [intConcurrencyID] int  NOT NULL
 );
@@ -229,28 +222,28 @@ GO
 -- Creating table 'tblCMBankTransaction'
 CREATE TABLE [dbo].[tblCMBankTransaction] (
     [cntID] int IDENTITY(1,1) NOT NULL,
-    [strTransactionID] nvarchar(20)  NOT NULL,
+    [strTransactionID] nvarchar(20) COLLATE Latin1_General_CI_AS  NOT NULL,
     [intBankTransactionTypeID] int  NOT NULL,
     [intBankAccountID] int  NOT NULL,
     [intCurrencyID] int  NULL,
     [dblExchangeRate] decimal(38,20)  NOT NULL,
     [dtmDate] datetime  NOT NULL,
-    [strPayee] nvarchar(150)  NOT NULL,
+    [strPayee] nvarchar(150) COLLATE Latin1_General_CI_AS NOT NULL,
     [intPayeeID] int  NULL,
-    [strAddress] nvarchar(60)  NULL,
-    [strZipCode] nvarchar(42)  NULL,
-    [strCity] nvarchar(85)  NULL,
-    [strState] nvarchar(60)  NULL,
-    [strCountry] nvarchar(75)  NULL,
+    [strAddress] nvarchar(60) COLLATE Latin1_General_CI_AS NULL,
+    [strZipCode] nvarchar(42) COLLATE Latin1_General_CI_AS NULL,
+    [strCity] nvarchar(85) COLLATE Latin1_General_CI_AS NULL,
+    [strState] nvarchar(60) COLLATE Latin1_General_CI_AS NULL,
+    [strCountry] nvarchar(75) COLLATE Latin1_General_CI_AS NULL,
     [dblAmount] decimal(18,6)  NOT NULL,
-    [strAmountInWords] nvarchar(250)  NOT NULL,
-    [strMemo] nvarchar(250)  NOT NULL,
+    [strAmountInWords] nvarchar(250) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strMemo] nvarchar(250) COLLATE Latin1_General_CI_AS NOT NULL,
     [intReferenceNo] int  NULL,
     [ysnCheckPrinted] bit  NOT NULL,
     [ysnCheckToBePrinted] bit  NOT NULL,
     [ysnCheckVoid] bit  NOT NULL,
     [ysnPosted] bit  NOT NULL,
-    [strLink] nvarchar(20)  NULL,
+    [strLink] nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
     [ysnClr] bit  NOT NULL,
     [dtmDateReconciled] datetime  NULL,
     [intCreatedUserID] int  NULL,
@@ -264,10 +257,10 @@ GO
 -- Creating table 'tblCMBankTransactionDetail'
 CREATE TABLE [dbo].[tblCMBankTransactionDetail] (
     [intBankTransactionDetailID] int IDENTITY(1,1) NOT NULL,
-    [strTransactionID] nvarchar(20)  NOT NULL,
+    [strTransactionID] nvarchar(20) COLLATE Latin1_General_CI_AS NOT NULL,
     [dtmDate] datetime  NULL,
     [intGLAccountID] int  NOT NULL,
-    [strDescription] nvarchar(250)  NOT NULL,
+    [strDescription] nvarchar(250) COLLATE Latin1_General_CI_AS NOT NULL,
     [dblDebit] decimal(18,6)  NOT NULL,
     [dblCredit] decimal(18,6)  NOT NULL,
     [intUndepositedFundID] int  NULL,
@@ -283,7 +276,7 @@ GO
 -- Creating table 'tblCMCreditCardBatchEntry'
 CREATE TABLE [dbo].[tblCMCreditCardBatchEntry] (
     [cntID] int IDENTITY(1,1) NOT NULL,
-    [strBatchID] nvarchar(20)  NOT NULL,
+    [strBatchID] nvarchar(20) COLLATE Latin1_General_CI_AS NOT NULL,
     [intBankAccountID] int  NOT NULL,
     [dblTotal] decimal(18,6)  NOT NULL,
     [intCreatedUserID] int  NULL,
@@ -297,13 +290,13 @@ GO
 -- Creating table 'tblCMCreditCardBatchEntryDetail'
 CREATE TABLE [dbo].[tblCMCreditCardBatchEntryDetail] (
     [intCreditCardBatchEntryDetailID] int IDENTITY(1,1) NOT NULL,
-    [strBatchID] nvarchar(20)  NOT NULL,
+    [strBatchID] nvarchar(20) COLLATE Latin1_General_CI_AS NOT NULL,
     [dtmDate] datetime  NOT NULL,
-    [strPayee] nvarchar(150)  NOT NULL,
+    [strPayee] nvarchar(150) COLLATE Latin1_General_CI_AS NOT NULL,
     [intPayeeID] int  NULL,
     [intGLAccountID] int  NOT NULL,
-    [strMemo] nvarchar(250)  NOT NULL,
-    [strTransactionID] nvarchar(20)  NOT NULL,
+    [strMemo] nvarchar(250) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strTransactionID] nvarchar(20) COLLATE Latin1_General_CI_AS NOT NULL,
     [intCreatedUserID] int  NULL,
     [dtmCreated] datetime  NULL,
     [intLastModifiedUserID] int  NULL,
@@ -315,17 +308,17 @@ GO
 -- Creating table 'tblCMBankTransfer'
 CREATE TABLE [dbo].[tblCMBankTransfer] (
     [cntID] int IDENTITY(1,1) NOT NULL,
-    [strTransactionID] nvarchar(20)  NOT NULL,
+    [strTransactionID] nvarchar(20) COLLATE Latin1_General_CI_AS NOT NULL,
     [dtmDate] datetime  NOT NULL,
     [intBankTransactionTypeID] int  NOT NULL,
     [dblAmount] decimal(18,6)  NOT NULL,
-    [strDescription] nvarchar(250)  NOT NULL,
+    [strDescription] nvarchar(250) COLLATE Latin1_General_CI_AS NOT NULL,
     [intBankAccountIDFrom] int  NOT NULL,
     [intGLAccountIDFrom] int  NOT NULL,
-    [strReferenceFrom] nvarchar(150)  NOT NULL,
+    [strReferenceFrom] nvarchar(150) COLLATE Latin1_General_CI_AS NOT NULL,
     [intBankAccountIDTo] int  NOT NULL,
     [intGLAccountIDTo] int  NOT NULL,
-    [strReferenceTo] nvarchar(150)  NOT NULL,
+    [strReferenceTo] nvarchar(150) COLLATE Latin1_General_CI_AS NOT NULL,
     [ysnPosted] bit  NOT NULL,
     [intCreatedUserID] int  NULL,
     [dtmCreated] datetime  NULL,
@@ -355,9 +348,9 @@ GO
 -- Creating table 'tblCMUndepositedFund'
 CREATE TABLE [dbo].[tblCMUndepositedFund] (
     [intUndepositedFundID] int IDENTITY(1,1) NOT NULL,
-    [strTransactionID] nvarchar(40)  NOT NULL,
+    [strTransactionID] nvarchar(40) COLLATE Latin1_General_CI_AS NOT NULL,
     [dblDebit] decimal(18,6)  NOT NULL,
-    [strBankTransactionID] nvarchar(20)  NOT NULL,
+    [strBankTransactionID] nvarchar(20) COLLATE Latin1_General_CI_AS NOT NULL,
     [intCreatedUserID] int  NULL,
     [dtmCreated] datetime  NULL,
     [intLastModifiedUserID] int  NULL,
@@ -368,18 +361,18 @@ GO
 
 -- Creating table 'tblCMBank'
 CREATE TABLE [dbo].[tblCMBank] (
-    [strBankName] nvarchar(250)  NOT NULL,
-    [strContact] nvarchar(150)  NOT NULL,
-    [strAddress] nvarchar(60)  NOT NULL,
-    [strZipCode] nvarchar(42)  NOT NULL,
-    [strCity] nvarchar(85)  NOT NULL,
-    [strState] nvarchar(60)  NOT NULL,
-    [strCountry] nvarchar(75)  NOT NULL,
-    [strPhone] nvarchar(30)  NOT NULL,
-    [strFax] nvarchar(30)  NOT NULL,
-    [strWebsite] nvarchar(125)  NOT NULL,
-    [strEmail] nvarchar(225)  NOT NULL,
-    [strRTN] nvarchar(12)  NOT NULL,
+    [strBankName] nvarchar(250) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strContact] nvarchar(150) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strAddress] nvarchar(60) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strZipCode] nvarchar(42) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strCity] nvarchar(85) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strState] nvarchar(60) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strCountry] nvarchar(75) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strPhone] nvarchar(30) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strFax] nvarchar(30) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strWebsite] nvarchar(125) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strEmail] nvarchar(225) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strRTN] nvarchar(12) COLLATE Latin1_General_CI_AS NOT NULL,
     [intCreatedUserID] int  NULL,
     [dtmCreated] datetime  NULL,
     [intLastModifiedUserID] int  NULL,

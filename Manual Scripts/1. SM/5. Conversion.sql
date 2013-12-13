@@ -22,9 +22,10 @@ GO
 	,strDescription
 	,strValue
 	,intSort
+	,intUserID
 	,intConcurrencyID
 	)
-	select 'isLegacyIntegration', 'isLegacyIntegration', 'true', 0, 0
+	select 'isLegacyIntegration', 'isLegacyIntegration', 'true', 0, 0, 0
 
 /*
 	BEGIN CONVERSION Company Preference
