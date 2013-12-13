@@ -1,19 +1,195 @@
 
 GO
-/****** Object:  StoredProcedure [dbo].[usp_BuildGLAccountTemporary]    Script Date: 10/07/2013 18:00:31 ******/
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_BuildGLAccountTemporary]') AND type in (N'P', N'PC'))
-DROP PROCEDURE [dbo].usp_BuildGLAccountTemporary
+
+
+/****************************************************
+******* SCRIPTS REQUIRED FROM ANOTHER MODULE ********
+****************************************************/
+
+
+/****** Object:  StoredProcedure [dbo].[usp_GLBuildTempCOASegment]    Script Date: 11/13/2013 18:00:31 ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_GLBuildTempCOASegment]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].usp_GLBuildTempCOASegment
 GO
 
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-/*----------------------*/
-/* CREATE THE PROCEDURE */
-/*----------------------*/
+CREATE PROCEDURE usp_GLBuildTempCOASegment
+	
+AS
+BEGIN
+	--CREATE DYNAMIC ACCOUNT STRUCTURE
+	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tempDASTable') DROP TABLE tempDASTable 
+	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tblGLTempCOASegment') DROP TABLE tblGLTempCOASegment
 
-CREATE PROCEDURE  [dbo].[usp_BuildGLAccountTemporary]
+			DECLARE @Segments NVARCHAR(MAX)
+			SELECT @Segments = SUBSTRING((SELECT '],[' + strStructureName FROM tblGLAccountStructure WHERE strType <> 'Divider' FOR XML PATH('')),3,200000) + ']'
+			DECLARE @Query NVARCHAR(MAX)
+			SET @Query = 
+			'SELECT A.intAccountID, DAS.* INTO tblGLTempCOASegment FROM tblGLAccount A
+			INNER JOIN (
+			 SELECT *  FROM (
+			   SELECT DISTINCT
+			   A.strAccountID 
+			   ,C.strCode
+			   ,D.strStructureName
+				from tblGLAccount A INNER JOIN tblGLAccountSegmentMapping B 
+				  ON A.intAccountID = B.intAccountID
+			   INNER JOIN tblGLAccountSegment C
+				ON B.intAccountSegmentID = C.intAccountSegmentID
+			   INNER JOIN  tblGLAccountStructure D 
+				ON C.intAccountStructureID = D.intAccountStructureID
+			  ) AS tempTable
+			 PIVOT
+			 (
+			 MIN(strCode)
+			 FOR strStructureName IN (' + @Segments + ')) AS PVT
+			 ) AS DAS
+			ON A.strAccountID = DAS.strAccountID
+			'
+			
+			EXEC sp_executesql @Query
+END
+GO
+
+
+
+/****************************************************
+**************** BUILDING OF ACCOUNTS ***************
+****************************************************/
+
+
+/****** Object:  StoredProcedure [dbo].[usp_GLAccountOriginSync]    Script Date: 10/07/2013 18:00:31 ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_GLAccountOriginSync]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].usp_GLAccountOriginSync
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE  [dbo].[usp_GLAccountOriginSync]
+@intUserID INT
+AS
+
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+
+-- +++++ TO TEMP TABLE +++++ --
+SELECT * INTO #TempUpdateCrossReference
+FROM tblGLCOACrossReference WHERE intLegacyReferenceID IS NULL
+
+-- +++++ SYNC ACCOUNTS +++++ --
+WHILE EXISTS(SELECT 1 FROM #TempUpdateCrossReference)
+BEGIN
+	Declare @ID_update INT = (SELECT TOP 1 inti21ID FROM #TempUpdateCrossReference)
+	Declare @ACCOUNT_update varchar(200) = (SELECT TOP 1 REPLACE(strCurrentExternalID,'-','') FROM #TempUpdateCrossReference WHERE inti21ID = @ID_update)
+	Declare @TYPE_update varchar(200) = (SELECT TOP 1 strAccountType FROM tblGLAccount LEFT JOIN tblGLAccountGroup ON tblGLAccount.intAccountGroupID = tblGLAccountGroup.intAccountGroupID WHERE intAccountID = @ID_update)
+	Declare @ACTIVE_update BIT = (SELECT TOP 1 ysnActive FROM tblGLAccount WHERE intAccountID = @ID_update)
+	Declare @DESCRIPTION_update varchar(500) = (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountID = @ID_update)
+	Declare @LegacyType_update varchar(200) = ''
+	Declare @LegacySide_update varchar(200) = ''
+	Declare @LegacyActive_update varchar(200) = 'N'
+	
+	IF @ACTIVE_update = 1
+		BEGIN
+			SET @LegacyActive_update = 'Y'
+		END
+
+	IF @TYPE_update = 'Asset'
+		BEGIN
+			SET @LegacyType_update = 'A'
+			SET @LegacySide_update = 'D'
+		END
+	ELSE IF @TYPE_update = 'Liability'
+		BEGIN
+			SET @LegacyType_update = 'L'
+			SET @LegacySide_update = 'C'
+		END
+	ELSE IF @TYPE_update = 'Equity'
+		BEGIN
+			SET @LegacyType_update = 'Q'
+			SET @LegacySide_update = 'C'
+		END
+	ELSE IF @TYPE_update = 'Revenue'
+		BEGIN
+			SET @LegacyType_update = 'I'
+			SET @LegacySide_update = 'C'
+		END
+	ELSE IF @TYPE_update = 'Expense'
+		BEGIN
+			SET @LegacyType_update = 'E'
+			SET @LegacySide_update = 'D'
+		END
+	ELSE IF @TYPE_update = 'Cost of Goods Sold'
+		BEGIN
+			SET @LegacyType_update = 'C'
+			SET @LegacySide_update = 'D'
+		END
+	ELSE IF @TYPE_update = 'Sales'
+		BEGIN
+			SET @LegacyType_update = 'I'
+			SET @LegacySide_update = 'C'
+		END
+	
+	INSERT INTO glactmst (
+		[glact_acct1_8],
+		[glact_acct9_16],
+		[glact_desc],
+		[glact_type],
+		[glact_normal_value],
+		[glact_saf_cat],
+		[glact_flow_cat],
+		[glact_uom],
+		[glact_verify_flag],
+		[glact_active_yn],
+		[glact_sys_acct_yn],
+		[glact_desc_lookup],
+		[glact_user_fld_1],
+		[glact_user_fld_2],
+		[glact_user_id],
+		[glact_user_rev_dt]
+		)
+	VALUES (
+		CONVERT(INT, SUBSTRING(@ACCOUNT_update,1,8)),
+		CONVERT(INT, SUBSTRING(@ACCOUNT_update,9,16)),
+		SUBSTRING(@DESCRIPTION_update,0,30),
+		@LegacyType_update,
+		@LegacySide_update,
+		'',
+		'',
+		'',
+		'',
+		@LegacyActive_update,
+		'N',
+		'',
+		'',
+		'',
+		@intUserID,
+		CONVERT(INT, CONVERT(VARCHAR(8), GETDATE(), 112))
+		)
+				
+		UPDATE tblGLCOACrossReference SET intLegacyReferenceID = (SELECT TOP 1 A4GLIdentity FROM glactmst ORDER BY A4GLIdentity DESC) WHERE inti21ID = @ID_update		
+		DELETE FROM #TempUpdateCrossReference WHERE inti21ID = @ID_update
+END
+	
+select 1
+
+
+GO
+/****** Object:  StoredProcedure [dbo].[usp_GLBuildAccountTemporary]    Script Date: 10/07/2013 18:00:31 ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_GLBuildAccountTemporary]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].usp_GLBuildAccountTemporary
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE  [dbo].[usp_GLBuildAccountTemporary]
 @intUserID INT
 AS
 
@@ -218,128 +394,105 @@ DROP TABLE #ConstructAccount
 DELETE tblGLTempAccountToBuild WHERE intUserID = @intUserID
 
 select 1
+
 GO
-/****** Object:  StoredProcedure [dbo].[usp_SyncAccounts]    Script Date: 10/07/2013 18:00:31 ******/
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_SyncAccounts]') AND type in (N'P', N'PC'))
-DROP PROCEDURE [dbo].usp_SyncAccounts
+
+/****** Object:  StoredProcedure [dbo].[usp_GLBuildAccount]    Script Date: 10/07/2013 18:00:31 ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_GLBuildAccount]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].usp_GLBuildAccount
 GO
 
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE  [dbo].[usp_SyncAccounts]
-@intUserID INT
+CREATE PROCEDURE  [dbo].[usp_GLBuildAccount]
+@intUserID nvarchar(50)
 AS
 
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 
--- +++++ TO TEMP TABLE +++++ --
-SELECT * INTO #TempUpdateCrossReference
-FROM tblGLCOACrossReference WHERE intLegacyReferenceID IS NULL
+-- +++++ INSERT ACCOUNT ID +++++ --
+INSERT INTO tblGLAccount ([strAccountID],[strDescription],[intAccountGroupID], [ysnActive])
+SELECT strAccountID, 
+	   strDescription,
+	   intAccountGroupID,
+	   1
+FROM tblGLTempAccount
+WHERE intUserID = @intUserID and strAccountID NOT IN (SELECT strAccountID FROM tblGLAccount)	
+ORDER BY strAccountID
 
--- +++++ SYNC ACCOUNTS +++++ --
-WHILE EXISTS(SELECT 1 FROM #TempUpdateCrossReference)
+-- +++++ DELETE LEGACY COA TABLE AT 1st BUILD +++++ --
+IF NOT EXISTS(SELECT 1 FROM tblGLCOACrossReference)
 BEGIN
-	Declare @ID_update INT = (SELECT TOP 1 inti21ID FROM #TempUpdateCrossReference)
-	Declare @ACCOUNT_update varchar(200) = (SELECT TOP 1 REPLACE(strCurrentExternalID,'-','') FROM #TempUpdateCrossReference WHERE inti21ID = @ID_update)
-	Declare @TYPE_update varchar(200) = (SELECT TOP 1 strAccountType FROM tblGLAccount LEFT JOIN tblGLAccountGroup ON tblGLAccount.intAccountGroupID = tblGLAccountGroup.intAccountGroupID WHERE intAccountID = @ID_update)
-	Declare @ACTIVE_update BIT = (SELECT TOP 1 ysnActive FROM tblGLAccount WHERE intAccountID = @ID_update)
-	Declare @DESCRIPTION_update varchar(500) = (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountID = @ID_update)
-	Declare @LegacyType_update varchar(200) = ''
-	Declare @LegacySide_update varchar(200) = ''
-	Declare @LegacyActive_update varchar(200) = 'N'
-	
-	IF @ACTIVE_update = 1
-		BEGIN
-			SET @LegacyActive_update = 'Y'
-		END
-
-	IF @TYPE_update = 'Asset'
-		BEGIN
-			SET @LegacyType_update = 'A'
-			SET @LegacySide_update = 'D'
-		END
-	ELSE IF @TYPE_update = 'Liability'
-		BEGIN
-			SET @LegacyType_update = 'L'
-			SET @LegacySide_update = 'C'
-		END
-	ELSE IF @TYPE_update = 'Equity'
-		BEGIN
-			SET @LegacyType_update = 'Q'
-			SET @LegacySide_update = 'C'
-		END
-	ELSE IF @TYPE_update = 'Revenue'
-		BEGIN
-			SET @LegacyType_update = 'I'
-			SET @LegacySide_update = 'C'
-		END
-	ELSE IF @TYPE_update = 'Expense'
-		BEGIN
-			SET @LegacyType_update = 'E'
-			SET @LegacySide_update = 'D'
-		END
-	ELSE IF @TYPE_update = 'Cost of Goods Sold'
-		BEGIN
-			SET @LegacyType_update = 'C'
-			SET @LegacySide_update = 'D'
-		END
-	ELSE IF @TYPE_update = 'Sales'
-		BEGIN
-			SET @LegacyType_update = 'I'
-			SET @LegacySide_update = 'C'
-		END
-	
-	INSERT INTO glactmst (
-		[glact_acct1_8],
-		[glact_acct9_16],
-		[glact_desc],
-		[glact_type],
-		[glact_normal_value],
-		[glact_saf_cat],
-		[glact_flow_cat],
-		[glact_uom],
-		[glact_verify_flag],
-		[glact_active_yn],
-		[glact_sys_acct_yn],
-		[glact_desc_lookup],
-		[glact_user_fld_1],
-		[glact_user_fld_2],
-		[glact_user_id],
-		[glact_user_rev_dt]
-		)
-	VALUES (
-		CONVERT(INT, SUBSTRING(@ACCOUNT_update,1,8)),
-		CONVERT(INT, SUBSTRING(@ACCOUNT_update,9,16)),
-		SUBSTRING(@DESCRIPTION_update,0,30),
-		@LegacyType_update,
-		@LegacySide_update,
-		'',
-		'',
-		'',
-		'',
-		@LegacyActive_update,
-		'N',
-		'',
-		'',
-		'',
-		@intUserID,
-		CONVERT(INT, CONVERT(VARCHAR(8), GETDATE(), 112))
-		)
-				
-		UPDATE tblGLCOACrossReference SET intLegacyReferenceID = (SELECT TOP 1 A4GLIdentity FROM glactmst ORDER BY A4GLIdentity DESC) WHERE inti21ID = @ID_update		
-		DELETE FROM #TempUpdateCrossReference WHERE inti21ID = @ID_update
+	DELETE glactmst	
 END
-	
+
+-- +++++ INSERT CROSS REFERENCE +++++ --
+INSERT INTO tblGLCOACrossReference ([inti21ID],[stri21ID],[strExternalID], [strCurrentExternalID], [strCompanyID], [intConcurrencyID])
+SELECT (SELECT intAccountID FROM tblGLAccount A WHERE A.strAccountID = B.strAccountID) as inti21ID,
+	   B.strAccountID as stri21ID,
+	   CAST(CAST(B.strPrimary AS INT) AS NVARCHAR(50))  + '.' + REPLICATE('0',(select 8 - SUM(intLength) from tblGLAccountStructure where strType = 'Segment')) + B.strSegment as strExternalID , 	   
+	   B.strPrimary + '-' + REPLICATE('0',(select 8 - SUM(intLength) from tblGLAccountStructure where strType = 'Segment')) + B.strSegment as strCurrentExternalID,
+	   'Legacy' as strCompanyID,
+	   1
+FROM tblGLTempAccount B
+WHERE intUserID = @intUserID and strAccountID NOT IN (SELECT stri21ID FROM tblGLCOACrossReference)	
+ORDER BY strAccountID
+
+-- +++++ INSERT SEGMENT MAPPING +++++ --
+WHILE EXISTS(SELECT 1 FROM tblGLTempAccount WHERE intUserID = @intUserID)
+BEGIN
+	Declare @ID INT = (SELECT TOP 1 cntID FROM tblGLTempAccount WHERE intUserID = @intUserID)
+	Declare @segmentcodes varchar(200) = (SELECT TOP 1 strAccountSegmentID FROM tblGLTempAccount WHERE intUserID = @intUserID)
+	Declare @segmentID varchar(200) = null
+	Declare @accountID INT = (SELECT TOP 1 intAccountID FROM tblGLAccount WHERE strAccountID = (SELECT TOP 1 strAccountID FROM tblGLTempAccount WHERE intUserID = @intUserID))
+
+	WHILE LEN(@segmentcodes) > 0
+	BEGIN
+		IF PATINDEX('%;%',@segmentcodes) > 0
+		BEGIN
+			SET @segmentID = SUBSTRING(@segmentcodes, 0, PATINDEX('%;%',@segmentcodes))
+			
+			INSERT INTO tblGLAccountSegmentMapping ([intAccountID], [intAccountSegmentID]) values (@accountID, @segmentID)
+			UPDATE tblGLAccountSegment SET ysnBuild = 1 WHERE intAccountSegmentID = @segmentID
+			UPDATE tblGLAccountStructure SET ysnBuild = 1 WHERE intAccountStructureID = (SELECT intAccountStructureID FROM tblGLAccountSegment WHERE intAccountSegmentID = @segmentID)
+
+			SET @segmentcodes = SUBSTRING(@segmentcodes, LEN(@segmentID + ';') + 1, LEN(@segmentcodes))
+		END
+		ELSE
+		BEGIN
+			SET @segmentID = @segmentcodes
+			SET @segmentcodes = NULL
+			
+			INSERT INTO tblGLAccountSegmentMapping ([intAccountID], [intAccountSegmentID]) values (@accountID, @segmentID)
+			UPDATE tblGLAccountSegment SET ysnBuild = 1 WHERE intAccountSegmentID = @segmentID
+			UPDATE tblGLAccountStructure SET ysnBuild = 1 WHERE intAccountStructureID = (SELECT intAccountStructureID FROM tblGLAccountSegment WHERE intAccountSegmentID = @segmentID)
+			
+			SELECT @segmentID
+		END
+		
+		DELETE FROM tblGLTempAccount WHERE cntID = @ID
+	END
+END
+
+
+DELETE FROM tblGLTempAccount WHERE intUserID = @intUserID
+
+EXEC usp_GLAccountOriginSync @intUserID
+EXEC usp_GLBuildTempCOASegment
+
+
 select 1
 
-
-
---[usp_SyncAccounts] '130'
 GO
+
+/****************************************************
+******************** POSTING SCRIPT *****************
+****************************************************/
+
 /****** Object:  StoredProcedure [dbo].[usp_PostFiscalYear]    Script Date: 10/07/2013 18:00:31 ******/
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_PostFiscalYear]') AND type in (N'P', N'PC'))
 DROP PROCEDURE [dbo].usp_PostFiscalYear
@@ -401,6 +554,8 @@ CREATE TABLE #ConstructGL
 DECLARE  @dblRetained			 NUMERIC (18,6)
 		,@dblRetainedDebit		 NUMERIC (18,6)
 		,@dblRetainedCredit		 NUMERIC (18,6)
+		,@dblRetainedDebitUnit	 NUMERIC (18,6)
+		,@dblRetainedCreditUnit	 NUMERIC (18,6)
 		,@strRetainedAcctGroup	 NVARCHAR(50)  
 		,@dtmDate				 DATETIME  
 		,@strCurrencyID			 NVARCHAR(30)
@@ -536,6 +691,8 @@ SET @dblRetained =
 
 SET @dblRetainedDebit = (SELECT SUM(dblDebit) as dblDebit FROM #ConstructGL)
 SET @dblRetainedCredit = (SELECT SUM(dblCredit) as dblCredit FROM #ConstructGL)
+SET @dblRetainedDebitUnit = (SELECT SUM(dblDebitUnit) as dblDebitUnit FROM #ConstructGL)
+SET @dblRetainedCreditUnit = (SELECT SUM(dblCreditUnit) as dblCreditUnit FROM #ConstructGL)
 
 IF @dblRetainedDebit > @dblRetainedCredit
 BEGIN
@@ -556,8 +713,8 @@ SELECT
 		,strAccountGroup		= @strRetainedAcctGroup
 		,dblDebit				= @dblRetainedDebit
 		,dblCredit				= @dblRetainedCredit
-		,dblDebitUnit			= 0
-		,dblCreditUnit			= 0
+		,dblDebitUnit			= @dblRetainedDebitUnit
+		,dblCreditUnit			= @dblRetainedCreditUnit
 		,strGLDescription		= 'Retained Earnings'
 		,strCode				= 'RE'
 		,strTransactionID		= CAST(@intYear as NVARCHAR(10)) + '-' + @strRetainedAccount
@@ -667,163 +824,26 @@ END
 
 SELECT * FROM #ConstructGL
 DROP TABLE #ConstructGL
+
 GO
 
-/****** Object:  StoredProcedure [dbo].[usp_BuildGLTempCOASegment]    Script Date: 11/13/2013 18:00:31 ******/
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_BuildGLTempCOASegment]') AND type in (N'P', N'PC'))
-DROP PROCEDURE [dbo].usp_BuildGLTempCOASegment
-GO
 
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	<Description,,>
--- =============================================
-CREATE PROCEDURE usp_BuildGLTempCOASegment
-	
-AS
-BEGIN
-	--CREATE DYNAMIC ACCOUNT STRUCTURE
-	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tempDASTable') DROP TABLE tempDASTable 
-	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tblGLTempCOASegment') DROP TABLE tblGLTempCOASegment
 
-			DECLARE @Segments NVARCHAR(MAX)
-			SELECT @Segments = SUBSTRING((SELECT '],[' + strStructureName FROM tblGLAccountStructure WHERE strType <> 'Divider' FOR XML PATH('')),3,200000) + ']'
-			DECLARE @Query NVARCHAR(MAX)
-			SET @Query = 
-			'SELECT A.intAccountID, DAS.* INTO tblGLTempCOASegment FROM tblGLAccount A
-			INNER JOIN (
-			 SELECT *  FROM (
-			   SELECT DISTINCT
-			   A.strAccountID 
-			   ,C.strCode
-			   ,D.strStructureName
-				from tblGLAccount A INNER JOIN tblGLAccountSegmentMapping B 
-				  ON A.intAccountID = B.intAccountID
-			   INNER JOIN tblGLAccountSegment C
-				ON B.intAccountSegmentID = C.intAccountSegmentID
-			   INNER JOIN  tblGLAccountStructure D 
-				ON C.intAccountStructureID = D.intAccountStructureID
-			  ) AS tempTable
-			 PIVOT
-			 (
-			 MIN(strCode)
-			 FOR strStructureName IN (' + @Segments + ')) AS PVT
-			 ) AS DAS
-			ON A.strAccountID = DAS.strAccountID
-			'
-			--select @Segments
-			EXEC sp_executesql @Query
-END
-GO
+/****************************************************
+******************* UTILITY SCRIPTS *****************
+****************************************************/
 
-/****** Object:  StoredProcedure [dbo].[usp_BuildGLAccount]    Script Date: 10/07/2013 18:00:31 ******/
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_BuildGLAccount]') AND type in (N'P', N'PC'))
-DROP PROCEDURE [dbo].usp_BuildGLAccount
+
+/****** Object:  StoredProcedure [dbo].[usp_GLImportOriginCOA]    Script Date: 11/06/2013 08:39:35 ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_GLImportOriginCOA]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].usp_GLImportOriginCOA
 GO
 
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE  [dbo].[usp_BuildGLAccount]
-@intUserID nvarchar(50)
-AS
-
-SET QUOTED_IDENTIFIER OFF
-SET ANSI_NULLS ON
-SET NOCOUNT ON
-
--- +++++ INSERT ACCOUNT ID +++++ --
-INSERT INTO tblGLAccount ([strAccountID],[strDescription],[intAccountGroupID], [ysnActive])
-SELECT strAccountID, 
-	   strDescription,
-	   intAccountGroupID,
-	   1
-FROM tblGLTempAccount
-WHERE intUserID = @intUserID and strAccountID NOT IN (SELECT strAccountID FROM tblGLAccount)	
-ORDER BY strAccountID
-
--- +++++ DELETE LEGACY COA TABLE AT 1st BUILD +++++ --
-IF NOT EXISTS(SELECT 1 FROM tblGLCOACrossReference)
-BEGIN
-	DELETE glactmst	
-END
-
--- +++++ INSERT CROSS REFERENCE +++++ --
-INSERT INTO tblGLCOACrossReference ([inti21ID],[stri21ID],[strExternalID], [strCurrentExternalID], [strCompanyID], [intConcurrencyID])
-SELECT (SELECT intAccountID FROM tblGLAccount A WHERE A.strAccountID = B.strAccountID) as inti21ID,
-	   B.strAccountID as stri21ID,
-	   CAST(CAST(B.strPrimary AS INT) AS NVARCHAR(50))  + '.' + REPLICATE('0',(select 8 - SUM(intLength) from tblGLAccountStructure where strType = 'Segment')) + B.strSegment as strExternalID , 	   
-	   B.strPrimary + '-' + REPLICATE('0',(select 8 - SUM(intLength) from tblGLAccountStructure where strType = 'Segment')) + B.strSegment as strCurrentExternalID,
-	   'Legacy' as strCompanyID,
-	   1
-FROM tblGLTempAccount B
-WHERE intUserID = @intUserID and strAccountID NOT IN (SELECT stri21ID FROM tblGLCOACrossReference)	
-ORDER BY strAccountID
-
--- +++++ INSERT SEGMENT MAPPING +++++ --
-WHILE EXISTS(SELECT 1 FROM tblGLTempAccount WHERE intUserID = @intUserID)
-BEGIN
-	Declare @ID INT = (SELECT TOP 1 cntID FROM tblGLTempAccount WHERE intUserID = @intUserID)
-	Declare @segmentcodes varchar(200) = (SELECT TOP 1 strAccountSegmentID FROM tblGLTempAccount WHERE intUserID = @intUserID)
-	Declare @segmentID varchar(200) = null
-	Declare @accountID INT = (SELECT TOP 1 intAccountID FROM tblGLAccount WHERE strAccountID = (SELECT TOP 1 strAccountID FROM tblGLTempAccount WHERE intUserID = @intUserID))
-
-	WHILE LEN(@segmentcodes) > 0
-	BEGIN
-		IF PATINDEX('%;%',@segmentcodes) > 0
-		BEGIN
-			SET @segmentID = SUBSTRING(@segmentcodes, 0, PATINDEX('%;%',@segmentcodes))
-			
-			INSERT INTO tblGLAccountSegmentMapping ([intAccountID], [intAccountSegmentID]) values (@accountID, @segmentID)
-			UPDATE tblGLAccountSegment SET ysnBuild = 1 WHERE intAccountSegmentID = @segmentID
-			UPDATE tblGLAccountStructure SET ysnBuild = 1 WHERE intAccountStructureID = (SELECT intAccountStructureID FROM tblGLAccountSegment WHERE intAccountSegmentID = @segmentID)
-
-			SET @segmentcodes = SUBSTRING(@segmentcodes, LEN(@segmentID + ';') + 1, LEN(@segmentcodes))
-		END
-		ELSE
-		BEGIN
-			SET @segmentID = @segmentcodes
-			SET @segmentcodes = NULL
-			
-			INSERT INTO tblGLAccountSegmentMapping ([intAccountID], [intAccountSegmentID]) values (@accountID, @segmentID)
-			UPDATE tblGLAccountSegment SET ysnBuild = 1 WHERE intAccountSegmentID = @segmentID
-			UPDATE tblGLAccountStructure SET ysnBuild = 1 WHERE intAccountStructureID = (SELECT intAccountStructureID FROM tblGLAccountSegment WHERE intAccountSegmentID = @segmentID)
-			
-			SELECT @segmentID
-		END
-		
-		DELETE FROM tblGLTempAccount WHERE cntID = @ID
-	END
-END
-
-
-DELETE FROM tblGLTempAccount WHERE intUserID = @intUserID
-
-EXEC usp_SyncAccounts @intUserID
-EXEC usp_BuildGLTempCOASegment
-
-
-select 1
-
-GO
-
-
-/****** Object:  StoredProcedure [dbo].[usp_ImportLegacyCOA]    Script Date: 11/06/2013 08:39:35 ******/
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_ImportLegacyCOA]') AND type in (N'P', N'PC'))
-DROP PROCEDURE [dbo].usp_ImportLegacyCOA
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE  [dbo].[usp_ImportLegacyCOA]
+CREATE PROCEDURE  [dbo].[usp_GLImportOriginCOA]
 @ysnStructure	BIT = 0,
 @ysnPrimary		BIT = 0,
 @ysnSegment		BIT = 0,
@@ -980,8 +1000,8 @@ BEGIN
 		FROM
 		tblGLAccountSegment
 		
-		EXEC usp_BuildGLAccountTemporary 0
-		EXEC usp_BuildGLAccount 0
+		EXEC usp_GLBuildAccountTemporary 0
+		EXEC usp_GLBuildAccount 0
 		
 		UPDATE tblGLAccountSegment SET ysnBuild = 1
 	END	
@@ -1039,7 +1059,7 @@ SET NOCOUNT ON
 	FROM
 	@tblQuery
 	
-	EXEC usp_BuildGLAccountTemporary @intUserID
+	EXEC usp_GLBuildAccountTemporary @intUserID
 		
 	SELECT '1'
 	
