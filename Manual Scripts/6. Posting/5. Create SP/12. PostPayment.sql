@@ -190,7 +190,7 @@ BEGIN
 			,[intTransactionID]		= NULL
 			,[dtmDatePaid]				= @dtmDate
 			,[strBatchID]			= @strBatchID
-			,[intAccountID]			= A.intAccountID
+			,[intAccountID]			= A.intAccountId
 			,[strAccountGroup]		= GLAccntGrp.strAccountGroup
 			,[dblDebit]				= 0
 			,[dblCredit]			= A.dblAmountPaid
@@ -217,7 +217,7 @@ BEGIN
 			,[strModuleName]		= @MODULE_NAME
 			,[strUOMCode]			= NULL 
 	FROM	[dbo].tblAPPayments A INNER JOIN [dbo].tblGLAccount GLAccnt
-				ON A.intAccountID = GLAccnt.intAccountID
+				ON A.intAccountId = GLAccnt.intAccountID
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
 	WHERE	A.intPaymentId = @strTransactionID
@@ -228,7 +228,7 @@ BEGIN
 			,[intTransactionID]		= NULL
 			,[dtmDate]				= @dtmDate
 			,[strBatchID]			= @strBatchID
-			,[intAccountID]			= A.intAccountID
+			,[intAccountID]			= A.intAccountId
 			,[strAccountGroup]		= GLAccntGrp.strAccountGroup
 			,[dblDebit]				= B.dblPayment
 			,[dblCredit]			= 0
