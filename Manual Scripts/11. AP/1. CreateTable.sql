@@ -3,8 +3,10 @@ CREATE TABLE [dbo].[tblEntities] (
     [strName] [nvarchar](max) NOT NULL,
     [strWebsite] [nvarchar](max) NOT NULL,
     [strInternalNotes] [nvarchar](max),
+    [RowVersion] rowversion NOT NULL,
     CONSTRAINT [PK_dbo.tblEntities] PRIMARY KEY ([intEntityId])
 )
+
 CREATE TABLE [dbo].[tblEntityTypes] (
     [intEntityTypeId] [int] NOT NULL IDENTITY,
     [intEntityId] [int] NOT NULL,
@@ -291,5 +293,5 @@ ALTER TABLE dbo.[tblAPVendors] ALTER COLUMN [str1099Category]
 ALTER TABLE tblAPVendors
 ADD CONSTRAINT APVendorId_Unique UNIQUE NONCLUSTERED(strVendorId)
 
-ALTER TABLE tblAPVendors
-ADD CONSTRAINT APVendorId_Unique UNIQUE NONCLUSTERED(strVendorId)
+--ALTER TABLE tblAPVendors
+--ADD CONSTRAINT APVendorId_Unique UNIQUE NONCLUSTERED(strVendorId)
