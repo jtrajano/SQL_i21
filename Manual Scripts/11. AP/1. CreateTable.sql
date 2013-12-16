@@ -168,31 +168,31 @@ ALTER TABLE dbo.[tblEntityContacts] ALTER COLUMN [strName]
            [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL;
 
 ALTER TABLE dbo.[tblEntityContacts] ALTER COLUMN [strTitle]
-           [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](max) COLLATE Latin1_General_CI_AS
 
 ALTER TABLE dbo.[tblEntityContacts] ALTER COLUMN [strLocationName]
-           [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](max) COLLATE Latin1_General_CI_AS
 
 ALTER TABLE dbo.[tblEntityContacts] ALTER COLUMN [strDepartment]
-           [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](max) COLLATE Latin1_General_CI_AS
 
 ALTER TABLE dbo.[tblEntityContacts] ALTER COLUMN [strMobile]
-           [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](max) COLLATE Latin1_General_CI_AS
 
 ALTER TABLE dbo.[tblEntityContacts] ALTER COLUMN [strPhone]
-           [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](max) COLLATE Latin1_General_CI_AS
 
 ALTER TABLE dbo.[tblEntityContacts] ALTER COLUMN [strPhone2]
-           [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](max) COLLATE Latin1_General_CI_AS
 
 ALTER TABLE dbo.[tblEntityContacts] ALTER COLUMN [strEmail2]
-           [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](max) COLLATE Latin1_General_CI_AS
 
 ALTER TABLE dbo.[tblEntityContacts] ALTER COLUMN [strFax]
-           [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](max) COLLATE Latin1_General_CI_AS
 
 ALTER TABLE dbo.[tblEntityContacts] ALTER COLUMN [strNotes]
-           [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](max) COLLATE Latin1_General_CI_AS
 
 
 --tblEntityLocations
@@ -200,28 +200,28 @@ ALTER TABLE dbo.[tblEntityLocations] ALTER COLUMN [strLocationName]
            [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL;
 
 ALTER TABLE dbo.[tblEntityLocations] ALTER COLUMN [strAddress]
-           [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](max) COLLATE Latin1_General_CI_AS
 
 ALTER TABLE dbo.[tblEntityLocations] ALTER COLUMN [strCity]
-           [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](max) COLLATE Latin1_General_CI_AS
 
 ALTER TABLE dbo.[tblEntityLocations] ALTER COLUMN [strCountry]
-           [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](max) COLLATE Latin1_General_CI_AS
 
 ALTER TABLE dbo.[tblEntityLocations] ALTER COLUMN [strState]
-           [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](max) COLLATE Latin1_General_CI_AS
 
 ALTER TABLE dbo.[tblEntityLocations] ALTER COLUMN [strZipCode]
-           [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](max) COLLATE Latin1_General_CI_AS
 
 ALTER TABLE dbo.[tblEntityLocations] ALTER COLUMN [strEmail]
-           [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](max) COLLATE Latin1_General_CI_AS
 
 ALTER TABLE dbo.[tblEntityLocations] ALTER COLUMN [strNotes]
-           [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](max) COLLATE Latin1_General_CI_AS
 
 ALTER TABLE dbo.[tblEntityLocations] ALTER COLUMN [strW9Name]
-           [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](max) COLLATE Latin1_General_CI_AS
 
 --ADD UNIQUE CONSTRAIN
 
@@ -252,39 +252,39 @@ ALTER TABLE dbo.[tblAPBills] ALTER COLUMN [strVendorId]
            [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL;
 
 ALTER TABLE dbo.[tblAPBills] ALTER COLUMN [strVendorOrderNumber]
-           [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](max) COLLATE Latin1_General_CI_AS;
 
 ALTER TABLE dbo.[tblAPBills] ALTER COLUMN [strDescription]
-           [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](max) COLLATE Latin1_General_CI_AS;
 
 --tblAPPayments
 ALTER TABLE dbo.[tblAPPayments] ALTER COLUMN [strVendorId]
            [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL;
 
 ALTER TABLE dbo.[tblAPPayments] ALTER COLUMN [strPaymentInfo]
-           [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](max) COLLATE Latin1_General_CI_AS;
 
 ALTER TABLE dbo.[tblAPPayments] ALTER COLUMN [strNotes]
-           [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](max) COLLATE Latin1_General_CI_AS;
 
 --tblAPVendors
 ALTER TABLE dbo.[tblAPVendors] ALTER COLUMN [strVendorPayToId]
-           [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](max) COLLATE Latin1_General_CI_AS;
 
 ALTER TABLE dbo.[tblAPVendors] ALTER COLUMN [strVendorId]
            [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL;
 
 ALTER TABLE dbo.[tblAPVendors] ALTER COLUMN [strVendorAccountNum]
-           [nvarchar](15) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](15) COLLATE Latin1_General_CI_AS;
 
 ALTER TABLE dbo.[tblAPVendors] ALTER COLUMN [str1099Name]
-           [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](100) COLLATE Latin1_General_CI_AS;
 
 ALTER TABLE dbo.[tblAPVendors] ALTER COLUMN [str1099Type]
-           [nvarchar](20) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](20) COLLATE Latin1_General_CI_AS ;
 
 ALTER TABLE dbo.[tblAPVendors] ALTER COLUMN [str1099Category]
-           [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL;
+           [nvarchar](100) COLLATE Latin1_General_CI_AS;
 
 --ADD UNIQUE CONSTRAINT
 
