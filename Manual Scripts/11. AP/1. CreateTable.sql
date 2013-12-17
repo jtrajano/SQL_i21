@@ -46,6 +46,7 @@ CREATE TABLE [dbo].[tblEntityLocations] (
     [intShipViaId] [int],
     [intTaxCodeId] [int],
     [intTermsId] [int],
+    [intWarehouseId] [int]
     CONSTRAINT [PK_dbo.tblEntityLocations] PRIMARY KEY ([intEntityLocationId])
 )
 CREATE INDEX [IX_intEntityId] ON [dbo].[tblEntityLocations]([intEntityId])
