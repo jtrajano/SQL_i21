@@ -93,7 +93,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 		
 -- Read the detail table and populate the variables. 
 SELECT	@dblAmountDetailTotal = SUM(ISNULL(dblPayment, 0))
-FROM	[dbo].tblAPPaymentDetail A
+FROM	[dbo].tblAPPaymentDetails A
 WHERE	intPaymentId = @strTransactionID 
 IF @@ERROR <> 0	GOTO Post_Rollback		
 
@@ -265,10 +265,10 @@ BEGIN
 	IF @@ERROR <> 0	GOTO Post_Rollback
 	
 	-- Update the posted flag in the transaction table
-	UPDATE tblAPBills
+	UPDATE tblAPPayments
 	SET		ysnPosted = 1
 			--,intConcurrencyID += 1 
-	WHERE	strBillId = @strTransactionID
+	WHERE	intPaymentId = @strTransactionID
 	
 END
 ELSE IF @ysnPost = 0
