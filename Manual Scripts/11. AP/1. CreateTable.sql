@@ -57,6 +57,7 @@ CREATE TABLE [dbo].[tblAPBillBatches] (
     [intBillBatchId] [int] NOT NULL IDENTITY,
     [intAccountId] [int] NOT NULL,
     [strBillBatchNumber] [nvarchar](50),
+	[ysnPosted] [bit] NOT NULL,
     CONSTRAINT [PK_dbo.tblAPBillBatches] PRIMARY KEY ([intBillBatchId])
 )
 CREATE TABLE [dbo].[tblAPBills] (
@@ -102,6 +103,7 @@ CREATE TABLE [dbo].[tblAPPaymentDetails] (
     [dtmDueDate] [datetime] NOT NULL,
     [dblDiscount] [decimal](18, 2) NOT NULL,
     [dblAmountDue] [decimal](18, 2) NOT NULL,
+	[dblInterest] [decimal](18, 2) NOT NULL,
     [dblPayment] [decimal](18, 2) NOT NULL,
     CONSTRAINT [PK_dbo.tblAPPaymentDetails] PRIMARY KEY ([intPaymentDetailId])
 )
@@ -293,3 +295,4 @@ ADD CONSTRAINT APVendorId_Unique UNIQUE NONCLUSTERED(strVendorId)
 
 ALTER TABLE tblAPVendors
 ADD CONSTRAINT APVendorId_Unique UNIQUE NONCLUSTERED(strVendorId)
+
