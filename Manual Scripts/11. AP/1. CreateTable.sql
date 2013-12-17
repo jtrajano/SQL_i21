@@ -3,8 +3,10 @@ CREATE TABLE [dbo].[tblEntities] (
     [strName] [nvarchar](max) NOT NULL,
     [strWebsite] [nvarchar](max) NOT NULL,
     [strInternalNotes] [nvarchar](max),
+    [RowVersion] rowversion NOT NULL,
     CONSTRAINT [PK_dbo.tblEntities] PRIMARY KEY ([intEntityId])
 )
+
 CREATE TABLE [dbo].[tblEntityTypes] (
     [intEntityTypeId] [int] NOT NULL IDENTITY,
     [intEntityId] [int] NOT NULL,
@@ -44,6 +46,7 @@ CREATE TABLE [dbo].[tblEntityLocations] (
     [intShipViaId] [int],
     [intTaxCodeId] [int],
     [intTermsId] [int],
+    [intWarehouseId] [int]
     CONSTRAINT [PK_dbo.tblEntityLocations] PRIMARY KEY ([intEntityLocationId])
 )
 CREATE INDEX [IX_intEntityId] ON [dbo].[tblEntityLocations]([intEntityId])
@@ -57,7 +60,6 @@ CREATE TABLE [dbo].[tblAPBillBatches] (
     [intBillBatchId] [int] NOT NULL IDENTITY,
     [intAccountId] [int] NOT NULL,
     [strBillBatchNumber] [nvarchar](50),
-	[ysnPosted] [bit] NOT NULL,
     CONSTRAINT [PK_dbo.tblAPBillBatches] PRIMARY KEY ([intBillBatchId])
 )
 CREATE TABLE [dbo].[tblAPBills] (
@@ -103,7 +105,6 @@ CREATE TABLE [dbo].[tblAPPaymentDetails] (
     [dtmDueDate] [datetime] NOT NULL,
     [dblDiscount] [decimal](18, 2) NOT NULL,
     [dblAmountDue] [decimal](18, 2) NOT NULL,
-	[dblInterest] [decimal](18, 2) NOT NULL,
     [dblPayment] [decimal](18, 2) NOT NULL,
     CONSTRAINT [PK_dbo.tblAPPaymentDetails] PRIMARY KEY ([intPaymentDetailId])
 )
@@ -293,6 +294,5 @@ ALTER TABLE dbo.[tblAPVendors] ALTER COLUMN [str1099Category]
 ALTER TABLE tblAPVendors
 ADD CONSTRAINT APVendorId_Unique UNIQUE NONCLUSTERED(strVendorId)
 
-ALTER TABLE tblAPVendors
-ADD CONSTRAINT APVendorId_Unique UNIQUE NONCLUSTERED(strVendorId)
-
+--ALTER TABLE tblAPVendors
+--ADD CONSTRAINT APVendorId_Unique UNIQUE NONCLUSTERED(strVendorId)
