@@ -54,6 +54,7 @@
 CREATE TABLE [dbo].[tblARCustomers] (
     [intEntityId] [int] NOT NULL,
     [strCustomerNumber] [nvarchar](15) COLLATE Latin1_General_CI_AS,
+    [strType] [nvarchar](max) COLLATE Latin1_General_CI_AS,
     [dblCreditLimit] [decimal](18, 2) NOT NULL,
     [dblARBalance] [decimal](18, 2) NOT NULL,
     [strAccountNumber] [nvarchar](max) COLLATE Latin1_General_CI_AS,
