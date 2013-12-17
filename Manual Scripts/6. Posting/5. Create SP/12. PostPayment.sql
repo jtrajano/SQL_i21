@@ -257,7 +257,7 @@ BEGIN
 	FROM	[dbo].tblAPPayments A 
 			LEFT JOIN tblAPPaymentDetails B ON A.intPaymentId = B.intPaymentId
 			INNER JOIN [dbo].tblGLAccount GLAccnt
-				ON B.intAccountID = GLAccnt.intAccountID
+				ON B.intAccountId = GLAccnt.intAccountID
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
 	WHERE	B.intPaymentId = @strTransactionID
