@@ -55,7 +55,7 @@ GO
 
 CREATE TABLE [dbo].[tblAPBillBatches] (
     [intBillBatchId] [int] NOT NULL IDENTITY,
-    [intAccountID] [int] NOT NULL,
+    [intAccountId] [int] NOT NULL,
     [strBillBatchNumber] [nvarchar](50),
     CONSTRAINT [PK_dbo.tblAPBillBatches] PRIMARY KEY ([intBillBatchId])
 )
@@ -70,7 +70,7 @@ CREATE TABLE [dbo].[tblAPBills] (
     [dtmDate] [datetime] NOT NULL,
     [dtmBillDate] [datetime] NOT NULL,
     [dtmDueDate] [datetime] NOT NULL,
-    [intAccountID] [int] NOT NULL,
+    [intAccountId] [int] NOT NULL,
     [strDescription] [nvarchar](max),
     [dblTotal] [decimal](18, 2) NOT NULL,
     [ysnPosted] [bit] NOT NULL,
@@ -98,7 +98,7 @@ CREATE TABLE [dbo].[tblAPPaymentDetails] (
     [intPaymentId] [int] NOT NULL,
     [intBillId] [int] NOT NULL,
     [intTermsId] [int] NOT NULL,
-    [intAccountID] [int] NOT NULL,
+    [intAccountId] [int] NOT NULL,
     [dtmDueDate] [datetime] NOT NULL,
     [dblDiscount] [decimal](18, 2) NOT NULL,
     [dblAmountDue] [decimal](18, 2) NOT NULL,
