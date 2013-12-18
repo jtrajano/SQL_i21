@@ -35,6 +35,7 @@ CREATE TABLE [dbo].[tblEntityLocations] (
     [intEntityLocationId] [int] NOT NULL IDENTITY,
     [intEntityId] [int] NOT NULL,
     [strLocationName] [nvarchar](50) NOT NULL,
+	[strContactName] [nvarchar](max),
     [strAddress] [nvarchar](max),
     [strCity] [nvarchar](max),
     [strCountry] [nvarchar](max),
