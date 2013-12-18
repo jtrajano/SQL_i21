@@ -190,7 +190,7 @@ BEGIN
 			,[intTransactionID]		= NULL
 			,[dtmDatePaid]				= @dtmDate
 			,[strBatchID]			= @strBatchID
-			,[intAccountID]			= A.intAccountId
+			,[intAccountID]			= A.intBankAccountId
 			,[strAccountGroup]		= GLAccntGrp.strAccountGroup
 			,[dblDebit]				= 0
 			,[dblCredit]			= A.dblAmountPaid
@@ -217,7 +217,7 @@ BEGIN
 			,[strModuleName]		= @MODULE_NAME
 			,[strUOMCode]			= NULL 
 	FROM	[dbo].tblAPPayments A INNER JOIN [dbo].tblGLAccount GLAccnt
-				ON A.intAccountId = GLAccnt.intAccountID
+				ON A.intBankAccountId = GLAccnt.intAccountID
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
 	WHERE	A.intPaymentId = @strTransactionID
@@ -228,9 +228,9 @@ BEGIN
 			,[intTransactionID]		= NULL
 			,[dtmDate]				= @dtmDate
 			,[strBatchID]			= @strBatchID
-			,[intAccountID]			= A.intAccountId
+			,[intAccountID]			= B.intAccountId
 			,[strAccountGroup]		= GLAccntGrp.strAccountGroup
-			,[dblDebit]				= B.dblPayment
+			,[dblDebit]				= SUM(B.dblPayment)
 			,[dblCredit]			= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
@@ -260,15 +260,10 @@ BEGIN
 				ON B.intAccountId = GLAccnt.intAccountID
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
-	WHERE	B.intPaymentId = @strTransactionID
+	WHERE	A.intPaymentId = @strTransactionID
+	GROUP BY A.intPaymentId, A.intAccountId, GLAccntGrp.strAccountGroup, A.dtmDatePaid
 	
 	IF @@ERROR <> 0	GOTO Post_Rollback
-	
-	-- Update the posted flag in the transaction table
-	UPDATE tblAPPayments
-	SET		ysnPosted = 1
-			--,intConcurrencyID += 1 
-	WHERE	intPaymentId = @strTransactionID
 	
 END
 ELSE IF @ysnPost = 0
@@ -291,6 +286,13 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 EXEC [dbo].[BookGLEntries] @ysnPost, @ysnRecap, @isSuccessful OUTPUT, @message_id OUTPUT
 IF @isSuccessful = 0 GOTO Post_Rollback
+
+	
+-- Update the posted flag in the transaction table
+UPDATE tblAPPayments
+SET		ysnPosted = 1
+		--,intConcurrencyID += 1 
+WHERE	intPaymentId = @strTransactionID
 
 --=====================================================================================================================================
 -- 	Check if process is only a RECAP
