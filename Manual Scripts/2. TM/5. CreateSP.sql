@@ -22,68 +22,68 @@ AS
 	SET NOCOUNT ON
 	IF (ISNULL(@xmlParam,'') = '')
 	BEGIN
-	SELECT '' as intCustomerID 
-		,'' as dblProductCost
+	SELECT 0 as intCustomerID 
+		,0.0 as dblProductCost
 		,'' as agcus_last_name 
 		,'' as agcus_first_name 
 		,'' as CustomerName 
 		,'' as agcus_phone
 		,'' as agcus_key 
 		,'' as agcus_tax_state
-		,'' as agcus_ar_per1 
-		,'' as agcus_cred_limit 
-		,'' as agcus_last_stmt_bal 
-		,'' as agcus_budget_amt_due 
-		,'' as agcus_ar_future
-		,'' as agcus_prc_lvl
+		,0.0 as agcus_ar_per1 
+		,0 as agcus_cred_limit 
+		,0.0 as agcus_last_stmt_bal 
+		,0.0 as agcus_budget_amt_due 
+		,0.0 as agcus_ar_future
+		,0 as agcus_prc_lvl
 		,'' as TermDesc
-		,'' as Credits 
-		,'' as TotalPast
-		,'' as ARBalance 
-		,'' as dblPastCredit 
-		,'' as intSiteNumber 
-		,'' as dblLastDeliveredGal 
+		,0.0 as Credits 
+		,0.0 as TotalPast
+		,0.0 as ARBalance 
+		,0.0 as dblPastCredit 
+		,0 as intSiteNumber 
+		,0.0 as dblLastDeliveredGal 
 		,'' as strSequenceID 
-		,'' as intLastDeliveryDegreeDay
+		,0 as intLastDeliveryDegreeDay
 		,'' as strSiteAddress 
-		,'' as dtmOnHoldEndDate 
-		,'' as ysnOnHold 
+		,getdate() as dtmOnHoldEndDate 
+		,0 as ysnOnHold 
 		,'' as strHoldReason
 		,'' as strOnHold
-		,'' as intFillMethodID 
+		,0 as intFillMethodID 
 		,'' as strCity 
 		,'' as strState 
 		,'' as strZipCode
 		,'' as strComment
 		,'' as strInstruction 
-		,'' as dblDegreeDayBetweenDelivery 
-		,'' as dblTotalCapacity
-		,'' as dblTotalReserve
+		,0.0 as dblDegreeDayBetweenDelivery 
+		,0.0 as dblTotalCapacity
+		,0.0 as dblTotalReserve
 		,'' as strSiteDescription 
-		,'' as dblLastGalsInTank
-		,'' as dtmLastDeliveryDate 
+		,0.0 as dblLastGalsInTank
+		,getdate() as dtmLastDeliveryDate 
 		,'' as intSiteID 
-		,'' as dblEstimatedPercentLeft 
-		,'' as dtmNextDeliveryDate 
-		,'' as intNextDeliveryDegreeDay 
+		,0.0 as dblEstimatedPercentLeft 
+		,getdate() as dtmNextDeliveryDate 
+		,0 as intNextDeliveryDegreeDay 
 		,'' as SiteLabel 
 		,'' as SiteDeliveryDD 
-		,'' as dblDailyUse 
+		,0.0 as dblDailyUse 
 		,'' as strFillGroupCode 
 		,'' as strDescription 
-		,'' as ysnActive 
-		,'' as intFillGroupID 
+		,0 as ysnActive 
+		,0 as intFillGroupID 
 		,'' as strDriverName 
 		,'' as strDriverID 
-		,'' as dtmRequestedDate 
-		,'' as dblQuantity 
+		,getdate() as dtmRequestedDate 
+		,0.0 as dblQuantity 
 		,'' as strProductID 
 		,'' as strProductDescription 
 		,'' as strFillMethod 
 		,'' as strRouteID 
 		,'' as strBetweenDlvry 
 		,'' as strLocation 
-		,'' as dtmForecastedDelivery 
+		,getdate() as dtmForecastedDelivery 
 	RETURN;
 	END  
 
@@ -1617,18 +1617,18 @@ BEGIN
 		  ,'' AS agcus_last_name
 		  ,'' AS CustomerName
 		  ,'' AS CustomerStatus
-		  ,'' AS dtmDate
-		  ,'' AS intSiteID
-		  ,'' AS intSiteNumber
-		  ,'' AS intTankSize
-		  ,'' AS intTotalTanks
+		  ,Getdate() AS dtmDate
+		  ,0 AS intSiteID
+		  ,0 AS intSiteNumber
+		  ,0 AS intTankSize
+		  ,0 AS intTotalTanks
 		  ,'' AS SiteStatus
 		  ,'' AS strLocation
 		  ,'' AS strOwnership
 		  ,'' AS strSerialNumber
 		  ,'' AS strTankType
 		  ,'' AS vwcus_key
-		  ,'' AS ysnHasLeakCheck
+		  ,0 AS ysnHasLeakCheck
 	return;
 	end
 	
@@ -1852,18 +1852,18 @@ BEGIN
 		  ,'' AS agcus_last_name
 		  ,'' AS CustomerName
 		  ,'' AS CustomerStatus
-		  ,'' AS dtmDate
-		  ,'' AS intSiteID
-		  ,'' AS intSiteNumber
-		  ,'' AS intTankSize
-		  ,'' AS intTotalTanks
+		  ,getdate() AS dtmDate
+		  ,0 AS intSiteID
+		  ,0 AS intSiteNumber
+		  ,0 AS intTankSize
+		  ,0 AS intTotalTanks
 		  ,'' AS SiteStatus
 		  ,'' AS strLocation
 		  ,'' AS strOwnership
 		  ,'' AS strSerialNumber
 		  ,'' AS strTankType
 		  ,'' AS vwcus_key
-		  ,'' AS ysnHasGasCheck
+		  ,0 AS ysnHasGasCheck
 	return;
 	end
 	
@@ -2072,18 +2072,18 @@ BEGIN
 		  ,'' AS agcus_last_name
 		  ,'' AS CustomerName
 		  ,'' AS CustomerStatus
-		  ,'' AS dtmDate
-		  ,'' AS intSiteID
-		  ,'' AS intSiteNumber
-		  ,'' AS intTankSize
-		  ,'' AS intTotalTanks
+		  ,getdate() AS dtmDate
+		  ,0 AS intSiteID
+		  ,0 AS intSiteNumber
+		  ,0 AS intTankSize
+		  ,0 AS intTotalTanks
 		  ,'' AS SiteStatus
 		  ,'' AS strLocation
 		  ,'' AS strOwnership
 		  ,'' AS strSerialNumber
 		  ,'' AS strTankType
 		  ,'' AS vwcus_key
-		  ,'' AS ysnHasLeakCheck
+		  ,0 AS ysnHasLeakCheck
 	return;
 	end
 	
@@ -2306,18 +2306,18 @@ BEGIN
 		  ,'' AS agcus_last_name
 		  ,'' AS CustomerName
 		  ,'' AS CustomerStatus
-		  ,'' AS dtmDate
-		  ,'' AS intSiteID
-		  ,'' AS intSiteNumber
-		  ,'' AS intTankSize
-		  ,'' AS intTotalTanks
+		  ,getdate() AS dtmDate
+		  ,0 AS intSiteID
+		  ,0 AS intSiteNumber
+		  ,0 AS intTankSize
+		  ,0 AS intTotalTanks
 		  ,'' AS SiteStatus
 		  ,'' AS strLocation
 		  ,'' AS strOwnership
 		  ,'' AS strSerialNumber
 		  ,'' AS strTankType
 		  ,'' AS vwcus_key
-		  ,'' AS ysnHasGasCheck
+		  ,0 AS ysnHasGasCheck
 	return;
 	end
 	
