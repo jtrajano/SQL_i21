@@ -115,6 +115,22 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50010) EXEC sp_dropmessa
 SET @strmessage = 'The bank account is inactive.'
 EXEC sp_addmessage 50010,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50011) EXEC sp_dropmessage 50011, 'us_english'	
+SET @strmessage = 'Duplicate checkbook id found.'
+EXEC sp_addmessage 50011,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50012) EXEC sp_dropmessage 50012, 'us_english'	
+SET @strmessage = 'Unable to delete checkbook because it is used in the A/P Invoice file.'
+EXEC sp_addmessage 50012,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50013) EXEC sp_dropmessage 50013, 'us_english'	
+SET @strmessage = 'Unable to delete checkbook because it is used in the Check History file.'
+EXEC sp_addmessage 50013,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50014) EXEC sp_dropmessage 50014, 'us_english'	
+SET @strmessage = 'Unable to delete checkbook because it is used in the A/P Transaction file.'
+EXEC sp_addmessage 50014,11,@strmessage,'us_english','False'
+
 GO
 
 EXEC PostMessages

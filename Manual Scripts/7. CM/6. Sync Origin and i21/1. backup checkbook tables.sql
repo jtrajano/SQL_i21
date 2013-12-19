@@ -7,11 +7,11 @@ SELECT	*
 INTO	apchkmst_bk
 FROM	apchkmst
 
--- CREATE THE i21fied tables. 
+-- CREATE THE BASE TABLES FOR LEGACY. 
 SELECT	*
-INTO	apcbkmsti21fied
+INTO	apcbkmst_legacy
 FROM	apcbkmst
 
 SELECT	*
-INTO	apchkmsti21fied
+INTO	apchkmst_legacy
 FROM	apchkmst

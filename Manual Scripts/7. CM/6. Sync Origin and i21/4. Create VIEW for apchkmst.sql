@@ -6,5 +6,5 @@ GO
 CREATE VIEW [dbo].apchkmst
 AS 
 
-SELECT * FROM apchkmsti21fied
+SELECT * FROM apchkmst_legacy
 GO 

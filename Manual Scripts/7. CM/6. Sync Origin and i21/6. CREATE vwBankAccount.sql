@@ -64,7 +64,7 @@ SELECT	i21.intBankAccountID
 		,origin.apcbk_laser_down_lines		-- INT
 		,origin.apcbk_prtr_checks			-- CHAR (80)
 		,origin.apcbk_auto_assign_trx_yn	-- Y/N
-FROM	dbo.tblCMBankAccount i21 LEFT JOIN dbo.apcbkmsti21fied origin
+FROM	dbo.tblCMBankAccount i21 LEFT JOIN dbo.apcbkmst_legacy origin
 			ON i21.strCbkNo = origin.apcbk_no
 GO 
 
