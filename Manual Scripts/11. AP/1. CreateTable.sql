@@ -3,8 +3,10 @@ CREATE TABLE [dbo].[tblEntities] (
     [strName] [nvarchar](max) NOT NULL,
     [strWebsite] [nvarchar](max) NOT NULL,
     [strInternalNotes] [nvarchar](max),
+    [RowVersion] rowversion NOT NULL,
     CONSTRAINT [PK_dbo.tblEntities] PRIMARY KEY ([intEntityId])
 )
+
 CREATE TABLE [dbo].[tblEntityTypes] (
     [intEntityTypeId] [int] NOT NULL IDENTITY,
     [intEntityId] [int] NOT NULL,
@@ -33,6 +35,7 @@ CREATE TABLE [dbo].[tblEntityLocations] (
     [intEntityLocationId] [int] NOT NULL IDENTITY,
     [intEntityId] [int] NOT NULL,
     [strLocationName] [nvarchar](50) NOT NULL,
+	[strContactName] [nvarchar](max),
     [strAddress] [nvarchar](max),
     [strCity] [nvarchar](max),
     [strCountry] [nvarchar](max),
@@ -44,6 +47,7 @@ CREATE TABLE [dbo].[tblEntityLocations] (
     [intShipViaId] [int],
     [intTaxCodeId] [int],
     [intTermsId] [int],
+    [intWarehouseId] [int]
     CONSTRAINT [PK_dbo.tblEntityLocations] PRIMARY KEY ([intEntityLocationId])
 )
 CREATE INDEX [IX_intEntityId] ON [dbo].[tblEntityLocations]([intEntityId])
@@ -55,8 +59,9 @@ GO
 
 CREATE TABLE [dbo].[tblAPBillBatches] (
     [intBillBatchId] [int] NOT NULL IDENTITY,
-    [intAccountID] [int] NOT NULL,
+    [intAccountId] [int] NOT NULL,
     [strBillBatchNumber] [nvarchar](50),
+	[ysnPosted] [bit] NULL DEFAULT(0),
     CONSTRAINT [PK_dbo.tblAPBillBatches] PRIMARY KEY ([intBillBatchId])
 )
 CREATE TABLE [dbo].[tblAPBills] (
@@ -70,10 +75,11 @@ CREATE TABLE [dbo].[tblAPBills] (
     [dtmDate] [datetime] NOT NULL,
     [dtmBillDate] [datetime] NOT NULL,
     [dtmDueDate] [datetime] NOT NULL,
-    [intAccountID] [int] NOT NULL,
+    [intAccountId] [int] NOT NULL,
     [strDescription] [nvarchar](max),
     [dblTotal] [decimal](18, 2) NOT NULL,
     [ysnPosted] [bit] NOT NULL,
+	[ysnPaid] [bit] NOT NULL,
     CONSTRAINT [PK_dbo.tblAPBills] PRIMARY KEY ([intBillId])
 )
 CREATE INDEX [IX_intBillBatchId] ON [dbo].[tblAPBills]([intBillBatchId])
@@ -98,11 +104,12 @@ CREATE TABLE [dbo].[tblAPPaymentDetails] (
     [intPaymentId] [int] NOT NULL,
     [intBillId] [int] NOT NULL,
     [intTermsId] [int] NOT NULL,
-    [intAccountID] [int] NOT NULL,
+    [intAccountId] [int] NOT NULL,
     [dtmDueDate] [datetime] NOT NULL,
     [dblDiscount] [decimal](18, 2) NOT NULL,
     [dblAmountDue] [decimal](18, 2) NOT NULL,
     [dblPayment] [decimal](18, 2) NOT NULL,
+	[dblInterest] [decimal](18, 2) NOT NULL,
     CONSTRAINT [PK_dbo.tblAPPaymentDetails] PRIMARY KEY ([intPaymentDetailId])
 )
 CREATE INDEX [IX_intPaymentId] ON [dbo].[tblAPPaymentDetails]([intPaymentId])
@@ -291,5 +298,38 @@ ALTER TABLE dbo.[tblAPVendors] ALTER COLUMN [str1099Category]
 ALTER TABLE tblAPVendors
 ADD CONSTRAINT APVendorId_Unique UNIQUE NONCLUSTERED(strVendorId)
 
-ALTER TABLE tblAPVendors
-ADD CONSTRAINT APVendorId_Unique UNIQUE NONCLUSTERED(strVendorId)
+--ALTER TABLE tblAPVendors
+--ADD CONSTRAINT APVendorId_Unique UNIQUE NONCLUSTERED(strVendorId)
+
+
+
+--IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID(N'[dbo].[ImportBills]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
+--DROP PROCEDURE [dbo].ImportBills
+--GO
+--CREATE PROCEDURE ImportBills
+	
+--AS
+
+--SET QUOTED_IDENTIFIER OFF
+--SET ANSI_NULLS ON
+--SET NOCOUNT ON
+--SET XACT_ABORT ON
+--SET ANSI_WARNINGS OFF
+
+----back up
+--IF(EXISTS(SELECT 1 FROM sys.tables WHERE name = 'tblAPOriginBills')) DROP TABLE tblAPOriginBills
+--SELECT * INTO tblAPOriginBills FROM aptrxmst 
+
+--IF(EXISTS(SELECT 1 FROM sys.tables WHERE name = 'tblAPOriginBillsPosted')) DROP TABLE tblAPOriginBillsPosted
+--SELECT * INTO tblAPOriginBillsPosted FROM aptrxmst 
+
+--SELECT * FROM aptrxmst
+
+--INSERT INTO [dbo].[tblAPBills] ([intBillBatchId], [strVendorId], [strVendorOrderNumber], [intTermsId], [intTaxCodeId], [dtmDate], [dtmBillDate], [dtmDueDate], [intAccountId], [strDescription], [dblTotal], [ysnPosted], [ysnPaid])
+--SELECT 
+--	0
+--	,A.aptrx_vnd_no
+--	,A.aptrx_ivc_no
+--	,
+--	FROM aptrxmst A
+--	INNER JOIN aptrxmst B ON A.aptrx_ivc_no = B.aptrx_ivc_no
