@@ -150,7 +150,7 @@ CREATE TABLE [dbo].[tblCMBankAccount] (
     [dtmCreated] datetime  NULL,
     [intLastModifiedUserID] int  NULL,
     [dtmLastModified] datetime  NULL,
-    [strCbkNo] nvarchar(2) NULL, -- NOTE: No need to collate the strCbkNo field. It is used in data sync
+    [strCbkNo] nvarchar(2) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyID] int  NOT NULL
 );
 GO
