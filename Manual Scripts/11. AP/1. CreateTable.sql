@@ -61,7 +61,7 @@ CREATE TABLE [dbo].[tblAPBillBatches] (
     [intBillBatchId] [int] NOT NULL IDENTITY,
     [intAccountId] [int] NOT NULL,
     [strBillBatchNumber] [nvarchar](50),
-	[ysnPosted] [bit] NOT NULL,
+	[ysnPosted] [bit] NULL DEFAULT(0),
     CONSTRAINT [PK_dbo.tblAPBillBatches] PRIMARY KEY ([intBillBatchId])
 )
 CREATE TABLE [dbo].[tblAPBills] (
