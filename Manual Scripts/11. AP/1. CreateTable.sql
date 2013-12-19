@@ -79,6 +79,7 @@ CREATE TABLE [dbo].[tblAPBills] (
     [strDescription] [nvarchar](max),
     [dblTotal] [decimal](18, 2) NOT NULL,
     [ysnPosted] [bit] NOT NULL,
+	[ysnPaid] [bit] NOT NULL,
     CONSTRAINT [PK_dbo.tblAPBills] PRIMARY KEY ([intBillId])
 )
 CREATE INDEX [IX_intBillBatchId] ON [dbo].[tblAPBills]([intBillBatchId])
@@ -299,3 +300,57 @@ ADD CONSTRAINT APVendorId_Unique UNIQUE NONCLUSTERED(strVendorId)
 
 --ALTER TABLE tblAPVendors
 --ADD CONSTRAINT APVendorId_Unique UNIQUE NONCLUSTERED(strVendorId)
+
+--VIEWS
+IF EXISTS (SELECT * FROM sys.sysobjects WHERE ID = OBJECT_ID(N'vyu_VendorHistory') AND OBJECTPROPERTY(ID, N'IsView') = 1) 
+DROP VIEW vyu_VendorHistory
+
+GO
+
+CREATE VIEW vyu_VendorHistory
+AS
+SELECT 
+	strVendorId = A.strVendorId
+	,A.dtmDate
+	,intTransactionId = A.intBillId 
+	,strTransactionType = 'Bill'
+	,dblTotal = ISNULL(A.dblTotal,0)
+	,dblAmountPaid = ISNULL(SUM(B.dblPayment),0)
+	,CAST((CASE WHEN (A.dblTotal - SUM(B.dblPayment) = 0) THEN 1 ELSE 0 END) AS BIT) AS ysnPaid
+	,dblAmountDue = ISNULL(A.dblTotal,0) - ISNULL(SUM(B.dblPayment),0)
+FROM tblAPBills A
+		LEFT JOIN tblAPPaymentDetails B ON A.intBillId = B.intBillId
+GROUP BY A.intBillId, A.dtmDate, A.dblTotal, A.strVendorId
+
+GO
+
+--IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID(N'[dbo].[ImportBills]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
+--DROP PROCEDURE [dbo].ImportBills
+--GO
+--CREATE PROCEDURE ImportBills
+	
+--AS
+
+--SET QUOTED_IDENTIFIER OFF
+--SET ANSI_NULLS ON
+--SET NOCOUNT ON
+--SET XACT_ABORT ON
+--SET ANSI_WARNINGS OFF
+
+----back up
+--IF(EXISTS(SELECT 1 FROM sys.tables WHERE name = 'tblAPOriginBills')) DROP TABLE tblAPOriginBills
+--SELECT * INTO tblAPOriginBills FROM aptrxmst 
+
+--IF(EXISTS(SELECT 1 FROM sys.tables WHERE name = 'tblAPOriginBillsPosted')) DROP TABLE tblAPOriginBillsPosted
+--SELECT * INTO tblAPOriginBillsPosted FROM aptrxmst 
+
+--SELECT * FROM aptrxmst
+
+--INSERT INTO [dbo].[tblAPBills] ([intBillBatchId], [strVendorId], [strVendorOrderNumber], [intTermsId], [intTaxCodeId], [dtmDate], [dtmBillDate], [dtmDueDate], [intAccountId], [strDescription], [dblTotal], [ysnPosted], [ysnPaid])
+--SELECT 
+--	0
+--	,A.aptrx_vnd_no
+--	,A.aptrx_ivc_no
+--	,
+--	FROM aptrxmst A
+--	INNER JOIN aptrxmst B ON A.aptrx_ivc_no = B.aptrx_ivc_no

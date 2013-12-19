@@ -261,7 +261,7 @@ BEGIN
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
 	WHERE	A.intPaymentId = @strTransactionID
-	GROUP BY A.intPaymentId, A.intAccountId, GLAccntGrp.strAccountGroup, A.dtmDatePaid
+	GROUP BY A.intPaymentId, B.intAccountId, GLAccntGrp.strAccountGroup, A.dtmDatePaid
 	
 	IF @@ERROR <> 0	GOTO Post_Rollback
 	
