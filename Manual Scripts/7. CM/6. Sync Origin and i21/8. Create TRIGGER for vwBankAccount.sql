@@ -319,7 +319,7 @@ SET NOCOUNT ON
 	FROM	inserted i INNER JOIN deleted d
 				ON i.intBankAccountID = d.intBankAccountID
 			INNER JOIN dbo.apcbkmst_legacy legacy
-				ON d.strCbkNo = legacy.apcbk_no
+				ON d.strCbkNo = legacy.apcbk_no COLLATE Latin1_General_CI_AS
 	WHERE	ISNULL(i.strCbkNo, '') <> ''
 			AND ISNULL(d.strCbkNo, '') <> ''
 					
@@ -397,7 +397,7 @@ SET NOCOUNT ON
 			,apcbk_user_rev_dt			= 0
 	FROM	inserted i 
 	WHERE	ISNULL(i.strCbkNo, '') <> ''
-			AND NOT EXISTS (SELECT TOP 1 1 FROM dbo.apcbkmst_legacy legacy WHERE legacy.apcbk_no = i.strCbkNo)			
+			AND NOT EXISTS (SELECT TOP 1 1 FROM dbo.apcbkmst_legacy legacy WHERE legacy.apcbk_no COLLATE Latin1_General_CI_AS = i.strCbkNo)			
 	IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 
 EXIT_TRIGGER:
@@ -428,7 +428,7 @@ BEGIN
 	IF EXISTS (
 		SELECT	TOP 1 1 
 		FROM	deleted d INNER JOIN dbo.apivcmst legacy 
-					ON d.strCbkNo = legacy.apivc_cbk_no 
+					ON d.strCbkNo = legacy.apivc_cbk_no COLLATE Latin1_General_CI_AS
 		WHERE	ISNULL(d.strCbkNo, '') <> ''
 	)
 	BEGIN
@@ -441,7 +441,7 @@ BEGIN
 	IF EXISTS (
 		SELECT	TOP 1 1 
 		FROM	deleted d INNER JOIN dbo.apchkmst legacy 
-					ON d.strCbkNo = legacy.apchk_cbk_no 
+					ON d.strCbkNo = legacy.apchk_cbk_no COLLATE Latin1_General_CI_AS
 		WHERE	ISNULL(d.strCbkNo, '') <> ''
 	)
 	BEGIN
@@ -454,7 +454,7 @@ BEGIN
 	IF EXISTS (
 		SELECT	TOP 1 1 
 		FROM	deleted d INNER JOIN dbo.aptrxmst legacy 
-					ON d.strCbkNo = legacy.aptrx_cbk_no 
+					ON d.strCbkNo = legacy.aptrx_cbk_no COLLATE Latin1_General_CI_AS
 		WHERE	ISNULL(d.strCbkNo, '') <> ''
 	)
 	BEGIN
@@ -475,7 +475,7 @@ BEGIN
 	-- Delete records in legacy bank account table (apcbkmst_legacy). 
 	DELETE	dbo.apcbkmst_legacy
 	FROM	deleted d INNER JOIN dbo.apcbkmst_legacy legacy
-				ON d.strCbkNo = legacy.apcbk_no
+				ON d.strCbkNo = legacy.apcbk_no COLLATE Latin1_General_CI_AS
 	WHERE	ISNULL(d.strCbkNo, '') <> ''
 	IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 

@@ -47,7 +47,7 @@ INSERT INTO tblCMBank (
 		,intConcurrencyID
 	)
 SELECT 
-		strBankName				= ISNULL(i.apcbk_desc, '') COLLATE Latin1_General_CI_AS
+		strBankName				= LTRIM(RTRIM(ISNULL(i.apcbk_desc, ''))) COLLATE Latin1_General_CI_AS
 		,strContact				= ''
 		,strAddress				= ''
 		,strZipCode				= ''
@@ -58,14 +58,14 @@ SELECT
 		,strFax					= ''
 		,strWebsite				= ''	
 		,strEmail				= ''
-		,strRTN					= CAST(i.apcbk_transit_route AS NVARCHAR(12)) COLLATE Latin1_General_CI_AS
+		,strRTN					= ISNULL(CAST(i.apcbk_transit_route AS NVARCHAR(12)), '') COLLATE Latin1_General_CI_AS
 		,intCreatedUserID		= NULL
 		,dtmCreated				= GETDATE()
 		,intLastModifiedUserID	= NULL
 		,dtmLastModified		= GETDATE()
 		,intConcurrencyID		= 1
 FROM	apcbkmst i
-WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBank WHERE strBankName = ISNULL(i.apcbk_desc, '') COLLATE Latin1_General_CI_AS)
+WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBank WHERE strBankName = LTRIM(RTRIM(ISNULL(i.apcbk_desc, ''))) COLLATE Latin1_General_CI_AS)
 
 -- Insert new record in tblCMBankAccount
 INSERT INTO tblCMBankAccount (
@@ -114,14 +114,14 @@ INSERT INTO tblCMBankAccount (
 		,strCbkNo	
 )
 SELECT			
-		strBankName							= ISNULL(i.apcbk_desc, '') COLLATE Latin1_General_CI_AS
+		strBankName							= LTRIM(RTRIM(ISNULL(i.apcbk_desc, ''))) COLLATE Latin1_General_CI_AS
 		,ysnActive							= CASE WHEN i.apcbk_active_yn = 'Y' THEN 1 ELSE 0 END 
 		,intGLAccountID						= dbo.fn_GetGLAccountIDFromOriginToi21(i.apcbk_gl_cash) 
 		,intCurrencyID						= dbo.fn_GetCurrencyIDFromOriginToi21(i.apcbk_currency)
 		,intBankAccountType					= @DEPOSIT_ACCOUNT
 		,strContact							= ''
-		,strBankAccountNo					= ISNULL(i.apcbk_bank_acct_no, '')
-		,strRTN								= i.apcbk_transit_route
+		,strBankAccountNo					= ISNULL(i.apcbk_bank_acct_no, '') COLLATE Latin1_General_CI_AS
+		,strRTN								= ISNULL(i.apcbk_transit_route, '') 
 		,strAddress							= ''
 		,strZipCode							= ''
 		,strCity							= ''
@@ -132,13 +132,13 @@ SELECT
 		,strWebsite							= ''
 		,strEmail							= ''
 		,intCheckStartingNo					= 1
-		,intCheckEndingNo					= i.apcbk_next_chk_no
-		,intCheckNextNo						= i.apcbk_next_chk_no
+		,intCheckEndingNo					= ISNULL(i.apcbk_next_chk_no, 0)
+		,intCheckNextNo						= ISNULL(i.apcbk_next_chk_no, 0)
 		,ysnCheckEnableMICRPrint			= 1
 		,ysnCheckDefaultToBePrinted			= 1
 		,intBackupCheckStartingNo			= 0
 		,intBackupCheckEndingNo				= 0
-		,intEFTNextNo						= i.apcbk_next_eft_no
+		,intEFTNextNo						= ISNULL(i.apcbk_next_eft_no, 0)
 		,intEFTBankFileFormatID				= NULL 
 		,strEFTCompanyID					= ''
 		,strEFTBankName						= ''
@@ -158,4 +158,4 @@ SELECT
 		,intConcurrencyID					= 1
 		,strCbkNo							= i.apcbk_no	
 FROM	apcbkmst i
-WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBankAccount WHERE tblCMBankAccount.strCbkNo = i.apcbk_no)
+WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBankAccount WHERE tblCMBankAccount.strCbkNo = i.apcbk_no COLLATE Latin1_General_CI_AS)
