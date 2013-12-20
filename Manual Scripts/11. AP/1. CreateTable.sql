@@ -61,6 +61,8 @@ CREATE TABLE [dbo].[tblAPBillBatches] (
     [intBillBatchId] [int] NOT NULL IDENTITY,
     [intAccountId] [int] NOT NULL,
     [strBillBatchNumber] [nvarchar](50),
+	[strReference] [nvarchar](50),
+	[dblTotal] [decimal](18, 2) NOT NULL,
 	[ysnPosted] [bit] NULL DEFAULT(0),
     CONSTRAINT [PK_dbo.tblAPBillBatches] PRIMARY KEY ([intBillBatchId])
 )
@@ -292,6 +294,9 @@ ALTER TABLE dbo.[tblAPVendors] ALTER COLUMN [str1099Type]
 
 ALTER TABLE dbo.[tblAPVendors] ALTER COLUMN [str1099Category]
            [nvarchar](100) COLLATE Latin1_General_CI_AS;
+
+ALTER TABLE dbo.[tblAPBillBatches]
+	ALTER COLUMN [strReference] [nvarchar](50) COLLATE Latin1_General_CI_AS
 
 --ADD UNIQUE CONSTRAINT
 
