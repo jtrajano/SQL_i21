@@ -1,0 +1,25 @@
+﻿CREATE TABLE [dbo].[tblFRRowDesign] (
+    [intRowDetailID]          INT             IDENTITY (1, 1) NOT NULL,
+    [intRowID]                INT             NOT NULL,
+    [intRefNo]                INT             NOT NULL,
+    [strDescription]          NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
+    [strRowType]              NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
+    [strBalanceSide]          NVARCHAR (10)   COLLATE Latin1_General_CI_AS NULL,
+    [strRelatedRows]          NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strAccountsUsed]         NVARCHAR (500)  COLLATE Latin1_General_CI_AS NULL,
+    [ysnShowCredit]           BIT             CONSTRAINT [DF__tblFRRowD__ysnSh__3C69FB99] DEFAULT ((1)) NULL,
+    [ysnShowDebit]            BIT             CONSTRAINT [DF__tblFRRowD__ysnSh__3D5E1FD2] DEFAULT ((1)) NULL,
+    [ysnShowOthers]           BIT             CONSTRAINT [DF__tblFRRowD__ysnSh__3E52440B] DEFAULT ((1)) NULL,
+    [ysnLinktoGL]             BIT             NULL,
+    [dblHeight]               NUMERIC (18, 6) NULL,
+    [strFontName]             NCHAR (35)      COLLATE Latin1_General_CI_AS NULL,
+    [strFontStyle]            NCHAR (20)      COLLATE Latin1_General_CI_AS NULL,
+    [strFontColor]            NCHAR (20)      COLLATE Latin1_General_CI_AS NULL,
+    [intFontSize]             INT             NULL,
+    [strOverrideFormatMask]   NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
+    [ysnForceReversedExpense] BIT             CONSTRAINT [DF__tblFRRowD__ysnFo__3B75D760] DEFAULT ((0)) NULL,
+    [intSort]                 INT             NULL,
+    [intConcurrencyID]        INT             CONSTRAINT [DF__tblFRRowD__intCo__3F466844] DEFAULT ((1)) NULL,
+    CONSTRAINT [PK_tblFRRowDesign_1] PRIMARY KEY CLUSTERED ([intRowDetailID] ASC, [intRowID] ASC, [intRefNo] ASC)
+);
+
