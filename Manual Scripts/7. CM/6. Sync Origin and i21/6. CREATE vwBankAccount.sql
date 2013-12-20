@@ -52,7 +52,7 @@ SELECT	i21.intBankAccountID
 		,i21.intConcurrencyID
 		-- The following fields are from the origin system		
 		,origin.apcbk_comment				-- CHAR (30)
-		,origin.apcbk_password				-- CHAR (16)
+		,apcbk_password = ISNULL(origin.apcbk_password, '')	-- CHAR (16)
 		,origin.apcbk_show_bal_yn			-- Y/N
 		,origin.apcbk_prompt_align_yn		-- Y/N
 		,origin.apcbk_chk_clr_ord_dn		-- Y/N
@@ -65,7 +65,7 @@ SELECT	i21.intBankAccountID
 		,origin.apcbk_prtr_checks			-- CHAR (80)
 		,origin.apcbk_auto_assign_trx_yn	-- Y/N
 FROM	dbo.tblCMBankAccount i21 LEFT JOIN dbo.apcbkmst_legacy origin
-			ON i21.strCbkNo = origin.apcbk_no
+			ON i21.strCbkNo = origin.apcbk_no COLLATE Latin1_General_CI_AS
 GO 
 
 -- Comment this for now. I am unable to add indexes on views that is using LEFT, RIGHT, or OUTER joins. Index only works on INNER joins. 
