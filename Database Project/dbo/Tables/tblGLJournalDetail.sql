@@ -1,0 +1,28 @@
+﻿CREATE TABLE [dbo].[tblGLJournalDetail] (
+    [intJournalDetailID] INT             IDENTITY (1, 1) NOT NULL,
+    [intLineNo]          INT             NULL,
+    [intJournalID]       INT             NOT NULL,
+    [dtmDate]            DATETIME        NULL,
+    [intAccountID]       INT             NULL,
+    [dblDebit]           NUMERIC (18, 6) NULL,
+    [dblDebitRate]       NUMERIC (18, 6) NULL,
+    [dblCredit]          NUMERIC (18, 6) NULL,
+    [dblCreditRate]      NUMERIC (18, 6) NULL,
+    [dblDebitUnit]       NUMERIC (18, 6) NULL,
+    [dblCreditUnit]      NUMERIC (18, 6) NULL,
+    [strDescription]     NVARCHAR (255)  COLLATE Latin1_General_CI_AS NULL,
+    [intConcurrencyID]   INT             NULL,
+    [dblUnitsInLBS]      NUMERIC (18, 6) NULL,
+    [strDocument]        NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
+    [strComments]        NVARCHAR (255)  COLLATE Latin1_General_CI_AS NULL,
+    [strReference]       NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
+    [dblDebitUnitsInLBS] NUMERIC (18, 6) NULL,
+    [strCorrecting]      NVARCHAR (1)    COLLATE Latin1_General_CI_AS NULL,
+    [strSourcePgm]       NVARCHAR (8)    COLLATE Latin1_General_CI_AS NULL,
+    [strCheckBookNo]     NVARCHAR (2)    COLLATE Latin1_General_CI_AS NULL,
+    [strWorkArea]        NVARCHAR (40)   COLLATE Latin1_General_CI_AS NULL,
+    CONSTRAINT [PK_tblGLJournalDetail] PRIMARY KEY CLUSTERED ([intJournalDetailID] ASC),
+    CONSTRAINT [FK_tblGLJournalDetail_tblGLAccount] FOREIGN KEY ([intAccountID]) REFERENCES [dbo].[tblGLAccount] ([intAccountID]),
+    CONSTRAINT [FK_tblGLJournalDetail_tblGLJournal] FOREIGN KEY ([intJournalID]) REFERENCES [dbo].[tblGLJournal] ([intJournalID]) ON DELETE CASCADE
+);
+

@@ -52,7 +52,7 @@ SELECT	i21.intBankAccountID
 		,i21.intConcurrencyID
 		-- The following fields are from the origin system		
 		,origin.apcbk_comment				-- CHAR (30)
-		,origin.apcbk_password				-- CHAR (16)
+		,apcbk_password = ISNULL(origin.apcbk_password, '')	-- CHAR (16)
 		,origin.apcbk_show_bal_yn			-- Y/N
 		,origin.apcbk_prompt_align_yn		-- Y/N
 		,origin.apcbk_chk_clr_ord_dn		-- Y/N

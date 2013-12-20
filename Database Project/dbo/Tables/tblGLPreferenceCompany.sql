@@ -1,0 +1,25 @@
+﻿CREATE TABLE [dbo].[tblGLPreferenceCompany] (
+    [intPreferenceCompanyID]    INT           IDENTITY (1, 1) NOT NULL,
+    [ysnUnitAccounting]         BIT           NOT NULL,
+    [intUnitDecimalPlaces]      INT           NULL,
+    [intDecimalPlaces]          INT           NULL,
+    [strBatchPrefix]            NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+    [intBatchStartNo]           INT           NULL,
+    [strJournalPrefix]          NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+    [intJournalStartID]         INT           NULL,
+    [strAuditAdjustmentPrefix]  NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+    [intAuditAdjustmentStartID] INT           NULL,
+    [strOpeningBalancePrefix]   NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+    [intOpeningBalanceID]       INT           NULL,
+    [strReversalJournalPrefix]  NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+    [intReversalJournalID]      INT           NULL,
+    [strRecurringJournalPrefix] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+    [intRecurringJournalID]     INT           NULL,
+    [strCOAAdjustmentPrefix]    NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+    [intCOAAdjustmentID]        INT           NULL,
+    [strCurrency]               NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+    [intConcurrencyID]          INT           NULL,
+    [strEmailAddress]           NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+    CONSTRAINT [PK_tblGLPreferenceCompany] PRIMARY KEY CLUSTERED ([intPreferenceCompanyID] ASC)
+);
+

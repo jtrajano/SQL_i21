@@ -296,6 +296,9 @@ ALTER TABLE dbo.[tblAPVendors] ALTER COLUMN [str1099Type]
 ALTER TABLE dbo.[tblAPVendors] ALTER COLUMN [str1099Category]
            [nvarchar](100) COLLATE Latin1_General_CI_AS;
 
+ALTER TABLE dbo.[tblAPBillBatches]
+	ALTER COLUMN [strReference] [nvarchar](50) COLLATE Latin1_General_CI_AS
+
 --ADD UNIQUE CONSTRAINT
 
 ALTER TABLE tblAPVendors
