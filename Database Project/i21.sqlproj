@@ -68,6 +68,21 @@
     <Folder Include="Scripts" />
     <Folder Include="Scripts\Pre-Deployment" />
     <Folder Include="Scripts\Post-Deployment" />
+    <Folder Include="Scripts\Pre-Deployment\Manual Run" />
+    <Folder Include="Scripts\Pre-Deployment\Manual Run\TM" />
+    <Folder Include="Scripts\Pre-Deployment\Manual Run\CM" />
+    <Folder Include="Scripts\Post-Deployment\TM" />
+    <Folder Include="Scripts\Post-Deployment\FIN" />
+    <Folder Include="Scripts\Post-Deployment\FIN\DefaultData" />
+    <Folder Include="Scripts\Post-Deployment\Manual Run" />
+    <Folder Include="Scripts\Post-Deployment\Manual Run\Reports" />
+    <Folder Include="Scripts\Post-Deployment\Optional Run" />
+    <Folder Include="Scripts\Post-Deployment\Optional Run\SM" />
+    <Folder Include="Scripts\Post-Deployment\Reports" />
+    <Folder Include="Scripts\Post-Deployment\Reports\DefaultData" />
+    <Folder Include="Scripts\Post-Deployment\SM" />
+    <Folder Include="Scripts\Post-Deployment\SM\DefaultData" />
+    <Folder Include="Scripts\Pre-Deployment\SM" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblGLJournalRecurring.sql" />
@@ -701,10 +716,7 @@
     <Build Include="dbo\Tables\ssvndmst.sql" />
     <Build Include="dbo\Tables\ssvtxmst.sql" />
     <Build Include="dbo\Views\vyu_VendorHistory.sql" />
-    <None Include="Scripts\Pre-Deployment\1_CM.sql" />
     <PreDeploy Include="Scripts\Pre-Deployment\PreDeployment.sql" />
-    <None Include="Scripts\Post-Deployment\4_ReportData.sql" />
-    <PostDeploy Include="Scripts\Post-Deployment\PostDeployData.sql" />
     <Build Include="dbo\Views\vwCMBankAccount.sql" />
     <Build Include="dbo\Views\vwCMBank.sql" />
     <Build Include="dbo\Views\apchkmst.sql" />
@@ -715,11 +727,28 @@
     <Build Include="dbo\Functions\fn_GetGLAccountIDFromi21ToOrigin.sql" />
     <Build Include="dbo\Functions\fn_GetCurrencyIDFromOriginToi21.sql" />
     <Build Include="dbo\Functions\fn_GetCurrencyIDFromi21ToOrigin.sql" />
+    <None Include="Scripts\Pre-Deployment\Manual Run\TM\1_1320_to_1340.sql" />
+    <None Include="Scripts\Pre-Deployment\Manual Run\TM\2_DropUniqueConstraints.sql" />
+    <None Include="Scripts\Pre-Deployment\Manual Run\CM\1_CM.sql" />
+    <None Include="Scripts\Post-Deployment\TM\1_OriginIndexing.sql" />
+    <None Include="Scripts\Post-Deployment\FIN\DefaultData\AccountGroup.sql" />
+    <None Include="Scripts\Post-Deployment\Manual Run\Reports\UpdateConnection.sql" />
+    <None Include="Scripts\Post-Deployment\Optional Run\SM\1_ZipCodeData.sql" />
+    <None Include="Scripts\Post-Deployment\Reports\DefaultData\4_ReportData.sql" />
+    <None Include="Scripts\Post-Deployment\Reports\1_ReportDisableConstraints.sql" />
+    <None Include="Scripts\Post-Deployment\Reports\2_ReportDeleteOldData.sql" />
+    <None Include="Scripts\Post-Deployment\Reports\3_ReportEnableConstraints.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\1_MasterMenu.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\2_UserRole.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\3_Currency.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\4_StartingNumbers.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\5_CompanySetup.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\6_Preferences.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1_Cleanup.sql" />
+    <PostDeploy Include="Scripts\Post-Deployment\PostDeployment.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="i21.publish.xml" />
-    <None Include="Scripts\Post-Deployment\1_ReportDisableConstraints.sql" />
-    <None Include="Scripts\Post-Deployment\2_ReportDeleteOldData.sql" />
-    <None Include="Scripts\Post-Deployment\3_ReportEnableConstraints.sql" />
+    <None Include="Scripts\Pre-Deployment\SM\1_DataCleanup.sql" />
   </ItemGroup>
 </Project>
