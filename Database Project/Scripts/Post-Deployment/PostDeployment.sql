@@ -12,8 +12,6 @@ Post-Deployment Script Template
 
 print 'BEGIN POST DEPLOYMENT'
 
--- System Manager
-:r .\SM\1_Cleanup.sql
 
 -- System Manager Default Data
 :r .\SM\DefaultData\1_MasterMenu.sql
