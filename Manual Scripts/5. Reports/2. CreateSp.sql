@@ -40,8 +40,8 @@ BEGIN
 	--GET REPORT ID'S
 	INSERT INTO @ReportIds
 	SELECT report.intReportId
-	FROM tblRMDatasources datasource
-	INNER JOIN tblRMReports report
+	FROM tblRMDatasource datasource
+	INNER JOIN tblRMReport report
 	ON report.intReportId = datasource.intReportId
 	WHERE datasource.strQuery LIKE '%tempDASTable%' 
 	or datasource.strQuery LIKE '%tblGLTempCOASegment%' 
@@ -66,13 +66,13 @@ BEGIN
 		DECLARE @CFFieldName NVARCHAR(MAX)
 		
 		--CHECK IF THERE IS EXISTING CFS WITH tempDASTable or tblGLTempCOASegment
-		IF EXISTS (SELECT * FROM tblRMCriteriaFieldSelections WHERE strSource = 'tempDASTable' or strSource = 'tblGLTempCOASegment' or strSource IS NULL)
+		IF EXISTS (SELECT * FROM tblRMCriteriaFieldSelection WHERE strSource = 'tempDASTable' or strSource = 'tblGLTempCOASegment' or strSource IS NULL)
 			BEGIN
 				
 				--STORE CFS ID's 
 				INSERT INTO @CFS
 				SELECT intCriteriaFieldSelectionId 
-				FROM tblRMCriteriaFieldSelections 
+				FROM tblRMCriteriaFieldSelection
 				WHERE strSource = 'tempDASTable' 
 				or strSource = 'tblGLTempCOASegment'
 				or strSource IS NULL
@@ -82,8 +82,8 @@ BEGIN
 					SELECT @CFSId = Id FROM @CFS
 					
 					--DELETE CF and CFS WITH tblGLTempCOASegment
-					DELETE tblRMCriteriaFields WHERE intCriteriaFieldSelectionId = @CFSId
-					DELETE tblRMCriteriaFieldSelections WHERE intCriteriaFieldSelectionId = @CFSId
+					DELETE tblRMCriteriaField WHERE intCriteriaFieldSelectionId = @CFSId
+					DELETE tblRMCriteriaFieldSelection WHERE intCriteriaFieldSelectionId = @CFSId
 					
 					DELETE @CFS WHERE Id = @CFSId
 				END
@@ -95,11 +95,11 @@ BEGIN
 			BEGIN
 				--INSERT CRITERIA FIELDSELECTION
 				SET @CFSSource = 'tblGLTempCOASegment'
-				SELECT TOP 1 @CFSConnectionId = intConnectionId FROM tblRMConnections
+				SELECT TOP 1 @CFSConnectionId = intConnectionId FROM tblRMConnection
 				SELECT @CFSFieldName = AccntStrcture FROM @DynamicColumns
 				IF (@CFSFieldName != 'intAccountID' AND @CFSFieldName != 'strAccountID')
 					BEGIN
-						INSERT INTO tblRMCriteriaFieldSelections
+						INSERT INTO tblRMCriteriaFieldSelection
 						(strName,intConnectionId,strFieldName,strCaption,strValueField,strDisplayField,ysnDistinct,strSource,intFieldSourceType)
 						VALUES (@CFSFieldName,@CFSConnectionId,@CFSFieldName,@CFSFieldName,@CFSFieldName,@CFSFieldName,'True',@CFSSource,0)
 					END
@@ -107,7 +107,7 @@ BEGIN
 				--STORE NEWLY SAVE CFS
 				INSERT INTO @NewCFS
 				SELECT intCriteriaFieldSelectionId,strName
-				FROM tblRMCriteriaFieldSelections 
+				FROM tblRMCriteriaFieldSelection
 				WHERE strSource = 'tempDASTable' 
 				or strSource = 'tblGLTempCOASegment'
 		
@@ -130,7 +130,7 @@ BEGIN
 						BEGIN
 							--INSERT CRITERIA FIELDS
 							SELECT @CurrentReportId = Id FROM @ReportIds WHERE Indexs = @Counter
-							INSERT INTO tblRMCriteriaFields
+							INSERT INTO tblRMCriteriaField
 							(intReportId,intCriteriaFieldSelectionId,strFieldName,strDataType,strDescription,strConditions,ysnIsRequired,ysnShow,ysnAllowSort,ysnEditCondition)
 							VALUES (@CurrentReportId,@NCFSId,@NCFSName,'String',@NCFSName,'Equal To',0,1,1,1)
 						
