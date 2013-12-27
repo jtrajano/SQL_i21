@@ -35,3 +35,7 @@ BEGIN
 
 END
 
+UPDATE tblAPBillBatches
+	SET ysnPosted = 1
+		WHERE intBillBatchId = @strTransactionID
+
