@@ -427,11 +427,9 @@
     <Build Include="dbo\Tables\apbatmst.sql" />
     <Build Include="dbo\Tables\apcbemst.sql" />
     <Build Include="dbo\Tables\apcbhmst.sql" />
-    <Build Include="dbo\Tables\apcbkmst.sql" />
     <Build Include="dbo\Tables\apccdmst.sql" />
     <Build Include="dbo\Tables\apccrmst.sql" />
     <Build Include="dbo\Tables\apcdhmst.sql" />
-    <Build Include="dbo\Tables\apchkmst.sql" />
     <Build Include="dbo\Tables\apcrhmst.sql" />
     <Build Include="dbo\Tables\apcrrmst.sql" />
     <Build Include="dbo\Tables\apcrvmst.sql" />
