@@ -15,6 +15,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iecusrmst0]
     ON [dbo].[ecusrmst]([ecusr_username] ASC);
@@ -23,4 +25,34 @@ CREATE UNIQUE CLUSTERED INDEX [Iecusrmst0]
 GO
 CREATE NONCLUSTERED INDEX [Iecusrmst1]
     ON [dbo].[ecusrmst]([ecusr_name] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[ecusrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[ecusrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[ecusrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[ecusrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[ecusrmst] TO PUBLIC
+    AS [dbo];
 

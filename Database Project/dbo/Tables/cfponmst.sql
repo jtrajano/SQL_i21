@@ -9,7 +9,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Icfponmst0]
     ON [dbo].[cfponmst]([cfpon_ar_cus_no] ASC, [cfpon_expiration_date] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[cfponmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[cfponmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[cfponmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[cfponmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[cfponmst] TO PUBLIC
+    AS [dbo];
 

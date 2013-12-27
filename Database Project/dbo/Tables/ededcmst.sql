@@ -12,6 +12,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iededcmst0]
     ON [dbo].[ededcmst]([ededc_vics_cust_no_n] ASC, [ededc_vics_store_n] ASC);
@@ -20,4 +22,34 @@ CREATE UNIQUE CLUSTERED INDEX [Iededcmst0]
 GO
 CREATE NONCLUSTERED INDEX [Iededcmst1]
     ON [dbo].[ededcmst]([ededc_ship_to_cus] ASC, [ededc_batch_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[ededcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[ededcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[ededcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[ededcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[ededcmst] TO PUBLIC
+    AS [dbo];
 

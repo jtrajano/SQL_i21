@@ -15,6 +15,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igatpbmst0]
     ON [dbo].[gatpbmst]([gatpb_com_cd] ASC, [gatpb_due_yyyymm] ASC, [gatpb_loc_no] ASC, [gatpb_mkt_zone] ASC);
@@ -23,4 +25,34 @@ CREATE UNIQUE CLUSTERED INDEX [Igatpbmst0]
 GO
 CREATE NONCLUSTERED INDEX [Igatpbmst1]
     ON [dbo].[gatpbmst]([gatpb_bot] ASC, [gatpb_bot_option] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gatpbmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gatpbmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gatpbmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gatpbmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gatpbmst] TO PUBLIC
+    AS [dbo];
 

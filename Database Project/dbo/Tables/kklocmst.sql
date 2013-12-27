@@ -31,7 +31,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ikklocmst0]
     ON [dbo].[kklocmst]([kkloc_loc_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[kklocmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[kklocmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[kklocmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[kklocmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[kklocmst] TO PUBLIC
+    AS [dbo];
 

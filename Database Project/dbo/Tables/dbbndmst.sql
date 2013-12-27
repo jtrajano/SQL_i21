@@ -46,6 +46,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Idbbndmst0]
     ON [dbo].[dbbndmst]([dbbnd_cus_no] ASC, [dbbnd_series] ASC, [dbbnd_bond_no] ASC);
@@ -59,4 +61,34 @@ CREATE NONCLUSTERED INDEX [Idbbndmst1]
 GO
 CREATE NONCLUSTERED INDEX [Idbbndmst2]
     ON [dbo].[dbbndmst]([dbbnd_maturity_rev_dt] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[dbbndmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[dbbndmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[dbbndmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[dbbndmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[dbbndmst] TO PUBLIC
+    AS [dbo];
 

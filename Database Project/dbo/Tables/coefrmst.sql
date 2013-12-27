@@ -35,6 +35,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Icoefrmst0]
     ON [dbo].[coefrmst]([coefr_contact_id] ASC, [coefr_type] ASC, [coefr_form_id] ASC, [coefr_init_timestamp] ASC, [coefr_lot_no] ASC);
@@ -98,4 +100,34 @@ CREATE NONCLUSTERED INDEX [Icoefrmst11]
 GO
 CREATE NONCLUSTERED INDEX [Icoefrmst12]
     ON [dbo].[coefrmst]([coefr_select_yn] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[coefrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[coefrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[coefrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[coefrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[coefrmst] TO PUBLIC
+    AS [dbo];
 

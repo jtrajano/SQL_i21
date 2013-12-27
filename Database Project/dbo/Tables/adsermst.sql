@@ -45,6 +45,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iadsermst0]
     ON [dbo].[adsermst]([adser_serial_no] ASC, [adser_tie_breaker] ASC);
@@ -53,4 +55,34 @@ CREATE UNIQUE CLUSTERED INDEX [Iadsermst0]
 GO
 CREATE NONCLUSTERED INDEX [Iadsermst1]
     ON [dbo].[adsermst]([adser_cus_no] ASC, [adser_itm_no] ASC, [adser_tank_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[adsermst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[adsermst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[adsermst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[adsermst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[adsermst] TO PUBLIC
+    AS [dbo];
 

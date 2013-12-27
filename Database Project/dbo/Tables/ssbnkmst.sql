@@ -21,7 +21,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Issbnkmst0]
     ON [dbo].[ssbnkmst]([ssbnk_code] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[ssbnkmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[ssbnkmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[ssbnkmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[ssbnkmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[ssbnkmst] TO PUBLIC
+    AS [dbo];
 

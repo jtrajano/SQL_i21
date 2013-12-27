@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblRMConnections] (
+﻿CREATE TABLE [dbo].[tblRMConnection] (
     [intConnectionId]       INT            IDENTITY (1, 1) NOT NULL,
     [strName]               NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [intConnectionType]     INT            NOT NULL,

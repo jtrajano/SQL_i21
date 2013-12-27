@@ -15,6 +15,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ipremdmst0]
     ON [dbo].[premdmst]([premd_year] ASC, [premd_qtrno] ASC, [premd_emp] ASC, [premd_code] ASC, [premd_type] ASC);
@@ -33,4 +35,34 @@ CREATE UNIQUE NONCLUSTERED INDEX [Ipremdmst2]
 GO
 CREATE NONCLUSTERED INDEX [Ipremdmst3]
     ON [dbo].[premdmst]([premd_code] ASC, [premd_emp] ASC, [premd_year] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[premdmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[premdmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[premdmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[premdmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[premdmst] TO PUBLIC
+    AS [dbo];
 

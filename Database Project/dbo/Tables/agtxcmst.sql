@@ -20,7 +20,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iagtxcmst0]
     ON [dbo].[agtxcmst]([agtxc_tax_type] ASC, [agtxc_seq_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[agtxcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[agtxcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[agtxcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[agtxcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[agtxcmst] TO PUBLIC
+    AS [dbo];
 

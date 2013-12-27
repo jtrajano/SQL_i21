@@ -15,7 +15,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Icoeflmst0]
     ON [dbo].[coeflmst]([coefl_contact_id] ASC, [coefl_type] ASC, [coefl_form_id] ASC, [coefl_init_timestamp] ASC, [coefl_lot_no] ASC, [coefl_delv_ts_rev] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[coeflmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[coeflmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[coeflmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[coeflmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[coeflmst] TO PUBLIC
+    AS [dbo];
 

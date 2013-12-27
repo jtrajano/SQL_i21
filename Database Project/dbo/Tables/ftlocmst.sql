@@ -33,7 +33,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iftlocmst0]
     ON [dbo].[ftlocmst]([ftloc_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[ftlocmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[ftlocmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[ftlocmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[ftlocmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[ftlocmst] TO PUBLIC
+    AS [dbo];
 

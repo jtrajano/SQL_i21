@@ -15,7 +15,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ipaonamst0]
     ON [dbo].[paonamst]([paona_type_cs] ASC, [paona_cus_no] ASC, [paona_stock_type] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[paonamst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[paonamst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[paonamst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[paonamst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[paonamst] TO PUBLIC
+    AS [dbo];
 

@@ -53,6 +53,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Isllocmst0]
     ON [dbo].[sllocmst]([slloc_lead_id] ASC, [slloc_loc_id] ASC);
@@ -86,4 +88,34 @@ CREATE NONCLUSTERED INDEX [Isllocmst5]
 GO
 CREATE NONCLUSTERED INDEX [Isllocmst6]
     ON [dbo].[sllocmst]([slloc_src_file] ASC, [slloc_src_key] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[sllocmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[sllocmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[sllocmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[sllocmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[sllocmst] TO PUBLIC
+    AS [dbo];
 

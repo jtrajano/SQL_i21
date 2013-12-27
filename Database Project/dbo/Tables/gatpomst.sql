@@ -33,7 +33,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igatpomst0]
     ON [dbo].[gatpomst]([gatpo_pur_sls_ind] ASC, [gatpo_com_cd] ASC, [gatpo_cus_no] ASC, [gatpo_ord_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gatpomst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gatpomst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gatpomst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gatpomst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gatpomst] TO PUBLIC
+    AS [dbo];
 

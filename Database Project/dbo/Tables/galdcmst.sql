@@ -11,7 +11,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igaldcmst0]
     ON [dbo].[galdcmst]([galdc_loc_no] ASC, [galdc_load_no] ASC, [galdc_pur_sls_frt] ASC, [galdc_seq_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[galdcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[galdcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[galdcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[galdcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[galdcmst] TO PUBLIC
+    AS [dbo];
 

@@ -19,7 +19,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Irnfltmst0]
     ON [dbo].[rnfltmst]([rnflt_char_cd] ASC, [rnflt_feed_stock] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[rnfltmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[rnfltmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[rnfltmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[rnfltmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[rnfltmst] TO PUBLIC
+    AS [dbo];
 

@@ -15,7 +15,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iapvnrmst0]
     ON [dbo].[apvnrmst]([apvnr_vnd_no] ASC, [apvnr_yyyy] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[apvnrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[apvnrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[apvnrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[apvnrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[apvnrmst] TO PUBLIC
+    AS [dbo];
 

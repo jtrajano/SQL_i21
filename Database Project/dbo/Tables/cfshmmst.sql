@@ -8,7 +8,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Icfshmmst0]
     ON [dbo].[cfshmmst]([cfshm_host_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[cfshmmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[cfshmmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[cfshmmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[cfshmmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[cfshmmst] TO PUBLIC
+    AS [dbo];
 

@@ -15,6 +15,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iageommst0]
     ON [dbo].[ageommst]([ageom_period] ASC, [ageom_itm_no] ASC, [ageom_loc_no] ASC);
@@ -28,4 +30,34 @@ CREATE UNIQUE NONCLUSTERED INDEX [Iageommst1]
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [Iageommst2]
     ON [dbo].[ageommst]([ageom_loc_no] ASC, [ageom_itm_no] ASC, [ageom_period] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[ageommst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[ageommst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[ageommst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[ageommst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[ageommst] TO PUBLIC
+    AS [dbo];
 

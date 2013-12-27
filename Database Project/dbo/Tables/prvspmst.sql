@@ -14,7 +14,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iprvspmst0]
     ON [dbo].[prvspmst]([prvsp_type] ASC, [prvsp_pay_type] ASC, [prvsp_part_time] ASC, [prvsp_years] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[prvspmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[prvspmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[prvspmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[prvspmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[prvspmst] TO PUBLIC
+    AS [dbo];
 

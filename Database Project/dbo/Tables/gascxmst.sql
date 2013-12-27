@@ -9,7 +9,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igascxmst0]
     ON [dbo].[gascxmst]([gascx_cus_no] ASC, [gascx_rec_type] ASC, [gascx_data] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gascxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gascxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gascxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gascxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gascxmst] TO PUBLIC
+    AS [dbo];
 

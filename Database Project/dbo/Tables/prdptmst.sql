@@ -9,7 +9,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iprdptmst0]
     ON [dbo].[prdptmst]([prdpt_dept_cd] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[prdptmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[prdptmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[prdptmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[prdptmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[prdptmst] TO PUBLIC
+    AS [dbo];
 

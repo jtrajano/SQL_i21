@@ -44,7 +44,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ipxtotmst0]
     ON [dbo].[pxtotmst]([pxtot_rpt_rev_dt] ASC, [pxtot_rpt_state] ASC, [pxtot_rpt_form] ASC, [pxtot_rpt_sched] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[pxtotmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[pxtotmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[pxtotmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[pxtotmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[pxtotmst] TO PUBLIC
+    AS [dbo];
 

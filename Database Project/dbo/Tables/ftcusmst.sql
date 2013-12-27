@@ -27,7 +27,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iftcusmst0]
     ON [dbo].[ftcusmst]([ftcus_cus_no] ASC, [ftcus_farm_no] ASC, [ftcus_field_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[ftcusmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[ftcusmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[ftcusmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[ftcusmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[ftcusmst] TO PUBLIC
+    AS [dbo];
 

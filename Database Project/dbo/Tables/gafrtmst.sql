@@ -8,6 +8,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igafrtmst0]
     ON [dbo].[gafrtmst]([gafrt_origin] ASC, [gafrt_dest] ASC);
@@ -16,4 +18,34 @@ CREATE UNIQUE CLUSTERED INDEX [Igafrtmst0]
 GO
 CREATE NONCLUSTERED INDEX [Igafrtmst1]
     ON [dbo].[gafrtmst]([gafrt_dest] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gafrtmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gafrtmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gafrtmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gafrtmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gafrtmst] TO PUBLIC
+    AS [dbo];
 

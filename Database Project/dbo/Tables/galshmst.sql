@@ -20,7 +20,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igalshmst0]
     ON [dbo].[galshmst]([galsh_cus_no] ASC, [galsh_ship_to] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[galshmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[galshmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[galshmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[galshmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[galshmst] TO PUBLIC
+    AS [dbo];
 

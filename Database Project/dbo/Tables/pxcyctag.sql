@@ -9,7 +9,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ipxcyctag0]
     ON [dbo].[pxcyctag]([pxcyctag_cycle_id] ASC, [pxcyctag_cycle_seq] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[pxcyctag] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[pxcyctag] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[pxcyctag] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[pxcyctag] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[pxcyctag] TO PUBLIC
+    AS [dbo];
 

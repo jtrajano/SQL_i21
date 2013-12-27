@@ -9,7 +9,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ietimxmst0]
     ON [dbo].[etimxmst]([etimx_min_item] ASC, [etimx_max_item] ASC, [etimx_msg_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[etimxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[etimxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[etimxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[etimxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[etimxmst] TO PUBLIC
+    AS [dbo];
 

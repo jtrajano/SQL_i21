@@ -26,7 +26,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igadscmst0]
     ON [dbo].[gadscmst]([gadsc_currency] ASC, [gadsc_loc_no] ASC, [gadsc_disc_schd_no] ASC, [gadsc_com_cd] ASC, [gadsc_stor_type] ASC, [gadsc_disc_cd] ASC, [gadsc_seq_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gadscmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gadscmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gadscmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gadscmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gadscmst] TO PUBLIC
+    AS [dbo];
 

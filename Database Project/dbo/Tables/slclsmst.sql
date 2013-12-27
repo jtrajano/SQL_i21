@@ -11,7 +11,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Islclsmst0]
     ON [dbo].[slclsmst]([slcls_name] ASC, [slcls_value] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[slclsmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[slclsmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[slclsmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[slclsmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[slclsmst] TO PUBLIC
+    AS [dbo];
 

@@ -25,6 +25,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igacxfmst0]
     ON [dbo].[gacxfmst]([gacxf_card_cus_no] ASC);
@@ -33,4 +35,34 @@ CREATE UNIQUE CLUSTERED INDEX [Igacxfmst0]
 GO
 CREATE NONCLUSTERED INDEX [Igacxfmst1]
     ON [dbo].[gacxfmst]([gacxf_ag_cus_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gacxfmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gacxfmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gacxfmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gacxfmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gacxfmst] TO PUBLIC
+    AS [dbo];
 

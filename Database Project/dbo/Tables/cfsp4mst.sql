@@ -36,7 +36,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Icfsp4mst0]
     ON [dbo].[cfsp4mst]([cfsp4_host_no] ASC, [cfsp4_site_type] ASC, [cfsp4_site_cd] ASC, [cfsp4_effective_yyyymmdd] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[cfsp4mst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[cfsp4mst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[cfsp4mst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[cfsp4mst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[cfsp4mst] TO PUBLIC
+    AS [dbo];
 

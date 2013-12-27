@@ -17,6 +17,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ietposmst0]
     ON [dbo].[etposmst]([etpos_loc] ASC, [etpos_itm] ASC);
@@ -35,4 +37,34 @@ CREATE UNIQUE NONCLUSTERED INDEX [Ietposmst2]
 GO
 CREATE NONCLUSTERED INDEX [Ietposmst3]
     ON [dbo].[etposmst]([etpos_date_calc] ASC, [etpos_time_calc] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[etposmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[etposmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[etposmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[etposmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[etposmst] TO PUBLIC
+    AS [dbo];
 

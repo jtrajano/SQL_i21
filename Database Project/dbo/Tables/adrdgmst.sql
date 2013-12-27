@@ -11,7 +11,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iadrdgmst0]
     ON [dbo].[adrdgmst]([adrdg_loc_no] ASC, [adrdg_rev_dt] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[adrdgmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[adrdgmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[adrdgmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[adrdgmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[adrdgmst] TO PUBLIC
+    AS [dbo];
 

@@ -11,7 +11,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Isseodmst0]
     ON [dbo].[sseodmst]([sseod_src_sys] ASC, [sseod_audit_no] ASC, [sseod_seq_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[sseodmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[sseodmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[sseodmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[sseodmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[sseodmst] TO PUBLIC
+    AS [dbo];
 

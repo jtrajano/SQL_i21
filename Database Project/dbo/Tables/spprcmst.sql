@@ -31,7 +31,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ispprcmst0]
     ON [dbo].[spprcmst]([spprc_cus_no] ASC, [spprc_itm_no] ASC, [spprc_class] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[spprcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[spprcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[spprcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[spprcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[spprcmst] TO PUBLIC
+    AS [dbo];
 

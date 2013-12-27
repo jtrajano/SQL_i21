@@ -20,7 +20,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iaglclmst0]
     ON [dbo].[aglclmst]([aglcl_tax_state] ASC, [aglcl_tax_auth_id1] ASC, [aglcl_tax_auth_id2] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[aglclmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[aglclmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[aglclmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[aglclmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[aglclmst] TO PUBLIC
+    AS [dbo];
 

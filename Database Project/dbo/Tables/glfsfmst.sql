@@ -73,7 +73,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iglfsfmst0]
     ON [dbo].[glfsfmst]([glfsf_no] ASC, [glfsf_line_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[glfsfmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[glfsfmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[glfsfmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[glfsfmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[glfsfmst] TO PUBLIC
+    AS [dbo];
 

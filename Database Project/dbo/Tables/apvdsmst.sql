@@ -20,7 +20,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iapvdsmst0]
     ON [dbo].[apvdsmst]([apvds_vnd_no] ASC, [apvds_dealer_site_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[apvdsmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[apvdsmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[apvdsmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[apvdsmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[apvdsmst] TO PUBLIC
+    AS [dbo];
 

@@ -20,7 +20,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iftcdemst0]
     ON [dbo].[ftcdemst]([ftcde_type] ASC, [ftcde_loc_no] ASC, [ftcde_code_id] ASC, [ftcde_itm_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[ftcdemst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[ftcdemst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[ftcdemst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[ftcdemst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[ftcdemst] TO PUBLIC
+    AS [dbo];
 

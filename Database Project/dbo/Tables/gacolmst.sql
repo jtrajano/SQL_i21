@@ -21,6 +21,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igacolmst0]
     ON [dbo].[gacolmst]([gacol_pur_sls_ind] ASC, [gacol_loc_no] ASC, [gacol_com_cd] ASC, [gacol_cus_no] ASC, [gacol_rcpt_no] ASC, [gacol_seq_no] ASC);
@@ -29,4 +31,34 @@ CREATE UNIQUE CLUSTERED INDEX [Igacolmst0]
 GO
 CREATE NONCLUSTERED INDEX [Igacolmst1]
     ON [dbo].[gacolmst]([gacol_cnt_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gacolmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gacolmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gacolmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gacolmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gacolmst] TO PUBLIC
+    AS [dbo];
 

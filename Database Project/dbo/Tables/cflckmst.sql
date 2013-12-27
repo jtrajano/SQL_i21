@@ -8,6 +8,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Icflckmst0]
     ON [dbo].[cflckmst]([cflck_card_no] ASC);
@@ -16,4 +18,34 @@ CREATE UNIQUE CLUSTERED INDEX [Icflckmst0]
 GO
 CREATE NONCLUSTERED INDEX [Icflckmst1]
     ON [dbo].[cflckmst]([cflck_ar_cus_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[cflckmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[cflckmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[cflckmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[cflckmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[cflckmst] TO PUBLIC
+    AS [dbo];
 

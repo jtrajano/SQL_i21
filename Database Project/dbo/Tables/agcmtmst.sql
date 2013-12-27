@@ -29,6 +29,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iagcmtmst0]
     ON [dbo].[agcmtmst]([agcmt_cus_no] ASC, [agcmt_com_typ] ASC, [agcmt_com_cd] ASC, [agcmt_com_seq] ASC);
@@ -37,4 +39,34 @@ CREATE UNIQUE CLUSTERED INDEX [Iagcmtmst0]
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [Iagcmtmst1]
     ON [dbo].[agcmtmst]([agcmt_com_typ] ASC, [agcmt_cus_no] ASC, [agcmt_com_cd] ASC, [agcmt_com_seq] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[agcmtmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[agcmtmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[agcmtmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[agcmtmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[agcmtmst] TO PUBLIC
+    AS [dbo];
 

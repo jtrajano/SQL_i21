@@ -165,6 +165,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iagocamst0]
     ON [dbo].[agocamst]([agoca_cus_no] ASC, [agoca_ord_no] ASC, [agoca_loc_no] ASC, [agoca_line_no] ASC, [agoca_stamp_rev_dt] ASC, [agoca_stamp_time] ASC);
@@ -173,4 +175,34 @@ CREATE UNIQUE CLUSTERED INDEX [Iagocamst0]
 GO
 CREATE NONCLUSTERED INDEX [Iagocamst1]
     ON [dbo].[agocamst]([agoca_stamp_rev_dt] ASC, [agoca_stamp_time] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[agocamst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[agocamst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[agocamst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[agocamst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[agocamst] TO PUBLIC
+    AS [dbo];
 

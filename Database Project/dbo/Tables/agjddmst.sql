@@ -74,7 +74,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iagjddmst0]
     ON [dbo].[agjddmst]([agjdd_period] ASC, [agjdd_acct1_8] ASC, [agjdd_acct9_16] ASC, [agjdd_src_id] ASC, [agjdd_src_seq] ASC, [agjdd_line_no] ASC, [agjdd_dtl_line_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[agjddmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[agjddmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[agjddmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[agjddmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[agjddmst] TO PUBLIC
+    AS [dbo];
 

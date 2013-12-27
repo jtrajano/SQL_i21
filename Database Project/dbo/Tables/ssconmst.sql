@@ -47,6 +47,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Issconmst0]
     ON [dbo].[ssconmst]([sscon_contact_id] ASC, [sscon_cus_no] ASC, [sscon_lead_id] ASC, [sscon_loc_id] ASC, [sscon_vnd_no] ASC);
@@ -70,4 +72,34 @@ CREATE NONCLUSTERED INDEX [Issconmst3]
 GO
 CREATE NONCLUSTERED INDEX [Issconmst4]
     ON [dbo].[ssconmst]([sscon_vnd_no] ASC, [sscon_contact_id] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[ssconmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[ssconmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[ssconmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[ssconmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[ssconmst] TO PUBLIC
+    AS [dbo];
 

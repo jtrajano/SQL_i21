@@ -245,6 +245,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Icftrxmst0]
     ON [dbo].[cftrxmst]([cftrx_ar_cus_no] ASC, [cftrx_card_no] ASC, [cftrx_rev_dt] ASC, [cftrx_time] ASC);
@@ -258,4 +260,34 @@ CREATE NONCLUSTERED INDEX [Icftrxmst1]
 GO
 CREATE NONCLUSTERED INDEX [Icftrxmst2]
     ON [dbo].[cftrxmst]([cftrx_bus_rev_dt] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[cftrxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[cftrxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[cftrxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[cftrxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[cftrxmst] TO PUBLIC
+    AS [dbo];
 

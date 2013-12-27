@@ -20,3 +20,18 @@ FROM tblAPBills A
 GROUP BY A.intBillId, A.dtmDate, A.dblTotal, A.strVendorId
 
 GO
+
+IF EXISTS (SELECT * FROM sys.sysobjects WHERE ID = OBJECT_ID(N'vyuBillBatch') AND OBJECTPROPERTY(ID, N'IsView') = 1) 
+DROP VIEW vyuBillBatch
+
+GO
+
+CREATE VIEW vyuBillBatch
+AS
+SELECT 
+	A.*,
+	B.strAccountID AS strAccountId
+FROM tblAPBillBatches A
+		INNER JOIN tblGLAccount B ON A.intAccountId = B.intAccountID
+
+GO

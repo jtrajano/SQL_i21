@@ -18,7 +18,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iagicmmst0]
     ON [dbo].[agicmmst]([agicm_itm_no] ASC, [agicm_loc_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[agicmmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[agicmmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[agicmmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[agicmmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[agicmmst] TO PUBLIC
+    AS [dbo];
 

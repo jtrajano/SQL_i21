@@ -27,7 +27,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ietctlmst0]
     ON [dbo].[etctlmst]([etctl_key] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[etctlmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[etctlmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[etctlmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[etctlmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[etctlmst] TO PUBLIC
+    AS [dbo];
 

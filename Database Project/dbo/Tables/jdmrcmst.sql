@@ -19,6 +19,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ijdmrcmst0]
     ON [dbo].[jdmrcmst]([jdmrc_merchant_no] ASC, [jdmrc_product_line] ASC);
@@ -27,4 +29,34 @@ CREATE UNIQUE CLUSTERED INDEX [Ijdmrcmst0]
 GO
 CREATE NONCLUSTERED INDEX [Ijdmrcmst1]
     ON [dbo].[jdmrcmst]([jdmrc_product_line] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[jdmrcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[jdmrcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[jdmrcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[jdmrcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[jdmrcmst] TO PUBLIC
+    AS [dbo];
 

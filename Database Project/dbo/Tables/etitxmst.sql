@@ -9,6 +9,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ietitxmst0]
     ON [dbo].[etitxmst]([etitx_itm_no] ASC);
@@ -17,4 +19,34 @@ CREATE UNIQUE CLUSTERED INDEX [Ietitxmst0]
 GO
 CREATE NONCLUSTERED INDEX [Ietitxmst1]
     ON [dbo].[etitxmst]([etitx_et_itm_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[etitxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[etitxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[etitxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[etitxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[etitxmst] TO PUBLIC
+    AS [dbo];
 

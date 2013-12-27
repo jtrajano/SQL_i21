@@ -85,7 +85,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ipacusmst0]
     ON [dbo].[pacusmst]([pacus_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[pacusmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[pacusmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[pacusmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[pacusmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[pacusmst] TO PUBLIC
+    AS [dbo];
 

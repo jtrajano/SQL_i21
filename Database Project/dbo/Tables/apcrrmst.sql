@@ -19,7 +19,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iapcrrmst0]
     ON [dbo].[apcrrmst]([apcrr_vnd_no] ASC, [apcrr_cbk_no] ASC, [apcrr_ccd_ref_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[apcrrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[apcrrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[apcrrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[apcrrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[apcrrmst] TO PUBLIC
+    AS [dbo];
 

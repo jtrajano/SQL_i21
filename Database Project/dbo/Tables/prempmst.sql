@@ -469,6 +469,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iprempmst0]
     ON [dbo].[prempmst]([premp_emp] ASC);
@@ -487,4 +489,34 @@ CREATE NONCLUSTERED INDEX [Iprempmst2]
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [Iprempmst3]
     ON [dbo].[prempmst]([premp_dept] ASC, [premp_emp] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[prempmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[prempmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[prempmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[prempmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[prempmst] TO PUBLIC
+    AS [dbo];
 

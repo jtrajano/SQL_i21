@@ -29,6 +29,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igahdgmst0]
     ON [dbo].[gahdgmst]([gahdg_com_cd] ASC, [gahdg_broker_no] ASC, [gahdg_hedge_yyyymm] ASC, [gahdg_rev_dt] ASC, [gahdg_ref] ASC, [gahdg_seq] ASC);
@@ -37,4 +39,34 @@ CREATE UNIQUE CLUSTERED INDEX [Igahdgmst0]
 GO
 CREATE NONCLUSTERED INDEX [Igahdgmst1]
     ON [dbo].[gahdgmst]([gahdg_rev_dt] ASC, [gahdg_ref] ASC, [gahdg_seq] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gahdgmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gahdgmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gahdgmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gahdgmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gahdgmst] TO PUBLIC
+    AS [dbo];
 

@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblRMFilters] (
+﻿CREATE TABLE [dbo].[tblRMFilter] (
     [intFilterId]    INT            IDENTITY (1, 1) NOT NULL,
     [strBeginGroup]  NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strEndGroup]    NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,

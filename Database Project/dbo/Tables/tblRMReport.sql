@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblRMReports] (
+﻿CREATE TABLE [dbo].[tblRMReport] (
     [intReportId]              INT             IDENTITY (1, 1) NOT NULL,
     [blbLayout]                VARBINARY (MAX) NULL,
     [strName]                  NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,

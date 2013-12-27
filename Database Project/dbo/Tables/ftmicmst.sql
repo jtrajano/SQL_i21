@@ -36,7 +36,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iftmicmst0]
     ON [dbo].[ftmicmst]([ftmic_itm_no] ASC, [ftmic_loc_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[ftmicmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[ftmicmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[ftmicmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[ftmicmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[ftmicmst] TO PUBLIC
+    AS [dbo];
 

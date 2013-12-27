@@ -48,6 +48,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Irnhstmst0]
     ON [dbo].[rnhstmst]([rnhst_yr_prod] ASC, [rnhst_co_epa_id] ASC, [rnhst_fac_id] ASC, [rnhst_fuel_type] ASC, [rnhst_batch_no] ASC, [rnhst_beg_gal] ASC, [rnhst_end_gal] ASC, [rnhst_seq_no] ASC);
@@ -61,4 +63,34 @@ CREATE NONCLUSTERED INDEX [Irnhstmst1]
 GO
 CREATE NONCLUSTERED INDEX [Irnhstmst2]
     ON [dbo].[rnhstmst]([rnhst_vnd_no] ASC, [rnhst_po_no] ASC, [rnhst_receipt_seq] ASC, [rnhst_po_line_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[rnhstmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[rnhstmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[rnhstmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[rnhstmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[rnhstmst] TO PUBLIC
+    AS [dbo];
 

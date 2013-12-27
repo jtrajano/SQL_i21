@@ -26,6 +26,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iefeftmst0]
     ON [dbo].[efeftmst]([efeft_eft_type_cv] ASC, [efeft_eft_no] ASC, [efeft_src_sys] ASC);
@@ -34,4 +36,34 @@ CREATE UNIQUE CLUSTERED INDEX [Iefeftmst0]
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [Iefeftmst1]
     ON [dbo].[efeftmst]([efeft_eft_no] ASC, [efeft_eft_type_cv] ASC, [efeft_src_sys] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[efeftmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[efeftmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[efeftmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[efeftmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[efeftmst] TO PUBLIC
+    AS [dbo];
 

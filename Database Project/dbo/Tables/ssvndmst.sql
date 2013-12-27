@@ -52,6 +52,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Issvndmst0]
     ON [dbo].[ssvndmst]([ssvnd_vnd_no] ASC);
@@ -65,4 +67,34 @@ CREATE NONCLUSTERED INDEX [Issvndmst1]
 GO
 CREATE NONCLUSTERED INDEX [Issvndmst2]
     ON [dbo].[ssvndmst]([ssvnd_phone] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[ssvndmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[ssvndmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[ssvndmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[ssvndmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[ssvndmst] TO PUBLIC
+    AS [dbo];
 

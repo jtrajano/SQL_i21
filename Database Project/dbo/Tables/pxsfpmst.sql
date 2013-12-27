@@ -10,7 +10,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ipxsfpmst0]
     ON [dbo].[pxsfpmst]([pxsfp_state_id] ASC, [pxsfp_form_id] ASC, [pxsfp_sched_id] ASC, [pxsfp_fuel_code] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[pxsfpmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[pxsfpmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[pxsfpmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[pxsfpmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[pxsfpmst] TO PUBLIC
+    AS [dbo];
 

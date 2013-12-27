@@ -11,6 +11,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Islstemst0]
     ON [dbo].[slstemst]([slste_id] ASC, [slste_cnty_name] ASC);
@@ -19,4 +21,34 @@ CREATE UNIQUE CLUSTERED INDEX [Islstemst0]
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [Islstemst1]
     ON [dbo].[slstemst]([slste_st_code] ASC, [slste_cnty_code] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[slstemst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[slstemst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[slstemst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[slstemst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[slstemst] TO PUBLIC
+    AS [dbo];
 

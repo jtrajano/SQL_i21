@@ -133,6 +133,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iagcusmst0]
     ON [dbo].[agcusmst]([agcus_key] ASC);
@@ -151,4 +153,34 @@ CREATE NONCLUSTERED INDEX [Iagcusmst2]
 GO
 CREATE NONCLUSTERED INDEX [IX_agcusmst_A4GLIdentity]
     ON [dbo].[agcusmst]([A4GLIdentity] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[agcusmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[agcusmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[agcusmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[agcusmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[agcusmst] TO PUBLIC
+    AS [dbo];
 

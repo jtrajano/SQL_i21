@@ -37,6 +37,59 @@
     [apchk_payee_4]      CHAR (50)       NULL,
     [apchk_user_id]      CHAR (16)       NULL,
     [apchk_user_rev_dt]  INT             NULL,
-    [A4GLIdentity]       NUMERIC (9)     IDENTITY (1, 1) NOT NULL
+    [A4GLIdentity]       NUMERIC (9)     IDENTITY (1, 1) NOT NULL,
+    CONSTRAINT [k_apchkmst] PRIMARY KEY NONCLUSTERED ([apchk_cbk_no] ASC, [apchk_rev_dt] ASC, [apchk_trx_ind] ASC, [apchk_chk_no] ASC)
 );
+
+
+
+
+GO
+CREATE NONCLUSTERED INDEX [Iapchkmst3]
+    ON [dbo].[apchkmst_legacy]([apchk_name] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [Iapchkmst2]
+    ON [dbo].[apchkmst_legacy]([apchk_vnd_no] ASC, [apchk_alt2_cbk_no] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [Iapchkmst1]
+    ON [dbo].[apchkmst_legacy]([apchk_alt_cbk_no] ASC, [apchk_alt_trx_ind] ASC, [apchk_alt_chk_no] ASC);
+
+
+GO
+CREATE UNIQUE CLUSTERED INDEX [Iapchkmst0]
+    ON [dbo].[apchkmst_legacy]([apchk_cbk_no] ASC, [apchk_rev_dt] ASC, [apchk_trx_ind] ASC, [apchk_chk_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[apchkmst_legacy] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[apchkmst_legacy] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[apchkmst_legacy] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[apchkmst_legacy] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[apchkmst_legacy] TO PUBLIC
+    AS [dbo];
 

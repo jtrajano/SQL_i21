@@ -12,7 +12,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ipxtcnmst0]
     ON [dbo].[pxtcnmst]([pxtcn_state] ASC, [pxtcn_term_cd] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[pxtcnmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[pxtcnmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[pxtcnmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[pxtcnmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[pxtcnmst] TO PUBLIC
+    AS [dbo];
 

@@ -195,7 +195,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iagrcpmst0]
     ON [dbo].[agrcpmst]([agrcp_cus_no] ASC, [agrcp_rcp_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[agrcpmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[agrcpmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[agrcpmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[agrcpmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[agrcpmst] TO PUBLIC
+    AS [dbo];
 

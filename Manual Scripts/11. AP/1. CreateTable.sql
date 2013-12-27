@@ -80,6 +80,7 @@ CREATE TABLE [dbo].[tblAPBills] (
     [intAccountId] [int] NOT NULL,
     [strDescription] [nvarchar](max),
     [dblTotal] [decimal](18, 2) NOT NULL,
+	[dblAmountDue] [decimal](18, 2) NOT NULL,
     [ysnPosted] [bit] NOT NULL,
 	[ysnPaid] [bit] NOT NULL,
     CONSTRAINT [PK_dbo.tblAPBills] PRIMARY KEY ([intBillId])

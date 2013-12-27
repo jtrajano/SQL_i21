@@ -12,7 +12,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ifxcmtmst0]
     ON [dbo].[fxcmtmst]([fxcmt_div] ASC, [fxcmt_dept] ASC, [fxcmt_class] ASC, [fxcmt_id_no] ASC, [fxcmt_seq_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[fxcmtmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[fxcmtmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[fxcmtmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[fxcmtmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[fxcmtmst] TO PUBLIC
+    AS [dbo];
 

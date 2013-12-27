@@ -32,6 +32,44 @@
     [apcbk_bnk_no]             CHAR (4)        NULL,
     [apcbk_user_id]            CHAR (16)       NULL,
     [apcbk_user_rev_dt]        INT             NULL,
-    [A4GLIdentity]             NUMERIC (9)     IDENTITY (1, 1) NOT NULL
+    [A4GLIdentity]             NUMERIC (9)     IDENTITY (1, 1) NOT NULL,
+    CONSTRAINT [k_apcbkmst] PRIMARY KEY NONCLUSTERED ([apcbk_no] ASC)
 );
+
+
+
+
+GO
+CREATE UNIQUE CLUSTERED INDEX [Iapcbkmst0]
+    ON [dbo].[apcbkmst_legacy]([apcbk_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[apcbkmst_legacy] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[apcbkmst_legacy] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[apcbkmst_legacy] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[apcbkmst_legacy] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[apcbkmst_legacy] TO PUBLIC
+    AS [dbo];
 

@@ -21,6 +21,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iagiarmst0]
     ON [dbo].[agiarmst]([agiar_itm_no] ASC, [agiar_loc_no] ASC, [agiar_cnv_rev_dt] ASC, [agiar_seq_no] ASC);
@@ -29,4 +31,34 @@ CREATE UNIQUE CLUSTERED INDEX [Iagiarmst0]
 GO
 CREATE NONCLUSTERED INDEX [Iagiarmst1]
     ON [dbo].[agiarmst]([agiar_rev_dt] ASC, [agiar_alt_loc_no] ASC, [agiar_ref_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[agiarmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[agiarmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[agiarmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[agiarmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[agiarmst] TO PUBLIC
+    AS [dbo];
 

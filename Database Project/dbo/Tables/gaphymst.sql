@@ -54,7 +54,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igaphymst0]
     ON [dbo].[gaphymst]([gaphy_loc_no] ASC, [gaphy_bin_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gaphymst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gaphymst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gaphymst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gaphymst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gaphymst] TO PUBLIC
+    AS [dbo];
 

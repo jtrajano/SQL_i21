@@ -12,6 +12,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ipxcycmst0]
     ON [dbo].[pxcycmst]([pxcyc_cycle_id] ASC, [pxcyc_seq_no] ASC);
@@ -20,4 +22,34 @@ CREATE UNIQUE CLUSTERED INDEX [Ipxcycmst0]
 GO
 CREATE NONCLUSTERED INDEX [Ipxcycmst1]
     ON [dbo].[pxcycmst]([pxcyc_rpt_state] ASC, [pxcyc_rpt_form] ASC, [pxcyc_rpt_sched] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[pxcycmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[pxcycmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[pxcycmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[pxcycmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[pxcycmst] TO PUBLIC
+    AS [dbo];
 

@@ -19,6 +19,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iprhstmst0]
     ON [dbo].[prhstmst]([prhst_emp_no] ASC, [prhst_code] ASC, [prhst_no] ASC, [prhst_chk_type] ASC, [prhst_tax_type] ASC, [prhst_tax] ASC, [prhst_dept] ASC);
@@ -27,4 +29,34 @@ CREATE UNIQUE CLUSTERED INDEX [Iprhstmst0]
 GO
 CREATE NONCLUSTERED INDEX [Iprhstmst1]
     ON [dbo].[prhstmst]([prhst_code] ASC, [prhst_no] ASC, [prhst_chk_type] ASC, [prhst_emp_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[prhstmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[prhstmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[prhstmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[prhstmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[prhstmst] TO PUBLIC
+    AS [dbo];
 

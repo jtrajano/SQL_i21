@@ -109,7 +109,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Issrpomst0]
     ON [dbo].[ssrpomst]([ssrpo_rpt_pgm_name] ASC, [ssrpo_rpt_user] ASC, [ssrpo_rpt_name] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[ssrpomst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[ssrpomst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[ssrpomst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[ssrpomst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[ssrpomst] TO PUBLIC
+    AS [dbo];
 

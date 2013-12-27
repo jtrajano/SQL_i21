@@ -12,7 +12,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iglbatmst0]
     ON [dbo].[glbatmst]([glbat_type] ASC, [glbat_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[glbatmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[glbatmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[glbatmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[glbatmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[glbatmst] TO PUBLIC
+    AS [dbo];
 

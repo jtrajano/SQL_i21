@@ -319,6 +319,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ipxrptmst0]
     ON [dbo].[pxrptmst]([pxrpt_trans_rev_dt] ASC, [pxrpt_ord_no] ASC, [pxrpt_trans_type] ASC, [pxrpt_seq_no] ASC);
@@ -342,4 +344,34 @@ CREATE NONCLUSTERED INDEX [Ipxrptmst3]
 GO
 CREATE NONCLUSTERED INDEX [Ipxrptmst4]
     ON [dbo].[pxrptmst]([pxrpt_car_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[pxrptmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[pxrptmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[pxrptmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[pxrptmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[pxrptmst] TO PUBLIC
+    AS [dbo];
 

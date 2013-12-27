@@ -29,6 +29,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Icoefimst0]
     ON [dbo].[coefimst]([coefi_pgm_id] ASC, [coefi_cus_id] ASC, [coefi_form_type] ASC, [coefi_id_no] ASC, [coefi_loc_no] ASC, [coefi_run_date] ASC, [coefi_run_time] ASC, [coefi_user_id] ASC);
@@ -87,4 +89,34 @@ CREATE NONCLUSTERED INDEX [Icoefimst10]
 GO
 CREATE NONCLUSTERED INDEX [Icoefimst11]
     ON [dbo].[coefimst]([coefi_status] ASC, [coefi_form_type] ASC, [coefi_run_date] ASC, [coefi_run_time] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[coefimst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[coefimst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[coefimst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[coefimst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[coefimst] TO PUBLIC
+    AS [dbo];
 

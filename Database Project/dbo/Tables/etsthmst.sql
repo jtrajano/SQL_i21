@@ -12,6 +12,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ietsthmst0]
     ON [dbo].[etsthmst]([etsth_loc] ASC, [etsth_tic_dt] ASC, [etsth_cust] ASC, [etsth_ticket] ASC, [etsth_rec_id] ASC, [etsth_seq] ASC);
@@ -35,4 +37,34 @@ CREATE NONCLUSTERED INDEX [Ietsthmst3]
 GO
 CREATE NONCLUSTERED INDEX [Ietsthmst4]
     ON [dbo].[etsthmst]([etsth_ticket] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[etsthmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[etsthmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[etsthmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[etsthmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[etsthmst] TO PUBLIC
+    AS [dbo];
 

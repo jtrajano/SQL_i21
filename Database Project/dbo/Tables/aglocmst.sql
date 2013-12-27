@@ -114,7 +114,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iaglocmst0]
     ON [dbo].[aglocmst]([agloc_loc_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[aglocmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[aglocmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[aglocmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[aglocmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[aglocmst] TO PUBLIC
+    AS [dbo];
 

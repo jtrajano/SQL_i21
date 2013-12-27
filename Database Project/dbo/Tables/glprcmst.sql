@@ -8,6 +8,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iglprcmst0]
     ON [dbo].[glprcmst]([glprc_sub_acct] ASC);
@@ -16,4 +18,34 @@ CREATE UNIQUE CLUSTERED INDEX [Iglprcmst0]
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [Iglprcmst1]
     ON [dbo].[glprcmst]([glprc_desc] ASC, [glprc_sub_acct] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[glprcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[glprcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[glprcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[glprcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[glprcmst] TO PUBLIC
+    AS [dbo];
 

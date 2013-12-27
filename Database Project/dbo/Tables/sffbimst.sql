@@ -10,7 +10,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Isffbimst0]
     ON [dbo].[sffbimst]([sffbi_cus_no] ASC, [sffbi_farm_id] ASC, [sffbi_barn_id] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[sffbimst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[sffbimst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[sffbimst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[sffbimst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[sffbimst] TO PUBLIC
+    AS [dbo];
 

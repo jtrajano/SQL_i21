@@ -13,7 +13,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Icftlcmst0]
     ON [dbo].[cftlcmst]([cftlc_state] ASC, [cftlc_county] ASC, [cftlc_city] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[cftlcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[cftlcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[cftlcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[cftlcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[cftlcmst] TO PUBLIC
+    AS [dbo];
 

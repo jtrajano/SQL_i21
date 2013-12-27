@@ -32,6 +32,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iaprcrmst0]
     ON [dbo].[aprcrmst]([aprcr_vnd_no] ASC, [aprcr_invoice_no] ASC);
@@ -45,4 +47,34 @@ CREATE UNIQUE NONCLUSTERED INDEX [Iaprcrmst1]
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [Iaprcrmst2]
     ON [dbo].[aprcrmst]([aprcr_grp_no] ASC, [aprcr_alt2_cbk_no] ASC, [aprcr_alt2_vnd_no] ASC, [aprcr_alt2_invoice_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[aprcrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[aprcrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[aprcrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[aprcrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[aprcrmst] TO PUBLIC
+    AS [dbo];
 

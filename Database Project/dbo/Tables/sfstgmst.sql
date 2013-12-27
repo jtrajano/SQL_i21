@@ -29,6 +29,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Isfstgmst0]
     ON [dbo].[sfstgmst]([sfstg_cus_no] ASC, [sfstg_stg_id] ASC, [sfstg_seq_no] ASC);
@@ -37,4 +39,34 @@ CREATE UNIQUE CLUSTERED INDEX [Isfstgmst0]
 GO
 CREATE NONCLUSTERED INDEX [Isfstgmst1]
     ON [dbo].[sfstgmst]([sfstg_grp_id] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[sfstgmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[sfstgmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[sfstgmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[sfstgmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[sfstgmst] TO PUBLIC
+    AS [dbo];
 

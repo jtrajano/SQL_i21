@@ -33,6 +33,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iapivcmst0]
     ON [dbo].[apivcmst]([apivc_vnd_no] ASC, [apivc_ivc_no] ASC);
@@ -51,4 +53,34 @@ CREATE NONCLUSTERED INDEX [Iapivcmst2]
 GO
 CREATE NONCLUSTERED INDEX [Iapivcmst3]
     ON [dbo].[apivcmst]([apivc_cbk_no] ASC, [apivc_chk_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[apivcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[apivcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[apivcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[apivcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[apivcmst] TO PUBLIC
+    AS [dbo];
 

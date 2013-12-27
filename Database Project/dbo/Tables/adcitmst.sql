@@ -51,6 +51,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iadcitmst0]
     ON [dbo].[adcitmst]([adcit_cus_no] ASC, [adcit_itm_no] ASC, [adcit_tank_no] ASC);
@@ -64,4 +66,34 @@ CREATE NONCLUSTERED INDEX [Iadcitmst1]
 GO
 CREATE NONCLUSTERED INDEX [Iadcitmst2]
     ON [dbo].[adcitmst]([adcit_rte_id] ASC, [adcit_seq_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[adcitmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[adcitmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[adcitmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[adcitmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[adcitmst] TO PUBLIC
+    AS [dbo];
 

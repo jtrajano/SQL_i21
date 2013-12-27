@@ -11,7 +11,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ijdtrmmst0]
     ON [dbo].[jdtrmmst]([jdtrm_merchant_no] ASC, [jdtrm_store] ASC, [jdtrm_terminal] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[jdtrmmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[jdtrmmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[jdtrmmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[jdtrmmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[jdtrmmst] TO PUBLIC
+    AS [dbo];
 

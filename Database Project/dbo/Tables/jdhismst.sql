@@ -42,6 +42,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ijdhismst0]
     ON [dbo].[jdhismst]([jdhis_cus_no] ASC, [jdhis_ivc_no] ASC, [jdhis_loc_no] ASC);
@@ -85,4 +87,34 @@ CREATE NONCLUSTERED INDEX [Ijdhismst7]
 GO
 CREATE NONCLUSTERED INDEX [Ijdhismst8]
     ON [dbo].[jdhismst]([jdhis_manual_auth] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[jdhismst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[jdhismst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[jdhismst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[jdhismst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[jdhismst] TO PUBLIC
+    AS [dbo];
 

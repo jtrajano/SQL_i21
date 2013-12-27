@@ -22,7 +22,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iagtrmmst0]
     ON [dbo].[agtrmmst]([agtrm_key_n] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[agtrmmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[agtrmmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[agtrmmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[agtrmmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[agtrmmst] TO PUBLIC
+    AS [dbo];
 

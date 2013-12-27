@@ -31,7 +31,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iprdedmst0]
     ON [dbo].[prdedmst]([prded_code] ASC, [prded_type] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[prdedmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[prdedmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[prdedmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[prdedmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[prdedmst] TO PUBLIC
+    AS [dbo];
 

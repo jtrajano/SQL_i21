@@ -23,7 +23,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igachrmst0]
     ON [dbo].[gachrmst]([gachr_currency] ASC, [gachr_loc_no] ASC, [gachr_com_cd] ASC, [gachr_stor_type] ASC, [gachr_stor_schd_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gachrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gachrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gachrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gachrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gachrmst] TO PUBLIC
+    AS [dbo];
 

@@ -166,6 +166,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iagphsmst0]
     ON [dbo].[agphsmst]([agphs_vnd_no] ASC, [agphs_ord_no] ASC, [agphs_rcpt_seq] ASC, [agphs_line_no] ASC);
@@ -184,4 +186,34 @@ CREATE NONCLUSTERED INDEX [Iagphsmst2]
 GO
 CREATE NONCLUSTERED INDEX [Iagphsmst3]
     ON [dbo].[agphsmst]([agphs_rct_rev_dt] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[agphsmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[agphsmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[agphsmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[agphsmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[agphsmst] TO PUBLIC
+    AS [dbo];
 

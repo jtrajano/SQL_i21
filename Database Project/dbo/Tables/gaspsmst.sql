@@ -17,7 +17,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igaspsmst0]
     ON [dbo].[gaspsmst]([gasps_pur_sls_ind] ASC, [gasps_cus_no] ASC, [gasps_com_cd] ASC, [gasps_stor_type] ASC, [gasps_tic_no] ASC, [gasps_loc_no] ASC, [gasps_tie_breaker] ASC, [gasps_seq_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gaspsmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gaspsmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gaspsmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gaspsmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gaspsmst] TO PUBLIC
+    AS [dbo];
 

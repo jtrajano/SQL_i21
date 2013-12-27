@@ -25,7 +25,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iftfrmmst0]
     ON [dbo].[ftfrmmst]([ftfrm_cus_no] ASC, [ftfrm_farm_no] ASC, [ftfrm_field_no] ASC, [ftfrm_workord_date] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[ftfrmmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[ftfrmmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[ftfrmmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[ftfrmmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[ftfrmmst] TO PUBLIC
+    AS [dbo];
 
