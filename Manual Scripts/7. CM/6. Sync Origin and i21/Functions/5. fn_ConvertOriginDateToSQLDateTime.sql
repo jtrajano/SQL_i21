@@ -18,32 +18,50 @@ RETURNS DATETIME
 AS
 BEGIN 
 	-- Validate if the integer date is valid. 
+	-- It must be a positive value
+	IF (@intDate <= 0)
+		RETURN NULL
+	
+	-- It must be 8-digits. 
 	IF ( LEN(CAST(@intDate AS NVARCHAR(8))) < 8 ) 
 		RETURN NULL
 		
-	-- Validate if the 1st 4 digits are valid 
+	-- Validate if the first 4 digits are valid 
 	DECLARE @strDate AS NVARCHAR(8) = CAST(@intDate AS NVARCHAR(8)),
-			@year AS NVARCHAR(4),
-			@month AS NVARCHAR(2),
-			@day AS NVARCHAR(2)
+			@year AS INT,
+			@month AS INT,
+			@day AS INT
 	
-	SELECT	@year = SUBSTRING(@strDate, 1, 4)
-			,@month = SUBSTRING(@strDate, 5, 2)
-			,@day = SUBSTRING(@strDate, 7, 2)
-			
-	IF NOT (CAST(@year AS INT) > 1900 AND (CAST(@month AS INT) BETWEEN 1 AND 12) AND (CAST(@day AS INT) BETWEEN 1 AND 31))
+	-- Parse the values into yyyy mm dd. 
+	SELECT	@year = CAST(SUBSTRING(@strDate, 1, 4) AS INT)
+			,@month = CAST(SUBSTRING(@strDate, 5, 2) AS INT)
+			,@day = CAST(SUBSTRING(@strDate, 7, 2) AS INT)
+	
+	-- Support only the years 1900 and above. Months must be up to 12 months and days must be up to 31 days. 
+	IF (@year < 1900 OR @month > 12 OR @day > 31)
 		RETURN NULL
 	
-	-- TODO: Check if date is a valid leap year
-	--IF NOT ( CAST(@year AS INT) % 4 = 0 CAST(@month AS INT) = 2 AND CAST(@day AS INT) < 29 ) 
-	--	RETURN NULL
-
-	-- TODO: Check if a valid end day of a month
-	--IF NOT ( CAST(@year AS INT) % 4 = 0 CAST(@month AS INT) = 2 AND CAST(@day AS INT) < 29 ) 
-	--	RETURN NULL		
-		
+	-- Validate if the certain months has only 31 days (Jan, Mar, May, Jul, Aug, Oct, and Dec)
+	IF (@month IN (1, 3, 5, 7, 8, 10, 12) AND @day > 31 )
+		RETURN NULL	
+	
+	-- Validate the days in months with 30 or less days (Feb, Apr, Jun, Sept, and Nov)
+	IF (@month IN (2, 4, 6, 9, 11) AND @day > 30)
+		RETURN NULL
+	
+	-- Validate the days in February
+	IF (@month = 2)
+	BEGIN
+		IF (@day > 29)
+			RETURN NULL
+	
+		-- If year is not a leap year, check if it only has 28 days
+		IF (@year % 4 > 0 AND @day > 28)
+			RETURN NULL 
+	END
+	
+	-- Convert the integer value to SQL Date
 	RETURN CAST(CAST(@intDate AS NVARCHAR(8)) AS DATETIME)
-
 END
 
 GO
