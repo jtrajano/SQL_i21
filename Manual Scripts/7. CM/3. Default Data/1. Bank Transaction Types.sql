@@ -3,19 +3,10 @@
 -- Purpose: Insert fresh data for the transaction types. 
 -- This table holds the prefix and number for the bank 
 -- transaction ids. 
---
--- WARNING! This script resets the data in the table.
--- You may lose data and reset the transaction numbers
--- for all the Cash Management transactions
 -- --------------------------------------------------
 -- Date Created: 10/09/2013 5:32 PM
 -- Created by: Feb Montefrio
 -- --------------------------------------------------
-
-TRUNCATE TABLE dbo.[tblCMBankTransactionType]
-
--- SET IDENTITY_INSERT to ON.
--- SET IDENTITY_INSERT dbo.[tblCMBankTransactionType] ON
 
 INSERT INTO dbo.[tblCMBankTransactionType] (
 	[intBankTransactionTypeID]
@@ -30,6 +21,8 @@ SELECT
 	,[strTransactionPrefix]			= 'BDEP'
 	,[intTransactionNo]				= 1
 	,[intConcurrencyID]				= 1
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 1)
+	
 UNION ALL 
 SELECT 
 	[intBankTransactionTypeID]		= 2
@@ -37,6 +30,8 @@ SELECT
 	,[strTransactionPrefix]			= 'BWD'
 	,[intTransactionNo]				= 1
 	,[intConcurrencyID]				= 1
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 2)
+	
 UNION ALL 
 SELECT 
 	[intBankTransactionTypeID]		= 3
@@ -44,6 +39,8 @@ SELECT
 	,[strTransactionPrefix]			= 'MCHK'
 	,[intTransactionNo]				= 1
 	,[intConcurrencyID]				= 1
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 3)
+	
 UNION ALL 
 SELECT 
 	[intBankTransactionTypeID]		= 4
@@ -51,6 +48,8 @@ SELECT
 	,[strTransactionPrefix]			= 'BTFR'
 	,[intTransactionNo]				= 1
 	,[intConcurrencyID]				= 1
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 4)
+
 UNION ALL 
 SELECT 
 	[intBankTransactionTypeID]		= 5
@@ -58,6 +57,8 @@ SELECT
 	,[strTransactionPrefix]			= 'BTRN'
 	,[intTransactionNo]				= 1
 	,[intConcurrencyID]				= 1
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 5)
+	
 UNION ALL 
 SELECT 
 	[intBankTransactionTypeID]		= 6
@@ -65,6 +66,8 @@ SELECT
 	,[strTransactionPrefix]			= 'CCHG'
 	,[intTransactionNo]				= 1
 	,[intConcurrencyID]				= 1
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 6)
+	
 UNION ALL 
 SELECT 
 	[intBankTransactionTypeID]		= 7
@@ -72,6 +75,8 @@ SELECT
 	,[strTransactionPrefix]			= 'CRTN'
 	,[intTransactionNo]				= 1
 	,[intConcurrencyID]				= 1
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 7)
+	
 UNION ALL 
 SELECT 
 	[intBankTransactionTypeID]		= 8
@@ -79,6 +84,8 @@ SELECT
 	,[strTransactionPrefix]			= 'CPMT'
 	,[intTransactionNo]				= 1
 	,[intConcurrencyID]				= 1
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 8)	
+	
 UNION ALL 
 SELECT 
 	[intBankTransactionTypeID]		= 9
@@ -86,6 +93,8 @@ SELECT
 	,[strTransactionPrefix]			= ''
 	,[intTransactionNo]				= 1
 	,[intConcurrencyID]				= 1
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 9)	
+	
 UNION ALL 
 SELECT 
 	[intBankTransactionTypeID]		= 10
@@ -93,3 +102,31 @@ SELECT
 	,[strTransactionPrefix]			= ''
 	,[intTransactionNo]				= 1
 	,[intConcurrencyID]				= 1
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 10)		
+	
+UNION ALL 
+SELECT 
+	[intBankTransactionTypeID]		= 11
+	,[strBankTransactionTypeName]	= 'Origin Deposit'
+	,[strTransactionPrefix]			= 'ODEP'
+	,[intTransactionNo]				= 1
+	,[intConcurrencyID]				= 1	
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 11)	
+	
+UNION ALL 
+SELECT 
+	[intBankTransactionTypeID]		= 12
+	,[strBankTransactionTypeName]	= 'Origin Checks'
+	,[strTransactionPrefix]			= 'OCHK'
+	,[intTransactionNo]				= 1
+	,[intConcurrencyID]				= 1	
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 12)	
+		
+UNION ALL 
+SELECT 
+	[intBankTransactionTypeID]		= 13
+	,[strBankTransactionTypeName]	= 'Origin EFT'
+	,[strTransactionPrefix]			= 'OEFT'
+	,[intTransactionNo]				= 1
+	,[intConcurrencyID]				= 1			
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 13)	
