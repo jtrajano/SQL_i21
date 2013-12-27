@@ -183,6 +183,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igasctmst0]
     ON [dbo].[gasctmst]([gasct_loc_no] ASC, [gasct_scale_id] ASC, [gasct_in_out_ind] ASC, [gasct_tic_no] ASC);
@@ -196,4 +198,34 @@ CREATE UNIQUE NONCLUSTERED INDEX [Igasctmst1]
 GO
 CREATE NONCLUSTERED INDEX [Igasctmst2]
     ON [dbo].[gasctmst]([gasct_ivc_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gasctmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gasctmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gasctmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gasctmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gasctmst] TO PUBLIC
+    AS [dbo];
 

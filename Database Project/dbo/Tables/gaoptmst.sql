@@ -37,6 +37,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igaoptmst0]
     ON [dbo].[gaoptmst]([gaopt_pur_sls_ind] ASC, [gaopt_com_cd] ASC, [gaopt_cus_no] ASC, [gaopt_ref_no] ASC, [gaopt_ref_seq_no] ASC, [gaopt_seq_no] ASC);
@@ -50,4 +52,34 @@ CREATE NONCLUSTERED INDEX [Igaoptmst1]
 GO
 CREATE NONCLUSTERED INDEX [Igaoptmst2]
     ON [dbo].[gaoptmst]([gaopt_cus_no] ASC, [gaopt_ref_no] ASC, [gaopt_ref_seq_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gaoptmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gaoptmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gaoptmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gaoptmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gaoptmst] TO PUBLIC
+    AS [dbo];
 

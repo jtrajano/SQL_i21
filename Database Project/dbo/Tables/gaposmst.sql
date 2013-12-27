@@ -149,6 +149,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igaposmst0]
     ON [dbo].[gaposmst]([gapos_com_cd] ASC, [gapos_loc_no] ASC);
@@ -157,4 +159,34 @@ CREATE UNIQUE CLUSTERED INDEX [Igaposmst0]
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [Igaposmst1]
     ON [dbo].[gaposmst]([gapos_loc_no] ASC, [gapos_com_cd] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gaposmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gaposmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gaposmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gaposmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gaposmst] TO PUBLIC
+    AS [dbo];
 

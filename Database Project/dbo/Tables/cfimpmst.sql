@@ -132,6 +132,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Icfimpmst0]
     ON [dbo].[cfimpmst]([cfimp_key_seq] ASC);
@@ -145,4 +147,34 @@ CREATE UNIQUE NONCLUSTERED INDEX [Icfimpmst1]
 GO
 CREATE NONCLUSTERED INDEX [Icfimpmst2]
     ON [dbo].[cfimpmst]([cfimp_site] ASC, [cfimp_prod_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[cfimpmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[cfimpmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[cfimpmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[cfimpmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[cfimpmst] TO PUBLIC
+    AS [dbo];
 

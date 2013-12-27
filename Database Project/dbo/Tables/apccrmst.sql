@@ -23,6 +23,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iapccrmst0]
     ON [dbo].[apccrmst]([apccr_vnd_no] ASC, [apccr_cbk_no] ASC, [apccr_ccd_ref_no] ASC);
@@ -41,4 +43,34 @@ CREATE NONCLUSTERED INDEX [Iapccrmst2]
 GO
 CREATE NONCLUSTERED INDEX [Iapccrmst3]
     ON [dbo].[apccrmst]([apccr_entry_date] ASC, [apccr_entry_time] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[apccrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[apccrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[apccrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[apccrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[apccrmst] TO PUBLIC
+    AS [dbo];
 

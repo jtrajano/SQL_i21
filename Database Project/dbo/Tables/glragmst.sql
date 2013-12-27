@@ -158,6 +158,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iglragmst0]
     ON [dbo].[glragmst]([glrag_grid_id] ASC);
@@ -166,4 +168,34 @@ CREATE UNIQUE CLUSTERED INDEX [Iglragmst0]
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [Iglragmst1]
     ON [dbo].[glragmst]([glrag_desc] ASC, [glrag_grid_id] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[glragmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[glragmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[glragmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[glragmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[glragmst] TO PUBLIC
+    AS [dbo];
 

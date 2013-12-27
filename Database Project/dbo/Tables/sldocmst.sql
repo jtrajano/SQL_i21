@@ -22,6 +22,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Isldocmst0]
     ON [dbo].[sldocmst]([sldoc_slsmn_id] ASC, [sldoc_rev_dt] ASC, [sldoc_hhmm] ASC, [sldoc_type] ASC, [sldoc_tie_breaker] ASC);
@@ -30,4 +32,34 @@ CREATE UNIQUE CLUSTERED INDEX [Isldocmst0]
 GO
 CREATE NONCLUSTERED INDEX [Isldocmst1]
     ON [dbo].[sldocmst]([sldoc_slnam_key] ASC, [sldoc_slloc_key] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[sldocmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[sldocmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[sldocmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[sldocmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[sldocmst] TO PUBLIC
+    AS [dbo];
 

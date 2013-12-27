@@ -13,10 +13,13 @@
     [dblTotal]             DECIMAL (18, 2) NOT NULL,
     [ysnPosted]            BIT             NOT NULL,
     [ysnPaid]              BIT             NOT NULL,
-    [strBillId]            AS              ('BL-'+CONVERT([varchar](5),[intBillId],0) collate Latin1_General_CI_AS),
+    [strBillId]            AS              ('BL-'+CONVERT([varchar](5),[intBillId],(0)) collate Latin1_General_CI_AS),
+    [dblAmountDue]         DECIMAL (18, 2) NOT NULL,
     CONSTRAINT [PK_dbo.tblAPBills] PRIMARY KEY CLUSTERED ([intBillId] ASC),
     CONSTRAINT [FK_dbo.tblAPBills_dbo.tblAPBillBatches_intBillBatchId] FOREIGN KEY ([intBillBatchId]) REFERENCES [dbo].[tblAPBillBatches] ([intBillBatchId]) ON DELETE CASCADE
 );
+
+
 
 
 

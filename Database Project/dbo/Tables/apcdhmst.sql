@@ -23,7 +23,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iapcdhmst0]
     ON [dbo].[apcdhmst]([apcdh_vnd_no] ASC, [apcdh_cbk_no] ASC, [apcdh_ccd_ref_no] ASC, [apcdh_dealer_site] ASC, [apcdh_line_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[apcdhmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[apcdhmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[apcdhmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[apcdhmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[apcdhmst] TO PUBLIC
+    AS [dbo];
 

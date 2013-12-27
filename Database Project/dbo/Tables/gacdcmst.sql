@@ -13,7 +13,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igacdcmst0]
     ON [dbo].[gacdcmst]([gacdc_com_cd] ASC, [gacdc_cd] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gacdcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gacdcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gacdcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gacdcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gacdcmst] TO PUBLIC
+    AS [dbo];
 

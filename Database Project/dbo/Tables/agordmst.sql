@@ -164,6 +164,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iagordmst0]
     ON [dbo].[agordmst]([agord_cus_no] ASC, [agord_ord_no] ASC, [agord_loc_no] ASC, [agord_line_no] ASC);
@@ -182,4 +184,34 @@ CREATE NONCLUSTERED INDEX [Iagordmst2]
 GO
 CREATE NONCLUSTERED INDEX [Iagordmst3]
     ON [dbo].[agordmst]([agord_itm_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[agordmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[agordmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[agordmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[agordmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[agordmst] TO PUBLIC
+    AS [dbo];
 

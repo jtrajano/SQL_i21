@@ -11,6 +11,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ijddbcmst0]
     ON [dbo].[jddbcmst]([jddbc_bill_code] ASC);
@@ -19,4 +21,34 @@ CREATE UNIQUE CLUSTERED INDEX [Ijddbcmst0]
 GO
 CREATE NONCLUSTERED INDEX [Ijddbcmst1]
     ON [dbo].[jddbcmst]([jddbc_budget_billing] ASC, [jddbc_alt_bill_code] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[jddbcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[jddbcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[jddbcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[jddbcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[jddbcmst] TO PUBLIC
+    AS [dbo];
 

@@ -95,6 +95,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igaixfmst0]
     ON [dbo].[gaixfmst]([gaixf_com_cd] ASC, [gaixf_tic_no] ASC, [gaixf_in_out_ind] ASC, [gaixf_loc_no] ASC, [gaixf_seq_no] ASC);
@@ -103,4 +105,34 @@ CREATE UNIQUE CLUSTERED INDEX [Igaixfmst0]
 GO
 CREATE NONCLUSTERED INDEX [Igaixfmst1]
     ON [dbo].[gaixfmst]([gaixf_com_cd] ASC, [gaixf_match_tic_no] ASC, [gaixf_match_loc_no] ASC, [gaixf_match_seq_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gaixfmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gaixfmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gaixfmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gaixfmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gaixfmst] TO PUBLIC
+    AS [dbo];
 

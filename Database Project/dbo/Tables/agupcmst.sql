@@ -12,6 +12,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iagupcmst0]
     ON [dbo].[agupcmst]([agupc_code_type] ASC, [agupc_item_no] ASC, [agupc_loc_no] ASC, [agupc_upc_cd] ASC);
@@ -35,4 +37,34 @@ CREATE NONCLUSTERED INDEX [Iagupcmst3]
 GO
 CREATE NONCLUSTERED INDEX [Iagupcmst4]
     ON [dbo].[agupcmst]([agupc_upc_cd] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[agupcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[agupcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[agupcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[agupcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[agupcmst] TO PUBLIC
+    AS [dbo];
 

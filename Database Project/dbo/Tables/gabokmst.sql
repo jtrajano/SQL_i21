@@ -17,6 +17,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igabokmst0]
     ON [dbo].[gabokmst]([gabok_pur_sls_ind] ASC, [gabok_ag_ga_ind] ASC, [gabok_com_cd] ASC, [gabok_itm_no] ASC, [gabok_cus_no] ASC, [gabok_seq_no] ASC);
@@ -25,4 +27,34 @@ CREATE UNIQUE CLUSTERED INDEX [Igabokmst0]
 GO
 CREATE NONCLUSTERED INDEX [Igabokmst1]
     ON [dbo].[gabokmst]([gabok_cus_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gabokmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gabokmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gabokmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gabokmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gabokmst] TO PUBLIC
+    AS [dbo];
 

@@ -743,6 +743,8 @@
     <Build Include="dbo\Tables\tblRMConfiguration.sql" />
     <Build Include="dbo\Tables\tblRMArchive.sql" />
     <Build Include="dbo\Stored Procedures\uspRMInsertDynamicParameterFields.sql" />
+    <Build Include="Security\RoleMemberships.sql" />
+    <Build Include="Security\irely.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="i21.publish.xml" />

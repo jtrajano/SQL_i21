@@ -19,7 +19,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igacchmst0]
     ON [dbo].[gacchmst]([gacch_pur_sls_ind] ASC, [gacch_cus_no] ASC, [gacch_com_cd] ASC, [gacch_loc_no] ASC, [gacch_cnt_no] ASC, [gacch_cnt_seq_no] ASC, [gacch_cnt_sub_no] ASC, [gacch_seq_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gacchmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gacchmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gacchmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gacchmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gacchmst] TO PUBLIC
+    AS [dbo];
 

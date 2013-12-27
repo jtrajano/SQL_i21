@@ -14,6 +14,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igaprcmst0]
     ON [dbo].[gaprcmst]([gaprc_com_cd] ASC, [gaprc_bot] ASC, [gaprc_loc_no] ASC);
@@ -22,4 +24,34 @@ CREATE UNIQUE CLUSTERED INDEX [Igaprcmst0]
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [Igaprcmst1]
     ON [dbo].[gaprcmst]([gaprc_loc_no] ASC, [gaprc_com_cd] ASC, [gaprc_bot] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gaprcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gaprcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gaprcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gaprcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gaprcmst] TO PUBLIC
+    AS [dbo];
 

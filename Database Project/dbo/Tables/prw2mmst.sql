@@ -30,7 +30,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iprw2mmst0]
     ON [dbo].[prw2mmst]([prw2m_empid] ASC, [prw2m_year] ASC, [prw2m_stid] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[prw2mmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[prw2mmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[prw2mmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[prw2mmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[prw2mmst] TO PUBLIC
+    AS [dbo];
 

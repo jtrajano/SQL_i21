@@ -242,6 +242,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Icfticmst0]
     ON [dbo].[cfticmst]([cftic_rev_dt] ASC, [cftic_time] ASC, [cftic_seq_no] ASC);
@@ -250,4 +252,34 @@ CREATE UNIQUE CLUSTERED INDEX [Icfticmst0]
 GO
 CREATE NONCLUSTERED INDEX [Icfticmst1]
     ON [dbo].[cfticmst]([cftic_tic_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[cfticmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[cfticmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[cfticmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[cfticmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[cfticmst] TO PUBLIC
+    AS [dbo];
 

@@ -23,6 +23,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iglijemst0]
     ON [dbo].[glijemst]([glije_period] ASC, [glije_acct_no] ASC, [glije_src_sys] ASC, [glije_src_no] ASC, [glije_line_no] ASC);
@@ -36,4 +38,34 @@ CREATE UNIQUE NONCLUSTERED INDEX [Iglijemst1]
 GO
 CREATE NONCLUSTERED INDEX [Iglijemst2]
     ON [dbo].[glijemst]([glije_acct_no] ASC, [glije_period] ASC, [glije_src_sys] ASC, [glije_src_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[glijemst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[glijemst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[glijemst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[glijemst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[glijemst] TO PUBLIC
+    AS [dbo];
 

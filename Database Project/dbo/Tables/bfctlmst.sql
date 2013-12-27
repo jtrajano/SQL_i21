@@ -35,7 +35,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ibfctlmst0]
     ON [dbo].[bfctlmst]([bfctl_key_n] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[bfctlmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[bfctlmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[bfctlmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[bfctlmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[bfctlmst] TO PUBLIC
+    AS [dbo];
 

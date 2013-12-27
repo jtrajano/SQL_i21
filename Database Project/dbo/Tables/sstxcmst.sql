@@ -61,7 +61,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Isstxcmst0]
     ON [dbo].[sstxcmst]([sstxc_tax_cls_id] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[sstxcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[sstxcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[sstxcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[sstxcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[sstxcmst] TO PUBLIC
+    AS [dbo];
 

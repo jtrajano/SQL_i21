@@ -15,7 +15,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igackomst0]
     ON [dbo].[gackomst]([gacko_com_cd] ASC, [gacko_type_cio] ASC, [gacko_state] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gackomst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gackomst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gackomst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gackomst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gackomst] TO PUBLIC
+    AS [dbo];
 

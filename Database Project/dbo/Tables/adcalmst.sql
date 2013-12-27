@@ -27,6 +27,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iadcalmst0]
     ON [dbo].[adcalmst]([adcal_loc_no] ASC, [adcal_cus_no] ASC, [adcal_itm_no] ASC, [adcal_tank_no] ASC);
@@ -40,4 +42,34 @@ CREATE NONCLUSTERED INDEX [Iadcalmst1]
 GO
 CREATE NONCLUSTERED INDEX [Iadcalmst2]
     ON [dbo].[adcalmst]([adcal_req_rev_dt] ASC, [adcal_rte_id] ASC, [adcal_seq] ASC, [adcal_priority] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[adcalmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[adcalmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[adcalmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[adcalmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[adcalmst] TO PUBLIC
+    AS [dbo];
 

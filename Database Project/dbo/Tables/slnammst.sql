@@ -8,6 +8,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Islnammst0]
     ON [dbo].[slnammst]([slnam_id] ASC);
@@ -16,4 +18,34 @@ CREATE UNIQUE CLUSTERED INDEX [Islnammst0]
 GO
 CREATE NONCLUSTERED INDEX [Islnammst1]
     ON [dbo].[slnammst]([slnam_name] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[slnammst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[slnammst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[slnammst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[slnammst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[slnammst] TO PUBLIC
+    AS [dbo];
 

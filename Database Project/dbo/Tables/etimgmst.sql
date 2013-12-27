@@ -13,6 +13,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ietimgmst0]
     ON [dbo].[etimgmst]([etimg_mess_no] ASC);
@@ -21,4 +23,34 @@ CREATE UNIQUE CLUSTERED INDEX [Ietimgmst0]
 GO
 CREATE NONCLUSTERED INDEX [Ietimgmst1]
     ON [dbo].[etimgmst]([etimg_date_calc] ASC, [etimg_time_calc] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[etimgmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[etimgmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[etimgmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[etimgmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[etimgmst] TO PUBLIC
+    AS [dbo];
 

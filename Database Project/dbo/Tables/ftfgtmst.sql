@@ -380,7 +380,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iftfgtmst0]
     ON [dbo].[ftfgtmst]([ftfgt_cus_no] ASC, [ftfgt_farm_no] ASC, [ftfgt_field_no] ASC, [ftfgt_ftitm_no] ASC, [ftfgt_loc_no] ASC, [ftfgt_guide_id] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[ftfgtmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[ftfgtmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[ftfgtmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[ftfgtmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[ftfgtmst] TO PUBLIC
+    AS [dbo];
 

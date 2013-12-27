@@ -13,7 +13,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Islhscmst0]
     ON [dbo].[slhscmst]([slhsc_lead_id] ASC, [slhsc_loc_id] ASC, [slhsc_rev_dt] ASC, [slhsc_hst_seq] ASC, [slhsc_seq] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[slhscmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[slhscmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[slhscmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[slhscmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[slhscmst] TO PUBLIC
+    AS [dbo];
 

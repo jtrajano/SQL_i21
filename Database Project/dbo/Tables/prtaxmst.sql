@@ -86,6 +86,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iprtaxmst0]
     ON [dbo].[prtaxmst]([prtax_year] ASC, [prtax_tax_type] ASC, [prtax_code] ASC);
@@ -94,4 +96,34 @@ CREATE UNIQUE CLUSTERED INDEX [Iprtaxmst0]
 GO
 CREATE NONCLUSTERED INDEX [Iprtaxmst1]
     ON [dbo].[prtaxmst]([prtax_tax_type] ASC, [prtax_code] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[prtaxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[prtaxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[prtaxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[prtaxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[prtaxmst] TO PUBLIC
+    AS [dbo];
 

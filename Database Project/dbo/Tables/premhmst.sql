@@ -12,7 +12,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ipremhmst0]
     ON [dbo].[premhmst]([premh_emp] ASC, [premh_period_date] ASC, [premh_time] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[premhmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[premhmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[premhmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[premhmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[premhmst] TO PUBLIC
+    AS [dbo];
 

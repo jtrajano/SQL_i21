@@ -18,7 +18,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iawclxmst0]
     ON [dbo].[awclxmst]([awclx_category] ASC, [awclx_sub_category] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[awclxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[awclxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[awclxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[awclxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[awclxmst] TO PUBLIC
+    AS [dbo];
 

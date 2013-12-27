@@ -10,7 +10,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iecmylmst0]
     ON [dbo].[ecmylmst]([ecmyl_username] ASC, [ecmyl_link_sequence] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[ecmylmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[ecmylmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[ecmylmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[ecmylmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[ecmylmst] TO PUBLIC
+    AS [dbo];
 

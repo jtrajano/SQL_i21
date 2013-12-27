@@ -110,7 +110,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ifxratmst0]
     ON [dbo].[fxratmst]([fxrat_rt_key] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[fxratmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[fxratmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[fxratmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[fxratmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[fxratmst] TO PUBLIC
+    AS [dbo];
 

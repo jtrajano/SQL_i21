@@ -22,7 +22,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igaeommst0]
     ON [dbo].[gaeommst]([gaeom_com_cd] ASC, [gaeom_currency] ASC, [gaeom_mkt_zone] ASC, [gaeom_loc_no] ASC, [gaeom_rev_dt] ASC, [gaeom_bot] ASC, [gaeom_bot_opt] ASC, [gaeom_rec_id] ASC, [gaeom_pur_sls_ind] ASC, [gaeom_rec_sub_id] ASC, [gaeom_trk_rail_ind] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gaeommst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gaeommst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gaeommst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gaeommst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gaeommst] TO PUBLIC
+    AS [dbo];
 

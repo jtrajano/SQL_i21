@@ -11,7 +11,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Icoedmmst0]
     ON [dbo].[coedmmst]([coedm_co] ASC, [coedm_message_type] ASC, [coedm_eform_type] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[coedmmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[coedmmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[coedmmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[coedmmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[coedmmst] TO PUBLIC
+    AS [dbo];
 

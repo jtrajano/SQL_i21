@@ -15,6 +15,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Icoesdmst0]
     ON [dbo].[coesdmst]([coesd_loc_no] ASC, [coesd_device_id] ASC);
@@ -23,4 +25,34 @@ CREATE UNIQUE CLUSTERED INDEX [Icoesdmst0]
 GO
 CREATE NONCLUSTERED INDEX [Icoesdmst1]
     ON [dbo].[coesdmst]([coesd_loc_no] ASC, [coesd_host_name] ASC, [coesd_active_yn] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[coesdmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[coesdmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[coesdmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[coesdmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[coesdmst] TO PUBLIC
+    AS [dbo];
 

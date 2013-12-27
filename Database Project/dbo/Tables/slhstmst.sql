@@ -29,7 +29,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Islhstmst0]
     ON [dbo].[slhstmst]([slhst_slnam_key] ASC, [slhst_slloc_key] ASC, [slhst_rev_dt] ASC, [slhst_tie_breaker] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[slhstmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[slhstmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[slhstmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[slhstmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[slhstmst] TO PUBLIC
+    AS [dbo];
 

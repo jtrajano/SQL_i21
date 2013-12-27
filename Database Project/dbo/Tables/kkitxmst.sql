@@ -10,6 +10,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ikkitxmst0]
     ON [dbo].[kkitxmst]([kkitx_dep_no] ASC);
@@ -18,4 +20,34 @@ CREATE UNIQUE CLUSTERED INDEX [Ikkitxmst0]
 GO
 CREATE NONCLUSTERED INDEX [Ikkitxmst1]
     ON [dbo].[kkitxmst]([kkitx_itm_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[kkitxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[kkitxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[kkitxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[kkitxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[kkitxmst] TO PUBLIC
+    AS [dbo];
 

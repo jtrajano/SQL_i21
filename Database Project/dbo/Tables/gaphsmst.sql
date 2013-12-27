@@ -99,6 +99,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igaphsmst0]
     ON [dbo].[gaphsmst]([gaphs_pur_sls_ind] ASC, [gaphs_cus_no] ASC, [gaphs_com_cd] ASC, [gaphs_spl_no] ASC, [gaphs_dlvry_rev_dt] ASC, [gaphs_loc_no] ASC, [gaphs_tic_no] ASC, [gaphs_tie_breaker] ASC);
@@ -117,4 +119,34 @@ CREATE NONCLUSTERED INDEX [Igaphsmst2]
 GO
 CREATE NONCLUSTERED INDEX [Igaphsmst3]
     ON [dbo].[gaphsmst]([gaphs_cus_ref_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gaphsmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gaphsmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gaphsmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gaphsmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gaphsmst] TO PUBLIC
+    AS [dbo];
 

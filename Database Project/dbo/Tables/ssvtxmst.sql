@@ -25,7 +25,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Issvtxmst0]
     ON [dbo].[ssvtxmst]([ssvtx_vnd_no] ASC, [ssvtx_itm_no] ASC, [ssvtx_cls_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[ssvtxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[ssvtxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[ssvtxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[ssvtxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[ssvtxmst] TO PUBLIC
+    AS [dbo];
 

@@ -16,6 +16,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iaglotmst0]
     ON [dbo].[aglotmst]([aglot_itm_no] ASC, [aglot_loc_no] ASC, [aglot_lot_no] ASC);
@@ -24,4 +26,34 @@ CREATE UNIQUE CLUSTERED INDEX [Iaglotmst0]
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [Iaglotmst1]
     ON [dbo].[aglotmst]([aglot_itm_no] ASC, [aglot_loc_no] ASC, [aglot_create_date] ASC, [aglot_lot_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[aglotmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[aglotmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[aglotmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[aglotmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[aglotmst] TO PUBLIC
+    AS [dbo];
 

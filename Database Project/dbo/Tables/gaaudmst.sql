@@ -1025,7 +1025,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igaaudmst0]
     ON [dbo].[gaaudmst]([gaaud_pur_sls_ind] ASC, [gaaud_trans_type] ASC, [gaaud_key_filler1] ASC, [gaaud_in_type] ASC, [gaaud_key_filler2] ASC, [gaaud_tie_breaker] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gaaudmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gaaudmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gaaudmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gaaudmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gaaudmst] TO PUBLIC
+    AS [dbo];
 

@@ -87,7 +87,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igaxfrmst0]
     ON [dbo].[gaxfrmst]([gaxfr_pur_sls_ind] ASC, [gaxfr_loc_no] ASC, [gaxfr_com_cd] ASC, [gaxfr_tic_no] ASC, [gaxfr_to_loc_no] ASC, [gaxfr_tie_breaker] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gaxfrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gaxfrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gaxfrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gaxfrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gaxfrmst] TO PUBLIC
+    AS [dbo];
 

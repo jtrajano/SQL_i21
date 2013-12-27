@@ -17,7 +17,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iapcrvmst0]
     ON [dbo].[apcrvmst]([apcrv_vnd_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[apcrvmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[apcrvmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[apcrvmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[apcrvmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[apcrvmst] TO PUBLIC
+    AS [dbo];
 

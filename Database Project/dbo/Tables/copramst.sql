@@ -17,6 +17,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Icopramst0]
     ON [dbo].[copramst]([copra_rpt_type] ASC, [copra_user_id] ASC, [copra_cnv_date] ASC, [copra_cnv_time] ASC, [copra_seq_no] ASC);
@@ -35,4 +37,34 @@ CREATE NONCLUSTERED INDEX [Icopramst2]
 GO
 CREATE NONCLUSTERED INDEX [Icopramst3]
     ON [dbo].[copramst]([copra_rpt_type] ASC, [copra_rpt_date] ASC, [copra_cnv_time] ASC, [copra_seq_no] ASC, [copra_user_id] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[copramst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[copramst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[copramst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[copramst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[copramst] TO PUBLIC
+    AS [dbo];
 

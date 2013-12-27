@@ -9,6 +9,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ipxcitmst0]
     ON [dbo].[pxcitmst]([pxcit_city_id] ASC);
@@ -17,4 +19,34 @@ CREATE UNIQUE CLUSTERED INDEX [Ipxcitmst0]
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [Ipxcitmst1]
     ON [dbo].[pxcitmst]([pxcit_city_name] ASC, [pxcit_state] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[pxcitmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[pxcitmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[pxcitmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[pxcitmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[pxcitmst] TO PUBLIC
+    AS [dbo];
 

@@ -24,6 +24,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ieclogmst0]
     ON [dbo].[eclogmst]([eclog_username] ASC, [eclog_cust_no] ASC, [eclog_trx_type] ASC, [eclog_date_posted] ASC, [eclog_time_posted] ASC, [eclog_line_no] ASC);
@@ -32,4 +34,34 @@ CREATE UNIQUE CLUSTERED INDEX [Ieclogmst0]
 GO
 CREATE NONCLUSTERED INDEX [Ieclogmst1]
     ON [dbo].[eclogmst]([eclog_cust_no] ASC, [eclog_trx_type] ASC, [eclog_date_posted] ASC, [eclog_time_posted] ASC, [eclog_line_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[eclogmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[eclogmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[eclogmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[eclogmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[eclogmst] TO PUBLIC
+    AS [dbo];
 

@@ -75,6 +75,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ipaeoymst0]
     ON [dbo].[paeoymst]([paeoy_cus_no] ASC, [paeoy_rfd_type] ASC);
@@ -83,4 +85,34 @@ CREATE UNIQUE CLUSTERED INDEX [Ipaeoymst0]
 GO
 CREATE NONCLUSTERED INDEX [Ipaeoymst1]
     ON [dbo].[paeoymst]([paeoy_rfd_type] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[paeoymst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[paeoymst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[paeoymst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[paeoymst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[paeoymst] TO PUBLIC
+    AS [dbo];
 

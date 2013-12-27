@@ -19,6 +19,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ipastxmst0]
     ON [dbo].[pastxmst]([pastx_cus_no] ASC, [pastx_cert_no] ASC);
@@ -27,4 +29,34 @@ CREATE UNIQUE CLUSTERED INDEX [Ipastxmst0]
 GO
 CREATE NONCLUSTERED INDEX [Ipastxmst1]
     ON [dbo].[pastxmst]([pastx_cert_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[pastxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[pastxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[pastxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[pastxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[pastxmst] TO PUBLIC
+    AS [dbo];
 

@@ -291,6 +291,16 @@ SET		ysnPosted = 1
 		--,intConcurrencyID += 1 
 WHERE	intPaymentId = @strTransactionID
 
+--Update dblAmountDue on tblAPBill
+UPDATE tblAPBills
+	SET tblAPBills.dblAmountDue = (SELECT SUM(B.dblPayment) 
+								FROM tblAPPayments A
+										INNER JOIN tblAPPaymentDetails B 
+												ON A.intPaymentId = B.intPaymentId
+										INNER JOIN tblAPBills C
+												ON B.intBillId = C.intBillId
+						GROUP BY A.intPaymentId)
+
 --=====================================================================================================================================
 -- 	Check if process is only a RECAP
 ---------------------------------------------------------------------------------------------------------------------------------------

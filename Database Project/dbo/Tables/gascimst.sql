@@ -58,7 +58,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igascimst0]
     ON [dbo].[gascimst]([gasci_loc_no] ASC, [gasci_scale_id] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gascimst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gascimst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gascimst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gascimst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gascimst] TO PUBLIC
+    AS [dbo];
 

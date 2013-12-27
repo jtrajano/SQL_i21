@@ -27,6 +27,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iglsjemst0]
     ON [dbo].[glsjemst]([glsje_batch] ASC, [glsje_src_sys] ASC, [glsje_src_no] ASC, [glsje_line_no] ASC);
@@ -35,4 +37,34 @@ CREATE UNIQUE CLUSTERED INDEX [Iglsjemst0]
 GO
 CREATE NONCLUSTERED INDEX [Iglsjemst1]
     ON [dbo].[glsjemst]([glsje_src_sys] ASC, [glsje_src_no] ASC, [glsje_line_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[glsjemst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[glsjemst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[glsjemst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[glsjemst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[glsjemst] TO PUBLIC
+    AS [dbo];
 

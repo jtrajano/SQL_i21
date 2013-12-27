@@ -11,6 +11,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igafutmst0]
     ON [dbo].[gafutmst]([gafut_com_cd] ASC, [gafut_bot_opt] ASC, [gafut_bot_yy] ASC);
@@ -19,4 +21,34 @@ CREATE UNIQUE CLUSTERED INDEX [Igafutmst0]
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [Igafutmst1]
     ON [dbo].[gafutmst]([gafut_com_cd] ASC, [gafut_bot_yy] ASC, [gafut_bot_opt] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gafutmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gafutmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gafutmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gafutmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gafutmst] TO PUBLIC
+    AS [dbo];
 

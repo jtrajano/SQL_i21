@@ -10,6 +10,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iethzxmst0]
     ON [dbo].[ethzxmst]([ethzx_epa] ASC, [ethzx_itm] ASC);
@@ -23,4 +25,34 @@ CREATE NONCLUSTERED INDEX [Iethzxmst1]
 GO
 CREATE NONCLUSTERED INDEX [Iethzxmst2]
     ON [dbo].[ethzxmst]([ethzx_date_calc] ASC, [ethzx_time_calc] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[ethzxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[ethzxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[ethzxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[ethzxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[ethzxmst] TO PUBLIC
+    AS [dbo];
 

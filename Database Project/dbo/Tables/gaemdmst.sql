@@ -31,7 +31,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igaemdmst0]
     ON [dbo].[gaemdmst]([gaemd_com_cd] ASC, [gaemd_currency] ASC, [gaemd_mkt_zone] ASC, [gaemd_loc_no] ASC, [gaemd_rev_dt] ASC, [gaemd_bot] ASC, [gaemd_bot_opt] ASC, [gaemd_rec_id] ASC, [gaemd_pur_sls_ind] ASC, [gaemd_rec_sub_id] ASC, [gaemd_trk_rail_ind] ASC, [gaemd_detail_key] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gaemdmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gaemdmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gaemdmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gaemdmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gaemdmst] TO PUBLIC
+    AS [dbo];
 

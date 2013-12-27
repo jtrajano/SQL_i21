@@ -34,6 +34,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iaptrxmst0]
     ON [dbo].[aptrxmst]([aptrx_vnd_no] ASC, [aptrx_ivc_no] ASC);
@@ -47,4 +49,34 @@ CREATE NONCLUSTERED INDEX [Iaptrxmst1]
 GO
 CREATE NONCLUSTERED INDEX [Iaptrxmst2]
     ON [dbo].[aptrxmst]([aptrx_cbk_no] ASC, [aptrx_chk_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[aptrxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[aptrxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[aptrxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[aptrxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[aptrxmst] TO PUBLIC
+    AS [dbo];
 

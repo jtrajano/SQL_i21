@@ -26,7 +26,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Irnrinmst0]
     ON [dbo].[rnrinmst]([rnrin_yrprod] ASC, [rnrin_co_epa_id] ASC, [rnrin_fac_id] ASC, [rnrin_char_cd] ASC, [rnrin_feed_stock] ASC, [rnrin_batch_no] ASC, [rnrin_beg_gal] ASC, [rnrin_end_gal] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[rnrinmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[rnrinmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[rnrinmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[rnrinmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[rnrinmst] TO PUBLIC
+    AS [dbo];
 

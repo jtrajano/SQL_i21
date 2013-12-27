@@ -16,6 +16,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Icopwdmst0]
     ON [dbo].[copwdmst]([copwd_user_id] ASC, [copwd_system] ASC, [copwd_pgm_id] ASC);
@@ -24,4 +26,34 @@ CREATE UNIQUE CLUSTERED INDEX [Icopwdmst0]
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [Icopwdmst1]
     ON [dbo].[copwdmst]([copwd_pgm_id] ASC, [copwd_user_id] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[copwdmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[copwdmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[copwdmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[copwdmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[copwdmst] TO PUBLIC
+    AS [dbo];
 

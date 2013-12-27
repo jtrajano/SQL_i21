@@ -81,7 +81,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iagtaxmst0]
     ON [dbo].[agtaxmst]([agtax_itm_no] ASC, [agtax_state] ASC, [agtax_auth_id1] ASC, [agtax_auth_id2] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[agtaxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[agtaxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[agtaxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[agtaxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[agtaxmst] TO PUBLIC
+    AS [dbo];
 

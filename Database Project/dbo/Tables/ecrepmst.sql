@@ -9,7 +9,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iecrepmst0]
     ON [dbo].[ecrepmst]([ecrep_username] ASC, [ecrep_system] ASC, [ecrep_page_id] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[ecrepmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[ecrepmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[ecrepmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[ecrepmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[ecrepmst] TO PUBLIC
+    AS [dbo];
 

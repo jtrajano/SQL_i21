@@ -110,6 +110,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Igaitrmst0]
     ON [dbo].[gaitrmst]([gaitr_pur_sls_ind] ASC, [gaitr_loc_no] ASC, [gaitr_cus_no] ASC, [gaitr_com_cd] ASC, [gaitr_tic_no] ASC, [gaitr_ship_rev_dt] ASC, [gaitr_rail_ref_no] ASC, [gaitr_load_seq] ASC);
@@ -118,4 +120,34 @@ CREATE UNIQUE CLUSTERED INDEX [Igaitrmst0]
 GO
 CREATE NONCLUSTERED INDEX [Igaitrmst1]
     ON [dbo].[gaitrmst]([gaitr_process_tic_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[gaitrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[gaitrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[gaitrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[gaitrmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[gaitrmst] TO PUBLIC
+    AS [dbo];
 

@@ -12,6 +12,8 @@
 );
 
 
+
+
 GO
 CREATE CLUSTERED INDEX [Ijdaudmst0]
     ON [dbo].[jdaudmst]([jdaud_file] ASC);
@@ -35,4 +37,34 @@ CREATE NONCLUSTERED INDEX [Ijdaudmst3]
 GO
 CREATE NONCLUSTERED INDEX [Ijdaudmst4]
     ON [dbo].[jdaudmst]([jdaud_timestamp] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[jdaudmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[jdaudmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[jdaudmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[jdaudmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[jdaudmst] TO PUBLIC
+    AS [dbo];
 

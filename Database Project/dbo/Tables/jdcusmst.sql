@@ -17,6 +17,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ijdcusmst0]
     ON [dbo].[jdcusmst]([jdcus_patron_no] ASC, [jdcus_product_line] ASC);
@@ -30,4 +32,34 @@ CREATE NONCLUSTERED INDEX [Ijdcusmst1]
 GO
 CREATE NONCLUSTERED INDEX [Ijdcusmst2]
     ON [dbo].[jdcusmst]([jdcus_cus_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[jdcusmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[jdcusmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[jdcusmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[jdcusmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[jdcusmst] TO PUBLIC
+    AS [dbo];
 

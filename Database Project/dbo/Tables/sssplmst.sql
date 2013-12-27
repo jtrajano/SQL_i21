@@ -48,7 +48,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Isssplmst0]
     ON [dbo].[sssplmst]([ssspl_bill_to_cus] ASC, [ssspl_split_no] ASC, [ssspl_rec_type] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[sssplmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[sssplmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[sssplmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[sssplmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[sssplmst] TO PUBLIC
+    AS [dbo];
 

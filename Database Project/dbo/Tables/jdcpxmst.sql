@@ -11,6 +11,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ijdcpxmst0]
     ON [dbo].[jdcpxmst]([jdcpx_product_line] ASC, [jdcpx_crd_plan_no] ASC, [jdcpx_seq_no] ASC);
@@ -19,4 +21,34 @@ CREATE UNIQUE CLUSTERED INDEX [Ijdcpxmst0]
 GO
 CREATE NONCLUSTERED INDEX [Ijdcpxmst1]
     ON [dbo].[jdcpxmst]([jdcpx_bill_code] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[jdcpxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[jdcpxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[jdcpxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[jdcpxmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[jdcpxmst] TO PUBLIC
+    AS [dbo];
 

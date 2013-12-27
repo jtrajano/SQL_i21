@@ -15,7 +15,39 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iagdpcmst0]
     ON [dbo].[agdpcmst]([agdpc_loc_no] ASC, [agdpc_pay_type] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[agdpcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[agdpcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[agdpcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[agdpcmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[agdpcmst] TO PUBLIC
+    AS [dbo];
 

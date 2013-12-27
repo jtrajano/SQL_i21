@@ -105,6 +105,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ifthstmst0]
     ON [dbo].[fthstmst]([fthst_cus_no] ASC, [fthst_farm_no] ASC, [fthst_field_no] ASC, [fthst_work_ord_no] ASC, [fthst_loc_no] ASC, [fthst_line_no] ASC);
@@ -113,4 +115,34 @@ CREATE UNIQUE CLUSTERED INDEX [Ifthstmst0]
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [Ifthstmst1]
     ON [dbo].[fthstmst]([fthst_loc_no] ASC, [fthst_work_ord_no] ASC, [fthst_line_no] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[fthstmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[fthstmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[fthstmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[fthstmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[fthstmst] TO PUBLIC
+    AS [dbo];
 

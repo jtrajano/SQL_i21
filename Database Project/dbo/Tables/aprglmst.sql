@@ -13,6 +13,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iaprglmst0]
     ON [dbo].[aprglmst]([aprgl_cbk_no] ASC, [aprgl_trx_ind] ASC, [aprgl_vnd_no] ASC, [aprgl_ivc_no] ASC, [aprgl_dist_no] ASC);
@@ -21,4 +23,34 @@ CREATE UNIQUE CLUSTERED INDEX [Iaprglmst0]
 GO
 CREATE NONCLUSTERED INDEX [Iaprglmst1]
     ON [dbo].[aprglmst]([aprgl_alt_cbk_no] ASC, [aprgl_gl_acct] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[aprglmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[aprglmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[aprglmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[aprglmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[aprglmst] TO PUBLIC
+    AS [dbo];
 

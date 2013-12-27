@@ -43,6 +43,8 @@
 );
 
 
+
+
 GO
 CREATE UNIQUE CLUSTERED INDEX [Ietbilmst0]
     ON [dbo].[etbilmst]([etbil_loc] ASC, [etbil_tic_dt] ASC, [etbil_cust] ASC, [etbil_ticket] ASC, [etbil_rec_type] ASC, [etbil_seq] ASC);
@@ -66,4 +68,34 @@ CREATE NONCLUSTERED INDEX [Ietbilmst3]
 GO
 CREATE NONCLUSTERED INDEX [Ietbilmst4]
     ON [dbo].[etbilmst]([etbil_rec_type] ASC);
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[etbilmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[etbilmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[etbilmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[etbilmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[etbilmst] TO PUBLIC
+    AS [dbo];
 
