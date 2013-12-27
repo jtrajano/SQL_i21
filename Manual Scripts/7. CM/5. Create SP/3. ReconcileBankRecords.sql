@@ -87,4 +87,9 @@ WHERE	intBankAccountID = @intBankAccountID
 		AND ysnClr = 1
 		AND dtmDateReconciled IS NULL 
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate, dtmDate) AS FLOAT)) AS DATETIME)
+		
+-- TODO: 
+-- MARK AS CLEARED THE ORIGIN BANK TRANSACTIONS
+
+
 GO

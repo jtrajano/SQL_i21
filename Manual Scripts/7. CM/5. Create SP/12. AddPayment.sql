@@ -46,19 +46,7 @@ EXEC dbo.AddPayment @intBankAccountID = 2, @dtmDate = '2013-11-16T00:00:00', @in
 
 '====================================================================================================================================='
 SCRIPT CREATED BY: Feb Montefrio		DATE CREATED: December 06, 2013
---------------------------------------------------------------------------------------------------------------------------------------						
-Last Modified By    :	1. 
-						:
-						n.
-
-Last Modified Date  :	1. 
-						:
-						n.
-
-Synopsis            :	1. 
-						:
-						n.
-*/
+-------------------------------------------------------------------------------------------------------------------------------------*/
 
 --=====================================================================================================================================
 -- 	DELETE THE STORED PROCEDURE IF IT EXISTS
@@ -88,20 +76,22 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRANSACTION 
 
-DECLARE @BANK_DEPOSIT INT = 1,
-		@BANK_WITHDRAWAL INT = 2,
-		@MISC_CHECKS INT = 3,
-		@BANK_TRANSFER INT = 4,
-		@BANK_TRANSACTION INT = 5,
-		@CREDIT_CARD_CHARGE INT = 6,
-		@CREDIT_CARD_RETURNS INT = 7,
-		@CREDIT_CARD_PAYMENTS INT = 8,
-		@BANK_TRANSFER_WD INT = 9,
-		@BANK_TRANSFER_DEP INT = 10,
-		
-		@strTransactionID NVARCHAR(40),
-		@msg_id INT
-
+DECLARE @BANK_DEPOSIT INT = 1
+		,@BANK_WITHDRAWAL INT = 2
+		,@MISC_CHECKS INT = 3
+		,@BANK_TRANSFER INT = 4
+		,@BANK_TRANSACTION INT = 5
+		,@CREDIT_CARD_CHARGE INT = 6
+		,@CREDIT_CARD_RETURNS INT = 7
+		,@CREDIT_CARD_PAYMENTS INT = 8
+		,@BANK_TRANSFER_WD INT = 9
+		,@BANK_TRANSFER_DEP INT = 10
+		,@ORIGIN_DEPOSIT AS INT = 11
+		,@ORIGIN_CHECKS AS INT = 12
+		,@ORIGIN_EFT AS INT = 13
+		-- Local variables:
+		,@strTransactionID NVARCHAR(40)
+		,@msg_id INT
 
 -- Initialize the transaction id. 
 SELECT	@strTransactionID = strTransactionPrefix + '-' + CAST(intTransactionNo AS NVARCHAR(20))

@@ -44,19 +44,7 @@ EXEC dbo.GetBankBalance @intBankAccountID = null, @dtmDate = null
 
 '====================================================================================================================================='
 SCRIPT CREATED BY: Feb Montefrio		DATE CREATED: November 28, 2013
---------------------------------------------------------------------------------------------------------------------------------------						
-Last Modified By    :	1. 
-						:
-						n.
-
-Last Modified Date  :	1. 
-						:
-						n.
-
-Synopsis            :	1. 
-						:
-						n.
-*/
+-------------------------------------------------------------------------------------------------------------------------------------*/
 
 --=====================================================================================================================================
 -- 	DELETE THE STORED PROCEDURE IF IT EXISTS
@@ -79,17 +67,20 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @BANK_DEPOSIT INT = 1,
-		@BANK_WITHDRAWAL INT = 2,
-		@MISC_CHECKS INT = 3,
-		@BANK_TRANSFER INT = 4,
-		@BANK_TRANSACTION INT = 5,
-		@CREDIT_CARD_CHARGE INT = 6,
-		@CREDIT_CARD_RETURNS INT = 7,
-		@CREDIT_CARD_PAYMENTS INT = 8,
-		@BANK_TRANSFER_WD INT = 9,
-		@BANK_TRANSFER_DEP INT = 10
-	
+DECLARE @BANK_DEPOSIT INT = 1
+		,@BANK_WITHDRAWAL INT = 2
+		,@MISC_CHECKS INT = 3
+		,@BANK_TRANSFER INT = 4
+		,@BANK_TRANSACTION INT = 5
+		,@CREDIT_CARD_CHARGE INT = 6
+		,@CREDIT_CARD_RETURNS INT = 7
+		,@CREDIT_CARD_PAYMENTS INT = 8
+		,@BANK_TRANSFER_WD INT = 9
+		,@BANK_TRANSFER_DEP INT = 10
+		,@ORIGIN_DEPOSIT AS INT = 11
+		,@ORIGIN_CHECKS AS INT = 12
+		,@ORIGIN_EFT AS INT = 13
+		
 DECLARE @returnBalance AS NUMERIC(18,6)		
 
 -- Get bank amounts from Misc Check and Bank Transfer (WD)
@@ -99,7 +90,7 @@ WHERE	ysnPosted = 1
 		AND dblAmount <> 0 
 		AND intBankAccountID = @intBankAccountID
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDate) AS FLOAT)) AS DATETIME)		
-		AND intBankTransactionTypeID IN (@MISC_CHECKS, @BANK_TRANSFER_WD)
+		AND intBankTransactionTypeID IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT)
 
 -- Get bank amounts from Bank Transactions 		
 SELECT	@returnBalance = ISNULL(@returnBalance, 0) + ISNULL(SUM(ISNULL(B.dblCredit, 0)), 0) - ISNULL(SUM(ISNULL(B.dblDebit, 0)), 0)
@@ -118,7 +109,7 @@ WHERE	ysnPosted = 1
 		AND dblAmount <> 0 
 		AND intBankAccountID = @intBankAccountID
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDate) AS FLOAT)) AS DATETIME)		
-		AND intBankTransactionTypeID NOT IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @BANK_TRANSACTION, @BANK_WITHDRAWAL)		
+		AND intBankTransactionTypeID NOT IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @BANK_TRANSACTION, @BANK_WITHDRAWAL, @ORIGIN_CHECKS, @ORIGIN_EFT)		
 
 SELECT	intBankAccountID = @intBankAccountID,
 		dblBalance = ISNULL(@returnBalance, 0)
