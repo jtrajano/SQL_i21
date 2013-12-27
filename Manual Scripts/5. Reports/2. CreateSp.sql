@@ -1,7 +1,7 @@
 GO
 /****** Object:  StoredProcedure [dbo].[usp_RMInsertDynamicParameterFields]    ******/
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[usp_RMInsertDynamicParameterFields]') AND type in (N'P', N'PC'))
-DROP PROCEDURE [dbo].usp_RMInsertDynamicParameterFields
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspRMInsertDynamicParameterFields]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].uspRMInsertDynamicParameterFields
 GO
 
 SET ANSI_NULLS ON
@@ -12,7 +12,7 @@ GO
 -- Create date: <Create Date,,11/12/2013>
 -- Description:	<Description,,This SP insert dynamic fields for report field list and field selection manager base on GL account structure>
 
-CREATE PROCEDURE usp_RMInsertDynamicParameterFields
+CREATE PROCEDURE uspRMInsertDynamicParameterFields
 	
 AS
 BEGIN
