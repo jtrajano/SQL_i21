@@ -78,6 +78,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@ORIGIN_DEPOSIT AS INT = 11
 		,@ORIGIN_CHECKS AS INT = 12
 		,@ORIGIN_EFT AS INT = 13
+		,@ORIGIN_WITHDRAWAL AS INT = 14
 		
 SELECT	ISNULL(SUM(ABS(ISNULL(dblAmount, 0))), 0)
 FROM	tblCMBankTransaction 
@@ -89,7 +90,7 @@ WHERE	ysnPosted = 1
 		AND dtmDateReconciled IS NULL
 		AND (
 			-- Filter for all the bank payments and debits:
-			intBankTransactionTypeID IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT)
+			intBankTransactionTypeID IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL)
 			OR ( dblAmount < 0 AND intBankTransactionTypeID = @BANK_TRANSACTION )
 		)
 GO

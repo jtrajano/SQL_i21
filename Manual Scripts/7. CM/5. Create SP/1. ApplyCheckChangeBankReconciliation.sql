@@ -86,6 +86,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@ORIGIN_DEPOSIT AS INT = 11
 		,@ORIGIN_CHECKS AS INT = 12
 		,@ORIGIN_EFT AS INT = 13
+		,@ORIGIN_WITHDRAWAL AS INT = 14
 
 -- Bulk update the ysnClr
 UPDATE	tblCMBankTransaction 
@@ -98,7 +99,7 @@ WHERE	ysnPosted = 1
 		AND 1 = 
 			CASE	WHEN	@strSide = 'DEBIT' 
 							AND (
-								intBankTransactionTypeID IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT)
+								intBankTransactionTypeID IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL)
 								OR ( dblAmount < 0 AND intBankTransactionTypeID = @BANK_TRANSACTION )
 							) THEN 1 					
 					WHEN	@strSide = 'CREDIT' 
@@ -112,6 +113,3 @@ WHERE	ysnPosted = 1
 			END	
 
 GO
-
-
--- SELECT * FROM tblCMBankTransactionType

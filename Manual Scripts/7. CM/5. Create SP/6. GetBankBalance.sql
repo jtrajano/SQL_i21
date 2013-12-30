@@ -80,6 +80,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@ORIGIN_DEPOSIT AS INT = 11
 		,@ORIGIN_CHECKS AS INT = 12
 		,@ORIGIN_EFT AS INT = 13
+		,@ORIGIN_WITHDRAWAL AS INT = 14
 		
 DECLARE @returnBalance AS NUMERIC(18,6)		
 
@@ -90,7 +91,7 @@ WHERE	ysnPosted = 1
 		AND dblAmount <> 0 
 		AND intBankAccountID = @intBankAccountID
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDate) AS FLOAT)) AS DATETIME)		
-		AND intBankTransactionTypeID IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT)
+		AND intBankTransactionTypeID IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL)
 
 -- Get bank amounts from Bank Transactions 		
 SELECT	@returnBalance = ISNULL(@returnBalance, 0) + ISNULL(SUM(ISNULL(B.dblCredit, 0)), 0) - ISNULL(SUM(ISNULL(B.dblDebit, 0)), 0)
@@ -109,7 +110,7 @@ WHERE	ysnPosted = 1
 		AND dblAmount <> 0 
 		AND intBankAccountID = @intBankAccountID
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDate) AS FLOAT)) AS DATETIME)		
-		AND intBankTransactionTypeID NOT IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @BANK_TRANSACTION, @BANK_WITHDRAWAL, @ORIGIN_CHECKS, @ORIGIN_EFT)		
+		AND intBankTransactionTypeID NOT IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @BANK_TRANSACTION, @BANK_WITHDRAWAL, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL)		
 
 SELECT	intBankAccountID = @intBankAccountID,
 		dblBalance = ISNULL(@returnBalance, 0)
