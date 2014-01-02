@@ -90,6 +90,8 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@ORIGIN_CHECKS AS INT = 12
 		,@ORIGIN_EFT AS INT = 13
 		,@ORIGIN_WITHDRAWAL AS INT = 14		
+		,@ORIGIN_WIRE AS INT = 15
+		
 		-- Local variables:
 		,@strTransactionID NVARCHAR(40)
 		,@msg_id INT

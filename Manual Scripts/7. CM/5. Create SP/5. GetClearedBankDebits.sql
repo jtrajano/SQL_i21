@@ -93,6 +93,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@ORIGIN_CHECKS AS INT = 12
 		,@ORIGIN_EFT AS INT = 13
 		,@ORIGIN_WITHDRAWAL AS INT = 14
+		,@ORIGIN_WIRE AS INT = 15
 		
 SELECT	totalCount = ISNULL(COUNT(1), 0)
 		,totalAmount = ISNULL(SUM(ABS(ISNULL(dblAmount, 0))), 0)
@@ -107,11 +108,11 @@ WHERE	ysnPosted = 1
 			-- 1. Include only bank transaction if not permanently reconciled. 
 			-- 2. Or if the bank transaction is reconciled on the provided statement date. 
 			dtmDateReconciled IS NULL 
-			OR CAST(FLOOR(CAST(dtmDateReconciled AS FLOAT)) AS DATETIME) = CAST(FLOOR(CAST(ISNULL(@dtmStatementDate, dtmDate) AS FLOAT)) AS DATETIME)
+			OR CAST(FLOOR(CAST(dtmDateReconciled AS FLOAT)) AS DATETIME) = CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME)
 		)
 		AND (
 			-- Filter for all the bank payments and debits:
-			intBankTransactionTypeID IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL)
+			intBankTransactionTypeID IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
 			OR ( dblAmount < 0 AND intBankTransactionTypeID = @BANK_TRANSACTION )
 		)
 GO
