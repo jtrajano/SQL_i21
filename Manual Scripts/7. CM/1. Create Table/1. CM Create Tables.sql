@@ -239,7 +239,7 @@ CREATE TABLE [dbo].[tblCMBankTransaction] (
     [dblAmount] decimal(18,6)  NOT NULL,
     [strAmountInWords] nvarchar(250) COLLATE Latin1_General_CI_AS NOT NULL,
     [strMemo] nvarchar(250) COLLATE Latin1_General_CI_AS NOT NULL,
-    [intReferenceNo] int  NULL,
+    [strReferenceNo] NVARCHAR(20) NULL,
     [ysnCheckPrinted] bit  NOT NULL,
     [ysnCheckToBePrinted] bit  NOT NULL,
     [ysnCheckVoid] bit  NOT NULL,

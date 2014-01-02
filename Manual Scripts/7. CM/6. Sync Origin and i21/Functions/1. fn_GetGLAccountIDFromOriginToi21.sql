@@ -3,24 +3,7 @@
    SCRIPT CREATED BY: Feb Montefrio	DATE CREATED: December 17, 2013
   -------------------------------------------------------------------------------------------------------------------------------------						
    Script Name         :  fn_GetGLAccountIDFromOriginToi21
-   Description		   :  From a Origin G/L account id, return the PK key equivalent of it in i21 COA table (tblGLAccount). 
-   Last Modified By    : 1. 
-                         2.
-                         :
-                         :
-                         n.
-
-   Last Modified Date  : 1. 
-                         2. 
-                         :
-                         :
-                         n.
-
-   Synopsis            : 1. 
-                         2. 
-                         :
-                         :
-                         n.
+   Description		   :  From an Origin G/L account id, return the PK key equivalent of it in i21 COA table (tblGLAccount).
 */
 
 IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_id(N'[dbo].fn_GetGLAccountIDFromOriginToi21') AND objectproperty(id, N'ISScalarFUNCTION') = 1)
