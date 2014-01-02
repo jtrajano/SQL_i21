@@ -32,6 +32,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- Financials
 :r .\FIN\DefaultData\AccountGroup.sql
+:r .\FIN\DefaultData\BankTransactionTypes.sql
 
 
 print 'END POST DEPLOYMENT'

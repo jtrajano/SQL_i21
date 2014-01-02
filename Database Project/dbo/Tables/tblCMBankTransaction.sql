@@ -16,7 +16,7 @@
     [dblAmount]                DECIMAL (18, 6)  NOT NULL,
     [strAmountInWords]         NVARCHAR (250)   COLLATE Latin1_General_CI_AS NOT NULL,
     [strMemo]                  NVARCHAR (250)   COLLATE Latin1_General_CI_AS NOT NULL,
-    [intReferenceNo]           INT              NULL,
+	[strReferenceNo]           NVARCHAR (20)    COLLATE Latin1_General_CI_AS NOT NULL,
     [ysnCheckPrinted]          BIT              NOT NULL,
     [ysnCheckToBePrinted]      BIT              NOT NULL,
     [ysnCheckVoid]             BIT              NOT NULL,
