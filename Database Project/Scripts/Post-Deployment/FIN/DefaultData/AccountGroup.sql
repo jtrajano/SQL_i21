@@ -31,6 +31,10 @@ GO
 	BEGIN
 		INSERT [dbo].[tblGLAccountGroup] ([intAccountGroupID], [strAccountGroup], [strAccountType], [intParentGroupID], [intGroup], [intSort], [intConcurrencyID], [intAccountBegin], [intAccountEnd], [strAccountGroupNamespace]) VALUES (7, N'Cost of Goods Sold', N'Cost of Goods Sold', 0, 1, 70000, NULL, NULL, NULL, NULL)
 	END
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountGroup WHERE intAccountGroupID = 8 AND strAccountGroup = N'Payables' AND strAccountType = N'Liability')
+	BEGIN
+		INSERT [dbo].[tblGLAccountGroup] ([intAccountGroupID], [strAccountGroup], [strAccountType], [intParentGroupID], [intGroup], [intSort], [intConcurrencyID], [intAccountBegin], [intAccountEnd], [strAccountGroupNamespace]) VALUES (8, N'Payables', N'Liability', 0, 1, 80000, NULL, NULL, NULL, NULL)
+	END
 GO
 	SET IDENTITY_INSERT [dbo].[tblGLAccountGroup] OFF
 GO

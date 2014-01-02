@@ -18,8 +18,8 @@ DECLARE @Bill NVARCHAR(50)
 DECLARE @Success BIT
 
 SELECT strBillId INTO #Bills
-	FROM tblAPBillBatches A 
-		INNER JOIN tblAPBills B ON A.intBillBatchId = B.intBillBatchId
+	FROM tblAPBillBatch A 
+		INNER JOIN tblAPBill B ON A.intBillBatchId = B.intBillBatchId
 	WHERE B.ysnPosted = 0 AND A.intBillBatchId = @strTransactionID
 
 WHILE(EXISTS(SELECT 1 FROM #Bills))
@@ -32,7 +32,7 @@ BEGIN
 
 END
 
-UPDATE tblAPBillBatches
+UPDATE tblAPBillBatch
 	SET ysnPosted = 1
 		WHERE intBillBatchId = @strTransactionID
 

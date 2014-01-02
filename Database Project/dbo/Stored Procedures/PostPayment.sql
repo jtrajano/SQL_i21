@@ -82,7 +82,7 @@ SELECT	TOP 1
 		@dblAmount = dblAmountPaid,
 		@intUserID = 1,
 		@ysnTransactionPostedFlag = ysnPosted
-FROM	[dbo].tblAPPayments 
+FROM	[dbo].tblAPPayment
 WHERE	intPaymentId = @strTransactionID 
 		--AND intBankTransactionTypeID = @BANK_TRANSACTION_TYPE_ID
 IF @@ERROR <> 0	GOTO Post_Rollback		
@@ -90,7 +90,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 		
 -- Read the detail table and populate the variables. 
 SELECT	@dblAmountDetailTotal = SUM(ISNULL(dblPayment, 0))
-FROM	[dbo].tblAPPaymentDetails A
+FROM	[dbo].tblAPPaymentDetail A
 WHERE	intPaymentId = @strTransactionID 
 IF @@ERROR <> 0	GOTO Post_Rollback		
 
@@ -213,7 +213,7 @@ BEGIN
 			,[strTransactionForm]	= A.intPaymentId
 			,[strModuleName]		= @MODULE_NAME
 			,[strUOMCode]			= NULL 
-	FROM	[dbo].tblAPPayments A INNER JOIN [dbo].tblGLAccount GLAccnt
+	FROM	[dbo].tblAPPayment A INNER JOIN [dbo].tblGLAccount GLAccnt
 				ON A.intBankAccountId = GLAccnt.intAccountID
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
@@ -251,8 +251,8 @@ BEGIN
 			,[strTransactionForm]	= A.intPaymentId
 			,[strModuleName]		= @MODULE_NAME
 			,[strUOMCode]			= NULL 
-	FROM	[dbo].tblAPPayments A 
-			LEFT JOIN tblAPPaymentDetails B ON A.intPaymentId = B.intPaymentId
+	FROM	[dbo].tblAPPayment A 
+			LEFT JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 			INNER JOIN [dbo].tblGLAccount GLAccnt
 				ON B.intAccountId = GLAccnt.intAccountID
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
@@ -286,16 +286,16 @@ IF @isSuccessful = 0 GOTO Post_Rollback
 
 	
 -- Update the posted flag in the transaction table
-UPDATE tblAPPayments
+UPDATE tblAPPayment
 SET		ysnPosted = 1
 		--,intConcurrencyID += 1 
 WHERE	intPaymentId = @strTransactionID
 
 --Update dblAmountDue on tblAPBill
-UPDATE tblAPBills
-	SET tblAPBills.dblAmountDue = (SELECT SUM(B.dblPayment) 
-								FROM tblAPPayments A
-										INNER JOIN tblAPPaymentDetails B 
+UPDATE tblAPBill
+	SET tblAPBill.dblAmountDue = (SELECT SUM(B.dblPayment) 
+								FROM tblAPPayment A
+										INNER JOIN tblAPPaymentDetail B 
 												ON A.intPaymentId = B.intPaymentId
 										INNER JOIN tblAPBills C
 												ON B.intBillId = C.intBillId

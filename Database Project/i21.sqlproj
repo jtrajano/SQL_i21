@@ -207,14 +207,14 @@
     <Build Include="dbo\Tables\tblEntityLocations.sql" />
     <Build Include="dbo\Tables\tblDBPanelColumn.sql" />
     <Build Include="dbo\Tables\tblSMMasterMenu.sql" />
-    <Build Include="dbo\Tables\tblAPBillBatches.sql" />
-    <Build Include="dbo\Tables\tblAPBills.sql" />
+    <Build Include="dbo\Tables\tblAPBillBatch.sql" />
+    <Build Include="dbo\Tables\tblAPBill.sql" />
     <Build Include="dbo\Tables\tblSMUserRoleMenu.sql" />
-    <Build Include="dbo\Tables\tblAPPayments.sql" />
+    <Build Include="dbo\Tables\tblAPPayment.sql" />
     <Build Include="dbo\Tables\tblDBPanelFormat.sql" />
-    <Build Include="dbo\Tables\tblAPPaymentDetails.sql" />
+    <Build Include="dbo\Tables\tblAPPaymentDetail.sql" />
     <Build Include="dbo\Tables\tblDBPanelTab.sql" />
-    <Build Include="dbo\Tables\tblAPVendors.sql" />
+    <Build Include="dbo\Tables\tblAPVendor.sql" />
     <Build Include="dbo\Tables\tblSMUserMenu.sql" />
     <Build Include="dbo\Tables\tblDBPanelUser.sql" />
     <Build Include="dbo\Tables\tblTMWorkCloseReason.sql" />
@@ -698,7 +698,7 @@
     <Build Include="dbo\Tables\ssvncmst.sql" />
     <Build Include="dbo\Tables\ssvndmst.sql" />
     <Build Include="dbo\Tables\ssvtxmst.sql" />
-    <Build Include="dbo\Views\vyu_VendorHistory.sql" />
+    <Build Include="dbo\Views\vyuVendorHistory.sql" />
     <PreDeploy Include="Scripts\Pre-Deployment\PreDeployment.sql" />
     <Build Include="dbo\Views\vwCMBankAccount.sql" />
     <Build Include="dbo\Views\vwCMBank.sql" />
@@ -745,9 +745,13 @@
     <Build Include="dbo\Stored Procedures\uspRMInsertDynamicParameterFields.sql" />
     <Build Include="Security\RoleMemberships.sql" />
     <Build Include="Security\irely.sql" />
+    <Build Include="dbo\Views\vyuBillBatch.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="i21.publish.xml" />
     <None Include="Scripts\Pre-Deployment\SM\1_DataCleanup.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="i21.refactorlog" />
   </ItemGroup>
 </Project>

@@ -82,7 +82,7 @@ SELECT	TOP 1
 		@dblAmount = dblTotal,
 		@intUserID = 1,
 		@ysnTransactionPostedFlag = ysnPosted
-FROM	[dbo].tblAPBills 
+FROM	[dbo].tblAPBill 
 WHERE	strBillId = @strTransactionID 
 		--AND intBankTransactionTypeID = @BANK_TRANSACTION_TYPE_ID
 IF @@ERROR <> 0	GOTO Post_Rollback		
@@ -90,7 +90,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 		
 -- Read the detail table and populate the variables. 
 SELECT	@dblAmountDetailTotal = A.dblTotal --SUM(ISNULL(dblCredit, 0) - ISNULL(dblDebit, 0))
-FROM	[dbo].tblAPBills A
+FROM	[dbo].tblAPBill A
 WHERE	strBillId = @strTransactionID 
 IF @@ERROR <> 0	GOTO Post_Rollback		
 
@@ -213,7 +213,7 @@ BEGIN
 			,[strTransactionForm]	= A.strBillId
 			,[strModuleName]		= @MODULE_NAME
 			,[strUOMCode]			= NULL 
-	FROM	[dbo].tblAPBills A INNER JOIN [dbo].tblGLAccount GLAccnt
+	FROM	[dbo].tblAPBill A INNER JOIN [dbo].tblGLAccount GLAccnt
 				ON A.intAccountId = GLAccnt.intAccountID
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
@@ -251,7 +251,7 @@ BEGIN
 			,[strTransactionForm]	= A.strBillId
 			,[strModuleName]		= @MODULE_NAME
 			,[strUOMCode]			= NULL 
-	FROM	[dbo].tblAPBills A INNER JOIN [dbo].tblGLAccount GLAccnt
+	FROM	[dbo].tblAPBill A INNER JOIN [dbo].tblGLAccount GLAccnt
 				ON A.intAccountId = GLAccnt.intAccountID
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
@@ -260,7 +260,7 @@ BEGIN
 	IF @@ERROR <> 0	GOTO Post_Rollback
 	
 	-- Update the posted flag in the transaction table
-	UPDATE tblAPBills
+	UPDATE tblAPBill
 	SET		ysnPosted = 1
 			--,intConcurrencyID += 1 
 	WHERE	strBillId = @strTransactionID
@@ -273,7 +273,7 @@ BEGIN
 	IF @@ERROR <> 0	GOTO Post_Rollback
 	
 	-- Update the posted flag in the transaction table
-	UPDATE tblAPBills
+	UPDATE tblAPBill
 	SET		ysnPosted = 0
 			--,intConcurrencyID += 1 
 	WHERE	strBillId = @strTransactionID
