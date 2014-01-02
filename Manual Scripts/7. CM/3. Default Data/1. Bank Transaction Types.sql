@@ -108,7 +108,7 @@ UNION ALL
 SELECT 
 	[intBankTransactionTypeID]		= 11
 	,[strBankTransactionTypeName]	= 'Origin Deposit'
-	,[strTransactionPrefix]			= 'ODEP'
+	,[strTransactionPrefix]			= ''
 	,[intTransactionNo]				= 1
 	,[intConcurrencyID]				= 1	
 WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 11)	
@@ -117,25 +117,30 @@ UNION ALL
 SELECT 
 	[intBankTransactionTypeID]		= 12
 	,[strBankTransactionTypeName]	= 'Origin Checks'
-	,[strTransactionPrefix]			= 'OCHK'
+	,[strTransactionPrefix]			= ''
 	,[intTransactionNo]				= 1
 	,[intConcurrencyID]				= 1	
 WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 12)	
-		
 UNION ALL 
 SELECT 
 	[intBankTransactionTypeID]		= 13
 	,[strBankTransactionTypeName]	= 'Origin EFT'
-	,[strTransactionPrefix]			= 'OEFT'
+	,[strTransactionPrefix]			= ''
 	,[intTransactionNo]				= 1
 	,[intConcurrencyID]				= 1			
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 13)	
-
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 13)
 UNION ALL 
 SELECT 
 	[intBankTransactionTypeID]		= 14
 	,[strBankTransactionTypeName]	= 'Origin Withdrawal'
-	,[strTransactionPrefix]			= 'OWD'
+	,[strTransactionPrefix]			= ''
 	,[intTransactionNo]				= 1
 	,[intConcurrencyID]				= 1			
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 14)	
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 14)
+UNION ALL 
+SELECT 
+	[intBankTransactionTypeID]		= 15
+	,[strBankTransactionTypeName]	= 'Origin Wire'
+	,[strTransactionPrefix]			= ''
+	,[intTransactionNo]				= 1
+	,[intConcurrencyID]				= 1			

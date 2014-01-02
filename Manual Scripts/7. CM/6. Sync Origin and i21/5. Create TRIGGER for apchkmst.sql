@@ -163,7 +163,7 @@ SET NOCOUNT ON
 			,dblAmount
 			,strAmountInWords
 			,strMemo
-			,intReferenceNo
+			,strReferenceNo
 			,ysnCheckPrinted
 			,ysnCheckToBePrinted
 			,ysnCheckVoid
@@ -219,7 +219,7 @@ SET NOCOUNT ON
 			,strMemo					=	RTRIM(LTRIM(ISNULL(i.apchk_comment_1, ''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_2))) > 0 THEN CHAR(13) ELSE '' END +
 											RTRIM(LTRIM(ISNULL(i.apchk_comment_2, ''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_3))) > 0 THEN CHAR(13) ELSE '' END +
 											RTRIM(LTRIM(ISNULL(i.apchk_comment_3, ''))) 
-			,intReferenceNo				=	dbo.fn_GetNumbersFromString(i.apchk_chk_no)
+			,strReferenceNo				=	RTRIM(LTRIM(i.apchk_chk_no))
 			,ysnCheckPrinted			=	1 
 			,ysnCheckToBePrinted		=	1
 			,ysnCheckVoid				=	CASE
@@ -382,7 +382,7 @@ SET NOCOUNT ON
 				,dblAmount
 				,strAmountInWords
 				,strMemo
-				,intReferenceNo
+				,strReferenceNo
 				,ysnCheckPrinted
 				,ysnCheckToBePrinted
 				,ysnCheckVoid
@@ -438,7 +438,7 @@ SET NOCOUNT ON
 				,strMemo					=	RTRIM(LTRIM(ISNULL(i.apchk_comment_1, ''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_2))) > 0 THEN CHAR(13) ELSE '' END +
 												RTRIM(LTRIM(ISNULL(i.apchk_comment_2, ''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_3))) > 0 THEN CHAR(13) ELSE '' END +
 												RTRIM(LTRIM(ISNULL(i.apchk_comment_3, ''))) 
-				,intReferenceNo				=	dbo.fn_GetNumbersFromString(i.apchk_chk_no)
+				,strReferenceNo				=	RTRIM(LTRIM(i.apchk_chk_no))
 				,ysnCheckPrinted			=	1 
 				,ysnCheckToBePrinted		=	1
 				,ysnCheckVoid				=	CASE
@@ -513,7 +513,7 @@ SET NOCOUNT ON
 				,strMemo					=	RTRIM(LTRIM(ISNULL(i.apchk_comment_1, ''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_2))) > 0 THEN CHAR(13) ELSE '' END +
 												RTRIM(LTRIM(ISNULL(i.apchk_comment_2, ''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_3))) > 0 THEN CHAR(13) ELSE '' END +
 												RTRIM(LTRIM(ISNULL(i.apchk_comment_3, ''))) 
-				,intReferenceNo				=	dbo.fn_GetNumbersFromString(i.apchk_chk_no)
+				,strReferenceNo				=	RTRIM(LTRIM(i.apchk_chk_no))
 				,ysnCheckPrinted			=	1
 				,ysnCheckToBePrinted		=	1
 				,ysnCheckVoid				=	CASE

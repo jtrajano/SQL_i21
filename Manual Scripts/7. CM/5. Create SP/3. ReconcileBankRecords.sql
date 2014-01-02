@@ -1,9 +1,9 @@
 /*
 {*******************************************************************}
 {                                                                   }
-{       i21 iRely Suite Cash Management Script						}
+{       i21 iRely Suite Cash Management Script                      }
 {                                                                   }
-{       Copyright © 2004-2014 iRely, LLC                            }
+{       Copyright Â© 2004-2014 iRely, LLC                            }
 {       All Rights Reserved                                         }
 {                                                                   }
 {   The entire contents of this file is protected by U.S. and       }

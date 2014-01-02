@@ -3,7 +3,7 @@
 {                                                                   }
 {       i21 iRely Suite Posting Script								}
 {                                                                   }
-{       Copyright © 2004-2014 iRely, LLC							}
+{       Copyright Â© 2004-2014 iRely, LLC                            }
 {       All Rights Reserved                                         }
 {                                                                   }
 {   The entire contents of this file is protected by U.S. and       }
@@ -48,7 +48,7 @@
 ' 9. SET NOCOUNT ON on all scripts.
     - eliminates SQL Server sending DONE_IN_PROC messages to the client for each statement in s Stored Proc.
 ' 10. SET QUOTED_IDENTIFIER OFF
-    - Causes Microsoft® SQL Server™ to follow the SQL-92 rules regarding quotation mark delimiting identifiers and literal strings.
+    - Causes Microsft SQL Server to follow the SQL-92 rules regarding quotation mark delimiting identifiers and literal strings. 
     - Data with single quote can be processed using ''. Ex INSERT INTO tablename(fields) VALUES ('Ryan''s')
 ' 11. SET ANSI_NULLS ON
     - Allows for the comparison operators to return TRUE or FALSE when comparing against null values.
@@ -68,8 +68,8 @@
   Rolls back an explicit or implicit transaction to the beginning of the transaction, or to a savepoint inside a transaction.
 ' 4. RAISERROR
   Generates an error message and initiates error processing for the session. RAISERROR can either reference a user-defined message stored in the sys.messages
-  catalog view or build a message dynamically. The message is returned as a server error message to the calling application or to an associated CATCH block 
-  of a TRY…CATCH construct.
+  catalog view or build a message dynamically. The message is returned as a server error message to the calling application or to an associated CATCH block of 
+  a TRY-CATCH onstruct. 
 '====================================================================================================================================='
 ' REQUIRED PARAMETERS:
 '
@@ -366,7 +366,7 @@ BEGIN
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strProductID]			= NULL
 			,[strWarehouseID]		= NULL
-			,[strNum]				= CAST(A.intReferenceNo AS NVARCHAR(100))
+			,[strNum]				= A.strReferenceNo
 			,[strCompanyName]		= NULL
 			,[strBillInvoiceNumber] = NULL 
 			,[strJournalLineDescription] = NULL 
@@ -406,7 +406,7 @@ BEGIN
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strProductID]			= NULL
 			,[strWarehouseID]		= NULL
-			,[strNum]				= CAST(A.intReferenceNo AS NVARCHAR(100))
+			,[strNum]				= A.strReferenceNo
 			,[strCompanyName]		= NULL
 			,[strBillInvoiceNumber] = NULL 
 			,[strJournalLineDescription] = NULL 

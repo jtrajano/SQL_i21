@@ -4,7 +4,7 @@
   -------------------------------------------------------------------------------------------------------------------------------------						
    Script Name         :  fn_GetNumbersFromString
    
-   Description		   :  Strip off all the alpha characters from a string and return only an integer value. 
+   Description		   :  Strips off all the alpha characters from a string and return only an integer value.
 */
 
 IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_id(N'[dbo].fn_GetNumbersFromString') AND objectproperty(id, N'ISScalarFUNCTION') = 1)

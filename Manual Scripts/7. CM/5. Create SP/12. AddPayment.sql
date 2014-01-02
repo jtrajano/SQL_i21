@@ -3,7 +3,7 @@
 {                                                                   }
 {       i21 iRely Suite Cash Management Script						}
 {                                                                   }
-{       Copyright © 2004-2014 iRely, LLC							}
+{       Copyright Â© 2004-2014 iRely, LLC                            }
 {       All Rights Reserved                                         }
 {                                                                   }
 {   The entire contents of this file is protected by U.S. and       }
@@ -124,7 +124,7 @@ INSERT INTO tblCMBankTransaction(
 	,dblAmount
 	,strAmountInWords
 	,strMemo
-	,intReferenceNo
+	,strReferenceNo
 	,ysnCheckPrinted
 	,ysnCheckToBePrinted
 	,ysnCheckVoid
@@ -154,7 +154,7 @@ SELECT	strTransactionID			= @strTransactionID
 		,dblAmount					= @dblAmount * -1
 		,strAmountInWords			= dbo.fn_ConvertNumberToWord(@dblAmount * -1)
 		,strMemo					= ISNULL(@strDescription, '')
-		,intReferenceNo				= 0
+		,strReferenceNo				= ''
 		,ysnCheckPrinted			= 0
 		,ysnCheckToBePrinted		= 0
 		,ysnCheckVoid				= 0
