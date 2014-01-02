@@ -43,19 +43,7 @@ EXEC dbo.GetClearedBankCredits @intBankAccountID = 2, @dtmStatementDate = NULL
 
 '====================================================================================================================================='
 SCRIPT CREATED BY: Feb Montefrio		DATE CREATED: November 28, 2013
---------------------------------------------------------------------------------------------------------------------------------------						
-Last Modified By    :	1. 
-						:
-						n.
-
-Last Modified Date  :	1. 
-						:
-						n.
-
-Synopsis            :	1. 
-						:
-						n.
-*/
+-------------------------------------------------------------------------------------------------------------------------------------*/
 
 --=====================================================================================================================================
 -- 	DELETE THE STORED PROCEDURE IF IT EXISTS
@@ -78,16 +66,20 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @BANK_DEPOSIT INT = 1,
-		@BANK_WITHDRAWAL INT = 2,
-		@MISC_CHECKS INT = 3,
-		@BANK_TRANSFER INT = 4,
-		@BANK_TRANSACTION INT = 5,
-		@CREDIT_CARD_CHARGE INT = 6,
-		@CREDIT_CARD_RETURNS INT = 7,
-		@CREDIT_CARD_PAYMENTS INT = 8,
-		@BANK_TRANSFER_WD INT = 9,
-		@BANK_TRANSFER_DEP INT = 10
+DECLARE @BANK_DEPOSIT INT = 1
+		,@BANK_WITHDRAWAL INT = 2
+		,@MISC_CHECKS INT = 3
+		,@BANK_TRANSFER INT = 4
+		,@BANK_TRANSACTION INT = 5
+		,@CREDIT_CARD_CHARGE INT = 6
+		,@CREDIT_CARD_RETURNS INT = 7
+		,@CREDIT_CARD_PAYMENTS INT = 8
+		,@BANK_TRANSFER_WD INT = 9
+		,@BANK_TRANSFER_DEP INT = 10
+		,@ORIGIN_DEPOSIT AS INT = 11
+		,@ORIGIN_CHECKS AS INT = 12
+		,@ORIGIN_EFT AS INT = 13
+		,@ORIGIN_WITHDRAWAL AS INT = 14
 		
 SELECT	totalCount = ISNULL(COUNT(1), 0)
 		,totalAmount = ISNULL(SUM(ISNULL(dblAmount, 0)), 0)
@@ -106,8 +98,7 @@ WHERE	ysnPosted = 1
 		)
 		AND (
 			-- Filter for all the bank deposits and credits:
-			intBankTransactionTypeID = @BANK_DEPOSIT
-			OR intBankTransactionTypeID = @BANK_TRANSFER_DEP
+			intBankTransactionTypeID IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT)
 			OR ( dblAmount > 0 AND intBankTransactionTypeID = @BANK_TRANSACTION )
 		)
 GO

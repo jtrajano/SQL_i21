@@ -130,3 +130,12 @@ SELECT
 	,[intTransactionNo]				= 1
 	,[intConcurrencyID]				= 1			
 WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 13)	
+
+UNION ALL 
+SELECT 
+	[intBankTransactionTypeID]		= 14
+	,[strBankTransactionTypeName]	= 'Origin Withdrawal'
+	,[strTransactionPrefix]			= 'OWD'
+	,[intTransactionNo]				= 1
+	,[intConcurrencyID]				= 1			
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 14)	
