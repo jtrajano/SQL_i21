@@ -31,7 +31,7 @@ IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[
 BEGIN
 	IF NOT EXISTS(SELECT top 1 1 FROM sys.columns WHERE NAME  = N'intPanelUserId' AND OBJECT_ID = OBJECT_ID(N'tblDBPanelAccess')) AND EXISTS (SELECT top 1 1 FROM sys.columns WHERE NAME  = N'intPanelUserID' AND OBJECT_ID = OBJECT_ID(N'tblDBPanelAccess'))
 	BEGIN
-	 EXEC sp_rename 'tblDBPanelAccess.intPanelUserID', 'intPanelColumnId', 'COLUMN'
+	 EXEC sp_rename 'tblDBPanelAccess.intPanelUserID', 'intPanelUserId', 'COLUMN'
 	END
 
 	IF NOT EXISTS(SELECT top 1 1 FROM sys.columns WHERE NAME  = N'intUserId' AND OBJECT_ID = OBJECT_ID(N'tblDBPanelAccess')) AND EXISTS (SELECT top 1 1 FROM sys.columns WHERE NAME  = N'intUserID' AND OBJECT_ID = OBJECT_ID(N'tblDBPanelAccess'))
