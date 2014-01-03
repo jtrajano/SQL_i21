@@ -144,3 +144,4 @@ SELECT
 	,[strTransactionPrefix]			= ''
 	,[intTransactionNo]				= 1
 	,[intConcurrencyID]				= 1			
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 15)
