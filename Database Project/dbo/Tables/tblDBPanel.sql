@@ -1,15 +1,15 @@
 ﻿CREATE TABLE [dbo].[tblDBPanel] (
-    [intPanelID]            INT             IDENTITY (1, 1) NOT NULL,
+    [intPanelId]            INT             IDENTITY (1, 1) NOT NULL,
     [intRowsReturned]       INT             NOT NULL,
     [intRowsVisible]        SMALLINT        NOT NULL,
     [intChartZoom]          SMALLINT        NOT NULL,
     [intChartHeight]        SMALLINT        NOT NULL,
-    [intUserID]             INT             NOT NULL,
+    [intUserId]             INT             NOT NULL,
     [intDefaultColumn]      SMALLINT        NULL,
     [intDefaultRow]         SMALLINT        NULL,
     [intDefaultWidth]       SMALLINT        NULL,
-    [intSourcePanelID]      INT             NOT NULL,
-    [intConnectionID]       INT             NOT NULL,
+    [intSourcePanelId]      INT             NOT NULL,
+    [intConnectionId]       INT             NOT NULL,
     [intDrillDownPanel]     INT             NOT NULL,
     [strClass]              NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
     [strPanelName]          NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
@@ -46,6 +46,6 @@
     [imgLayoutGrid]         VARBINARY (MAX) NULL,
     [imgLayoutPivotGrid]    VARBINARY (MAX) NULL,
     [strPanelVersion]       NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS DEFAULT ((14.1)) NOT NULL,
-    CONSTRAINT [PK_dbo.tblDBPanel] PRIMARY KEY CLUSTERED ([intPanelID] ASC)
+    CONSTRAINT [PK_dbo.tblDBPanel] PRIMARY KEY CLUSTERED ([intPanelId] ASC)
 );
 

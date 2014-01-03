@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblDBPanelColumn] (
-    [intPanelColumnID]   INT            IDENTITY (1, 1) NOT NULL,
-    [intPanelID]         INT            NOT NULL,
+    [intPanelColumnId]   INT            IDENTITY (1, 1) NOT NULL,
+    [intPanelId]         INT            NOT NULL,
     [strColumn]          NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strCaption]         NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [intWidth]           SMALLINT       DEFAULT ((30)) NOT NULL,
@@ -16,14 +16,14 @@
     [strType]            NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strAxis]            NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strUserName]        NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
-    [intUserID]          INT            NOT NULL,
+    [intUserId]          INT            NOT NULL,
     [intDonut]           SMALLINT       NOT NULL,
     [intMinInterval]     SMALLINT       DEFAULT ((0)) NOT NULL,
     [intMaxInterval]     SMALLINT       DEFAULT ((0)) NOT NULL,
     [intStepInterval]    SMALLINT       DEFAULT ((0)) NOT NULL,
     [strIntervalFormat]  NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [ysnHiddenColumn]    BIT            DEFAULT ((0)) NOT NULL,
-    CONSTRAINT [PK_dbo.tblDBPanelColumn] PRIMARY KEY CLUSTERED ([intPanelColumnID] ASC),
-    CONSTRAINT [FK_dbo.tblDBPanelColumn_dbo.tblDBPanel_intPanelID] FOREIGN KEY ([intPanelID]) REFERENCES [dbo].[tblDBPanel] ([intPanelID]) ON DELETE CASCADE
+    CONSTRAINT [PK_dbo.tblDBPanelColumn] PRIMARY KEY CLUSTERED ([intPanelColumnId] ASC),
+    CONSTRAINT [FK_dbo.tblDBPanelColumn_dbo.tblDBPanel_intPanelID] FOREIGN KEY ([intPanelId]) REFERENCES [dbo].[tblDBPanel] ([intPanelId]) ON DELETE CASCADE
 );
 
