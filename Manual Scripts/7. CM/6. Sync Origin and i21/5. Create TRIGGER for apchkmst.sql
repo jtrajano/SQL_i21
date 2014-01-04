@@ -120,31 +120,15 @@ SET NOCOUNT ON
 			,@CREDIT_CARD_PAYMENTS AS INT = 8
 			,@BANK_TRANSFER_WD AS INT = 9
 			,@BANK_TRANSFER_DEP AS INT = 10
-			,@ORIGIN_DEPOSIT AS INT = 11 -- NEGATIVE AMOUNT
-			,@ORIGIN_WITHDRAWAL AS INT = 14 -- POSITIVE AMOUNT
+			,@ORIGIN_DEPOSIT AS INT = 11		-- NEGATIVE AMOUNT, INDICATOR: O, APCHK_CHK_NO PREFIX: NONE
+			,@ORIGIN_CHECKS AS INT = 12			-- POSITIVE AMOUNT, INDICATOR: C, APCHK_CHK_NO PREFIX: N/A, IT MUST BE A VALID NUMBER
+			,@ORIGIN_EFT AS INT = 13			-- POSITIVE AMOUNT, INDICATOR: N/A, APCHK_CHK_NO PREFIX: 'E'		
+			,@ORIGIN_WITHDRAWAL AS INT = 14		-- POSITIVE AMOUNT, INDICATOR: N/A, APCHK_CHK_NO PREFIX: NONE
+			,@ORIGIN_WIRE AS INT = 15			-- POSITIVE AMOUNT, INDICATOR: N/A, APCHK_CHK_NO PREFIX: 'W'
 			
 			-- Declare the local variables. 
 			,@intBankAccountID AS INT
-			
-	-- Get the proper transaction prefix to use: 
-	DECLARE @ORIGIN_DEPOSIT_PREFIX AS NVARCHAR(10),
-			@ORIGIN_WITHDRAWAL_PREFIX AS NVARCHAR(10)
-	
-	IF @@ERROR <> 0 GOTO EXIT_TRIGGER
-	
-	-- Get the prefix from the transaction type table
-	SELECT	TOP 1 
-			@ORIGIN_DEPOSIT_PREFIX = strTransactionPrefix
-	FROM	dbo.[tblCMBankTransactionType]
-	WHERE	intBankTransactionTypeID = @ORIGIN_DEPOSIT
-	IF @@ERROR <> 0 GOTO EXIT_TRIGGER
-			
-	SELECT	TOP 1 
-			@ORIGIN_WITHDRAWAL_PREFIX = strTransactionPrefix
-	FROM	dbo.[tblCMBankTransactionType]
-	WHERE	intBankTransactionTypeID = @ORIGIN_WITHDRAWAL
-	IF @@ERROR <> 0 GOTO EXIT_TRIGGER
-	
+
 	-- Insert the record from the origin system to i21. 
 	INSERT INTO tblCMBankTransaction (
 			strTransactionID
@@ -178,24 +162,19 @@ SET NOCOUNT ON
 			,intConcurrencyID	
 	)
 	SELECT 
-			strTransactionID			=	
-											CASE 
-												WHEN i.apchk_chk_amt > 0 THEN
-													@ORIGIN_WITHDRAWAL_PREFIX + '-' 
-													+ CAST(i.apchk_cbk_no AS NVARCHAR(2)) 
-													+ CAST(i.apchk_rev_dt AS NVARCHAR(10))
-													+ CAST(i.apchk_trx_ind AS NVARCHAR(1))
-													+ CAST(i.apchk_chk_no AS NVARCHAR(8)) 
-												WHEN i.apchk_chk_amt < 0 THEN 
-													@ORIGIN_DEPOSIT_PREFIX + '-' 
-													+ CAST(i.apchk_cbk_no AS NVARCHAR(2)) 
-													+ CAST(i.apchk_rev_dt AS NVARCHAR(10))
-													+ CAST(i.apchk_trx_ind AS NVARCHAR(1))
-													+ CAST(i.apchk_chk_no AS NVARCHAR(8))  
-											END
+			strTransactionID			=	CAST(i.apchk_cbk_no AS NVARCHAR(2)) + '-'
+											+ CAST(i.apchk_rev_dt AS NVARCHAR(10)) + '-'
+											+ CAST(i.apchk_trx_ind AS NVARCHAR(1)) + '-'
+											+ CAST(i.apchk_chk_no AS NVARCHAR(8))
 			,intBankTransactionTypeID	=	
-											CASE	
-												WHEN i.apchk_chk_amt > 0 THEN @ORIGIN_WITHDRAWAL
+											CASE
+												WHEN i.apchk_chk_amt > 0 THEN 
+													CASE 
+														WHEN LEFT(i.apchk_chk_no, 1) = 'E' THEN @ORIGIN_EFT
+														WHEN LEFT(i.apchk_chk_no, 1) = 'W' THEN @ORIGIN_WIRE
+														WHEN i.apchk_trx_ind = 'C' THEN @ORIGIN_CHECKS
+														ELSE @ORIGIN_WITHDRAWAL
+													END
 												WHEN i.apchk_chk_amt < 0 THEN @ORIGIN_DEPOSIT
 											END
 			,intBankAccountID			=	f.intBankAccountID
@@ -245,7 +224,8 @@ SET NOCOUNT ON
 				ON f.strCbkNo = i.apchk_cbk_no COLLATE Latin1_General_CI_AS  	
 	WHERE	f.intBankAccountID IS NOT NULL
 			AND i.apchk_chk_amt <> 0
-	IF @@ERROR <> 0 GOTO EXIT_TRIGGER	
+			AND dbo.fn_ConvertOriginDateToSQLDateTime(apchk_gl_rev_dt) IS NOT NULL
+	IF @@ERROR <> 0 GOTO EXIT_TRIGGER	 
 	
 EXIT_TRIGGER: 
 
@@ -279,8 +259,11 @@ SET NOCOUNT ON
 			,@CREDIT_CARD_PAYMENTS AS INT = 8
 			,@BANK_TRANSFER_WD AS INT = 9
 			,@BANK_TRANSFER_DEP AS INT = 10
-			,@ORIGIN_DEPOSIT AS INT = 11 -- NEGATIVE AMOUNT
-			,@ORIGIN_WITHDRAWAL AS INT = 14 -- POSITIVE AMOUNT
+			,@ORIGIN_DEPOSIT AS INT = 11		-- NEGATIVE AMOUNT, INDICATOR: O, APCHK_CHK_NO PREFIX: NONE
+			,@ORIGIN_CHECKS AS INT = 12			-- POSITIVE AMOUNT, INDICATOR: C, APCHK_CHK_NO PREFIX: N/A, IT MUST BE A VALID NUMBER
+			,@ORIGIN_EFT AS INT = 13			-- POSITIVE AMOUNT, INDICATOR: N/A, APCHK_CHK_NO PREFIX: 'E'		
+			,@ORIGIN_WITHDRAWAL AS INT = 14		-- POSITIVE AMOUNT, INDICATOR: N/A, APCHK_CHK_NO PREFIX: NONE
+			,@ORIGIN_WIRE AS INT = 15			-- POSITIVE AMOUNT, INDICATOR: N/A, APCHK_CHK_NO PREFIX: 'W'
 			
 			-- Declare the local variables. 
 			,@intBankAccountID AS INT
@@ -332,25 +315,6 @@ SET NOCOUNT ON
 				AND f.apchk_chk_no = i.apchk_chk_no
 	IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 			
-	-- Get the proper transaction prefix to use: 
-	DECLARE @ORIGIN_DEPOSIT_PREFIX AS NVARCHAR(10)
-			,@ORIGIN_WITHDRAWAL_PREFIX AS NVARCHAR(10)
-			
-	IF @@ERROR <> 0 GOTO EXIT_TRIGGER
-	
-	-- Get the prefix from the transaction type table
-	SELECT	TOP 1 
-			@ORIGIN_DEPOSIT_PREFIX = strTransactionPrefix
-	FROM	dbo.[tblCMBankTransactionType]
-	WHERE	intBankTransactionTypeID = @ORIGIN_DEPOSIT
-	IF @@ERROR <> 0 GOTO EXIT_TRIGGER		
-	
-	SELECT	TOP 1 
-			@ORIGIN_WITHDRAWAL_PREFIX = strTransactionPrefix
-	FROM	dbo.[tblCMBankTransactionType]
-	WHERE	intBankTransactionTypeID = @ORIGIN_WITHDRAWAL
-	IF @@ERROR <> 0 GOTO EXIT_TRIGGER
-		
 	-- Check if the record exists. 
 	-- If it does not exists, insert it.
 	IF NOT EXISTS (
@@ -361,7 +325,7 @@ SET NOCOUNT ON
 									+ CAST(i.apchk_trx_ind AS NVARCHAR(1))
 									+ CAST(i.apchk_chk_no AS NVARCHAR(8))
 					) COLLATE Latin1_General_CI_AS 
-					AND f.intBankTransactionTypeID IN (@ORIGIN_DEPOSIT, @ORIGIN_WITHDRAWAL)
+					AND f.intBankTransactionTypeID IN (@ORIGIN_DEPOSIT, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
 	)
 	BEGIN 
 		-- Insert the record from the origin system to i21. 
@@ -397,24 +361,19 @@ SET NOCOUNT ON
 				,intConcurrencyID	
 		)
 		SELECT 
-				strTransactionID			=	
-												CASE 
-													WHEN i.apchk_chk_amt > 0 THEN
-														@ORIGIN_WITHDRAWAL_PREFIX + '-' 
-														+ CAST(i.apchk_cbk_no AS NVARCHAR(2)) 
-														+ CAST(i.apchk_rev_dt AS NVARCHAR(10))
-														+ CAST(i.apchk_trx_ind AS NVARCHAR(1))
-														+ CAST(i.apchk_chk_no AS NVARCHAR(8)) 
-													WHEN i.apchk_chk_amt < 0 THEN 
-														@ORIGIN_DEPOSIT_PREFIX + '-' 
-														+ CAST(i.apchk_cbk_no AS NVARCHAR(2)) 
-														+ CAST(i.apchk_rev_dt AS NVARCHAR(10))
-														+ CAST(i.apchk_trx_ind AS NVARCHAR(1))
-														+ CAST(i.apchk_chk_no AS NVARCHAR(8))  
-												END
+				strTransactionID			=	CAST(i.apchk_cbk_no AS NVARCHAR(2)) + '-'
+												+ CAST(i.apchk_rev_dt AS NVARCHAR(10)) + '-'
+												+ CAST(i.apchk_trx_ind AS NVARCHAR(1)) + '-'
+												+ CAST(i.apchk_chk_no AS NVARCHAR(8))
 				,intBankTransactionTypeID	=	
-												CASE	
-													WHEN i.apchk_chk_amt > 0 THEN @ORIGIN_WITHDRAWAL
+												CASE
+													WHEN i.apchk_chk_amt > 0 THEN 
+														CASE 
+															WHEN LEFT(i.apchk_chk_no, 1) = 'E' THEN @ORIGIN_EFT
+															WHEN LEFT(i.apchk_chk_no, 1) = 'W' THEN @ORIGIN_WIRE
+															WHEN i.apchk_trx_ind = 'C' THEN @ORIGIN_CHECKS
+															ELSE @ORIGIN_WITHDRAWAL
+														END
 													WHEN i.apchk_chk_amt < 0 THEN @ORIGIN_DEPOSIT
 												END
 				,intBankAccountID			=	f.intBankAccountID
@@ -446,10 +405,10 @@ SET NOCOUNT ON
 													ELSE 0
 												END
 				,ysnPosted					=	1
-				,strLink					=	CAST(i.apchk_cbk_no AS NVARCHAR(2)) 
-												+ CAST(i.apchk_rev_dt AS NVARCHAR(10)) 
-												+ CAST(i.apchk_trx_ind AS NVARCHAR(1)) 
-												+ CAST(i.apchk_chk_no AS NVARCHAR(8)) 
+				,strLink					=	CAST(apchk_cbk_no AS NVARCHAR(2)) 
+												+ CAST(apchk_rev_dt AS NVARCHAR(10)) 
+												+ CAST(apchk_trx_ind AS NVARCHAR(1)) 
+												+ CAST(apchk_chk_no AS NVARCHAR(8)) 
 				,ysnClr						=	CASE 
 													WHEN i.apchk_cleared_ind = 'C' THEN 1
 													ELSE 0
@@ -461,9 +420,10 @@ SET NOCOUNT ON
 				,dtmLastModified			=	dbo.fn_ConvertOriginDateToSQLDateTime(i.apchk_rev_dt)
 				,intConcurrencyID			=	1
 		FROM	dbo.tblCMBankAccount f INNER JOIN inserted i
-					ON f.strCbkNo = i.apchk_cbk_no COLLATE Latin1_General_CI_AS
+					ON f.strCbkNo = i.apchk_cbk_no COLLATE Latin1_General_CI_AS  	
 		WHERE	f.intBankAccountID IS NOT NULL
 				AND i.apchk_chk_amt <> 0
+				AND dbo.fn_ConvertOriginDateToSQLDateTime(apchk_gl_rev_dt) IS NOT NULL				
 		IF @@ERROR <> 0 GOTO EXIT_TRIGGER	
 	END		
 	ELSE 
@@ -472,24 +432,19 @@ SET NOCOUNT ON
 		-- However, do not allow the update if the bank record is already cleared. 
 		UPDATE	dbo.tblCMBankTransaction 
 		SET		
-				strTransactionID			=	
-												CASE 
-													WHEN i.apchk_chk_amt > 0 THEN
-														@ORIGIN_WITHDRAWAL_PREFIX + '-' 
-														+ CAST(apchk_cbk_no AS NVARCHAR(2)) 
-														+ CAST(apchk_rev_dt AS NVARCHAR(10))
-														+ CAST(apchk_trx_ind AS NVARCHAR(1))
-														+ CAST(apchk_chk_no AS NVARCHAR(8)) 
-													WHEN i.apchk_chk_amt < 0 THEN 
-														@ORIGIN_DEPOSIT_PREFIX + '-' 
-														+ CAST(apchk_cbk_no AS NVARCHAR(2)) 
-														+ CAST(apchk_rev_dt AS NVARCHAR(10))
-														+ CAST(apchk_trx_ind AS NVARCHAR(1))
-														+ CAST(apchk_chk_no AS NVARCHAR(8))  
-												END
+				strTransactionID			=	CAST(i.apchk_cbk_no AS NVARCHAR(2)) + '-'
+												+ CAST(i.apchk_rev_dt AS NVARCHAR(10)) + '-'
+												+ CAST(i.apchk_trx_ind AS NVARCHAR(1)) + '-'
+												+ CAST(i.apchk_chk_no AS NVARCHAR(8))
 				,intBankTransactionTypeID	=	
-												CASE	
-													WHEN i.apchk_chk_amt > 0 THEN @ORIGIN_WITHDRAWAL
+												CASE
+													WHEN i.apchk_chk_amt > 0 THEN 
+														CASE 
+															WHEN LEFT(i.apchk_chk_no, 1) = 'E' THEN @ORIGIN_EFT
+															WHEN LEFT(i.apchk_chk_no, 1) = 'W' THEN @ORIGIN_WIRE
+															WHEN i.apchk_trx_ind = 'C' THEN @ORIGIN_CHECKS
+															ELSE @ORIGIN_WITHDRAWAL
+														END
 													WHEN i.apchk_chk_amt < 0 THEN @ORIGIN_DEPOSIT
 												END
 				,intBankAccountID			=	e.intBankAccountID
@@ -521,7 +476,10 @@ SET NOCOUNT ON
 													ELSE 0
 												END
 				,ysnPosted					=	1
-				,strLink					=	i.apchk_chk_no
+				,strLink					=	CAST(apchk_cbk_no AS NVARCHAR(2)) 
+												+ CAST(apchk_rev_dt AS NVARCHAR(10)) 
+												+ CAST(apchk_trx_ind AS NVARCHAR(1)) 
+												+ CAST(apchk_chk_no AS NVARCHAR(8)) 
 				,ysnClr						=	CASE 
 													WHEN i.apchk_cleared_ind = 'C' THEN 1
 													ELSE 0
@@ -538,13 +496,14 @@ SET NOCOUNT ON
 									+ CAST(i.apchk_trx_ind AS NVARCHAR(1)) 
 									+ CAST(i.apchk_chk_no AS NVARCHAR(8))
 					) COLLATE Latin1_General_CI_AS 
-					AND f.intBankTransactionTypeID IN (@ORIGIN_DEPOSIT, @ORIGIN_WITHDRAWAL)
+					AND f.intBankTransactionTypeID IN (@ORIGIN_DEPOSIT, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
 					AND f.ysnClr = 0
 				INNER JOIN dbo.tblCMBankAccount e
 					ON e.strCbkNo = i.apchk_cbk_no COLLATE Latin1_General_CI_AS
 					AND e.intBankAccountID = f.intBankAccountID				
 		WHERE	e.intBankAccountID IS NOT NULL
-				AND i.apchk_chk_amt <> 0	
+				AND i.apchk_chk_amt <> 0
+				AND dbo.fn_ConvertOriginDateToSQLDateTime(apchk_gl_rev_dt) IS NOT NULL
 		IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 	END
 	
@@ -580,8 +539,11 @@ SET NOCOUNT ON
 			,@CREDIT_CARD_PAYMENTS AS INT = 8
 			,@BANK_TRANSFER_WD AS INT = 9
 			,@BANK_TRANSFER_DEP AS INT = 10
-			,@ORIGIN_DEPOSIT AS INT = 11
-			,@ORIGIN_WITHDRAWAL AS INT = 14
+			,@ORIGIN_DEPOSIT AS INT = 11		-- NEGATIVE AMOUNT, INDICATOR: O, APCHK_CHK_NO PREFIX: NONE
+			,@ORIGIN_CHECKS AS INT = 12			-- POSITIVE AMOUNT, INDICATOR: C, APCHK_CHK_NO PREFIX: N/A, IT MUST BE A VALID NUMBER
+			,@ORIGIN_EFT AS INT = 13			-- POSITIVE AMOUNT, INDICATOR: N/A, APCHK_CHK_NO PREFIX: 'E'		
+			,@ORIGIN_WITHDRAWAL AS INT = 14		-- POSITIVE AMOUNT, INDICATOR: N/A, APCHK_CHK_NO PREFIX: NONE
+			,@ORIGIN_WIRE AS INT = 15			-- POSITIVE AMOUNT, INDICATOR: N/A, APCHK_CHK_NO PREFIX: 'W'
 			
 			-- Declare the local variables. 
 			,@intBankAccountID AS INT
@@ -600,7 +562,7 @@ SET NOCOUNT ON
 									+ CAST(d.apchk_trx_ind AS NVARCHAR(1)) 
 									+ CAST(d.apchk_chk_no AS NVARCHAR(8))
 					) COLLATE Latin1_General_CI_AS 
-					AND f.intBankTransactionTypeID IN (@ORIGIN_DEPOSIT, @ORIGIN_WITHDRAWAL)
+					AND f.intBankTransactionTypeID IN (@ORIGIN_DEPOSIT, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
 			INNER JOIN dbo.tblCMBankAccount e
 				ON e.strCbkNo = d.apchk_cbk_no COLLATE Latin1_General_CI_AS
 				AND e.intBankAccountID = f.intBankAccountID						
