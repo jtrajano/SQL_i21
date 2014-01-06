@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblCMBankTransactionDetail] (
     [intBankTransactionDetailID] INT             IDENTITY (1, 1) NOT NULL,
-    [strTransactionID]           NVARCHAR (20)   COLLATE Latin1_General_CI_AS NOT NULL,
+    [strTransactionID]           NVARCHAR (40)   COLLATE Latin1_General_CI_AS NOT NULL,
     [dtmDate]                    DATETIME        NULL,
     [intGLAccountID]             INT             NOT NULL,
     [strDescription]             NVARCHAR (250)  COLLATE Latin1_General_CI_AS NOT NULL,
