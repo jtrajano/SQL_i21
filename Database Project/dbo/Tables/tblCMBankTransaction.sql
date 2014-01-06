@@ -21,7 +21,7 @@
     [ysnCheckToBePrinted]      BIT              NOT NULL,
     [ysnCheckVoid]             BIT              NOT NULL,
     [ysnPosted]                BIT              NOT NULL,
-    [strLink]                  NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
+    [strLink]                  NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
     [ysnClr]                   BIT              NOT NULL,
     [dtmDateReconciled]        DATETIME         NULL,
     [intCreatedUserID]         INT              NULL,
