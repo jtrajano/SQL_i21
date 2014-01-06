@@ -1,9 +1,9 @@
 ﻿CREATE TABLE [dbo].[tblDBPanelAccess] (
-    [intPanelUserID] INT IDENTITY (1, 1) NOT NULL,
-    [intUserID]      INT NOT NULL,
-    [intPanelID]     INT NOT NULL,
+    [intPanelUserId] INT IDENTITY (1, 1) NOT NULL,
+    [intUserId]      INT NOT NULL,
+    [intPanelId]     INT NOT NULL,
     [ysnShow]        BIT DEFAULT ((0)) NOT NULL,
-    CONSTRAINT [PK_dbo.tblDBPanelAccess] PRIMARY KEY CLUSTERED ([intPanelUserID] ASC),
-    CONSTRAINT [FK_dbo.tblDBPanelAccess_dbo.tblDBPanel_intPanelID] FOREIGN KEY ([intPanelID]) REFERENCES [dbo].[tblDBPanel] ([intPanelID]) ON DELETE CASCADE
+    CONSTRAINT [PK_dbo.tblDBPanelAccess] PRIMARY KEY CLUSTERED ([intPanelUserId] ASC),
+    CONSTRAINT [FK_dbo.tblDBPanelAccess_dbo.tblDBPanel_intPanelID] FOREIGN KEY ([intPanelId]) REFERENCES [dbo].[tblDBPanel] ([intPanelId]) ON DELETE CASCADE
 );
 
