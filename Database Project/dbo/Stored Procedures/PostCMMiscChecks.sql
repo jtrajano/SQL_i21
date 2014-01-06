@@ -241,7 +241,7 @@ BEGIN
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strProductID]			= NULL
 			,[strWarehouseID]		= NULL
-			,[strNum]				= CAST(A.intReferenceNo AS NVARCHAR(100))
+			,[strNum]				= A.strReferenceNo
 			,[strCompanyName]		= NULL
 			,[strBillInvoiceNumber] = NULL 
 			,[strJournalLineDescription] = NULL 
@@ -281,7 +281,7 @@ BEGIN
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strProductID]			= NULL
 			,[strWarehouseID]		= NULL
-			,[strNum]				= CAST(A.intReferenceNo AS NVARCHAR(100))
+			,[strNum]				= A.strReferenceNo
 			,[strCompanyName]		= NULL
 			,[strBillInvoiceNumber] = NULL 
 			,[strJournalLineDescription] = NULL 
