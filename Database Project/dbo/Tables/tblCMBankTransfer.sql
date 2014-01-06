@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblCMBankTransfer] (
     [cntID]                    INT             IDENTITY (1, 1) NOT NULL,
-    [strTransactionID]         NVARCHAR (20)   COLLATE Latin1_General_CI_AS NOT NULL,
+    [strTransactionID]         NVARCHAR (40)   COLLATE Latin1_General_CI_AS NOT NULL,
     [dtmDate]                  DATETIME        NOT NULL,
     [intBankTransactionTypeID] INT             NOT NULL,
     [dblAmount]                DECIMAL (18, 6) NOT NULL,

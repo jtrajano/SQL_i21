@@ -270,7 +270,7 @@ BEGIN
 	IF @@ERROR <> 0	GOTO Post_Rollback
 	
 	-- Update the posted flag in the transaction table
-	UPDATE tblAPBill
+	UPDATE tblAPBills
 	SET		ysnPosted = 0
 			--,intConcurrencyID += 1 
 	WHERE	strBillId = @strTransactionID
@@ -293,17 +293,13 @@ WHERE	intPaymentId = @strTransactionID
 
 --Update dblAmountDue on tblAPBill
 UPDATE tblAPBill
-	SET tblAPBill.dblAmountDue = (SELECT C.dblTotal - SUM(B.dblPayment) 
+	SET tblAPBill.dblAmountDue = (SELECT SUM(B.dblPayment) 
 								FROM tblAPPayment A
 										INNER JOIN tblAPPaymentDetail B 
 												ON A.intPaymentId = B.intPaymentId
-										INNER JOIN tblAPBill C
+										INNER JOIN tblAPBills C
 												ON B.intBillId = C.intBillId
-									WHERE A.intPaymentId = @strTransactionID
-						GROUP BY A.intPaymentId, C.dblTotal),
-	tblAPBill.ysnPaid = CASE WHEN tblAPBill.dblAmountDue <= 0 THEN 1 ELSE 0 END
-
-
+						GROUP BY A.intPaymentId)
 
 --=====================================================================================================================================
 -- 	Check if process is only a RECAP
