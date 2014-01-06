@@ -746,12 +746,10 @@
     <Build Include="Security\RoleMemberships.sql" />
     <Build Include="Security\irely.sql" />
     <Build Include="dbo\Views\vyuBillBatch.sql" />
-<<<<<<< HEAD
     <Build Include="dbo\Stored Procedures\uspImportAPOriginTransactions.sql" />
     <Build Include="dbo\Stored Procedures\uspImportVendor.sql" />
     <Build Include="dbo\Database Triggers\trgBillBatchRecordNumber.sql" />
     <Build Include="dbo\Database Triggers\trgPaymentRecordNumber.sql" />
-=======
     <Build Include="dbo\Stored Procedures\PagedBankReconPaymentAndDebit.sql" />
     <Build Include="dbo\Stored Procedures\PagedBankReconDepositAndCredit.sql" />
     <Build Include="dbo\Stored Procedures\sp_AcuGetUser_1_1.sql" />
@@ -759,7 +757,6 @@
     <Build Include="dbo\Stored Procedures\sp_AcuDescribe_2_1.sql" />
     <Build Include="dbo\Stored Procedures\sp_AcuCountTables_1_1.sql" />
     <Build Include="dbo\Stored Procedures\sp_AcuCheckTable_2_1.sql" />
->>>>>>> f9f07b8870362f1d148eb555f587b61f1b0ec65d
   </ItemGroup>
   <ItemGroup>
     <None Include="i21.publish.xml" />
