@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblAPBill] (
     [intBillId]            INT             IDENTITY (1, 1) NOT NULL,
-    [intBillBatchId]       INT             NOT NULL,
+    [intBillBatchId]       INT             NULL,
     [strVendorId]          NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NOT NULL,
     [strVendorOrderNumber] NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [intTermsId]           INT             NOT NULL,
@@ -8,7 +8,7 @@
     [dtmDate]              DATETIME        NOT NULL,
     [dtmBillDate]          DATETIME        NOT NULL,
     [dtmDueDate]           DATETIME        NOT NULL,
-    [intAccountId]         INT             NOT NULL,
+    [intAccountId]         INT             NULL,
     [strDescription]       NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [dblTotal]             DECIMAL (18, 2) NOT NULL,
     [ysnPosted]            BIT             NOT NULL,

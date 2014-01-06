@@ -12,6 +12,7 @@
     [dblAmountPaid]      DECIMAL (18, 2) NOT NULL,
     [dblUnappliedAmount] DECIMAL (18, 2) NOT NULL,
     [ysnPosted]          BIT             NOT NULL,
+    [strPaymentRecordNum] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     CONSTRAINT [PK_dbo.tblAPPayments] PRIMARY KEY CLUSTERED ([intPaymentId] ASC)
 );
 
