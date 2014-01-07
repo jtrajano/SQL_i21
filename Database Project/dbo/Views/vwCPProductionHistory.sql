@@ -1,18 +1,4 @@
-﻿
-
-
-
-
-
-
-
-
-
-
-
-
-
-CREATE VIEW [dbo].[vwCPProductionHistory]
+﻿CREATE VIEW [dbo].[vwCPProductionHistory]
 AS
 select
 	a.A4GLIdentity
@@ -53,4 +39,3 @@ where
 	--a.gaphs_cus_no
 	--,a.gaphs_spl_no
 	--,a.gaphs_com_cd
-

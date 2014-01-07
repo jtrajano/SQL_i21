@@ -1,18 +1,4 @@
-﻿
-
-
-
-
-
-
-
-
-
-
-
-
-
-CREATE VIEW [dbo].[vwCPOptions]
+﻿CREATE VIEW [dbo].[vwCPOptions]
 AS
 select
 	a.A4GLIdentity
@@ -33,6 +19,7 @@ select
 	,a.gaopt_prcd_no_un
 	,a.gaopt_prcd_un_prc
 	,a.gaopt_un_target_prc
+	,a.gaopt_pur_sls_ind
 from
 	gaoptmst a
 left outer join
@@ -42,4 +29,3 @@ left outer join
 	--(a.gaopt_com_cd = @gaopt_com_cd)
 	--and (a.gaopt_cus_no = @gaopt_cus_no)
 	--and (a.gaopt_pur_sls_ind = @gaopt_pur_sls_ind)
-

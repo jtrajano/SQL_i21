@@ -1,16 +1,4 @@
-﻿
-
-
-
-
-
-
-
-
-
-
-
-CREATE VIEW [dbo].[vwCPOrders]
+﻿CREATE VIEW [dbo].[vwCPOrders]
 AS
 SELECT DISTINCT
 	a.A4GLIdentity
@@ -26,6 +14,7 @@ SELECT DISTINCT
 	,a.agord_bill_to_cus
 	,a.agord_ship_type
 	,a.agord_ship_total
+	,a.agord_ivc_no
 FROM
 	agordmst AS a
 INNER JOIN
@@ -38,5 +27,3 @@ WHERE
 	(a.agord_line_no = 1)
 	--AND (a.agord_type LIKE @agord_type)
 	AND (a.agord_type <> 'Q')
-
-

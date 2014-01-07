@@ -1,27 +1,5 @@
-﻿
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-CREATE VIEW [dbo].[vwCPDatabaseDate]
+﻿CREATE VIEW [dbo].[vwCPDatabaseDate]
 AS
 select
 	id = 1
 	,dbdate = GETDATE()
-
-
-

@@ -1,16 +1,4 @@
-﻿
-
-
-
-
-
-
-
-
-
-
-
-CREATE VIEW [dbo].[vwCPPurchases]
+﻿CREATE VIEW [dbo].[vwCPPurchases]
 AS
 select
 	a.A4GLIdentity
@@ -33,7 +21,3 @@ left outer join
 		and a.agstm_itm_no = b.agitm_no 
 where
 	(a.agstm_rec_type = 5)
-
-
-
-

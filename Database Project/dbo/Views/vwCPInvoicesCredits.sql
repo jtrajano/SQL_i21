@@ -1,6 +1,4 @@
-﻿
-
-CREATE VIEW [dbo].[vwCPInvoicesCredits]
+﻿CREATE VIEW [dbo].[vwCPInvoicesCredits]
 AS
 
 select
@@ -29,7 +27,7 @@ select
 	,agivc_disc_rev_dt = (case len(convert(varchar, a.agivc_disc_rev_dt)) when 8 then convert(date, cast(convert(varchar, a.agivc_disc_rev_dt) AS CHAR(12)), 112) else null end)
 	,agivc_net_rev_dt = (case len(convert(varchar, a.agivc_net_rev_dt)) when 8 then convert(date, cast(convert(varchar, a.agivc_net_rev_dt) AS CHAR(12)), 112) else null end)
 	,a.agivc_src_sys
-	,agivc_orig_rev_dt = (case len(convert(varchar, a.agivc_orig_rev_dt)) when 8 then convert(date, cast(convert(varchar, a.agivc_orig_rev_dt) AS CHAR(12)), 112) else null end)
+	,a.agivc_orig_rev_dt--agivc_orig_rev_dt = (case len(convert(varchar, a.agivc_orig_rev_dt)) when 8 then convert(date, cast(convert(varchar, a.agivc_orig_rev_dt) AS CHAR(12)), 112) else null end)
     ,a.agivc_split_no
 	,a.agivc_pd_days_old
 	,a.agivc_eft_ivc_paid_yn
@@ -44,3 +42,5 @@ from agivcmst a
 		on a.agivc_bill_to_cus = c.agcrd_cus_no 
 		and a.agivc_orig_rev_dt = c.agcrd_rev_dt 
 		and a.agivc_ivc_no = c.agcrd_ref_no
+		
+--where a.agivc_bill_to_cus = '0000000505'

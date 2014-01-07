@@ -1,17 +1,4 @@
-﻿
-
-
-
-
-
-
-
-
-
-
-
-
-CREATE VIEW [dbo].[vwCPContracts]
+﻿CREATE VIEW [dbo].[vwCPContracts]
 AS
 select distinct
 	a.A4GLIdentity
@@ -26,6 +13,8 @@ select distinct
 	,b.agitm_un_desc
 	,a.agcnt_line_no
 	,a.agcnt_un_bal
+	,a.agcnt_cus_no
+	, strStatus = (case when a.agcnt_un_bal > 0 then 'Open' else 'Closed' end)
 from
 	agcntmst a
 left outer join

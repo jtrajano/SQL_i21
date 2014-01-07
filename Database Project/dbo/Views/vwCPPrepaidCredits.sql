@@ -1,10 +1,4 @@
-﻿
-
-
-
-
-
-CREATE VIEW [dbo].[vwCPPrepaidCredits]
+﻿CREATE VIEW [dbo].[vwCPPrepaidCredits]
 AS
 select 
 	A4GLIdentity = row_number() over (order by agcrd_loc_no)
@@ -24,7 +18,3 @@ group by
 	,agcrd_cred_ind
 	,agcrd_ref_no
 	,agcrd_rev_dt
-
-
-
-
