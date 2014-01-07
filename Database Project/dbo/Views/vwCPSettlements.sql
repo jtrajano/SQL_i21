@@ -1,12 +1,4 @@
-﻿
-
-
-
-
-
-
-
-CREATE VIEW [dbo].[vwCPSettlements]
+﻿CREATE VIEW [dbo].[vwCPSettlements]
 AS
 select
 	gastl_rec_type
@@ -19,7 +11,7 @@ select
 	,gastl_ivc_no
 	,gastl_defer_pmt_rev_dt = (case len(convert(varchar, gastl_defer_pmt_rev_dt)) when 8 then convert(date, cast(convert(varchar, gastl_defer_pmt_rev_dt) AS CHAR(12)), 112) else null end)
 	,gastl_cnt_no
-	,gastl_pd_yn
+	,gastl_pd_yn = (case gastl_pd_yn when 'Y' then 'P' else 'U' end)
 	,gastl_cus_no
 	,gastl_com_cd
 	,gastl_tie_breaker
@@ -31,12 +23,10 @@ select
 from
 	gastlmst
 where
-	(gastl_pd_yn <> 'Y')
-	and (gastl_rec_type <> 'F')
+	(gastl_rec_type <> 'F')
+	--and (gastl_pd_yn <> 'Y')
 	--and (gastl_cus_no = @gastl_cus_no)
 	--and (gastl_stl_rev_dt >= @gastl_stl_rev_dt)
 	--and (gastl_stl_rev_dt <= @gastl_stl_rev_dt1)
 	--and (gastl_com_cd = @gastl_com_cd)
 	--and (gastl_pur_sls_ind = @gastl_pur_sls_ind)
-
-

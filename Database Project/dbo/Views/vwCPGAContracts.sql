@@ -1,13 +1,4 @@
-﻿
-
-
-
-
-
-
-
-
-CREATE VIEW [dbo].[vwCPGAContracts]
+﻿CREATE VIEW [dbo].[vwCPGAContracts]
 AS
 select
 	a.gacnt_loc_no
@@ -25,7 +16,7 @@ select
 	,b.gacom_desc
 	,a.gacnt_un_bal
 	,a.gacnt_un_bal_unprc
-	,'' as status
+	,status = (case when a.gacnt_un_bal > 0 then 'Open' else 'Closed' end)
 	,a.gacnt_pur_sls_ind
 	,a.gacnt_un_frt_basis
 	,'' as Remarks

@@ -1,17 +1,4 @@
-﻿
-
-
-
-
-
-
-
-
-
-
-
-
-CREATE VIEW [dbo].[vwCPInvoicesCreditsReports]
+﻿CREATE VIEW [dbo].[vwCPInvoicesCreditsReports]
 AS
 select
 	strCompanyName = rtrim(ltrim(c.coctl_co_name))
@@ -39,7 +26,8 @@ select
 	,strTax = 'GROUND WATER TAX'
 	,strTaxUnitsSold = convert(nvarchar, round(dd.agstm_un, 4)) + ' ' + dd.agstm_un_desc
 	,dblTaxUnitPrice = round(cast(dd.agstm_lc1_rt as float), 4)
-	,dblTaxExtended = convert(decimal(10,2), (((dd.agstm_un * dd.agstm_un_prc) * dd.agstm_lc1_rt)/100))
+	--,dblTaxExtended = convert(decimal(10,2), (((dd.agstm_un * dd.agstm_un_prc) * dd.agstm_lc1_rt)/100))
+	,dblTaxExtended = convert(decimal(10,2), ((dd.agstm_pkg_ship * dd.agstm_un_per_pak) * dd.agstm_un_prc))
 from coctlmst c, agcusmst t, agivcmst v, agstmmst d, agstmmst dd
 where v.agivc_bill_to_cus = t.agcus_key
 	and d.agstm_bill_to_cus = t.agcus_key
@@ -50,4 +38,3 @@ where v.agivc_bill_to_cus = t.agcus_key
 	and dd.agstm_rec_type = 5
 	--and t.agcus_key = '0000000505'
 	--and v.agivc_ivc_no = '00222145'
-

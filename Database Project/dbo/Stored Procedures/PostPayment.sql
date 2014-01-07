@@ -270,7 +270,7 @@ BEGIN
 	IF @@ERROR <> 0	GOTO Post_Rollback
 	
 	-- Update the posted flag in the transaction table
-	UPDATE tblAPBills
+	UPDATE tblAPBill
 	SET		ysnPosted = 0
 			--,intConcurrencyID += 1 
 	WHERE	strBillId = @strTransactionID
@@ -297,7 +297,7 @@ UPDATE tblAPBill
 								FROM tblAPPayment A
 										INNER JOIN tblAPPaymentDetail B 
 												ON A.intPaymentId = B.intPaymentId
-										INNER JOIN tblAPBills C
+										INNER JOIN tblAPBill C
 												ON B.intBillId = C.intBillId
 						GROUP BY A.intPaymentId)
 

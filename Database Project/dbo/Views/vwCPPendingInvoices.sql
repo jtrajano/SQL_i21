@@ -1,12 +1,4 @@
-﻿
-
-
---select * from agordmst
-
-
-
-
-CREATE VIEW [dbo].[vwCPPendingInvoices]
+﻿CREATE VIEW [dbo].[vwCPPendingInvoices]
 AS
 SELECT DISTINCT
 	a.agord_ivc_no
@@ -33,5 +25,3 @@ WHERE
 	(a.agord_line_no = 1)
 	AND (a.agord_type IN ('I', 'B', 'D', 'C', 'O'))
 	AND (a.agord_ship_total <> 0)
-
-

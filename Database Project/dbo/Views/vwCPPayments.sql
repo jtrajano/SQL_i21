@@ -1,16 +1,4 @@
-﻿
-
-
-
-
-
-
-
-
-
-
-
-CREATE VIEW [dbo].[vwCPPayments]
+﻿CREATE VIEW [dbo].[vwCPPayments]
 AS
 select
 	p.A4GLIdentity
@@ -30,4 +18,3 @@ where
  --and (p.agpay_cus_no = @agpay_cus_no)
  --and (p.agpay_chk_no = @agpay_chk_no)
 --order by p.agpay_orig_rev_dt
-
