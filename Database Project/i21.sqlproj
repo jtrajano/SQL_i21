@@ -762,5 +762,8 @@
     <None Include="i21.publish.xml" />
     <None Include="Scripts\Pre-Deployment\SM\1_DataCleanup.sql" />
     <None Include="Scripts\Post-Deployment\FIN\DefaultData\BankTransactionTypes.sql" />
+    <None Include="dbo\Views\vwCPBABusinessSummaryServiceCharge.sql" />
+    <None Include="dbo\Views\vwCPBABusinessSummary.sql" />
+    <None Include="dbo\Views\vwCPGASettlementsReports.sql" />
   </ItemGroup>
 </Project>

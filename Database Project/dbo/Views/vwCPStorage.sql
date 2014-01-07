@@ -1,20 +1,4 @@
-﻿
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-CREATE VIEW [dbo].[vwCPStorage]
+﻿CREATE VIEW [dbo].[vwCPStorage]
 AS
 select
 	gastr_stor_type

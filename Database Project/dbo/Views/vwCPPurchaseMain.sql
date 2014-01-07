@@ -1,19 +1,4 @@
-﻿
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-CREATE VIEW [dbo].[vwCPPurchaseMain]
+﻿CREATE VIEW [dbo].[vwCPPurchaseMain]
 AS
 
 select distinct
@@ -38,4 +23,3 @@ group by
 	,agitm_desc
 	,agstm_un
 	,agstm_un_desc
-

@@ -1,18 +1,4 @@
-﻿
-
-
-
-
-
-
-
-
-
-
-
-
-
-CREATE VIEW [dbo].[vwCPPurchaseDetail]
+﻿CREATE VIEW [dbo].[vwCPPurchaseDetail]
 AS
 
 select distinct
@@ -36,4 +22,3 @@ where
 	--and (a.agstm_ship_rev_dt <= @agstm_ship_rev_dt1)
 	--and (a.agstm_bill_to_cus = @agstm_bill_to_cus)
 	--and (a.agstm_itm_no = @agstm_itm_no)
-
