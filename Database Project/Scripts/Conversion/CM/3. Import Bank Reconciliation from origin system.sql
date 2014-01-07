@@ -15,9 +15,13 @@
 					2. dblStatementEndingBalance - Legacy/Origin does not have a record of the statement ending balance. 
 					
 					After importing the bank reconciliation records, the user can re-enter the statement balance inside the bank reconciliation screen and save
-					the bank statement balance.  
-					
+					the bank statement balance.					
+				
 					*Prerequisite: Run this script after a successful run of the "Import Bank Transactions from apchkmst" script.  
+					
+					Modification 01/07/2014:
+					1. Import logic is changed. All reconciled records will be imported in one reconciliation history record per bank account. 
+					2. The user will be doing the reconciliation from this single record. 
 */
 
 -- Declare and initialize the constant variables
@@ -38,7 +42,9 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@ORIGIN_WIRE AS INT = 15
 
 -- Declare and initialize the local variables.
-DECLARE @intBankAccountID AS INT 
+DECLARE @intBankAccountID AS INT
+		,@dtmMostRecentReconciliation DATETIME
+
 
 -- 1. Gather the bank accounts record and store it in a temporary table. 
 SELECT	intBankAccountID, strBankName
@@ -52,10 +58,18 @@ BEGIN
 	SELECT TOP 1 @intBankAccountID = intBankAccountID
 	FROM #tmpBankAccounts
 	
-	-- 2.1. Gather the reconciled transactions and store it inside a temp table. 
+	-- 2.2. Get the most recent bank reconciliation for the bank account. 
+	SELECT	@dtmMostRecentReconciliation = MAX(A.dtmDateReconciled)
+	FROM	tblCMBankTransaction A
+	WHERE	A.dtmDateReconciled IS NOT NULL 
+			AND A.intBankAccountID = @intBankAccountID
+			AND A.ysnClr = 1
+			AND A.ysnPosted = 1
+			AND ISNULL(A.dblAmount, 0) <> 0	
+	
+	-- 2.3. Gather the reconciled transactions and store it inside a temp table. 
 	-- Group it by the date reconciled. 
-	SELECT	A.dtmDateReconciled
-			,dblClearedPaymentsOrDebits = SUM(
+	SELECT	dblClearedPaymentsOrDebits = SUM(
 				CASE 
 					WHEN A.intBankTransactionTypeID IN (@ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE) THEN
 						ISNULL(A.dblAmount, 0)
@@ -83,19 +97,19 @@ BEGIN
 						)
 				FROM	tblCMBankTransaction B
 				WHERE	B.intBankAccountID = @intBankAccountID
-						AND B.dtmDate <= A.dtmDateReconciled
+						AND B.dtmDate <= @dtmMostRecentReconciliation
 						AND B.ysnPosted = 1
 			)
 	INTO	#tmpClearedTransactions 
 	FROM	tblCMBankTransaction  A
-	WHERE	A.dtmDateReconciled IS NOT NULL 
+	WHERE	A.dtmDateReconciled IS NOT NULL
+			AND @dtmMostRecentReconciliation IS NOT NULL
 			AND A.intBankAccountID = @intBankAccountID
 			AND A.ysnClr = 1
-			AND A.ysnPosted = 1
+			AND A.ysnPosted = 1 
 			AND ISNULL(A.dblAmount, 0) <> 0
-	GROUP BY A.dtmDateReconciled
-	ORDER BY A.dtmDateReconciled
 	
+	-- 2.4. Insert the bank reconciliation record. 
 	INSERT INTO tblCMBankReconciliation (
 			intBankAccountID
 			,dtmDateReconciled
@@ -109,10 +123,11 @@ BEGIN
 			,intLastModifiedUserID
 			,dtmLastModified
 			,intConcurrencyID
+			,ysnImported
 	)
 	SELECT	
 			intBankAccountID			= @intBankAccountID
-			,dtmDateReconciled			= tmp.dtmDateReconciled
+			,dtmDateReconciled			= @dtmMostRecentReconciliation
 			,dblStatementOpeningBalance = 0
 			,dblDebitCleared			= tmp.dblClearedPaymentsOrDebits
 			,dblCreditCleared			= tmp.dblDepositsOrCredits
@@ -123,14 +138,27 @@ BEGIN
 			,intLastModifiedUserID		= 0
 			,dtmLastModified			= GETDATE()
 			,intConcurrencyID			= 1
+			,ysnImported				= 1
 	FROM	#tmpClearedTransactions tmp	
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblCMBankReconciliation WHERE intBankAccountID = @intBankAccountID AND dtmDateReconciled = tmp.dtmDateReconciled)
+	WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBankReconciliation WHERE intBankAccountID = @intBankAccountID AND dtmDateReconciled = @dtmMostRecentReconciliation)
+			AND @dtmMostRecentReconciliation IS NOT NULL
+			
+	-- 2.6. Update the bank transaction and set the imported record to the new reconciliation date. 
+	UPDATE tblCMBankTransaction
+	SET		dtmDateReconciled = @dtmMostRecentReconciliation
+	WHERE	dtmDateReconciled IS NOT NULL
+			AND @dtmMostRecentReconciliation IS NOT NULL
+			AND intBankAccountID = @intBankAccountID
+			AND ysnClr = 1
+			AND ysnPosted = 1 
+			AND ISNULL(dblAmount, 0) <> 0
+			AND intBankTransactionTypeID IN (@ORIGIN_DEPOSIT, @ORIGIN_CHECKS,@ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
 
-	-- 2.last. Delete the bank account from the tmp table after processing it. 
+	-- 2.6. Delete the bank account from the tmp table after processing it. 
 	DELETE FROM #tmpBankAccounts
 	WHERE intBankAccountID = @intBankAccountID
 	
-	-- 2.last. Drop the temp table. 
+	-- 2.7. Drop the temp table. 
 	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#tmpClearedTransactions')) DROP TABLE #tmpClearedTransactions
 END
 
