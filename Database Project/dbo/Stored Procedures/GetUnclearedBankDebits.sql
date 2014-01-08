@@ -32,11 +32,17 @@ DECLARE @BANK_DEPOSIT INT = 1
 SELECT	ISNULL(SUM(ABS(ISNULL(dblAmount, 0))), 0)
 FROM	tblCMBankTransaction 
 WHERE	ysnPosted = 1
-		AND ysnClr = 0
 		AND intBankAccountID = @intBankAccountID
 		AND dblAmount <> 0		
-		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmStatementDate, dtmDate) AS FLOAT)) AS DATETIME)
-		AND dtmDateReconciled IS NULL
+		AND	1 =	CASE	
+					WHEN ysnClr = 0 THEN 
+						CASE WHEN CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmStatementDate, dtmDate) AS FLOAT)) AS DATETIME) THEN 1 ELSE 0 END
+					WHEN ysnClr = 1 THEN 
+						CASE	WHEN	CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmStatementDate, dtmDate) AS FLOAT)) AS DATETIME) 
+										AND CAST(FLOOR(CAST(ISNULL(dtmDateReconciled, dtmDate) AS FLOAT)) AS DATETIME) > CAST(FLOOR(CAST(ISNULL(@dtmStatementDate, dtmDate) AS FLOAT)) AS DATETIME) 
+								THEN 1 ELSE 0 
+						END
+				END	
 		AND (
 			-- Filter for all the bank payments and debits:
 			intBankTransactionTypeID IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
