@@ -767,5 +767,7 @@
     <None Include="dbo\Views\vwCPBABusinessSummaryServiceCharge.sql" />
     <None Include="dbo\Views\vwCPBABusinessSummary.sql" />
     <None Include="dbo\Views\vwCPGASettlementsReports.sql" />
+    <None Include="dbo\Views\vwCPGAContractOption.sql" />
+    <None Include="dbo\Views\vwCPGAContractHistory.sql" />
   </ItemGroup>
 </Project>
