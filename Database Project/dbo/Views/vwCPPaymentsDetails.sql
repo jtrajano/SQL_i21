@@ -1,7 +1,8 @@
 ﻿CREATE VIEW [dbo].[vwCPPaymentsDetails]
 AS
 select
-	strCustomerNo = rtrim(ltrim(c.agcus_first_name)) + ' ' + rtrim(ltrim(c.agcus_last_name))
+	strCustomerName = rtrim(ltrim(c.agcus_first_name)) + ' ' + rtrim(ltrim(c.agcus_last_name))
+	,strCustomerNo = agpay_cus_no
 	,strCheckNo = agpay_chk_no
 	,dblAmount = agpay_amt
 	,strLocationNo = agpay_ivc_loc_no
@@ -15,7 +16,8 @@ from
 --where agpay_orig_rev_dt between 20120816 and 20131211 and agpay_cus_no = '0000000505'
 union all
 select
-	strCustomerNo = rtrim(ltrim(c.agcus_first_name)) + ' ' + rtrim(ltrim(c.agcus_last_name))
+	strCustomerName = rtrim(ltrim(c.agcus_first_name)) + ' ' + rtrim(ltrim(c.agcus_last_name))
+	,strCustomerNo = a.agpye_cus_no
 	,strCheckNo = a.agpye_chk_no
 	,dblAmount = a.agpye_amt
 	,strLocationNo = a.agpye_ivc_loc_no
@@ -35,7 +37,8 @@ left outer join
 --where a.agpye_rev_dt between 20120816 and 20131211 and a.agpye_cus_no = '0000000505'
 union all
 SELECT
-	strCustomerNo = rtrim(ltrim(c.agcus_first_name)) + ' ' + rtrim(ltrim(c.agcus_last_name))
+	strCustomerName = rtrim(ltrim(c.agcus_first_name)) + ' ' + rtrim(ltrim(c.agcus_last_name))
+	,strCustomerNo = a.agcrd_cus_no
 	,strCheckNo = 'Unapplied'
 	,dblAmount = SUM(a.agcrd_amt - a.agcrd_amt_used)
 	,strLocationNo = a.agcrd_loc_no
