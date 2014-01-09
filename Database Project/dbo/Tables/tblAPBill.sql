@@ -13,7 +13,7 @@
 	[dblTotal] [decimal](18, 2) NOT NULL,
 	[ysnPosted] [bit] NOT NULL,
 	[ysnPaid] [bit] NOT NULL,
-	[strBillId] [NVARCHAR](50) collate Latin1_General_CI_AS NOT NULL,
+	[strBillId] [NVARCHAR](50) collate Latin1_General_CI_AS NULL,
 	[dblAmountDue] [decimal](18, 2) NOT NULL,
 	[dtmDatePaid] [datetime] NULL,
  CONSTRAINT [PK_dbo.tblAPBill] PRIMARY KEY CLUSTERED 
