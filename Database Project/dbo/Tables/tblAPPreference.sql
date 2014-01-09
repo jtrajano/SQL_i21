@@ -3,6 +3,6 @@
 	[intPreferenceId] INT IDENTITY(1,1) NOT NULL PRIMARY KEY, 
     [intDefaultAccountId] INT NULL, 
     [intWithholdAccountId] INT NULL, 
-    [intDiscountId] INT NULL, 
-    [dblWithholdPercent] INT NULL
+    [intDiscountAccountId] INT NULL, 
+    [dblWithholdPercent] DECIMAL(18, 6) NULL
 )

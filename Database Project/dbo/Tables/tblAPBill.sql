@@ -1,28 +1,36 @@
-﻿CREATE TABLE [dbo].[tblAPBill] (
-    [intBillId]            INT             IDENTITY (1, 1) NOT NULL,
-    [intBillBatchId]       INT             NULL,
-    [strVendorId]          NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NOT NULL,
-    [strVendorOrderNumber] NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [intTermsId]           INT             NOT NULL,
-    [intTaxCodeId]         INT             NULL,
-    [dtmDate]              DATETIME        NOT NULL,
-    [dtmBillDate]          DATETIME        NOT NULL,
-    [dtmDueDate]           DATETIME        NOT NULL,
-    [intAccountId]         INT             NULL,
-    [strDescription]       NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [dblTotal]             DECIMAL (18, 2) NOT NULL,
-    [ysnPosted]            BIT             NOT NULL,
-    [ysnPaid]              BIT             NOT NULL,
-    [strBillId]            AS              ('BL-'+CONVERT([varchar](5),[intBillId],(0)) collate Latin1_General_CI_AS),
-    [dblAmountDue]         DECIMAL (18, 2) NOT NULL,
-    CONSTRAINT [PK_dbo.tblAPBill] PRIMARY KEY CLUSTERED ([intBillId] ASC),
-    CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPBillBatch_intBillBatchId] FOREIGN KEY ([intBillBatchId]) REFERENCES [dbo].[tblAPBillBatch] ([intBillBatchId]) ON DELETE CASCADE
-);
+﻿CREATE TABLE [dbo].[tblAPBill](
+	[intBillId] [int] IDENTITY(1,1) NOT NULL,
+	[intBillBatchId] [int] NULL,
+	[strVendorId] [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strVendorOrderNumber] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+	[intTermsId] [int] NOT NULL,
+	[intTaxCodeId] [int] NULL,
+	[dtmDate] [datetime] NOT NULL,
+	[dtmBillDate] [datetime] NOT NULL,
+	[dtmDueDate] [datetime] NOT NULL,
+	[intAccountId] [int] NULL,
+	[strDescription] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+	[dblTotal] [decimal](18, 2) NOT NULL,
+	[ysnPosted] [bit] NOT NULL,
+	[ysnPaid] [bit] NOT NULL,
+	[strBillId] [NVARCHAR](50) collate Latin1_General_CI_AS NOT NULL,
+	[dblAmountDue] [decimal](18, 2) NOT NULL,
+	[dtmDatePaid] [datetime] NULL,
+ CONSTRAINT [PK_dbo.tblAPBill] PRIMARY KEY CLUSTERED 
+(
+	[intBillId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 
+GO
 
+ALTER TABLE [dbo].[tblAPBill]  WITH NOCHECK ADD  CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPBillBatch_intBillBatchId] FOREIGN KEY([intBillBatchId])
+REFERENCES [dbo].[tblAPBillBatch] ([intBillBatchId])
+ON DELETE CASCADE
+GO
 
-
-
+ALTER TABLE [dbo].[tblAPBill] CHECK CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPBillBatch_intBillBatchId]
+GO
 
 GO
 CREATE NONCLUSTERED INDEX [IX_intBillBatchId]

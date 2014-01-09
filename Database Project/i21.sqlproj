@@ -758,6 +758,15 @@
     <Build Include="dbo\Stored Procedures\sp_AcuCountTables_1_1.sql" />
     <Build Include="dbo\Stored Procedures\sp_AcuCheckTable_2_1.sql" />
     <Build Include="dbo\Tables\tblAPPreference.sql" />
+    <Build Include="dbo\Tables\tblAPBillDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspPostPayment.sql" />
+    <Build Include="dbo\Functions\fnGetRowsFromDelimitedValues.sql" />
+    <Build Include="dbo\Tables\tblGLRecap.sql" />
+    <Build Include="dbo\Functions\fnLTrimX.sql" />
+    <Build Include="dbo\Functions\fnRTrimX.sql" />
+    <Build Include="dbo\Functions\fnTrimX.sql" />
+    <Build Include="dbo\Stored Procedures\uspPostBill.sql" />
+    <Build Include="dbo\Stored Procedures\uspPostBillBatch.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="i21.publish.xml" />
@@ -766,5 +775,8 @@
     <None Include="dbo\Views\vwCPBABusinessSummaryServiceCharge.sql" />
     <None Include="dbo\Views\vwCPBABusinessSummary.sql" />
     <None Include="dbo\Views\vwCPGASettlementsReports.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="i21.refactorlog" />
   </ItemGroup>
 </Project>

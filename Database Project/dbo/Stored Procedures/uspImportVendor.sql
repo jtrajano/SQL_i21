@@ -232,7 +232,7 @@ BEGIN
 			@ysnPymtCtrlActive        	= CASE WHEN ssvnd_pay_ctl_ind = 'A' THEN 1 ELSE 0 END,
 			@ysnPymtCtrlAlwaysDiscount	= NULL,
 			@ysnPymtCtrlEFTActive     	= NULL,
-			@ysnPymtCtrlHold          	= CASE WHEN ssvnd_acct_stat = 'A' THEN 1 ELSE 0 END,
+			@ysnPymtCtrlHold          	= NULL,
 			@ysnPrint1099             	= CASE WHEN ssvnd_1099_yn = 'Y' THEN 1 ELSE 0 END,
 			@ysnWithholding           	= CASE WHEN ssvnd_wthhld_yn = 'N' THEN 0 ELSE 1 END,
 			@ysnW9Signed              	= ssvnd_w9_signed_rev_dt,

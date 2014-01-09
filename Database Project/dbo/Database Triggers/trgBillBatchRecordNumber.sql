@@ -14,3 +14,7 @@ AS
 	FROM tblAPBillBatch A
 		INNER JOIN INSERTED B ON A.intBillBatchId = B.intBillBatchId
 	END
+
+	UPDATE tblSMStartingNumber
+		SET intNumber = intNumber + 1
+	WHERE strTransactionType = 'Bill Batch' AND ysnEnable = 1

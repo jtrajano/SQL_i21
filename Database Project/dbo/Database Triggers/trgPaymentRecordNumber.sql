@@ -14,3 +14,7 @@ AS
 	FROM tblAPPayment A
 		INNER JOIN INSERTED B ON A.intPaymentId = B.intPaymentId
 	END
+
+	UPDATE tblSMStartingNumber
+		SET intNumber = intNumber + 1
+	WHERE strTransactionType = 'Payable' AND ysnEnable = 1

@@ -291,15 +291,18 @@ SET		ysnPosted = 1
 		--,intConcurrencyID += 1 
 WHERE	intPaymentId = @strTransactionID
 
---Update dblAmountDue on tblAPBill
+
+--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
 UPDATE tblAPBill
-	SET tblAPBill.dblAmountDue = (SELECT SUM(B.dblPayment) 
-								FROM tblAPPayment A
-										INNER JOIN tblAPPaymentDetail B 
-												ON A.intPaymentId = B.intPaymentId
-										INNER JOIN tblAPBill C
-												ON B.intBillId = C.intBillId
-						GROUP BY A.intPaymentId)
+	SET tblAPBill.dblAmountDue = (C.dblTotal - B.dblPayment),
+						--GROUP BY A.intPaymentId,C.dblTotal, C.intBillId),
+		tblAPBill.ysnPaid = (CASE WHEN tblAPBill.dblAmountDue = 0 THEN 1 ELSE 0 END)
+FROM tblAPPayment A
+			INNER JOIN tblAPPaymentDetail B 
+					ON A.intPaymentId = B.intPaymentId
+			INNER JOIN tblAPBill C
+					ON B.intBillId = C.intBillId
+			WHERE A.intPaymentId = @strTransactionID AND C.intBillId = tblAPBill.intBillId
 
 --=====================================================================================================================================
 -- 	Check if process is only a RECAP

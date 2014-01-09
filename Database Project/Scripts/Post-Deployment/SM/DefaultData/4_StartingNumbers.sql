@@ -26,6 +26,18 @@ GO
 	BEGIN 
 		INSERT [dbo].[tblSMStartingNumber] ([cntID], [strTransactionType], [strPrefix], [intNumber], [intTransactionTypeID], [strModule], [ysnEnable], [intConcurrencyID]) VALUES (6, N'COA Adjustment', N'GLADJ-', 0, 6, N'Accounting', 1, 1)
 	END
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bill Batch')
+	BEGIN 
+		INSERT [dbo].[tblSMStartingNumber] ([cntID], [strTransactionType], [strPrefix], [intNumber], [intTransactionTypeID], [strModule], [ysnEnable], [intConcurrencyID]) VALUES (6, N'Bill Batch', N'BB-', 0, 6, N'Accounts Payable', 1, 1)
+	END
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Payable')
+	BEGIN 
+		INSERT [dbo].[tblSMStartingNumber] ([cntID], [strTransactionType], [strPrefix], [intNumber], [intTransactionTypeID], [strModule], [ysnEnable], [intConcurrencyID]) VALUES (6, N'Payable', N'PAY-', 0, 6, N'Accounts Payable', 1, 1)
+	END
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bill')
+	BEGIN 
+		INSERT [dbo].[tblSMStartingNumber] ([cntID], [strTransactionType], [strPrefix], [intNumber], [intTransactionTypeID], [strModule], [ysnEnable], [intConcurrencyID]) VALUES (6, N'Bill', N'BL-', 0, 6, N'Accounts Payable', 1, 1)
+	END
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'
