@@ -32,11 +32,17 @@ DECLARE @BANK_DEPOSIT INT = 1
 SELECT	ISNULL(SUM(ISNULL(dblAmount,0)), 0)
 FROM	tblCMBankTransaction 
 WHERE	ysnPosted = 1
-		AND ysnClr = 0
 		AND intBankAccountID = @intBankAccountID
 		AND dblAmount <> 0
-		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmStatementDate, dtmDate) AS FLOAT)) AS DATETIME)
-		AND dtmDateReconciled IS NULL
+		AND	1 =	CASE	
+					WHEN ysnClr = 0 THEN 
+						CASE WHEN CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmStatementDate, dtmDate) AS FLOAT)) AS DATETIME) THEN 1 ELSE 0 END
+					WHEN ysnClr = 1 THEN 
+						CASE	WHEN	CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmStatementDate, dtmDate) AS FLOAT)) AS DATETIME) 
+										AND CAST(FLOOR(CAST(ISNULL(dtmDateReconciled, dtmDate) AS FLOAT)) AS DATETIME) > CAST(FLOOR(CAST(ISNULL(@dtmStatementDate, dtmDate) AS FLOAT)) AS DATETIME) 
+								THEN 1 ELSE 0 
+						END
+				END
 		AND (
 			-- Filter for all the bank deposits and credits:
 			intBankTransactionTypeID IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT)

@@ -767,6 +767,7 @@
     <Build Include="dbo\Functions\fnTrimX.sql" />
     <Build Include="dbo\Stored Procedures\uspPostBill.sql" />
     <Build Include="dbo\Stored Procedures\uspPostBillBatch.sql" />
+    <Build Include="dbo\Views\vwCPGAContractDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="i21.publish.xml" />
@@ -775,6 +776,8 @@
     <None Include="dbo\Views\vwCPBABusinessSummaryServiceCharge.sql" />
     <None Include="dbo\Views\vwCPBABusinessSummary.sql" />
     <None Include="dbo\Views\vwCPGASettlementsReports.sql" />
+    <None Include="dbo\Views\vwCPGAContractOption.sql" />
+    <None Include="dbo\Views\vwCPGAContractHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
