@@ -56,6 +56,8 @@ INSERT INTO #tmpValidData
 	WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPostData) AND 
 		1 = ISNULL([dbo].isOpenAccountingDate(A.[dtmDatePaid]), 0)
 
+SELECT @successfulCount = COUNT(*) FROM #tmpValidData
+
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
 --=====================================================================================================================================
@@ -103,7 +105,7 @@ IF ISNULL(@recap, 0) = 0
 		--CREDIT
 		SELECT
 			 [strPaymentRecordNum]
-			,(SELECT intAccountID FROM tblGLAccount WHERE intAccountID = (SELECT intGLAccountID FROM tblCMBankAccount WHERE intBankAccountID = 1))
+			,(SELECT intAccountID FROM tblGLAccount WHERE intAccountID = (SELECT intGLAccountID FROM tblCMBankAccount WHERE intBankAccountID = A.intBankAccountId))
 			,'Posted Payable'
 			,A.[strVendorId]
 			,A.[dtmDatePaid]
@@ -126,7 +128,33 @@ IF ISNULL(@recap, 0) = 0
 				INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 					ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpValidData)
-	
+		--Withheld
+		UNION
+		SELECT
+			 [strPaymentRecordNum]
+			,(SELECT intWithholdAccountId FROM tblAPPreference)
+			,'Posted Payable'
+			,A.[strVendorId]
+			,A.[dtmDatePaid]
+			,[dblDebit]				= 0
+			,[dblCredit]			= A.dblWithheldAmount
+			,[dblDebitUnit]			= ISNULL(A.[dblAmountPaid], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountID] = A.[intAccountId]), 0)
+			,[dblCreditUnit]		= ISNULL(A.[dblAmountPaid], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountID] = A.[intAccountId]), 0)
+			,A.[dtmDatePaid]
+			,0
+			,1
+			,[dblExchangeRate]		= 1
+			,[intUserID]			= @userId
+			,[dtmDateEntered]		= GETDATE()
+			,[strBatchID]			= @batchId
+			,[strCode]				= 'AP'
+			,[strModuleName]		= @MODULE_NAME
+			,A.intPaymentId
+		FROM	[dbo].tblAPPayment A INNER JOIN [dbo].tblGLAccount GLAccnt
+					ON A.intBankAccountId = GLAccnt.intAccountID
+				INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
+					ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
+		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpValidData)
 		---- DEBIT SIDE
 		UNION ALL 
 		SELECT	[strPaymentRecordNum]
@@ -152,7 +180,7 @@ IF ISNULL(@recap, 0) = 0
 				LEFT JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpValidData)
-		--GROUP BY A.intPaymentId, B.intAccountId, A.dtmDatePaid
+		
 
 		-- Update the posted flag in the transaction table
 		UPDATE tblAPPayment
@@ -179,6 +207,10 @@ ELSE
 	BEGIN
 		--TODO:
 		--DELETE TABLE PER Session
+		DELETE FROM tblGLDetailRecap
+			WHERE strTransactionID IN (SELECT CAST(intPaymentId AS NVARCHAR(50)) FROM #tmpValidData);
+
+		--GO
 
 		WITH Units 
 		AS 
@@ -186,9 +218,9 @@ ELSE
 			SELECT	A.[dblLbsPerUnit], B.[intAccountID] 
 			FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitID] = B.[intAccountUnitID]
 		)
-		INSERT INTO tblGLRecap (
-			 [strTransactionId]
-			,[intAccountId]
+		INSERT INTO tblGLDetailRecap (
+			 [strTransactionID]
+			,[intAccountID]
 			,[strDescription]
 			,[strReference]	
 			,[dtmTransactionDate]
@@ -198,19 +230,19 @@ ELSE
 			,[dblCreditUnit]
 			,[dtmDate]
 			,[ysnIsUnposted]
-			,[intConcurrencyId]	
+			,[intConcurrencyID]	
 			,[dblExchangeRate]
-			,[intUserId]
+			,[intUserID]
 			,[dtmDateEntered]
-			,[strBatchId]
+			,[strBatchID]
 			,[strCode]
 			,[strModuleName]
 			,[strTransactionForm]
 		)
 		--CREDIT SIDE
 		SELECT
-			 [strPaymentRecordNum]
-			,(SELECT intAccountID FROM tblGLAccount WHERE intAccountID = (SELECT intGLAccountID FROM tblCMBankAccount WHERE intBankAccountID = 1))
+			 CAST(A.intPaymentId AS NVARCHAR(50))--[strPaymentRecordNum]
+			,(SELECT intAccountID FROM tblGLAccount WHERE intAccountID = (SELECT intGLAccountID FROM tblCMBankAccount WHERE intBankAccountID = A.intBankAccountId))
 			,'Posted Payable'
 			,A.[strVendorId]
 			,A.[dtmDatePaid]
@@ -232,9 +264,36 @@ ELSE
 			LEFT JOIN tblAPPaymentDetail B 
 				ON A.intPaymentId = B.intPaymentId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpValidData)
+		--Withheld
+		UNION
+		SELECT
+			 CAST(A.intPaymentId AS NVARCHAR(50))--[strPaymentRecordNum]
+			,(SELECT intWithholdAccountId FROM tblAPPreference)
+			,'Posted Payable'
+			,A.[strVendorId]
+			,A.[dtmDatePaid]
+			,[dblDebit]				= 0
+			,[dblCredit]			= A.dblWithheldAmount
+			,[dblDebitUnit]			= ISNULL(A.[dblAmountPaid], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountID] = A.[intAccountId]), 0)
+			,[dblCreditUnit]		= ISNULL(A.[dblAmountPaid], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountID] = A.[intAccountId]), 0)
+			,A.[dtmDatePaid]
+			,0
+			,1
+			,[dblExchangeRate]		= 1
+			,[intUserID]			= @userId
+			,[dtmDateEntered]		= GETDATE()
+			,[strBatchID]			= @batchId
+			,[strCode]				= 'AP'
+			,[strModuleName]		= @MODULE_NAME
+			,A.intPaymentId
+		FROM	[dbo].tblAPPayment A INNER JOIN [dbo].tblGLAccount GLAccnt
+					ON A.intBankAccountId = GLAccnt.intAccountID
+				INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
+					ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
+		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpValidData)
 		---- DEBIT SIDE
 		UNION ALL 
-		SELECT	[strPaymentRecordNum]
+		SELECT	CAST(A.intPaymentId AS NVARCHAR(50))--[strPaymentRecordNum]
 				,C.[intAccountId]
 				,'Posted Payable'
 				,A.[strVendorId]
@@ -351,18 +410,13 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 --IF @@ERROR <> 0	GOTO Post_Rollback;
 
 
-
---=====================================================================================================================================
--- 	RETURN TOTAL NUMBER OF VALID JOURNALS
----------------------------------------------------------------------------------------------------------------------------------------
-SELECT @successfulCount = COUNT(*) FROM #tmpValidData
-
 --=====================================================================================================================================
 -- 	FINALIZING STAGE
 ---------------------------------------------------------------------------------------------------------------------------------------
 Post_Commit:
 	COMMIT TRANSACTION
 	SET @success = 1
+	SET @recapId = (SELECT TOP 1 intPaymentId FROM #tmpValidData) --only support recap per record
 	GOTO Post_Exit
 
 Post_Rollback:
