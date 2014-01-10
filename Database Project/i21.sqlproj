@@ -768,6 +768,7 @@
     <Build Include="dbo\Stored Procedures\uspPostBill.sql" />
     <Build Include="dbo\Stored Procedures\uspPostBillBatch.sql" />
     <Build Include="dbo\Views\vwCPGAContractDetail.sql" />
+    <Build Include="dbo\Database Triggers\trgBillRecordNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="i21.publish.xml" />
