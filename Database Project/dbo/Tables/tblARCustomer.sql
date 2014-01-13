@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblARCustomers] (
+﻿CREATE TABLE [dbo].[tblARCustomer] (
     [intEntityId]         INT             NOT NULL,
     [strCustomerNumber]   NVARCHAR (15)   COLLATE Latin1_General_CI_AS NULL,
     [strType]             NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
@@ -17,6 +17,7 @@
     [intShipToId]         INT             NULL,
     [intEntityContactId]  INT             NOT NULL,
     [intEntityLocationId] INT             NOT NULL,
+    [intConcurrencyID]    INT             NULL,
     CONSTRAINT [PK_dbo.tblARCustomers] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
     CONSTRAINT [FK_dbo.tblARCustomers_dbo.tblEntities_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntities] ([intEntityId])
 );
@@ -24,5 +25,5 @@
 
 GO
 CREATE NONCLUSTERED INDEX [IX_intEntityId]
-    ON [dbo].[tblARCustomers]([intEntityId] ASC);
+    ON [dbo].[tblARCustomer]([intEntityId] ASC);
 
