@@ -219,7 +219,6 @@
     <Build Include="dbo\Tables\tblSMUserMenu.sql" />
     <Build Include="dbo\Tables\tblDBPanelUser.sql" />
     <Build Include="dbo\Tables\tblTMWorkCloseReason.sql" />
-    <Build Include="dbo\Tables\tblARCustomers.sql" />
     <Build Include="dbo\Tables\tblTMTankType.sql" />
     <Build Include="dbo\Tables\tblTMTankTownship.sql" />
     <Build Include="dbo\Tables\tblTMTankMeasurement.sql" />
@@ -766,6 +765,7 @@
     <Build Include="dbo\Stored Procedures\uspPostBillBatch.sql" />
     <Build Include="dbo\Views\vwCPGAContractDetail.sql" />
     <Build Include="dbo\Database Triggers\trgBillRecordNumber.sql" />
+    <Build Include="dbo\Tables\tblARCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="i21.publish.xml" />
