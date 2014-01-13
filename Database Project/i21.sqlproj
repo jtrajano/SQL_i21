@@ -330,9 +330,6 @@
     <Build Include="dbo\Stored Procedures\AddDeposit.sql" />
     <Build Include="dbo\Stored Procedures\AddPayment.sql" />
     <Build Include="dbo\Stored Procedures\usp_BuildMenuPermissions.sql" />
-    <Build Include="dbo\Stored Procedures\PostBill.sql" />
-    <Build Include="dbo\Stored Procedures\PostBatchBill.sql" />
-    <Build Include="dbo\Stored Procedures\PostPayment.sql" />
     <Build Include="dbo\Stored Procedures\WithoutLeakCheck.sql" />
     <Build Include="dbo\Stored Procedures\WithoutGasCheck.sql" />
     <Build Include="dbo\Stored Procedures\WithLeakCheck.sql" />
@@ -768,6 +765,7 @@
     <Build Include="dbo\Stored Procedures\uspPostBill.sql" />
     <Build Include="dbo\Stored Procedures\uspPostBillBatch.sql" />
     <Build Include="dbo\Views\vwCPGAContractDetail.sql" />
+    <Build Include="dbo\Database Triggers\trgBillRecordNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="i21.publish.xml" />
