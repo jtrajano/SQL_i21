@@ -85,6 +85,7 @@
     <Folder Include="Scripts\Post-Deployment\SM\DefaultData" />
     <Folder Include="Scripts\Pre-Deployment\SM" />
     <Folder Include="dbo\Database Triggers" />
+    <Folder Include="Scripts\Pre-Deployment\Manual Run\AR" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblGLJournalRecurring.sql" />
@@ -778,5 +779,6 @@
     <None Include="dbo\Views\vwCPGAContractOption.sql" />
     <None Include="dbo\Views\vwCPGAContractHistory.sql" />
     <None Include="Scripts\Post-Deployment\VersionUpdate.sql" />
+    <None Include="Scripts\Pre-Deployment\Manual Run\AR\1_RenameObjects.sql" />
   </ItemGroup>
 </Project>
