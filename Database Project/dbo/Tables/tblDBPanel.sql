@@ -46,6 +46,7 @@
     [imgLayoutGrid]         VARBINARY (MAX) NULL,
     [imgLayoutPivotGrid]    VARBINARY (MAX) NULL,
     [strPanelVersion]       NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS DEFAULT ((14.1)) NOT NULL,
+    [intFilterId] INT NULL, 
     CONSTRAINT [PK_dbo.tblDBPanel] PRIMARY KEY CLUSTERED ([intPanelId] ASC)
 );
 

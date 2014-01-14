@@ -17,8 +17,7 @@
     [intWarehouseId]      INT            NULL,
     [intConcurrencyID]    INT            NULL,
     CONSTRAINT [PK_dbo.tblEntityLocations] PRIMARY KEY CLUSTERED ([intEntityLocationId] ASC),
-    CONSTRAINT [FK_dbo.tblEntityLocations_dbo.tblEntities_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntities] ([intEntityId]) ON DELETE CASCADE,
-    CONSTRAINT [EntityLocatioName_Unique] UNIQUE NONCLUSTERED ([strLocationName] ASC)
+    CONSTRAINT [FK_dbo.tblEntityLocations_dbo.tblEntities_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntities] ([intEntityId]) ON DELETE CASCADE
 );
 
 
