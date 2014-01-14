@@ -18,8 +18,8 @@
     [intEntityContactId]  INT             NOT NULL,
     [intEntityLocationId] INT             NOT NULL,
     [intConcurrencyID]    INT             NULL,
-    CONSTRAINT [PK_dbo.tblARCustomers] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
-    CONSTRAINT [FK_dbo.tblARCustomers_dbo.tblEntities_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntities] ([intEntityId])
+    CONSTRAINT [PK_dbo.tblARCustomer] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
+    CONSTRAINT [FK_dbo.tblARCustomer_dbo.tblEntities_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntities] ([intEntityId])
 );
 
 
