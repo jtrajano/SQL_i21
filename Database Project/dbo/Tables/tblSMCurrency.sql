@@ -8,6 +8,7 @@
     [dblMaxRate]          NUMERIC (18, 6) NULL,
     [intSort]             INT             NULL,
     [intConcurrencyID]    INT             NULL,
-    CONSTRAINT [PK_SMCurrency_CurrencyID] PRIMARY KEY CLUSTERED ([intCurrencyID] ASC)
+    CONSTRAINT [PK_SMCurrency_CurrencyID] PRIMARY KEY CLUSTERED ([intCurrencyID] ASC), 
+    CONSTRAINT [AK_tblSMCurrency_strCurrencyID] UNIQUE ([strCurrency]) 
 );
 

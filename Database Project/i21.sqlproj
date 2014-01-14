@@ -4,6 +4,7 @@
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
     <VisualStudioVersion Condition="'$(SSDTExists)' == ''">10.0</VisualStudioVersion>
+    <ValidateCasingOnIdentifiers>False</ValidateCasingOnIdentifiers>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -84,6 +85,7 @@
     <Folder Include="Scripts\Post-Deployment\SM\DefaultData" />
     <Folder Include="Scripts\Pre-Deployment\SM" />
     <Folder Include="dbo\Database Triggers" />
+    <Folder Include="Scripts\Pre-Deployment\Manual Run\AR" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblGLJournalRecurring.sql" />
@@ -219,7 +221,6 @@
     <Build Include="dbo\Tables\tblSMUserMenu.sql" />
     <Build Include="dbo\Tables\tblDBPanelUser.sql" />
     <Build Include="dbo\Tables\tblTMWorkCloseReason.sql" />
-    <Build Include="dbo\Tables\tblARCustomers.sql" />
     <Build Include="dbo\Tables\tblTMTankType.sql" />
     <Build Include="dbo\Tables\tblTMTankTownship.sql" />
     <Build Include="dbo\Tables\tblTMTankMeasurement.sql" />
@@ -767,6 +768,7 @@
     <Build Include="dbo\Views\vwCPGAContractDetail.sql" />
     <Build Include="dbo\Database Triggers\trgBillRecordNumber.sql" />
     <Build Include="dbo\Tables\tblAPRecurringTransaction.sql" />
+    <Build Include="dbo\Tables\tblARCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="i21.publish.xml" />
@@ -777,8 +779,7 @@
     <None Include="dbo\Views\vwCPGASettlementsReports.sql" />
     <None Include="dbo\Views\vwCPGAContractOption.sql" />
     <None Include="dbo\Views\vwCPGAContractHistory.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <RefactorLog Include="i21.refactorlog" />
+    <None Include="Scripts\Post-Deployment\VersionUpdate.sql" />
+    <None Include="Scripts\Pre-Deployment\Manual Run\AR\1_RenameObjects.sql" />
   </ItemGroup>
 </Project>

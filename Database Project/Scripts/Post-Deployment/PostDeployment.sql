@@ -34,5 +34,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\FIN\DefaultData\AccountGroup.sql
 :r .\FIN\DefaultData\BankTransactionTypes.sql
 
+-- Version Update
+:r .\VersionUpdate.sql
+
 
 print 'END POST DEPLOYMENT'
