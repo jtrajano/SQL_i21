@@ -86,7 +86,6 @@
     <Folder Include="Scripts\Pre-Deployment\SM" />
     <Folder Include="dbo\Database Triggers" />
     <Folder Include="Scripts\Pre-Deployment\Manual Run\AR" />
-    <Folder Include="Scripts\Pre-Deployment\Manual Run\Dashboard" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblGLJournalRecurring.sql" />
@@ -770,8 +769,7 @@
     <Build Include="dbo\Database Triggers\trgBillRecordNumber.sql" />
     <Build Include="dbo\Tables\tblAPRecurringTransaction.sql" />
     <Build Include="dbo\Tables\tblARCustomer.sql" />
-    <None Include="Scripts\Pre-Deployment\Manual Run\Dashboard\1_1340_to_1410.sql" />
-    <Build Include="dbo\Tables\tblDBPanelFilter.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesAgingSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="i21.publish.xml" />
@@ -784,8 +782,5 @@
     <None Include="dbo\Views\vwCPGAContractHistory.sql" />
     <None Include="Scripts\Post-Deployment\VersionUpdate.sql" />
     <None Include="Scripts\Pre-Deployment\Manual Run\AR\1_RenameObjects.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <RefactorLog Include="i21.refactorlog" />
   </ItemGroup>
 </Project>
