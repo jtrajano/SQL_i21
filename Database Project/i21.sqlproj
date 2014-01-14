@@ -770,7 +770,7 @@
     <Build Include="dbo\Database Triggers\trgBillRecordNumber.sql" />
     <Build Include="dbo\Tables\tblAPRecurringTransaction.sql" />
     <Build Include="dbo\Tables\tblARCustomer.sql" />
-    <Build Include="Scripts\Pre-Deployment\Manual Run\Dashboard\1_1340_to_1410.sql" />
+    <None Include="Scripts\Pre-Deployment\Manual Run\Dashboard\1_1340_to_1410.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="i21.publish.xml" />
