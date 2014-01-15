@@ -145,3 +145,11 @@ SELECT
 	,[intTransactionNo]				= 1
 	,[intConcurrencyID]				= 1			
 WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 15)
+UNION ALL 
+SELECT 
+	[intBankTransactionTypeID]		= 16
+	,[strBankTransactionTypeName]	= 'AP Payment'
+	,[strTransactionPrefix]			= ''
+	,[intTransactionNo]				= 1
+	,[intConcurrencyID]				= 1			
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 16)

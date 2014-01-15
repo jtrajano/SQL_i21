@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspImportVendor
 	@VendorId NVARCHAR(50) = NULL,
-	@Update BIT = 0
+	@Update BIT = 0,
+	@Total INT = 0 OUTPUT
 
 AS
 
@@ -10,7 +11,8 @@ BEGIN
 	UPDATE ssvndmst
 		SET ssvnd_co_per_ind = B.intVendorType,
 		ssvnd_name = A.strName,
-		ssvnd_addr_1 = C.strAddress,
+		ssvnd_addr_1 = CASE WHEN CHARINDEX(CHAR(10), C.strAddress) > 0 THEN SUBSTRING(C.strAddress, 0, CHARINDEX(CHAR(10),C.strAddress)) ELSE C.strAddress END,
+		ssvnd_addr_2 = CASE WHEN CHARINDEX(CHAR(10), C.strAddress) > 0 THEN SUBSTRING(C.strAddress, CHARINDEX(CHAR(10),C.strAddress), LEN(C.strAddress)) ELSE NULL END,
 		ssvnd_city = C.strCity,
 		ssvnd_st = C.strState,
 		ssvnd_zip = C.strZipCode,
@@ -19,7 +21,16 @@ BEGIN
 		ssvnd_contact = D.strName,
 		ssvnd_1099_yn = B.ysnPrint1099,
 		ssvnd_wthhld_yn = B.ysnWithholding,
-		ssvnd_pay_ctl_ind = B.ysnPymtCtrlActive
+		ssvnd_pay_ctl_ind = (CASE WHEN ysnPymtCtrlActive = 1 THEN 'A'
+			 WHEN ysnPymtCtrlAlwaysDiscount = 1 THEN 'D'
+			 WHEN ysnPymtCtrlEFTActive = 1  THEN 'E'
+			 WHEN ysnPymtCtrlHold = 1 THEN 'H' END),
+		ssvnd_fed_tax_id = B.strFederalTaxId,
+		ssvnd_w9_signed_rev_dt = ysnW9Signed,
+		ssvnd_pay_to = strVendorPayToId,
+		ssvnd_currency = E.strCurrency,
+		ssvnd_1099_name = str1099Name,
+		ssvnd_gl_pur = F.strExternalID
 	FROM
 		tblEntities A
 	INNER JOIN tblAPVendor B
@@ -28,7 +39,11 @@ BEGIN
 		ON B.intEntityLocationId = C.intEntityLocationId
 	INNER JOIN tblEntityContacts D
 		ON B.intEntityContactId = D.intEntityContactId
-	WHERE strVendorId = @VendorId
+	LEFT JOIN tblSMCurrency E
+		ON B.intCurrencyId = E.intCurrencyID
+	LEFT JOIN tblGLCOACrossReference F
+		ON B.intGLAccountExpenseId = F.inti21ID
+	WHERE ssvndmst.ssvnd_vnd_no = '0000000025'
 
 RETURN;
 END
@@ -66,8 +81,8 @@ BEGIN
 		strVendorId,
 		CASE WHEN intVendorType = 0 THEN 'C' ELSE 'P' END,
 		A.strName,
-		SUBSTRING(C.strAddress, 0, CHARINDEX(CHAR(10),C.strAddress)),
-		SUBSTRING(C.strAddress, CHARINDEX(CHAR(10),C.strAddress), LEN(C.strAddress)),
+		CASE WHEN CHARINDEX(CHAR(10), C.strAddress) > 0 THEN SUBSTRING(C.strAddress, 0, CHARINDEX(CHAR(10),C.strAddress)) ELSE C.strAddress END,
+		CASE WHEN CHARINDEX(CHAR(10), C.strAddress) > 0 THEN SUBSTRING(C.strAddress, CHARINDEX(CHAR(10),C.strAddress), LEN(C.strAddress)) ELSE NULL END,
 		strCity,
 		strState,
 		strZipCode,
@@ -76,9 +91,12 @@ BEGIN
 		D.strName,
 		CASE WHEN ysnPrint1099 = 0 THEN 'N' ELSE 'Y' END,
 		CASE WHEN ysnWithholding = 0 THEN 'N' ELSE 'Y' END,
-		CASE WHEN ysnPymtCtrlActive = 0 THEN 'N' ELSE 'Y' END,
+		CASE WHEN ysnPymtCtrlActive = 1 THEN 'A'
+			 WHEN ysnPymtCtrlAlwaysDiscount = 1 THEN 'D'
+			 WHEN ysnPymtCtrlEFTActive = 1  THEN 'E'
+			 WHEN ysnPymtCtrlHold = 1 THEN 'H' END,
 		strFederalTaxId,
-		CASE WHEN ysnW9Signed = 0 THEN 'N' ELSE 'Y' END,
+		ysnW9Signed,
 		strVendorPayToId,
 		E.strCurrency,
 		str1099Name,
@@ -93,7 +111,7 @@ BEGIN
 		ON B.intEntityContactId = D.intEntityContactId
 	LEFT JOIN tblSMCurrency E
 		ON B.intCurrencyId = E.intCurrencyID
-	INNER JOIN tblGLCOACrossReference F
+	LEFT JOIN tblGLCOACrossReference F
 		ON B.intGLAccountExpenseId = F.inti21ID
 	WHERE strVendorId = @VendorId
 	RETURN;
@@ -282,3 +300,5 @@ BEGIN
 	END
 
 END
+
+SET @Total = @@ROWCOUNT
