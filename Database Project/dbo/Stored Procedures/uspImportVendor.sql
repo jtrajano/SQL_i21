@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspImportVendor
 	@VendorId NVARCHAR(50) = NULL,
-	@Update BIT = 0
+	@Update BIT = 0,
+	@Total INT OUTPUT
 
 AS
 
@@ -282,3 +283,5 @@ BEGIN
 	END
 
 END
+
+SET @Total = @@ROWCOUNT
