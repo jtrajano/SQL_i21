@@ -71,7 +71,7 @@ INSERT INTO tblCMBankTransaction(
 	,strAmountInWords
 	,strMemo
 	,strReferenceNo
-	,ysnCheckPrinted
+	,dtmCheckPrinted
 	,ysnCheckToBePrinted
 	,ysnCheckVoid
 	,ysnPosted
@@ -101,7 +101,7 @@ SELECT	strTransactionID			= @strTransactionID
 		,strAmountInWords			= dbo.fn_ConvertNumberToWord(@dblAmount)
 		,strMemo					= ISNULL(@strDescription, '')
 		,strReferenceNo				= ''
-		,ysnCheckPrinted			= 0
+		,dtmCheckPrinted			= NULL
 		,ysnCheckToBePrinted		= 0
 		,ysnCheckVoid				= 0
 		,ysnPosted					= 0

@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblCMBank] (
     [strBankName]           NVARCHAR (250) COLLATE Latin1_General_CI_AS NOT NULL,
     [strContact]            NVARCHAR (150) COLLATE Latin1_General_CI_AS NOT NULL,
-    [strAddress]            NVARCHAR (60)  COLLATE Latin1_General_CI_AS NOT NULL,
+    [strAddress]            NVARCHAR (65)  COLLATE Latin1_General_CI_AS NOT NULL,
     [strZipCode]            NVARCHAR (42)  COLLATE Latin1_General_CI_AS NOT NULL,
     [strCity]               NVARCHAR (85)  COLLATE Latin1_General_CI_AS NOT NULL,
     [strState]              NVARCHAR (60)  COLLATE Latin1_General_CI_AS NOT NULL,

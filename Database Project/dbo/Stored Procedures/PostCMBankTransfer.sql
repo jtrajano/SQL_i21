@@ -320,7 +320,7 @@ BEGIN
 		,strAmountInWords
 		,strMemo
 		,strReferenceNo
-		,ysnCheckPrinted
+		,dtmCheckPrinted
 		,ysnCheckToBePrinted
 		,ysnCheckVoid
 		,ysnPosted
@@ -351,7 +351,7 @@ BEGIN
 			,strAmountInWords			= dbo.fn_ConvertNumberToWord(A.dblAmount)
 			,strMemo					= A.strReferenceFrom
 			,strReferenceNo				= ''
-			,ysnCheckPrinted			= 0
+			,dtmCheckPrinted			= NULL
 			,ysnCheckToBePrinted		= 0
 			,ysnCheckVoid				= 0
 			,ysnPosted					= 1
@@ -388,7 +388,7 @@ BEGIN
 			,strAmountInWords			= dbo.fn_ConvertNumberToWord(A.dblAmount)
 			,strMemo					= A.strReferenceTo
 			,strReferenceNo				= ''
-			,ysnCheckPrinted			= 0
+			,dtmCheckPrinted			= NULL
 			,ysnCheckToBePrinted		= 0
 			,ysnCheckVoid				= 0
 			,ysnPosted					= 1
