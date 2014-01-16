@@ -48,7 +48,7 @@
     [strPanelVersion]       NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS DEFAULT ((14.1)) NOT NULL,
     [intFilterId] INT NULL, 
     CONSTRAINT [PK_dbo.tblDBPanel] PRIMARY KEY CLUSTERED ([intPanelId] ASC),
-	CONSTRAINT [FK_dbo.tblDBPanelFilter_dbo.tblDBPanel_intFilterId] FOREIGN KEY ([intFilterId]) REFERENCES [dbo].[tblDBPanelFilter] ([intFilterId]) ON DELETE CASCADE
+	CONSTRAINT [FK_dbo.tblDBPanelFilter_dbo.tblDBPanel_intFilterId] FOREIGN KEY ([intFilterId]) REFERENCES [dbo].[tblDBPanelFilter] ([intFilterId]) ON DELETE NO ACTION
 
 );
 
