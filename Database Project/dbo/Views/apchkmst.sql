@@ -135,7 +135,7 @@ SET NOCOUNT ON
 			,strAmountInWords
 			,strMemo
 			,strReferenceNo
-			,ysnCheckPrinted
+			,dtmCheckPrinted
 			,ysnCheckToBePrinted
 			,ysnCheckVoid
 			,ysnPosted
@@ -186,7 +186,7 @@ SET NOCOUNT ON
 											RTRIM(LTRIM(ISNULL(i.apchk_comment_2, ''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_3))) > 0 THEN CHAR(13) ELSE '' END +
 											RTRIM(LTRIM(ISNULL(i.apchk_comment_3, ''))) 
 			,strReferenceNo				=	RTRIM(LTRIM(i.apchk_chk_no))
-			,ysnCheckPrinted			=	1 
+			,dtmCheckPrinted			=	dbo.fn_ConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt)
 			,ysnCheckToBePrinted		=	1
 			,ysnCheckVoid				=	CASE
 												WHEN i.apchk_void_ind = 'Y' THEN 1
@@ -326,7 +326,7 @@ SET NOCOUNT ON
 				,strAmountInWords
 				,strMemo
 				,strReferenceNo
-				,ysnCheckPrinted
+				,dtmCheckPrinted
 				,ysnCheckToBePrinted
 				,ysnCheckVoid
 				,ysnPosted
@@ -377,7 +377,7 @@ SET NOCOUNT ON
 												RTRIM(LTRIM(ISNULL(i.apchk_comment_2, ''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_3))) > 0 THEN CHAR(13) ELSE '' END +
 												RTRIM(LTRIM(ISNULL(i.apchk_comment_3, ''))) 
 				,strReferenceNo				=	RTRIM(LTRIM(i.apchk_chk_no))
-				,ysnCheckPrinted			=	1 
+				,dtmCheckPrinted			=	dbo.fn_ConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt) 
 				,ysnCheckToBePrinted		=	1
 				,ysnCheckVoid				=	CASE
 													WHEN i.apchk_void_ind = 'Y' THEN 1
@@ -448,7 +448,7 @@ SET NOCOUNT ON
 												RTRIM(LTRIM(ISNULL(i.apchk_comment_2, ''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_3))) > 0 THEN CHAR(13) ELSE '' END +
 												RTRIM(LTRIM(ISNULL(i.apchk_comment_3, ''))) 
 				,strReferenceNo				=	RTRIM(LTRIM(i.apchk_chk_no))
-				,ysnCheckPrinted			=	1
+				,dtmCheckPrinted			=	dbo.fn_ConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt)
 				,ysnCheckToBePrinted		=	1
 				,ysnCheckVoid				=	CASE
 													WHEN i.apchk_void_ind = 'Y' THEN 1
