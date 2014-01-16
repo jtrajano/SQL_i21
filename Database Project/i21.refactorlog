@@ -56,4 +56,46 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="dtmPrintJobCreated" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="f4c904f1-3c75-4c34-b657-9c6d0f5f3dea" ChangeDateTime="01/16/2014 05:45:04">
+    <Property Name="ElementName" Value="[dbo].[tblCMCheckNumberAudit].[intCheckNo]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMCheckNumberAudit]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strCheckNo" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="572cfcc5-836a-4345-83f1-0f3a170e8cdd" ChangeDateTime="01/16/2014 05:45:22">
+    <Property Name="ElementName" Value="[dbo].[tblCMCheckNumberAudit].[strCheckNo]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMCheckNumberAudit]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strCheckNumber" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="f7c53939-f515-4c36-95ad-8d1ce9040f55" ChangeDateTime="01/16/2014 05:45:32">
+    <Property Name="ElementName" Value="[dbo].[tblCMCheckNumberAudit].[strCheckNumber]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMCheckNumberAudit]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strCheckNo" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b49c4411-f48b-4601-bde9-5fcdba06c243" ChangeDateTime="01/16/2014 05:45:37">
+    <Property Name="ElementName" Value="[dbo].[tblCMCheckNumberAudit].[intCheckNumberStatus]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMCheckNumberAudit]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCheckNoStatus" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="fc573bbb-fcaf-4fff-809f-8e0c2193ab91" ChangeDateTime="01/16/2014 05:45:48">
+    <Property Name="ElementName" Value="[dbo].[tblCMCheckPrintJobSpool].[strCheckNumber]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMCheckPrintJobSpool]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strCheckNo" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="6ad11667-c019-4175-a782-e1e31ead81de" ChangeDateTime="01/16/2014 05:46:43">
+    <Property Name="ElementName" Value="[dbo].[tblCMCheckNumberAudit].[strRecordNo]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMCheckNumberAudit]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strTransactionID" />
+  </Operation>
 </Operations>

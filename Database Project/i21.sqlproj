@@ -772,6 +772,9 @@
     <Build Include="dbo\Views\vyuAPPayablesAgingSummary.sql" />
     <Build Include="dbo\Stored Procedures\ApplyCheckChangeForCheckPrint.sql" />
     <Build Include="dbo\Tables\tblCMCheckPrintJobSpool.sql" />
+    <Build Include="dbo\Stored Procedures\CheckPrint_ValidatePrintJobs.sql" />
+    <Build Include="dbo\Stored Procedures\CheckPrint_QueuePrintJobs.sql" />
+    <Build Include="dbo\Stored Procedures\GenerateCheckNumbers.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="i21.publish.xml" />
