@@ -783,6 +783,7 @@
     <None Include="dbo\Views\vwCPGAContractHistory.sql" />
     <None Include="Scripts\Post-Deployment\VersionUpdate.sql" />
     <None Include="Scripts\Pre-Deployment\Manual Run\AR\1_RenameObjects.sql" />
+    <None Include="dbo\Tables\tblCPUserConfiguration.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
