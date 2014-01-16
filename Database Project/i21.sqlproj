@@ -773,6 +773,9 @@
     <Build Include="dbo\Stored Procedures\ApplyCheckChangeForCheckPrint.sql" />
     <Build Include="dbo\Tables\tblCMCheckPrintJobSpool.sql" />
     <Build Include="dbo\Tables\tblDBPanelFilter.sql" />
+    <Build Include="dbo\Tables\tblSMTerm.sql" />
+    <Build Include="dbo\Tables\tblSMShipVia.sql" />
+    <Build Include="dbo\Tables\tblSMPaymentMethod.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="i21.publish.xml" />
