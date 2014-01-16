@@ -298,7 +298,7 @@ BEGIN
 		DELETE FROM #tmpssvndmst WHERE ssvnd_vnd_no = @originVendor
 
 	END
+	
+SET @Total = @@ROWCOUNT
 
 END
-
-SET @Total = @@ROWCOUNT
