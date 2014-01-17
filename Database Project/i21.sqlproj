@@ -787,6 +787,8 @@
     <Build Include="Scripts\Pre-Deployment\Manual Run\Dashboard\1_1340_to_1410.sql" />
     <Build Include="dbo\Stored Procedures\usp_GLBuildOriginAccount.sql" />
     <Build Include="dbo\Stored Procedures\usp_GLImportOriginHistoricalJournal.sql" />
+    <Build Include="dbo\Stored Procedures\ApplyCheckChangeForPrintFail.sql" />
+    <Build Include="dbo\Stored Procedures\CommitPrintCheckVerification.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="i21.publish.xml" />
