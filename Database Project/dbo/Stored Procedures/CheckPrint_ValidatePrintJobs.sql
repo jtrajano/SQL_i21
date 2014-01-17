@@ -1,7 +1,6 @@
-﻿
-CREATE PROCEDURE CheckPrint_ValidatePrintJobs
+﻿CREATE PROCEDURE CheckPrint_ValidatePrintJobs
 	@intBankAccountID INT = NULL,
-	@ysnPrintJobExists BIT = NULL OUTPUT 
+	@ysnPrintJobExists INT = NULL OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -32,3 +31,5 @@ SELECT	TOP 1
 		@ysnPrintJobExists = 1
 FROM	tblCMCheckPrintJobSpool
 WHERE	intBankAccountID = @intBankAccountID
+
+SET @ysnPrintJobExists = ISNULL(@ysnPrintJobExists, 0)

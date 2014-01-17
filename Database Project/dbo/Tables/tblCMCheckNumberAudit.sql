@@ -1,10 +1,10 @@
 ﻿CREATE TABLE [dbo].[tblCMCheckNumberAudit] (
 	[cntID] INT NOT NULL IDENTITY, 
 	[intBankAccountID]     INT            NOT NULL,
-    [strCheckNo]           NVARCHAR(20)            NOT NULL,    
+    [strCheckNo]           NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL,    
     [intCheckNoStatus] INT            NOT NULL,
     [strRemarks]           NVARCHAR (200) COLLATE Latin1_General_CI_AS NULL,
-    [strTransactionID] NVARCHAR(40) NULL, 
+    [strTransactionID] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL, 
     [intUserID] INT NULL, 
     [dtmCreated] DATETIME NULL, 
     [dtmCheckPrinted] DATETIME NULL, 
