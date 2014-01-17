@@ -196,6 +196,13 @@ IF ISNULL(@recap, 0) = 0
 				--,intConcurrencyID += 1 
 		WHERE	intPaymentId IN (SELECT intPaymentId FROM #tmpValidData)
 
+		UPDATE tblAPPaymentDetail
+			SET dblAmountDue = B.dblAmountDue - dblAmountPaid
+		FROM tblAPPayment A
+			LEFT JOIN tblAPPaymentDetail B
+				ON A.intPaymentId = B.intPaymentId
+		WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpValidData)
+
 
 		--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
 		UPDATE tblAPBill
