@@ -155,7 +155,7 @@ BEGIN
 		FROM
 		tblGLAccountSegment
 		
-		EXEC usp_GLBuildAccountTemporary 0
+		EXEC usp_GLBuildOriginAccount  0
 		EXEC usp_GLBuildAccount 0
 		
 		UPDATE tblGLAccountSegment SET ysnBuild = 1
