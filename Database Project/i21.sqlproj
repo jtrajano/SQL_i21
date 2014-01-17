@@ -770,8 +770,6 @@
     <Build Include="dbo\Tables\tblAPRecurringTransaction.sql" />
     <Build Include="dbo\Tables\tblARCustomer.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAgingSummary.sql" />
-    <Build Include="dbo\Stored Procedures\usp_GLBuildOriginAccount.sql" />
-    <Build Include="dbo\Stored Procedures\usp_GLImportOriginHistoricalJournal.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="i21.publish.xml" />
