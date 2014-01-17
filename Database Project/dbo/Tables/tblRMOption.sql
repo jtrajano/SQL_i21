@@ -8,7 +8,7 @@
     [intReportId]      INT            NOT NULL,
     [ysnEnable]        BIT            NOT NULL,
     [intSortId]        INT            NOT NULL,
-    [intUserId]        INT            NOT NULL,
+    [intUserId]        INT            NULL,
     [ysnDefault]       BIT            NULL,
     [intConcurrencyId] INT            NULL,
     CONSTRAINT [PK_dbo.Options] PRIMARY KEY CLUSTERED ([intOptionId] ASC),
