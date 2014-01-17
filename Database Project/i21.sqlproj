@@ -86,6 +86,7 @@
     <Folder Include="Scripts\Pre-Deployment\SM" />
     <Folder Include="dbo\Database Triggers" />
     <Folder Include="Scripts\Pre-Deployment\Manual Run\AR" />
+    <Folder Include="Scripts\Post-Deployment\DB" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblGLJournalRecurring.sql" />
@@ -781,6 +782,7 @@
     <Build Include="dbo\Tables\tblSMTerm.sql" />
     <Build Include="dbo\Tables\tblSMShipVia.sql" />
     <Build Include="dbo\Tables\tblSMPaymentMethod.sql" />
+    <None Include="Scripts\Post-Deployment\DB\1_CannedPanels.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="i21.publish.xml" />
