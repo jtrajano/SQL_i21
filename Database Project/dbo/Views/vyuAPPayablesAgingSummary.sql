@@ -12,7 +12,8 @@ SELECT tblAPBill.dtmDate AS dtmDate
 , dblInterest = 0 
 , tblAPBill.strVendorId 
 , isnull(tblAPBill.strVendorId,'') + ' - ' + isnull(tblEntities.strName,'') as strVendorIdName 
-, tblAPBill.dtmDueDate 
+, tblAPBill.dtmDueDate
+, tblAPBill.dtmDiscountDate
 , tblAPBill.ysnPosted 
 , tblAPBill.ysnPaid
 , tblGLAccount.strAccountID
@@ -34,6 +35,7 @@ SELECT tblAPPayment.dtmDatePaid AS dtmDate,
 , tblAPBill.strVendorId 
 , isnull(tblAPBill.strVendorId,'') + ' - ' + isnull(tblEntities.strName,'') as strVendorIdName 
 , tblAPBill.dtmDueDate 
+, tblAPBill.dtmDiscountDate
 , tblAPBill.ysnPosted 
 , tblAPBill.ysnPaid
 , tblGLAccount.strAccountID

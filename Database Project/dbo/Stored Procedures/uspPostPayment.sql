@@ -37,6 +37,12 @@ CREATE TABLE #tmpValidData (
 --DECLARRE VARIABLES
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
 SET @recapId = '1'
+
+--SET BatchId
+IF(ISNULL(@batchId,'') = '')
+BEGIN
+	EXEC GetStartingNumber 3, @batchId
+END
 --=====================================================================================================================================
 -- 	POPULATE JOURNALS TO POST TEMPORARY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -75,6 +81,8 @@ IF ISNULL(@recap, 0) = 0
 	END
 	ELSE
 	BEGIN
+
+		--POSTING
 		WITH Units 
 		AS 
 		(
@@ -188,23 +196,32 @@ IF ISNULL(@recap, 0) = 0
 				--,intConcurrencyID += 1 
 		WHERE	intPaymentId IN (SELECT intPaymentId FROM #tmpValidData)
 
+		UPDATE tblAPPaymentDetail
+			SET dblAmountDue = B.dblAmountDue - dblAmountPaid
+		FROM tblAPPayment A
+			LEFT JOIN tblAPPaymentDetail B
+				ON A.intPaymentId = B.intPaymentId
+		WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpValidData)
+
 
 		--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
 		UPDATE tblAPBill
 			SET tblAPBill.dblAmountDue = (C.dblTotal - B.dblPayment),
-								--GROUP BY A.intPaymentId,C.dblTotal, C.intBillId),
-				tblAPBill.ysnPaid = (CASE WHEN C.dblAmountDue = 0 THEN 1 ELSE 0 END)
+				tblAPBill.ysnPaid = (CASE WHEN (C.dblTotal - B.dblPayment) = 0 THEN 1 ELSE 0 END),
+				dtmDatePaid = (CASE WHEN (C.dblTotal - B.dblPayment) = 0 THEN A.dtmDatePaid ELSE NULL END)
 		FROM tblAPPayment A
 					INNER JOIN tblAPPaymentDetail B 
 							ON A.intPaymentId = B.intPaymentId
 					INNER JOIN tblAPBill C
 							ON B.intBillId = C.intBillId
-					WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpValidData) AND C.intBillId = C.intBillId
+					WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpValidData)
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
 ELSE
 	BEGIN
+
+		--RECAP
 		--TODO:
 		--DELETE TABLE PER Session
 		DELETE FROM tblGLDetailRecap

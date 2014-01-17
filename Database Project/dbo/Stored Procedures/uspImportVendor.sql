@@ -5,7 +5,7 @@
 
 AS
 
-IF(@Update = 1 AND ISNULL(NULLIF(@VendorId, ''),'') = '')
+IF(@Update = 1 AND ISNULL(NULLIF(@VendorId, ''),'') <> '')
 BEGIN
 
 	UPDATE ssvndmst
@@ -43,7 +43,7 @@ BEGIN
 		ON B.intCurrencyId = E.intCurrencyID
 	LEFT JOIN tblGLCOACrossReference F
 		ON B.intGLAccountExpenseId = F.inti21ID
-	WHERE ssvndmst.ssvnd_vnd_no = '0000000025'
+	WHERE ssvndmst.ssvnd_vnd_no = @VendorId
 
 RETURN;
 END
@@ -298,7 +298,7 @@ BEGIN
 		DELETE FROM #tmpssvndmst WHERE ssvnd_vnd_no = @originVendor
 
 	END
+	
+SET @Total = @@ROWCOUNT
 
 END
-
-SET @Total = @@ROWCOUNT

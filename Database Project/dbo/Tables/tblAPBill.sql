@@ -16,7 +16,8 @@
 	[strBillId] [NVARCHAR](50) collate Latin1_General_CI_AS NULL,
 	[dblAmountDue] [decimal](18, 2) NOT NULL,
 	[dtmDatePaid] [datetime] NULL,
- CONSTRAINT [PK_dbo.tblAPBill] PRIMARY KEY CLUSTERED 
+ [dtmDiscountDate] DATETIME NULL, 
+    CONSTRAINT [PK_dbo.tblAPBill] PRIMARY KEY CLUSTERED 
 (
 	[intBillId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]

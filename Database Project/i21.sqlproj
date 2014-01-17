@@ -86,6 +86,8 @@
     <Folder Include="Scripts\Pre-Deployment\SM" />
     <Folder Include="dbo\Database Triggers" />
     <Folder Include="Scripts\Pre-Deployment\Manual Run\AR" />
+    <Folder Include="Scripts\Post-Deployment\DB" />
+    <Folder Include="Scripts\Pre-Deployment\Manual Run\Dashboard" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblGLJournalRecurring.sql" />
@@ -770,6 +772,19 @@
     <Build Include="dbo\Tables\tblAPRecurringTransaction.sql" />
     <Build Include="dbo\Tables\tblARCustomer.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAgingSummary.sql" />
+    <Build Include="dbo\Stored Procedures\ApplyCheckChangeForCheckPrint.sql" />
+    <Build Include="dbo\Tables\tblCMCheckPrintJobSpool.sql" />
+    <Build Include="dbo\Stored Procedures\CheckPrint_ValidatePrintJobs.sql" />
+    <Build Include="dbo\Stored Procedures\CheckPrint_QueuePrintJobs.sql" />
+    <Build Include="dbo\Stored Procedures\GenerateCheckNumbers.sql" />
+    <Build Include="dbo\Stored Procedures\uspCreateBankTransactionPayment.sql" />
+    <Build Include="dbo\Views\vyuPayments.sql" />
+    <Build Include="dbo\Tables\tblDBPanelFilter.sql" />
+    <Build Include="dbo\Tables\tblSMTerm.sql" />
+    <Build Include="dbo\Tables\tblSMShipVia.sql" />
+    <Build Include="dbo\Tables\tblSMPaymentMethod.sql" />
+    <None Include="Scripts\Post-Deployment\DB\1_CannedPanels.sql" />
+    <Build Include="Scripts\Pre-Deployment\Manual Run\Dashboard\1_1340_to_1410.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="i21.publish.xml" />
@@ -782,5 +797,6 @@
     <None Include="dbo\Views\vwCPGAContractHistory.sql" />
     <None Include="Scripts\Post-Deployment\VersionUpdate.sql" />
     <None Include="Scripts\Pre-Deployment\Manual Run\AR\1_RenameObjects.sql" />
+    <None Include="dbo\Tables\tblCPUserConfiguration.sql" />
   </ItemGroup>
 </Project>
