@@ -51,7 +51,7 @@ BEGIN
 		[strState] = '',
 		[strCountry] = '',
 		[dblAmount] = A.dblAmountPaid,
-		[strAmountInWords] = fn_ConvertNUmberToWords(A.dblAmountPaid),
+		[strAmountInWords] = fn_ConvertNumberToWords(A.dblAmountPaid),
 		[strMemo] = NULL,
 		[strReferenceNo] = NULL,
 		[ysnCheckToBePrinted] = 0,

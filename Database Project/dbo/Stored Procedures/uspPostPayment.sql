@@ -207,7 +207,6 @@ IF ISNULL(@recap, 0) = 0
 		--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
 		UPDATE tblAPBill
 			SET tblAPBill.dblAmountDue = (C.dblTotal - B.dblPayment),
-								--GROUP BY A.intPaymentId,C.dblTotal, C.intBillId),
 				tblAPBill.ysnPaid = (CASE WHEN (C.dblTotal - B.dblPayment) = 0 THEN 1 ELSE 0 END),
 				dtmDatePaid = (CASE WHEN (C.dblTotal - B.dblPayment) = 0 THEN A.dtmDatePaid ELSE NULL END)
 		FROM tblAPPayment A
