@@ -65,20 +65,10 @@ CREATE TABLE #Structure
 	,intAccountStructureID	INT
 )
 
-IF (SELECT TOP 1 strType FROM tblGLAccountStructure WHERE intSort = 1) = 'Primary'
-	BEGIN 
-		INSERT INTO #Structure 
-		SELECT strMask, strType, intAccountStructureID
-		FROM tblGLAccountStructure WHERE strType <> 'Divider'
-		ORDER BY intSort DESC
-	END
-ELSE
-	BEGIN
-		INSERT INTO #Structure 
-		SELECT strMask, strType, intAccountStructureID
-		FROM tblGLAccountStructure WHERE strType <> 'Divider'
-		ORDER BY intSort DESC
-	END
+INSERT INTO #Structure 
+SELECT strMask, strType, intAccountStructureID
+FROM tblGLAccountStructure WHERE strType <> 'Divider'
+ORDER BY intSort DESC
 
 CREATE TABLE #Segments
 (
@@ -88,7 +78,6 @@ CREATE TABLE #Segments
 	,intAccountSegmentID		INT
 	,strAccountSegmentID		NVARCHAR(100)
 )
-
 
 INSERT INTO #Segments
 SELECT a.strCode, a.strDescription, a.intAccountStructureID, a.intAccountSegmentID, a.intAccountSegmentID AS strAccountSegmentID
@@ -183,16 +172,20 @@ END
 
 INSERT INTO tblGLTempAccount
 SELECT strCode AS strAccountID, 
-	   CAST(CAST(strPrimary AS INT) AS NVARCHAR(50)), 
-	   CAST(CAST(strSegment AS INT) AS NVARCHAR(50)),
+	   strPrimary, 
+	   strSegment,
 	   strDescription,
 	   strAccountGroup,
 	   intAccountGroupID,
-	   strAccountSegmentID,
-	   @intUserID AS intUserID,
-	   dtmCreated = getDate()
+	   strAccountSegmentID,	   
+	   intAccountUnitID = (SELECT TOP 1 intAccountUnitID FROM tblGLAccountUnit WHERE strUOMCode = CAST(glactmst.glact_uom AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS), --glact_uom 
+	   ysnSystem = (CASE WHEN glact_sys_acct_yn = 'N' THEN 0 ELSE 1 END), -- glact_sys_acct_yn
+	   ysnActive = (CASE WHEN glact_active_yn = 'N' THEN 0 ELSE 1 END), -- glact_active_yn   
+	   @intUserID AS intUserID,	   
+	   getDate() AS dtmCreated
 FROM #ConstructAccount
-WHERE strCode NOT IN (SELECT strAccountID FROM tblGLAccount) AND ((CAST(CAST(strPrimary AS INT) AS NVARCHAR(50)) + '-' + CAST(CAST(strSegment AS INT) AS NVARCHAR(50))) IN (select CAST(CAST(glact_acct1_8 AS INT) AS NVARCHAR(50)) + '-' + CAST(CAST(glact_acct9_16 AS INT) AS NVARCHAR(50)) from glactmst))
+LEFT JOIN glactmst ON (CAST(CAST(strPrimary AS INT) AS NVARCHAR(50)) + '-' + CAST(CAST(strSegment AS INT) AS NVARCHAR(50))) = (CAST(CAST(glact_acct1_8 AS INT) AS NVARCHAR(50)) + '-' + CAST(CAST(glact_acct9_16 AS INT) AS NVARCHAR(50)))
+WHERE strCode NOT IN (SELECT strAccountID FROM tblGLAccount)
 ORDER BY strCode		
 
 DROP TABLE #TempResults
@@ -202,7 +195,5 @@ DROP TABLE #Segments
 DROP TABLE #ConstructAccount
 
 DELETE tblGLTempAccountToBuild WHERE intUserID = @intUserID
-
-select 1
 
 END

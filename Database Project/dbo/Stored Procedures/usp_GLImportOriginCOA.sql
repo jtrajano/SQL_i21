@@ -2,8 +2,10 @@
 @ysnStructure	BIT = 0,
 @ysnPrimary		BIT = 0,
 @ysnSegment		BIT = 0,
+@ysnUnit		BIT = 0,
 @ysnOverride	BIT = 0,
-@ysnBuild		BIT = 0
+@ysnBuild		BIT = 0,
+@result			NVARCHAR(500) = '' OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -12,10 +14,11 @@ SET NOCOUNT ON
 
 IF (EXISTS(SELECT SegmentCode FROM (SELECT glact_acct1_8 AS SegmentCode,max(glact_desc) AS CodeDescription,glact_type FROM glactmst GROUP BY glact_acct1_8,glact_type) tblX group by SegmentCode HAVING COUNT(*) > 1) and @ysnOverride = 0)
 BEGIN
-	SELECT 'There are accounts that are classified as an Income and Balance Sheet Type account. <br/> Kindly verify at Legacy GL.' as Result
+	SET @result = 'There are accounts that are classified as an Income and Balance Sheet Type account. <br/> Kindly verify at Legacy GL.'
 END
 ELSE
 BEGIN
+	-- IMPORT ACCOUNT STRUCTURE
 	IF @ysnStructure = 1
 	BEGIN
 		DECLARE  @PrimaryLength		NUMERIC (18,6)
@@ -35,6 +38,7 @@ BEGIN
 								VALUES (3,'Profit Center','Segment', @SegmentLength,'0',2,0,9 - @SegmentLength)
 	END	
 
+	-- IMPORT PRIMARY ACCOUNT
 	IF @ysnPrimary = 1
 	BEGIN
 		DECLARE @query VARCHAR(500)		
@@ -102,6 +106,7 @@ BEGIN
 		
 	END
 		
+	-- IMPORT SEGMENT ACCOUNT
 	IF @ysnSegment = 1
 	BEGIN											
 		SELECT glprc_sub_acct AS SegmentCode
@@ -144,7 +149,17 @@ BEGIN
 		
 		DROP TABLE #segments		
 	END
+	
+	-- IMPORT UNIT OF MEASURE
+	IF @ysnUnit = 1
+	BEGIN	
+		DELETE tblGLAccountUnit
 		
+		INSERT tblGLAccountUnit (strUOMCode,strUOMDesc,dblLbsPerUnit,intConcurrencyID)
+			SELECT gluom_code,gluom_desc,gluom_lbs_per_unit,NULL FROM gluommst	
+	END	
+		
+	-- BUILD COA
 	IF @ysnBuild = 1
 	BEGIN
 		INSERT INTO tblGLTempAccountToBuild
@@ -153,16 +168,12 @@ BEGIN
 			,0
 			,dtmCreated = getDate()
 		FROM
-		tblGLAccountSegment
+		tblGLAccountSegment				
 		
 		EXEC usp_GLBuildOriginAccount  0
-		EXEC usp_GLBuildAccount 0
-		
-		UPDATE tblGLAccountSegment SET ysnBuild = 1
+		EXEC usp_GLBuildAccount 0				
 	END	
 	
-	SELECT '1'
+	SET @result = 'SUCCESSFULLY IMPORTED'
 	
 END
-
-	

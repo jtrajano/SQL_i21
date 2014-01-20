@@ -210,6 +210,6 @@ BEGIN
 	DROP TABLE iRelyImptblGLJournal						
 	DROP TABLE iRelyImptblGLJournalDetail
 
-	SELECT 'successfully imported'
+	SELECT 'SUCCESSFULLY IMPORTED'
 						
 END
