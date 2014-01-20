@@ -789,6 +789,7 @@
     <Build Include="dbo\Stored Procedures\usp_GLImportOriginHistoricalJournal.sql" />
     <Build Include="dbo\Stored Procedures\ApplyCheckChangeForPrintFail.sql" />
     <Build Include="dbo\Stored Procedures\CommitPrintCheckVerification.sql" />
+    <Build Include="dbo\Stored Procedures\GetDuplicateCheckNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="i21.publish.xml" />
