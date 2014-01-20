@@ -1,0 +1,73 @@
+{
+    "type": "Ext.container.Container",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "filter",
+        "designer|userClassName": "Filter",
+        "height": 23,
+        "width": 277
+    },
+    "designerId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4",
+    "cn": [
+        {
+            "type": "Ext.form.field.Trigger",
+            "reference": {
+                "name": "items",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "fieldLabel": "Filter",
+                "itemId": "txtFilter",
+                "labelWidth": 35,
+                "margin": "0 0 0 5",
+                "onTrigger1Click": null,
+                "onTrigger2Click": null,
+                "tabIndex": -1,
+                "trigger2Cls": null,
+                "triggerCls": "x-form-clear-trigger",
+                "width": 189
+            },
+            "configAlternates": {
+                "onTrigger2Click": "object",
+                "onTrigger1Click": "object"
+            },
+            "designerId": "de56539e-f102-4107-902a-c60a28cf0078",
+            "customConfigs": [
+                {
+                    "group": "(Custom Properties)",
+                    "name": "trigger2Cls",
+                    "type": "string"
+                },
+                {
+                    "group": "(Custom Properties)",
+                    "name": "onTrigger1Click",
+                    "type": "string"
+                },
+                {
+                    "group": "(Custom Properties)",
+                    "name": "onTrigger2Click",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "type": "Ext.form.Label",
+            "reference": {
+                "name": "items",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "itemId": "lblTotalRecords",
+                "padding": 3,
+                "text": ""
+            },
+            "designerId": "2cf331a3-e16c-4551-8f6b-308b6781aa76"
+        }
+    ]
+}

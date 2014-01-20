@@ -1,0 +1,89 @@
+{
+    "type": "Ext.toolbar.Paging",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "border": null,
+        "container|padding": null,
+        "designer|userAlias": "ipagingstatusbar",
+        "designer|userClassName": "StatusbarPaging",
+        "floating": null,
+        "frame": null,
+        "inputItemWidth": 60,
+        "itemId": "tlbPaging",
+        "margin": null,
+        "prependButtons": true,
+        "width": null
+    },
+    "designerId": "6e9d32bd-1b77-41b2-9662-434eced19679",
+    "cn": [
+        {
+            "type": "Ext.button.Button",
+            "reference": {
+                "name": "items",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "designer|displayName": null,
+                "icon": null,
+                "iconCls": "small-help",
+                "itemId": "btnHelp",
+                "layout|flex": null,
+                "tabIndex": -1,
+                "text": "Help",
+                "tooltip": "Click to get help on this form"
+            },
+            "configAlternates": {
+                "tooltip": "string"
+            },
+            "designerId": "247c5654-a93e-4631-b93c-c1ba367e7a0e"
+        },
+        {
+            "type": "Ext.toolbar.Separator",
+            "reference": {
+                "name": "items",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "designer|displayName": "separator",
+                "layout|flex": null
+            },
+            "designerId": "cfb782d2-59b7-4f96-8bf6-a17fd84bc082"
+        },
+        {
+            "type": "Ext.form.Label",
+            "reference": {
+                "name": "items",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "designer|displayName": null,
+                "itemId": "lblStatus",
+                "layout|flex": null,
+                "layout|margins": "0 5",
+                "text": "Ready"
+            },
+            "designerId": "dba197c7-2211-4e2f-a5a2-a21986c61faf"
+        },
+        {
+            "type": "Ext.toolbar.Fill",
+            "reference": {
+                "name": "items",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "designer|displayName": "Fill",
+                "layout|flex": null,
+                "margin": null
+            },
+            "designerId": "d2e7a712-d34e-4295-83b5-d356dbe27446"
+        }
+    ]
+}

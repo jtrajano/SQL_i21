@@ -1,0 +1,81 @@
+{
+    "type": "Ext.toolbar.Toolbar",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "istatusbar",
+        "designer|userClassName": "Statusbar",
+        "itemId": "tlbStatusbar",
+        "width": 1265
+    },
+    "designerId": "0afbe385-6a12-469e-9f51-96107236353a",
+    "cn": [
+        {
+            "type": "Ext.button.Button",
+            "reference": {
+                "name": "items",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "designer|displayName": null,
+                "icon": null,
+                "iconCls": "small-help",
+                "itemId": "btnHelp",
+                "layout|flex": null,
+                "tabIndex": -1,
+                "text": "Help",
+                "tooltip": "Click to get help on this form"
+            },
+            "configAlternates": {
+                "tooltip": "string"
+            },
+            "designerId": "47c14ba2-6975-43aa-bea8-c2dd5447d942"
+        },
+        {
+            "type": "Ext.toolbar.Separator",
+            "reference": {
+                "name": "items",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "designer|displayName": "separator",
+                "layout|flex": null
+            },
+            "designerId": "4ae1b61e-4b2f-4362-962b-a7843859aac7"
+        },
+        {
+            "type": "Ext.form.Label",
+            "reference": {
+                "name": "items",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "designer|displayName": null,
+                "itemId": "lblReady",
+                "layout|flex": null,
+                "layout|margins": "0 5",
+                "text": "Ready"
+            },
+            "designerId": "a693cbde-5aad-4664-a701-32c4b9463ba5"
+        },
+        {
+            "type": "Ext.toolbar.Fill",
+            "reference": {
+                "name": "items",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "designer|displayName": "fill",
+                "layout|flex": null
+            },
+            "designerId": "77035203-e130-420d-a120-908e9a78295d"
+        }
+    ]
+}
