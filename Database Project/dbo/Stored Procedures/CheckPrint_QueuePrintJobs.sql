@@ -11,6 +11,8 @@ SET ANSI_NULLS ON
 --SET NOCOUNT ON // This is commented out. We need the number rows of affected by this stored procedure. 
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
+
+BEGIN TRANSACTION 
 		
 DECLARE -- Constant variables for bank account types:
 		@BANK_DEPOSIT INT = 1
@@ -51,6 +53,7 @@ SELECT *
 INTO	#tmpPrintJobSpoolTable
 FROM	dbo.tblCMCheckPrintJobSpool
 WHERE	1 = 0 
+IF @@ERROR <> 0 GOTO _ROLLBACK
 
 -- Insert the 'check' transactions in the check print-job spool table. 
 INSERT INTO #tmpPrintJobSpoolTable(
@@ -87,22 +90,28 @@ WHERE	F.intBankAccountID = @intBankAccountID
 		AND F.ysnClr = 0
 		AND F.dblAmount <> 0
 		AND F.dtmCheckPrinted IS NULL
+IF @@ERROR <> 0 GOTO _ROLLBACK		
 
 -- Check if there are transactions to queue a print job
 IF NOT EXISTS (SELECT TOP 1 1 FROM #tmpPrintJobSpoolTable)
-	RETURN -1; 
+BEGIN 
+	GOTO _ROLLBACK;
+END 
 
 -- Get the next check number from the bank account table
 SELECT TOP 1 
-		@strNextCheckNumber = REPLICATE('0', 20 - LEN(CAST(intCheckNextNo AS NVARCHAR(20)))) + CAST(intCheckNextNo AS NVARCHAR(20))
+		@strNextCheckNumber = REPLICATE('0', 20 - LEN(CAST(
+		intCheckNextNo AS NVARCHAR(20)))) + CAST(intCheckNextNo AS NVARCHAR(20))
 FROM	dbo.tblCMBankAccount
 WHERE	intBankAccountID = @intBankAccountID
+IF @@ERROR <> 0 GOTO _ROLLBACK
 
 -- Get the manually assigned check numbers 
 SELECT	* 
 INTO	#tmpManuallyAssignedCheckNumbers
 FROM	#tmpPrintJobSpoolTable
 WHERE	LTRIM(RTRIM(ISNULL(strCheckNo, ''))) <> ''
+IF @@ERROR <> 0 GOTO _ROLLBACK
 
 -- The code below will assign the check numbers to the transaction that does not have the check number.
 WHILE EXISTS (
@@ -115,6 +124,7 @@ BEGIN
 			@strRecordNo = strTransactionID
 	FROM	#tmpPrintJobSpoolTable
 	WHERE	LTRIM(RTRIM(ISNULL(strCheckNo, ''))) = ''
+	IF @@ERROR <> 0 GOTO _ROLLBACK
 
 	-- Get the next check number from the Check Number Audit table. 
 	-- FYI. Start from the next check number. 
@@ -126,22 +136,26 @@ BEGIN
 			AND intCheckNoStatus = @CHECK_NUMBER_STATUS_UNUSED
 			AND strCheckNo NOT IN (SELECT strCheckNo FROM #tmpManuallyAssignedCheckNumbers)
 	ORDER BY cntID
+	IF @@ERROR <> 0 GOTO _ROLLBACK
 
 	-- If there is NO more available check numbers to complete the print job, abort the process. 
 	IF (LTRIM(RTRIM(ISNULL(@strNextCheckNumber, ''))) = '')
-		RETURN -1; 
-
+	BEGIN 
+		GOTO _ROLLBACK
+	END 
+		
 	-- Assign the check number
 	UPDATE	#tmpPrintJobSpoolTable
 	SET		strCheckNo = @strNextCheckNumber
 	WHERE	strTransactionID = @strRecordNo
+	IF @@ERROR <> 0 GOTO _ROLLBACK
 	
 	-- Update the check number audit and mark it as assigned for print check (for print check verification)
 	UPDATE	dbo.tblCMCheckNumberAudit
 	SET		intCheckNoStatus = @CHECK_NUMBER_STATUS_FOR_PRINT_VERIFICATION
 	WHERE	intBankAccountID = @intBankAccountID
 			AND strCheckNo = @strNextCheckNumber
-
+	IF @@ERROR <> 0 GOTO _ROLLBACK
 END 
 
 -- From here, temp print job table is now complete with information it needs to queue the print job. 
@@ -168,5 +182,26 @@ SELECT
 		,ysnFail
 		,strReason
 FROM	#tmpPrintJobSpoolTable
+IF @@ERROR <> 0 GOTO _ROLLBACK
+
+-- Update the next check number in the bank accounts table
+IF ( ISNUMERIC(@strNextCheckNumber) = 1)
+BEGIN 
+	UPDATE dbo.tblCMBankAccount
+	SET intCheckNextNo = CAST(@strNextCheckNumber AS INT)
+	WHERE intBankAccountID = @intBankAccountID
+	IF @@ERROR <> 0 GOTO _ROLLBACK
+END 
+
+_COMMIT_TRANS:
+	COMMIT TRANSACTION
+	GOTO _EXIT
+
+_ROLLBACK: 
+	ROLLBACK TRANSACTION
+	RETURN -1;
+	
+	GOTO _EXIT
+_EXIT:
 
 GO
