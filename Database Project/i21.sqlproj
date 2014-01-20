@@ -784,7 +784,7 @@
     <Build Include="dbo\Tables\tblSMShipVia.sql" />
     <Build Include="dbo\Tables\tblSMPaymentMethod.sql" />
     <None Include="Scripts\Post-Deployment\DB\1_CannedPanels.sql" />
-    <Build Include="Scripts\Pre-Deployment\Manual Run\Dashboard\1_1340_to_1410.sql" />
+    <None Include="Scripts\Pre-Deployment\Manual Run\Dashboard\1_1340_to_1410.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="i21.publish.xml" />
