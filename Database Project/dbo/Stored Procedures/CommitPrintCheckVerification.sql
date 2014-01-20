@@ -32,6 +32,22 @@ DECLARE -- Constant variables for Check number status.
 SELECT	@strTransactionID = CASE WHEN LTRIM(RTRIM(@strTransactionID)) = '' THEN NULL ELSE @strTransactionID END
 		,@strBatchID = CASE WHEN LTRIM(RTRIM(@strBatchID)) = '' THEN NULL ELSE @strBatchID END
 IF @@ERROR <> 0 GOTO _ROLLBACK
+
+-- Check if there are failed checks and the reason is missing. 
+IF EXISTS (
+	SELECT TOP 1 1 
+	FROM	dbo.tblCMCheckPrintJobSpool B
+	WHERE	B.ysnFail = 1
+			AND LTRIM(RTRIM(ISNULL(B.strReason, ''))) = ''
+			AND B.intBankAccountID = @intBankAccountID
+			AND B.strTransactionID = ISNULL(@strTransactionID, B.strTransactionID)
+			AND B.strBatchID = ISNULL(@strBatchID, B.strBatchID)
+)
+BEGIN 
+	-- A failed check is misisng a reason.
+	RAISERROR(50011, 11, 1)
+	GOTO _ROLLBACK
+END
 		
 -- Update the Bank Transaction table:
 -- 1. Update the check printed date. 

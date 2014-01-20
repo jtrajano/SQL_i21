@@ -135,6 +135,13 @@ BEGIN
 	UPDATE	#tmpPrintJobSpoolTable
 	SET		strCheckNo = @strNextCheckNumber
 	WHERE	strTransactionID = @strRecordNo
+	
+	-- Update the check number audit and mark it as assigned for print check (for print check verification)
+	UPDATE	dbo.tblCMCheckNumberAudit
+	SET		intCheckNoStatus = @CHECK_NUMBER_STATUS_FOR_PRINT_VERIFICATION
+	WHERE	intBankAccountID = @intBankAccountID
+			AND strCheckNo = @strNextCheckNumber
+
 END 
 
 -- From here, temp print job table is now complete with information it needs to queue the print job. 
