@@ -63,20 +63,10 @@ CREATE TABLE #Structure
 	,intAccountStructureID	INT
 )
 
-IF (SELECT TOP 1 strType FROM tblGLAccountStructure WHERE intSort = 1) = 'Primary'
-	BEGIN 
-		INSERT INTO #Structure 
-		SELECT strMask, strType, intAccountStructureID
-		FROM tblGLAccountStructure WHERE strType <> 'Divider'
-		ORDER BY intSort DESC
-	END
-ELSE
-	BEGIN
-		INSERT INTO #Structure 
-		SELECT strMask, strType, intAccountStructureID
-		FROM tblGLAccountStructure WHERE strType <> 'Divider'
-		ORDER BY intSort DESC
-	END
+INSERT INTO #Structure 
+SELECT strMask, strType, intAccountStructureID
+FROM tblGLAccountStructure WHERE strType <> 'Divider'
+ORDER BY intSort DESC
 
 CREATE TABLE #Segments
 (
@@ -186,9 +176,12 @@ SELECT strCode AS strAccountID,
 	   strDescription,
 	   strAccountGroup,
 	   intAccountGroupID,
-	   strAccountSegmentID,
-	   @intUserID AS intUserID,
-	   dtmCreated = getDate()
+	   strAccountSegmentID,	   
+	   intAccountUnitID = NULL,
+	   ysnSystem = 1,
+	   ysnActive = 1,
+	   @intUserID AS intUserID,	   
+	   getDate() AS dtmCreated	   	   
 FROM #ConstructAccount
 WHERE strCode NOT IN (SELECT strAccountID FROM tblGLAccount)	   
 ORDER BY strCode		

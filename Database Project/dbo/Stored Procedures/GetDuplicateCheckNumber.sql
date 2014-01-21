@@ -1,9 +1,8 @@
 ﻿
 CREATE PROCEDURE GetDuplicateCheckNumber
 	@intBankAccountID INT = NULL,
-	@strTransactionID NVARCHAR(40) = NULL,
-	@strCheckNumber NVARCHAR(20) = NULL,
-	@isDuplicate BIT = 0 OUTPUT
+	@strTransactionID AS NVARCHAR(40) = NULL,
+	@strCheckNo AS NVARCHAR(20) = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -27,18 +26,21 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@ORIGIN_EFT AS INT = 13
 		,@ORIGIN_WITHDRAWAL AS INT = 14
 		,@ORIGIN_WIRE AS INT = 15
+		,@AP_PAYMENT AS INT = 16
+		
+-- Clean the parameter
+SET @strCheckNo = LTRIM(RTRIM(ISNULL(@strCheckNo, ''))) 		
 		
 SELECT	TOP 1 
-		@isDuplicate = 1
-FROM	dbo.tblCMBankTransaction 
-WHERE	intBankAccountID = @intBankAccountID
-		AND strTransactionID <> @strTransactionID
-		AND 1 = 
-				CASE	WHEN ISNUMERIC(strReferenceNo) = 1 AND ISNUMERIC(@strCheckNumber) = 1THEN 
-							CASE WHEN CAST(strReferenceNo AS INT) = CAST(@strCheckNumber AS INT) THEN 1 ELSE 0 END 
-						ELSE 
-							CASE WHEN strReferenceNo = @strCheckNumber THEN 1 ELSE 0 END 							
-				END 
-		AND	intBankTransactionTypeID IN (@MISC_CHECKS, @ORIGIN_CHECKS)
-
-SET @isDuplicate = ISNULL(@isDuplicate, 0)
+		intBankAccountID 
+		,strTransactionID
+		,strReferenceNo
+FROM	tblCMBankTransaction 
+WHERE	strTransactionID <> @strTransactionID
+		AND intBankAccountID = @intBankAccountID
+		AND intBankTransactionTypeID IN (@MISC_CHECKS, @ORIGIN_CHECKS, @AP_PAYMENT)
+		AND (
+			strReferenceNo = @strCheckNo 
+			OR strReferenceNo = REPLICATE('0', 20 - LEN(CAST(@strCheckNo AS NVARCHAR(20)))) + CAST(@strCheckNo AS NVARCHAR(20))		
+		)
+		AND @strCheckNo <> ''

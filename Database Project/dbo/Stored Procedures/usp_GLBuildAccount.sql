@@ -7,11 +7,13 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 
 -- +++++ INSERT ACCOUNT ID +++++ --
-INSERT INTO tblGLAccount ([strAccountID],[strDescription],[intAccountGroupID], [ysnActive])
+INSERT INTO tblGLAccount ([strAccountID],[strDescription],[intAccountGroupID],[intAccountUnitID],[ysnSystem],[ysnActive])
 SELECT strAccountID, 
 	   strDescription,
 	   intAccountGroupID,
-	   1
+	   intAccountUnitID,
+	   ysnSystem,
+	   ysnActive
 FROM tblGLTempAccount
 WHERE intUserID = @intUserID and strAccountID NOT IN (SELECT strAccountID FROM tblGLAccount)	
 ORDER BY strAccountID
@@ -38,6 +40,7 @@ BEGIN
 END
 ELSE
 BEGIN
+	-- HANDLE OUT OF STANDARD ACCOUNT STRUCTURE (e.i REPowell)
 	INSERT INTO tblGLCOACrossReference ([inti21ID],[stri21ID],[strExternalID], [strCurrentExternalID], [strCompanyID], [intConcurrencyID])
 	SELECT (SELECT intAccountID FROM tblGLAccount A WHERE A.strAccountID = B.strAccountID) as inti21ID,
 		   B.strAccountID as stri21ID,

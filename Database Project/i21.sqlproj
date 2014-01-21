@@ -86,6 +86,8 @@
     <Folder Include="Scripts\Pre-Deployment\SM" />
     <Folder Include="dbo\Database Triggers" />
     <Folder Include="Scripts\Pre-Deployment\Manual Run\AR" />
+    <Folder Include="Scripts\Post-Deployment\DB" />
+    <Folder Include="Scripts\Pre-Deployment\Manual Run\Dashboard" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblGLJournalRecurring.sql" />
@@ -782,6 +784,13 @@
     <Build Include="dbo\Tables\tblSMShipVia.sql" />
     <Build Include="dbo\Tables\tblSMPaymentMethod.sql" />
     <Build Include="dbo\Tables\tblAPInvalidTransaction.sql" />
+    <None Include="Scripts\Post-Deployment\DB\1_CannedPanels.sql" />
+    <None Include="Scripts\Pre-Deployment\Manual Run\Dashboard\1_1340_to_1410.sql" />
+    <Build Include="dbo\Stored Procedures\usp_GLBuildOriginAccount.sql" />
+    <Build Include="dbo\Stored Procedures\usp_GLImportOriginHistoricalJournal.sql" />
+    <Build Include="dbo\Stored Procedures\ApplyCheckChangeForPrintFail.sql" />
+    <Build Include="dbo\Stored Procedures\CommitPrintCheckVerification.sql" />
+    <Build Include="dbo\Stored Procedures\GetDuplicateCheckNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="i21.publish.xml" />
@@ -795,8 +804,5 @@
     <None Include="Scripts\Post-Deployment\VersionUpdate.sql" />
     <None Include="Scripts\Pre-Deployment\Manual Run\AR\1_RenameObjects.sql" />
     <None Include="dbo\Tables\tblCPUserConfiguration.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <RefactorLog Include="i21.refactorlog" />
   </ItemGroup>
 </Project>
