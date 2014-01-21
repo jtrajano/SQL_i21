@@ -1,13 +1,19 @@
 ﻿CREATE PROCEDURE uspPostBill
-	@batchId			AS NVARCHAR(20)		= '',
-	@journalType		AS NVARCHAR(30)		= '',
+	@batchId			AS NVARCHAR(20)		= NULL,
+	@billBatchId		AS NVARCHAR(20)		= NULL,
+	@transactionType	AS NVARCHAR(30)		= NULL,
 	@post				AS BIT				= 0,
 	@recap				AS BIT				= 0,
-	@param				AS NVARCHAR(MAX)	= '',
+	@param				AS NVARCHAR(MAX)	= NULL,
 	@userId				AS INT				= 1,
+	@beginDate			AS DATE				= NULL,
+	@endDate			AS DATE				= NULL,
+	@beginTransaction	AS NVARCHAR(50)		= NULL,
+	@endTransaction		AS NVARCHAR(50)		= NULL,
 	@successfulCount	AS INT				= 0 OUTPUT,
+	@invalidCount		AS INT				= 0 OUTPUT,
 	@success			AS BIT				= 0 OUTPUT,
-	@recapId			AS NVARCHAR(250)	=  NEWID OUTPUT
+	@recapId			AS NVARCHAR(250)	= NEWID OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -30,9 +36,10 @@ CREATE TABLE #tmpPostBillData (
 	UNIQUE (intBillId)
 );
 
-CREATE TABLE #tmpValidBillData (
-	[intBillId] [int] PRIMARY KEY,
-	UNIQUE (intBillId)
+CREATE TABLE #tmpInvalidBillData (
+	[strError] [NVARCHAR](100),
+	[strTransactionType] [NVARCHAR](50),
+	[strTransactionId] [NVARCHAR](50)
 );
 
 --DECLARRE VARIABLES
@@ -41,23 +48,79 @@ SET @recapId = '1'
 --=====================================================================================================================================
 -- 	POPULATE JOURNALS TO POST TEMPORARY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
-IF (ISNULL(@param, '') <> '') 
+IF (@param IS NOT NULL) 
+BEGIN
 	INSERT INTO #tmpPostBillData SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@param)
---ELSE IF Provision for Date Begin and Date End Parameter
---ELSE IF Provision for Journal Begin and Journal End Parameter
-ELSE
-	INSERT INTO #tmpPostBillData SELECT [intBillId] FROM tblAPBill
+END
+
+IF (@billBatchId IS NOT NULL)
+BEGIN
+	INSERT INTO #tmpPostBillData
+	SELECT B.intBillId FROM tblAPBillBatch A
+			LEFT JOIN tblAPBill B	
+				ON A.intBillBatchId = B.intBillBatchId
+END
+	
+IF(@beginDate IS NOT NULL)
+BEGIN
+	INSERT INTO #tmpPostBillData
+	SELECT intBillId FROM tblAPBill
+	WHERE dtmDate BETWEEN @beginDate AND @endDate
+END
+
+IF(@beginTransaction IS NOT NULL)
+BEGIN
+	INSERT INTO #tmpPostBillData
+	SELECT intBillId FROM tblAPBill
+	WHERE intBillId BETWEEN @beginTransaction AND @endTransaction
+END
 
 --=====================================================================================================================================
--- 	POPULATE VALID JOURNALS TEMPORARY TABLE
+-- 	GET ALL INVALID TRANSACTIONS
 ---------------------------------------------------------------------------------------------------------------------------------------
-INSERT INTO #tmpValidBillData
-	SELECT DISTINCT A.[intBillId]
+
+--Fiscal Year
+INSERT INTO #tmpInvalidBillData
+	SELECT 
+		'Unable to find an open fiscal year period to match the transaction date.',
+		'Payable',
+		A.intBillId
 	FROM tblAPBill A 
 	WHERE  A.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
-		1 = ISNULL([dbo].isOpenAccountingDate(A.[dtmDate]), 0)
+		0 = ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0)
 
-IF @@ERROR <> 0	GOTO Post_Rollback;
+--NOT BALANCE
+INSERT INTO #tmpInvalidBillData
+	SELECT 
+		'The debit and credit amounts are not balanced.',
+		'Payable',
+		A.intBillId
+	FROM tblAPBill A 
+	WHERE  A.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
+		A.dblTotal <> (SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = A.intBillId)
+
+--ALREADY POSTED
+INSERT INTO #tmpInvalidBillData
+	SELECT 
+		'The transaction is already posted.',
+		'Payable',
+		A.intBillId
+	FROM tblAPBill A 
+	WHERE  A.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
+		A.ysnPosted = 1
+
+DECLARE @totalInvalid INT
+SET @totalInvalid = (SELECT COUNT(*) #tmpInvalidBillData)
+
+IF(@totalInvalid > 0)
+BEGIN
+
+	INSERT INTO tblAPInvalidTransaction(strError, strTransactionId, strTransactionType)
+	SELECT * FROM #tmpInvalidBillData
+
+	SET @invalidCount = @totalInvalid
+
+END
 
 
 --=====================================================================================================================================
@@ -70,7 +133,7 @@ IF ISNULL(@recap, 0) = 0
 		
 		UPDATE tblAPBill
 			SET ysnPosted = 0
-		FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpValidBillData)
+		FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 
 	END
 	ELSE
@@ -124,7 +187,7 @@ IF ISNULL(@recap, 0) = 0
 			[strModuleName]		= @MODULE_NAME,
 			[strTransactionForm] = A.intBillId
 		FROM	[dbo].tblAPBill A
-		WHERE	A.intBillId IN (SELECT intBillId FROM #tmpValidBillData)
+		WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 	
 		--DEBIT
 		UNION ALL 
@@ -150,11 +213,11 @@ IF ISNULL(@recap, 0) = 0
 			[strTransactionForm] = A.intBillId
 		FROM	[dbo].tblAPBill A LEFT JOIN [dbo].tblAPBillDetail B
 					ON A.intBillId = B.intBillId
-		WHERE	A.intBillId IN (SELECT intBillId FROM #tmpValidBillData)
+		WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 	
 		UPDATE tblAPBill
 			SET ysnPosted = 1
-		WHERE tblAPBill.intBillId IN (SELECT intBillId FROM #tmpValidBillData)
+		WHERE tblAPBill.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
@@ -211,7 +274,7 @@ ELSE
 			[strModuleName]		= @MODULE_NAME,
 			[strTransactionForm] = A.intBillId
 		FROM	[dbo].tblAPBill A
-		WHERE	A.intBillId IN (SELECT intBillId FROM #tmpValidBillData)
+		WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 	
 		--DEBIT
 		UNION ALL 
@@ -237,7 +300,7 @@ ELSE
 			[strTransactionForm] = A.intBillId
 		FROM	[dbo].tblAPBill A LEFT JOIN [dbo].tblAPBillDetail B
 					ON A.intBillId = B.intBillId
-		WHERE	A.intBillId IN (SELECT intBillId FROM #tmpValidBillData)
+		WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 
@@ -256,7 +319,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 --=====================================================================================================================================
 -- 	RETURN TOTAL NUMBER OF VALID JOURNALS
 ---------------------------------------------------------------------------------------------------------------------------------------
-SELECT @successfulCount = COUNT(*) FROM #tmpValidBillData
+SELECT @successfulCount = COUNT(*) FROM #tmpPostBillData
 
 --=====================================================================================================================================
 -- 	FINALIZING STAGE
@@ -273,5 +336,5 @@ Post_Rollback:
 
 Post_Exit:
 	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#tmpPostBillData')) DROP TABLE #tmpPostBillData
-	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#tmpValidBillData')) DROP TABLE #tmpValidBillData
+	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#tmpInvalidBillData')) DROP TABLE #tmpInvalidBillData
 GO

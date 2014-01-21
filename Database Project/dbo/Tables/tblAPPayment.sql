@@ -14,6 +14,7 @@
     [ysnPosted]          BIT             NOT NULL,
     [strPaymentRecordNum] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [dblWithheldAmount] DECIMAL(18, 6) NULL, 
+    [intUserId] INT NULL, 
     CONSTRAINT [PK_dbo.tblAPPayments] PRIMARY KEY CLUSTERED ([intPaymentId] ASC)
 );
 

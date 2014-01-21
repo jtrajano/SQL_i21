@@ -17,6 +17,7 @@
 	[dblAmountDue] [decimal](18, 2) NOT NULL,
 	[dtmDatePaid] [datetime] NULL,
  [dtmDiscountDate] DATETIME NULL, 
+    [intUserId] INT NULL, 
     CONSTRAINT [PK_dbo.tblAPBill] PRIMARY KEY CLUSTERED 
 (
 	[intBillId] ASC
