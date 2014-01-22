@@ -47,6 +47,18 @@ BEGIN
 						INNER JOIN dbo.tblGLAccount AS B ON B.intAccountID = A.intAccountID 
 						INNER JOIN dbo.tblGLAccountGroup AS C ON C.intAccountGroupID = B.intAccountGroupID
 						LEFT JOIN dbo.tblGLTempCOASegment AS D ON D.intAccountID = B.intAccountID')
+						
+						
+						
+	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vyu_GLAccountView') DROP VIEW vyu_GLAccountView
+	
+		EXEC ('CREATE VIEW [dbo].[vyu_GLAccountView]
+		AS
+		SELECT     C.*, A.strDescription, B.strAccountGroup, B.strAccountType, A.intAccountGroupID, A.ysnIsUsed, A.ysnActive, A.dblOpeningBalance, A.intAccountUnitID
+		FROM		dbo.tblGLAccount AS A 
+					INNER JOIN dbo.tblGLAccountGroup AS B ON B.intAccountGroupID = A.intAccountGroupID
+					LEFT JOIN dbo.tblGLTempCOASegment AS C ON C.intAccountID = A.intAccountID')
 
 				
 END
+

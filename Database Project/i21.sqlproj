@@ -284,7 +284,6 @@
     <Build Include="dbo\Views\vwCPCurrentCashBids.sql" />
     <Build Include="dbo\Views\vwclsmst.sql" />
     <Build Include="dbo\Views\vwCPContracts.sql" />
-    <Build Include="dbo\Views\vyu_GLDetailView.sql" />
     <Build Include="dbo\Views\vwCPPendingPayments.sql" />
     <Build Include="dbo\Views\vwCPPendingInvoices.sql" />
     <Build Include="dbo\Views\vwCPPaymentsDetails.sql" />
@@ -297,7 +296,6 @@
     <Build Include="dbo\Views\vwlclmst.sql" />
     <Build Include="dbo\Views\vwCPBillingAccountPayments.sql" />
     <Build Include="dbo\Views\vyu_GLAccountGroupView.sql" />
-    <Build Include="dbo\Views\vyu_GLAccountView.sql" />
     <Build Include="dbo\Functions\fn_getBeginBalanceUnit.sql" />
     <Build Include="dbo\Functions\fn_getBeginBalance.sql" />
     <Build Include="dbo\Functions\fn_getEndBalanceUnit.sql" />
