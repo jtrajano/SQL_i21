@@ -1,13 +1,18 @@
 ﻿CREATE PROCEDURE uspPostPayment
-	@batchId			AS NVARCHAR(20)		= '',
-	@journalType		AS NVARCHAR(30)		= '',
+	@batchId			AS NVARCHAR(20)		= NULL,
+	@transactionType	AS NVARCHAR(30)		= NULL,
 	@post				AS BIT				= 0,
 	@recap				AS BIT				= 0,
-	@param				AS NVARCHAR(MAX)	= '',
+	@param				AS NVARCHAR(MAX)	= NULL,
 	@userId				AS INT				= 1,
+	@beginDate			AS DATE				= NULL,
+	@endDate			AS DATE				= NULL,
+	@beginTransaction	AS NVARCHAR(50)		= NULL,
+	@endTransaction		AS NVARCHAR(50)		= NULL,
 	@successfulCount	AS INT				= 0 OUTPUT,
+	@invalidCount		AS INT				= 0 OUTPUT,
 	@success			AS BIT				= 0 OUTPUT,
-	@recapId			AS NVARCHAR(250)	=  NEWID OUTPUT
+	@recapId			AS NVARCHAR(250)	= NEWID OUTPUT
 	--OUTPUT Parameter for GUID
 	--Provision for Date Begin and Date End Parameter
 	--Provision for Journal Begin and Journal End Parameter
@@ -24,14 +29,15 @@ BEGIN TRANSACTION
 --=====================================================================================================================================
 -- 	DECLARE TEMPORARY TABLES
 ---------------------------------------------------------------------------------------------------------------------------------------
-CREATE TABLE #tmpPostData (
+CREATE TABLE #tmpPayablePostData (
 	[intPaymentId] [int] PRIMARY KEY,
 	UNIQUE (intPaymentId)
 );
 
-CREATE TABLE #tmpValidData (
-	[intPaymentId] [int] PRIMARY KEY,
-	UNIQUE (intPaymentId)
+CREATE TABLE #tmpPayableInvalidData (
+	[strError] [NVARCHAR](100),
+	[strTransactionType] [NVARCHAR](50),
+	[strTransactionId] [NVARCHAR](50)
 );
 
 --DECLARRE VARIABLES
@@ -39,32 +45,79 @@ DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
 SET @recapId = '1'
 
 --SET BatchId
-IF(ISNULL(@batchId,'') = '')
+IF(@batchId IS NULL)
 BEGIN
 	EXEC GetStartingNumber 3, @batchId
 END
---=====================================================================================================================================
--- 	POPULATE JOURNALS TO POST TEMPORARY TABLE
----------------------------------------------------------------------------------------------------------------------------------------
-IF (ISNULL(@param, '') <> '') 
-	INSERT INTO #tmpPostData SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@param)
---ELSE IF Provision for Date Begin and Date End Parameter
---ELSE IF Provision for Journal Begin and Journal End Parameter
-ELSE
-	INSERT INTO #tmpPostData SELECT [intPaymentId] FROM tblAPPayment
 
 --=====================================================================================================================================
--- 	POPULATE VALID JOURNALS TEMPORARY TABLE
+-- 	POPULATE TRANSACTIONS TO POST TEMPORARY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
-INSERT INTO #tmpValidData
-	SELECT DISTINCT A.[intPaymentId]
+IF (@param IS NOT NULL) 
+BEGIN
+	INSERT INTO #tmpPayablePostData SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@param)
+END
+
+IF(@beginDate IS NOT NULL)
+BEGIN
+	INSERT INTO #tmpPayablePostData
+	SELECT intPaymentId FROM tblAPPayment
+	WHERE dtmDatePaid BETWEEN @beginDate AND @endDate
+END
+
+IF(@beginTransaction IS NOT NULL)
+BEGIN
+	INSERT INTO #tmpPayablePostData
+	SELECT intPaymentId FROM tblAPPayment
+	WHERE intPaymentId BETWEEN @beginTransaction AND @endTransaction
+END
+
+--=====================================================================================================================================
+-- 	GET ALL INVALID TRANSACTIONS
+---------------------------------------------------------------------------------------------------------------------------------------
+
+--Fiscal Year
+INSERT INTO #tmpPayableInvalidData
+	SELECT 
+		'Unable to find an open fiscal year period to match the transaction date.',
+		'Payable',
+		A.intPaymentId
 	FROM tblAPPayment A 
-	WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPostData) AND 
-		1 = ISNULL([dbo].isOpenAccountingDate(A.[dtmDatePaid]), 0)
+	WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
+		0 = ISNULL([dbo].isOpenAccountingDate(A.[dtmDatePaid]), 0)
 
-SELECT @successfulCount = COUNT(*) FROM #tmpValidData
+--NOT BALANCE
+INSERT INTO #tmpPayableInvalidData
+	SELECT 
+		'The debit and credit amounts are not balanced.',
+		'Payable',
+		A.intPaymentId
+	FROM tblAPPayment A 
+	WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
+		A.dblAmountPaid <> (SELECT SUM(dblPayment) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)
 
-IF @@ERROR <> 0	GOTO Post_Rollback;
+--ALREADY POSTED
+INSERT INTO #tmpPayableInvalidData
+	SELECT 
+		'The transaction is already posted.',
+		'Payable',
+		A.intPaymentId
+	FROM tblAPPayment A 
+	WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
+		A.ysnPosted = 1
+
+DECLARE @totalInvalid INT
+SET @totalInvalid = (SELECT COUNT(*) #tmpPayableInvalidData)
+
+IF(@totalInvalid > 0)
+BEGIN
+
+	INSERT INTO tblAPInvalidTransaction(strError, strTransactionId, strTransactionType)
+	SELECT * FROM #tmpPayableInvalidData
+
+	SET @invalidCount = @totalInvalid
+
+END
 
 --=====================================================================================================================================
 -- 	CHECK IF THE PROCESS IS RECAP OR NOT
@@ -76,7 +129,7 @@ IF ISNULL(@recap, 0) = 0
 		
 		UPDATE tblAPPayment
 			SET ysnPosted = 0
-		FROM tblAPPayment WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpValidData)
+		FROM tblAPPayment WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 	END
 	ELSE
@@ -135,7 +188,7 @@ IF ISNULL(@recap, 0) = 0
 					ON A.intBankAccountId = GLAccnt.intAccountID
 				INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 					ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
-		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpValidData)
+		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 		--Withheld
 		UNION
 		SELECT
@@ -162,7 +215,7 @@ IF ISNULL(@recap, 0) = 0
 					ON A.intBankAccountId = GLAccnt.intAccountID
 				INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 					ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
-		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpValidData)
+		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 		---- DEBIT SIDE
 		UNION ALL 
 		SELECT	[strPaymentRecordNum]
@@ -187,21 +240,21 @@ IF ISNULL(@recap, 0) = 0
 		FROM	[dbo].tblAPPayment A 
 				LEFT JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
-		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpValidData)
+		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 		
 
 		-- Update the posted flag in the transaction table
 		UPDATE tblAPPayment
 		SET		ysnPosted = 1
 				--,intConcurrencyID += 1 
-		WHERE	intPaymentId IN (SELECT intPaymentId FROM #tmpValidData)
+		WHERE	intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		UPDATE tblAPPaymentDetail
 			SET dblAmountDue = B.dblAmountDue - dblAmountPaid
 		FROM tblAPPayment A
 			LEFT JOIN tblAPPaymentDetail B
 				ON A.intPaymentId = B.intPaymentId
-		WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpValidData)
+		WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 
 		--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
@@ -214,7 +267,10 @@ IF ISNULL(@recap, 0) = 0
 							ON A.intPaymentId = B.intPaymentId
 					INNER JOIN tblAPBill C
 							ON B.intBillId = C.intBillId
-					WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpValidData)
+					WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+
+		--Insert to bank transaction
+		--EXEC uspCreateBankTransactionPayment
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
@@ -225,7 +281,7 @@ ELSE
 		--TODO:
 		--DELETE TABLE PER Session
 		DELETE FROM tblGLDetailRecap
-			WHERE strTransactionID IN (SELECT CAST(intPaymentId AS NVARCHAR(50)) FROM #tmpValidData);
+			WHERE strTransactionID IN (SELECT CAST(intPaymentId AS NVARCHAR(50)) FROM #tmpPayablePostData);
 
 		--GO
 
@@ -280,7 +336,7 @@ ELSE
 		FROM	[dbo].tblAPPayment A 
 			LEFT JOIN tblAPPaymentDetail B 
 				ON A.intPaymentId = B.intPaymentId
-		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpValidData)
+		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 		--Withheld
 		UNION
 		SELECT
@@ -307,7 +363,7 @@ ELSE
 					ON A.intBankAccountId = GLAccnt.intAccountID
 				INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 					ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
-		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpValidData)
+		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 		---- DEBIT SIDE
 		UNION ALL 
 		SELECT	CAST(A.intPaymentId AS NVARCHAR(50))--[strPaymentRecordNum]
@@ -332,7 +388,7 @@ ELSE
 		FROM	[dbo].tblAPPayment A 
 				LEFT JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
-		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpValidData)
+		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 		--GROUP BY A.intPaymentId, B.intAccountId, A.dtmDatePaid
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
@@ -433,7 +489,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 Post_Commit:
 	COMMIT TRANSACTION
 	SET @success = 1
-	SET @recapId = (SELECT TOP 1 intPaymentId FROM #tmpValidData) --only support recap per record
+	SET @recapId = (SELECT TOP 1 intPaymentId FROM #tmpPayablePostData) --only support recap per record
 	GOTO Post_Exit
 
 Post_Rollback:
@@ -442,6 +498,6 @@ Post_Rollback:
 	GOTO Post_Exit
 
 Post_Exit:
-	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#tmpPostData')) DROP TABLE #tmpPostData
-	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#tmpValidData')) DROP TABLE #tmpValidData
+	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#tmpPayablePostData')) DROP TABLE #tmpPayablePostData
+	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#tmpValidData')) DROP TABLE #tmpPayableInvalidData
 GO

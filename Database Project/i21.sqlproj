@@ -783,6 +783,7 @@
     <Build Include="dbo\Tables\tblSMTerm.sql" />
     <Build Include="dbo\Tables\tblSMShipVia.sql" />
     <Build Include="dbo\Tables\tblSMPaymentMethod.sql" />
+    <Build Include="dbo\Tables\tblAPInvalidTransaction.sql" />
     <None Include="Scripts\Post-Deployment\DB\1_CannedPanels.sql" />
     <None Include="Scripts\Pre-Deployment\Manual Run\Dashboard\1_1340_to_1410.sql" />
     <Build Include="dbo\Stored Procedures\usp_GLBuildOriginAccount.sql" />

@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCreateBankTransactionPayment]
 	@batchId INT = 0,
-	@userId NVARCHAR(50) = '',
+	@userId NVARCHAR(50) = NULL,
 	@paymentId INT
 AS
 BEGIN

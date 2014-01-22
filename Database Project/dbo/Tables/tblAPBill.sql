@@ -16,12 +16,13 @@
 	[strBillId] [NVARCHAR](50) collate Latin1_General_CI_AS NULL,
 	[dblAmountDue] [decimal](18, 2) NOT NULL,
 	[dtmDatePaid] [datetime] NULL,
-	[dtmDiscountDate] DATETIME NULL, 
+ 	[dtmDiscountDate] DATETIME NULL, 
+    [intUserId] INT NULL, 
     CONSTRAINT [PK_dbo.tblAPBill] PRIMARY KEY CLUSTERED ([intBillId] ASC),
     CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPBillBatch_intBillBatchId] FOREIGN KEY ([intBillBatchId]) REFERENCES [dbo].[tblAPBillBatch] ([intBillBatchId]) ON DELETE CASCADE
 )
-GO
 
+GO
 CREATE NONCLUSTERED INDEX [IX_intBillBatchId]
     ON [dbo].[tblAPBill]([intBillBatchId] ASC);
 GO
