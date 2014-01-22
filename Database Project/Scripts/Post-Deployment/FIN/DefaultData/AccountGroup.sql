@@ -1,8 +1,8 @@
 ﻿GO
 	PRINT N'BEGIN INSERT DEFAULT ACCOUNT GROUP'
 GO
-	SET IDENTITY_INSERT [dbo].[tblGLAccountGroup] ON
-GO
+--	SET IDENTITY_INSERT [dbo].[tblGLAccountGroup] ON
+--GO
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountGroup WHERE strAccountGroup = N'Asset' AND strAccountType = N'Asset')
 	BEGIN
 		INSERT [dbo].[tblGLAccountGroup] ([strAccountGroup], [strAccountType], [intParentGroupID], [intGroup], [intSort], [intConcurrencyID], [intAccountBegin], [intAccountEnd], [strAccountGroupNamespace]) VALUES (N'Asset', N'Asset', 0, 1, 10000, 129, 0, 0, N'src')
@@ -31,12 +31,12 @@ GO
 	BEGIN
 		INSERT [dbo].[tblGLAccountGroup] ([strAccountGroup], [strAccountType], [intParentGroupID], [intGroup], [intSort], [intConcurrencyID], [intAccountBegin], [intAccountEnd], [strAccountGroupNamespace]) VALUES (N'Cost of Goods Sold', N'Cost of Goods Sold', 0, 1, 70000, NULL, NULL, NULL, NULL)
 	END
-		IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountGroup WHERE strAccountGroup = N'Payables' AND strAccountType = N'Liability')
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountGroup WHERE strAccountGroup = N'Payables' AND strAccountType = N'Liability')
 	BEGIN
-		INSERT [dbo].[tblGLAccountGroup] ([strAccountGroup], [strAccountType], [intParentGroupID], [intGroup], [intSort], [intConcurrencyID], [intAccountBegin], [intAccountEnd], [strAccountGroupNamespace]) VALUES (N'Payables', N'Liability', 2, 1, 20000, NULL, NULL, NULL, NULL)
+		INSERT [dbo].[tblGLAccountGroup] ([strAccountGroup], [strAccountType], [intParentGroupID], [intGroup], [intSort], [intConcurrencyID], [intAccountBegin], [intAccountEnd], [strAccountGroupNamespace]) VALUES (N'Payables', N'Liability', (SELECT TOP 1 intAccountGroupID FROM tblGLAccountGroup WHERE strAccountGroup = N'Liability' AND strAccountType = N'Liability') , 1, 20000, NULL, NULL, NULL, NULL)
 	END
 GO
-	SET IDENTITY_INSERT [dbo].[tblGLAccountGroup] OFF
-GO
+--	SET IDENTITY_INSERT [dbo].[tblGLAccountGroup] OFF
+--GO
 	PRINT N'END INSERT DEFAULT ACCOUNT GROUP'
 GO
