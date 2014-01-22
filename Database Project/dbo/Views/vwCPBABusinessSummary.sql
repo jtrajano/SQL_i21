@@ -1,6 +1,5 @@
 ﻿CREATE VIEW [dbo].[vwCPBABusinessSummary]
-AS
-select
+	AS select
 	A4GLIdentity = row_number() over (order by a.agstm_loc_no)
 	,strCustomerNo = a.agstm_bill_to_cus
 	,strItem = a.agstm_itm_no
