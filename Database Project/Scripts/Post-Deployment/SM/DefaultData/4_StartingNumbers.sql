@@ -142,6 +142,16 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyID]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bank Transaction')
+	UNION ALL
+	SELECT	[cntID]					= 14
+			,[strTransactionType]	= N'Misc Checks'
+			,[strPrefix]			= N'MCHK-'
+			,[intNumber]			= 1
+			,[intTransactionTypeID] = 14
+			,[strModule]			= 'Cash Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyID]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Misc Checks')
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO

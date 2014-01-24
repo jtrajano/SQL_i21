@@ -35,22 +35,27 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@ORIGIN_EFT AS INT = 13
 		,@ORIGIN_WITHDRAWAL AS INT = 14		
 		,@ORIGIN_WIRE AS INT = 15
+
+		,@STARTING_NUMBER_DEPOSIT AS NVARCHAR(100) = 'Bank Deposit'
+		,@STARTING_NUMBER_WITHDRAWAL AS NVARCHAR(100) = 'Bank Withdrawal'
+		,@STARTING_NUMBER_TRANSFER AS NVARCHAR(100) = 'Bank Transfer'
+		,@STARTING_NUMBER_BANK_TRANSACTION AS NVARCHAR(100) = 'Bank Transaction'
 		
 		-- Local variables:
 		,@strTransactionID NVARCHAR(40)
 		,@msg_id INT
 
 -- Initialize the transaction id. 
-SELECT	@strTransactionID = strTransactionPrefix + '-' + CAST(intTransactionNo AS NVARCHAR(20))
-FROM	tblCMBankTransactionType
-WHERE	intBankTransactionTypeID = @BANK_TRANSACTION
+SELECT	@strTransactionID = strPrefix + CAST(intNumber AS NVARCHAR(20))
+FROM	dbo.tblSMStartingNumber
+WHERE	strTransactionType = @STARTING_NUMBER_BANK_TRANSACTION
 IF @@ERROR <> 0	GOTO AddPayment_Rollback
 
 -- Increment the next transaction number
-UPDATE	tblCMBankTransactionType
-SET		intTransactionNo += 1
-WHERE	intBankTransactionTypeID = @BANK_TRANSACTION
-IF @@ERROR <> 0	GOTO AddPayment_Rollback
+UPDATE	dbo.tblSMStartingNumber
+SET		intNumber += 1
+WHERE	strTransactionType = @STARTING_NUMBER_BANK_TRANSACTION
+IF @@ERROR <> 0	GOTO AddDeposit_Rollback
 
 -- Create the Bank Deposit HEADER
 INSERT INTO tblCMBankTransaction(
