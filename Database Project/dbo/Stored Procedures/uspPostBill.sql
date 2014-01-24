@@ -109,7 +109,7 @@ INSERT INTO #tmpInvalidBillData
 	WHERE  A.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
 		A.ysnPosted = 1
 
-DECLARE @totalInvalid INT
+DECLARE @totalInvalid INT = 0
 SET @totalInvalid = (SELECT COUNT(*) #tmpInvalidBillData)
 
 IF(@totalInvalid > 0)
