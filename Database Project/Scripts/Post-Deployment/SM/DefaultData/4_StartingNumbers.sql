@@ -16,7 +16,7 @@ GO
 	SELECT	[cntID]					= 1
 			,[strTransactionType]	= N'Audit Adjustment'
 			,[strPrefix]			=  N'AA-'
-			,[intNumber]			= 0
+			,[intNumber]			= 1
 			,[intTransactionTypeID] = 1
 			,[strModule]			= N'Accounting'
 			,[ysnEnable]			= 1
@@ -26,7 +26,7 @@ GO
 	SELECT	[cntID]					= 2
 			,[strTransactionType]	= N'General Journal'
 			,[strPrefix]			=  N'GJ-'
-			,[intNumber]			= 0
+			,[intNumber]			= 1
 			,[intTransactionTypeID] = 2
 			,[strModule]			= N'Accounting'
 			,[ysnEnable]			= 1
@@ -36,7 +36,7 @@ GO
 	SELECT	[cntID]					= 3
 			,[strTransactionType]	= N'Batch Post'
 			,[strPrefix]			= N'BATCH-'
-			,[intNumber]			= 0
+			,[intNumber]			= 1
 			,[intTransactionTypeID] = 3
 			,[strModule]			= N'Posting'
 			,[ysnEnable]			= 1
@@ -46,7 +46,7 @@ GO
 	SELECT	[cntID]					= 4
 			,[strTransactionType]	= N'Recurring Journal'
 			,[strPrefix]			= N'REC-'
-			,[intNumber]			= 0
+			,[intNumber]			= 1
 			,[intTransactionTypeID] = 4
 			,[strModule]			= N'Accounting'
 			,[ysnEnable]			= 1
@@ -56,7 +56,7 @@ GO
 	SELECT	[cntID]					= 5
 			,[strTransactionType]	= N'General Journal Reversal'
 			,[strPrefix]			= N'REV-'
-			,[intNumber]			= 0
+			,[intNumber]			= 1
 			,[intTransactionTypeID] = 5
 			,[strModule]			= N'Accounting'
 			,[ysnEnable]			= 1
@@ -66,7 +66,7 @@ GO
 	SELECT	[cntID]					= 6
 			,[strTransactionType]	= N'COA Adjustment'
 			,[strPrefix]			= N'GLADJ-'
-			,[intNumber]			= 0
+			,[intNumber]			= 1
 			,[intTransactionTypeID] = 6
 			,[strModule]			= N'Accounting'
 			,[ysnEnable]			= 1
@@ -76,7 +76,7 @@ GO
 	SELECT	[cntID] = 7
 			,[strTransactionType]	= N'Bill Batch'
 			,[strPrefix]			= N'BB-'
-			,[intNumber]			= 0
+			,[intNumber]			= 1
 			,[intTransactionTypeID] = 7
 			,[strModule]			= N'Accounts Payable'
 			,[ysnEnable]			= 1
@@ -86,7 +86,7 @@ GO
 	SELECT	[cntID]					= 8
 			,[strTransactionType]	= N'Payable'
 			,[strPrefix]			= N'PAY-'
-			,[intNumber]			= 0
+			,[intNumber]			= 1
 			,[intTransactionTypeID] = 8
 			,[strModule]			= N'Accounts Payable'
 			,[ysnEnable]			= 1
@@ -96,7 +96,7 @@ GO
 	SELECT	[cntID]					= 9
 			,[strTransactionType]	= N'Bill'
 			,[strPrefix]			= N'BL-'
-			,[intNumber]			= 0
+			,[intNumber]			= 1
 			,[intTransactionTypeID] = 9
 			,[strModule]			= N'Accounts Payable'
 			,[ysnEnable]			= 1
@@ -106,7 +106,7 @@ GO
 	SELECT	[cntID]					= 10
 			,[strTransactionType]	= N'Bank Deposit'
 			,[strPrefix]			= N'BDEP-'
-			,[intNumber]			= 0
+			,[intNumber]			= 1
 			,[intTransactionTypeID] = 10
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1
@@ -116,7 +116,7 @@ GO
 	SELECT	[cntID]					= 11
 			,[strTransactionType]	= N'Bank Withdrawal'
 			,[strPrefix]			= N'BWD-'
-			,[intNumber]			= 0
+			,[intNumber]			= 1
 			,[intTransactionTypeID] = 11
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1
@@ -126,7 +126,7 @@ GO
 	SELECT	[cntID]					= 12
 			,[strTransactionType]	= N'Bank Transfer'
 			,[strPrefix]			= N'BTFR-'
-			,[intNumber]			= 0
+			,[intNumber]			= 1
 			,[intTransactionTypeID] = 12
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1
@@ -136,7 +136,7 @@ GO
 	SELECT	[cntID]					= 13
 			,[strTransactionType]	= N'Bank Transaction'
 			,[strPrefix]			= N'BTRN-'
-			,[intNumber]			= 0
+			,[intNumber]			= 1
 			,[intTransactionTypeID] = 13
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1
