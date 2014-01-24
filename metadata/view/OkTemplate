@@ -8,9 +8,9 @@
     "userConfig": {
         "collapsible": null,
         "constrainHeader": true,
-        "defaultFocus": "dtmStartDate",
-        "designer|userAlias": "customercontact",
-        "designer|userClassName": "CustomerContact",
+        "defaultFocus": null,
+        "designer|userAlias": "oktemplate",
+        "designer|userClassName": "OkTemplate",
         "height": 360,
         "hidden": false,
         "icon": null,
@@ -22,7 +22,7 @@
         "minWidth": 487,
         "minimizable": null,
         "modal": true,
-        "title": "Customer Contacts",
+        "title": "OK Template",
         "width": 487
     },
     "designerId": "d68dd158-b609-47a4-a734-9e059390fa50",
@@ -43,10 +43,10 @@
                 "frame": null,
                 "header": false,
                 "height": 350,
-                "itemId": "frmCustomerContact",
+                "itemId": "frmOkTemplate",
                 "layout": "vbox",
                 "margin": -1,
-                "title": "My Form",
+                "title": null,
                 "url": null,
                 "width": 450
             },
@@ -140,7 +140,7 @@
                                 "fieldLabel": "Contact Name",
                                 "labelWidth": 85,
                                 "layout|flex": 1,
-                                "name": "strContactFullName"
+                                "name": null
                             },
                             "designerId": "f29ef269-3449-4a67-99ea-4699b67a329a"
                         },
@@ -156,7 +156,7 @@
                                 "labelWidth": 50,
                                 "layout|flex": 1,
                                 "layout|margins": "0 0 0 5",
-                                "name": "strTitle"
+                                "name": null
                             },
                             "designerId": "d1f9fd52-e815-4634-8b52-9e3fce44a209"
                         }
@@ -190,7 +190,7 @@
                                 "labelWidth": 85,
                                 "layout|flex": 1,
                                 "maskRe": "/[0123456789\\+\\(\\)\\-]/",
-                                "name": "strPhone"
+                                "name": null
                             },
                             "designerId": "0a0528a7-8565-4afc-b945-7c496c3ad1bc"
                         },
@@ -213,15 +213,15 @@
                                     "]"
                                 ],
                                 "designer|createAlias": "gridcombobox",
-                                "displayField": "strLocationName",
+                                "displayField": null,
                                 "fieldLabel": "Location",
-                                "itemId": "cboLocation",
+                                "itemId": null,
                                 "labelWidth": 50,
                                 "layout|flex": 1,
                                 "layout|margins": "0 0 0 5",
-                                "name": "strLocationName",
+                                "name": null,
                                 "queryMode": "local",
-                                "valueField": "strLocationName"
+                                "valueField": null
                             },
                             "configAlternates": {
                                 "columns": "array"
@@ -265,7 +265,7 @@
                                 "labelWidth": 85,
                                 "layout|flex": 1,
                                 "maskRe": "/[0123456789\\+\\(\\)\\-]/",
-                                "name": "strMobile"
+                                "name": null
                             },
                             "designerId": "1b053bf7-dbf5-4e7b-a701-8d838a195f6e"
                         },
@@ -282,7 +282,7 @@
                                 "layout|flex": 1,
                                 "layout|margins": "0 0 0 5",
                                 "maskRe": "/[0123456789\\+\\(\\)\\-]/",
-                                "name": "strFax"
+                                "name": null
                             },
                             "designerId": "702ed689-b9bc-4800-bdbc-d8a657c8025f"
                         }
@@ -316,7 +316,7 @@
                                 "labelWidth": 85,
                                 "layout|flex": 1,
                                 "maskRe": "/[0123456789\\+\\(\\)\\-]/",
-                                "name": "strPhone2"
+                                "name": null
                             },
                             "designerId": "9a76e778-f3f1-4785-a656-2d00dc416489"
                         },
@@ -332,7 +332,7 @@
                                 "labelWidth": 50,
                                 "layout|flex": 1,
                                 "layout|margins": "0 0 0 5",
-                                "name": "strEmail2"
+                                "name": null
                             },
                             "designerId": "2a9d75bc-8a4e-4878-8794-99360d7da371"
                         }
@@ -349,7 +349,7 @@
                         "fieldLabel": "Email",
                         "labelWidth": 85,
                         "layout|flex": null,
-                        "name": "strEmail"
+                        "name": null
                     },
                     "designerId": "51c7fbaf-b200-42d9-96c0-1f23e27af680"
                 },
@@ -364,7 +364,7 @@
                         "fieldLabel": "Department",
                         "labelWidth": 85,
                         "layout|flex": null,
-                        "name": "strDepartment"
+                        "name": null
                     },
                     "designerId": "d86f51b8-bf41-4640-aad1-3467f6aa091b"
                 },
@@ -379,7 +379,7 @@
                         "fieldLabel": "Notes",
                         "labelWidth": 85,
                         "layout|flex": 1,
-                        "name": "strNotes"
+                        "name": null
                     },
                     "designerId": "ec9b3895-0a41-4753-a308-90c6bffed9b6"
                 },
