@@ -320,7 +320,8 @@ SET NOCOUNT ON
 			,dtmLastModified
 			,intConcurrencyID
 			,strCbkNo
-	)	
+	)
+	OUTPUT 	inserted.intBankAccountID
 	SELECT	strBankName							= i.strBankName
 			,ysnActive							= i.ysnActive
 			,intGLAccountID						= i.intGLAccountID
@@ -446,6 +447,7 @@ EXIT_TRIGGER:
 
 END
 GO
+
 
 CREATE TRIGGER trg_delete_vwCMBankAccount
 ON [dbo].vwCMBankAccount
