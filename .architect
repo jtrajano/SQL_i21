@@ -7,6 +7,7 @@
         "resource": true,
         "d7ef9c4d-9fa7-40a9-ac40-8922ff13c54c": {
             "id": "d7ef9c4d-9fa7-40a9-ac40-8922ff13c54c",
+            "expanded": false,
             "cn": [
                 {
                     "id": "76b180be-b7ce-479d-8f48-96a2e7c4aea2",
@@ -794,6 +795,9 @@
                     "id": "247c5654-a93e-4631-b93c-c1ba367e7a0e"
                 },
                 {
+                    "id": "b6becf95-7548-4017-9886-1e103bd9f435"
+                },
+                {
                     "id": "cfb782d2-59b7-4f96-8bf6-a17fd84bc082"
                 },
                 {
@@ -819,11 +823,8 @@
     },
     "tabState": {
         "openTabs": [
-            "ae13962d-c7fb-4964-a6c4-e63105d7b3bd",
-            "10aea025-86cf-458b-ae8d-8fe2fa689193",
-            "ab2f780c-31cc-4dd2-82fd-519b77b4bcef",
-            "d68dd158-b609-47a4-a734-9e059390fa50",
             "d7ef9c4d-9fa7-40a9-ac40-8922ff13c54c",
+            "6e9d32bd-1b77-41b2-9662-434eced19679",
             "0afbe385-6a12-469e-9f51-96107236353a"
         ]
     },

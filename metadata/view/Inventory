@@ -6,6 +6,7 @@
     },
     "codeClass": null,
     "userConfig": {
+        "collapsible": true,
         "defaultFocus": null,
         "designer|userAlias": "inventory",
         "designer|userClassName": "Inventory",

@@ -45,8 +45,8 @@
             "userConfig": {
                 "designer|displayName": null,
                 "icon": null,
-                "iconCls": "small-tooltip",
-                "itemId": "btnHelp1",
+                "iconCls": "small-light-bulb-off",
+                "itemId": "btnDisplayField",
                 "layout|flex": null,
                 "tabIndex": -1,
                 "text": null,

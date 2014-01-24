@@ -34,13 +34,35 @@
                 "itemId": "btnHelp",
                 "layout|flex": null,
                 "tabIndex": -1,
-                "text": "Help",
-                "tooltip": "Click to get help on this form"
+                "text": null,
+                "tooltip": "Click to get help on this screen"
             },
             "configAlternates": {
                 "tooltip": "string"
             },
             "designerId": "247c5654-a93e-4631-b93c-c1ba367e7a0e"
+        },
+        {
+            "type": "Ext.button.Button",
+            "reference": {
+                "name": "items",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "designer|displayName": null,
+                "icon": null,
+                "iconCls": "small-light-bulb-off",
+                "itemId": "btnDisplayField",
+                "layout|flex": null,
+                "tabIndex": -1,
+                "text": null,
+                "tooltip": "Click to display table/field name tooltips"
+            },
+            "configAlternates": {
+                "tooltip": "string"
+            },
+            "designerId": "b6becf95-7548-4017-9886-1e103bd9f435"
         },
         {
             "type": "Ext.toolbar.Separator",
