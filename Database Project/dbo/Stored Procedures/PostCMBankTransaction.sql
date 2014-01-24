@@ -66,6 +66,7 @@ DECLARE
 	-- Transaction type related variables
 	,@BANK_TRANSACTION_TYPE_ID AS INT = 5 			-- (Default) Bank Transaction type id is 5 (See tblCMBankTransactionType). 
 	,@GL_DETAIL_CODE AS NVARCHAR(10) = 'BTRN'		-- (Default) String code used in GL Detail table. 
+	,@STARTING_NUMBER_TRANS_TYPE AS NVARCHAR(100) = ''
 	
 	,@BANK_DEPOSIT INT = 1
 	,@BANK_WITHDRAWAL INT = 2
@@ -120,10 +121,15 @@ FROM	[dbo].tblCMBankTransactionDetail
 WHERE	strTransactionID = @strTransactionID 
 IF @@ERROR <> 0	GOTO Post_Rollback		
 
--- Determine the CODE to use based on the on bank transactio type. 
-SELECT	@GL_DETAIL_CODE = strTransactionPrefix
-FROM	tblCMBankTransactionType
+-- Determine the CODE to use based from the bank transaction type. 
+SELECT	@STARTING_NUMBER_TRANS_TYPE = strBankTransactionTypeName
+FROM	dbo.tblCMBankTransactionType
 WHERE	intBankTransactionTypeID = @BANK_TRANSACTION_TYPE_ID
+
+SELECT	@GL_DETAIL_CODE = REPLACE(strPrefix, '-', '')
+FROM	dbo.tblSMStartingNumber
+WHERE	strTransactionType = @STARTING_NUMBER_TRANS_TYPE
+
 IF @@ERROR <> 0	GOTO Post_Rollback		
 
 --=====================================================================================================================================
