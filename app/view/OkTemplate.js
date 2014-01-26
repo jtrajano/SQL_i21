@@ -32,6 +32,7 @@ Ext.define('Inventory.view.OkTemplate', {
     minWidth: 487,
     width: 487,
     layout: 'fit',
+    collapsible: true,
     constrainHeader: true,
     iconCls: 'small-icon-i21',
     title: 'OK Template',

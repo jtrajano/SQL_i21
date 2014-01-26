@@ -6,7 +6,7 @@
     },
     "codeClass": null,
     "userConfig": {
-        "collapsible": null,
+        "collapsible": true,
         "constrainHeader": true,
         "defaultFocus": null,
         "designer|userAlias": "oktemplate",

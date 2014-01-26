@@ -241,7 +241,7 @@ Ext.define('Inventory.view.Inventory', {
                                         {
                                             xtype: 'panel',
                                             flex: 1,
-                                            margins: '5 0 14 0',
+                                            margins: '5 0 10 0',
                                             maxHeight: 1,
                                             bodyBorder: true
                                         },
@@ -385,12 +385,6 @@ Ext.define('Inventory.view.Inventory', {
                                                     dataIndex: 'number',
                                                     text: 'Max Qty',
                                                     format: '0'
-                                                },
-                                                {
-                                                    xtype: 'gridcolumn',
-                                                    dataIndex: 'string',
-                                                    text: 'Alt Item Code',
-                                                    flex: 1
                                                 }
                                             ]
                                         }
