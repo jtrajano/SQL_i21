@@ -3,7 +3,7 @@
     [intBankAccountID] INT            NOT NULL,
     [intEFTACHStatus]  INT            NOT NULL,
     [strRemarks]       NVARCHAR (200) COLLATE Latin1_General_CI_AS NOT NULL,
-    [intConcurrencyID] INT            NOT NULL,
+    [intConcurrencyID] INT            NULL,
     CONSTRAINT [PK_tblCMEFTACHAudit] PRIMARY KEY CLUSTERED ([intEFTACHNo] ASC, [intBankAccountID] ASC),
     CONSTRAINT [FK_tblCMBankAccounttblCMEFTACHAudit] FOREIGN KEY ([intBankAccountID]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountID])
 );

@@ -15,7 +15,7 @@
     [dtmCreated]            DATETIME       NULL,
     [intLastModifiedUserID] INT            NULL,
     [dtmLastModified]       DATETIME       NULL,
-    [intConcurrencyID]      INT            NOT NULL,
+    [intConcurrencyID]      INT            NULL,
     CONSTRAINT [PK_tblCMBank] PRIMARY KEY CLUSTERED ([strBankName] ASC)
 );
 
