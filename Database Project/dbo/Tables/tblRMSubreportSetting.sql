@@ -8,7 +8,10 @@
     [strParentDataType]     NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strChildField]         NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strChildDataType]      NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [intConcurrencyId]      INT             NOT NULL DEFAULT 1,
     CONSTRAINT [PK_dbo.SubreportSettings] PRIMARY KEY CLUSTERED ([intSubreportSettingId] ASC),
     CONSTRAINT [FK_dbo.SubreportSettings_dbo.Reports_intReportId] FOREIGN KEY ([intReportId]) REFERENCES [dbo].[tblRMReport] ([intReportId]) ON DELETE CASCADE
 );
+
+
 

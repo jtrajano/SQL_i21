@@ -4,7 +4,7 @@
     [dblStatementEndingBalance]  DECIMAL (18) NULL,
     [intLastModifiedUserID]      INT          NOT NULL,
     [dtmLastModified]            DATETIME     NOT NULL,
-    [intConcurrencyID]           INT          NULL,
+    [intConcurrencyId]           INT          NOT NULL DEFAULT 1,
     CONSTRAINT [PK_tblCMCurrentBankReconciliation] PRIMARY KEY CLUSTERED ([intBankAccountID] ASC)
 );
 

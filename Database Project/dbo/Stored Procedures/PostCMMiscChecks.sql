@@ -50,7 +50,7 @@ CREATE TABLE #tmpGLDetail (
 	,[strBillInvoiceNumber]		[nvarchar](35)  COLLATE Latin1_General_CI_AS NULL
 	,[strJournalLineDescription] [nvarchar](250)  COLLATE Latin1_General_CI_AS NULL
 	,[ysnIsUnposted]			[bit] NOT NULL
-	,[intConcurrencyID]			[int] NULL
+	,[intConcurrencyId]			[int] NULL
 	,[intUserID]				[int] NULL
 	,[strTransactionForm]		[nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
 	,[strModuleName]			[nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
@@ -214,7 +214,7 @@ BEGIN
 			,[strBillInvoiceNumber]
 			,[strJournalLineDescription]
 			,[ysnIsUnposted]
-			,[intConcurrencyID]
+			,[intConcurrencyId]
 			,[intUserID]
 			,[strTransactionForm]
 			,[strModuleName]
@@ -246,7 +246,7 @@ BEGIN
 			,[strBillInvoiceNumber] = NULL 
 			,[strJournalLineDescription] = NULL 
 			,[ysnIsUnposted]		= 0 
-			,[intConcurrencyID]		= 1
+			,[intConcurrencyId]		= 1
 			,[intUserID]			= A.intLastModifiedUserID
 			,[strTransactionForm]	= A.strTransactionID
 			,[strModuleName]		= @MODULE_NAME
@@ -286,7 +286,7 @@ BEGIN
 			,[strBillInvoiceNumber] = NULL 
 			,[strJournalLineDescription] = NULL 
 			,[ysnIsUnposted]		= 0 
-			,[intConcurrencyID]		= 1
+			,[intConcurrencyId]		= 1
 			,[intUserID]			= A.intLastModifiedUserID
 			,[strTransactionForm]	= A.strTransactionID
 			,[strModuleName]		= @MODULE_NAME
@@ -304,7 +304,7 @@ BEGIN
 	-- Update the posted flag in the transaction table
 	UPDATE tblCMBankTransaction
 	SET		ysnPosted = 1
-			,intConcurrencyID += 1 
+			,intConcurrencyId += 1 
 	WHERE	strTransactionID = @strTransactionID
 	
 END
@@ -317,7 +317,7 @@ BEGIN
 	-- Update the posted flag in the transaction table
 	UPDATE tblCMBankTransaction
 	SET		ysnPosted = 0
-			,intConcurrencyID += 1 
+			,intConcurrencyId += 1 
 	WHERE	strTransactionID = @strTransactionID
 	IF @@ERROR <> 0	GOTO Post_Rollback
 END
@@ -354,7 +354,7 @@ BEGIN
 			,[dtmDateEntered]		
 			,[dtmTransactionDate]	
 			,[ysnIsUnposted]		
-			,[intConcurrencyID]		
+			,[intConcurrencyId]		
 			,[intUserID]			
 			,[strTransactionForm]	
 			,[strModuleName]		
@@ -379,7 +379,7 @@ BEGIN
 			,[dtmDateEntered]		
 			,[dtmTransactionDate]	
 			,[ysnIsUnposted]		
-			,[intConcurrencyID]		
+			,[intConcurrencyId]		
 			,[intUserID]			
 			,[strTransactionForm]	
 			,[strModuleName]		

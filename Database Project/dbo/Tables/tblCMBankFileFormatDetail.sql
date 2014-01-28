@@ -14,7 +14,7 @@
     [dtmCreated]                DATETIME       NULL,
     [intLastModifiedUserID]     INT            NULL,
     [dtmLastModified]           DATETIME       NULL,
-    [intConcurrencyID]          INT            NOT NULL,
+    [intConcurrencyId]          INT            NOT NULL DEFAULT 1,
     CONSTRAINT [PK_tblCMBankFileFormatDetail] PRIMARY KEY CLUSTERED ([intBankFileFormatDetailID] ASC),
     CONSTRAINT [FK_tblCMBankFileFormattblCMBankFileFormatDetail] FOREIGN KEY ([intBankFileFormatID]) REFERENCES [dbo].[tblCMBankFileFormat] ([intBankFileFormatID]) ON DELETE CASCADE
 );

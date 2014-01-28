@@ -12,7 +12,7 @@
     [dtmCreated]                 DATETIME        NULL,
     [intLastModifiedUserID]      INT             NULL,
     [dtmLastModified]            DATETIME        NULL,
-    [intConcurrencyID]           INT             NOT NULL,
+    [intConcurrencyId]           INT             NOT NULL DEFAULT 1,
     CONSTRAINT [PK_tblCMBankTransactionDetail] PRIMARY KEY CLUSTERED ([intBankTransactionDetailID] ASC),
     CONSTRAINT [FK_tblCMBankTransactiontblCMBankTransactionDetail] FOREIGN KEY ([strTransactionID]) REFERENCES [dbo].[tblCMBankTransaction] ([strTransactionID]) ON DELETE CASCADE
 );

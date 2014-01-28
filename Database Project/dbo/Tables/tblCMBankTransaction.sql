@@ -28,7 +28,7 @@
     [dtmCreated]               DATETIME         NULL,
     [intLastModifiedUserID]    INT              NULL,
     [dtmLastModified]          DATETIME         NULL,
-    [intConcurrencyID]         INT              NOT NULL,
+    [intConcurrencyId]         INT              NOT NULL DEFAULT 1,
     CONSTRAINT [PK_tblCMBankTransaction] PRIMARY KEY CLUSTERED ([strTransactionID] ASC),
     CONSTRAINT [FK_tblCMBankAccounttblCMBankTransaction] FOREIGN KEY ([intBankAccountID]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountID]),
     CONSTRAINT [FK_tblCMBankTransactiontblSMCurrency] FOREIGN KEY ([intCurrencyID]) REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID])

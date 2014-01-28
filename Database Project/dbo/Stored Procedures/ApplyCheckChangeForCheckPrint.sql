@@ -32,7 +32,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 -- Mass update the ysnCheckToBePrinted
 UPDATE	tblCMBankTransaction 
 SET		ysnCheckToBePrinted = @ysnCheckToBePrinted
-		,intConcurrencyID = intConcurrencyID + 1
+		,intConcurrencyId = intConcurrencyId + 1
 WHERE	intBankAccountID = @intBankAccountID
 		AND intBankTransactionTypeID IN (@MISC_CHECKS, @AP_PAYMENT)
 		AND strTransactionID = ISNULL(@strTransactionID, strTransactionID)

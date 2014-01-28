@@ -18,7 +18,7 @@
     [strCOAAdjustmentPrefix]    NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
     [intCOAAdjustmentID]        INT           NULL,
     [strCurrency]               NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
-    [intConcurrencyID]          INT           NULL,
+    [intConcurrencyId]          INT           NOT NULL DEFAULT 1,
     [strEmailAddress]           NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblGLPreferenceCompany] PRIMARY KEY CLUSTERED ([intPreferenceCompanyID] ASC)
 );

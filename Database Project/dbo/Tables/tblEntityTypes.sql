@@ -2,7 +2,7 @@
     [intEntityTypeId]  INT            IDENTITY (1, 1) NOT NULL,
     [intEntityId]      INT            NOT NULL,
     [strType]          NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NOT NULL,
-    [intConcurrencyID] INT            NULL,
+    [intConcurrencyId]      INT             NOT NULL DEFAULT 1,
     CONSTRAINT [PK_dbo.tblEntityTypes] PRIMARY KEY CLUSTERED ([intEntityTypeId] ASC),
     CONSTRAINT [FK_dbo.tblEntityTypes_dbo.tblEntities_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntities] ([intEntityId]) ON DELETE CASCADE
 );

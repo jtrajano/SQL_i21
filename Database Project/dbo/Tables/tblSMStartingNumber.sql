@@ -6,7 +6,7 @@
     [intTransactionTypeID] INT            NULL,
     [strModule]            NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [ysnEnable]            BIT            NULL,
-    [intConcurrencyID]     INT            NULL,
+    [intConcurrencyId]     INT            NOT NULL DEFAULT 1,
     CONSTRAINT [PK_tblSMStartingNumber] PRIMARY KEY CLUSTERED ([strTransactionType] ASC)
 );
 

@@ -5,7 +5,7 @@
     [strExternalID]        NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NOT NULL,
     [strCurrentExternalID] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strCompanyID]         NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
-    [intConcurrencyID]     INT            NULL,
+    [intConcurrencyId]     INT            NOT NULL DEFAULT 1,
     [intLegacyReferenceID] NUMERIC (9)    NULL,
     CONSTRAINT [PK_tblCrossReference] PRIMARY KEY CLUSTERED ([intCrossReferenceID] ASC),
     CONSTRAINT [FK_tblGLCOACrossReference_tblGLAccount] FOREIGN KEY ([inti21ID]) REFERENCES [dbo].[tblGLAccount] ([intAccountID]) ON DELETE CASCADE

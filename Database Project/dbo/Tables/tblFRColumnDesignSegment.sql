@@ -6,7 +6,7 @@
     [strSegmentCode]     NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
     [intColumnID]        INT            NOT NULL,
     [intRefNo]           INT            NOT NULL,
-    [intConcurrencyID]   INT            DEFAULT ((1)) NULL,
+    [intConcurrencyId]   INT            DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFRColumnDesignSegment_1] PRIMARY KEY CLUSTERED ([intColumnSegmentID] ASC)
 );
 

@@ -15,7 +15,7 @@
     [strColumnName]     NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [intColumnRefNo]    INT             NULL,
     [intSort]           INT             NULL,
-    [intConcurrencyID]  INT             CONSTRAINT [DF__tblFRHead__intCo__3DE0CF80] DEFAULT ((1)) NULL,
+    [intConcurrencyId]  INT             DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFRHeaderDesign] PRIMARY KEY CLUSTERED ([intHeaderDetailID] ASC, [intHeaderID] ASC)
 );
 

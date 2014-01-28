@@ -42,7 +42,7 @@
     [intLastModifiedUserID]            INT            NULL,
     [dtmLastModified]                  DATETIME       NULL,
     [strCbkNo]                         NVARCHAR (2)   COLLATE Latin1_General_CI_AS NOT NULL,
-    [intConcurrencyID]                 INT            NOT NULL,
+    [intConcurrencyId]                 INT            NOT NULL DEFAULT 1,
     CONSTRAINT [PK_tblCMBankAccount] PRIMARY KEY CLUSTERED ([intBankAccountID] ASC),
     CONSTRAINT [FK_tblCMBankAccounttblSMCurrency] FOREIGN KEY ([intCurrencyID]) REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
     CONSTRAINT [FK_tblCMBankFileFormattblCMBankAccount] FOREIGN KEY ([intEFTBankFileFormatID]) REFERENCES [dbo].[tblCMBankFileFormat] ([intBankFileFormatID]),

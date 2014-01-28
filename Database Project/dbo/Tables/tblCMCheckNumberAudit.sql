@@ -8,7 +8,7 @@
     [intUserID]				INT NULL, 
     [dtmCreated]			DATETIME NULL, 
     [dtmCheckPrinted]		DATETIME NULL, 
-    [intConcurrencyID]		INT NULL,     
+    [intConcurrencyId]		INT NOT NULL DEFAULT 1,     
     CONSTRAINT [FK_tblCMBankAccounttblCMCheckNumberAudit] FOREIGN KEY ([intBankAccountID]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountID]), 
     CONSTRAINT [PK_tblCMCheckNumberAudit] PRIMARY KEY ([cntID])
 );

@@ -10,7 +10,7 @@
     [dtmPosted]          DATETIME         NULL,
     [strDescription]     NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
     [ysnPosted]          BIT              NULL,
-    [intConcurrencyID]   INT              NULL,
+    [intConcurrencyId]   INT              NOT NULL DEFAULT 1,
     [dtmJournalDate]     DATETIME         NULL,
     [intUserID]          INT              NULL,
     [strSourceID]        NVARCHAR (10)    COLLATE Latin1_General_CI_AS NULL,

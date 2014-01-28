@@ -146,7 +146,7 @@ INSERT INTO tblGLDetail (
 		,strTransactionForm
 		,strModuleName
 		,strUOMCode
-		,intConcurrencyID	
+		,intConcurrencyId	
 )
 SELECT 
 		strBatchID
@@ -177,7 +177,7 @@ SELECT
 		,strTransactionForm
 		,strModuleName
 		,strUOMCode
-		,intConcurrencyID	
+		,intConcurrencyId	
 FROM	#tmpGLDetail
 WHERE	@ysnRecap = 0
 
@@ -188,7 +188,7 @@ WHERE	@ysnRecap = 0
 UPDATE	tblGLSummary 
 SET		dblDebit = ISNULL(tblGLSummary.dblDebit, 0) + ISNULL(tmpGLDetailGrouped.dblDebit, 0)
 		,dblCredit = ISNULL(tblGLSummary.dblCredit, 0) + ISNULL(tmpGLDetailGrouped.dblCredit, 0)
-		,intConcurrencyID = ISNULL(intConcurrencyID, 0) + 1
+		,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 FROM	(
 			SELECT	dblDebit	= SUM(ISNULL(B.dblDebit, 0))
 					,dblCredit	= SUM(ISNULL(B.dblCredit, 0))
@@ -213,7 +213,7 @@ INSERT INTO tblGLSummary (
 		,dblCredit
 		,dblDebitUnit
 		,dblCreditUnit
-		,intConcurrencyID
+		,intConcurrencyId
 )
 SELECT	#tmpGLDetail.intAccountID
 		,ISNULL(CONVERT(VARCHAR(10), #tmpGLDetail.dtmDate, 112), '')

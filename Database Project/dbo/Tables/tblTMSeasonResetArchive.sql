@@ -6,6 +6,6 @@
     [strCurrentSeason]        NVARCHAR (6)   COLLATE Latin1_General_CI_AS NOT NULL,
     [strSeason]               NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [intClockID]              INT            NOT NULL,
-    [intConcurrencyID]        INT            NULL
+    [intConcurrencyId]        INT            DEFAULT 1 NOT NULL
 );
 

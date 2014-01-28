@@ -6,6 +6,6 @@
     [intDegreeDays]                    INT             NOT NULL,
     [dblAccumulatedDD]                 NUMERIC (18, 6) NOT NULL,
     [intClockID]                       INT             NOT NULL,
-    [intConcurrencyID]                 INT             NULL
+    [intConcurrencyId]                 INT             NOT NULL DEFAULT 1
 );
 

@@ -46,7 +46,7 @@ SELECT	i21.intBankAccountID
 		,i21.intLastModifiedUserID
 		,i21.dtmLastModified
 		,i21.strCbkNo
-		,i21.intConcurrencyID
+		,i21.intConcurrencyId
 		-- The following fields are from the origin system		
 		,origin.apcbk_comment				-- CHAR (30)
 		,apcbk_password = ISNULL(origin.apcbk_password, '')	-- CHAR (16)
@@ -137,7 +137,7 @@ SET NOCOUNT ON
 			,dtmCreated							= i.dtmCreated
 			,intLastModifiedUserID				= i.intLastModifiedUserID
 			,dtmLastModified					= i.dtmLastModified
-			,intConcurrencyID					= i.intConcurrencyID
+			,intConcurrencyId					= i.intConcurrencyId
 			,strCbkNo							= i.strCbkNo
 	FROM	inserted i INNER JOIN dbo.tblCMBankAccount B
 				ON i.intBankAccountID = B.intBankAccountID
@@ -318,9 +318,10 @@ SET NOCOUNT ON
 			,dtmCreated
 			,intLastModifiedUserID
 			,dtmLastModified
-			,intConcurrencyID
+			,intConcurrencyId
 			,strCbkNo
-	)	
+	)
+	OUTPUT 	inserted.intBankAccountID
 	SELECT	strBankName							= i.strBankName
 			,ysnActive							= i.ysnActive
 			,intGLAccountID						= i.intGLAccountID
@@ -362,7 +363,7 @@ SET NOCOUNT ON
 			,dtmCreated							= i.dtmCreated
 			,intLastModifiedUserID				= i.intLastModifiedUserID
 			,dtmLastModified					= i.dtmLastModified
-			,intConcurrencyID					= i.intConcurrencyID
+			,intConcurrencyId					= i.intConcurrencyId
 			,strCbkNo							= i.strCbkNo
 	FROM	inserted i 
 	IF @@ERROR <> 0 GOTO EXIT_TRIGGER
@@ -446,6 +447,7 @@ EXIT_TRIGGER:
 
 END
 GO
+
 
 CREATE TRIGGER trg_delete_vwCMBankAccount
 ON [dbo].vwCMBankAccount

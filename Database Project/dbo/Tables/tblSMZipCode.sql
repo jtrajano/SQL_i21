@@ -7,7 +7,7 @@
     [dblLatitude]      NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,
     [dblLongitude]     NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,
     [intSort]          INT             DEFAULT ((1)) NOT NULL,
-    [intConcurrencyID] INT             DEFAULT ((0)) NOT NULL,
+    [intConcurrencyId] INT             DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblSMZipCode] PRIMARY KEY CLUSTERED ([strZipCode] ASC, [strCity] ASC)
 );
 

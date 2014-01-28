@@ -1,7 +1,4 @@
 ﻿
---=====================================================================================================================================
--- 	CREATE THE STORED PROCEDURE AFTER DELETING IT
----------------------------------------------------------------------------------------------------------------------------------------
 CREATE PROCEDURE AddPayment
 	@intBankAccountID INT
 	,@dtmDate DATETIME 
@@ -55,7 +52,7 @@ IF @@ERROR <> 0	GOTO AddPayment_Rollback
 UPDATE	dbo.tblSMStartingNumber
 SET		intNumber += 1
 WHERE	strTransactionType = @STARTING_NUMBER_BANK_TRANSACTION
-IF @@ERROR <> 0	GOTO AddDeposit_Rollback
+IF @@ERROR <> 0	GOTO AddPayment_Rollback
 
 -- Create the Bank Deposit HEADER
 INSERT INTO tblCMBankTransaction(
@@ -87,7 +84,7 @@ INSERT INTO tblCMBankTransaction(
 	,dtmCreated
 	,intLastModifiedUserID
 	,dtmLastModified
-	,intConcurrencyID
+	,intConcurrencyId
 )
 SELECT	strTransactionID			= @strTransactionID
 		,intBankTransactionTypeID	= @BANK_TRANSACTION
@@ -117,7 +114,7 @@ SELECT	strTransactionID			= @strTransactionID
 		,dtmCreated					= GETDATE()
 		,intLastModifiedUserID		= @intUserID
 		,dtmLastModified			= GETDATE()
-		,intConcurrencyID			= 1
+		,intConcurrencyId			= 1
 IF @@ERROR <> 0	GOTO AddPayment_Rollback
 
 -- Create the Bank Deposit DETAIL
@@ -134,7 +131,7 @@ INSERT INTO tblCMBankTransactionDetail(
 	,dtmCreated
 	,intLastModifiedUserID
 	,dtmLastModified
-	,intConcurrencyID
+	,intConcurrencyId
 )
 SELECT	strTransactionID		= @strTransactionID
 		,dtmDate				= @dtmDate
@@ -148,7 +145,7 @@ SELECT	strTransactionID		= @strTransactionID
 		,dtmCreated				= GETDATE()
 		,intLastModifiedUserID	= @intUserID
 		,dtmLastModified		= GETDATE()
-		,intConcurrencyID		= 1
+		,intConcurrencyId		= 1
 FROM	tblGLAccount 
 WHERE	intAccountID = @intGLAccountID
 IF @@ERROR <> 0	GOTO AddPayment_Rollback

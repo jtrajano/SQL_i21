@@ -5,7 +5,7 @@
     [strReportName]         NVARCHAR (200) COLLATE Latin1_General_CI_AS NOT NULL,
     [strFullpath]           NVARCHAR (200) COLLATE Latin1_General_CI_AS NULL,
     [ysnShowCriteria]       BIT            DEFAULT ((0)) NOT NULL,
-    [intConcurrencyID]      INT            DEFAULT ((1)) NULL,
+    [intConcurrencyId]      INT            DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFRGroupOtherReports] PRIMARY KEY CLUSTERED ([intGroupOtherReportID] ASC, [strFRReportGroup] ASC)
 );
 

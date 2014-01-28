@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblTMPossessionType] (
-    [intConcurrencyID]    INT           CONSTRAINT [DEF_tblTMPossessionType_intConcurrencyID] DEFAULT ((0)) NULL,
+    [intConcurrencyId]    INT           DEFAULT 1 NOT NULL,
     [intPossessionTypeID] INT           IDENTITY (1, 1) NOT NULL,
-    [strPossessionType]   NVARCHAR (50) COLLATE Latin1_General_CI_AS CONSTRAINT [DEF_tblTMPossessionType_strPossessionType] DEFAULT ('') NOT NULL,
+    [strPossessionType]   NVARCHAR (50) COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
     CONSTRAINT [PK_tblTMPossessionType] PRIMARY KEY CLUSTERED ([intPossessionTypeID] ASC)
 );
 

@@ -5,6 +5,6 @@
     [strSegmentCode]                NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [strSegmentName]                NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [ysnDisplayToHeader]            BIT            DEFAULT ((0)) NULL,
-    [intConcurrencyID]              INT            DEFAULT ((1)) NULL,
+    [intConcurrencyId]              INT            DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFRSegmentFilterGroupDetail] PRIMARY KEY CLUSTERED ([intSegmentFilterGroupDetailID] ASC, [intSegmentFilterGroupID] ASC)
 );

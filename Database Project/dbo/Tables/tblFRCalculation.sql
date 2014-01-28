@@ -4,7 +4,7 @@
     [intComponentID]   INT            NULL,
     [strCalculation]   NVARCHAR (500) COLLATE Latin1_General_CI_AS NULL,
     [imgCalcTree]      IMAGE          NULL,
-    [intConcurrencyID] INT            DEFAULT ((1)) NULL,
+    [intConcurrencyId] INT            DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFRCalculation] PRIMARY KEY CLUSTERED ([intCalculationID] ASC)
 );
 

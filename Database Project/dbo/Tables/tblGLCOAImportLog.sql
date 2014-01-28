@@ -6,7 +6,7 @@
     [dtmDate]              DATETIME      NULL,
     [strMachineName]       NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
     [strJournalType]       NCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
-    [intConcurrencyID]     INT           NULL,
+    [intConcurrencyId]     INT           NOT NULL DEFAULT 1,
     CONSTRAINT [PK_tblGLCOAImportLog] PRIMARY KEY CLUSTERED ([intImportLogID] ASC)
 );
 

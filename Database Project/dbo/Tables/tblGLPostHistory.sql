@@ -6,7 +6,7 @@
     [strTransactionType] NVARCHAR (255)  COLLATE Latin1_General_CI_AS NULL,
     [dtmPostDate]        DATETIME        NOT NULL,
     [dblTotal]           NUMERIC (18, 6) NOT NULL,
-    [intConcurrencyID]   INT             NULL,
+    [intConcurrencyId]   INT             NOT NULL DEFAULT 1,
     CONSTRAINT [PK_tblGLPostHistory] PRIMARY KEY CLUSTERED ([intPostHistoryID] ASC)
 );
 

@@ -36,7 +36,7 @@ CREATE TABLE #ConstructGL
 	,strBillInvoiceNumber		NVARCHAR(100)
 	,strJournalLineDescription	NVARCHAR(500)
 	,ysnIsUnposted				BIT
-	,intConcurrencyID			INT
+	,intConcurrencyId			INT
 	,intUserID					INT
 	,strTransactionForm			NVARCHAR(510)
 	,strModuleName				NVARCHAR(510)
@@ -132,7 +132,7 @@ SELECT
 		,strBillInvoiceNumber		= NULL
 		,strJournalLineDescription	= NULL
 		,ysnIsUnposted				= 0
-		,intConcurrencyID			= 1
+		,intConcurrencyId			= 1
 		,intUserID					= @intUserID
 		,strTransactionForm			= NULL
 		,strModuleName				= NULL
@@ -227,7 +227,7 @@ SELECT
 		,strBillInvoiceNumber	= NULL
 		,strJournalLineDescription	= NULL
 		,ysnIsUnposted			= 0
-		,intConcurrencyID		= 1
+		,intConcurrencyId		= 1
 		,intUserID				= @intUserID
 		,strTransactionForm		= NULL
 		,strModuleName			= NULL
@@ -265,7 +265,7 @@ BEGIN
 			,strBillInvoiceNumber
 			,strJournalLineDescription
 			,ysnIsUnposted
-			,intConcurrencyID
+			,intConcurrencyId
 			,intUserID
 			,strTransactionForm
 			,strModuleName
@@ -277,7 +277,7 @@ BEGIN
 END	
 ELSE IF @ysnPost = 0 and @ysnRecap = 0
 BEGIN
-	INSERT INTO tblGLDetail (dtmDate,strBatchID,intAccountID,strAccountGroup,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,strDescription,strCode,strTransactionID,strReference,strJobID,intCurrencyID,dblExchangeRate,dtmDateEntered,dtmTransactionDate,strProductID,strWarehouseID,strNum,strCompanyName,strBillInvoiceNumber,strJournalLineDescription,ysnIsUnposted,intConcurrencyID,intUserID,strTransactionForm,strModuleName,strUOMCode)
+	INSERT INTO tblGLDetail (dtmDate,strBatchID,intAccountID,strAccountGroup,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,strDescription,strCode,strTransactionID,strReference,strJobID,intCurrencyID,dblExchangeRate,dtmDateEntered,dtmTransactionDate,strProductID,strWarehouseID,strNum,strCompanyName,strBillInvoiceNumber,strJournalLineDescription,ysnIsUnposted,intConcurrencyId,intUserID,strTransactionForm,strModuleName,strUOMCode)
 	SELECT   dtmDate
 			,strBatchID
 			,intAccountID
@@ -304,7 +304,7 @@ BEGIN
 			,strBillInvoiceNumber
 			,strJournalLineDescription
 			,1 as ysnIsUnposted
-			,intConcurrencyID
+			,intConcurrencyId
 			,intUserID
 			,strTransactionForm
 			,strModuleName

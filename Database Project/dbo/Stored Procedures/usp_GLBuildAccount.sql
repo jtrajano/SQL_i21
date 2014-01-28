@@ -27,7 +27,7 @@ END
 -- +++++ INSERT CROSS REFERENCE +++++ --
 IF (select SUM(intLength) from tblGLAccountStructure where strType = 'Segment') <= 8
 BEGIN
-	INSERT INTO tblGLCOACrossReference ([inti21ID],[stri21ID],[strExternalID], [strCurrentExternalID], [strCompanyID], [intConcurrencyID])
+	INSERT INTO tblGLCOACrossReference ([inti21ID],[stri21ID],[strExternalID], [strCurrentExternalID], [strCompanyID], [intConcurrencyId])
 	SELECT (SELECT intAccountID FROM tblGLAccount A WHERE A.strAccountID = B.strAccountID) as inti21ID,
 		   B.strAccountID as stri21ID,
 		   CAST(CAST(B.strPrimary AS INT) AS NVARCHAR(50))  + '.' + REPLICATE('0',(select 8 - SUM(intLength) from tblGLAccountStructure where strType = 'Segment')) + B.strSegment as strExternalID , 	   
@@ -41,7 +41,7 @@ END
 ELSE
 BEGIN
 	-- HANDLE OUT OF STANDARD ACCOUNT STRUCTURE (e.i REPowell)
-	INSERT INTO tblGLCOACrossReference ([inti21ID],[stri21ID],[strExternalID], [strCurrentExternalID], [strCompanyID], [intConcurrencyID])
+	INSERT INTO tblGLCOACrossReference ([inti21ID],[stri21ID],[strExternalID], [strCurrentExternalID], [strCompanyID], [intConcurrencyId])
 	SELECT (SELECT intAccountID FROM tblGLAccount A WHERE A.strAccountID = B.strAccountID) as inti21ID,
 		   B.strAccountID as stri21ID,
 		   CAST(CAST(B.strPrimary AS INT) AS NVARCHAR(50)) + SUBSTRING(B.strSegment,0,(select TOP 1 intLength + 1 from tblGLAccountStructure where strType = 'Segment'  order by intSort)) + '.' + 

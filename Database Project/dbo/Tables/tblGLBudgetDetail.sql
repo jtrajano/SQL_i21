@@ -50,7 +50,7 @@
     [curOperPlan10]    NUMERIC (18, 6) NULL,
     [curOperPlan11]    NUMERIC (18, 6) NULL,
     [curOperPlan12]    NUMERIC (18, 6) NULL,
-    [intConcurrencyID] INT             NULL,
+    [intConcurrencyId] INT             NOT NULL DEFAULT 1,
     CONSTRAINT [PK_tblGLBudgetDetail] PRIMARY KEY CLUSTERED ([strAccountID] ASC, [dtmYear] ASC)
 );
 

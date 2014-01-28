@@ -30,9 +30,9 @@
     [intColumnID]               INT             NULL,
     [intMapID]                  INT             NULL,
     [strOrientation]            NCHAR (15)      COLLATE Latin1_General_CI_AS NULL,
-    [ysnLowPriority]            BIT             CONSTRAINT [DF__tblFRRepo__ysnLo__12AF1E51] DEFAULT ((0)) NULL,
-    [intSort]                   INT             CONSTRAINT [DF__tblFRRepo__intSo__0B0DFC89] DEFAULT ((0)) NULL,
-    [intConcurrencyID]          INT             CONSTRAINT [DF__tblFRRepo__intCo__13A3428A] DEFAULT ((1)) NULL,
+    [ysnLowPriority]            BIT             DEFAULT 0 NULL,
+    [intSort]                   INT             DEFAULT 0 NULL,
+    [intConcurrencyId]          INT             DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFRReport] PRIMARY KEY CLUSTERED ([intReportID] ASC)
 );
 

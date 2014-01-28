@@ -17,7 +17,7 @@
     [ysnHiddenColumn]          BIT             NULL,
     [dblWidth]                 NUMERIC (18, 6) NULL,
     [intSort]                  INT             NULL,
-    [intConcurrencyID]         INT             CONSTRAINT [DF__tblFRColu__intCo__436D5B69] DEFAULT ((1)) NULL,
+    [intConcurrencyId]         INT             NOT NULL DEFAULT 1 ,
     CONSTRAINT [PK_tblFRColumnDesign] PRIMARY KEY CLUSTERED ([intColumnDetailID] ASC, [intColumnID] ASC)
 );
 

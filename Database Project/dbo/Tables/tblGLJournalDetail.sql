@@ -11,7 +11,7 @@
     [dblDebitUnit]       NUMERIC (18, 6) NULL,
     [dblCreditUnit]      NUMERIC (18, 6) NULL,
     [strDescription]     NVARCHAR (255)  COLLATE Latin1_General_CI_AS NULL,
-    [intConcurrencyID]   INT             NULL,
+    [intConcurrencyId]   INT             NOT NULL DEFAULT 1,
     [dblUnitsInLBS]      NUMERIC (18, 6) NULL,
     [strDocument]        NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [strComments]        NVARCHAR (255)  COLLATE Latin1_General_CI_AS NULL,

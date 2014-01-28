@@ -9,6 +9,6 @@
     [dblYTDSalesThisSeason]       NUMERIC (18, 6) NOT NULL,
     [dblYTDSalesLastSeason]       NUMERIC (18, 6) NOT NULL,
     [dblYTDSales2SeasonsAgo]      NUMERIC (18, 6) NOT NULL,
-    [intConcurrencyID]            INT             NULL
+    [intConcurrencyId]            INT             NOT NULL DEFAULT 1
 );
 

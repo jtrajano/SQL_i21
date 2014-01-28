@@ -13,6 +13,7 @@
     [intSort]          SMALLINT       NOT NULL,
     [strType]          NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [ysnVisible]       BIT            NOT NULL,
+    [intConcurrencyId ] INT NOT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_dbo.tblDBPanelFormat] PRIMARY KEY CLUSTERED ([intPanelFormatId] ASC),
     CONSTRAINT [FK_dbo.tblDBPanelFormat_dbo.tblDBPanel_intPanelID] FOREIGN KEY ([intPanelId]) REFERENCES [dbo].[tblDBPanel] ([intPanelId]) ON DELETE CASCADE
 );
