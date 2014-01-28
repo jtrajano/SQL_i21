@@ -70,7 +70,7 @@ INSERT INTO #tmpGLDetail (
 		,[strBillInvoiceNumber]
 		,[strJournalLineDescription]
 		,[ysnIsUnposted]
-		,[intConcurrencyID]
+		,[intConcurrencyId]
 		,[intUserID]
 		,[strTransactionForm]
 		,[strModuleName]
@@ -100,7 +100,7 @@ SELECT	[strTransactionID]
 		,[strBillInvoiceNumber]
 		,[strJournalLineDescription]
 		,ysnIsUnposted		= 1
-		,[intConcurrencyID]
+		,[intConcurrencyId]
 		,[intUserID]		= @intUserID
 		,[strTransactionForm]
 		,[strModuleName]

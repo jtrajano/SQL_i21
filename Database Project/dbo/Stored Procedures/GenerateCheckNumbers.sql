@@ -60,7 +60,7 @@ BEGIN
 				,intUserID
 				,dtmCreated
 				,dtmCheckPrinted
-				,intConcurrencyID
+				,intConcurrencyId
 		)
 		SELECT	strCheckNo			= REPLICATE('0', 20 - LEN(CAST(@intCheckNumber AS NVARCHAR(20)))) + CAST(@intCheckNumber AS NVARCHAR(20))
 				,intBankAccountID	= @intBankAccountID
@@ -70,7 +70,7 @@ BEGIN
 				,intUserID			= @intUserID
 				,dtmCreated			= GETDATE()
 				,dtmCheckPrinted	= NULL
-				,intConcurrencyID	= 1	
+				,intConcurrencyId	= 1	
 		IF @@ERROR <> 0	GOTO GenerateCheckNumbers_Rollback				
 	END
 	ELSE 

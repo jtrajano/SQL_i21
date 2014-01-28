@@ -31,7 +31,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 -- Bulk update the ysnClr
 UPDATE	tblCMBankTransaction 
 SET		ysnClr = @ysnClr
-		,intConcurrencyID = intConcurrencyID + 1
+		,intConcurrencyId = intConcurrencyId + 1
 WHERE	ysnPosted = 1
 		AND dtmDateReconciled IS NULL
 		AND intBankAccountID = @intBankAccountID

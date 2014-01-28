@@ -154,7 +154,7 @@ IF ISNULL(@recap, 0) = 0
 			[dblCreditUnit],
 			[dtmDate],
 			[ysnIsUnposted],
-			[intConcurrencyID],
+			[intConcurrencyId],
 			[dblExchangeRate],
 			[intUserID],
 			[dtmDateEntered],
@@ -246,7 +246,7 @@ IF ISNULL(@recap, 0) = 0
 		-- Update the posted flag in the transaction table
 		UPDATE tblAPPayment
 		SET		ysnPosted = 1
-				--,intConcurrencyID += 1 
+				--,intConcurrencyId += 1 
 		WHERE	intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		UPDATE tblAPPaymentDetail
@@ -298,7 +298,7 @@ IF ISNULL(@recap, 0) = 0
 			[dtmCreated],
 			[intLastModifiedUserID],
 			[dtmLastModified],
-			[intConcurrencyID]
+			[intConcurrencyId]
 		)
 		SELECT
 			[strTransactionID] = A.strPaymentRecordNum,
@@ -328,7 +328,7 @@ IF ISNULL(@recap, 0) = 0
 			[dtmCreated] = GETDATE(),
 			[intLastModifiedUserID] = NULL,
 			[dtmLastModified] = GETDATE(),
-			[intConcurrencyID] = 1
+			[intConcurrencyId] = 1
 			FROM tblAPPayment A
 				INNER JOIN tblAPVendor B
 					ON A.strVendorId = B.strVendorId
@@ -365,7 +365,7 @@ ELSE
 			,[dblCreditUnit]
 			,[dtmDate]
 			,[ysnIsUnposted]
-			,[intConcurrencyID]	
+			,[intConcurrencyId]	
 			,[dblExchangeRate]
 			,[intUserID]
 			,[dtmDateEntered]
@@ -474,7 +474,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 --UPDATE	tblGLSummary 
 --SET		 [dblDebit] = ISNULL(tblGLSummary.[dblDebit], 0) + ISNULL(GLDetailGrouped.[dblDebit], 0)
 --		,[dblCredit] = ISNULL(tblGLSummary.[dblCredit], 0) + ISNULL(GLDetailGrouped.[dblCredit], 0)
---		,[intConcurrencyID] = ISNULL([intConcurrencyID], 0) + 1
+--		,[intConcurrencyId] = ISNULL([intConcurrencyId], 0) + 1
 --FROM	(
 --			SELECT	 [dblDebit]		= SUM(ISNULL(B.[dblDebit], 0))
 --					,[dblCredit]	= SUM(ISNULL(B.[dblCredit], 0))
@@ -522,7 +522,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 --	,[dblCredit]
 --	,[dblDebitUnit]
 --	,[dblCreditUnit]
---	,[intConcurrencyID]
+--	,[intConcurrencyId]
 --)
 --SELECT	
 --	 [intAccountID]		= A.[intAccountID]
@@ -531,7 +531,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 --	,[dblCredit]		= SUM(A.[dblCredit])
 --	,[dblDebitUnit]		= SUM(A.[dblDebitUnit])
 --	,[dblCreditUnit]	= SUM(A.[dblCreditUnit])
---	,[intConcurrencyID] = 1
+--	,[intConcurrencyId] = 1
 --FROM JournalDetail A
 --WHERE NOT EXISTS 
 --		(

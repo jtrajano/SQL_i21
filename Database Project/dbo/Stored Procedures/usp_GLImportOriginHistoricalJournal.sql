@@ -32,7 +32,7 @@ BEGIN
 		@intCurrencyID AS intCurrencyID,																									-- intCurrencyID
 		0 AS ysnPosted,																														-- ysnPosted	
 		@intUserID AS intUserID,																											-- intUserID
-		NULL AS intConcurrencyID,																											-- intConcurrencyID
+		NULL AS intConcurrencyId,																											-- intConcurrencyId
 		NULL AS strReverseLink,
 		NULL AS strRecurringStatus,
 		NULL AS dtmJournalDate,																												-- dtmJournalDate
@@ -56,7 +56,7 @@ BEGIN
 	--+++++++++++++++++++++++++++++++++
 
 	INSERT tblGLJournal (dtmReverseDate,strJournalID,strTransactionType, dtmDate,strReverseLink,intCurrencyID,dblExchangeRate,dtmPosted,strDescription,
-							ysnPosted,intConcurrencyID,dtmJournalDate,intUserID,strSourceID,strJournalType,strRecurringStatus,strSourceType)
+							ysnPosted,intConcurrencyId,dtmJournalDate,intUserID,strSourceID,strJournalType,strRecurringStatus,strSourceType)
 	SELECT  dtmReverseDate,
 			strJournalID,
 			strTransactionType, 
@@ -67,7 +67,7 @@ BEGIN
 			dtmPosted,
 			strDescription,
 			ysnPosted,
-			intConcurrencyID,
+			intConcurrencyId,
 			dtmJournalDate,
 			intUserID,
 			strSourceID,
@@ -200,7 +200,7 @@ BEGIN
 	--	   INSERT JOURNAL [DETAIL]
 	--+++++++++++++++++++++++++++++++++
 
-	INSERT tblGLJournalDetail (intLineNo,intJournalID,dtmDate,intAccountID,dblDebit,dblDebitRate,dblCredit,dblCreditRate,dblDebitUnit,dblCreditUnit,strDescription,intConcurrencyID,
+	INSERT tblGLJournalDetail (intLineNo,intJournalID,dtmDate,intAccountID,dblDebit,dblDebitRate,dblCredit,dblCreditRate,dblDebitUnit,dblCreditUnit,strDescription,intConcurrencyId,
 								dblUnitsInLBS,strDocument,strComments,strReference,dblDebitUnitsInLBS,strCorrecting,strSourcePgm,strCheckBookNo,strWorkArea)
 						SELECT intLineNo,intJournalID,gooddate,intAccountID,Debit,DebitRate,Credit,CreditRate,DebitUnits,CreditUnits,strDescription,intCurrencyID,
 								dblUnitsInlbs,strDocument,strComments,strReference,DebitUnitsInlbs,strCorrecting,strSourcePgm,strCheckbookNo,strWorkArea 

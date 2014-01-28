@@ -146,7 +146,7 @@ SET NOCOUNT ON
 			,dtmCreated
 			,intLastModifiedUserID
 			,dtmLastModified
-			,intConcurrencyID	
+			,intConcurrencyId	
 	)
 	SELECT 
 			strTransactionID			=	CAST(i.apchk_cbk_no AS NVARCHAR(2)) + '-'
@@ -206,7 +206,7 @@ SET NOCOUNT ON
 			,dtmCreated					=	dbo.fn_ConvertOriginDateToSQLDateTime(i.apchk_user_rev_dt)
 			,intLastModifiedUserID		=	i.apchk_user_id
 			,dtmLastModified			=	dbo.fn_ConvertOriginDateToSQLDateTime(i.apchk_rev_dt)
-			,intConcurrencyID			=	1
+			,intConcurrencyId			=	1
 	FROM	dbo.tblCMBankAccount f INNER JOIN inserted i
 				ON f.strCbkNo = i.apchk_cbk_no COLLATE Latin1_General_CI_AS  	
 	WHERE	f.intBankAccountID IS NOT NULL
@@ -337,7 +337,7 @@ SET NOCOUNT ON
 				,dtmCreated
 				,intLastModifiedUserID
 				,dtmLastModified
-				,intConcurrencyID	
+				,intConcurrencyId	
 		)
 		SELECT 
 				strTransactionID			=	CAST(i.apchk_cbk_no AS NVARCHAR(2)) + '-'
@@ -397,7 +397,7 @@ SET NOCOUNT ON
 				,dtmCreated					=	dbo.fn_ConvertOriginDateToSQLDateTime(i.apchk_user_rev_dt)
 				,intLastModifiedUserID		=	i.apchk_user_id
 				,dtmLastModified			=	dbo.fn_ConvertOriginDateToSQLDateTime(i.apchk_rev_dt)
-				,intConcurrencyID			=	1
+				,intConcurrencyId			=	1
 		FROM	dbo.tblCMBankAccount f INNER JOIN inserted i
 					ON f.strCbkNo = i.apchk_cbk_no COLLATE Latin1_General_CI_AS  	
 		WHERE	f.intBankAccountID IS NOT NULL
@@ -468,7 +468,7 @@ SET NOCOUNT ON
 				,dtmCreated					=	dbo.fn_ConvertOriginDateToSQLDateTime(i.apchk_user_rev_dt)
 				,intLastModifiedUserID		=	i.apchk_user_id
 				,dtmLastModified			=	dbo.fn_ConvertOriginDateToSQLDateTime(i.apchk_rev_dt)
-				,intConcurrencyID			=	f.intConcurrencyID + 1
+				,intConcurrencyId			=	f.intConcurrencyId + 1
 		FROM	inserted i INNER JOIN dbo.tblCMBankTransaction f
 					ON f.strLink = ( CAST(i.apchk_cbk_no AS NVARCHAR(2)) 
 									+ CAST(i.apchk_rev_dt AS NVARCHAR(10)) 

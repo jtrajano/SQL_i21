@@ -235,7 +235,7 @@ BEGIN
 			--Vendors
 			@intVendorType				= CASE WHEN ssvnd_co_per_ind = 'C' THEN 0 ELSE 1 END,
 			@originVendor				= ssvnd_vnd_no,
-			@intCurrencyId				= (SELECT TOP 1 intConcurrencyID FROM tblSMCurrency WHERE strCurrency COLLATE Latin1_General_CI_AS = ssvnd_currency COLLATE Latin1_General_CI_AS),
+			@intCurrencyId				= (SELECT TOP 1 intConcurrencyId FROM tblSMCurrency WHERE strCurrency COLLATE Latin1_General_CI_AS = ssvnd_currency COLLATE Latin1_General_CI_AS),
 			@strVendorPayToId         	= ssvnd_pay_to,
 			@intPaymentMethodId       	= NULL,
 			@intShipViaId             	= NULL,

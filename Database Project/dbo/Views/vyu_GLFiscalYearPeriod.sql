@@ -7,7 +7,7 @@ SELECT A.[intGLFiscalYearPeriodID]
 	,A.[dtmStartDate]
 	,A.[dtmEndDate]
 	,A.[ysnOpen]
-	,A.[intConcurrencyID]
+	,A.[intConcurrencyId]
 	,B.[strFiscalYear]
 
 FROM tblGLFiscalYearPeriod A
