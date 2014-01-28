@@ -7,10 +7,13 @@
     [ysnRequired]      BIT            NULL,
     [ysnCanned]        BIT            NULL,
     [ysnDefault]       BIT            NULL,
-    [intConcurrencyId] INT            NULL,
+    [intDefaultSortId] INT            NULL,
+    [intConcurrencyId] INT             NOT NULL DEFAULT 1,
     CONSTRAINT [PK_dbo.Sorts] PRIMARY KEY CLUSTERED ([intSortId] ASC),
     CONSTRAINT [FK_dbo.Sorts_dbo.Reports_intReportId] FOREIGN KEY ([intReportId]) REFERENCES [dbo].[tblRMReport] ([intReportId]) ON DELETE CASCADE
 );
+
+
 
 
 
