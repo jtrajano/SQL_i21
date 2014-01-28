@@ -5,7 +5,7 @@
     [strDefaultName]            NVARCHAR (50)  COLLATE Latin1_General_CI_AS NOT NULL,
     [strDescription]            NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
     [strRowFilter]              NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
-    [intConcurrencyID]          INT            NULL,
+    [intConcurrencyId]          INT            NOT NULL DEFAULT 1,
     [intAccountID]              INT            NULL,
     CONSTRAINT [PK_GLAccountDefault_AccountDefaultID] PRIMARY KEY CLUSTERED ([intAccountDefaultDetailID] ASC),
     CONSTRAINT [FK_tblGLAccountDefault_tblGLAccount] FOREIGN KEY ([intAccountID]) REFERENCES [dbo].[tblGLAccount] ([intAccountID]),

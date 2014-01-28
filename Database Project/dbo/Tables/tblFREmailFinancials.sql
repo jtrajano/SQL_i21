@@ -6,7 +6,7 @@
     [strIdentifierID]     NVARCHAR (40)  COLLATE Latin1_General_CI_AS NULL,
     [strExtraNotes]       NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [strEmail]            NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
-    [intConcurrencyID]    INT            DEFAULT ((1)) NULL,
+    [intConcurrencyId]    INT            DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFREmailFinancials] PRIMARY KEY CLUSTERED ([strContactID] ASC, [strContactType] ASC, [strReportName] ASC)
 );
 

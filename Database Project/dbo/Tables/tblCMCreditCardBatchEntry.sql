@@ -7,7 +7,7 @@
     [dtmCreated]            DATETIME        NULL,
     [intLastModifiedUserID] INT             NULL,
     [dtmLastModified]       DATETIME        NULL,
-    [intConcurrencyID]      INT             NULL,
+    [intConcurrencyId]      INT             NOT NULL DEFAULT 1,
     CONSTRAINT [PK_tblCMCreditCardBatchEntry] PRIMARY KEY CLUSTERED ([strBatchID] ASC),
     CONSTRAINT [FK_tblCMBankAccounttblCMCreditCardBatchEntry] FOREIGN KEY ([intBankAccountID]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountID])
 );

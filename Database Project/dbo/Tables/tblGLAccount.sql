@@ -6,7 +6,7 @@
     [intAccountGroupID] INT             NULL,
     [dblOpeningBalance] NUMERIC (18, 6) NULL,
     [ysnIsUsed]         BIT             CONSTRAINT [DF_tblGLAccount_ysnIsUsed] DEFAULT ((0)) NOT NULL,
-    [intConcurrencyID]  INT             NULL,
+    [intConcurrencyId]  INT             NOT NULL DEFAULT 1,
     [intAccountUnitID]  INT             NULL,
     [strComments]       NVARCHAR (255)  COLLATE Latin1_General_CI_AS NULL,
     [ysnActive]         BIT             NULL,

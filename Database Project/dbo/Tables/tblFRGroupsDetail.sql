@@ -5,7 +5,7 @@
     [ysnShowReportSettings] BIT            NULL,
     [strReportName]         NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
     [strReportDescription]  NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
-    [intConcurrencyID]      INT            DEFAULT ((1)) NULL,
+    [intConcurrencyId]      INT            DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFRGroupsDetail] PRIMARY KEY CLUSTERED ([intGroupDetailID] ASC)
 );
 

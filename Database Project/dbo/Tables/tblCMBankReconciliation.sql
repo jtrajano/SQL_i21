@@ -10,7 +10,7 @@
     [dtmCreated]                 DATETIME        NULL,
     [intLastModifiedUserID]      INT             NULL,
     [dtmLastModified]            DATETIME        NULL,
-    [intConcurrencyID]           INT             NULL,
+    [intConcurrencyId]           INT             NOT NULL DEFAULT 1,
     [ysnImported] BIT NULL , 
     CONSTRAINT [PK_tblCMBankReconciliation] PRIMARY KEY CLUSTERED ([intBankAccountID] ASC, [dtmDateReconciled] ASC),
     CONSTRAINT [FK_tblCMBankAccounttblCMBankReconciliation] FOREIGN KEY ([intBankAccountID]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountID])

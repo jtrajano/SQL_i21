@@ -5,7 +5,7 @@
     [intParentGroupID]         INT             NULL,
     [intGroup]                 INT             NULL,
     [intSort]                  INT             NULL,
-    [intConcurrencyID]         INT             NULL,
+    [intConcurrencyId]         INT             NOT NULL DEFAULT 1,
     [intAccountBegin]          INT             NULL,
     [intAccountEnd]            INT             NULL,
     [strAccountGroupNamespace] NVARCHAR (1000) COLLATE Latin1_General_CI_AS NULL,

@@ -7,7 +7,7 @@
     [strMask]                NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [intSort]                INT            NULL,
     [ysnBuild]               BIT            CONSTRAINT [DF_tblGLAccountStructure_ysnBuild] DEFAULT ((0)) NOT NULL,
-    [intConcurrencyID]       INT            NULL,
+    [intConcurrencyId]       INT            NOT NULL DEFAULT 1,
     [intStartingPosition]    INT            NULL,
     [intLegacyLength]        INT            NULL,
     [strOtherSoftwareColumn] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,

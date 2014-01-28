@@ -19,7 +19,7 @@
     [dtmDateEntered]     DATETIME         NOT NULL,
     [dtmTransactionDate] DATETIME         NULL,
     [ysnIsUnposted]      BIT              NOT NULL,
-    [intConcurrencyID]   INT              NULL,
+    [intConcurrencyId]   INT              NOT NULL DEFAULT 1,
     [intUserID]          INT              NULL,
     [strTransactionForm] NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
     [strModuleName]      NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,

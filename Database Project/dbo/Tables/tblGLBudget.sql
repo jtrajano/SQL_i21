@@ -14,7 +14,7 @@
     [curLastYear]       NUMERIC (18, 6) NULL,
     [curBudget]         NUMERIC (18, 6) NULL,
     [curOperPlan]       NUMERIC (18, 6) NULL,
-    [intConcurrencyID]  INT             NULL,
+    [intConcurrencyId]  INT             NOT NULL DEFAULT 1,
     [ysnSelect]         BIT             NULL,
     CONSTRAINT [PK_tblGLBudget] PRIMARY KEY CLUSTERED ([intBudgetID] ASC),
     CONSTRAINT [FK_tblGLBudget_tblGLAccount] FOREIGN KEY ([intAccountID]) REFERENCES [dbo].[tblGLAccount] ([intAccountID]),

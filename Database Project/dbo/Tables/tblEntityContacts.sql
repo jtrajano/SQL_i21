@@ -12,7 +12,7 @@
     [strEmail2]          NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strFax]             NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strNotes]           NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
-    [intConcurrencyID]   INT            NULL,
+    [intConcurrencyId]   INT            NOT NULL DEFAULT 1,
     CONSTRAINT [PK_dbo.tblEntityContacts] PRIMARY KEY CLUSTERED ([intEntityContactId] ASC),
     CONSTRAINT [FK_dbo.tblEntityContacts_dbo.tblEntities_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntities] ([intEntityId]) ON DELETE CASCADE
 );

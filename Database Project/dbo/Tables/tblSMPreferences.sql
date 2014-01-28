@@ -5,7 +5,7 @@
     [strDescription]   NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [strValue]         NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [intSort]          INT            NULL,
-    [intConcurrencyID] INT            NULL,
+    [intConcurrencyId]      INT           NOT NULL DEFAULT 1,
     CONSTRAINT [PK_SMPreferences_PreferenceID] PRIMARY KEY CLUSTERED ([intUserID] ASC, [strPreference] ASC)
 );
 

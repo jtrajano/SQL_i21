@@ -7,7 +7,7 @@
     [dtmCreated]            DATETIME        NULL,
     [intLastModifiedUserID] INT             NULL,
     [dtmLastModified]       DATETIME        NULL,
-    [intConcurrencyID]      INT             NULL,
+    [intConcurrencyId]      INT             NULL DEFAULT 1,
     CONSTRAINT [PK_tblCMUndepositedFund] PRIMARY KEY CLUSTERED ([intUndepositedFundID] ASC)
 );
 

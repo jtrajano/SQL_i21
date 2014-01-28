@@ -13,7 +13,7 @@
     [intSortId]        INT            NOT NULL,
     [intUserId]        INT            NOT NULL,
     [ysnDefault]       BIT            NULL,
-    [intConcurrencyId] INT            NULL,
+    [intConcurrencyId]      INT           NOT NULL DEFAULT 1,
     CONSTRAINT [PK_dbo.Filters] PRIMARY KEY CLUSTERED ([intFilterId] ASC)
 );
 

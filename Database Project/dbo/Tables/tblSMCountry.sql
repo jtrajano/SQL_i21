@@ -4,7 +4,7 @@
     [strPhoneNumber]   NVARCHAR (40)  COLLATE Latin1_General_CI_AS NULL,
     [strCountryCode]   NVARCHAR (40)  COLLATE Latin1_General_CI_AS NULL,
     [intSort]          INT            NULL,
-    [intConcurrencyID] INT            NULL,
+    [intConcurrencyId]      INT            NOT NULL DEFAULT 1,
     CONSTRAINT [PK_SMCountry_CoutryID] PRIMARY KEY CLUSTERED ([intCountryID] ASC)
 );
 

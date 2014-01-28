@@ -6,7 +6,7 @@
     [strSourceNumber]      NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strSourceSystem]      NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strJournalID]         NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
-    [intConcurrencyID]     INT            NULL,
+    [intConcurrencyId]     INT            NOT NULL DEFAULT 1,
     CONSTRAINT [PK_tblGLCOAImportLogDetail] PRIMARY KEY CLUSTERED ([intImportLogDetailID] ASC),
     CONSTRAINT [FK_tblGLCOAImportLogDetail_tblGLCOAImportLog] FOREIGN KEY ([intImportLogID]) REFERENCES [dbo].[tblGLCOAImportLog] ([intImportLogID])
 );

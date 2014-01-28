@@ -3,7 +3,7 @@
     [strRowName]       NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
     [strDescription]   NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
     [intMapID]         INT            NULL,
-    [intConcurrencyID] INT            CONSTRAINT [DF__tblFRRow__intCon__4B7734FF] DEFAULT ((1)) NULL,
+    [intConcurrencyId] INT            DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFRRow] PRIMARY KEY CLUSTERED ([intRowID] ASC)
 );
 

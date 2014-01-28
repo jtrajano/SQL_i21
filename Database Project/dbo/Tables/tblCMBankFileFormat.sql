@@ -7,7 +7,7 @@
     [dtmCreated]            DATETIME       NULL,
     [intLastModifiedUserID] INT            NULL,
     [dtmLastModified]       DATETIME       NULL,
-    [intConcurrencyID]      INT            NULL,
+    [intConcurrencyId]      INT            NOT NULL DEFAULT 1,
     CONSTRAINT [PK_tblCMBankFileFormat] PRIMARY KEY CLUSTERED ([intBankFileFormatID] ASC)
 );
 
