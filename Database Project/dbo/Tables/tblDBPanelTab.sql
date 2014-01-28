@@ -11,6 +11,7 @@
     [intColumnCount]   INT            NOT NULL,
     [strTabName]       NVARCHAR (MAX) COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
     [strRenameTabName] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [intConcurrencyId ] INT NOT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_dbo.tblDBPanelTab] PRIMARY KEY CLUSTERED ([intPanelTabId] ASC)
 );
 
