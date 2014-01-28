@@ -7,7 +7,7 @@
     [dblDebitUnit]     NUMERIC (18, 6) NULL,
     [dblCreditUnit]    NUMERIC (18, 6) NULL,
     [strCode]          NVARCHAR (40)   COLLATE Latin1_General_CI_AS NULL,
-    [intConcurrencyID] INT             NULL,
+    [intConcurrencyId] INT             NOT NULL DEFAULT 1,
     CONSTRAINT [PK_tblGLSummary] PRIMARY KEY CLUSTERED ([intSummaryID] ASC),
     CONSTRAINT [FK_tblGLSummary_tblGLAccount] FOREIGN KEY ([intAccountID]) REFERENCES [dbo].[tblGLAccount] ([intAccountID])
 );

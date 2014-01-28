@@ -11,7 +11,7 @@
     [intCloseReasonID]    INT            NULL,
     [strComments]         NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [intSiteID]           INT            NOT NULL,
-    [intConcurrencyID]    INT            NULL,
+    [intConcurrencyId]    INT            DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblTMWork] PRIMARY KEY CLUSTERED ([intWorkOrderID] ASC),
     CONSTRAINT [FK_tblTMWork_tblTMSite] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID]),
     CONSTRAINT [FK_tblTMWork_tblTMWorkCloseReason] FOREIGN KEY ([intCloseReasonID]) REFERENCES [dbo].[tblTMWorkCloseReason] ([intCloseReasonID]),

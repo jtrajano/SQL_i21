@@ -7,7 +7,7 @@
     [intCurrencyID]         INT              NULL,
     [dblExchangeRate]       NUMERIC (38, 20) NULL,
     [strReference]          NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
-    [intConcurrencyID]      INT              NULL,
+    [intConcurrencyId]      INT              NOT NULL DEFAULT 1,
     [strMode]               NVARCHAR (20)    COLLATE Latin1_General_CI_AS NULL,
     [strUserMode]           NVARCHAR (20)    COLLATE Latin1_General_CI_AS NULL,
     [intAdvanceReminder]    INT              NULL,
