@@ -5,28 +5,28 @@
 
 AS
 
-IF(@Update = 1 AND ISNULL(NULLIF(@VendorId, ''),'') <> '')
+IF(@Update = 1 AND @VendorId IS NOT NULL)
 BEGIN
 
 	UPDATE ssvndmst
-		SET ssvnd_co_per_ind = B.intVendorType,
+		SET ssvnd_co_per_ind = CASE WHEN B.intVendorType = 0 THEN 'P' ELSE 'C' END,
 		ssvnd_name = A.strName,
 		ssvnd_addr_1 = CASE WHEN CHARINDEX(CHAR(10), C.strAddress) > 0 THEN SUBSTRING(C.strAddress, 0, CHARINDEX(CHAR(10),C.strAddress)) ELSE C.strAddress END,
 		ssvnd_addr_2 = CASE WHEN CHARINDEX(CHAR(10), C.strAddress) > 0 THEN SUBSTRING(C.strAddress, CHARINDEX(CHAR(10),C.strAddress), LEN(C.strAddress)) ELSE NULL END,
 		ssvnd_city = C.strCity,
 		ssvnd_st = C.strState,
 		ssvnd_zip = C.strZipCode,
-		ssvnd_phone = D.strPhone,
+		ssvnd_phone = ISNULL(D.strPhone, ''),
 		ssvnd_phone2 = D.strPhone2,
 		ssvnd_contact = D.strName,
-		ssvnd_1099_yn = B.ysnPrint1099,
-		ssvnd_wthhld_yn = B.ysnWithholding,
+		ssvnd_1099_yn = CASE WHEN B.ysnPrint1099 = 0 THEN 'N' ELSE 'Y' END,
+		ssvnd_wthhld_yn = CASE WHEN B.ysnWithholding = 0 THEN 'N' ELSE 'Y' END,
 		ssvnd_pay_ctl_ind = (CASE WHEN ysnPymtCtrlActive = 1 THEN 'A'
 			 WHEN ysnPymtCtrlAlwaysDiscount = 1 THEN 'D'
 			 WHEN ysnPymtCtrlEFTActive = 1  THEN 'E'
 			 WHEN ysnPymtCtrlHold = 1 THEN 'H' END),
 		ssvnd_fed_tax_id = B.strFederalTaxId,
-		ssvnd_w9_signed_rev_dt = ysnW9Signed,
+		--ssvnd_w9_signed_rev_dt = CASE WHEN ysnW9Signed = 0 THEN 'N' ELSE 'Y' END,
 		ssvnd_pay_to = strVendorPayToId,
 		ssvnd_currency = E.strCurrency,
 		ssvnd_1099_name = str1099Name,
@@ -48,7 +48,7 @@ BEGIN
 RETURN;
 END
 
-IF(@Update = 0 AND ISNULL(NULLIF(@VendorId, ''),'') <> '') -- INSERT per vendor id
+IF(@Update = 0 AND @VendorId IS NOT NULL) -- INSERT per vendor id
 BEGIN
 --ssvnd_addr_2, ssvnd_phone_ext, ssvnd_phone2_ext,ssvnd_gl_pur,ssvnd_pay_ctl_ind,ssvnd_prev_ctl_ind
 --ssvnd_acct_stat
@@ -86,7 +86,7 @@ BEGIN
 		strCity,
 		strState,
 		strZipCode,
-		strPhone,
+		ISNULL(strPhone,''),
 		strPhone2,
 		D.strName,
 		CASE WHEN ysnPrint1099 = 0 THEN 'N' ELSE 'Y' END,
@@ -96,7 +96,7 @@ BEGIN
 			 WHEN ysnPymtCtrlEFTActive = 1  THEN 'E'
 			 WHEN ysnPymtCtrlHold = 1 THEN 'H' END,
 		strFederalTaxId,
-		ysnW9Signed,
+		CONVERT(VARCHAR(8), GETDATE(), 112),
 		strVendorPayToId,
 		E.strCurrency,
 		str1099Name,
@@ -117,7 +117,7 @@ BEGIN
 	RETURN;
 END
 
-IF(@Update = 0 AND ISNULL(NULLIF(@VendorId, ''),'') = '')
+IF(@Update = 0 AND @VendorId IS NULL)
 BEGIN
 	
 	--1 Time synchronization here
@@ -209,7 +209,7 @@ BEGIN
 			@strContactLocationName = @strContactName,
 			@strDepartment = NULL,
 			@strMobile     = NULL,
-			@strPhone      = ssvnd_phone + ' ' + ssvnd_phone_ext,
+			@strPhone      = ISNULL(ssvnd_phone,'') + ' ' + ISNULL(ssvnd_phone_ext,''),
 			@strPhone2     = NULL,
 			@strEmail      = NULL,
 			@strEmail2     = NULL,
@@ -219,7 +219,7 @@ BEGIN
 			--Locations
 			@strLocationName = @strContactName,
 			@strContactName  = @strContactName,
-			@strAddress      = ssvnd_addr_1 + CHAR(13) + CHAR(10) + ssvnd_addr_2,
+			@strAddress      = ISNULL(ssvnd_addr_1,'') + CHAR(10) + ISNULL(ssvnd_addr_2,''),
 			@strCity         = ssvnd_city,
 			@strCountry      = (SELECT TOP 1 strCountry FROM tblSMZipCode WHERE strState COLLATE Latin1_General_CI_AS = ssvnd_st COLLATE Latin1_General_CI_AS),
 			@strState        = ssvnd_st,
@@ -254,7 +254,7 @@ BEGIN
 			@ysnPrint1099             	= CASE WHEN ssvnd_1099_yn = 'Y' THEN 1 ELSE 0 END,
 			@ysnWithholding           	= CASE WHEN ssvnd_wthhld_yn = 'N' THEN 0 ELSE 1 END,
 			@ysnW9Signed              	= ssvnd_w9_signed_rev_dt,
-			@dblCreditLimit           	= ssvnd_future_bal,
+			@dblCreditLimit           	= ISNULL(ssvnd_future_bal,0),
 			@intCreatedUserId         	= NULL,
 			@intLastModifiedUserId    	= NULL,
 			@dtmLastModified          	= NULL,
