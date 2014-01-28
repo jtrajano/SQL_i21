@@ -23,6 +23,7 @@
     [intStepInterval]    SMALLINT       DEFAULT ((0)) NOT NULL,
     [strIntervalFormat]  NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [ysnHiddenColumn]    BIT            DEFAULT ((0)) NOT NULL,
+    [intConcurrencyId ] INT NOT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_dbo.tblDBPanelColumn] PRIMARY KEY CLUSTERED ([intPanelColumnId] ASC),
     CONSTRAINT [FK_dbo.tblDBPanelColumn_dbo.tblDBPanel_intPanelID] FOREIGN KEY ([intPanelId]) REFERENCES [dbo].[tblDBPanel] ([intPanelId]) ON DELETE CASCADE
 );

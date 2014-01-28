@@ -14,6 +14,9 @@
     [intCompanyInformationId]  INT             NULL,
     [intGroupSort]             INT             NULL,
     [intNameSort]              INT             NULL,
+    [intConcurrencyId]         INT              NOT NULL DEFAULT 1,
     CONSTRAINT [PK_dbo.Reports] PRIMARY KEY CLUSTERED ([intReportId] ASC)
 );
+
+
 

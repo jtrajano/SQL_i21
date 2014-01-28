@@ -10,8 +10,11 @@
     [ysnShow]                     BIT            NOT NULL,
     [ysnAllowSort]                BIT            NOT NULL,
     [ysnEditCondition]            BIT            NOT NULL,
+    [intConcurrencyId]            INT             NOT NULL DEFAULT 1,
     CONSTRAINT [PK_dbo.CriteriaFields] PRIMARY KEY CLUSTERED ([intCriteriaFieldId] ASC),
     CONSTRAINT [FK_dbo.CriteriaFields_dbo.CriteriaFieldSelections_intCriteriaFieldSelectionId] FOREIGN KEY ([intCriteriaFieldSelectionId]) REFERENCES [dbo].[tblRMCriteriaFieldSelection] ([intCriteriaFieldSelectionId]),
     CONSTRAINT [FK_dbo.CriteriaFields_dbo.Reports_intReportId] FOREIGN KEY ([intReportId]) REFERENCES [dbo].[tblRMReport] ([intReportId]) ON DELETE CASCADE
 );
+
+
 

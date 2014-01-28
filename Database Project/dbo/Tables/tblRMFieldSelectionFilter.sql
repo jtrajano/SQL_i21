@@ -4,7 +4,10 @@
     [intFilterType]             INT            NOT NULL,
     [strFilter]                 NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strJoin]                   NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [intConcurrencyId]          INT             NOT NULL DEFAULT 1,
     CONSTRAINT [PK_dbo.FieldSelectionFilters] PRIMARY KEY CLUSTERED ([intFieldSelectionFilterId] ASC),
     CONSTRAINT [FK_dbo.FieldSelectionFilters_dbo.CriteriaFields_intCriteriaFieldId] FOREIGN KEY ([intCriteriaFieldId]) REFERENCES [dbo].[tblRMCriteriaField] ([intCriteriaFieldId]) ON DELETE CASCADE
 );
+
+
 
