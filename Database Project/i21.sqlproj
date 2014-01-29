@@ -807,4 +807,7 @@
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
   </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="i21.refactorlog" />
+  </ItemGroup>
 </Project>

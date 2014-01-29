@@ -17,6 +17,7 @@
     [strFavorite]       NVARCHAR (MAX) COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
     [ysnDisabled]       BIT            DEFAULT ((0)) NOT NULL,
     [ysnAdmin]          BIT            DEFAULT ((0)) NOT NULL,
+    [intConcurrencyId] INT NOT NULL DEFAULT (1), 
     CONSTRAINT [PK_User] PRIMARY KEY CLUSTERED ([intUserSecurityID] ASC),
     CONSTRAINT [FK_UserSecurity_UserRole] FOREIGN KEY ([intUserRoleID]) REFERENCES [dbo].[tblSMUserRole] ([intUserRoleID])
 );
