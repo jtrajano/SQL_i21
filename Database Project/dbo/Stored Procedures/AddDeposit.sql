@@ -149,7 +149,7 @@ SELECT	intTransactionId		= @intTransactionId
 		,dtmLastModified		= GETDATE()
 		,intConcurrencyId		= 1
 FROM	tblGLAccount 
-WHERE	intAccountId = @intGLAccountId
+WHERE	intAccountID = @intGLAccountId
 IF @@ERROR <> 0	GOTO AddDeposit_Rollback
 
 -- Post the transaction 
