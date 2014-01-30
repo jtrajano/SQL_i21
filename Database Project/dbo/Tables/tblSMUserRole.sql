@@ -6,6 +6,7 @@
     [strMenuPermission] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strForm]           NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [ysnAdmin]          BIT            DEFAULT ((0)) NOT NULL,
+    [intConcurrencyId] INT NOT NULL DEFAULT (1), 
     CONSTRAINT [PK_Role] PRIMARY KEY CLUSTERED ([intUserRoleID] ASC)
 );
 

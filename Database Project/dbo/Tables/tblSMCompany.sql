@@ -10,6 +10,7 @@
     [strFax]       NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strEmail]     NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strWebsite]   NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
+    [intConcurrencyId] INT NOT NULL DEFAULT (1), 
     CONSTRAINT [PK_Company] PRIMARY KEY CLUSTERED ([intCompanyID] ASC)
 );
 

@@ -6,6 +6,7 @@
     [strMachineName]    NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strUserName]       NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [intProcessID]      INT            NULL,
+    [intConcurrencyId] INT NOT NULL DEFAULT (1), 
     CONSTRAINT [PK_ActiveScreen] PRIMARY KEY CLUSTERED ([intActiveScreenID] ASC)
 );
 
