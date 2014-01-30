@@ -703,8 +703,8 @@
     <Build Include="dbo\Views\vwCMBank.sql" />
     <Build Include="dbo\Views\apchkmst.sql" />
     <Build Include="dbo\Views\apcbkmst.sql" />
-    <Build Include="dbo\Tables\apcbkmst_legacy.sql" />
-    <Build Include="dbo\Tables\apchkmst_legacy.sql" />
+    <Build Include="dbo\Tables\apcbkmst_origin.sql" />
+    <Build Include="dbo\Tables\apchkmst_origin.sql" />
     <Build Include="dbo\Functions\fn_GetGLAccountIDFromOriginToi21.sql" />
     <Build Include="dbo\Functions\fn_GetGLAccountIDFromi21ToOrigin.sql" />
     <Build Include="dbo\Functions\fn_GetCurrencyIDFromOriginToi21.sql" />

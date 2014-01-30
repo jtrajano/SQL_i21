@@ -3,9 +3,11 @@ AS
 
 SELECT 
 	A.* ,
-	B.strBankName,
+	C.strBankName,
 	B.strBankAccountNo
 	FROM tblAPPayment A
 		LEFT JOIN tblCMBankAccount B
-			ON A.intBankAccountId = B.intBankAccountID
+			ON A.intBankAccountId = B.intBankAccountId
+		INNER JOIN tblCMBank C
+			ON B.intBankId = C.intBankId
 

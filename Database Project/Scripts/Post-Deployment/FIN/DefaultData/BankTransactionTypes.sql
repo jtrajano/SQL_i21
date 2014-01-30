@@ -9,113 +9,113 @@
 -- --------------------------------------------------
 
 INSERT INTO dbo.[tblCMBankTransactionType] (
-	[intBankTransactionTypeID]
+	[intBankTransactionTypeId]
 	,[strBankTransactionTypeName]
 	,[intConcurrencyId]
 )
 SELECT 
-	[intBankTransactionTypeID]		= 1
+	[intBankTransactionTypeId]		= 1
 	,[strBankTransactionTypeName]	= 'Bank Deposit'
 	,[intConcurrencyId]				= 1
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 1)
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 1)
 	
 UNION ALL 
 SELECT 
-	[intBankTransactionTypeID]		= 2
+	[intBankTransactionTypeId]		= 2
 	,[strBankTransactionTypeName]	= 'Bank Withdrawal'
 	,[intConcurrencyId]				= 1
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 2)
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 2)
 	
 UNION ALL 
 SELECT 
-	[intBankTransactionTypeID]		= 3
+	[intBankTransactionTypeId]		= 3
 	,[strBankTransactionTypeName]	= 'Misc Checks'
 	,[intConcurrencyId]				= 1
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 3)
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 3)
 	
 UNION ALL 
 SELECT 
-	[intBankTransactionTypeID]		= 4
+	[intBankTransactionTypeId]		= 4
 	,[strBankTransactionTypeName]	= 'Bank Transfer'
 	,[intConcurrencyId]				= 1
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 4)
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 4)
 
 UNION ALL 
 SELECT 
-	[intBankTransactionTypeID]		= 5
+	[intBankTransactionTypeId]		= 5
 	,[strBankTransactionTypeName]	= 'Bank Transaction'
 	,[intConcurrencyId]				= 1
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 5)
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 5)
 	
 UNION ALL 
 SELECT 
-	[intBankTransactionTypeID]		= 6
+	[intBankTransactionTypeId]		= 6
 	,[strBankTransactionTypeName]	= 'Credit Card Charge'
 	,[intConcurrencyId]				= 1
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 6)
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 6)
 	
 UNION ALL 
 SELECT 
-	[intBankTransactionTypeID]		= 7
+	[intBankTransactionTypeId]		= 7
 	,[strBankTransactionTypeName]	= 'Credit Card Returns'
 	,[intConcurrencyId]				= 1
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 7)
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 7)
 	
 UNION ALL 
 SELECT 
-	[intBankTransactionTypeID]		= 8
+	[intBankTransactionTypeId]		= 8
 	,[strBankTransactionTypeName]	= 'Credit Card Payments'
 	,[intConcurrencyId]				= 1
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 8)	
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 8)	
 	
 UNION ALL 
 SELECT 
-	[intBankTransactionTypeID]		= 9
+	[intBankTransactionTypeId]		= 9
 	,[strBankTransactionTypeName]	= 'Bank Transfer (WD)'
 	,[intConcurrencyId]				= 1
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 9)	
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 9)	
 	
 UNION ALL 
 SELECT 
-	[intBankTransactionTypeID]		= 10
+	[intBankTransactionTypeId]		= 10
 	,[strBankTransactionTypeName]	= 'Bank Transfer (DEP)'
 	,[intConcurrencyId]				= 1
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 10)		
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 10)		
 	
 UNION ALL 
 SELECT 
-	[intBankTransactionTypeID]		= 11
+	[intBankTransactionTypeId]		= 11
 	,[strBankTransactionTypeName]	= 'Origin Deposit'
 	,[intConcurrencyId]				= 1	
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 11)	
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 11)	
 	
 UNION ALL 
 SELECT 
-	[intBankTransactionTypeID]		= 12
+	[intBankTransactionTypeId]		= 12
 	,[strBankTransactionTypeName]	= 'Origin Checks'
 	,[intConcurrencyId]				= 1	
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 12)	
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 12)	
 UNION ALL 
 SELECT 
-	[intBankTransactionTypeID]		= 13
+	[intBankTransactionTypeId]		= 13
 	,[strBankTransactionTypeName]	= 'Origin EFT'
 	,[intConcurrencyId]				= 1			
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 13)
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 13)
 UNION ALL 
 SELECT 
-	[intBankTransactionTypeID]		= 14
+	[intBankTransactionTypeId]		= 14
 	,[strBankTransactionTypeName]	= 'Origin Withdrawal'
 	,[intConcurrencyId]				= 1			
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 14)
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 14)
 UNION ALL 
 SELECT 
-	[intBankTransactionTypeID]		= 15
+	[intBankTransactionTypeId]		= 15
 	,[strBankTransactionTypeName]	= 'Origin Wire'
 	,[intConcurrencyId]				= 1			
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 15)
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 15)
 UNION ALL 
 SELECT 
-	[intBankTransactionTypeID]		= 16
+	[intBankTransactionTypeId]		= 16
 	,[strBankTransactionTypeName]	= 'AP Payment'
 	,[intConcurrencyId]				= 1			
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeID] = 16)
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 16)

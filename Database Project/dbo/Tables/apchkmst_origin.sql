@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[apchkmst_legacy] (
+﻿CREATE TABLE [dbo].[apchkmst_origin] (
     [apchk_cbk_no]       CHAR (2)        NOT NULL,
     [apchk_rev_dt]       INT             NOT NULL,
     [apchk_trx_ind]      CHAR (1)        NOT NULL,
@@ -46,50 +46,50 @@
 
 GO
 CREATE NONCLUSTERED INDEX [Iapchkmst3]
-    ON [dbo].[apchkmst_legacy]([apchk_name] ASC);
+    ON [dbo].[apchkmst_origin]([apchk_name] ASC);
 
 
 GO
 CREATE NONCLUSTERED INDEX [Iapchkmst2]
-    ON [dbo].[apchkmst_legacy]([apchk_vnd_no] ASC, [apchk_alt2_cbk_no] ASC);
+    ON [dbo].[apchkmst_origin]([apchk_vnd_no] ASC, [apchk_alt2_cbk_no] ASC);
 
 
 GO
 CREATE NONCLUSTERED INDEX [Iapchkmst1]
-    ON [dbo].[apchkmst_legacy]([apchk_alt_cbk_no] ASC, [apchk_alt_trx_ind] ASC, [apchk_alt_chk_no] ASC);
+    ON [dbo].[apchkmst_origin]([apchk_alt_cbk_no] ASC, [apchk_alt_trx_ind] ASC, [apchk_alt_chk_no] ASC);
 
 
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iapchkmst0]
-    ON [dbo].[apchkmst_legacy]([apchk_cbk_no] ASC, [apchk_rev_dt] ASC, [apchk_trx_ind] ASC, [apchk_chk_no] ASC);
+    ON [dbo].[apchkmst_origin]([apchk_cbk_no] ASC, [apchk_rev_dt] ASC, [apchk_trx_ind] ASC, [apchk_chk_no] ASC);
 
 
 GO
 GRANT UPDATE
-    ON OBJECT::[dbo].[apchkmst_legacy] TO PUBLIC
+    ON OBJECT::[dbo].[apchkmst_origin] TO PUBLIC
     AS [dbo];
 
 
 GO
 GRANT SELECT
-    ON OBJECT::[dbo].[apchkmst_legacy] TO PUBLIC
+    ON OBJECT::[dbo].[apchkmst_origin] TO PUBLIC
     AS [dbo];
 
 
 GO
 GRANT REFERENCES
-    ON OBJECT::[dbo].[apchkmst_legacy] TO PUBLIC
+    ON OBJECT::[dbo].[apchkmst_origin] TO PUBLIC
     AS [dbo];
 
 
 GO
 GRANT INSERT
-    ON OBJECT::[dbo].[apchkmst_legacy] TO PUBLIC
+    ON OBJECT::[dbo].[apchkmst_origin] TO PUBLIC
     AS [dbo];
 
 
 GO
 GRANT DELETE
-    ON OBJECT::[dbo].[apchkmst_legacy] TO PUBLIC
+    ON OBJECT::[dbo].[apchkmst_origin] TO PUBLIC
     AS [dbo];
 

@@ -1,19 +1,24 @@
 ﻿CREATE TABLE [dbo].[tblCMCreditCardBatchEntry] (
-    [cntID]                 INT             IDENTITY (1, 1) NOT NULL,
-    [strBatchID]            NVARCHAR (20)   COLLATE Latin1_General_CI_AS NOT NULL,
-    [intBankAccountID]      INT             NOT NULL,
-    [dblTotal]              DECIMAL (18, 6) NOT NULL,
-    [intCreatedUserID]      INT             NULL,
-    [dtmCreated]            DATETIME        NULL,
-    [intLastModifiedUserID] INT             NULL,
-    [dtmLastModified]       DATETIME        NULL,
-    [intConcurrencyId]      INT             NOT NULL DEFAULT 1,
-    CONSTRAINT [PK_tblCMCreditCardBatchEntry] PRIMARY KEY CLUSTERED ([strBatchID] ASC),
-    CONSTRAINT [FK_tblCMBankAccounttblCMCreditCardBatchEntry] FOREIGN KEY ([intBankAccountID]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountID])
+    [intCreditCardBatchEntryId]			INT             IDENTITY (1, 1) NOT NULL,
+    [strCreditCardBatchEntryId]			NVARCHAR (20)   COLLATE Latin1_General_CI_AS NOT NULL UNIQUE,
+    [intBankAccountId]					INT             NOT NULL,
+    [dblTotal]							DECIMAL (18, 6) NOT NULL DEFAULT 0,
+    [intCreatedUserId]					INT             NULL,
+    [dtmCreated]						DATETIME        NULL,
+    [intLastModifiedUserId]				INT             NULL,
+    [dtmLastModified]					DATETIME        NULL,
+    [intConcurrencyId]					INT             NOT NULL DEFAULT 1,
+    CONSTRAINT [PK_tblCMCreditCardBatchEntry] PRIMARY KEY CLUSTERED ([intCreditCardBatchEntryId]),
+    CONSTRAINT [FK_tblCMBankAccounttblCMCreditCardBatchEntry] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId])
 );
 
+GO
+CREATE NONCLUSTERED INDEX [tblCMCreditCardBatchEntry_strCreditCardBatchEntryId]
+    ON [dbo].[tblCMCreditCardBatchEntry]([strCreditCardBatchEntryId] ASC);
 
 GO
-CREATE NONCLUSTERED INDEX [IX_FK_tblCMBankAccounttblCMCreditCardBatchEntry]
-    ON [dbo].[tblCMCreditCardBatchEntry]([intBankAccountID] ASC);
 
+CREATE NONCLUSTERED INDEX [tblCMCreditCardBatchEntry_intBankAccountId]
+    ON [dbo].[tblCMCreditCardBatchEntry]([intBankAccountId] ASC);
+
+GO

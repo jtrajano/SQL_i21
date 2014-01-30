@@ -3,11 +3,11 @@ CREATE VIEW [dbo].vwCMBankAccount
 WITH SCHEMABINDING
 AS 
 
-SELECT	i21.intBankAccountID
-		,i21.strBankName
+SELECT	i21.intBankAccountId
+		,i21.intBankId
 		,i21.ysnActive
-		,i21.intGLAccountID
-		,i21.intCurrencyID
+		,i21.intGLAccountId
+		,i21.intCurrencyId
 		,i21.intBankAccountType
 		,i21.strContact
 		,i21.strBankAccountNo
@@ -29,8 +29,8 @@ SELECT	i21.intBankAccountID
 		,i21.intBackupCheckStartingNo
 		,i21.intBackupCheckEndingNo
 		,i21.intEFTNextNo
-		,i21.intEFTBankFileFormatID
-		,i21.strEFTCompanyID
+		,i21.intEFTBankFileFormatId
+		,i21.strEFTCompanyId
 		,i21.strEFTBankName
 		,i21.strMICRDescription
 		,i21.intMICRBankAccountSpacesCount
@@ -41,9 +41,9 @@ SELECT	i21.intBankAccountID
 		,i21.intMICRCheckNoPosition
 		,i21.strMICRLeftSymbol
 		,i21.strMICRRightSymbol
-		,i21.intCreatedUserID
+		,i21.intCreatedUserId
 		,i21.dtmCreated
-		,i21.intLastModifiedUserID
+		,i21.intLastModifiedUserId
 		,i21.dtmLastModified
 		,i21.strCbkNo
 		,i21.intConcurrencyId
@@ -61,7 +61,7 @@ SELECT	i21.intBankAccountID
 		,origin.apcbk_laser_down_lines		-- INT
 		,origin.apcbk_prtr_checks			-- CHAR (80)
 		,origin.apcbk_auto_assign_trx_yn	-- Y/N
-FROM	dbo.tblCMBankAccount i21 LEFT JOIN dbo.apcbkmst_legacy origin
+FROM	dbo.tblCMBankAccount i21 LEFT JOIN dbo.apcbkmst_origin origin
 			ON i21.strCbkNo = origin.apcbk_no COLLATE Latin1_General_CI_AS
 GO
 
@@ -84,7 +84,7 @@ SET NOCOUNT ON
 		WHERE	EXISTS (
 					SELECT	TOP 1 1 
 					FROM	dbo.tblCMBankAccount t 
-					WHERE	t.intBankAccountID <> i.intBankAccountID 
+					WHERE	t.intBankAccountId <> i.intBankAccountId 
 							AND t.strCbkNo = i.strCbkNo 
 							AND ISNULL(i.strCbkNo, '') <> ''
 				)
@@ -96,10 +96,10 @@ SET NOCOUNT ON
 
 	-- Proceed in updating the base table (tblCMBankAccount)				
 	UPDATE	dbo.tblCMBankAccount 
-	SET		strBankName							= i.strBankName
+	SET		intBankId							= i.intBankId
 			,ysnActive							= i.ysnActive
-			,intGLAccountID						= i.intGLAccountID
-			,intCurrencyID						= i.intCurrencyID
+			,intGLAccountId						= i.intGLAccountId
+			,intCurrencyId						= i.intCurrencyId
 			,intBankAccountType					= i.intBankAccountType
 			,strContact							= i.strContact
 			,strBankAccountNo					= i.strBankAccountNo
@@ -121,8 +121,8 @@ SET NOCOUNT ON
 			,intBackupCheckStartingNo			= i.intBackupCheckStartingNo
 			,intBackupCheckEndingNo				= i.intBackupCheckEndingNo
 			,intEFTNextNo						= i.intEFTNextNo
-			,intEFTBankFileFormatID				= i.intEFTBankFileFormatID
-			,strEFTCompanyID					= i.strEFTCompanyID
+			,intEFTBankFileFormatId				= i.intEFTBankFileFormatId
+			,strEFTCompanyId					= i.strEFTCompanyId
 			,strEFTBankName						= i.strEFTBankName
 			,strMICRDescription					= i.strMICRDescription
 			,intMICRBankAccountSpacesCount		= i.intMICRBankAccountSpacesCount
@@ -133,21 +133,21 @@ SET NOCOUNT ON
 			,intMICRCheckNoPosition				= i.intMICRCheckNoPosition
 			,strMICRLeftSymbol					= i.strMICRLeftSymbol
 			,strMICRRightSymbol					= i.strMICRRightSymbol
-			,intCreatedUserID					= i.intCreatedUserID
+			,intCreatedUserId					= i.intCreatedUserId
 			,dtmCreated							= i.dtmCreated
-			,intLastModifiedUserID				= i.intLastModifiedUserID
+			,intLastModifiedUserId				= i.intLastModifiedUserId
 			,dtmLastModified					= i.dtmLastModified
 			,intConcurrencyId					= i.intConcurrencyId
 			,strCbkNo							= i.strCbkNo
 	FROM	inserted i INNER JOIN dbo.tblCMBankAccount B
-				ON i.intBankAccountID = B.intBankAccountID
+				ON i.intBankAccountId = B.intBankAccountId
 
 	IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 	
-	-- UPDATE modified record for apcbkmst_legacy
-	UPDATE	dbo.apcbkmst_legacy 
+	-- UPDATE modified record for apcbkmst_origin
+	UPDATE	dbo.apcbkmst_origin 
 	SET		apcbk_no					= i.strCbkNo
-			,apcbk_currency				= dbo.fn_GetCurrencyIDFromi21ToOrigin(i.intCurrencyID)
+			,apcbk_currency				= dbo.fn_GetCurrencyIdFromi21ToOrigin(i.intCurrencyId)
 			,apcbk_password				= i.apcbk_password
 			,apcbk_desc					= i.strBankName COLLATE SQL_Latin1_General_CP1_CS_AS
 			,apcbk_bank_acct_no			= i.strBankAccountNo COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -170,7 +170,7 @@ SET NOCOUNT ON
 			--,apcbk_transit_route		= NULL
 			--,apcbk_ach_company_id		= NULL
 			--,apcbk_ach_bankname		= NULL
-			,apcbk_gl_cash				= dbo.fn_GetGLAccountIDFromi21ToOrigin(i.intGLAccountID)
+			,apcbk_gl_cash				= dbo.fn_GetGLAccountIdFromi21ToOrigin(i.intGLAccountId)
 			--,apcbk_gl_ap				= NULL
 			--,apcbk_gl_disc			= NULL
 			--,apcbk_gl_wthhld			= NULL
@@ -180,16 +180,16 @@ SET NOCOUNT ON
 			--,apcbk_user_id			= NULL 
 			--,apcbk_user_rev_dt		= 0	
 	FROM	inserted i INNER JOIN deleted d
-				ON i.intBankAccountID = d.intBankAccountID
-			INNER JOIN dbo.apcbkmst_legacy legacy
-				ON d.strCbkNo = legacy.apcbk_no COLLATE Latin1_General_CI_AS
+				ON i.intBankAccountId = d.intBankAccountId
+			INNER JOIN dbo.apcbkmst_origin origin
+				ON d.strCbkNo = origin.apcbk_no COLLATE Latin1_General_CI_AS
 	WHERE	ISNULL(i.strCbkNo, '') <> ''
 			AND ISNULL(d.strCbkNo, '') <> ''
 					
 	IF @@ERROR <> 0 GOTO EXIT_TRIGGER			
 
-	-- INSERT new records for apcbkmst_legacy (if it does not exists)
-	INSERT INTO apcbkmst_legacy (
+	-- INSERT new records for apcbkmst_origin (if it does not exists)
+	INSERT INTO apcbkmst_origin (
 			apcbk_no				
 			,apcbk_currency			
 			,apcbk_password			
@@ -226,7 +226,7 @@ SET NOCOUNT ON
 	)	
 	SELECT 
 			apcbk_no					= i.strCbkNo
-			,apcbk_currency				= dbo.fn_GetCurrencyIDFromi21ToOrigin(i.intCurrencyID)
+			,apcbk_currency				= dbo.fn_GetCurrencyIdFromi21ToOrigin(i.intCurrencyId)
 			,apcbk_password				= i.apcbk_password
 			,apcbk_desc					= i.strBankName COLLATE SQL_Latin1_General_CP1_CS_AS
 			,apcbk_bank_acct_no			= i.strBankAccountNo COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -249,7 +249,7 @@ SET NOCOUNT ON
 			,apcbk_transit_route		= NULL
 			,apcbk_ach_company_id		= NULL
 			,apcbk_ach_bankname			= NULL
-			,apcbk_gl_cash				= dbo.fn_GetGLAccountIDFromi21ToOrigin(i.intGLAccountID)
+			,apcbk_gl_cash				= dbo.fn_GetGLAccountIdFromi21ToOrigin(i.intGLAccountId)
 			,apcbk_gl_ap				= NULL
 			,apcbk_gl_disc				= NULL
 			,apcbk_gl_wthhld			= NULL
@@ -260,7 +260,7 @@ SET NOCOUNT ON
 			,apcbk_user_rev_dt			= 0
 	FROM	inserted i 
 	WHERE	ISNULL(i.strCbkNo, '') <> ''
-			AND NOT EXISTS (SELECT TOP 1 1 FROM dbo.apcbkmst_legacy legacy WHERE legacy.apcbk_no COLLATE Latin1_General_CI_AS = i.strCbkNo)			
+			AND NOT EXISTS (SELECT TOP 1 1 FROM dbo.apcbkmst_origin origin WHERE origin.apcbk_no COLLATE Latin1_General_CI_AS = i.strCbkNo)			
 	IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 
 EXIT_TRIGGER:
@@ -277,10 +277,10 @@ SET NOCOUNT ON
 
 	-- Proceed in inserting the record the base table (tblCMBankAccount)			
 	INSERT INTO tblCMBankAccount (
-			strBankName
+			intBankId
 			,ysnActive
-			,intGLAccountID
-			,intCurrencyID
+			,intGLAccountId
+			,intCurrencyId
 			,intBankAccountType
 			,strContact
 			,strBankAccountNo
@@ -302,8 +302,8 @@ SET NOCOUNT ON
 			,intBackupCheckStartingNo
 			,intBackupCheckEndingNo
 			,intEFTNextNo
-			,intEFTBankFileFormatID
-			,strEFTCompanyID
+			,intEFTBankFileFormatId
+			,strEFTCompanyId
 			,strEFTBankName
 			,strMICRDescription
 			,intMICRBankAccountSpacesCount
@@ -314,18 +314,18 @@ SET NOCOUNT ON
 			,intMICRCheckNoPosition
 			,strMICRLeftSymbol
 			,strMICRRightSymbol
-			,intCreatedUserID
+			,intCreatedUserId
 			,dtmCreated
-			,intLastModifiedUserID
+			,intLastModifiedUserId
 			,dtmLastModified
 			,intConcurrencyId
 			,strCbkNo
 	)
-	OUTPUT 	inserted.intBankAccountID
-	SELECT	strBankName							= i.strBankName
+	OUTPUT 	inserted.intBankAccountId
+	SELECT	intBankId							= i.intBankId
 			,ysnActive							= i.ysnActive
-			,intGLAccountID						= i.intGLAccountID
-			,intCurrencyID						= i.intCurrencyID
+			,intGLAccountId						= i.intGLAccountId
+			,intCurrencyId						= i.intCurrencyId
 			,intBankAccountType					= i.intBankAccountType
 			,strContact							= i.strContact
 			,strBankAccountNo					= i.strBankAccountNo
@@ -347,8 +347,8 @@ SET NOCOUNT ON
 			,intBackupCheckStartingNo			= i.intBackupCheckStartingNo
 			,intBackupCheckEndingNo				= i.intBackupCheckEndingNo
 			,intEFTNextNo						= i.intEFTNextNo
-			,intEFTBankFileFormatID				= i.intEFTBankFileFormatID
-			,strEFTCompanyID					= i.strEFTCompanyID
+			,intEFTBankFileFormatId				= i.intEFTBankFileFormatId
+			,strEFTCompanyId					= i.strEFTCompanyId
 			,strEFTBankName						= i.strEFTBankName
 			,strMICRDescription					= i.strMICRDescription
 			,intMICRBankAccountSpacesCount		= i.intMICRBankAccountSpacesCount
@@ -359,17 +359,17 @@ SET NOCOUNT ON
 			,intMICRCheckNoPosition				= i.intMICRCheckNoPosition
 			,strMICRLeftSymbol					= i.strMICRLeftSymbol
 			,strMICRRightSymbol					= i.strMICRRightSymbol
-			,intCreatedUserID					= i.intCreatedUserID
+			,intCreatedUserId					= i.intCreatedUserId
 			,dtmCreated							= i.dtmCreated
-			,intLastModifiedUserID				= i.intLastModifiedUserID
+			,intLastModifiedUserId				= i.intLastModifiedUserId
 			,dtmLastModified					= i.dtmLastModified
 			,intConcurrencyId					= i.intConcurrencyId
 			,strCbkNo							= i.strCbkNo
 	FROM	inserted i 
 	IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 
-	-- INSERT new records for apcbkmst_legacy
-	INSERT INTO apcbkmst_legacy (
+	-- INSERT new records for apcbkmst_origin
+	INSERT INTO apcbkmst_origin (
 			apcbk_no				
 			,apcbk_currency			
 			,apcbk_password			
@@ -406,7 +406,7 @@ SET NOCOUNT ON
 	)	
 	SELECT 
 			apcbk_no					= i.strCbkNo
-			,apcbk_currency				= dbo.fn_GetCurrencyIDFromi21ToOrigin(i.intCurrencyID)
+			,apcbk_currency				= dbo.fn_GetCurrencyIdFromi21ToOrigin(i.intCurrencyId)
 			,apcbk_password				= i.apcbk_password
 			,apcbk_desc					= i.strBankName COLLATE SQL_Latin1_General_CP1_CS_AS
 			,apcbk_bank_acct_no			= i.strBankAccountNo COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -429,7 +429,7 @@ SET NOCOUNT ON
 			,apcbk_transit_route		= NULL
 			,apcbk_ach_company_id		= NULL
 			,apcbk_ach_bankname			= NULL
-			,apcbk_gl_cash				= dbo.fn_GetGLAccountIDFromi21ToOrigin(i.intGLAccountID)
+			,apcbk_gl_cash				= dbo.fn_GetGLAccountIdFromi21ToOrigin(i.intGLAccountId)
 			,apcbk_gl_ap				= NULL
 			,apcbk_gl_disc				= NULL
 			,apcbk_gl_wthhld			= NULL
@@ -463,8 +463,8 @@ BEGIN
 	-- 1. ...if checkbook is used in apivcmst (Accounts Payable Invoice File)
 	IF EXISTS (
 		SELECT	TOP 1 1 
-		FROM	deleted d INNER JOIN dbo.apivcmst legacy 
-					ON d.strCbkNo = legacy.apivc_cbk_no COLLATE Latin1_General_CI_AS
+		FROM	deleted d INNER JOIN dbo.apivcmst origin 
+					ON d.strCbkNo = origin.apivc_cbk_no COLLATE Latin1_General_CI_AS
 		WHERE	ISNULL(d.strCbkNo, '') <> ''
 	)
 	BEGIN
@@ -476,8 +476,8 @@ BEGIN
 	-- 2. ...if checkbook is used in apchkmst (Check History File)
 	IF EXISTS (
 		SELECT	TOP 1 1 
-		FROM	deleted d INNER JOIN dbo.apchkmst legacy 
-					ON d.strCbkNo = legacy.apchk_cbk_no COLLATE Latin1_General_CI_AS
+		FROM	deleted d INNER JOIN dbo.apchkmst origin 
+					ON d.strCbkNo = origin.apchk_cbk_no COLLATE Latin1_General_CI_AS
 		WHERE	ISNULL(d.strCbkNo, '') <> ''
 	)
 	BEGIN
@@ -489,8 +489,8 @@ BEGIN
 	-- 3. ...if checkbook is used in aptrxmst (A/P Trans File)
 	IF EXISTS (
 		SELECT	TOP 1 1 
-		FROM	deleted d INNER JOIN dbo.aptrxmst legacy 
-					ON d.strCbkNo = legacy.aptrx_cbk_no COLLATE Latin1_General_CI_AS
+		FROM	deleted d INNER JOIN dbo.aptrxmst origin 
+					ON d.strCbkNo = origin.aptrx_cbk_no COLLATE Latin1_General_CI_AS
 		WHERE	ISNULL(d.strCbkNo, '') <> ''
 	)
 	BEGIN
@@ -505,13 +505,13 @@ BEGIN
 	-- Delete records from i21 bank account table. 
 	DELETE	dbo.tblCMBankAccount
 	FROM	dbo.tblCMBankAccount 
-	WHERE	intBankAccountID IN (SELECT d.intBankAccountID FROM deleted d)
+	WHERE	intBankAccountId IN (SELECT d.intBankAccountId FROM deleted d)
 	IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 
-	-- Delete records in legacy bank account table (apcbkmst_legacy). 
-	DELETE	dbo.apcbkmst_legacy
-	FROM	deleted d INNER JOIN dbo.apcbkmst_legacy legacy
-				ON d.strCbkNo = legacy.apcbk_no COLLATE Latin1_General_CI_AS
+	-- Delete records in origin bank account table (apcbkmst_origin). 
+	DELETE	dbo.apcbkmst_origin
+	FROM	deleted d INNER JOIN dbo.apcbkmst_origin origin
+				ON d.strCbkNo = origin.apcbk_no COLLATE Latin1_General_CI_AS
 	WHERE	ISNULL(d.strCbkNo, '') <> ''
 	IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 

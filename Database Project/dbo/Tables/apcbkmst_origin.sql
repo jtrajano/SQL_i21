@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[apcbkmst_legacy] (
+﻿CREATE TABLE [dbo].[apcbkmst_origin] (
     [apcbk_no]                 CHAR (2)        NOT NULL,
     [apcbk_currency]           CHAR (3)        NULL,
     [apcbk_password]           CHAR (16)       NULL,
@@ -41,35 +41,35 @@
 
 GO
 CREATE UNIQUE CLUSTERED INDEX [Iapcbkmst0]
-    ON [dbo].[apcbkmst_legacy]([apcbk_no] ASC);
+    ON [dbo].[apcbkmst_origin]([apcbk_no] ASC);
 
 
 GO
 GRANT UPDATE
-    ON OBJECT::[dbo].[apcbkmst_legacy] TO PUBLIC
+    ON OBJECT::[dbo].[apcbkmst_origin] TO PUBLIC
     AS [dbo];
 
 
 GO
 GRANT SELECT
-    ON OBJECT::[dbo].[apcbkmst_legacy] TO PUBLIC
+    ON OBJECT::[dbo].[apcbkmst_origin] TO PUBLIC
     AS [dbo];
 
 
 GO
 GRANT REFERENCES
-    ON OBJECT::[dbo].[apcbkmst_legacy] TO PUBLIC
+    ON OBJECT::[dbo].[apcbkmst_origin] TO PUBLIC
     AS [dbo];
 
 
 GO
 GRANT INSERT
-    ON OBJECT::[dbo].[apcbkmst_legacy] TO PUBLIC
+    ON OBJECT::[dbo].[apcbkmst_origin] TO PUBLIC
     AS [dbo];
 
 
 GO
 GRANT DELETE
-    ON OBJECT::[dbo].[apcbkmst_legacy] TO PUBLIC
+    ON OBJECT::[dbo].[apcbkmst_origin] TO PUBLIC
     AS [dbo];
 

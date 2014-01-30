@@ -1,10 +1,13 @@
 ﻿CREATE TABLE [dbo].[tblCMCurrentBankReconciliation] (
-    [intBankAccountID]           INT          NOT NULL,
-    [dblStatementOpeningBalance] DECIMAL (18) NULL,
-    [dblStatementEndingBalance]  DECIMAL (18) NULL,
-    [intLastModifiedUserID]      INT          NOT NULL,
-    [dtmLastModified]            DATETIME     NOT NULL,
+    [intBankAccountId]           INT          NOT NULL,
+    [dblStatementOpeningBalance] DECIMAL (18) NOT NULL DEFAULT 0,
+    [dblStatementEndingBalance]  DECIMAL (18) NOT NULL DEFAULT 0,
+    [intLastModifiedUserId]      INT          NULL,
+    [dtmLastModified]            DATETIME     NULL,
     [intConcurrencyId]           INT          NOT NULL DEFAULT 1,
-    CONSTRAINT [PK_tblCMCurrentBankReconciliation] PRIMARY KEY CLUSTERED ([intBankAccountID] ASC)
+    CONSTRAINT [PK_tblCMCurrentBankReconciliation] PRIMARY KEY CLUSTERED ([intBankAccountId] ASC)
 );
 
+GO
+CREATE NONCLUSTERED INDEX [IX_tblCMCurrentBankReconciliation_intBankAccountId]
+    ON [dbo].[tblCMCurrentBankReconciliation]([intBankAccountId] ASC);
