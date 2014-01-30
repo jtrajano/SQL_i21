@@ -1,16 +1,13 @@
 ﻿
---=====================================================================================================================================
--- 	CREATE THE STORED PROCEDURE AFTER DELETING IT
----------------------------------------------------------------------------------------------------------------------------------------
 CREATE PROCEDURE PostCMBankTransfer
 	@ysnPost				BIT		= 0
 	,@ysnRecap				BIT		= 0
-	,@strTransactionID		NVARCHAR(40) = NULL 
+	,@strTransactionId		NVARCHAR(40) = NULL 
 	,@isSuccessful			BIT		= 0 OUTPUT 
 	,@message_id			INT		= 0 OUTPUT 
 AS
 
-SET QUOTED_IDENTIFIER OFF
+SET QUOTED_IdENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
@@ -25,11 +22,11 @@ BEGIN TRANSACTION
 
 -- CREATE THE TEMPORARY TABLE 
 CREATE TABLE #tmpGLDetail (
-	[strTransactionID]			[nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
-	,[intTransactionID]			[int] NULL
+	[strTransactionId]			[nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
+	,[intTransactionId]			[int] NULL
 	,[dtmDate]					[datetime] NOT NULL
-	,[strBatchID]				[nvarchar](20)  COLLATE Latin1_General_CI_AS NULL
-	,[intAccountID]				[int] NULL
+	,[strBatchId]				[nvarchar](20)  COLLATE Latin1_General_CI_AS NULL
+	,[intAccountId]				[int] NULL
 	,[strAccountGroup]			[nvarchar](30)  COLLATE Latin1_General_CI_AS NULL
 	,[dblDebit]					[numeric](18, 6) NULL
 	,[dblCredit]				[numeric](18, 6) NULL
@@ -38,20 +35,20 @@ CREATE TABLE #tmpGLDetail (
 	,[strDescription]			[nvarchar](250)  COLLATE Latin1_General_CI_AS NULL
 	,[strCode]					[nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
 	,[strReference]				[nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
-	,[strJobID]					[nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
-	,[intCurrencyID]			[int] NULL
+	,[strJobId]					[nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
+	,[intCurrencyId]			[int] NULL
 	,[dblExchangeRate]			[numeric](38, 20) NOT NULL
 	,[dtmDateEntered]			[datetime] NOT NULL
 	,[dtmTransactionDate]		[datetime] NULL
-	,[strProductID]				[nvarchar](50)  COLLATE Latin1_General_CI_AS NULL
-	,[strWarehouseID]			[nvarchar](30)  COLLATE Latin1_General_CI_AS NULL
+	,[strProductId]				[nvarchar](50)  COLLATE Latin1_General_CI_AS NULL
+	,[strWarehouseId]			[nvarchar](30)  COLLATE Latin1_General_CI_AS NULL
 	,[strNum]					[nvarchar](100)  COLLATE Latin1_General_CI_AS NULL
 	,[strCompanyName]			[nvarchar](150)  COLLATE Latin1_General_CI_AS NULL
 	,[strBillInvoiceNumber]		[nvarchar](35)  COLLATE Latin1_General_CI_AS NULL
 	,[strJournalLineDescription] [nvarchar](250)  COLLATE Latin1_General_CI_AS NULL
 	,[ysnIsUnposted]			[bit] NOT NULL
 	,[intConcurrencyId]			[int] NULL
-	,[intUserID]				[int] NULL
+	,[intUserId]				[int] NULL
 	,[strTransactionForm]		[nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
 	,[strModuleName]			[nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
 	,[strUOMCode]				[char](6)  COLLATE Latin1_General_CI_AS NULL
@@ -60,8 +57,8 @@ CREATE TABLE #tmpGLDetail (
 -- Declare the variables 
 DECLARE 
 	-- Constant Variables. 
-	@BANK_TRANSACTION_TYPE_ID AS INT			= 4 -- Bank Transfer Type ID is 4 (See tblCMBankTransactionType). 
-	,@STARTING_NUM_TRANSACTION_TYPE_ID AS INT	= 3	-- Starting number for GL Detail table. Ex: 'BATCH-1234',
+	@BANK_TRANSACTION_TYPE_Id AS INT			= 4 -- Bank Transfer Type Id is 4 (See tblCMBankTransactionType). 
+	,@STARTING_NUM_TRANSACTION_TYPE_Id AS INT	= 3	-- Starting number for GL Detail table. Ex: 'BATCH-1234',
 	,@GL_DETAIL_CODE AS NVARCHAR(10)			= 'BTFR' -- String code used in GL Detail table. 
 	,@MODULE_NAME AS NVARCHAR(100)				= 'Cash Management' -- Module where this posting code belongs.
 	,@BANK_TRANSFER_WD AS INT					= 9 -- Transaction code for Bank Transfer Withdrawal. It also refers to as Bank Transfer FROM.
@@ -70,16 +67,16 @@ DECLARE
 	,@BANK_TRANSFER_DEP_PREFIX AS NVARCHAR(4)	= '-DEP'
 	
 	-- Local Variables
-	,@cntID AS INT
+	,@intTransactionId AS INT
 	,@dtmDate AS DATETIME
 	,@dblAmount AS NUMERIC(18,6)
-	,@strBatchID AS NVARCHAR(40)
-	,@intUserID AS INT
+	,@strBatchId AS NVARCHAR(40)
+	,@intUserId AS INT
 	,@ysnTransactionPostedFlag AS BIT
 	,@ysnTransactionClearedFlag AS BIT
-	,@intBankAccountIDFrom AS INT
-	,@intBankAccountIDTo AS INT
-	,@ysnBankAccountIDInactive AS BIT
+	,@intBankAccountIdFrom AS INT
+	,@intBankAccountIdTo AS INT
+	,@ysnBankAccountIdInactive AS BIT
 	
 	-- Table Variables
 	,@RecapTable AS RecapTableType	
@@ -93,23 +90,23 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 
 -- Read bank transfer table 
 SELECT	TOP 1 
-		@cntID = cntID
+		@intTransactionId = intTransactionId
 		,@dtmDate = dtmDate
 		,@dblAmount = dblAmount
-		,@intUserID = intLastModifiedUserID
+		,@intUserId = intLastModifiedUserId
 		,@ysnTransactionPostedFlag = ysnPosted
-		,@intBankAccountIDFrom = intBankAccountIDFrom
-		,@intBankAccountIDTo = intBankAccountIDTo
+		,@intBankAccountIdFrom = intBankAccountIdFrom
+		,@intBankAccountIdTo = intBankAccountIdTo
 FROM	[dbo].tblCMBankTransfer 
-WHERE	strTransactionID = @strTransactionID 
+WHERE	strTransactionId = @strTransactionId 
 IF @@ERROR <> 0	GOTO Post_Rollback		
 		
 --=====================================================================================================================================
--- 	VALIDATION 
+-- 	VALIdATION 
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 -- Validate if the bank transfer id exists. 
-IF @cntID IS NULL
+IF @intTransactionId IS NULL
 BEGIN 
 	-- Cannot find the transaction.
 	RAISERROR(50004, 11, 1)
@@ -145,9 +142,9 @@ IF @ysnPost = 0 AND @ysnRecap = 0
 BEGIN
 	SELECT TOP 1 @ysnTransactionClearedFlag = 1
 	FROM	tblCMBankTransaction 
-	WHERE	strLink = @strTransactionID
+	WHERE	strLink = @strTransactionId
 			AND ysnClr = 1
-			AND intBankTransactionTypeID IN (@BANK_TRANSFER_WD, @BANK_TRANSFER_DEP)
+			AND intBankTransactionTypeId IN (@BANK_TRANSFER_WD, @BANK_TRANSFER_DEP)
 			
 	IF @ysnTransactionClearedFlag = 1
 	BEGIN
@@ -160,12 +157,12 @@ END
 -- Check if the bank account is inactive
 IF @ysnRecap = 0 
 BEGIN
-	SELECT TOP 1 @ysnBankAccountIDInactive = 1
+	SELECT TOP 1 @ysnBankAccountIdInactive = 1
 	FROM	tblCMBankAccount
-	WHERE	intBankAccountID IN (@intBankAccountIDFrom, @intBankAccountIDTo) 
+	WHERE	intBankAccountId IN (@intBankAccountIdFrom, @intBankAccountIdTo) 
 			AND ysnActive = 0
 	
-	IF @ysnBankAccountIDInactive = 1
+	IF @ysnBankAccountIdInactive = 1
 	BEGIN
 		-- 'The bank account is inactive.'
 		RAISERROR(50010, 11, 1)
@@ -178,19 +175,19 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 -- Get the batch post id. 
-EXEC [dbo].GetStartingNumber @STARTING_NUM_TRANSACTION_TYPE_ID, @strBatchID OUTPUT 
+EXEC [dbo].GetStartingNumber @STARTING_NUM_TRANSACTION_TYPE_Id, @strBatchId OUTPUT 
 IF @@ERROR <> 0	GOTO Post_Rollback
 
 IF @ysnPost = 1
 BEGIN
 	-- Create the G/L Entries for Bank Transfer. 
-	-- 1. CREDIT SIDE (SOURCE FUND)
+	-- 1. CREDIT SIdE (SOURCE FUND)
 	INSERT INTO #tmpGLDetail (
-			[strTransactionID]
-			,[intTransactionID]
+			[strTransactionId]
+			,[intTransactionId]
 			,[dtmDate]
-			,[strBatchID]
-			,[intAccountID]
+			,[strBatchId]
+			,[intAccountId]
 			,[strAccountGroup]
 			,[dblDebit]
 			,[dblCredit]
@@ -199,29 +196,29 @@ BEGIN
 			,[strDescription]
 			,[strCode]
 			,[strReference]
-			,[strJobID]
-			,[intCurrencyID]
+			,[strJobId]
+			,[intCurrencyId]
 			,[dblExchangeRate]
 			,[dtmDateEntered]
 			,[dtmTransactionDate]
-			,[strProductID]
-			,[strWarehouseID]
+			,[strProductId]
+			,[strWarehouseId]
 			,[strNum]
 			,[strCompanyName]
 			,[strBillInvoiceNumber]
 			,[strJournalLineDescription]
 			,[ysnIsUnposted]
 			,[intConcurrencyId]
-			,[intUserID]
+			,[intUserId]
 			,[strTransactionForm]
 			,[strModuleName]
 			,[strUOMCode]
 	)
-	SELECT	[strTransactionID]		= @strTransactionID
-			,[intTransactionID]		= NULL
+	SELECT	[strTransactionId]		= @strTransactionId
+			,[intTransactionId]		= NULL
 			,[dtmDate]				= @dtmDate
-			,[strBatchID]			= @strBatchID
-			,[intAccountID]			= GLAccnt.intAccountID
+			,[strBatchId]			= @strBatchId
+			,[intAccountId]			= GLAccnt.intAccountId
 			,[strAccountGroup]		= GLAccntGrp.strAccountGroup
 			,[dblDebit]				= 0
 			,[dblCredit]			= A.dblAmount
@@ -230,37 +227,37 @@ BEGIN
 			,[strDescription]		= A.strDescription
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= A.strReferenceFrom
-			,[strJobID]				= NULL
-			,[intCurrencyID]		= NULL
+			,[strJobId]				= NULL
+			,[intCurrencyId]		= NULL
 			,[dblExchangeRate]		= 1
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
-			,[strProductID]			= NULL
-			,[strWarehouseID]		= NULL
+			,[strProductId]			= NULL
+			,[strWarehouseId]		= NULL
 			,[strNum]				= NULL
 			,[strCompanyName]		= NULL
 			,[strBillInvoiceNumber] = NULL 
 			,[strJournalLineDescription] = NULL 
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
-			,[intUserID]			= A.intLastModifiedUserID
-			,[strTransactionForm]	= A.strTransactionID
+			,[intUserId]			= A.intLastModifiedUserId
+			,[strTransactionForm]	= A.strTransactionId
 			,[strModuleName]		= @MODULE_NAME
 			,[strUOMCode]			= NULL 
 	FROM	[dbo].tblCMBankTransfer A INNER JOIN [dbo].tblGLAccount GLAccnt
-				ON A.intGLAccountIDFrom = GLAccnt.intAccountID		
+				ON A.intGLAccountIdFrom = GLAccnt.intAccountId		
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
-				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
-	WHERE	A.strTransactionID = @strTransactionID
+				ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
+	WHERE	A.strTransactionId = @strTransactionId
 	
 	
-	-- 2. DEBIT SIDE (TARGET OF THE FUND)
+	-- 2. DEBIT SIdE (TARGET OF THE FUND)
 	UNION ALL 
-	SELECT	[strTransactionID]		= @strTransactionID
-			,[intTransactionID]		= NULL
+	SELECT	[strTransactionId]		= @strTransactionId
+			,[intTransactionId]		= NULL
 			,[dtmDate]				= @dtmDate
-			,[strBatchID]			= @strBatchID
-			,[intAccountID]			= GLAccnt.intAccountID
+			,[strBatchId]			= @strBatchId
+			,[intAccountId]			= GLAccnt.intAccountId
 			,[strAccountGroup]		= GLAccntGrp.strAccountGroup
 			,[dblDebit]				= A.dblAmount
 			,[dblCredit]			= 0
@@ -269,28 +266,28 @@ BEGIN
 			,[strDescription]		= A.strDescription
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= A.strReferenceFrom
-			,[strJobID]				= NULL
-			,[intCurrencyID]		= NULL
+			,[strJobId]				= NULL
+			,[intCurrencyId]		= NULL
 			,[dblExchangeRate]		= 1
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
-			,[strProductID]			= NULL
-			,[strWarehouseID]		= NULL
+			,[strProductId]			= NULL
+			,[strWarehouseId]		= NULL
 			,[strNum]				= NULL
 			,[strCompanyName]		= NULL
 			,[strBillInvoiceNumber] = NULL 
 			,[strJournalLineDescription] = NULL 
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
-			,[intUserID]			= A.intLastModifiedUserID
-			,[strTransactionForm]	= A.strTransactionID
+			,[intUserId]			= A.intLastModifiedUserId
+			,[strTransactionForm]	= A.strTransactionId
 			,[strModuleName]		= @MODULE_NAME
 			,[strUOMCode]			= NULL 
 	FROM	[dbo].tblCMBankTransfer A INNER JOIN [dbo].tblGLAccount GLAccnt
-				ON A.intGLAccountIDTo = GLAccnt.intAccountID		
+				ON A.intGLAccountIdTo = GLAccnt.intAccountId		
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
-				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
-	WHERE	A.strTransactionID = @strTransactionID
+				ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
+	WHERE	A.strTransactionId = @strTransactionId
 	
 	IF @@ERROR <> 0	GOTO Post_Rollback
 	
@@ -298,19 +295,19 @@ BEGIN
 	UPDATE tblCMBankTransfer
 	SET		ysnPosted = 1
 			,intConcurrencyId += 1 
-	WHERE	strTransactionID = @strTransactionID
+	WHERE	strTransactionId = @strTransactionId
 	IF @@ERROR <> 0	GOTO Post_Rollback
 	
 	-- Create new records in tblCMBankTransaction	
 	INSERT INTO tblCMBankTransaction (
-		strTransactionID
-		,intBankTransactionTypeID
-		,intBankAccountID
-		,intCurrencyID
+		strTransactionId
+		,intBankTransactionTypeId
+		,intBankAccountId
+		,intCurrencyId
 		,dblExchangeRate
 		,dtmDate
 		,strPayee
-		,intPayeeID
+		,intPayeeId
 		,strAddress
 		,strZipCode
 		,strCity
@@ -327,21 +324,21 @@ BEGIN
 		,strLink
 		,ysnClr
 		,dtmDateReconciled
-		,intCreatedUserID
+		,intCreatedUserId
 		,dtmCreated
-		,intLastModifiedUserID
+		,intLastModifiedUserId
 		,dtmLastModified
 		,intConcurrencyId	
 	)
 	-- Bank Transaction Credit
-	SELECT	strTransactionID			= A.strTransactionID + @BANK_TRANSFER_WD_PREFIX
-			,intBankTransactionTypeID	= @BANK_TRANSFER_WD
-			,intBankAccountID			= A.intBankAccountIDFrom
-			,intCurrencyID				= NULL
+	SELECT	strTransactionId			= A.strTransactionId + @BANK_TRANSFER_WD_PREFIX
+			,intBankTransactionTypeId	= @BANK_TRANSFER_WD
+			,intBankAccountId			= A.intBankAccountIdFrom
+			,intCurrencyId				= NULL
 			,dblExchangeRate			= 1
 			,dtmDate					= A.dtmDate
 			,strPayee					= ''
-			,intPayeeID					= NULL
+			,intPayeeId					= NULL
 			,strAddress					= ''
 			,strZipCode					= ''
 			,strCity					= ''
@@ -355,30 +352,30 @@ BEGIN
 			,ysnCheckToBePrinted		= 0
 			,ysnCheckVoid				= 0
 			,ysnPosted					= 1
-			,strLink					= A.strTransactionID
+			,strLink					= A.strTransactionId
 			,ysnClr						= 0
 			,dtmDateReconciled			= NULL
-			,intCreatedUserID			= A.intCreatedUserID
+			,intCreatedUserId			= A.intCreatedUserId
 			,dtmCreated					= GETDATE()
-			,intLastModifiedUserID		= A.intLastModifiedUserID
+			,intLastModifiedUserId		= A.intLastModifiedUserId
 			,dtmLastModified			= GETDATE()
 			,intConcurrencyId			= 1	
 	FROM	[dbo].tblCMBankTransfer A INNER JOIN [dbo].tblGLAccount GLAccnt
-				ON A.intGLAccountIDFrom = GLAccnt.intAccountID		
+				ON A.intGLAccountIdFrom = GLAccnt.intAccountId		
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
-				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
-	WHERE	A.strTransactionID = @strTransactionID
+				ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
+	WHERE	A.strTransactionId = @strTransactionId
 	
 	-- Bank Transaction Debit
 	UNION ALL
-	SELECT	strTransactionID			= A.strTransactionID + @BANK_TRANSFER_DEP_PREFIX
-			,intBankTransactionTypeID	= @BANK_TRANSFER_DEP
-			,intBankAccountID			= A.intBankAccountIDTo
-			,intCurrencyID				= NULL
+	SELECT	strTransactionId			= A.strTransactionId + @BANK_TRANSFER_DEP_PREFIX
+			,intBankTransactionTypeId	= @BANK_TRANSFER_DEP
+			,intBankAccountId			= A.intBankAccountIdTo
+			,intCurrencyId				= NULL
 			,dblExchangeRate			= 1
 			,dtmDate					= A.dtmDate
 			,strPayee					= ''
-			,intPayeeID					= NULL
+			,intPayeeId					= NULL
 			,strAddress					= ''
 			,strZipCode					= ''
 			,strCity					= ''
@@ -392,40 +389,40 @@ BEGIN
 			,ysnCheckToBePrinted		= 0
 			,ysnCheckVoid				= 0
 			,ysnPosted					= 1
-			,strLink					= A.strTransactionID
+			,strLink					= A.strTransactionId
 			,ysnClr						= 0
 			,dtmDateReconciled			= NULL
-			,intCreatedUserID			= A.intCreatedUserID
+			,intCreatedUserId			= A.intCreatedUserId
 			,dtmCreated					= GETDATE()
-			,intLastModifiedUserID		= A.intLastModifiedUserID
+			,intLastModifiedUserId		= A.intLastModifiedUserId
 			,dtmLastModified			= GETDATE()
 			,intConcurrencyId			= 1	
 	FROM	[dbo].tblCMBankTransfer A INNER JOIN [dbo].tblGLAccount GLAccnt
-				ON A.intGLAccountIDFrom = GLAccnt.intAccountID		
+				ON A.intGLAccountIdFrom = GLAccnt.intAccountId		
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
-				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
-	WHERE	A.strTransactionID = @strTransactionID	
+				ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
+	WHERE	A.strTransactionId = @strTransactionId	
 	IF @@ERROR <> 0	GOTO Post_Rollback
 	
 END
 ELSE IF @ysnPost = 0
 BEGIN
 	-- Reverse the G/L entries
-	EXEC [dbo].ReverseGLEntries @strTransactionID, @GL_DETAIL_CODE, NULL, @intUserID	
+	EXEC [dbo].ReverseGLEntries @strTransactionId, @GL_DETAIL_CODE, NULL, @intUserId	
 	IF @@ERROR <> 0	GOTO Post_Rollback
 	
 	-- Update the posted flag in the transaction table
 	UPDATE tblCMBankTransfer
 	SET		ysnPosted = 0
 			,intConcurrencyId += 1 
-	WHERE	strTransactionID = @strTransactionID
+	WHERE	strTransactionId = @strTransactionId
 	IF @@ERROR <> 0	GOTO Post_Rollback
 	
 	-- Delete the records in tblCMBankTransaction
 	DELETE FROM tblCMBankTransaction
-	WHERE	strLink = @strTransactionID
+	WHERE	strLink = @strTransactionId
 			AND ysnClr = 0
-			AND intBankTransactionTypeID IN (@BANK_TRANSFER_WD, @BANK_TRANSFER_DEP)
+			AND intBankTransactionTypeId IN (@BANK_TRANSFER_WD, @BANK_TRANSFER_DEP)
 	IF @@ERROR <> 0	GOTO Post_Rollback
 END
 
@@ -442,11 +439,11 @@ IF @ysnRecap = 1
 BEGIN	
 	-- INSERT THE DATA FROM #tmpGLDetail TO @RecapTable
 	INSERT INTO @RecapTable (
-			[strTransactionID]		
-			,[intTransactionID]		
+			[strTransactionId]		
+			,[intTransactionId]		
 			,[dtmDate]				
-			,[strBatchID]			
-			,[intAccountID]			
+			,[strBatchId]			
+			,[intAccountId]			
 			,[strAccountGroup]		
 			,[dblDebit]				
 			,[dblCredit]			
@@ -455,23 +452,23 @@ BEGIN
 			,[strDescription]		
 			,[strCode]				
 			,[strReference]			
-			,[strJobID]				
-			,[intCurrencyID]		
+			,[strJobId]				
+			,[intCurrencyId]		
 			,[dblExchangeRate]		
 			,[dtmDateEntered]		
 			,[dtmTransactionDate]	
 			,[ysnIsUnposted]		
 			,[intConcurrencyId]		
-			,[intUserID]			
+			,[intUserId]			
 			,[strTransactionForm]	
 			,[strModuleName]		
 			,[strUOMCode]			
 	)	
-	SELECT	@strTransactionID
+	SELECT	@strTransactionId
 			,NULL
 			,[dtmDate]				
-			,[strBatchID]			
-			,[intAccountID]			
+			,[strBatchId]			
+			,[intAccountId]			
 			,[strAccountGroup]		
 			,[dblDebit]				
 			,[dblCredit]			
@@ -480,14 +477,14 @@ BEGIN
 			,[strDescription]		
 			,[strCode]				
 			,[strReference]			
-			,[strJobID]				
-			,[intCurrencyID]		
+			,[strJobId]				
+			,[intCurrencyId]		
 			,[dblExchangeRate]		
 			,[dtmDateEntered]		
 			,[dtmTransactionDate]	
 			,[ysnIsUnposted]		
 			,[intConcurrencyId]		
-			,[intUserID]			
+			,[intUserId]			
 			,[strTransactionForm]	
 			,[strModuleName]		
 			,[strUOMCode]	
@@ -521,5 +518,5 @@ Recap_Rollback:
 -- Clean-up routines:
 -- Delete all temporary tables used during the post transaction. 
 Post_Exit:
-	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#tmpGLDetail')) DROP TABLE #tmpGLDetail
+	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE Id = OBJECT_Id('TEMPDB..#tmpGLDetail')) DROP TABLE #tmpGLDetail
   

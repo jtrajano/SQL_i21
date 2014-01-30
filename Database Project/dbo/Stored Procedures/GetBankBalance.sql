@@ -1,13 +1,10 @@
 ﻿
---=====================================================================================================================================
--- 	CREATE THE STORED PROCEDURE AFTER DELETING IT
----------------------------------------------------------------------------------------------------------------------------------------
 CREATE PROCEDURE GetBankBalance
-	@intBankAccountID INT = NULL,
+	@intBankAccountId INT = NULL,
 	@dtmDate AS DATETIME = NULL
 AS
 
-SET QUOTED_IDENTIFIER OFF
+SET QUOTED_IdENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
@@ -36,19 +33,19 @@ SELECT	@returnBalance = SUM(ISNULL(dblAmount, 0) * -1)
 FROM	tblCMBankTransaction
 WHERE	ysnPosted = 1
 		AND dblAmount <> 0 
-		AND intBankAccountID = @intBankAccountID
+		AND intBankAccountId = @intBankAccountId
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDate) AS FLOAT)) AS DATETIME)		
-		AND intBankTransactionTypeID IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
+		AND intBankTransactionTypeId IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
 
 -- Get bank amounts from Bank Transactions 	
 -- Note: The computations are based on the detail table (tblCMBankTransactionDetail). 
 SELECT	@returnBalance = ISNULL(@returnBalance, 0) + ISNULL(SUM(ISNULL(B.dblCredit, 0)), 0) - ISNULL(SUM(ISNULL(B.dblDebit, 0)), 0)
 FROM	tblCMBankTransaction A INNER JOIN tblCMBankTransactionDetail B
-			ON A.strTransactionID = B.strTransactionID
+			ON A.intTransactionId = B.intTransactionId
 WHERE	A.ysnPosted = 1
-		AND A.intBankAccountID = @intBankAccountID
+		AND A.intBankAccountId = @intBankAccountId
 		AND CAST(FLOOR(CAST(A.dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate, A.dtmDate) AS FLOAT)) AS DATETIME)		
-		AND A.intBankTransactionTypeID IN (@BANK_TRANSACTION, @BANK_WITHDRAWAL)
+		AND A.intBankTransactionTypeId IN (@BANK_TRANSACTION, @BANK_WITHDRAWAL)
 HAVING	ISNULL(SUM(ISNULL(B.dblCredit, 0)), 0) - ISNULL(SUM(ISNULL(B.dblDebit, 0)), 0) <> 0
 
 -- Get bank amounts for the rest of the transactions like deposits, transferd (dep), and etc.
@@ -56,10 +53,10 @@ SELECT	@returnBalance = ISNULL(@returnBalance, 0) + ISNULL(SUM(ISNULL(dblAmount,
 FROM	tblCMBankTransaction
 WHERE	ysnPosted = 1
 		AND dblAmount <> 0 
-		AND intBankAccountID = @intBankAccountID
+		AND intBankAccountId = @intBankAccountId
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDate) AS FLOAT)) AS DATETIME)		
-		AND intBankTransactionTypeID NOT IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @BANK_TRANSACTION, @BANK_WITHDRAWAL, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)		
+		AND intBankTransactionTypeId NOT IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @BANK_TRANSACTION, @BANK_WITHDRAWAL, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)		
 
-SELECT	intBankAccountID = @intBankAccountID,
+SELECT	intBankAccountId = @intBankAccountId,
 		dblBalance = ISNULL(@returnBalance, 0)
 

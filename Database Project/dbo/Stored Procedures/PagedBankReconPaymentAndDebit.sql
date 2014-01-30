@@ -5,12 +5,12 @@
 CREATE PROCEDURE PagedBankReconPaymentAndDebit
 	@start INT
 	,@limit INT
-	,@intBankAccountID INT
+	,@intBankAccountId INT
 	,@dtmDate DATETIME
 	,@count INT OUTPUT 
 AS
 BEGIN
-	SET QUOTED_IDENTIFIER OFF
+	SET QUOTED_IdENTIFIER OFF
 	SET ANSI_NULLS ON
 	SET NOCOUNT ON
 	SET XACT_ABORT ON
@@ -34,11 +34,11 @@ BEGIN
 
 	WITH PagedBankTransactions AS 
 	(
-		SELECT	RowNumber = ROW_NUMBER() OVER (ORDER BY cntID)
+		SELECT	RowNumber = ROW_NUMBER() OVER (ORDER BY intTransactionId)
 				,*				
 		FROM	tblCMBankTransaction
 		WHERE	ysnPosted = 1
-				AND intBankAccountID = ISNULL(@intBankAccountID, intBankAccountID)
+				AND intBankAccountId = ISNULL(@intBankAccountId, intBankAccountId)
 				AND dblAmount <> 0		
 				AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate, dtmDate) AS FLOAT)) AS DATETIME)
 				AND (
@@ -50,8 +50,8 @@ BEGIN
 				)
 				AND (
 					-- Filter for all the bank payments and debits:
-					intBankTransactionTypeID IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
-					OR ( dblAmount < 0 AND intBankTransactionTypeID = @BANK_TRANSACTION )
+					intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
+					OR ( dblAmount < 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
 				)
 	)
 
@@ -64,7 +64,7 @@ BEGIN
 	SELECT	@count = COUNT(1)
 	FROM	tblCMBankTransaction
 	WHERE	ysnPosted = 1
-			AND intBankAccountID = ISNULL(@intBankAccountID, intBankAccountID)
+			AND intBankAccountId = ISNULL(@intBankAccountId, intBankAccountId)
 			AND dblAmount <> 0		
 			AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate, dtmDate) AS FLOAT)) AS DATETIME)
 			AND (
@@ -76,7 +76,7 @@ BEGIN
 			)
 			AND (
 				-- Filter for all the bank payments and debits:
-				intBankTransactionTypeID IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
-				OR ( dblAmount < 0 AND intBankTransactionTypeID = @BANK_TRANSACTION )
+				intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
+				OR ( dblAmount < 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
 			)
 END

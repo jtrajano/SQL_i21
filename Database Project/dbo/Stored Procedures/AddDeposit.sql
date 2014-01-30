@@ -1,15 +1,15 @@
 ﻿
 CREATE PROCEDURE AddDeposit
-	@intBankAccountID INT
+	@intBankAccountId INT
 	,@dtmDate DATETIME 
-	,@intGLAccountID INT	
+	,@intGLAccountId INT	
 	,@dblAmount NUMERIC(18,6)
 	,@strDescription NVARCHAR(250)
-	,@intUserID INT
+	,@intUserId INT
 	,@isAddSuccessful BIT = 0 OUTPUT
 AS
 
-SET QUOTED_IDENTIFIER OFF
+SET QUOTED_IdENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
@@ -39,11 +39,12 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@STARTING_NUMBER_BANK_TRANSACTION AS NVARCHAR(100) = 'Bank Transaction'
 
 		-- Local variables		
-		,@strTransactionID NVARCHAR(40)
+		,@strTransactionId NVARCHAR(40)
+		,@intTransactionId INT 
 		,@msg_id INT
 
 -- Initialize the transaction id. 
-SELECT	@strTransactionID = strPrefix + CAST(intNumber AS NVARCHAR(20))
+SELECT	@strTransactionId = strPrefix + CAST(intNumber AS NVARCHAR(20))
 FROM	dbo.tblSMStartingNumber
 WHERE	strTransactionType = @STARTING_NUMBER_DEPOSIT
 IF @@ERROR <> 0	GOTO AddDeposit_Rollback
@@ -56,14 +57,14 @@ IF @@ERROR <> 0	GOTO AddDeposit_Rollback
 
 -- Create the Bank Deposit HEADER
 INSERT INTO tblCMBankTransaction(
-	strTransactionID
-	,intBankTransactionTypeID
-	,intBankAccountID
-	,intCurrencyID
+	strTransactionId
+	,intBankTransactionTypeId
+	,intBankAccountId
+	,intCurrencyId
 	,dblExchangeRate
 	,dtmDate
 	,strPayee
-	,intPayeeID
+	,intPayeeId
 	,strAddress
 	,strZipCode
 	,strCity
@@ -80,20 +81,20 @@ INSERT INTO tblCMBankTransaction(
 	,strLink
 	,ysnClr
 	,dtmDateReconciled
-	,intCreatedUserID
+	,intCreatedUserId
 	,dtmCreated
-	,intLastModifiedUserID
+	,intLastModifiedUserId
 	,dtmLastModified
 	,intConcurrencyId
 )
-SELECT	strTransactionID			= @strTransactionID
-		,intBankTransactionTypeID	= @BANK_DEPOSIT
-		,intBankAccountID			= @intBankAccountID
-		,intCurrencyID				= NULL
+SELECT	strTransactionId			= @strTransactionId
+		,intBankTransactionTypeId	= @BANK_DEPOSIT
+		,intBankAccountId			= @intBankAccountId
+		,intCurrencyId				= NULL
 		,dblExchangeRate			= 1
 		,dtmDate					= @dtmDate
 		,strPayee					= ''
-		,intPayeeID					= NULL
+		,intPayeeId					= NULL
 		,strAddress					= ''
 		,strZipCode					= ''
 		,strCity					= ''
@@ -110,44 +111,45 @@ SELECT	strTransactionID			= @strTransactionID
 		,strLink					= ''
 		,ysnClr						= 0
 		,dtmDateReconciled			= NULL
-		,intCreatedUserID			= @intUserID
+		,intCreatedUserId			= @intUserId
 		,dtmCreated					= GETDATE()
-		,intLastModifiedUserID		= @intUserID
+		,intLastModifiedUserId		= @intUserId
 		,dtmLastModified			= GETDATE()
 		,intConcurrencyId			= 1
+SET @intTransactionId = @@IDENTITY
 IF @@ERROR <> 0	GOTO AddDeposit_Rollback
 
 -- Create the Bank Deposit DETAIL
 INSERT INTO tblCMBankTransactionDetail(
-	strTransactionID
+	intTransactionId
 	,dtmDate
-	,intGLAccountID
+	,intGLAccountId
 	,strDescription
 	,dblDebit
 	,dblCredit
-	,intUndepositedFundID
-	,intEntityID
-	,intCreatedUserID
+	,intUndepositedFundId
+	,intEntityId
+	,intCreatedUserId
 	,dtmCreated
-	,intLastModifiedUserID
+	,intLastModifiedUserId
 	,dtmLastModified
 	,intConcurrencyId
 )
-SELECT	strTransactionID		= @strTransactionID
+SELECT	intTransactionId		= @intTransactionId
 		,dtmDate				= @dtmDate
-		,intGLAccountID			= @intGLAccountID
+		,intGLAccountId			= @intGLAccountId
 		,strDescription			= tblGLAccount.strDescription
 		,dblDebit				= 0
 		,dblCredit				= @dblAmount
-		,intUndepositedFundID	= 0
-		,intEntityID			= NULL
-		,intCreatedUserID		= @intUserID
+		,intUndepositedFundId	= 0
+		,intEntityId			= NULL
+		,intCreatedUserId		= @intUserId
 		,dtmCreated				= GETDATE()
-		,intLastModifiedUserID	= @intUserID
+		,intLastModifiedUserId	= @intUserId
 		,dtmLastModified		= GETDATE()
 		,intConcurrencyId		= 1
 FROM	tblGLAccount 
-WHERE	intAccountID = @intGLAccountID
+WHERE	intAccountId = @intGLAccountId
 IF @@ERROR <> 0	GOTO AddDeposit_Rollback
 
 -- Post the transaction 
@@ -155,7 +157,7 @@ BEGIN TRY
 	EXEC dbo.PostCMBankDeposit 	
 			@ysnPost = 1
 			,@ysnRecap = 0
-			,@strTransactionID = @strTransactionID
+			,@strTransactionId = @strTransactionId
 			,@isSuccessful = @isAddSuccessful OUTPUT
 			,@message_id = @msg_id OUTPUT
 			

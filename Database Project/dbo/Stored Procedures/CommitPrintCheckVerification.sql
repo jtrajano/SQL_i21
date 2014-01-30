@@ -1,13 +1,13 @@
 ﻿
 CREATE PROCEDURE CommitPrintCheckVerification
-	@intBankAccountID INT = NULL,
-	@strTransactionID NVARCHAR(40) = NULL,
-	@strBatchID NVARCHAR(20) = NULL,
-	@intUserID INT,
+	@intBankAccountId INT = NULL,
+	@strTransactionId NVARCHAR(40) = NULL,
+	@strBatchId NVARCHAR(20) = NULL,
+	@intUserId INT,
 	@intErrorCode INT OUTPUT
 AS
 
-SET QUOTED_IDENTIFIER OFF
+SET QUOTED_IdENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
@@ -19,18 +19,18 @@ DECLARE -- Constant variables for Check number status.
 		@CHECK_NUMBER_STATUS_UNUSED AS INT = 1
 		,@CHECK_NUMBER_STATUS_USED AS INT = 2
 		,@CHECK_NUMBER_STATUS_PRINTED AS INT = 3
-		,@CHECK_NUMBER_STATUS_VOID AS INT = 4
+		,@CHECK_NUMBER_STATUS_VOId AS INT = 4
 		,@CHECK_NUMBER_STATUS_WASTED AS INT = 5
 		,@CHECK_NUMBER_STATUS_FOR_PRINT_VERIFICATION AS INT = 6
 		
 		-- Local variables
-		,@loop_strTransactionID AS NVARCHAR(40)
+		,@loop_strTransactionId AS NVARCHAR(40)
 		,@strCheckNo AS NVARCHAR(20)
-		,@cntID AS INT
+		,@intCheckNumberAuditId AS INT
 
 -- Clean the parameters
-SELECT	@strTransactionID = CASE WHEN LTRIM(RTRIM(@strTransactionID)) = '' THEN NULL ELSE @strTransactionID END
-		,@strBatchID = CASE WHEN LTRIM(RTRIM(@strBatchID)) = '' THEN NULL ELSE @strBatchID END
+SELECT	@strTransactionId = CASE WHEN LTRIM(RTRIM(@strTransactionId)) = '' THEN NULL ELSE @strTransactionId END
+		,@strBatchId = CASE WHEN LTRIM(RTRIM(@strBatchId)) = '' THEN NULL ELSE @strBatchId END
 IF @@ERROR <> 0 GOTO _ROLLBACK
 
 -- Check if there are failed checks and the reason is missing. 
@@ -39,9 +39,9 @@ IF EXISTS (
 	FROM	dbo.tblCMCheckPrintJobSpool B
 	WHERE	B.ysnFail = 1
 			AND LTRIM(RTRIM(ISNULL(B.strReason, ''))) = ''
-			AND B.intBankAccountID = @intBankAccountID
-			AND B.strTransactionID = ISNULL(@strTransactionID, B.strTransactionID)
-			AND B.strBatchID = ISNULL(@strBatchID, B.strBatchID)
+			AND B.intBankAccountId = @intBankAccountId
+			AND B.strTransactionId = ISNULL(@strTransactionId, B.strTransactionId)
+			AND B.strBatchId = ISNULL(@strBatchId, B.strBatchId)
 )
 BEGIN 
 	-- A failed check is misisng a reason.
@@ -56,29 +56,29 @@ UPDATE	dbo.tblCMBankTransaction
 SET		dtmCheckPrinted = CASE WHEN B.ysnFail = 0 THEN GETDATE() ELSE NULL END 
 		,strReferenceNo = CASE WHEN B.ysnFail = 0 THEN B.strCheckNo ELSE '' END
 FROM	dbo.tblCMBankTransaction A INNER JOIN dbo.tblCMCheckPrintJobSpool B
-			ON A.strTransactionID = B.strTransactionID
-			AND A.intBankAccountID = B.intBankAccountID
+			ON A.strTransactionId = B.strTransactionId
+			AND A.intBankAccountId = B.intBankAccountId
 WHERE	A.dtmCheckPrinted IS NULL
 		AND A.ysnClr = 0
-		AND B.intBankAccountID = @intBankAccountID
-		AND B.strTransactionID = ISNULL(@strTransactionID, B.strTransactionID)
-		AND B.strBatchID = ISNULL(@strBatchID, B.strBatchID)
+		AND B.intBankAccountId = @intBankAccountId
+		AND B.strTransactionId = ISNULL(@strTransactionId, B.strTransactionId)
+		AND B.strBatchId = ISNULL(@strBatchId, B.strBatchId)
 IF @@ERROR <> 0 GOTO _ROLLBACK
 		
 -- Create the temp table for processing the check number
 SELECT	* 
 INTO	#tmpCheckNumbers
 FROM	dbo.tblCMCheckPrintJobSpool		
-WHERE	intBankAccountID = @intBankAccountID
-		AND strTransactionID = ISNULL(@strTransactionID, strTransactionID)
-		AND strBatchID = ISNULL(@strBatchID, strBatchID)
+WHERE	intBankAccountId = @intBankAccountId
+		AND strTransactionId = ISNULL(@strTransactionId, strTransactionId)
+		AND strBatchId = ISNULL(@strBatchId, strBatchId)
 IF @@ERROR <> 0 GOTO _ROLLBACK
 
 -- Loop thru the print job spool table to update the Check Number Audit table 
 WHILE EXISTS (SELECT TOP 1 1 FROM #tmpCheckNumbers)
 BEGIN 
 	SELECT TOP 1 
-			@loop_strTransactionID = strTransactionID,
+			@loop_strTransactionId = strTransactionId,
 			@strCheckNo = strCheckNo
 	FROM	#tmpCheckNumbers
 	IF @@ERROR <> 0 GOTO _ROLLBACK
@@ -88,62 +88,65 @@ BEGIN
 		SELECT	TOP 1 1 
 		FROM	dbo.tblCMCheckNumberAudit 
 		WHERE	strCheckNo = @strCheckNo 
-				AND intBankAccountID = @intBankAccountID
+				AND intBankAccountId = @intBankAccountId
 				AND intCheckNoStatus IN (@CHECK_NUMBER_STATUS_UNUSED, @CHECK_NUMBER_STATUS_FOR_PRINT_VERIFICATION)
 	)
 	BEGIN 
 		INSERT INTO dbo.tblCMCheckNumberAudit (
-				intBankAccountID
+				intBankAccountId
 				,strCheckNo
 				,intCheckNoStatus
 				,strRemarks
-				,strTransactionID
-				,intUserID
+				,intTransactionId
+				,strTransactionId
+				,intUserId
 				,dtmCreated
 				,dtmCheckPrinted
 		)
-		SELECT	intBankAccountID	= A.intBankAccountID
+		SELECT	intBankAccountId	= A.intBankAccountId
 				,strCheckNo			= A.strCheckNo
 				,intCheckNoStatus	= CASE WHEN A.ysnFail = 1 THEN @CHECK_NUMBER_STATUS_WASTED ELSE @CHECK_NUMBER_STATUS_PRINTED END 
 				,strRemarks			= CASE WHEN A.ysnFail = 1 THEN A.strReason ELSE '' END 
-				,strTransactionID	= A.strTransactionID
-				,intUserID			= @intUserID
+				,intTransactionId	= A.intTransactionId
+				,strTransactionId	= A.strTransactionId
+				,intUserId			= @intUserId
 				,dtmCreated			= GETDATE()
 				,dtmCheckPrinted	= GETDATE()
 		FROM	#tmpCheckNumbers A
-		WHERE	strTransactionID = @loop_strTransactionID	
+		WHERE	strTransactionId = @loop_strTransactionId	
 		IF @@ERROR <> 0 GOTO _ROLLBACK
 	END 
 	
 	-- If there is an unused check number, update that check number. 
 	ELSE 
 	BEGIN 
-		SELECT TOP 1 @cntID = cntID
+		SELECT TOP 1 @intCheckNumberAuditId = intCheckNumberAuditId
 		FROM	dbo.tblCMCheckNumberAudit
 		WHERE	strCheckNo = @strCheckNo 
-				AND intBankAccountID = @intBankAccountID
+				AND intBankAccountId = @intBankAccountId
 				AND intCheckNoStatus IN (@CHECK_NUMBER_STATUS_UNUSED, @CHECK_NUMBER_STATUS_FOR_PRINT_VERIFICATION)
 				
 		UPDATE	dbo.tblCMCheckNumberAudit
 		SET		intCheckNoStatus	= CASE WHEN A.ysnFail = 1 THEN @CHECK_NUMBER_STATUS_WASTED ELSE @CHECK_NUMBER_STATUS_PRINTED END 
 				,strRemarks			= CASE WHEN A.ysnFail = 1 THEN A.strReason ELSE '' END 
-				,strTransactionID	= A.strTransactionID
-				,intUserID			= @intUserID
+				,intTransactionId	= A.intTransactionId
+				,strTransactionId	= A.strTransactionId
+				,intUserId			= @intUserId
 				,dtmCheckPrinted	= GETDATE()
 		FROM	#tmpCheckNumbers A 
-		WHERE	cntID = @cntID
-				AND A.strTransactionID = @loop_strTransactionID	
+		WHERE	intCheckNumberAuditId = @intCheckNumberAuditId
+				AND A.strTransactionId = @loop_strTransactionId	
 		IF @@ERROR <> 0 GOTO _ROLLBACK			
 	END 
 	
 	-- Delete the print job record. 
 	DELETE FROM dbo.tblCMCheckPrintJobSpool
-	WHERE strTransactionID = @loop_strTransactionID
+	WHERE strTransactionId = @loop_strTransactionId
 	IF @@ERROR <> 0 GOTO _ROLLBACK
 	
 	-- Delete the record from the temp table
 	DELETE FROM #tmpCheckNumbers
-	WHERE strTransactionID = @loop_strTransactionID	
+	WHERE strTransactionId = @loop_strTransactionId	
 	IF @@ERROR <> 0 GOTO _ROLLBACK
 END 
 

@@ -149,7 +149,7 @@ SET NOCOUNT ON
 	SET		apcbk_no					= i.strCbkNo
 			,apcbk_currency				= dbo.fn_GetCurrencyIdFromi21ToOrigin(i.intCurrencyId)
 			,apcbk_password				= i.apcbk_password
-			,apcbk_desc					= i.strBankName COLLATE SQL_Latin1_General_CP1_CS_AS
+			,apcbk_desc					= bank.strBankName COLLATE SQL_Latin1_General_CP1_CS_AS
 			,apcbk_bank_acct_no			= i.strBankAccountNo COLLATE SQL_Latin1_General_CP1_CS_AS
 			,apcbk_comment				= i.apcbk_comment 
 			,apcbk_show_bal_yn			= i.apcbk_show_bal_yn
@@ -183,6 +183,8 @@ SET NOCOUNT ON
 				ON i.intBankAccountId = d.intBankAccountId
 			INNER JOIN dbo.apcbkmst_origin origin
 				ON d.strCbkNo = origin.apcbk_no COLLATE Latin1_General_CI_AS
+			INNER JOIN dbo.tblCMBank bank
+				ON i.intBankId = bank.intBankId
 	WHERE	ISNULL(i.strCbkNo, '') <> ''
 			AND ISNULL(d.strCbkNo, '') <> ''
 					
@@ -228,7 +230,7 @@ SET NOCOUNT ON
 			apcbk_no					= i.strCbkNo
 			,apcbk_currency				= dbo.fn_GetCurrencyIdFromi21ToOrigin(i.intCurrencyId)
 			,apcbk_password				= i.apcbk_password
-			,apcbk_desc					= i.strBankName COLLATE SQL_Latin1_General_CP1_CS_AS
+			,apcbk_desc					= bank.strBankName COLLATE SQL_Latin1_General_CP1_CS_AS
 			,apcbk_bank_acct_no			= i.strBankAccountNo COLLATE SQL_Latin1_General_CP1_CS_AS
 			,apcbk_comment				= i.apcbk_comment 
 			,apcbk_show_bal_yn			= i.apcbk_show_bal_yn
@@ -258,7 +260,8 @@ SET NOCOUNT ON
 			,apcbk_bnk_no				= NULL
 			,apcbk_user_id				= NULL 
 			,apcbk_user_rev_dt			= 0
-	FROM	inserted i 
+	FROM	inserted i INNER JOIN dbo.tblCMBank bank
+				ON i.intBankId = bank.intBankId
 	WHERE	ISNULL(i.strCbkNo, '') <> ''
 			AND NOT EXISTS (SELECT TOP 1 1 FROM dbo.apcbkmst_origin origin WHERE origin.apcbk_no COLLATE Latin1_General_CI_AS = i.strCbkNo)			
 	IF @@ERROR <> 0 GOTO EXIT_TRIGGER
@@ -408,7 +411,7 @@ SET NOCOUNT ON
 			apcbk_no					= i.strCbkNo
 			,apcbk_currency				= dbo.fn_GetCurrencyIdFromi21ToOrigin(i.intCurrencyId)
 			,apcbk_password				= i.apcbk_password
-			,apcbk_desc					= i.strBankName COLLATE SQL_Latin1_General_CP1_CS_AS
+			,apcbk_desc					= bank.strBankName COLLATE SQL_Latin1_General_CP1_CS_AS
 			,apcbk_bank_acct_no			= i.strBankAccountNo COLLATE SQL_Latin1_General_CP1_CS_AS
 			,apcbk_comment				= i.apcbk_comment 
 			,apcbk_show_bal_yn			= i.apcbk_show_bal_yn
@@ -438,7 +441,8 @@ SET NOCOUNT ON
 			,apcbk_bnk_no				= NULL
 			,apcbk_user_id				= NULL 
 			,apcbk_user_rev_dt			= 0
-	FROM	inserted i
+	FROM	inserted i INNER JOIN dbo.tblCMBank bank
+				ON i.intBankId = bank.intBankId
 	WHERE	ISNULL(i.strCbkNo, '') <> ''
 	
 	IF @@ERROR <> 0 GOTO EXIT_TRIGGER
