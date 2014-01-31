@@ -1,6 +1,6 @@
 ﻿
 CREATE PROCEDURE ApplyCheckChangeBankReconciliation
-	@intBankAccountID INT = NULL,
+	@intBankAccountId INT = NULL,
 	@ysnClr BIT = NULL,
 	@strSide AS NVARCHAR(10) = 'DEBIT', 
 	@dtmStatementDate AS DATETIME = NULL
@@ -34,18 +34,18 @@ SET		ysnClr = @ysnClr
 		,intConcurrencyId = intConcurrencyId + 1
 WHERE	ysnPosted = 1
 		AND dtmDateReconciled IS NULL
-		AND intBankAccountID = @intBankAccountID
+		AND intBankAccountId = @intBankAccountId
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME)
 		AND 1 = 
 			CASE	WHEN	@strSide = 'DEBIT' 
 							AND (
-								intBankTransactionTypeID IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
-								OR ( dblAmount < 0 AND intBankTransactionTypeID = @BANK_TRANSACTION )
+								intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
+								OR ( dblAmount < 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
 							) THEN 1 					
 					WHEN	@strSide = 'CREDIT' 
 							AND (
-								intBankTransactionTypeID IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT)
-								OR ( dblAmount > 0 AND intBankTransactionTypeID = @BANK_TRANSACTION )
+								intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT)
+								OR ( dblAmount > 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
 							)
 					THEN 1
 					ELSE
