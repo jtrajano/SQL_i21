@@ -709,6 +709,32 @@
                                             "designerId": "6e79ead5-5b76-4b2d-a512-96881c3fab79"
                                         },
                                         {
+                                            "type": "Ext.grid.column.CheckColumn",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "text": "Stock Unit",
+                                                "width": 69
+                                            },
+                                            "designerId": "9c3442c0-48c1-43ae-937b-92372d6eb74b"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.CheckColumn",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "text": "Purchase & Sale",
+                                                "width": 89
+                                            },
+                                            "designerId": "9e8b6bcf-d784-40b8-be87-48b0619825e7"
+                                        },
+                                        {
                                             "type": "Ext.grid.column.Number",
                                             "reference": {
                                                 "name": "columns",

@@ -33,6 +33,7 @@ Ext.define('Inventory.view.Inventory', {
         'Ext.form.field.TextArea',
         'Ext.grid.Panel',
         'Ext.grid.column.Number',
+        'Ext.grid.column.CheckColumn',
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
         'Ext.grid.column.Date',
@@ -350,6 +351,16 @@ Ext.define('Inventory.view.Inventory', {
                                                     dataIndex: 'string',
                                                     text: 'Description',
                                                     flex: 2
+                                                },
+                                                {
+                                                    xtype: 'checkcolumn',
+                                                    width: 69,
+                                                    text: 'Stock Unit'
+                                                },
+                                                {
+                                                    xtype: 'checkcolumn',
+                                                    width: 89,
+                                                    text: 'Purchase & Sale'
                                                 },
                                                 {
                                                     xtype: 'numbercolumn',
