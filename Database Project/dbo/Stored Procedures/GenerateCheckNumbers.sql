@@ -1,13 +1,13 @@
 ﻿
 CREATE PROCEDURE GenerateCheckNumbers
-	@intBankAccountID INT = NULL,
+	@intBankAccountId INT = NULL,
 	@intStartNumber INT = NULL,
 	@intEndNumber INT = NULL,
-	@intUserID INT = NULL,
+	@intUserId INT = NULL,
 	@isDuplicateFound BIT = 0 OUTPUT
 AS
 
-SET QUOTED_IDENTIFIER OFF
+SET QUOTED_IdENTIFIER OFF
 SET ANSI_NULLS ON
 -- SET NOCOUNT ON 
 SET XACT_ABORT ON
@@ -18,9 +18,11 @@ BEGIN TRANSACTION
 DECLARE @CHECK_NUMBER_STATUS_UNUSED AS INT = 1
 		,@CHECK_NUMBER_STATUS_USED AS INT = 2
 		,@CHECK_NUMBER_STATUS_PRINTED AS INT = 3
-		,@CHECK_NUMBER_STATUS_VOID AS INT = 4
+		,@CHECK_NUMBER_STATUS_VOId AS INT = 4
 		,@CHECK_NUMBER_STATUS_WASTED AS INT = 5
 		,@CHECK_NUMBER_STATUS_FOR_PRINT_VERIFICATION AS INT = 6
+		
+		,@returnValue AS INT = 0
 
 -- Validate the start and end numbers
 IF (@intStartNumber IS NULL OR @intEndNumber IS NULL)
@@ -32,7 +34,7 @@ IF (@intStartNumber < 0 OR @intEndNumber < 0)
 IF (@intStartNumber > @intEndNumber)
 	GOTO GenerateCheckNumbers_Rollback
 
-IF NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblCMBankAccount WHERE intBankAccountID = @intBankAccountID)
+IF NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblCMBankAccount WHERE intBankAccountId = @intBankAccountId)
 	GOTO GenerateCheckNumbers_Rollback
 
 -- LOOP THRU THE NUMBERS 
@@ -47,27 +49,29 @@ BEGIN
 	IF NOT EXISTS (
 		SELECT	TOP 1 1 
 		FROM	dbo.tblCMCheckNumberAudit 
-		WHERE	intBankAccountID = @intBankAccountID 
+		WHERE	intBankAccountId = @intBankAccountId 
 				AND strCheckNo = REPLICATE('0', 20 - LEN(CAST(@intCheckNumber AS NVARCHAR(20)))) + CAST(@intCheckNumber AS NVARCHAR(20))
 	)
 	BEGIN 
 		INSERT INTO dbo.tblCMCheckNumberAudit(
 				strCheckNo
-				,intBankAccountID
+				,intBankAccountId
 				,intCheckNoStatus
 				,strRemarks
-				,strTransactionID
-				,intUserID
+				,intTransactionId
+				,strTransactionId
+				,intUserId
 				,dtmCreated
 				,dtmCheckPrinted
 				,intConcurrencyId
 		)
 		SELECT	strCheckNo			= REPLICATE('0', 20 - LEN(CAST(@intCheckNumber AS NVARCHAR(20)))) + CAST(@intCheckNumber AS NVARCHAR(20))
-				,intBankAccountID	= @intBankAccountID
+				,intBankAccountId	= @intBankAccountId
 				,intCheckNoStatus	= @CHECK_NUMBER_STATUS_UNUSED
 				,strRemarks			= NULL
-				,strTransactionID	= NULL
-				,intUserID			= @intUserID
+				,intTransactionId	= NULL
+				,strTransactionId	= NULL
+				,intUserId			= @intUserId
 				,dtmCreated			= GETDATE()
 				,dtmCheckPrinted	= NULL
 				,intConcurrencyId	= 1	
@@ -89,12 +93,13 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 GenerateCheckNumbers_Commit:
 	COMMIT TRANSACTION
-	RETURN 1;
+	SET @returnValue = 1
 	GOTO GenerateCheckNumbers_Exit
 	
 GenerateCheckNumbers_Rollback:
 	ROLLBACK TRANSACTION 
-	RETURN -1;
+	SET @returnValue = -1
 	
 GenerateCheckNumbers_Exit:	
 	SET @isDuplicateFound = ISNULL(@isDuplicateFound, 0)
+	RETURN @returnValue

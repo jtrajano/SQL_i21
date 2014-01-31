@@ -1,14 +1,14 @@
 ﻿
-CREATE FUNCTION fn_GetCurrencyIDFromOriginToi21(@strOriginCurrencyID AS NVARCHAR(3))	
+CREATE FUNCTION fn_GetCurrencyIdFromOriginToi21(@strOriginCurrencyId AS NVARCHAR(3))	
 RETURNS INT 
 AS
 BEGIN 
 
-	DECLARE @intCurrencyID INT
+	DECLARE @intCurrencyId INT
 
-	SELECT	@intCurrencyID = intCurrencyID
+	SELECT	@intCurrencyId = intCurrencyID
 	FROM	dbo.tblSMCurrency 
-	WHERE	strCurrency = @strOriginCurrencyID
+	WHERE	strCurrency = @strOriginCurrencyId
 
-	RETURN @intCurrencyID
+	RETURN @intCurrencyId
 END

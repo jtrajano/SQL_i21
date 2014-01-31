@@ -1,5 +1,5 @@
 ﻿
-CREATE FUNCTION fn_GetGLAccountIDFromi21ToOrigin(@inti21AccountID AS INT)	
+CREATE FUNCTION fn_GetGLAccountIdFromi21ToOrigin(@inti21AccountID AS INT)	
 RETURNS CHAR(16) 
 AS
 BEGIN 

@@ -26,24 +26,24 @@ DECLARE @BANK_DEPOSIT AS INT = 1
 		,@BANK_TRANSFER_WD AS INT = 9
 		,@BANK_TRANSFER_DEP AS INT = 10
 		,@ORIGIN_DEPOSIT AS INT = 11		-- NEGATIVE AMOUNT, INDICATOR: O, APCHK_CHK_NO PREFIX: NONE
-		,@ORIGIN_CHECKS AS INT = 12			-- POSITIVE AMOUNT, INDICATOR: C, APCHK_CHK_NO PREFIX: N/A, IT MUST BE A VALID NUMBER
+		,@ORIGIN_CHECKS AS INT = 12			-- POSITIVE AMOUNT, INDICATOR: C, APCHK_CHK_NO PREFIX: N/A, IT MUST BE A VALId NUMBER
 		,@ORIGIN_EFT AS INT = 13			-- POSITIVE AMOUNT, INDICATOR: N/A, APCHK_CHK_NO PREFIX: 'E'		
 		,@ORIGIN_WITHDRAWAL AS INT = 14		-- POSITIVE AMOUNT, INDICATOR: N/A, APCHK_CHK_NO PREFIX: NONE
 		,@ORIGIN_WIRE AS INT = 15			-- POSITIVE AMOUNT, INDICATOR: N/A, APCHK_CHK_NO PREFIX: 'W'
 		
 		-- Declare the local variables. 
-		,@intBankAccountID AS INT	
+		,@intBankAccountId AS INT	
 
 -- Insert the record from the origin system to i21. 
 INSERT INTO tblCMBankTransaction (
-		strTransactionID
-		,intBankTransactionTypeID
-		,intBankAccountID
-		,intCurrencyID
+		strTransactionId
+		,intBankTransactionTypeId
+		,intBankAccountId
+		,intCurrencyId
 		,dblExchangeRate
 		,dtmDate
 		,strPayee
-		,intPayeeID
+		,intPayeeId
 		,strAddress
 		,strZipCode
 		,strCity
@@ -53,25 +53,25 @@ INSERT INTO tblCMBankTransaction (
 		,strAmountInWords
 		,strMemo
 		,strReferenceNo
-		,ysnCheckPrinted
+		,dtmCheckPrinted
 		,ysnCheckToBePrinted
 		,ysnCheckVoid
 		,ysnPosted
 		,strLink
 		,ysnClr
 		,dtmDateReconciled
-		,intCreatedUserID
+		,intCreatedUserId
 		,dtmCreated
-		,intLastModifiedUserID
+		,intLastModifiedUserId
 		,dtmLastModified
-		,intConcurrencyID	
+		,intConcurrencyId	
 )
 SELECT 
-		strTransactionID			=	CAST(i.apchk_cbk_no AS NVARCHAR(2)) + '-'
+		strTransactionId			=	CAST(i.apchk_cbk_no AS NVARCHAR(2)) + '-'
 										+ CAST(i.apchk_rev_dt AS NVARCHAR(10)) + '-'
 										+ CAST(i.apchk_trx_ind AS NVARCHAR(1)) + '-'
 										+ CAST(i.apchk_chk_no AS NVARCHAR(8))
-		,intBankTransactionTypeID	=	
+		,intBankTransactionTypeId	=	
 										CASE
 											WHEN i.apchk_chk_amt > 0 THEN 
 												CASE 
@@ -82,8 +82,8 @@ SELECT
 												END
 											WHEN i.apchk_chk_amt < 0 THEN @ORIGIN_DEPOSIT
 										END
-		,intBankAccountID			=	f.intBankAccountID
-		,intCurrencyID				=	dbo.fn_GetCurrencyIDFromOriginToi21(i.apchk_currency_cnt)
+		,intBankAccountId			=	f.intBankAccountId
+		,intCurrencyId				=	dbo.fn_GetCurrencyIdFromOriginToi21(i.apchk_currency_cnt)
 		,dblExchangeRate			=	ISNULL(i.apchk_currency_rt, 1)
 		,dtmDate					=	dbo.fn_ConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt)
 		,strPayee					=	RTRIM(LTRIM(ISNULL(i.apchk_name, ''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_1))) > 0 THEN ', '  ELSE '' END +
@@ -91,7 +91,7 @@ SELECT
 										RTRIM(LTRIM(ISNULL(i.apchk_payee_2, ''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_3))) > 0 THEN ', '  ELSE '' END +
 										RTRIM(LTRIM(ISNULL(i.apchk_payee_3, ''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_4))) > 0 THEN ', '  ELSE '' END +
 										RTRIM(LTRIM(ISNULL(i.apchk_payee_4, '')))							
-		,intPayeeID					=	NULL
+		,intPayeeId					=	NULL
 		,strAddress					=	RTRIM(LTRIM(ISNULL(i.apchk_addr_1, ''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_addr_2))) > 0 THEN CHAR(13) ELSE '' END +
 										RTRIM(LTRIM(ISNULL(i.apchk_addr_2, '')))
 		,strZipCode					=	RTRIM(LTRIM(i.apchk_zip))
@@ -104,7 +104,7 @@ SELECT
 										RTRIM(LTRIM(ISNULL(i.apchk_comment_2, ''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_3))) > 0 THEN CHAR(13) ELSE '' END +
 										RTRIM(LTRIM(ISNULL(i.apchk_comment_3, ''))) 
 		,strReferenceNo				=	RTRIM(LTRIM(i.apchk_chk_no))
-		,ysnCheckPrinted			=	1 
+		,dtmCheckPrinted			=	NULL
 		,ysnCheckToBePrinted		=	1
 		,ysnCheckVoid				=	CASE
 											WHEN i.apchk_void_ind = 'Y' THEN 1
@@ -120,14 +120,14 @@ SELECT
 											ELSE 0
 										END
 		,dtmDateReconciled			=	dbo.fn_ConvertOriginDateToSQLDateTime(i.apchk_clear_rev_dt)
-		,intCreatedUserID			=	i.apchk_user_id
+		,intCreatedUserId			=	i.apchk_user_id
 		,dtmCreated					=	dbo.fn_ConvertOriginDateToSQLDateTime(i.apchk_user_rev_dt)
-		,intLastModifiedUserID		=	i.apchk_user_id
+		,intLastModifiedUserId		=	i.apchk_user_id
 		,dtmLastModified			=	dbo.fn_ConvertOriginDateToSQLDateTime(i.apchk_rev_dt)
-		,intConcurrencyID			=	1
+		,intConcurrencyId			=	1
 FROM	dbo.tblCMBankAccount f INNER JOIN apchkmst i
 			ON f.strCbkNo = i.apchk_cbk_no COLLATE Latin1_General_CI_AS  	
-WHERE	f.intBankAccountID IS NOT NULL
+WHERE	f.intBankAccountId IS NOT NULL
 		AND i.apchk_chk_amt <> 0
 		AND dbo.fn_ConvertOriginDateToSQLDateTime(apchk_gl_rev_dt) IS NOT NULL
 IF @@ERROR <> 0 GOTO EXIT_INSERT

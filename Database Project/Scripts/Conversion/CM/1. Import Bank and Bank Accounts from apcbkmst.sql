@@ -23,7 +23,7 @@ DECLARE @CHECKNO_TRAILING INT = 2
 
 -- MICR: CHECK NUMBER POSITION
 DECLARE @CHECKNO_LEFT INT = 1
-DECLARE @CHECKNO_MIDDLE INT = 2
+DECLARE @CHECKNO_MIdDLE INT = 2
 DECLARE @CHECKNO_RIGHT INT = 3
 
 -- INSERT new records for tblCMBank
@@ -40,13 +40,13 @@ INSERT INTO tblCMBank (
 		,strWebsite
 		,strEmail
 		,strRTN
-		,intCreatedUserID
+		,intCreatedUserId
 		,dtmCreated
-		,intLastModifiedUserID
+		,intLastModifiedUserId
 		,dtmLastModified
-		,intConcurrencyID
+		,intConcurrencyId
 	)
-SELECT 
+SELECT DISTINCT 
 		strBankName				= LTRIM(RTRIM(ISNULL(i.apcbk_desc, ''))) COLLATE Latin1_General_CI_AS
 		,strContact				= ''
 		,strAddress				= ''
@@ -58,21 +58,21 @@ SELECT
 		,strFax					= ''
 		,strWebsite				= ''	
 		,strEmail				= ''
-		,strRTN					= ISNULL(CAST(i.apcbk_transit_route AS NVARCHAR(12)), '') COLLATE Latin1_General_CI_AS
-		,intCreatedUserID		= NULL
+		,strRTN					= (SELECT TOP 1 ISNULL(CAST(A.apcbk_transit_route AS NVARCHAR(12)), '') FROM apcbkmst A WHERE A.apcbk_desc = i.apcbk_desc) --ISNULL(CAST(i.apcbk_transit_route AS NVARCHAR(12)), '') COLLATE Latin1_General_CI_AS
+		,intCreatedUserId		= NULL
 		,dtmCreated				= GETDATE()
-		,intLastModifiedUserID	= NULL
+		,intLastModifiedUserId	= NULL
 		,dtmLastModified		= GETDATE()
-		,intConcurrencyID		= 1
+		,intConcurrencyId		= 1
 FROM	apcbkmst i
 WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBank WHERE strBankName = LTRIM(RTRIM(ISNULL(i.apcbk_desc, ''))) COLLATE Latin1_General_CI_AS)
 
 -- Insert new record in tblCMBankAccount
 INSERT INTO tblCMBankAccount (
-		strBankName
+		intBankId
 		,ysnActive
-		,intGLAccountID
-		,intCurrencyID
+		,intGLAccountId
+		,intCurrencyId
 		,intBankAccountType
 		,strContact
 		,strBankAccountNo
@@ -94,8 +94,8 @@ INSERT INTO tblCMBankAccount (
 		,intBackupCheckStartingNo
 		,intBackupCheckEndingNo
 		,intEFTNextNo
-		,intEFTBankFileFormatID
-		,strEFTCompanyID
+		,intEFTBankFileFormatId
+		,strEFTCompanyId
 		,strEFTBankName
 		,strMICRDescription
 		,intMICRBankAccountSpacesCount
@@ -106,18 +106,18 @@ INSERT INTO tblCMBankAccount (
 		,intMICRCheckNoPosition
 		,strMICRLeftSymbol
 		,strMICRRightSymbol
-		,intCreatedUserID
+		,intCreatedUserId
 		,dtmCreated
-		,intLastModifiedUserID
+		,intLastModifiedUserId
 		,dtmLastModified
-		,intConcurrencyID
+		,intConcurrencyId
 		,strCbkNo	
 )
 SELECT			
-		strBankName							= LTRIM(RTRIM(ISNULL(i.apcbk_desc, ''))) COLLATE Latin1_General_CI_AS
+		intBankId							= (SELECT TOP 1 A.intBankId FROM tblCMBank A WHERE A.strBankName = LTRIM(RTRIM(ISNULL(i.apcbk_desc, ''))) COLLATE Latin1_General_CI_AS)   
 		,ysnActive							= CASE WHEN i.apcbk_active_yn = 'Y' THEN 1 ELSE 0 END 
-		,intGLAccountID						= dbo.fn_GetGLAccountIDFromOriginToi21(i.apcbk_gl_cash) 
-		,intCurrencyID						= dbo.fn_GetCurrencyIDFromOriginToi21(i.apcbk_currency)
+		,intGLAccountId						= dbo.fn_GetGLAccountIdFromOriginToi21(i.apcbk_gl_cash) 
+		,intCurrencyId						= dbo.fn_GetCurrencyIdFromOriginToi21(i.apcbk_currency)
 		,intBankAccountType					= @DEPOSIT_ACCOUNT
 		,strContact							= ''
 		,strBankAccountNo					= ISNULL(i.apcbk_bank_acct_no, '') COLLATE Latin1_General_CI_AS
@@ -139,8 +139,8 @@ SELECT
 		,intBackupCheckStartingNo			= 0
 		,intBackupCheckEndingNo				= 0
 		,intEFTNextNo						= ISNULL(i.apcbk_next_eft_no, 0)
-		,intEFTBankFileFormatID				= NULL 
-		,strEFTCompanyID					= ''
+		,intEFTBankFileFormatId				= NULL 
+		,strEFTCompanyId					= ''
 		,strEFTBankName						= ''
 		,strMICRDescription					= ''
 		,intMICRBankAccountSpacesCount		= 0
@@ -151,11 +151,11 @@ SELECT
 		,intMICRCheckNoPosition				= @CHECKNO_LEFT
 		,strMICRLeftSymbol					= 'C'
 		,strMICRRightSymbol					= 'C'
-		,intCreatedUserID					= NULL
+		,intCreatedUserId					= NULL
 		,dtmCreated							= GETDATE()
-		,intLastModifiedUserID				= NULL
+		,intLastModifiedUserId				= NULL
 		,dtmLastModified					= GETDATE()
-		,intConcurrencyID					= 1
+		,intConcurrencyId					= 1
 		,strCbkNo							= i.apcbk_no	
 FROM	apcbkmst i
 WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBankAccount WHERE tblCMBankAccount.strCbkNo = i.apcbk_no COLLATE Latin1_General_CI_AS)

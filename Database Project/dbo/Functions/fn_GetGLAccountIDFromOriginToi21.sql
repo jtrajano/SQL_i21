@@ -1,5 +1,5 @@
 ﻿
-CREATE FUNCTION fn_GetGLAccountIDFromOriginToi21(@strOriginAccountID AS NVARCHAR(16))	
+CREATE FUNCTION fn_GetGLAccountIdFromOriginToi21(@strOriginAccountId AS NVARCHAR(16))	
 RETURNS INT 
 AS
 BEGIN 
@@ -8,7 +8,7 @@ BEGIN
 
 	SELECT	@intAccountID = inti21ID 
 	FROM	dbo.tblGLCOACrossReference 
-	WHERE	strExternalID = @strOriginAccountID
+	WHERE	strExternalID = @strOriginAccountId
 
 	RETURN @intAccountID
 END
