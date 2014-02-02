@@ -1,9 +1,6 @@
 ﻿
---=====================================================================================================================================
--- 	CREATE THE STORED PROCEDURE AFTER DELETING IT
----------------------------------------------------------------------------------------------------------------------------------------
 CREATE PROCEDURE ReconcileBankRecords
-	@intBankAccountID INT = NULL,
+	@intBankAccountId INT = NULL,
 	@dtmDate AS DATETIME = NULL
 AS
 
@@ -13,13 +10,13 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-UPDATE	tblCMBankTransaction  
+UPDATE	[dbo].[tblCMBankTransaction]
 SET		dtmDateReconciled = @dtmDate
-WHERE	intBankAccountID = @intBankAccountID
+WHERE	intBankAccountId = @intBankAccountId
 		AND ysnPosted = 1
 		AND ysnClr = 1
 		AND dtmDateReconciled IS NULL 
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate, dtmDate) AS FLOAT)) AS DATETIME)
 		
 -- TODO: 
--- MARK AS CLEARED THE ORIGIN BANK TRANSACTIONS
+-- MARK AS CLEARED IN THE ORIGIN BANK TRANSACTIONS
