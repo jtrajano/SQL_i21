@@ -1,9 +1,6 @@
 ﻿
---=====================================================================================================================================
--- 	CREATE THE STORED PROCEDURE AFTER DELETING IT
----------------------------------------------------------------------------------------------------------------------------------------
 CREATE PROCEDURE GetBankCurrentEndingBalance
-	@intBankAccountID INT = NULL,
+	@intBankAccountId INT = NULL,
 	@dtmStatementDate DATETIME = NULL,	
 	@dblEndingBalance AS NUMERIC(18, 6) = NULL OUTPUT
 AS
@@ -16,16 +13,16 @@ SET ANSI_WARNINGS OFF
 	
 SELECT	TOP 1 
 		@dblEndingBalance = ISNULL(dblStatementEndingBalance, 0)
-FROM	tblCMCurrentBankReconciliation
-WHERE	intBankAccountID = @intBankAccountID
+FROM	[dbo].[tblCMCurrentBankReconciliation]
+WHERE	intBankAccountId = @intBankAccountId
 
 SELECT	TOP 1 
 		@dblEndingBalance = ISNULL(dblStatementEndingBalance, @dblEndingBalance)
-FROM	tblCMBankReconciliation 
-WHERE	intBankAccountID = @intBankAccountID 
+FROM	[dbo].[tblCMBankReconciliation]
+WHERE	intBankAccountId = @intBankAccountId
 		AND CAST(FLOOR(CAST(dtmDateReconciled AS FLOAT)) AS DATETIME) = CAST(FLOOR(CAST(ISNULL(@dtmStatementDate, dtmDateReconciled) AS FLOAT)) AS DATETIME)
 		AND @dtmStatementDate IS NOT NULL
 
-SELECT	intBankAccountID = @intBankAccountID,
+SELECT	intBankAccountId = @intBankAccountId,
 		dblEndingBalance = ISNULL(@dblEndingBalance, 0)
 

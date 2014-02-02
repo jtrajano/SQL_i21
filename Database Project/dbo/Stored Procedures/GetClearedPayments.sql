@@ -1,9 +1,6 @@
 ﻿
---=====================================================================================================================================
--- 	CREATE THE STORED PROCEDURE AFTER DELETING IT
----------------------------------------------------------------------------------------------------------------------------------------
-CREATE PROCEDURE GetClearedBankDebits
-	@intBankAccountID INT = NULL,
+CREATE PROCEDURE GetClearedPayments
+	@intBankAccountId INT = NULL,
 	@dtmStatementDate AS DATETIME = NULL
 AS
 
@@ -34,7 +31,7 @@ SELECT	totalCount = ISNULL(COUNT(1), 0)
 FROM	tblCMBankTransaction 
 WHERE	ysnPosted = 1
 		AND ysnClr = 1
-		AND intBankAccountID = @intBankAccountID
+		AND intBankAccountId = @intBankAccountId
 		AND dblAmount <> 0		
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmStatementDate, dtmDate) AS FLOAT)) AS DATETIME)
 		AND (
@@ -46,6 +43,6 @@ WHERE	ysnPosted = 1
 		)
 		AND (
 			-- Filter for all the bank payments and debits:
-			intBankTransactionTypeID IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
-			OR ( dblAmount < 0 AND intBankTransactionTypeID = @BANK_TRANSACTION )
+			intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
+			OR ( dblAmount < 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
 		)

@@ -30,7 +30,7 @@ DECLARE @returnBalance AS NUMERIC(18,6)
 
 -- Get bank amounts from Misc Check, Bank Transfer (WD), Origin Checks, Origin Withdrawal, Origin EFT, and Origin Wire
 SELECT	@returnBalance = SUM(ISNULL(dblAmount, 0) * -1)
-FROM	tblCMBankTransaction
+FROM	[dbo].[tblCMBankTransaction]
 WHERE	ysnPosted = 1
 		AND dblAmount <> 0 
 		AND intBankAccountId = @intBankAccountId
@@ -40,7 +40,7 @@ WHERE	ysnPosted = 1
 -- Get bank amounts from Bank Transactions 	
 -- Note: The computations are based on the detail table (tblCMBankTransactionDetail). 
 SELECT	@returnBalance = ISNULL(@returnBalance, 0) + ISNULL(SUM(ISNULL(B.dblCredit, 0)), 0) - ISNULL(SUM(ISNULL(B.dblDebit, 0)), 0)
-FROM	tblCMBankTransaction A INNER JOIN tblCMBankTransactionDetail B
+FROM	[dbo].[tblCMBankTransaction] A INNER JOIN [dbo].[tblCMBankTransactionDetail] B
 			ON A.intTransactionId = B.intTransactionId
 WHERE	A.ysnPosted = 1
 		AND A.intBankAccountId = @intBankAccountId
@@ -50,7 +50,7 @@ HAVING	ISNULL(SUM(ISNULL(B.dblCredit, 0)), 0) - ISNULL(SUM(ISNULL(B.dblDebit, 0)
 
 -- Get bank amounts for the rest of the transactions like deposits, transferd (dep), and etc.
 SELECT	@returnBalance = ISNULL(@returnBalance, 0) + ISNULL(SUM(ISNULL(dblAmount, 0)), 0)
-FROM	tblCMBankTransaction
+FROM	[dbo].[tblCMBankTransaction]
 WHERE	ysnPosted = 1
 		AND dblAmount <> 0 
 		AND intBankAccountId = @intBankAccountId

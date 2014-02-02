@@ -1,9 +1,6 @@
 ﻿
---=====================================================================================================================================
--- 	CREATE THE STORED PROCEDURE AFTER DELETING IT
----------------------------------------------------------------------------------------------------------------------------------------
-CREATE PROCEDURE GetUnclearedBankCredits
-	@intBankAccountID INT = NULL,
+CREATE PROCEDURE GetUnclearedDeposits
+	@intBankAccountId INT = NULL,
 	@dtmStatementDate AS DATETIME = NULL
 AS
 
@@ -30,9 +27,9 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@ORIGIN_WIRE AS INT = 15
 		
 SELECT	ISNULL(SUM(ISNULL(dblAmount,0)), 0)
-FROM	tblCMBankTransaction 
+FROM	[dbo].[tblCMBankTransaction]
 WHERE	ysnPosted = 1
-		AND intBankAccountID = @intBankAccountID
+		AND intBankAccountId = @intBankAccountId
 		AND dblAmount <> 0
 		AND	1 =	CASE	
 					WHEN ysnClr = 0 THEN 
@@ -45,6 +42,6 @@ WHERE	ysnPosted = 1
 				END
 		AND (
 			-- Filter for all the bank deposits and credits:
-			intBankTransactionTypeID IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT)
-			OR ( dblAmount > 0 AND intBankTransactionTypeID = @BANK_TRANSACTION )
+			intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT)
+			OR ( dblAmount > 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
 		)		
