@@ -354,13 +354,18 @@ Ext.define('Inventory.view.Inventory', {
                                                 },
                                                 {
                                                     xtype: 'checkcolumn',
-                                                    width: 69,
+                                                    width: 60,
                                                     text: 'Stock Unit'
                                                 },
                                                 {
                                                     xtype: 'checkcolumn',
-                                                    width: 89,
-                                                    text: 'Purchase & Sale'
+                                                    width: 60,
+                                                    text: 'Purchases'
+                                                },
+                                                {
+                                                    xtype: 'checkcolumn',
+                                                    width: 60,
+                                                    text: 'Sales'
                                                 },
                                                 {
                                                     xtype: 'numbercolumn',

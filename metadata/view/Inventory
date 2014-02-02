@@ -717,7 +717,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "text": "Stock Unit",
-                                                "width": 69
+                                                "width": 60
                                             },
                                             "designerId": "9c3442c0-48c1-43ae-937b-92372d6eb74b"
                                         },
@@ -729,10 +729,23 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "text": "Purchase & Sale",
-                                                "width": 89
+                                                "text": "Purchases",
+                                                "width": 60
                                             },
                                             "designerId": "9e8b6bcf-d784-40b8-be87-48b0619825e7"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.CheckColumn",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "text": "Sales",
+                                                "width": 60
+                                            },
+                                            "designerId": "55de5e07-ae77-4560-86c6-05cafb66eb0f"
                                         },
                                         {
                                             "type": "Ext.grid.column.Number",
