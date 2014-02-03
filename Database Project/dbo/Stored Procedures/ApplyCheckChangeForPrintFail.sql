@@ -1,8 +1,8 @@
 ﻿
 CREATE PROCEDURE ApplyCheckChangeForPrintFail
-	@intBankAccountID INT = NULL,
-	@strTransactionID NVARCHAR(40) = NULL,
-	@strBatchID NVARCHAR(20) = NULL,
+	@intBankAccountId INT = NULL,
+	@strTransactionId NVARCHAR(40) = NULL,
+	@strBatchId NVARCHAR(20) = NULL,
 	@ysnFail BIT = 0
 AS
 
@@ -13,12 +13,12 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 -- Clean the parameters
-SELECT	@strTransactionID = CASE WHEN LTRIM(RTRIM(@strTransactionID)) = '' THEN NULL ELSE @strTransactionID END
-		,@strBatchID = CASE WHEN LTRIM(RTRIM(@strBatchID)) = '' THEN NULL ELSE @strBatchID END
+SELECT	@strTransactionId = CASE WHEN LTRIM(RTRIM(@strTransactionId)) = '' THEN NULL ELSE @strTransactionId END
+		,@strBatchId = CASE WHEN LTRIM(RTRIM(@strBatchId)) = '' THEN NULL ELSE @strBatchId END
 
 -- Mass update the ysnFail
-UPDATE	dbo.tblCMCheckPrintJobSpool 
+UPDATE	[dbo].[tblCMCheckPrintJobSpool]
 SET		ysnFail = @ysnFail
-WHERE	intBankAccountID = @intBankAccountID
-		AND strTransactionID = ISNULL(@strTransactionID, strTransactionID)
-		AND strBatchID = ISNULL(@strBatchID, strBatchID)
+WHERE	intBankAccountId = @intBankAccountId
+		AND strTransactionId = ISNULL(@strTransactionId, strTransactionId)
+		AND strBatchId = ISNULL(@strBatchId, strBatchId)

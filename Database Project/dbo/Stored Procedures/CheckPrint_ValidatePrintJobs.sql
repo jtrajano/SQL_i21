@@ -1,5 +1,6 @@
-﻿CREATE PROCEDURE CheckPrint_ValidatePrintJobs
-	@intBankAccountID INT = NULL,
+﻿
+CREATE PROCEDURE CheckPrint_ValidatePrintJobs
+	@intBankAccountId INT = NULL,
 	@ysnPrintJobExists INT = NULL OUTPUT 
 AS
 
@@ -29,7 +30,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 -- Check if there are any print jobs for the specified bank account. 
 SELECT	TOP 1 
 		@ysnPrintJobExists = 1
-FROM	tblCMCheckPrintJobSpool
-WHERE	intBankAccountID = @intBankAccountID
+FROM	[dbo].[tblCMCheckPrintJobSpool]
+WHERE	intBankAccountId = @intBankAccountId
 
 SET @ysnPrintJobExists = ISNULL(@ysnPrintJobExists, 0)

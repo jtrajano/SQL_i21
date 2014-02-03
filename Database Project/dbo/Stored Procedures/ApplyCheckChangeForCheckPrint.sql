@@ -1,8 +1,8 @@
 ﻿
 CREATE PROCEDURE ApplyCheckChangeForCheckPrint
-	@intBankAccountID INT = NULL,
-	@strTransactionID NVARCHAR(40) = NULL,
-	@strBatchID NVARCHAR(20) = NULL,
+	@intBankAccountId INT = NULL,
+	@strTransactionId NVARCHAR(40) = NULL,
+	@strBatchId NVARCHAR(20) = NULL,
 	@ysnCheckToBePrinted BIT = 0
 AS
 
@@ -30,13 +30,13 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@AP_PAYMENT AS INT = 16
 
 -- Mass update the ysnCheckToBePrinted
-UPDATE	tblCMBankTransaction 
+UPDATE	[dbo].[tblCMBankTransaction]
 SET		ysnCheckToBePrinted = @ysnCheckToBePrinted
 		,intConcurrencyId = intConcurrencyId + 1
-WHERE	intBankAccountID = @intBankAccountID
-		AND intBankTransactionTypeID IN (@MISC_CHECKS, @AP_PAYMENT)
-		AND strTransactionID = ISNULL(@strTransactionID, strTransactionID)
-		AND strLink = ISNULL(@strBatchID, strLink)
+WHERE	intBankAccountId = @intBankAccountId
+		AND intBankTransactionTypeId IN (@MISC_CHECKS, @AP_PAYMENT)
+		AND strTransactionId = ISNULL(@strTransactionId, strTransactionId)
+		AND strLink = ISNULL(@strBatchId, strLink)
 		AND ysnPosted = 1
 		AND ysnClr = 0
 		AND dblAmount <> 0

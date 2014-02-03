@@ -355,11 +355,11 @@ IF @ysnRecap = 1
 BEGIN	
 	-- INSERT THE DATA FROM #tmpGLDetail TO @RecapTable
 	INSERT INTO @RecapTable (
-			[strTransactionId]		
-			,[intTransactionId]		
+			[strTransactionID]		
+			,[intTransactionID]		
 			,[dtmDate]				
-			,[strBatchId]			
-			,[intAccountId]			
+			,[strBatchID]			
+			,[intAccountID]			
 			,[strAccountGroup]		
 			,[dblDebit]				
 			,[dblCredit]			
@@ -368,18 +368,18 @@ BEGIN
 			,[strDescription]		
 			,[strCode]				
 			,[strReference]			
-			,[strJobId]				
-			,[intCurrencyId]		
+			,[strJobID]				
+			,[intCurrencyID]		
 			,[dblExchangeRate]		
 			,[dtmDateEntered]		
 			,[dtmTransactionDate]	
 			,[ysnIsUnposted]		
-			,[intConcurrencyId]		
-			,[intUserId]			
+			,[intConcurrencyID]		
+			,[intUserID]			
 			,[strTransactionForm]	
 			,[strModuleName]		
 			,[strUOMCode]			
-	)	
+	)
 	SELECT	@strTransactionId
 			,NULL
 			,[dtmDate]				
