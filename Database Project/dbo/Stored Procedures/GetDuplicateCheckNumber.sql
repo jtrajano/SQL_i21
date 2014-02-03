@@ -32,13 +32,13 @@ DECLARE @BANK_DEPOSIT INT = 1
 SET @strCheckNo = LTRIM(RTRIM(ISNULL(@strCheckNo, ''))) 		
 		
 SELECT	TOP 1 
-		intBankAccountID 
-		,strTransactionID
+		intBankAccountId
+		,strTransactionId
 		,strReferenceNo
 FROM	tblCMBankTransaction 
-WHERE	strTransactionID <> @strTransactionID
-		AND intBankAccountID = @intBankAccountID
-		AND intBankTransactionTypeID IN (@MISC_CHECKS, @ORIGIN_CHECKS, @AP_PAYMENT)
+WHERE	strTransactionId <> @strTransactionID
+		AND intBankAccountId = @intBankAccountID
+		AND intBankTransactionTypeId IN (@MISC_CHECKS, @ORIGIN_CHECKS, @AP_PAYMENT)
 		AND (
 			strReferenceNo = @strCheckNo 
 			OR strReferenceNo = REPLICATE('0', 20 - LEN(CAST(@strCheckNo AS NVARCHAR(20)))) + CAST(@strCheckNo AS NVARCHAR(20))		

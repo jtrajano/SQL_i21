@@ -33,9 +33,9 @@ DECLARE @BANK_DEPOSIT INT = 1
 UPDATE	tblCMBankTransaction 
 SET		ysnCheckToBePrinted = @ysnCheckToBePrinted
 		,intConcurrencyId = intConcurrencyId + 1
-WHERE	intBankAccountID = @intBankAccountID
-		AND intBankTransactionTypeID IN (@MISC_CHECKS, @AP_PAYMENT)
-		AND strTransactionID = ISNULL(@strTransactionID, strTransactionID)
+WHERE	intBankAccountId = @intBankAccountID
+		AND intBankTransactionTypeId IN (@MISC_CHECKS, @AP_PAYMENT)
+		AND strTransactionId = ISNULL(@strTransactionID, strTransactionId)
 		AND strLink = ISNULL(@strBatchID, strLink)
 		AND ysnPosted = 1
 		AND ysnClr = 0

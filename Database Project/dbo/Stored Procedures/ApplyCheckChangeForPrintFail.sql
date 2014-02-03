@@ -19,6 +19,6 @@ SELECT	@strTransactionID = CASE WHEN LTRIM(RTRIM(@strTransactionID)) = '' THEN N
 -- Mass update the ysnFail
 UPDATE	dbo.tblCMCheckPrintJobSpool 
 SET		ysnFail = @ysnFail
-WHERE	intBankAccountID = @intBankAccountID
-		AND strTransactionID = ISNULL(@strTransactionID, strTransactionID)
-		AND strBatchID = ISNULL(@strBatchID, strBatchID)
+WHERE	intBankAccountId = @intBankAccountID
+		AND strTransactionId = ISNULL(@strTransactionID, strTransactionId)
+		AND strBatchId = ISNULL(@strBatchID, strBatchId)

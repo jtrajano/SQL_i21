@@ -72,8 +72,8 @@ INSERT INTO #tmpPrintJobSpoolTable(
 -- 2. Belongs to the specified transaction id
 -- 3. Belongs to the specified batch id (strLink)
 -- 4. Are posted, not cleared in the bank recon, amount is not zero, and never been printed. 
-SELECT	intBankAccountID	= F.intBankAccountID
-		,strTransactionID	= F.strTransactionID
+SELECT	intBankAccountID	= F.intBankAccountId
+		,strTransactionID	= F.strTransactionId
 		,strBatchID			= F.strLink
 		,strCheckNo			= F.strReferenceNo
 		,dtmPrintJobCreated	= GETDATE()
@@ -82,10 +82,10 @@ SELECT	intBankAccountID	= F.intBankAccountID
 		,ysnFail			= 0
 		,strReason			= NULL
 FROM	dbo.tblCMBankTransaction F
-WHERE	F.intBankAccountID = @intBankAccountID
-		AND F.strTransactionID = ISNULL(@strTransactionID, F.strTransactionID)
+WHERE	F.intBankAccountId = @intBankAccountID
+		AND F.strTransactionId = ISNULL(@strTransactionID, F.strTransactionId)
 		AND F.strLink = ISNULL(@strBatchID, F.strLink)
-		AND F.intBankTransactionTypeID IN (@MISC_CHECKS, @AP_PAYMENT)
+		AND F.intBankTransactionTypeId IN (@MISC_CHECKS, @AP_PAYMENT)
 		AND F.ysnPosted = 1
 		AND F.ysnClr = 0
 		AND F.dblAmount <> 0
@@ -103,7 +103,7 @@ SELECT TOP 1
 		@strNextCheckNumber = REPLICATE('0', 20 - LEN(CAST(
 		intCheckNextNo AS NVARCHAR(20)))) + CAST(intCheckNextNo AS NVARCHAR(20))
 FROM	dbo.tblCMBankAccount
-WHERE	intBankAccountID = @intBankAccountID
+WHERE	intBankAccountId = @intBankAccountID
 IF @@ERROR <> 0 GOTO _ROLLBACK
 
 -- Get the manually assigned check numbers 
@@ -131,11 +131,11 @@ BEGIN
 	SELECT	TOP 1 
 			@strNextCheckNumber = strCheckNo
 	FROM	dbo.tblCMCheckNumberAudit
-	WHERE	intBankAccountID = @intBankAccountID			
+	WHERE	intBankAccountId = @intBankAccountID			
 			AND strCheckNo >= @strNextCheckNumber
 			AND intCheckNoStatus = @CHECK_NUMBER_STATUS_UNUSED
 			AND strCheckNo NOT IN (SELECT strCheckNo FROM #tmpManuallyAssignedCheckNumbers)
-	ORDER BY cntID
+	ORDER BY intCheckNumberAuditId
 	IF @@ERROR <> 0 GOTO _ROLLBACK
 
 	-- If there is NO more available check numbers to complete the print job, abort the process. 
@@ -153,7 +153,7 @@ BEGIN
 	-- Update the check number audit and mark it as assigned for print check (for print check verification)
 	UPDATE	dbo.tblCMCheckNumberAudit
 	SET		intCheckNoStatus = @CHECK_NUMBER_STATUS_FOR_PRINT_VERIFICATION
-	WHERE	intBankAccountID = @intBankAccountID
+	WHERE	intBankAccountId = @intBankAccountID
 			AND strCheckNo = @strNextCheckNumber
 	IF @@ERROR <> 0 GOTO _ROLLBACK
 END 
@@ -161,13 +161,13 @@ END
 -- From here, temp print job table is now complete with information it needs to queue the print job. 
 -- The system can now queue the print job. 
 INSERT INTO tblCMCheckPrintJobSpool(
-		intBankAccountID
-		,strTransactionID
-		,strBatchID
+		intBankAccountId
+		,strTransactionId
+		,strBatchId
 		,strCheckNo
 		,dtmPrintJobCreated
 		,dtmCheckPrinted
-		,intCreatedUserID
+		,intCreatedUserId
 		,ysnFail
 		,strReason
 )
@@ -189,7 +189,7 @@ IF ( ISNUMERIC(@strNextCheckNumber) = 1)
 BEGIN 
 	UPDATE dbo.tblCMBankAccount
 	SET intCheckNextNo = CAST(@strNextCheckNumber AS INT)
-	WHERE intBankAccountID = @intBankAccountID
+	WHERE intBankAccountId = @intBankAccountID
 	IF @@ERROR <> 0 GOTO _ROLLBACK
 END 
 

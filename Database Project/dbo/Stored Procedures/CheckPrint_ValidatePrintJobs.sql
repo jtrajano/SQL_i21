@@ -30,6 +30,6 @@ DECLARE @BANK_DEPOSIT INT = 1
 SELECT	TOP 1 
 		@ysnPrintJobExists = 1
 FROM	tblCMCheckPrintJobSpool
-WHERE	intBankAccountID = @intBankAccountID
+WHERE	intBankAccountId = @intBankAccountID
 
 SET @ysnPrintJobExists = ISNULL(@ysnPrintJobExists, 0)

@@ -322,11 +322,7 @@
     <Build Include="dbo\Stored Procedures\GetBankCurrentEndingBalance.sql" />
     <Build Include="dbo\Stored Procedures\ReconcileBankRecords.sql" />
     <Build Include="dbo\Stored Procedures\GetBankBeginningBalance.sql" />
-    <Build Include="dbo\Stored Procedures\GetClearedBankDebits.sql" />
     <Build Include="dbo\Stored Procedures\GetBankBalance.sql" />
-    <Build Include="dbo\Stored Procedures\GetClearedBankCredits.sql" />
-    <Build Include="dbo\Stored Procedures\GetUnclearedBankDebits.sql" />
-    <Build Include="dbo\Stored Procedures\GetUnclearedBankCredits.sql" />
     <Build Include="dbo\Stored Procedures\GetBankGLBalance.sql" />
     <Build Include="dbo\Stored Procedures\AddDeposit.sql" />
     <Build Include="dbo\Stored Procedures\AddPayment.sql" />
@@ -792,6 +788,10 @@
     <Build Include="dbo\Tables\tblCPUserConfiguration.sql" />
     <None Include="dbo\Views\vwCPBABusinessSummary.sql" />
     <Build Include="dbo\Functions\fn_ConvertOriginDateToSQLDateTime.sql" />
+    <Build Include="dbo\Stored Procedures\GetClearedDeposits.sql" />
+    <Build Include="dbo\Stored Procedures\GetClearedPayments.sql" />
+    <Build Include="dbo\Stored Procedures\GetUnclearedDeposits.sql" />
+    <Build Include="dbo\Stored Procedures\GetUnclearedPayments.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="i21.publish.xml" />
