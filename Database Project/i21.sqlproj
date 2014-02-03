@@ -792,6 +792,7 @@
     <Build Include="dbo\Stored Procedures\GetClearedPayments.sql" />
     <Build Include="dbo\Stored Procedures\GetUnclearedDeposits.sql" />
     <Build Include="dbo\Stored Procedures\GetUnclearedPayments.sql" />
+    <Build Include="dbo\Views\vwCPAgcusMst.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="i21.publish.xml" />
