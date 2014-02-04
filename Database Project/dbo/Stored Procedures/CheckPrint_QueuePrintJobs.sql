@@ -135,7 +135,7 @@ BEGIN
 			AND strCheckNo >= @strNextCheckNumber
 			AND intCheckNoStatus = @CHECK_NUMBER_STATUS_UNUSED
 			AND strCheckNo NOT IN (SELECT strCheckNo FROM #tmpManuallyAssignedCheckNumbers)
-	ORDER BY cntID
+	ORDER BY intCheckNumberAuditId
 	IF @@ERROR <> 0 GOTO _ROLLBACK
 
 	-- If there is NO more available check numbers to complete the print job, abort the process. 

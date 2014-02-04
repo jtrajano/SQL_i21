@@ -166,7 +166,7 @@ IF ISNULL(@recap, 0) = 0
 		--CREDIT
 		SELECT
 			 [strPaymentRecordNum]
-			,(SELECT intAccountID FROM tblGLAccount WHERE intAccountID = (SELECT intGLAccountID FROM tblCMBankAccount WHERE intBankAccountID = A.intBankAccountId))
+			,(SELECT intAccountID FROM tblGLAccount WHERE intAccountID = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
 			,'Posted Payable'
 			,A.[strVendorId]
 			,A.[dtmDatePaid]
@@ -271,14 +271,14 @@ IF ISNULL(@recap, 0) = 0
 
 		--Insert to bank transaction
 		INSERT INTO tblCMBankTransaction(
-			[strTransactionID],
-			[intBankTransactionTypeID],
-			[intBankAccountID],
-			[intCurrencyID],
+			[strTransactionId],
+			[intBankTransactionTypeId],
+			[intBankAccountId],
+			[intCurrencyId],
 			[dblExchangeRate],
 			[dtmDate],
 			[strPayee],
-			[intPayeeID],
+			[intPayeeId],
 			[strAddress],
 			[strZipCode],
 			[strCity],
@@ -294,15 +294,15 @@ IF ISNULL(@recap, 0) = 0
 			[strLink],
 			[ysnClr],
 			[dtmDateReconciled],
-			[intCreatedUserID],
+			[intCreatedUserId],
 			[dtmCreated],
-			[intLastModifiedUserID],
+			[intLastModifiedUserId],
 			[dtmLastModified],
 			[intConcurrencyId]
 		)
 		SELECT
 			[strTransactionID] = A.strPaymentRecordNum,
-			[intBankTransactionTypeID] = (SELECT TOP 1 intBankTransactionTypeID FROM tblCMBankTransactionType WHERE strBankTransactionTypeName = 'AP Payment'),
+			[intBankTransactionTypeID] = (SELECT TOP 1 intBankTransactionTypeId FROM tblCMBankTransactionType WHERE strBankTransactionTypeName = 'AP Payment'),
 			[intBankAccountID] = A.intBankAccountId,
 			[intCurrencyID] = A.intCurrencyId,
 			[dblExchangeRate] = 0,
@@ -377,7 +377,7 @@ ELSE
 		--CREDIT SIDE
 		SELECT
 			 CAST(A.intPaymentId AS NVARCHAR(50))--[strPaymentRecordNum]
-			,(SELECT intAccountID FROM tblGLAccount WHERE intAccountID = (SELECT intGLAccountID FROM tblCMBankAccount WHERE intBankAccountID = A.intBankAccountId))
+			,(SELECT intAccountID FROM tblGLAccount WHERE intAccountID = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
 			,'Posted Payable'
 			,A.[strVendorId]
 			,A.[dtmDatePaid]

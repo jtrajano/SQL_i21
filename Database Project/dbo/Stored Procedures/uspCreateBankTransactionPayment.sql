@@ -7,14 +7,14 @@ BEGIN
 
 	
 	INSERT INTO tblCMBankTransaction(
-		[strTransactionID],
-		[intBankTransactionTypeID],
-		[intBankAccountID],
-		[intCurrencyID],
+		[strTransactionId],
+		[intBankTransactionTypeId],
+		[intBankAccountId],
+		[intCurrencyId],
 		[dblExchangeRate],
 		[dtmDate],
 		[strPayee],
-		[intPayeeID],
+		[intPayeeId],
 		[strAddress],
 		[strZipCode],
 		[strCity],
@@ -30,15 +30,15 @@ BEGIN
 		[strLink],
 		[ysnClr],
 		[dtmDateReconciled],
-		[intCreatedUserID],
+		[intCreatedUserId],
 		[dtmCreated],
-		[intLastModifiedUserID],
+		[intLastModifiedUserId],
 		[dtmLastModified],
 		[intConcurrencyId]
 	)
 	SELECT
 		[strTransactionID] = A.strPaymentRecordNum,
-		[intBankTransactionTypeID] = (SELECT TOP 1 intBankTransactionTypeID FROM tblCMBankTransactionType WHERE strBankTransactionTypeName = 'AP Payment'),
+		[intBankTransactionTypeID] = (SELECT TOP 1 intBankTransactionTypeId FROM tblCMBankTransactionType WHERE strBankTransactionTypeName = 'AP Payment'),
 		[intBankAccountID] = A.intBankAccountId,
 		[intCurrencyID] = A.intCurrencyId,
 		[dblExchangeRate] = 0,
