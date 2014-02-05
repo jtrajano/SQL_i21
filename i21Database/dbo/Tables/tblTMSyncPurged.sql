@@ -1,0 +1,27 @@
+﻿CREATE TABLE [dbo].[tblTMSyncPurged] (
+    [intSyncPurged]                 INT             IDENTITY (1, 1) NOT NULL,
+    [strCustomerNumber]             NVARCHAR (10)   COLLATE Latin1_General_CI_AS DEFAULT (('0')) NOT NULL,
+    [strCustomerName]               NVARCHAR (150)  COLLATE Latin1_General_CI_AS NULL,
+    [strSiteNumber]                 NVARCHAR (4)    COLLATE Latin1_General_CI_AS DEFAULT (('0')) NOT NULL,
+    [strSiteAddress]                NCHAR (500)     COLLATE Latin1_General_CI_AS NULL,
+    [dblMeterReading]               DECIMAL (18, 6) CONSTRAINT [DF_Table_1_MeterReading] DEFAULT ((0)) NULL,
+    [strInvoiceNumber]              NVARCHAR (8)    COLLATE Latin1_General_CI_AS DEFAULT (('0')) NOT NULL,
+    [strBulkPlantNumber]            NVARCHAR (3)    COLLATE Latin1_General_CI_AS DEFAULT (('0')) NOT NULL,
+    [dtmInvoiceDate]                DATETIME        CONSTRAINT [DF_Table_1_InvoiceDate_1] DEFAULT ((0)) NULL,
+    [strItemNumber]                 NVARCHAR (13)   COLLATE Latin1_General_CI_AS DEFAULT (('0')) NULL,
+    [strItemAvailableForTM]         NVARCHAR (1)    COLLATE Latin1_General_CI_AS DEFAULT (('0')) NULL,
+    [strReversePreviousDelivery]    NVARCHAR (1)    COLLATE Latin1_General_CI_AS DEFAULT (('0')) NULL,
+    [strPerformerID]                NVARCHAR (3)    COLLATE Latin1_General_CI_AS DEFAULT (('0')) NULL,
+    [intInvoiceLineNumber]          INT             DEFAULT 0 NOT NULL,
+    [dblExtendedAmount]             DECIMAL (18, 6) DEFAULT 0 NULL,
+    [dblQuantityDelivered]          DECIMAL (18, 6) DEFAULT 0 NULL,
+    [dblActualPercentAfterDelivery] DECIMAL (18, 6) DEFAULT 0 NULL,
+    [strInvoiceType]                NVARCHAR (1)    COLLATE Latin1_General_CI_AS DEFAULT (('0')) NULL,
+    [strSalesPersonID]              NVARCHAR (3)    COLLATE Latin1_General_CI_AS DEFAULT (('0')) NULL,
+    [strReason]                     NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
+    [intUserID]                     INT             NOT NULL,
+    [dtmPurgeDate]                  DATETIME        NOT NULL,
+    [intConcurrencyId]              INT             DEFAULT 1 NOT NULL,
+    CONSTRAINT [PK_tblTMSyncPurged] PRIMARY KEY CLUSTERED ([intSyncPurged] ASC)
+);
+

@@ -1,0 +1,13 @@
+C:\Users\destrada\Documents\i21_sqlscripts\Database Project\i21Database\bin\Debug\i21Database.dacpac
+C:\Users\destrada\Documents\i21_sqlscripts\Database Project\i21Database\bin\Debug\i21Database.dll
+C:\Users\destrada\Documents\i21_sqlscripts\Database Project\i21Database\bin\Debug\i21Database.pdb
+C:\Users\destrada\Documents\i21_sqlscripts\Database Project\i21Database\bin\Debug\Origin.dll
+C:\Users\destrada\Documents\i21_sqlscripts\Database Project\i21Database\bin\Debug\Origin.pdb
+C:\Users\destrada\Documents\i21_sqlscripts\Database Project\i21Database\bin\Debug\Origin.dacpac
+C:\Users\destrada\Documents\i21_sqlscripts\Database Project\i21Database\obj\Debug\i21Database.sqlprojResolveAssemblyReference.cache
+C:\Users\destrada\Documents\i21_sqlscripts\Database Project\i21Database\obj\Debug\i21Database.dll
+C:\Users\destrada\Documents\i21_sqlscripts\Database Project\i21Database\obj\Debug\i21Database.pdb
+C:\Users\destrada\Documents\i21_sqlscripts\Database Project\i21Database\obj\Debug\Model.xml
+C:\Users\destrada\Documents\i21_sqlscripts\Database Project\i21Database\obj\Debug\refactor.xml
+C:\Users\destrada\Documents\i21_sqlscripts\Database Project\i21Database\obj\Debug\postdeploy.sql
+C:\Users\destrada\Documents\i21_sqlscripts\Database Project\i21Database\obj\Debug\predeploy.sql

@@ -1,0 +1,25 @@
+﻿CREATE TABLE [dbo].[tblFRRowDesign] (
+    [intRowDetailID]          INT             IDENTITY (1, 1) NOT NULL,
+    [intRowID]                INT             NOT NULL,
+    [intRefNo]                INT             NOT NULL,
+    [strDescription]          NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
+    [strRowType]              NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
+    [strBalanceSide]          NVARCHAR (10)   COLLATE Latin1_General_CI_AS NULL,
+    [strRelatedRows]          NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strAccountsUsed]         NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [ysnShowCredit]           BIT             DEFAULT 1 NULL,
+    [ysnShowDebit]            BIT             DEFAULT 1 NULL,
+    [ysnShowOthers]           BIT             DEFAULT 1 NULL,
+    [ysnLinktoGL]             BIT             NULL,
+    [dblHeight]               NUMERIC (18, 6) NULL,
+    [strFontName]             NCHAR (35)      COLLATE Latin1_General_CI_AS NULL,
+    [strFontStyle]            NCHAR (20)      COLLATE Latin1_General_CI_AS NULL,
+    [strFontColor]            NCHAR (20)      COLLATE Latin1_General_CI_AS NULL,
+    [intFontSize]             INT             NULL,
+    [strOverrideFormatMask]   NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
+    [ysnForceReversedExpense] BIT             DEFAULT 0 NULL,
+    [intSort]                 INT             NULL,
+    [intConcurrencyId]        INT             DEFAULT 1 NOT NULL,
+    CONSTRAINT [PK_tblFRRowDesign_1] PRIMARY KEY CLUSTERED ([intRowDetailID] ASC, [intRowID] ASC, [intRefNo] ASC)
+);
+
