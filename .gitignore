@@ -15,3 +15,11 @@ Database Project/bin/Debug/i21_2.publish.sql
 Database Project/i21.dbmdl
 Database Project/i21Dev.publish.publish.xml
 Database Project/i21SampleCo.publish.publish.xml
+Database Project/bin/Debug/DeploymentReport_3.txt
+Database Project/bin/Debug/DeploymentReport_4.txt
+Database Project/bin/Debug/i21_3.publish.sql
+Database Project/bin/Debug/i21_4.publish.sql
+Database Project/obj/Debug/Model.xml
+Database Project/obj/Debug/postdeploy.sql
+Database Project/obj/Debug/predeploy.sql
+Database Project/obj/Debug/refactor.xml
