@@ -184,7 +184,7 @@ SELECT strCode AS strAccountID,
 	   @intUserID AS intUserID,	   
 	   getDate() AS dtmCreated
 FROM #ConstructAccount
-LEFT JOIN glactmst ON (CAST(CAST(strPrimary AS INT) AS NVARCHAR(50)) + '-' + CAST(CAST(strSegment AS INT) AS NVARCHAR(50))) = (CAST(CAST(glact_acct1_8 AS INT) AS NVARCHAR(50)) + '-' + CAST(CAST(glact_acct9_16 AS INT) AS NVARCHAR(50)))
+INNER JOIN glactmst ON (CAST(CAST(strPrimary AS INT) AS NVARCHAR(50)) + '-' + CAST(CAST(strSegment AS INT) AS NVARCHAR(50))) = (CAST(CAST(glact_acct1_8 AS INT) AS NVARCHAR(50)) + '-' + CAST(CAST(glact_acct9_16 AS INT) AS NVARCHAR(50)))
 WHERE strCode NOT IN (SELECT strAccountID FROM tblGLAccount)
 ORDER BY strCode		
 

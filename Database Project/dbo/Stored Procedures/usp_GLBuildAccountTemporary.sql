@@ -195,5 +195,4 @@ DROP TABLE #ConstructAccount
 
 DELETE tblGLTempAccountToBuild WHERE intUserID = @intUserID
 
-select 1
-
+GO
