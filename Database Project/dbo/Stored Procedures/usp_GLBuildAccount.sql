@@ -85,8 +85,7 @@ BEGIN
 			INSERT INTO tblGLAccountSegmentMapping ([intAccountID], [intAccountSegmentID]) values (@accountID, @segmentID)
 			UPDATE tblGLAccountSegment SET ysnBuild = 1 WHERE intAccountSegmentID = @segmentID
 			UPDATE tblGLAccountStructure SET ysnBuild = 1 WHERE intAccountStructureID = (SELECT intAccountStructureID FROM tblGLAccountSegment WHERE intAccountSegmentID = @segmentID)
-			
-			SELECT @segmentID
+					
 		END
 		
 		DELETE FROM tblGLTempAccount WHERE cntID = @ID
@@ -99,6 +98,4 @@ DELETE FROM tblGLTempAccount WHERE intUserID = @intUserID
 EXEC usp_GLAccountOriginSync @intUserID
 EXEC usp_GLBuildTempCOASegment
 
-
-select 1
-
+GO
