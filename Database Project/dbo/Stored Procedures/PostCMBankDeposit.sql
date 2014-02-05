@@ -144,8 +144,8 @@ BEGIN
 	GOTO Post_Rollback
 END 
 
--- Check if the transaction is already posted
-IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0
+-- Check if the transaction is already unposted
+IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0 and @ysnRecap = 0 
 BEGIN 
 	-- The transaction is already unposted.
 	RAISERROR(50008, 11, 1)
