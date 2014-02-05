@@ -23,3 +23,4 @@ Database Project/obj/Debug/Model.xml
 Database Project/obj/Debug/postdeploy.sql
 Database Project/obj/Debug/predeploy.sql
 Database Project/obj/Debug/refactor.xml
+*.dbmdl

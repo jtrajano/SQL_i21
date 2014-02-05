@@ -474,14 +474,20 @@
     <RefactorLog Include="i21.refactorlog" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Origin\Origin.sqlproj">
+    <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <SqlCmdVariable Include="Origin">
+      <DefaultValue>Origin</DefaultValue>
+      <Value>$(SqlCmdVar__1)</Value>
+    </SqlCmdVariable>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Origin\Origin.sqlproj">
       <Name>Origin</Name>
       <Project>{e4f98288-79bd-4ec9-a41d-180685a8eb66}</Project>
       <Private>True</Private>
       <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
   </ItemGroup>
 </Project>
