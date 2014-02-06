@@ -1,0 +1,44 @@
+﻿CREATE TABLE [dbo].[agmanmst] (
+    [agman_itm_mfg_id]  CHAR (10)   NOT NULL,
+    [agman_itm_desc]    CHAR (25)   NULL,
+    [agman_user_id]     CHAR (16)   NULL,
+    [agman_user_rev_dt] INT         NULL,
+    [A4GLIdentity]      NUMERIC (9) IDENTITY (1, 1) NOT NULL,
+    CONSTRAINT [k_agmanmst] PRIMARY KEY NONCLUSTERED ([agman_itm_mfg_id] ASC)
+);
+
+
+GO
+CREATE UNIQUE CLUSTERED INDEX [Iagmanmst0]
+    ON [dbo].[agmanmst]([agman_itm_mfg_id] ASC);
+
+
+GO
+GRANT DELETE
+    ON OBJECT::[dbo].[agmanmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT INSERT
+    ON OBJECT::[dbo].[agmanmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT REFERENCES
+    ON OBJECT::[dbo].[agmanmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT SELECT
+    ON OBJECT::[dbo].[agmanmst] TO PUBLIC
+    AS [dbo];
+
+
+GO
+GRANT UPDATE
+    ON OBJECT::[dbo].[agmanmst] TO PUBLIC
+    AS [dbo];
+
