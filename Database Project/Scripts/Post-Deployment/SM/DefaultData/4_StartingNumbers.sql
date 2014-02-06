@@ -18,7 +18,7 @@ GO
 			,[strPrefix]			=  N'AA-'
 			,[intNumber]			= 1
 			,[intTransactionTypeID] = 1
-			,[strModule]			= N'Accounting'
+			,[strModule]			= N'General Ledger'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Audit Adjustment')
@@ -28,7 +28,7 @@ GO
 			,[strPrefix]			=  N'GJ-'
 			,[intNumber]			= 1
 			,[intTransactionTypeID] = 2
-			,[strModule]			= N'Accounting'
+			,[strModule]			= N'General Ledger'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'General Journal')
@@ -48,7 +48,7 @@ GO
 			,[strPrefix]			= N'REC-'
 			,[intNumber]			= 1
 			,[intTransactionTypeID] = 4
-			,[strModule]			= N'Accounting'
+			,[strModule]			= N'General Ledger'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Recurring Journal')
@@ -58,7 +58,7 @@ GO
 			,[strPrefix]			= N'REV-'
 			,[intNumber]			= 1
 			,[intTransactionTypeID] = 5
-			,[strModule]			= N'Accounting'
+			,[strModule]			= N'General Ledger'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId] = 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'General Journal Reversal')
@@ -68,7 +68,7 @@ GO
 			,[strPrefix]			= N'GLADJ-'
 			,[intNumber]			= 1
 			,[intTransactionTypeID] = 6
-			,[strModule]			= N'Accounting'
+			,[strModule]			= N'General Ledger'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'COA Adjustment')
