@@ -58,6 +58,7 @@ IF @@ERROR <> 0 GOTO _ROLLBACK
 -- Insert the 'check' transactions in the check print-job spool table. 
 INSERT INTO #tmpPrintJobSpoolTable(
 		intBankAccountId
+		,intTransactionId
 		,strTransactionId
 		,strBatchId
 		,strCheckNo
@@ -73,6 +74,7 @@ INSERT INTO #tmpPrintJobSpoolTable(
 -- 3. Belongs to the specified batch id (strLink)
 -- 4. Are posted, not cleared in the bank recon, amount is not zero, and never been printed. 
 SELECT	intBankAccountId	= F.intBankAccountId
+		,intTransactionId	= F.intTransactionId
 		,strTransactionId	= F.strTransactionId
 		,strBatchId			= F.strLink
 		,strCheckNo			= F.strReferenceNo
@@ -162,6 +164,7 @@ END
 -- The system can now queue the print job. 
 INSERT INTO tblCMCheckPrintJobSpool(
 		intBankAccountId
+		,intTransactionId
 		,strTransactionId
 		,strBatchId
 		,strCheckNo
@@ -173,6 +176,7 @@ INSERT INTO tblCMCheckPrintJobSpool(
 )
 SELECT
 		intBankAccountId
+		,intTransactionId
 		,strTransactionId
 		,strBatchId
 		,strCheckNo
