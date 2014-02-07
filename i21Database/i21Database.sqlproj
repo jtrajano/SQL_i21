@@ -470,6 +470,9 @@
     <PreDeploy Include="Scripts\Pre-Deployment\PreDeployment.sql" />
     <None Include="Scripts\Post-Deployment\Reports\4_ReportData.sql" />
     <None Include="Scripts\Post-Deployment\TM\2_CreationOfTMViewsPTorAG.sql" />
+    <Build Include="dbo\Tables\tblGLPostRecap.sql" />
+    <Build Include="dbo\Tables\tblGLPostResults.sql" />
+    <Build Include="dbo\Stored Procedures\usp_PostJournal.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
