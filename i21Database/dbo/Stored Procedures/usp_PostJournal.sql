@@ -1,9 +1,3 @@
---=====================================================================================================================================
--- 	DELETE THE STORED PROCEDURE IF IT EXISTS
----------------------------------------------------------------------------------------------------------------------------------------
-IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID(N'[dbo].[usp_PostJournal]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
-DROP PROCEDURE [dbo].[usp_PostJournal]
-GO
 
 --=====================================================================================================================================
 -- 	CREATE THE STORED PROCEDURE AFTER DELETING IT
