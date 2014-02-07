@@ -3,6 +3,7 @@
     [strPaymentMethod]   NVARCHAR (100) NOT NULL,
     [ysnActive]          BIT            DEFAULT ((1)) NOT NULL,
     [intSort]            INT            NULL,
+    [intConcurrencyId] INT NOT NULL DEFAULT (1), 
     CONSTRAINT [PK_tblSMPaymentMethod] PRIMARY KEY CLUSTERED ([intPaymentMethodID] ASC)
 );
 
