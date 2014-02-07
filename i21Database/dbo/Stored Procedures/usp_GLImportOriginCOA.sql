@@ -156,7 +156,7 @@ BEGIN
 		DELETE tblGLAccountUnit
 		
 		INSERT tblGLAccountUnit (strUOMCode,strUOMDesc,dblLbsPerUnit,intConcurrencyId)
-			SELECT gluom_code,gluom_desc,gluom_lbs_per_unit,NULL FROM gluommst	
+			SELECT gluom_code,gluom_desc,gluom_lbs_per_unit,1 FROM gluommst	
 	END	
 		
 	-- BUILD COA
