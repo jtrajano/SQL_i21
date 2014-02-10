@@ -16,7 +16,7 @@ print 'BEGIN POST DEPLOYMENT'
 -- System Manager Default Data
 :r .\SM\DefaultData\1_MasterMenu.sql
 :r .\SM\DefaultData\2_UserRole.sql
-:r .\SM\DefaultData\3_Currency.sql
+--:r .\SM\DefaultData\3_Currency.sql -- this can be risky if customers has currencies already
 :r .\SM\DefaultData\4_StartingNumbers.sql
 :r .\SM\DefaultData\5_CompanySetup.sql
 :r .\SM\DefaultData\6_Preferences.sql
