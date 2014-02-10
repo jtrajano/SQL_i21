@@ -840,4 +840,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strBankTransactionId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="5ccaf374-7d48-49bd-8bb0-8039dcbae90b" ChangeDateTime="02/10/2014 10:58:07">
+    <Property Name="ElementName" Value="[dbo].[tblSMShipVia].[int]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMShipVia]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intConcurrencyId" />
+  </Operation>
 </Operations>
