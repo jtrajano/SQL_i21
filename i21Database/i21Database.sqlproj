@@ -417,4 +417,7 @@
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="i21Database.publish.xml" />
+  </ItemGroup>
 </Project>
