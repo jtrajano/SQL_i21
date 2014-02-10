@@ -12,10 +12,6 @@ select distinct
 	,dblAmount = sum(agstm_amount)
 from
 	vwCPPurchaseDetail
---where
---	agstm_ship_rev_dt between @datefrom and @dateto
---	and agstm_bill_to_cus = ''
---	and agstm_itm_no = ''
 group by
 	agstm_bill_to_cus
 	,agstm_itm_no
