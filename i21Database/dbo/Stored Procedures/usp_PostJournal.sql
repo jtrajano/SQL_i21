@@ -18,6 +18,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 
 BEGIN TRANSACTION;
+
 --=====================================================================================================================================
 -- 	DECLARE TEMPORARY TABLES
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -36,21 +37,6 @@ CREATE TABLE #tmpReverseJournals (
 	UNIQUE (intJournalID)
 );
 
-----=====================================================================================================================================
----- 	MANUAL ASSIGN OF BATCH ID (for single post)
------------------------------------------------------------------------------------------------------------------------------------------
---IF (ISNULL(@batchId, '') = '')
---	SET @batchId = (SELECT TOP 1 strPrefix + CAST(intNumber AS NVARCHAR(20)) FROM tblSMStartingNumber WHERE [strTransactionType] = 'Batch Post')
-
-----=====================================================================================================================================
----- 	UPDATE STARTING NUMBERS
------------------------------------------------------------------------------------------------------------------------------------------
---UPDATE tblSMStartingNumber
---SET [intNumber] = ISNULL([intNumber], 0) + 1
---WHERE [strTransactionType] = 'Batch Post';
-
---IF @@ERROR <> 0	GOTO Post_Rollback;
-
 --=====================================================================================================================================
 -- 	POPULATE JOURNALS TO POST TEMPORARY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -65,7 +51,7 @@ ELSE
 IF ISNULL(@recap, 0) = 0
 	BEGIN
 		-- DELETE Results 2 DAYS OLDER	
-		DELETE tblGLPostResults WHERE dtmDate < DATEADD(day, -2, GETDATE())
+		DELETE tblGLPostResults WHERE dtmDate < DATEADD(day, -1, GETDATE())
 	
 		INSERT INTO tblGLPostResults (strBatchID,intTransactionID,strTransactionID,strDescription,dtmDate)
 			SELECT @batchId as strBatchID,tmpBatchResults.intJournalID as intTransactionID,tblB.strJournalID as strTransactionID, strMessage as strDescription,GETDATE() as dtmDate
@@ -111,14 +97,14 @@ IF ISNULL(@recap, 0) = 0
 				WHERE A.intJournalID IN (SELECT intJournalID FROM #tmpPostJournals)	
 				GROUP BY A.intJournalID		
 				HAVING SUM(ISNULL(A.dblCredit,0)) <> SUM(ISNULL(A.dblDebit,0)) 
-				UNION 
-				SELECT DISTINCT B.intJournalID,
-					'You cannot post this transaction because Accounting Unit setup does not match account id ' + C.strAccountID + ' setup.' AS strMessage
-				FROM tblGLJournalDetail B 
-					LEFT OUTER JOIN tblGLAccount C ON B.intAccountID = C.intAccountID
-				WHERE (ISNULL(B.dblCreditUnit, 0) > 0 OR ISNULL(B.dblDebitUnit, 0) > 0) AND ISNULL(C.intAccountUnitID, 0) = 0 
-					AND B.intJournalID IN (SELECT intJournalID FROM #tmpPostJournals)
-					GROUP BY B.intJournalID, C.intAccountID, C.strAccountID
+				--UNION 
+				--SELECT DISTINCT B.intJournalID,
+				--	'You cannot post this transaction because Accounting Unit setup does not match account id ' + C.strAccountID + ' setup.' AS strMessage
+				--FROM tblGLJournalDetail B 
+				--	LEFT OUTER JOIN tblGLAccount C ON B.intAccountID = C.intAccountID
+				--WHERE (ISNULL(B.dblCreditUnit, 0) > 0 OR ISNULL(B.dblDebitUnit, 0) > 0) AND ISNULL(C.intAccountUnitID, 0) = 0 
+				--	AND B.intJournalID IN (SELECT intJournalID FROM #tmpPostJournals)
+				--	GROUP BY B.intJournalID, C.intAccountID, C.strAccountID
 			) tmpBatchResults
 		LEFT JOIN tblGLJournal tblB ON tmpBatchResults.intJournalID = tblB.intJournalID
 	END
@@ -427,7 +413,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 --=====================================================================================================================================
 -- 	RETURN TOTAL NUMBER OF VALID JOURNALS
 ---------------------------------------------------------------------------------------------------------------------------------------
-SET @successfulCount = @successfulCount + (SELECT COUNT(*) FROM #tmpValidJournals)
+SET @successfulCount = ISNULL(@successfulCount,0) + (SELECT COUNT(*) FROM #tmpValidJournals)
 
 --=====================================================================================================================================
 -- 	REVERSE JOURNAL
@@ -562,6 +548,7 @@ Post_Rollback:
 Post_Exit:
 	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#tmpPostJournals')) DROP TABLE #tmpPostJournals
 	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#tmpValidJournals')) DROP TABLE #tmpValidJournals
+	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#tmpReverseJournals')) DROP TABLE #tmpReverseJournals		
 GO
 
 --=====================================================================================================================================

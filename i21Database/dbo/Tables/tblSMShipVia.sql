@@ -4,6 +4,7 @@
     [strShippingService] NVARCHAR (250) NULL,
     [ysnActive]          BIT            DEFAULT ((1)) NOT NULL,
     [intSort]            INT            NULL,
+    [intConcurrencyId] INT NOT NULL DEFAULT (1), 
     CONSTRAINT [PK_tblSMShipVia] PRIMARY KEY CLUSTERED ([intShipViaID] ASC)
 );
 
