@@ -30,3 +30,14 @@ Integration/obj/Debug/Model.xml
 Integration/obj/Debug/postdeploy.sql
 Integration/obj/Debug/predeploy.sql
 Origin/bin/Debug/Origin.sql
+Integration/bin/Debug/AgViews_3.publish.sql
+Integration/bin/Debug/AgViews_4.publish.sql
+Integration/bin/Debug/AgViews_5.publish.sql
+Integration/bin/Debug/AgViews_6.publish.sql
+Integration/bin/Debug/AgViews_7.publish.sql
+Integration/bin/Debug/DeploymentReport_3.txt
+Integration/bin/Debug/DeploymentReport_4.txt
+Integration/bin/Debug/DeploymentReport_5.txt
+Integration/bin/Debug/DeploymentReport_6.txt
+Integration/bin/Debug/DeploymentReport_7.txt
+Integration/bin/Debug/Integration.sql

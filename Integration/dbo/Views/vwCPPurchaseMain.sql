@@ -1,4 +1,7 @@
-﻿CREATE VIEW [dbo].[vwCPPurchaseMain]
+﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPPurchaseMain')
+	DROP VIEW vwCPPurchaseMain
+GO
+CREATE VIEW [dbo].[vwCPPurchaseMain]
 AS
 
 select distinct
@@ -19,3 +22,5 @@ group by
 	,agitm_desc
 	,agstm_un
 	,agstm_un_desc
+
+GO

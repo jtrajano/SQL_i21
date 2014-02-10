@@ -13,3 +13,4 @@ SELECT
   FROM vwCPPaymentsDetails
   GROUP BY dblAmount, dtmDate, strCheckNo,strCustomerNo
   --order by dtmDate
+GO

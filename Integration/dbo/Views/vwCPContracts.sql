@@ -1,4 +1,5 @@
-﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPContracts')
+﻿
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPContracts')
 	DROP VIEW vwCPContracts
 GO
 
