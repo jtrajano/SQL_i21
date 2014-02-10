@@ -104,7 +104,7 @@
     <None Include="dbo\Views\vwlclmst.sql" />
     <None Include="dbo\Views\vwlocmst.sql" />
     <None Include="dbo\Views\vwprcmst.sql" />
-    <None Include="dbo\Views\vwpxcycmst.sql" />
+    <None Include="dbo\Views\vyuTFTaxCycle.sql" />
     <None Include="dbo\Views\vwpyemst.sql" />
     <None Include="dbo\Views\vwslsmst.sql" />
     <None Include="dbo\Views\vwtaxmst.sql" />

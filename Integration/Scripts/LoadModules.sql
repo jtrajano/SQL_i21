@@ -28,6 +28,14 @@ BEGIN
 	--SELECT TOP 1 @AP = ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP'
 END
 
+--TAX FORMS--
+IF EXISTS (SELECT TOP 1 1 from INFORMATION_SCHEMA.COLUMNS where COLUMN_NAME = 'coctl_px_yn')
+BEGIN
+	EXEC ('INSERT INTO ##tblOriginMod (strPrefix, strName, ysnUsed) SELECT TOP 1 N''TF'', N''TAX FORMS'', CASE ISNULL(coctl_px_yn, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
+	--SELECT TOP 1 @TF = ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'TF'
+END
+--TAX FORMS--
+
 
 
 
