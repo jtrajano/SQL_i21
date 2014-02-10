@@ -1,0 +1,5 @@
+C:\Users\destrada\Documents\i21_sqlscripts\i21PreDeployment\bin\Debug\i21PreDeployment.dacpac
+C:\Users\destrada\Documents\i21_sqlscripts\i21PreDeployment\bin\Debug\i21PreDeployment.dll
+C:\Users\destrada\Documents\i21_sqlscripts\i21PreDeployment\bin\Debug\i21PreDeployment.pdb
+C:\Users\destrada\Documents\i21_sqlscripts\i21PreDeployment\obj\Debug\i21PreDeployment.dll
+C:\Users\destrada\Documents\i21_sqlscripts\i21PreDeployment\obj\Debug\i21PreDeployment.pdb

@@ -7,6 +7,8 @@ Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "i21Database", "i21Database\
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Integration", "Integration\Integration.sqlproj", "{E9E5693B-743B-4A2D-A9F7-59F616BB4FD8}"
 EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "i21PreDeployment", "i21PreDeployment\i21PreDeployment.sqlproj", "{FE629C39-9AC4-49FF-BAD1-A926E653E5F4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,6 +31,12 @@ Global
 		{E9E5693B-743B-4A2D-A9F7-59F616BB4FD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E9E5693B-743B-4A2D-A9F7-59F616BB4FD8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E9E5693B-743B-4A2D-A9F7-59F616BB4FD8}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{FE629C39-9AC4-49FF-BAD1-A926E653E5F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE629C39-9AC4-49FF-BAD1-A926E653E5F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE629C39-9AC4-49FF-BAD1-A926E653E5F4}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{FE629C39-9AC4-49FF-BAD1-A926E653E5F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE629C39-9AC4-49FF-BAD1-A926E653E5F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE629C39-9AC4-49FF-BAD1-A926E653E5F4}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
