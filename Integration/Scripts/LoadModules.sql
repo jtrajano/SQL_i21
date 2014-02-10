@@ -61,22 +61,11 @@ BEGIN
 	EXEC ('INSERT INTO ##tblOriginMod (strDBName, strPrefix, strName, ysnUsed) SELECT TOP 1 db_name(), N''CN'', N''CONTRACTS'', CASE ISNULL(coctl_pt, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
 END
 
-<<<<<<< HEAD
---TAX FORMS--
-IF EXISTS (SELECT TOP 1 1 from INFORMATION_SCHEMA.COLUMNS where COLUMN_NAME = 'coctl_px_yn')
-BEGIN
-	EXEC ('INSERT INTO ##tblOriginMod (strPrefix, strName, ysnUsed) SELECT TOP 1 N''TF'', N''TAX FORMS'', CASE ISNULL(coctl_px_yn, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
-	--SELECT TOP 1 @TF = ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'TF'
-END
---TAX FORMS--
-
-=======
 -- GRAINS
 IF EXISTS (SELECT TOP 1 1 from INFORMATION_SCHEMA.COLUMNS where COLUMN_NAME = 'coctl_ga')
 BEGIN
 	EXEC ('INSERT INTO ##tblOriginMod (strDBName, strPrefix, strName, ysnUsed) SELECT TOP 1 db_name(), N''GR'', N''GRAINS'', CASE ISNULL(coctl_ga, ''N'') WHEN ''Y'' THEN 1 else 0 END FROM coctlmst')
 END
->>>>>>> 3387f41c36d7808b976e1a1adc13856ef4b46921
 
 -- TAX FORMS
 IF EXISTS (SELECT TOP 1 1 from INFORMATION_SCHEMA.COLUMNS where COLUMN_NAME = 'coctl_px_yn')
