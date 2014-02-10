@@ -1,0 +1,131 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>Integration</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{e9e5693b-743b-4a2d-a9f7-59f616bb4fd8}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>AgViews</RootNamespace>
+    <AssemblyName>AgViews</AssemblyName>
+    <ModelCollation>1033,CS</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <DefaultCollation>SQL_Latin1_General_CP1_CS_AS</DefaultCollation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <!-- VS10 without SP1 will not have VisualStudioVersion set, so do that here -->
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <!-- Default to the v10.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">10.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="dbo" />
+    <Folder Include="dbo\Views" />
+    <Folder Include="Scripts" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dbo\Views\apchkmst.sql" />
+    <None Include="dbo\Views\vwapivcmst.sql" />
+    <None Include="dbo\Views\vwclsmst.sql" />
+    <None Include="dbo\Views\vwCMBank.sql" />
+    <None Include="dbo\Views\vwCMBankAccount.sql" />
+    <None Include="dbo\Views\vwcmtmst.sql" />
+    <None Include="dbo\Views\vwcntmst.sql" />
+    <None Include="dbo\Views\vwcoctlmst.sql" />
+    <None Include="dbo\Views\vwCPAgcusMst.sql" />
+    <None Include="dbo\Views\vwCPBABusinessSummary.sql" />
+    <None Include="dbo\Views\vwCPBillingAccountPayments.sql" />
+    <None Include="dbo\Views\vwCPContracts.sql" />
+    <None Include="dbo\Views\vwCPCurrentCashBids.sql" />
+    <None Include="dbo\Views\vwCPDatabaseDate.sql" />
+    <None Include="dbo\Views\vwCPGABusinessSummary.sql" />
+    <None Include="dbo\Views\vwCPGAContractDetail.sql" />
+    <None Include="dbo\Views\vwCPGAContracts.sql" />
+    <None Include="dbo\Views\vwCPInvoicesCredits.sql" />
+    <None Include="dbo\Views\vwCPInvoicesCreditsReports.sql" />
+    <None Include="dbo\Views\vwCPOptions.sql" />
+    <None Include="dbo\Views\vwCPOrders.sql" />
+    <None Include="dbo\Views\vwCPPayments.sql" />
+    <None Include="dbo\Views\vwCPPaymentsDetails.sql" />
+    <None Include="dbo\Views\vwCPPendingInvoices.sql" />
+    <None Include="dbo\Views\vwCPPendingPayments.sql" />
+    <None Include="dbo\Views\vwCPPrepaidCredits.sql" />
+    <None Include="dbo\Views\vwCPProductionHistory.sql" />
+    <None Include="dbo\Views\vwCPPurchaseDetail.sql" />
+    <None Include="dbo\Views\vwCPPurchaseMain.sql" />
+    <None Include="dbo\Views\vwCPPurchases.sql" />
+    <None Include="dbo\Views\vwCPPurchasesDetail.sql" />
+    <None Include="dbo\Views\vwCPSettlements.sql" />
+    <None Include="dbo\Views\vwCPStorage.sql" />
+    <None Include="dbo\Views\vwctlmst.sql" />
+    <None Include="dbo\Views\vwcusmst.sql" />
+    <None Include="dbo\Views\vwDispatch.sql" />
+    <None Include="dbo\Views\vwitmmst.sql" />
+    <None Include="dbo\Views\vwivcmst.sql" />
+    <None Include="dbo\Views\vwlclmst.sql" />
+    <None Include="dbo\Views\vwlocmst.sql" />
+    <None Include="dbo\Views\vwprcmst.sql" />
+    <None Include="dbo\Views\vwpxcycmst.sql" />
+    <None Include="dbo\Views\vwpyemst.sql" />
+    <None Include="dbo\Views\vwslsmst.sql" />
+    <None Include="dbo\Views\vwtaxmst.sql" />
+    <None Include="dbo\Views\vwticmst.sql" />
+    <None Include="dbo\Views\vwtrmmst.sql" />
+    <None Include="dbo\Views\vyu_GLAccountGroupView.sql" />
+    <None Include="dbo\Views\vyu_GLFiscalYearPeriod.sql" />
+    <None Include="dbo\Views\vyuAPPayablesAgingSummary.sql" />
+    <None Include="dbo\Views\vyuBillBatch.sql" />
+    <None Include="dbo\Views\vyuPayments.sql" />
+    <None Include="dbo\Views\vyuVendorHistory.sql" />
+    <None Include="Views.publish.xml" />
+    <None Include="Scripts\LoadModules.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <PreDeploy Include="Scripts\PreDeployment.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dbo\Views\apcbkmst.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <PostDeploy Include="Scripts\PostDeployment1.sql" />
+  </ItemGroup>
+</Project>
