@@ -10,3 +10,5 @@ vwcoctl_le_yn = coctl_le_yn
 ,A4GLIdentity = CAST(A4GLIdentity   AS INT)
 FROM
 coctlmst
+
+GO

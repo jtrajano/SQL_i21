@@ -103,7 +103,6 @@
     <None Include="dbo\Views\vwlclmst.sql" />
     <None Include="dbo\Views\vwlocmst.sql" />
     <None Include="dbo\Views\vwprcmst.sql" />
-    <None Include="dbo\Views\vyuTFTaxCycle.sql" />
     <None Include="dbo\Views\vwpyemst.sql" />
     <None Include="dbo\Views\vwslsmst.sql" />
     <None Include="dbo\Views\vwtaxmst.sql" />
@@ -111,6 +110,7 @@
     <None Include="dbo\Views\vwtrmmst.sql" />
     <None Include="Views.publish.xml" />
     <None Include="Scripts\LoadModules.sql" />
+    <None Include="Integration.publish.xml" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
@@ -120,5 +120,8 @@
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Scripts\PostDeployment1.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dbo\Views\vyuTFTaxCycle.sql" />
   </ItemGroup>
 </Project>
