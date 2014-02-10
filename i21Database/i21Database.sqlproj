@@ -116,8 +116,6 @@
     <Folder Include="Scripts\Post-Deployment\DB" />
     <Folder Include="Scripts\Post-Deployment\FIN" />
     <Folder Include="Scripts\Post-Deployment\FIN\DefaultData" />
-    <Folder Include="Scripts\Post-Deployment\Manual Run" />
-    <Folder Include="Scripts\Post-Deployment\Manual Run\1_Reports" />
     <Folder Include="Scripts\Post-Deployment\Optional Run" />
     <Folder Include="Scripts\Post-Deployment\Optional Run\1_SM" />
     <Folder Include="Scripts\Post-Deployment\Reports" />
@@ -130,6 +128,7 @@
     <Folder Include="Scripts\Pre-Deployment\Manual Run\3_Dashboard" />
     <Folder Include="Scripts\Pre-Deployment\Manual Run\1_TM" />
     <Folder Include="Scripts\Pre-Deployment\SM" />
+    <Folder Include="Scripts\Post-Deployment\Optional Run\2_Reports" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -394,7 +393,6 @@
     <None Include="Scripts\Post-Deployment\DB\1_CannedPanels.sql" />
     <None Include="Scripts\Post-Deployment\FIN\DefaultData\AccountGroup.sql" />
     <None Include="Scripts\Post-Deployment\FIN\DefaultData\BankTransactionTypes.sql" />
-    <None Include="Scripts\Post-Deployment\Manual Run\1_Reports\1_UpdateConnection.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\1_SM\1_ZipCodeData.sql" />
     <None Include="Scripts\Post-Deployment\Reports\1_ReportDisableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Reports\2_ReportDeleteOldData.sql" />
@@ -415,7 +413,6 @@
     <None Include="Scripts\Pre-Deployment\SM\1_DataCleanup.sql" />
     <PreDeploy Include="Scripts\Pre-Deployment\PreDeployment.sql" />
     <None Include="Scripts\Post-Deployment\Reports\4_ReportData.sql" />
-    <None Include="Scripts\Post-Deployment\TM\2_CreationOfTMViewsPTorAG.sql" />
     <Build Include="dbo\Tables\tblGLPostRecap.sql" />
     <Build Include="dbo\Tables\tblGLPostResults.sql" />
     <Build Include="dbo\Stored Procedures\usp_PostJournal.sql" />
@@ -426,6 +423,7 @@
     <Build Include="dbo\Views\vyuBillBatch.sql" />
     <Build Include="dbo\Views\vyuPayments.sql" />
     <Build Include="dbo\Views\vyuVendorHistory.sql" />
+    <None Include="Scripts\Post-Deployment\Optional Run\2_Reports\1_UpdateConnection.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
