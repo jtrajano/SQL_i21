@@ -11,3 +11,7 @@
 */
 
 
+--:r .\1_CM.sql
+
+:r .\SM\1_DataCleanup.sql
+:r .\DeleteScripts.sql

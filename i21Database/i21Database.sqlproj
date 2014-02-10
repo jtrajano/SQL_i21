@@ -123,6 +123,11 @@
     <Folder Include="Scripts\Post-Deployment\SM\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\TM" />
     <Folder Include="Scripts\Pre-Deployment" />
+    <Folder Include="Scripts\Pre-Deployment\Manual Run" />
+    <Folder Include="Scripts\Pre-Deployment\Manual Run\2_CM" />
+    <Folder Include="Scripts\Pre-Deployment\Manual Run\3_Dashboard" />
+    <Folder Include="Scripts\Pre-Deployment\Manual Run\1_TM" />
+    <Folder Include="Scripts\Pre-Deployment\SM" />
     <Folder Include="Scripts\Post-Deployment\Optional Run\2_Reports" />
   </ItemGroup>
   <ItemGroup>
@@ -401,6 +406,11 @@
     <None Include="Scripts\Post-Deployment\TM\1_OriginIndexing.sql" />
     <None Include="Scripts\Post-Deployment\PostDeployment.sql" />
     <None Include="Scripts\Post-Deployment\VersionUpdate.sql" />
+    <None Include="Scripts\Pre-Deployment\Manual Run\2_CM\1_CM.sql" />
+    <None Include="Scripts\Pre-Deployment\Manual Run\3_Dashboard\1_1340_to_1410.sql" />
+    <None Include="Scripts\Pre-Deployment\Manual Run\1_TM\1_1320_to_1340.sql" />
+    <None Include="Scripts\Pre-Deployment\Manual Run\1_TM\2_DropUniqueConstraints.sql" />
+    <None Include="Scripts\Pre-Deployment\SM\1_DataCleanup.sql" />
     <PreDeploy Include="Scripts\Pre-Deployment\PreDeployment.sql" />
     <None Include="Scripts\Post-Deployment\Reports\4_ReportData.sql" />
     <Build Include="dbo\Tables\tblGLPostRecap.sql" />
@@ -419,6 +429,20 @@
     <RefactorLog Include="i21.refactorlog" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="i21Database.publish.xml" />
+    <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <SqlCmdVariable Include="Origin">
+      <DefaultValue>Origin</DefaultValue>
+      <Value>$(SqlCmdVar__1)</Value>
+    </SqlCmdVariable>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Origin\Origin.sqlproj">
+      <Name>Origin</Name>
+      <Project>{e4f98288-79bd-4ec9-a41d-180685a8eb66}</Project>
+      <Private>True</Private>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ProjectReference>
   </ItemGroup>
 </Project>
