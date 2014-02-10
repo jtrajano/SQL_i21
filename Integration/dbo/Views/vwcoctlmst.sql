@@ -1,4 +1,8 @@
-﻿CREATE VIEW [dbo].[vwcoctlmst]
+﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwcoctlmst')
+	DROP VIEW vwcoctlmst
+GO
+
+CREATE VIEW [dbo].[vwcoctlmst]
 AS
 SELECT
 vwcoctl_le_yn = coctl_le_yn

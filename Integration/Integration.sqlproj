@@ -66,7 +66,6 @@
     <None Include="dbo\Views\apchkmst.sql" />
     <None Include="dbo\Views\vwapivcmst.sql" />
     <None Include="dbo\Views\vwclsmst.sql" />
-    <None Include="dbo\Views\vwCMBank.sql" />
     <None Include="dbo\Views\vwCMBankAccount.sql" />
     <None Include="dbo\Views\vwcmtmst.sql" />
     <None Include="dbo\Views\vwcntmst.sql" />
@@ -110,12 +109,6 @@
     <None Include="dbo\Views\vwtaxmst.sql" />
     <None Include="dbo\Views\vwticmst.sql" />
     <None Include="dbo\Views\vwtrmmst.sql" />
-    <None Include="dbo\Views\vyu_GLAccountGroupView.sql" />
-    <None Include="dbo\Views\vyu_GLFiscalYearPeriod.sql" />
-    <None Include="dbo\Views\vyuAPPayablesAgingSummary.sql" />
-    <None Include="dbo\Views\vyuBillBatch.sql" />
-    <None Include="dbo\Views\vyuPayments.sql" />
-    <None Include="dbo\Views\vyuVendorHistory.sql" />
     <None Include="Views.publish.xml" />
     <None Include="Scripts\LoadModules.sql" />
   </ItemGroup>
