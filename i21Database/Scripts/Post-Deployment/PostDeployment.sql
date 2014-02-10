@@ -28,7 +28,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\Reports\4_ReportData.sql
 
 -- Tank Management
-:r .\TM\1_OriginIndexing.sql
+-- :r .\TM\1_OriginIndexing.sql
 
 -- Financials
 :r .\FIN\DefaultData\AccountGroup.sql

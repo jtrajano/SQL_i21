@@ -417,10 +417,4 @@
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
   </ItemGroup>
-  <ItemGroup>
-    <SqlCmdVariable Include="Origin">
-      <DefaultValue>Origin</DefaultValue>
-      <Value>$(SqlCmdVar__1)</Value>
-    </SqlCmdVariable>
-  </ItemGroup>
 </Project>
