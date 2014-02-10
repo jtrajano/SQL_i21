@@ -424,6 +424,7 @@
     <Build Include="dbo\Views\vyuPayments.sql" />
     <Build Include="dbo\Views\vyuVendorHistory.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\2_Reports\1_UpdateConnection.sql" />
+    <Build Include="dbo\Stored Procedures\usp_ReverseGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
