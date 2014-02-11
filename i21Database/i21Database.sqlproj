@@ -241,7 +241,6 @@
     <Build Include="dbo\Tables\tblRMUser.sql" />
     <Build Include="dbo\Tables\tblSMActiveScreen.sql" />
     <Build Include="dbo\Tables\tblSMBuildNumber.sql" />
-    <Build Include="dbo\Tables\tblSMCompany.sql" />
     <Build Include="dbo\Tables\tblSMCompanySetup.sql" />
     <Build Include="dbo\Tables\tblSMCountry.sql" />
     <Build Include="dbo\Tables\tblSMCurrency.sql" />
