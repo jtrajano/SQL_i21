@@ -63,3 +63,5 @@ i21PreDeployment/bin/Debug/i21PreDeployment_1.publish.sql
 i21PreDeployment/i21PreDeployment.publish.xml
 i21PreDeployment/obj/Debug/i21PreDeployment.sqlproj.FileListAbsolute.txt
 i21Database/bin/
+i21PreDeployment/bin/
+Integration/bin/
