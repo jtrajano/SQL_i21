@@ -3,13 +3,13 @@
 -- 	CREATE THE STORED PROCEDURE AFTER DELETING IT
 ---------------------------------------------------------------------------------------------------------------------------------------
 CREATE PROCEDURE usp_ReverseGLEntries
-	 @strBatchID		AS NVARCHAR(50)	= ''
+	 @strBatchID		AS NVARCHAR(100)	= ''
 	,@strTransactionID	NVARCHAR(40)	= NULL
-	,@Recap				AS BIT			= 0
+	,@ysnRecap			AS BIT			= 0
 	,@strCode			NVARCHAR(10)	= NULL
 	,@dtmDateReverse	DATETIME		= NULL 
 	,@intUserID			INT				= NULL 
-	,@successfulID		AS NVARCHAR(50)	= '' OUTPUT
+	,@successfulCount	AS INT			= 0 OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -23,7 +23,7 @@ BEGIN TRANSACTION;
 --=====================================================================================================================================
 -- 	INITIALIZATION 
 ---------------------------------------------------------------------------------------------------------------------------------------
-IF ISNULL(@Recap, 0) = 0
+IF ISNULL(@ysnRecap, 0) = 0
 BEGIN
 	SELECT	@strBatchID = MAX(strBatchID)
 	FROM	tblGLDetail
@@ -35,7 +35,7 @@ END
 --=====================================================================================================================================
 -- 	REVERSE THE G/L ENTRIES
 ---------------------------------------------------------------------------------------------------------------------------------------
-IF ISNULL(@Recap, 0) = 0
+IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN			
 		INSERT INTO tblGLDetail (
 				[strTransactionID]
@@ -225,15 +225,11 @@ WHERE	strTransactionID = @strTransactionID
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
 --=====================================================================================================================================
--- 	UPDATE RESULT
+-- 	RETURN TOTAL NUMBER OF VALID GL ENTRIES
 ---------------------------------------------------------------------------------------------------------------------------------------
-INSERT INTO tblGLPostResults (strBatchID,intTransactionID,strTransactionID,strDescription,dtmDate)
-	SELECT @strBatchID as strBatchID,NULL,'' as strTransactionID, 'Transaction successfully unposted.' as strDescription, GETDATE() as dtmDate	
+SET @successfulCount = (SELECT COUNT(*) FROM tblGLDetail WHERE strTransactionID = @strTransactionID)
 
---=====================================================================================================================================
--- 	RETURN TOTAL NUMBER OF VALID JOURNALS
----------------------------------------------------------------------------------------------------------------------------------------
-SET @successfulID = @strBatchID
+IF @@ERROR <> 0	GOTO Post_Rollback;
 
 --=====================================================================================================================================
 -- 	FINALIZING STAGE
@@ -259,23 +255,10 @@ GO
 --EXEC [dbo].[usp_ReverseGLEntries]
 --	@strBatchID		= 'BATCH-13131'
 --	,@strTransactionID	= 'GJ-29'
---	,@Recap					= 0
+--	,@ysnRecap					= 0
 --	,@strCode			= 'GJ'
 --	,@dtmDateReverse	= NULL 
 --	,@intUserID			= 1
 --	,@successfulCount	= @intCount OUTPUT			
-				
---SELECT @intCount
-
-
---DECLARE @intCount AS INT
-
---EXEC [dbo].[usp_PostJournal]
---			@batchId	 = 'BATCH-321',				-- GENERATED BATCH ID
---			@journalType = 'General Journal',		-- TYPE OF JOURNAL (General Journal, Audit Adjustment and ETC)
---			@recap = 0,								-- WHEN SET TO 1, THEN IT WILL POPULATE tblGLPostRecap THAT CAN BE VIEWED VIA BUFFERED STORE IN SENCHA
---			@param = 'select intJournalID from tblGLJournal where strJournalID = ''GJ-24''',							-- COMMA DELIMITED JOURNAL ID TO POST 
---			@userId = 1,							-- USER ID THAT INITIATES POSTING
---			@successfulCount = @intCount OUTPUT		-- OUTPUT PARAMETER THAT RETURNS TOTAL NUMBER OF SUCCESSFUL RECORDS
 				
 --SELECT @intCount
