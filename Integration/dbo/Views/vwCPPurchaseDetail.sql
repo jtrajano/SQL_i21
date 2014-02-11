@@ -32,6 +32,16 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 	EXEC ('
 		CREATE VIEW [dbo].[vwCPPurchaseDetail]
 		AS
-		select ''PETRO HERE'' XX
+		SELECT DISTINCT
+			A4GLIdentity = 0
+			,agstm_bill_to_cus  = ''''
+			,agstm_itm_no = ''''
+			,agstm_loc_no = ''''
+			,agstm_ivc_no = ''''
+			,stm_ship_rev_dt = getdate()
+			,agitm_desc = ''''
+			,agstm_un = ''''
+			,agstm_un_desc = ''''
+			,agstm_amount = 0
 		')
 GO
