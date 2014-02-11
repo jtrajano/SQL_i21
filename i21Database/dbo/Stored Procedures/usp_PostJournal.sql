@@ -3,13 +3,14 @@
 -- 	CREATE THE STORED PROCEDURE AFTER DELETING IT
 ---------------------------------------------------------------------------------------------------------------------------------------
 CREATE PROCEDURE usp_PostJournal
-	@batchId			AS NVARCHAR(50)		= '',
-	@journalType		AS NVARCHAR(30)		= '',
-	@recap				AS BIT				= 0,
-	@param				AS NVARCHAR(MAX)	= '',
-	@userId				AS INT				= 1,
+	@Param				AS NVARCHAR(MAX)	= '',	
+	@ysnPost			AS BIT				= 0,
+	@ysnRecap			AS BIT				= 0,
+	@strBatchID			AS NVARCHAR(100)	= '',	
+	@strJournalType		AS NVARCHAR(30)		= '',
+	@intUserID			AS INT				= 1,
 	@successfulCount	AS INT				= 0 OUTPUT
---WITH ENCRYPTION
+	
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -37,24 +38,70 @@ CREATE TABLE #tmpReverseJournals (
 	UNIQUE (intJournalID)
 );
 
+
 --=====================================================================================================================================
 -- 	POPULATE JOURNALS TO POST TEMPORARY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
-IF (ISNULL(@param, '') <> '') 
-	INSERT INTO #tmpPostJournals EXEC (@param)
+IF (ISNULL(@Param, '') <> '') 
+	INSERT INTO #tmpPostJournals EXEC (@Param)
 ELSE
-	INSERT INTO #tmpPostJournals SELECT [intJournalID] FROM tblGLJournal
+	INSERT INTO #tmpPostJournals SELECT [intJournalID] FROM tblGLJournal	
+
+
+--=====================================================================================================================================
+-- 	UNPOSTING JOURNAL TRANSACTIONS
+---------------------------------------------------------------------------------------------------------------------------------------
+IF ISNULL(@ysnPost, 0) = 0
+	BEGIN
+		DECLARE @intCount AS INT
+		
+		IF ISNULL(@ysnRecap, 0) = 0
+			BEGIN
+				-- DELETE Results 1 DAY OLDER	
+				DELETE tblGLPostResults WHERE dtmDate < DATEADD(day, -1, GETDATE())
+				
+				INSERT INTO tblGLPostResults (strBatchID,intTransactionID,strTransactionID,strDescription,dtmDate)
+					SELECT @strBatchID as strBatchID
+							,(SELECT TOP 1 intJournalID FROM #tmpPostJournals) as intTransactionID
+							,(SELECT TOP 1 strJournalID FROM tblGLJournal WHERE intJournalID IN (SELECT intJournalID FROM #tmpPostJournals)) as strTransactionID
+							,strMessage as strDescription
+							,GETDATE() as dtmDate
+					FROM (
+						SELECT DISTINCT A.intJournalID,
+							'You cannot Unpost this General Journal. You must Unpost and Delete the Reversing transaction: ' + A.strJournalID + ' first!' AS strMessage
+						FROM tblGLJournal A 
+						WHERE A.strReverseLink IN (SELECT strJournalID FROM tblGLJournal WHERE intJournalID IN (SELECT intJournalID FROM #tmpPostJournals))
+					) tmpBatchResults
+			END
+
+		IF @@ERROR <> 0	GOTO Post_Rollback;
+		
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLJournal A WHERE A.strReverseLink IN (SELECT strJournalID FROM tblGLJournal WHERE intJournalID IN (SELECT intJournalID FROM #tmpPostJournals)))
+			BEGIN
+				SET @Param = (SELECT strJournalID FROM tblGLJournal WHERE intJournalID IN (SELECT intJournalID FROM #tmpPostJournals))
+				EXEC [dbo].[usp_ReverseGLEntries] @strBatchID, @Param, @ysnRecap, 'GJ', NULL, @intUserID, @intCount	OUT
+				SET @successfulCount = @intCount
+				
+				IF(@intCount > 0)
+				BEGIN
+					UPDATE tblGLJournal SET ysnPosted = 0 WHERE intJournalID IN (SELECT intJournalID FROM #tmpPostJournals)
+				END									
+			END
+		
+		GOTO Post_Commit;
+	END
+
 
 --=====================================================================================================================================
 --	JOURNAL VALIDATIONS
 ---------------------------------------------------------------------------------------------------------------------------------------
-IF ISNULL(@recap, 0) = 0
+IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN
 		-- DELETE Results 2 DAYS OLDER	
 		DELETE tblGLPostResults WHERE dtmDate < DATEADD(day, -1, GETDATE())
-	
+		
 		INSERT INTO tblGLPostResults (strBatchID,intTransactionID,strTransactionID,strDescription,dtmDate)
-			SELECT @batchId as strBatchID,tmpBatchResults.intJournalID as intTransactionID,tblB.strJournalID as strTransactionID, strMessage as strDescription,GETDATE() as dtmDate
+			SELECT @strBatchID as strBatchID,tmpBatchResults.intJournalID as intTransactionID,tblB.strJournalID as strTransactionID, strMessage as strDescription,GETDATE() as dtmDate
 			FROM (
 				SELECT DISTINCT A.intJournalID,
 					'Unable to find an open fiscal year period to match the transaction date.' AS strMessage
@@ -84,12 +131,13 @@ IF ISNULL(@recap, 0) = 0
 					'You cannot post this transaction because it has inactive account id ' + B.strAccountID + '.' AS strMessage
 				FROM tblGLJournalDetail A 
 					LEFT OUTER JOIN tblGLAccount B ON A.intAccountID = B.intAccountID
-				WHERE ISNULL(B.ysnActive, 0) = 0 AND A.intAccountID <> NULL AND A.intJournalID IN (SELECT intJournalID FROM #tmpPostJournals)
-				UNION 
+				WHERE ISNULL(B.ysnActive, 0) = 0 AND A.intJournalID IN (SELECT intJournalID FROM #tmpPostJournals)
+				UNION
 				SELECT DISTINCT A.intJournalID,
 					'You cannot post this transaction because it has invalid account(s).' AS strMessage
 				FROM tblGLJournalDetail A 
-				WHERE 0 = CASE WHEN ISNULL(A.intAccountID, '') = '' THEN 0 ELSE 1 END AND A.intJournalID IN (SELECT intJournalID FROM #tmpPostJournals)	
+					LEFT OUTER JOIN tblGLAccount B ON A.intAccountID = B.intAccountID
+				WHERE A.intAccountID IS NULL OR 0 = CASE WHEN ISNULL(A.intAccountID, '') = '' THEN 0 ELSE 1 END AND A.intJournalID IN (SELECT intJournalID FROM #tmpPostJournals)					
 				UNION 
 				SELECT DISTINCT A.intJournalID,
 					'Unable to post. The transaction is out of balance.' AS strMessage
@@ -111,6 +159,7 @@ IF ISNULL(@recap, 0) = 0
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 	
+	
 --=====================================================================================================================================
 -- 	POPULATE VALID JOURNALS TEMPORARY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -118,20 +167,25 @@ INSERT INTO #tmpValidJournals
 	SELECT DISTINCT A.[intJournalID]
 	FROM tblGLJournal A 
 	WHERE	A.[intJournalID] IN (SELECT B.intJournalID FROM #tmpPostJournals  B
-						WHERE B.intJournalID NOT IN (SELECT intTransactionID FROM tblGLPostResults WHERE strBatchID = @batchId GROUP BY intTransactionID)) 
+						WHERE B.intJournalID NOT IN (SELECT intTransactionID FROM tblGLPostResults WHERE strBatchID = @strBatchID GROUP BY intTransactionID)) 
 		AND
 		A.[ysnPosted] = 0 AND
-		A.[strJournalType] = @journalType
+		A.[strJournalType] = @strJournalType
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM #tmpValidJournals)
+	BEGIN
+		GOTO Post_Commit;
+	END
+
 
 --=====================================================================================================================================
 -- 	CHECK IF THE PROCESS IS RECAP OR NOT
 ---------------------------------------------------------------------------------------------------------------------------------------
-
 Post_Transaction:
 
-IF ISNULL(@recap, 0) = 0
+IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN							
 		WITH Units 
 		AS 
@@ -177,9 +231,9 @@ IF ISNULL(@recap, 0) = 0
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[dblExchangeRate]		= 1
-			,[intUserID]			= @userId
+			,[intUserID]			= @intUserID
 			,[dtmDateEntered]		= GETDATE()
-			,[strBatchID]			= @batchId
+			,[strBatchID]			= @strBatchID
 			,[strCode]				= 'GJ'
 			,[strModuleName]		= 'General Journal'
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B 
@@ -191,7 +245,7 @@ IF ISNULL(@recap, 0) = 0
 ELSE
 	BEGIN
 		-- DELETE Results 1 DAYS OLDER	
-		DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intUserID = @userId;
+		DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intUserID = @intUserID;
 		
 		WITH Accounts 
 		AS 
@@ -244,9 +298,9 @@ ELSE
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[dblExchangeRate]		= 1
-			,[intUserID]			= @userId
+			,[intUserID]			= @intUserID
 			,[dtmDateEntered]		= GETDATE()
-			,[strBatchID]			= @batchId
+			,[strBatchID]			= @strBatchID
 			,[strCode]				= 'GJ'
 			,[strModuleName]		= 'General Journal'
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B 
@@ -286,7 +340,7 @@ ELSE
 			,[strCode]				
 			,[strModuleName]
 		FROM [dbo].tblGLPostRecap A
-		WHERE A.[strBatchID] = @batchId and A.[intUserID] = @userId
+		WHERE A.[strBatchID] = @strBatchID and A.[intUserID] = @intUserID
 		GROUP BY [strTransactionID],[intTransactionID],[dtmDate],[dblExchangeRate],[dtmDateEntered],[ysnIsUnposted],[intUserID],[strBatchID],[strCode],[strModuleName]
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
@@ -295,6 +349,7 @@ ELSE
 	END
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
+
 
 --=====================================================================================================================================
 -- 	UPDATE GL SUMMARY RECORDS
@@ -331,6 +386,7 @@ WHERE tblGLSummary.[intAccountID] = GLDetailGrouped.[intAccountID] AND
 	  ISNULL(CONVERT(DATE, tblGLSummary.[dtmDate]), '') = ISNULL(CONVERT(DATE, GLDetailGrouped.[dtmDate]), '');
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
+
 
 --=====================================================================================================================================
 -- 	INSERT TO GL SUMMARY RECORDS
@@ -386,6 +442,7 @@ GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountID];
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
+
 --=====================================================================================================================================
 -- 	UPDATE JOURNAL TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -396,11 +453,12 @@ WHERE [intJournalID] IN (SELECT [intJournalID] FROM #tmpValidJournals);
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
+
 --=====================================================================================================================================
 -- 	UPDATE RESULT
 ---------------------------------------------------------------------------------------------------------------------------------------
 INSERT INTO tblGLPostResults (strBatchID,intTransactionID,strTransactionID,strDescription,dtmDate)
-	SELECT @batchId as strBatchID,intJournalID as intTransactionID,strJournalID as strTransactionID, strMessage as strDescription,GETDATE() as dtmDate
+	SELECT @strBatchID as strBatchID,intJournalID as intTransactionID,strJournalID as strTransactionID, strMessage as strDescription,GETDATE() as dtmDate
 	FROM (
 		SELECT DISTINCT A.intJournalID,A.strJournalID,
 			'Transaction successfully posted.' AS strMessage
@@ -410,10 +468,12 @@ INSERT INTO tblGLPostResults (strBatchID,intTransactionID,strTransactionID,strDe
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
+
 --=====================================================================================================================================
 -- 	RETURN TOTAL NUMBER OF VALID JOURNALS
 ---------------------------------------------------------------------------------------------------------------------------------------
 SET @successfulCount = ISNULL(@successfulCount,0) + (SELECT COUNT(*) FROM #tmpValidJournals)
+
 
 --=====================================================================================================================================
 -- 	REVERSE JOURNAL
@@ -534,6 +594,7 @@ END
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
+
 --=====================================================================================================================================
 -- 	FINALIZING STAGE
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -551,17 +612,18 @@ Post_Exit:
 	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#tmpReverseJournals')) DROP TABLE #tmpReverseJournals		
 GO
 
+
 --=====================================================================================================================================
 -- 	SCRIPT EXECUTION 
 ---------------------------------------------------------------------------------------------------------------------------------------
 --DECLARE @intCount AS INT
 
 --EXEC [dbo].[usp_PostJournal]
---			@batchId	 = 'BATCH-305',				-- GENERATED BATCH ID
---			@journalType = 'General Journal',		-- TYPE OF JOURNAL (General Journal, Audit Adjustment and ETC)
---			@recap = 0,								-- WHEN SET TO 1, THEN IT WILL POPULATE tblGLPostRecap THAT CAN BE VIEWED VIA BUFFERED STORE IN SENCHA
---			@param = '',							-- COMMA DELIMITED JOURNAL ID TO POST 
---			@userId = 1,							-- USER ID THAT INITIATES POSTING
+--			@strBatchID	 = 'BATCH-305',				-- GENERATED BATCH ID
+--			@strJournalType = 'General Journal',		-- TYPE OF JOURNAL (General Journal, Audit Adjustment and ETC)
+--			@ysnRecap = 0,								-- WHEN SET TO 1, THEN IT WILL POPULATE tblGLPostRecap THAT CAN BE VIEWED VIA BUFFERED STORE IN SENCHA
+--			@Param = '',							-- COMMA DELIMITED JOURNAL ID TO POST 
+--			@intUserID = 1,							-- USER ID THAT INITIATES POSTING
 --			@successfulCount = @intCount OUTPUT		-- OUTPUT PARAMETER THAT RETURNS TOTAL NUMBER OF SUCCESSFUL RECORDS
 				
 --SELECT @intCount
