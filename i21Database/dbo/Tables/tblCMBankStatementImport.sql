@@ -17,7 +17,6 @@
     [intLastModifiedUserId] INT NULL, 
     [dtmLastModified] DATETIME NULL, 
     [intConcurrencyId] INT NULL,
-	CONSTRAINT [PK_tblCMBankStatementImport] PRIMARY KEY CLUSTERED ([intBankStatementImportId] ASC),
 	CONSTRAINT [FK_tblCMBankAccounttblCMBankStatementImport] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]), 
-	UNIQUE NONCLUSTERED ([strBankStatementImportId] ASC)
+    CONSTRAINT [PK_tblCMBankStatementImport] PRIMARY KEY ([intBankStatementImportId]), 
 )
