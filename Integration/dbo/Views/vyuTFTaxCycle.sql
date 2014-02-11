@@ -1,6 +1,6 @@
 ﻿
 --DELETE OLD VIEW IF EXISTS
-IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuTFTaxCycle')
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwpxcycmst')
 	DROP VIEW vwpxcycmst
 GO
 IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuTFTaxCycle')

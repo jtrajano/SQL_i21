@@ -241,7 +241,6 @@
     <Build Include="dbo\Tables\tblRMUser.sql" />
     <Build Include="dbo\Tables\tblSMActiveScreen.sql" />
     <Build Include="dbo\Tables\tblSMBuildNumber.sql" />
-    <Build Include="dbo\Tables\tblSMCompany.sql" />
     <Build Include="dbo\Tables\tblSMCompanySetup.sql" />
     <Build Include="dbo\Tables\tblSMCountry.sql" />
     <Build Include="dbo\Tables\tblSMCurrency.sql" />
@@ -383,7 +382,7 @@
     <Build Include="dbo\Stored Procedures\WithoutLeakCheck.sql" />
     <Build Include="dbo\User Defined Types\RecapTableType.sql" />
     <None Include="Script.PreDeployment1.sql" />
-    <PostDeploy Include="Script.PostDeployment1.sql" />
+    <None Include="Script.PostDeployment1.sql" />
     <None Include="Scripts\Post-Deployment\DB\1_CannedPanels.sql" />
     <None Include="Scripts\Post-Deployment\FIN\DefaultData\AccountGroup.sql" />
     <None Include="Scripts\Post-Deployment\FIN\DefaultData\BankTransactionTypes.sql" />
@@ -398,7 +397,7 @@
     <None Include="Scripts\Post-Deployment\SM\DefaultData\5_CompanySetup.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\6_Preferences.sql" />
     <None Include="Scripts\Post-Deployment\TM\1_OriginIndexing.sql" />
-    <None Include="Scripts\Post-Deployment\PostDeployment.sql" />
+    <PostDeploy Include="Scripts\Post-Deployment\PostDeployment.sql" />
     <None Include="Scripts\Post-Deployment\VersionUpdate.sql" />
     <None Include="Scripts\Post-Deployment\Reports\4_ReportData.sql" />
     <Build Include="dbo\Tables\tblGLPostRecap.sql" />
@@ -413,6 +412,7 @@
     <Build Include="dbo\Views\vyuVendorHistory.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\2_Reports\1_UpdateConnection.sql" />
     <Build Include="dbo\Stored Procedures\usp_ReverseGLEntries.sql" />
+    <Build Include="dbo\Tables\tblCMBankStatementImport.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
