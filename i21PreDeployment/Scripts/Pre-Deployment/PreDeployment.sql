@@ -11,7 +11,6 @@
 */
 
 :r .\DeleteScripts.sql
-
 -- TM
 :r .\1_TM\1_1320_to_1340.sql
 :r .\1_TM\2_DropUniqueConstraints.sql

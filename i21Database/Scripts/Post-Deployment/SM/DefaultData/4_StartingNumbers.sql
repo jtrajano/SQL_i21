@@ -152,6 +152,16 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Misc Checks')
+	UNION ALL
+	SELECT	[cntID]					= 15
+			,[strTransactionType]	= N'Bank Stmt Import'
+			,[strPrefix]			= N'BSI-'
+			,[intNumber]			= 1
+			,[intTransactionTypeID] = 15
+			,[strModule]			= 'Cash Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bank Stmt Import')
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO

@@ -76,7 +76,18 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 	EXEC ('
 		CREATE VIEW [dbo].[vwCPPaymentsDetails]
 		AS
-		select 1 XX
+		SELECT strCustomerName = ''''
+			,strCustomerNo = ''''
+			,strCheckNo = ''''
+			,dblAmount = 0
+			,strLocationNo = ''''
+			,strCreditInd = ''''
+			,strReferenceNo = ''''
+			,dtmDate = getdate()
+			,strNote = ''''
+			,strInvoiceNo = ''''
 		')
 GO
+
+
 

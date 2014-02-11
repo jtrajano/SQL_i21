@@ -119,3 +119,9 @@ SELECT
 	,[strBankTransactionTypeName]	= 'AP Payment'
 	,[intConcurrencyId]				= 1			
 WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 16)
+UNION ALL 
+SELECT 
+	[intBankTransactionTypeId]		= 17
+	,[strBankTransactionTypeName]	= 'Bank Stmt Import'
+	,[intConcurrencyId]				= 1			
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 17)
