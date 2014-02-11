@@ -24,6 +24,7 @@
     [strLink]                  NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
     [ysnClr]                   BIT              DEFAULT 0 NOT NULL,
     [dtmDateReconciled]        DATETIME         NULL,
+	[intBankStatementImportId] INT              NULL,
     [intCreatedUserId]         INT              NULL,
     [dtmCreated]               DATETIME         NULL,
     [intLastModifiedUserId]    INT              NULL,
@@ -59,4 +60,8 @@ CREATE NONCLUSTERED INDEX [IX_tblCMBankTransaction_strReferenceNo]
 GO
 CREATE NONCLUSTERED INDEX [IX_tblCMBankTransaction_strTransactionId]
     ON [dbo].[tblCMBankTransaction]([strTransactionId] ASC);
+
+GO
+CREATE NONCLUSTERED INDEX [IX_tblCMBankTransaction_intBankStatementImportId]
+    ON [dbo].[tblCMBankTransaction]([intBankStatementImportId] ASC);
 
