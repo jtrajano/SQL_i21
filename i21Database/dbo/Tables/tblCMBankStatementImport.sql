@@ -1,13 +1,13 @@
 ﻿CREATE TABLE [dbo].[tblCMBankStatementImport]
 (
 	[intBankStatementImportId] INT IDENTITY (1, 1) NOT NULL,
-	[strBankStatementImportId] NVARCHAR(40) NOT NULL, 
+	[strBankStatementImportId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intBankAccountId] INT NOT NULL, 
     [dtmDate] DATETIME NULL, 
-    [strPayee] NVARCHAR(300) NULL, 
-    [strReferenceNo] NVARCHAR(20) NULL, 
-    [strRTN] NVARCHAR(12) NULL, 
-    [strBankAccountNo] NVARCHAR(20) NULL, 
+    [strPayee] NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL, 
+    [strReferenceNo] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
+    [strRTN] NVARCHAR(12) COLLATE Latin1_General_CI_AS NULL, 
+    [strBankAccountNo] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
     [dblAmount] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [dblDepositAmount] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [dblWithdrawalAmount] NUMERIC(18, 6) NOT NULL DEFAULT 0,	
