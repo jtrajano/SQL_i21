@@ -104,12 +104,12 @@ IF ISNULL(@ysnRecap, 0) = 0
 			SELECT @strBatchID as strBatchID,tmpBatchResults.intJournalID as intTransactionID,tblB.strJournalID as strTransactionID, strMessage as strDescription,GETDATE() as dtmDate
 			FROM (
 				SELECT DISTINCT A.intJournalID,
-					'Unable to find an open fiscal year period to match the transaction date.' AS strMessage
+					'Unable to find an open accounting period to match the transaction date.' AS strMessage
 				FROM tblGLJournal A 
 				WHERE A.intJournalID IN (SELECT intJournalID FROM #tmpPostJournals) AND ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0) = 0  
 				UNION
 				SELECT DISTINCT A.intJournalID,
-					'Unable to find an open fiscal year period to match the reverse date.' AS strMessage
+					'Unable to find an open accounting period to match the reverse date.' AS strMessage
 				FROM tblGLJournal A 
 				WHERE 0 = CASE WHEN ISNULL(A.dtmReverseDate, '') = '' THEN 1 ELSE ISNULL([dbo].isOpenAccountingDate(A.dtmReverseDate), 0) END 
 					  AND A.intJournalID IN (SELECT intJournalID FROM #tmpPostJournals)
@@ -348,7 +348,7 @@ ELSE
 			,[strTransactionForm]
 		FROM [dbo].tblGLPostRecap A
 		WHERE A.[strBatchID] = @strBatchID and A.[intUserID] = @intUserID
-		GROUP BY [strTransactionID],[intTransactionID],[dtmDate],[dblExchangeRate],[dtmDateEntered],[ysnIsUnposted],[intUserID],[strBatchID],[strCode],[strModuleName]
+		GROUP BY [strTransactionID],[intTransactionID],[dtmDate],[dblExchangeRate],[dtmDateEntered],[ysnIsUnposted],[intUserID],[strBatchID],[strCode],[strModuleName],[strTransactionForm]
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 
