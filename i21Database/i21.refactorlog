@@ -847,4 +847,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intConcurrencyId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="ce92e0e2-70f6-4f4a-b047-42f9c46affb3" ChangeDateTime="02/11/2014 05:02:02">
+    <Property Name="ElementName" Value="[dbo].[tblCMBankStatementImport].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMBankStatementImport]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intBankStatementImportId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="1750517d-244b-4955-aea8-fe06cc7c5198" ChangeDateTime="02/11/2014 05:09:52">
+    <Property Name="ElementName" Value="[dbo].[tblCMBankStatementImport].[intTransactionId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMBankStatementImport]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intMatchTransactionId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3dd62b22-49dc-44eb-837a-a1ccd7e41032" ChangeDateTime="02/11/2014 05:10:07">
+    <Property Name="ElementName" Value="[dbo].[tblCMBankStatementImport].[intMatchTransactionId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMBankStatementImport]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTransactionIdMatch" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="69566489-044f-4888-a254-e1b02d18ef7e" ChangeDateTime="02/11/2014 05:10:51">
+    <Property Name="ElementName" Value="[dbo].[tblCMBankStatementImport].[intConcurrencyId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMBankStatementImport]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCreatedUserId" />
+  </Operation>
 </Operations>

@@ -1,9 +1,8 @@
 ﻿GO
 	PRINT N'BEGIN CLEAN UP PREFERENCES - update null intUserID to 0'
 GO
-	UPDATE tblSMPreferences
-	SET intUserID = 0 
-	WHERE intUserID is null
+	IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.COLUMNS WHERE UPPER(COLUMN_NAME) = 'INTUSERID' and UPPER(TABLE_NAME) = 'TBLSMPREFERENCES') 
+		EXEC('UPDATE tblSMPreferences SET intUserID = 0  WHERE intUserID is null')
 GO
 	PRINT N'END CLEAN UP PREFERENCES - update null intUserID to 0'
 GO

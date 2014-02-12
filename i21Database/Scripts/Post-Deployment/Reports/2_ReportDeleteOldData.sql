@@ -5,7 +5,6 @@
 	print('/*******************  BEGIN DELETE old records  *******************/')
 	delete from tblRMArchive
 	delete from tblRMUser
-	delete from tblRMConnection
 	delete from tblRMReport
 	delete from tblRMCriteriaFieldSelection
 	delete from tblRMDatasource

@@ -11,3 +11,8 @@ C:\Users\destrada\Documents\i21_sqlscripts\Database Project\i21Database\obj\Debu
 C:\Users\destrada\Documents\i21_sqlscripts\Database Project\i21Database\obj\Debug\refactor.xml
 C:\Users\destrada\Documents\i21_sqlscripts\Database Project\i21Database\obj\Debug\postdeploy.sql
 C:\Users\destrada\Documents\i21_sqlscripts\Database Project\i21Database\obj\Debug\predeploy.sql
+C:\Users\destrada\Documents\i21_sqlscripts\i21Database\bin\Debug\i21Database.dacpac
+C:\Users\destrada\Documents\i21_sqlscripts\i21Database\bin\Debug\i21Database.dll
+C:\Users\destrada\Documents\i21_sqlscripts\i21Database\bin\Debug\i21Database.pdb
+C:\Users\destrada\Documents\i21_sqlscripts\i21Database\obj\Debug\i21Database.dll
+C:\Users\destrada\Documents\i21_sqlscripts\i21Database\obj\Debug\i21Database.pdb
