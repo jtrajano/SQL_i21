@@ -212,6 +212,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strBatchID]
 			,[strCode]
 			,[strModuleName]
+			,[strTransactionForm]
 		)
 		SELECT 
 			 [strTransactionID]		= B.[strJournalID]
@@ -234,8 +235,10 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intUserID]			= @intUserID
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchID]			= @strBatchID
-			,[strCode]				= 'GJ'
-			,[strModuleName]		= 'General Journal'
+			,[strCode]				= B.[strSourceType]
+			,[strModuleName]		= 'General Ledger'
+			,[strTransactionForm]	= B.[strTransactionType]
+			
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B 
 			ON A.[intJournalID] = B.[intJournalID]
 		WHERE B.[intJournalID] IN (SELECT [intJournalID] FROM #tmpValidJournals)
@@ -276,6 +279,7 @@ ELSE
 			,[strBatchID]
 			,[strCode]
 			,[strModuleName]
+			,[strTransactionForm]
 		)
 		SELECT 
 			 [strTransactionID]		= B.[strJournalID]
@@ -301,8 +305,9 @@ ELSE
 			,[intUserID]			= @intUserID
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchID]			= @strBatchID
-			,[strCode]				= 'GJ'
-			,[strModuleName]		= 'General Journal'
+			,[strCode]				= B.[strSourceType]
+			,[strModuleName]		= 'General Ledger'
+			,[strTransactionForm]	= B.[strTransactionType]
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B 
 			ON A.[intJournalID] = B.[intJournalID]
 		WHERE B.[intJournalID] IN (SELECT [intJournalID] FROM #tmpValidJournals)
@@ -323,6 +328,7 @@ ELSE
 			,[strBatchID]
 			,[strCode]
 			,[strModuleName]
+			,[strTransactionForm]
 		)
 		SELECT 
 			 [strTransactionID]
@@ -339,6 +345,7 @@ ELSE
 			,[strBatchID]	
 			,[strCode]				
 			,[strModuleName]
+			,[strTransactionForm]
 		FROM [dbo].tblGLPostRecap A
 		WHERE A.[strBatchID] = @strBatchID and A.[intUserID] = @intUserID
 		GROUP BY [strTransactionID],[intTransactionID],[dtmDate],[dblExchangeRate],[dtmDateEntered],[ysnIsUnposted],[intUserID],[strBatchID],[strCode],[strModuleName]
