@@ -31,6 +31,10 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@AP_PAYMENT AS INT = 16
         ,@BANK_STMT_IMPORT AS INT = 17
         
+        ,@IMPORT_STATUS_UNPROCESSED AS INT = 0
+        ,@IMPORT_STATUS_MATCHFOUND AS INT = 1
+        ,@IMPORT_STATUS_NOMATCHFOUND AS INT = 2
+        
         -- This is the buffer period to search for the transactions. 
 		,@BETWEEN_DAYS AS INT = 19 -- +/- 19 DAYS
 		
@@ -117,16 +121,23 @@ BEGIN
 		IF @@ERROR <> 0	GOTO _ROLLBACK
 					
 		IF (@ysnMatchFound = 1)
-		BEGIN 			
+		BEGIN 	
+			-- Link the transaction to the imported bank statement. 
+			-- Set the ysnClr to true		
 			UPDATE	dbo.tblCMBankTransaction 
 			SET		ysnClr = 1
 					,intBankStatementImportId = @intBankStatementImportId
-					,intConcurrencyId = A.intConcurrencyId + 1
-					
+					,intConcurrencyId = A.intConcurrencyId + 1					
 			FROM	dbo.tblCMBankTransaction A
 			WHERE	A.intTransactionId = @intTransactionId
 					AND A.ysnPosted = 1
 					AND A.ysnClr = 0
+			IF @@ERROR <> 0	GOTO _ROLLBACK
+			
+			-- Update the status of the Bank Statement Import
+			UPDATE	dbo.tblCMBankStatementImport
+			SET		intImportStatus = @IMPORT_STATUS_MATCHFOUND
+			WHERE	intBankStatementImportId = @intBankStatementImportId
 			IF @@ERROR <> 0	GOTO _ROLLBACK
 			
 			DELETE FROM #tmp_list_of_transactions
@@ -139,7 +150,15 @@ BEGIN
 			
 			SET @intBankStatementImportId = NULL
 			IF @@ERROR <> 0	GOTO _ROLLBACK
-		END 
+		END
+		ELSE 
+		BEGIN 
+			-- Update the status of the Bank Statement Import
+			UPDATE	dbo.tblCMBankStatementImport
+			SET		intImportStatus = @IMPORT_STATUS_NOMATCHFOUND
+			WHERE	intBankStatementImportId = @intBankStatementImportId
+			IF @@ERROR <> 0	GOTO _ROLLBACK		
+		END
 		
 		UPDATE	#tmp_list_of_transactions
 		SET		ysnTagged = 1
