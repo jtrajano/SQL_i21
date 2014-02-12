@@ -127,9 +127,29 @@ IF ISNULL(@recap, 0) = 0
 	IF(ISNULL(@post,0) = 0)
 	BEGIN
 		
+		--Unpost
 		UPDATE tblAPPayment
 			SET ysnPosted = 0
 		FROM tblAPPayment WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+
+		UPDATE tblAPPaymentDetail
+			SET tblAPPaymentDetail.dblAmountDue = B.dblAmountDue + B.dblPayment
+		FROM tblAPPayment A
+			LEFT JOIN tblAPPaymentDetail B
+				ON A.intPaymentId = B.intPaymentId
+		WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+
+		--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
+		UPDATE tblAPBill
+			SET tblAPBill.dblAmountDue = (C.dblAmountDue + B.dblPayment),
+				tblAPBill.ysnPaid = 0,
+				tblAPBill.dtmDatePaid = NULL
+		FROM tblAPPayment A
+					INNER JOIN tblAPPaymentDetail B 
+							ON A.intPaymentId = B.intPaymentId
+					INNER JOIN tblAPBill C
+							ON B.intBillId = C.intBillId
+					WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 	END
 	ELSE
@@ -250,7 +270,7 @@ IF ISNULL(@recap, 0) = 0
 		WHERE	intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		UPDATE tblAPPaymentDetail
-			SET dblAmountDue = B.dblAmountDue - dblAmountPaid
+			SET tblAPPaymentDetail.dblAmountDue = B.dblAmountDue - B.dblPayment
 		FROM tblAPPayment A
 			LEFT JOIN tblAPPaymentDetail B
 				ON A.intPaymentId = B.intPaymentId
@@ -261,7 +281,7 @@ IF ISNULL(@recap, 0) = 0
 		UPDATE tblAPBill
 			SET tblAPBill.dblAmountDue = (C.dblTotal - B.dblPayment),
 				tblAPBill.ysnPaid = (CASE WHEN (C.dblTotal - B.dblPayment) = 0 THEN 1 ELSE 0 END),
-				dtmDatePaid = (CASE WHEN (C.dblTotal - B.dblPayment) = 0 THEN A.dtmDatePaid ELSE NULL END)
+				tblAPBill.dtmDatePaid = (CASE WHEN (C.dblTotal - B.dblPayment) = 0 THEN A.dtmDatePaid ELSE NULL END)
 		FROM tblAPPayment A
 					INNER JOIN tblAPPaymentDetail B 
 							ON A.intPaymentId = B.intPaymentId

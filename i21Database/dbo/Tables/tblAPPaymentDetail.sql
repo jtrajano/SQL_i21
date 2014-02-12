@@ -9,6 +9,7 @@
     [dblAmountDue]       DECIMAL (18, 2) NOT NULL,
     [dblPayment]         DECIMAL (18, 2) NOT NULL,
     [dblInterest]        DECIMAL (18, 2) NOT NULL,
+    [dblTotal] DECIMAL(18, 2) NOT NULL, 
     CONSTRAINT [PK_dbo.tblAPPaymentDetail] PRIMARY KEY CLUSTERED ([intPaymentDetailId] ASC),
     CONSTRAINT [FK_dbo.tblAPPaymentDetail_dbo.tblAPPayments_intPaymentId] FOREIGN KEY ([intPaymentId]) REFERENCES [dbo].[tblAPPayment] ([intPaymentId]) ON DELETE CASCADE
 );
