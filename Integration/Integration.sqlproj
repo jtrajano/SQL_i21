@@ -69,7 +69,7 @@
     <None Include="dbo\Views\vwCMBankAccount.sql" />
     <None Include="dbo\Views\vwcmtmst.sql" />
     <None Include="dbo\Views\vwcntmst.sql" />
-    <None Include="dbo\Views\vwcoctlmst.sql" />
+    <None Include="dbo\Views\vyuTMOriginOption.sql" />
     <None Include="dbo\Views\vwCPAgcusMst.sql" />
     <None Include="dbo\Views\vwCPBABusinessSummary.sql" />
     <None Include="dbo\Views\vwCPBillingAccountPayments.sql" />

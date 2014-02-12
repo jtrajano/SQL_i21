@@ -21,7 +21,7 @@
 :r ..\dbo\Views\vwcmtmst.sql
 
 :r ..\dbo\Views\vwcntmst.sql
-:r ..\dbo\Views\vwcoctlmst.sql
+
 
 -- CUSTOMER PORTAL
 :r ..\dbo\Views\vwCPAgcusMst.sql
@@ -53,6 +53,7 @@
 :r ..\dbo\Views\vwCPStorage.sql
 
 -- TANK MANAGEMENT
+:r ..\dbo\Views\vyuTMOriginOption.sql
 :r ..\dbo\Views\vwctlmst.sql
 :r ..\dbo\Views\vwitmmst.sql
 :r ..\dbo\Views\vwivcmst.sql
