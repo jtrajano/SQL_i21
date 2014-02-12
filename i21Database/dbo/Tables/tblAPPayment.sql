@@ -25,9 +25,7 @@ ON tblAPPayment
 AFTER INSERT
 AS
 	DECLARE @PaymentId NVARCHAR(50)
-	SELECT @PaymentId = strPrefix + CONVERT(NVARCHAR,intNumber + 1) 
-		FROM tblSMStartingNumber 
-	WHERE strTransactionType = 'Payable' AND ysnEnable = 1
+	EXEC uspSMGetStartingNumber 8, @PaymentId
 	
 	IF(@PaymentId IS NOT NULL)
 	BEGIN
