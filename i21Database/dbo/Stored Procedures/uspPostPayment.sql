@@ -47,7 +47,7 @@ SET @recapId = '1'
 --SET BatchId
 IF(@batchId IS NULL)
 BEGIN
-	EXEC GetStartingNumber 3, @batchId
+	EXEC uspSMGetStartingNumber 3, @batchId
 END
 
 --=====================================================================================================================================

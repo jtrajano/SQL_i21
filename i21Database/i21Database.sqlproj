@@ -345,7 +345,7 @@
     <Build Include="dbo\Stored Procedures\GetClearedDeposits.sql" />
     <Build Include="dbo\Stored Procedures\GetClearedPayments.sql" />
     <Build Include="dbo\Stored Procedures\GetDuplicateCheckNumber.sql" />
-    <Build Include="dbo\Stored Procedures\GetStartingNumber.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMGetStartingNumber.sql" />
     <Build Include="dbo\Stored Procedures\GetUnclearedDeposits.sql" />
     <Build Include="dbo\Stored Procedures\GetUnclearedPayments.sql" />
     <Build Include="dbo\Stored Procedures\PagedBankReconDepositAndCredit.sql" />
