@@ -76,7 +76,7 @@ IF ISNULL(@ysnPost, 0) = 0
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 		
-		IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLJournal A WHERE A.strReverseLink IN (SELECT strJournalID FROM tblGLJournal WHERE intJournalID IN (SELECT intJournalID FROM #tmpPostJournals)))
+		IF (NOT EXISTS(SELECT TOP 1 1 FROM tblGLJournal A WHERE A.strReverseLink IN (SELECT strJournalID FROM tblGLJournal WHERE intJournalID IN (SELECT intJournalID FROM #tmpPostJournals))) OR ISNULL(@ysnRecap, 0) = 1)
 			BEGIN
 				SET @Param = (SELECT strJournalID FROM tblGLJournal WHERE intJournalID IN (SELECT intJournalID FROM #tmpPostJournals))
 				EXEC [dbo].[usp_ReverseGLEntries] @strBatchID, @Param, @ysnRecap, 'GJ', NULL, @intUserID, @intCount	OUT
@@ -212,6 +212,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strBatchID]
 			,[strCode]
 			,[strModuleName]
+			,[strTransactionForm]
 		)
 		SELECT 
 			 [strTransactionID]		= B.[strJournalID]
@@ -234,8 +235,10 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intUserID]			= @intUserID
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchID]			= @strBatchID
-			,[strCode]				= 'GJ'
-			,[strModuleName]		= 'General Journal'
+			,[strCode]				= B.[strSourceType]
+			,[strModuleName]		= 'General Ledger'
+			,[strTransactionForm]	= B.[strTransactionType]
+			
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B 
 			ON A.[intJournalID] = B.[intJournalID]
 		WHERE B.[intJournalID] IN (SELECT [intJournalID] FROM #tmpValidJournals)
@@ -276,6 +279,7 @@ ELSE
 			,[strBatchID]
 			,[strCode]
 			,[strModuleName]
+			,[strTransactionForm]
 		)
 		SELECT 
 			 [strTransactionID]		= B.[strJournalID]
@@ -301,8 +305,9 @@ ELSE
 			,[intUserID]			= @intUserID
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchID]			= @strBatchID
-			,[strCode]				= 'GJ'
-			,[strModuleName]		= 'General Journal'
+			,[strCode]				= B.[strSourceType]
+			,[strModuleName]		= 'General Ledger'
+			,[strTransactionForm]	= B.[strTransactionType]
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B 
 			ON A.[intJournalID] = B.[intJournalID]
 		WHERE B.[intJournalID] IN (SELECT [intJournalID] FROM #tmpValidJournals)
@@ -323,6 +328,7 @@ ELSE
 			,[strBatchID]
 			,[strCode]
 			,[strModuleName]
+			,[strTransactionForm]
 		)
 		SELECT 
 			 [strTransactionID]
@@ -339,6 +345,7 @@ ELSE
 			,[strBatchID]	
 			,[strCode]				
 			,[strModuleName]
+			,[strTransactionForm]
 		FROM [dbo].tblGLPostRecap A
 		WHERE A.[strBatchID] = @strBatchID and A.[intUserID] = @intUserID
 		GROUP BY [strTransactionID],[intTransactionID],[dtmDate],[dblExchangeRate],[dtmDateEntered],[ysnIsUnposted],[intUserID],[strBatchID],[strCode],[strModuleName]
@@ -420,6 +427,7 @@ INSERT INTO tblGLSummary (
 	,[dblCredit]
 	,[dblDebitUnit]
 	,[dblCreditUnit]
+	,[strCode]
 	,[intConcurrencyId]
 )
 SELECT	
@@ -429,6 +437,7 @@ SELECT
 	,[dblCredit]		= SUM(A.[dblCredit])
 	,[dblDebitUnit]		= SUM(A.[dblDebitUnit])
 	,[dblCreditUnit]	= SUM(A.[dblCreditUnit])
+	,[strCode] = 'GJ'
 	,[intConcurrencyId] = 1
 FROM JournalDetail A
 WHERE NOT EXISTS 
@@ -441,7 +450,6 @@ WHERE NOT EXISTS
 GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountID];
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
-
 
 --=====================================================================================================================================
 -- 	UPDATE JOURNAL TABLE
@@ -480,7 +488,7 @@ SET @successfulCount = ISNULL(@successfulCount,0) + (SELECT COUNT(*) FROM #tmpVa
 ---------------------------------------------------------------------------------------------------------------------------------------
 INSERT INTO #tmpReverseJournals (intJournalID)
 SELECT A.intJournalID FROM #tmpValidJournals A
-	LEFT JOIN tblGLJournal B ON A.intJournalID = B.intJournalID	
+	INNER JOIN tblGLJournal B ON A.intJournalID = B.intJournalID	
 	WHERE B.dtmReverseDate IS NOT NULL
 
 IF EXISTS (SELECT 1 FROM #tmpReverseJournals)
@@ -492,8 +500,8 @@ BEGIN
 		DECLARE @intJournalID INT = (SELECT TOP 1 intJournalID FROM #tmpReverseJournals)
 		DECLARE @strJournalID NVARCHAR(100) = ''
 		
-		EXEC [dbo].uspSMGetStartingNumber 2, @strJournalID OUTPUT 		
-			
+		EXEC [dbo].GetStartingNumber 5, @strJournalID OUTPUT 		
+		
 		INSERT INTO tblGLJournal (
 				 [dtmReverseDate]
 				,[strJournalID]
@@ -519,7 +527,7 @@ BEGIN
 				,[strTransactionType]
 				,[dtmReverseDate]
 				,A.strJournalID
-				,1
+				,[intCurrencyID]
 				,[dblExchangeRate]
 				,0
 				,'Reversing transaction for ' + A.strJournalID
@@ -619,10 +627,11 @@ GO
 --DECLARE @intCount AS INT
 
 --EXEC [dbo].[usp_PostJournal]
---			@strBatchID	 = 'BATCH-305',				-- GENERATED BATCH ID
---			@strJournalType = 'General Journal',		-- TYPE OF JOURNAL (General Journal, Audit Adjustment and ETC)
---			@ysnRecap = 0,								-- WHEN SET TO 1, THEN IT WILL POPULATE tblGLPostRecap THAT CAN BE VIEWED VIA BUFFERED STORE IN SENCHA
---			@Param = '',							-- COMMA DELIMITED JOURNAL ID TO POST 
+--			@Param	 = 'select intJournalID from tblGLJournal where strJournalID = ''REV-5''',				-- GENERATED BATCH ID
+--			@ysnPost = 0,
+--			@ysnRecap = 1,								-- WHEN SET TO 1, THEN IT WILL POPULATE tblGLPostRecap THAT CAN BE VIEWED VIA BUFFERED STORE IN SENCHA
+--			@strBatchID = 'BATCH-XXX5',							-- COMMA DELIMITED JOURNAL ID TO POST 
+--			@strJournalType = 'General Journal',
 --			@intUserID = 1,							-- USER ID THAT INITIATES POSTING
 --			@successfulCount = @intCount OUTPUT		-- OUTPUT PARAMETER THAT RETURNS TOTAL NUMBER OF SUCCESSFUL RECORDS
 				
