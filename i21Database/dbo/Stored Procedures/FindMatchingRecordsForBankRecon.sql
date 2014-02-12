@@ -1,7 +1,7 @@
 ﻿
 CREATE PROCEDURE FindMatchingRecordsForBankRecon
 	@strBankStatementImportId NVARCHAR(40) = NULL,
-	@ysnSuccess AS BIT = 0
+	@ysnSuccess AS BIT = 0 OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
