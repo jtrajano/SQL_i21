@@ -67,7 +67,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'CN' and strDBNa
 			,vwcnt_lc5_yn =ptcnt_lc5_yn
 			,vwcnt_lc6_yn =ptcnt_lc6_yn
 			,vwcnt_ppd_yndm =ptcnt_prepaid_ynd
-			,vwcnt_un_prc=CAST(0.00 AS DECIMAL(18,6))  
+			,vwcnt_un_prc=CAST(ptcnt_un_prc AS DECIMAL(18,6))  
 			,vwcnt_prc_lvl = ptcnt_prc_lvl
 			,A4GLIdentity = CAST(A4GLIdentity   AS INT)
 			FROM ptcntmst
