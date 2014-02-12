@@ -2,11 +2,11 @@
 	DROP VIEW vwcoctlmst
 GO
 
-IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuTMcoctlmst')
-	DROP VIEW vyuTMcoctlmst
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuTMOriginOption')
+	DROP VIEW vyuTMOriginOption
 GO
 
-CREATE VIEW [dbo].[vyuTMcoctlmst]
+CREATE VIEW [dbo].[vyuTMOriginOption]
 AS
 SELECT TOP 1
 ysnLoanEquipment = CAST((CASE WHEN coctl_le_yn= 'Y' THEN 1 ELSE 0 END) AS BIT)

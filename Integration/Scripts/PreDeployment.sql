@@ -53,7 +53,7 @@
 :r ..\dbo\Views\vwCPStorage.sql
 
 -- TANK MANAGEMENT
-:r ..\dbo\Views\vyuTMcoctlmst.sql
+:r ..\dbo\Views\vyuTMOriginOption.sql
 :r ..\dbo\Views\vwctlmst.sql
 :r ..\dbo\Views\vwitmmst.sql
 :r ..\dbo\Views\vwivcmst.sql
