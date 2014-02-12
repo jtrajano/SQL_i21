@@ -2,6 +2,10 @@
 	DROP VIEW vwcoctlmst
 GO
 
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuTMcoctlmst')
+	DROP VIEW vyuTMcoctlmst
+GO
+
 IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuTMOriginOption')
 	DROP VIEW vyuTMOriginOption
 GO
