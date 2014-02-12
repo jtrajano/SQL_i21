@@ -348,7 +348,7 @@ ELSE
 			,[strTransactionForm]
 		FROM [dbo].tblGLPostRecap A
 		WHERE A.[strBatchID] = @strBatchID and A.[intUserID] = @intUserID
-		GROUP BY [strTransactionID],[intTransactionID],[dtmDate],[dblExchangeRate],[dtmDateEntered],[ysnIsUnposted],[intUserID],[strBatchID],[strCode],[strModuleName]
+		GROUP BY [strTransactionID],[intTransactionID],[dtmDate],[dblExchangeRate],[dtmDateEntered],[ysnIsUnposted],[intUserID],[strBatchID],[strCode],[strModuleName] ,[strTransactionForm]
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 
