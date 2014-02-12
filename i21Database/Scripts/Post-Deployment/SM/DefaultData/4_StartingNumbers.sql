@@ -19,7 +19,7 @@ GO
 			,[strModule]			= N'General Ledger'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tmp_ms_xx_tblSMStartingNumber WHERE strTransactionType = N'Audit Adjustment')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Audit Adjustment')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 2
 			,[strTransactionType]	= N'General Journal'
@@ -28,7 +28,7 @@ GO
 			,[strModule]			= N'General Ledger'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tmp_ms_xx_tblSMStartingNumber WHERE strTransactionType = N'General Journal')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'General Journal')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 3
 			,[strTransactionType]	= N'Batch Post'
@@ -37,7 +37,7 @@ GO
 			,[strModule]			= N'Posting'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tmp_ms_xx_tblSMStartingNumber WHERE strTransactionType = N'Batch Post')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Batch Post')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 4
 			,[strTransactionType]	= N'Recurring Journal'
@@ -46,7 +46,7 @@ GO
 			,[strModule]			= N'General Ledger'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tmp_ms_xx_tblSMStartingNumber WHERE strTransactionType = N'Recurring Journal')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Recurring Journal')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 5
 			,[strTransactionType]	= N'General Journal Reversal'
@@ -55,7 +55,7 @@ GO
 			,[strModule]			= N'General Ledger'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId] = 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tmp_ms_xx_tblSMStartingNumber WHERE strTransactionType = N'General Journal Reversal')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'General Journal Reversal')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 6
 			,[strTransactionType]	= N'COA Adjustment'
@@ -64,7 +64,7 @@ GO
 			,[strModule]			= N'General Ledger'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tmp_ms_xx_tblSMStartingNumber WHERE strTransactionType = N'COA Adjustment')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'COA Adjustment')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 7
 			,[strTransactionType]	= N'Bill Batch'
@@ -73,7 +73,7 @@ GO
 			,[strModule]			= N'Accounts Payable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tmp_ms_xx_tblSMStartingNumber WHERE strTransactionType = N'Bill Batch')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bill Batch')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 8
 			,[strTransactionType]	= N'Payable'
@@ -82,7 +82,7 @@ GO
 			,[strModule]			= N'Accounts Payable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tmp_ms_xx_tblSMStartingNumber WHERE strTransactionType = N'Payable')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Payable')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 9
 			,[strTransactionType]	= N'Bill'
@@ -91,7 +91,7 @@ GO
 			,[strModule]			= N'Accounts Payable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tmp_ms_xx_tblSMStartingNumber WHERE strTransactionType = N'Bill')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bill')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 10
 			,[strTransactionType]	= N'Bank Deposit'
@@ -100,7 +100,7 @@ GO
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tmp_ms_xx_tblSMStartingNumber WHERE strTransactionType = N'Bank Deposit')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bank Deposit')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 11
 			,[strTransactionType]	= N'Bank Withdrawal'
@@ -109,7 +109,7 @@ GO
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tmp_ms_xx_tblSMStartingNumber WHERE strTransactionType = N'Bank Withdrawal')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bank Withdrawal')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 12
 			,[strTransactionType]	= N'Bank Transfer'
@@ -118,7 +118,7 @@ GO
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tmp_ms_xx_tblSMStartingNumber WHERE strTransactionType = N'Bank Transfer')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bank Transfer')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 13
 			,[strTransactionType]	= N'Bank Transaction'
@@ -127,7 +127,7 @@ GO
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tmp_ms_xx_tblSMStartingNumber WHERE strTransactionType = N'Bank Transaction')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bank Transaction')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 14
 			,[strTransactionType]	= N'Misc Checks'
@@ -136,7 +136,7 @@ GO
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tmp_ms_xx_tblSMStartingNumber WHERE strTransactionType = N'Misc Checks')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Misc Checks')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 15
 			,[strTransactionType]	= N'Bank Stmt Import'
@@ -145,7 +145,7 @@ GO
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tmp_ms_xx_tblSMStartingNumber WHERE strTransactionType = N'Bank Stmt Import')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bank Stmt Import')
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
