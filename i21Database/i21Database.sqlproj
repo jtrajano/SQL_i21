@@ -414,6 +414,7 @@
     <Build Include="dbo\Stored Procedures\usp_ReverseGLEntries.sql" />
     <Build Include="dbo\Tables\tblCMBankStatementImport.sql" />
     <Build Include="dbo\Stored Procedures\FindMatchingRecordsForBankRecon.sql" />
+    <Build Include="dbo\Stored Procedures\usp_PostAuditAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
