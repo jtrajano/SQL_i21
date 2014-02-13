@@ -15,7 +15,7 @@ ON tblAPBillBatch
 AFTER INSERT
 AS
 	DECLARE @BillBatchId NVARCHAR(50)
-	EXEC uspSMGetStartingNumber 7, @BillBatchId
+	EXEC uspSMGetStartingNumber 7, @BillBatchId OUT
 
 	IF(@BillBatchId IS NOT NULL)
 	BEGIN

@@ -25,7 +25,7 @@ ON tblAPPayment
 AFTER INSERT
 AS
 	DECLARE @PaymentId NVARCHAR(50)
-	EXEC uspSMGetStartingNumber 8, @PaymentId
+	EXEC uspSMGetStartingNumber 8, @PaymentId OUT
 	
 	IF(@PaymentId IS NOT NULL)
 	BEGIN
