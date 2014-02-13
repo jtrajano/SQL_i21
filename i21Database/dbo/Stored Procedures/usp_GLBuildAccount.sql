@@ -50,7 +50,7 @@ BEGIN
 		   CAST(CAST(B.strPrimary AS INT) AS NVARCHAR(50)) + SUBSTRING(B.strSegment,0,(select TOP 1 intLength + 1 from tblGLAccountStructure where strType = 'Segment'  order by intSort)) + '-' + 
 				REPLICATE('0',(select 8 - SUM(intLength) from tblGLAccountStructure where strType = 'Segment' and intAccountStructureID <> (select TOP 1 intAccountStructureID from tblGLAccountStructure where strType = 'Segment' order by intSort))) +  
 				SUBSTRING(B.strSegment,(select TOP 1 intLength + 1 from tblGLAccountStructure where strType = 'Segment'  order by intSort),(select SUM(intLength) from tblGLAccountStructure where strType = 'Segment')) as strCurrentExternalID,
-		   'Legacy' as strCompanyID,
+		   'Origin' as strCompanyID,
 		   1
 	FROM tblGLTempAccount B
 	WHERE intUserID = @intUserID and strAccountID NOT IN (SELECT stri21ID FROM tblGLCOACrossReference)	

@@ -1,4 +1,13 @@
 ﻿GO
+	PRINT N'BEGIN CLEAN UP AND INSERT DEFAULT DATA'
+GO
+	IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tmpSMStartingNumber')
+		DROP TABLE tmpSMStartingNumber
+GO
+	SELECT * INTO tmpSMStartingNumber FROM tblSMStartingNumber
+GO
+	TRUNCATE TABLE tblSMStartingNumber
+GO
 	PRINT N'BEGIN INSERT DEFAULT STARTING NUMBERS'
 GO
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] ON
@@ -150,4 +159,16 @@ GO
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'
+GO
+	-- Update the intNumber to update what really should be the current value
+	UPDATE tblSMStartingNumber
+	SET intNumber = x.intNumber
+	FROM tmpSMStartingNumber x
+	WHERE tblSMStartingNumber.strTransactionType = x.strTransactionType
+
+GO
+	IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tmpSMStartingNumber')
+		DROP TABLE tmpSMStartingNumber
+GO
+	PRINT N'BEGIN CLEAN UP AND INSERT DEFAULT DATA'
 GO

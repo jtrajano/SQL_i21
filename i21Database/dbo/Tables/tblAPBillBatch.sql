@@ -15,10 +15,8 @@ ON tblAPBillBatch
 AFTER INSERT
 AS
 	DECLARE @BillBatchId NVARCHAR(50)
-	SELECT @BillBatchId = strPrefix + CONVERT(NVARCHAR,intNumber + 1) 
-		FROM tblSMStartingNumber 
-	WHERE strTransactionType = 'Bill Batch' AND ysnEnable = 1
-	
+	EXEC uspSMGetStartingNumber 7, @BillBatchId OUT
+
 	IF(@BillBatchId IS NOT NULL)
 	BEGIN
 	UPDATE tblAPBillBatch
@@ -26,7 +24,3 @@ AS
 	FROM tblAPBillBatch A
 		INNER JOIN INSERTED B ON A.intBillBatchId = B.intBillBatchId
 	END
-
-	UPDATE tblSMStartingNumber
-		SET intNumber = intNumber + 1
-	WHERE strTransactionType = 'Bill Batch' AND ysnEnable = 1

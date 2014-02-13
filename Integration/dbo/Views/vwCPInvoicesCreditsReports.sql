@@ -51,6 +51,41 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 	EXEC ('
 		CREATE VIEW [dbo].[vwCPInvoicesCreditsReports]
 		AS
-		select ''PETRO HERE'' XX
+		select
+			strCompanyName = rtrim(ltrim(c.coctl_co_name))
+			,strCompanyAddress = rtrim(ltrim(c.coctl_co_addr))
+			,strCompanyAddress2 = rtrim(ltrim(c.coctl_co_addr2))
+			,strCompanyCityStateZip = rtrim(ltrim(c.coctl_co_city)) + '', '' + rtrim(ltrim(c.coctl_co_state)) + '' '' + rtrim(ltrim(c.coctl_co_zip))
+			,strCustomerName = rtrim(ltrim(t.ptcus_first_name)) + '' '' + rtrim(ltrim(t.ptcus_last_name))
+			,strCustomerAddress = rtrim(ltrim(t.ptcus_addr))
+			,strCustomerCityStateZip = rtrim(ltrim(t.ptcus_city)) + '', '' + rtrim(ltrim(t.ptcus_state)) + '' '' + rtrim(ltrim(t.ptcus_zip))
+			,strInvoiceNo = rtrim(ltrim(v.ptivc_invc_no))
+			,dtmOrderDate = (case len(convert(varchar, d.ptstm_rev_dt)) when 8 then convert(date, cast(convert(varchar, d.ptstm_rev_dt) AS CHAR(12)), 112) else null end)
+			,strAccountNo = rtrim(ltrim(t.ptcus_cus_no))
+			,strOrderNo = rtrim(ltrim(v.ptivc_invc_no))
+			,strPONo = rtrim(ltrim(v.ptivc_po_no))
+			,dtmShipDate = (case len(convert(varchar, d.ptstm_ship_rev_dt)) when 8 then convert(date, cast(convert(varchar, d.ptstm_ship_rev_dt) AS CHAR(12)), 112) else null end)
+			,strTerms = rtrim(ltrim(d.ptstm_terms_code))
+			,strSalesMan = rtrim(ltrim(v.ptivc_sold_by))
+			,strLocationNo = rtrim(ltrim(v.ptivc_loc_no))
+			,strComment = rtrim(ltrim(v.ptivc_comment))
+			,strItemNo = rtrim(ltrim(dd.ptstm_itm_no))
+			,strDescription = ''''
+			,strUnitsSold = convert(nvarchar, round(dd.ptstm_un, 4)) + '' '' + rtrim(ltrim(dd.ptstm_un_desc))
+			,dblUnitrice = round(dd.ptstm_un_prc, 4)
+			,dblExtended = convert(decimal(10,2),(dd.ptstm_un * dd.ptstm_un_prc))
+			,strTax = ''GROUND WATER TAX''
+			,strTaxUnitsSold = convert(nvarchar, round(dd.ptstm_un, 4)) + '' '' + dd.ptstm_un_desc
+			,dblTaxUnitPrice = round(cast(dd.ptstm_lc1_rt as float), 4)
+			--,dblTaxExtended = convert(decimal(10,2), (((dd.agstm_un * dd.agstm_un_prc) * dd.agstm_lc1_rt)/100))
+			,dblTaxExtended = convert(decimal(10,2), (dd.ptstm_pak_qty * dd.ptstm_un_prc))
+		from coctlmst c, ptcusmst t, ptivcmst v, ptstmmst d, ptstmmst dd
+		where v.ptivc_cus_no = t.ptcus_cus_no
+			and d.ptstm_bill_to_cus = t.ptcus_cus_no
+			and d.ptstm_ivc_no = v.ptivc_invc_no
+			and d.ptstm_rec_type = 1
+			and dd.ptstm_bill_to_cus = t.ptcus_cus_no
+			and dd.ptstm_ivc_no = v.ptivc_invc_no
+			and dd.ptstm_rec_type = 5
 		')
 GO
