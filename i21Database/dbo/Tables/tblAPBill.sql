@@ -34,7 +34,7 @@ ON tblAPBill
 AFTER INSERT
 AS
 	DECLARE @BillId NVARCHAR(50)
-	EXEC uspSMGetStartingNumber 9, @BillId
+	EXEC uspSMGetStartingNumber 9, @BillId OUT
 	
 	IF(@BillId IS NOT NULL)
 	BEGIN

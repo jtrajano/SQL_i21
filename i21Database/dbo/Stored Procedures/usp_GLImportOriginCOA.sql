@@ -14,7 +14,11 @@ SET NOCOUNT ON
 
 IF (EXISTS(SELECT SegmentCode FROM (SELECT glact_acct1_8 AS SegmentCode,max(glact_desc) AS CodeDescription,glact_type FROM glactmst GROUP BY glact_acct1_8,glact_type) tblX group by SegmentCode HAVING COUNT(*) > 1) and @ysnOverride = 0)
 BEGIN
-	SET @result = 'There are accounts that are classified as an Income and Balance Sheet Type account. <br/> Kindly verify at Legacy GL.'
+	SET @result = 'There are accounts that are classified as an Income and Balance Sheet Type account. <br/> Kindly verify at Origin GL.'
+END
+ELSE IF ((SELECT COUNT(*) FROM (SELECT DISTINCT(LEN(glact_acct1_8)) AS SegmentCode FROM glactmst) tblSegment) > 1 and @ysnOverride = 0)
+BEGIN
+	SET @result = 'There are accounts with different lengths. <br/> Kindly verify at Origin GL.'
 END
 ELSE
 BEGIN
@@ -41,8 +45,12 @@ BEGIN
 	-- IMPORT PRIMARY ACCOUNT
 	IF @ysnPrimary = 1
 	BEGIN
-		DECLARE @query VARCHAR(500)		
-		SET @query = 'SELECT glact_acct1_8 AS SegmentCode,max(glact_desc) AS CodeDescription,glact_type FROM glactmst GROUP BY glact_acct1_8,glact_type'
+		DECLARE	@Length		INT
+				,@query		VARCHAR(500)	
+					
+		SET @Length = ISNULL((SELECT intLength FROM tblGLAccountStructure WHERE strType = 'Primary'),0)
+		SET @query = 'SELECT glact_acct1_8 AS SegmentCode,max(glact_desc) AS CodeDescription,glact_type FROM glactmst WHERE LEN(glact_acct1_8) = ' + CAST(@Length AS NVARCHAR(10)) + ' GROUP BY glact_acct1_8,glact_type'		
+		
 		DECLARE @tblQuery TABLE
 		(
 			 SegmentCode			NVARCHAR(200) COLLATE Latin1_General_CI_AS NOT NULL
@@ -52,7 +60,7 @@ BEGIN
 		
 		IF @ysnOverride = 1
 		BEGIN
-			SET @query = 'SELECT glact_acct1_8 AS SegmentCode,max(glact_desc) AS CodeDescription,glact_type = (SELECT TOP 1 glact_type FROM glactmst AS tempType WHERE tempType.glact_acct1_8 = tempCode.glact_acct1_8 GROUP BY glact_type) FROM glactmst AS tempCode GROUP BY glact_acct1_8'
+			SET @query = 'SELECT glact_acct1_8 AS SegmentCode,max(glact_desc) AS CodeDescription,glact_type = (SELECT TOP 1 glact_type FROM glactmst AS tempType WHERE tempType.glact_acct1_8 = tempCode.glact_acct1_8 GROUP BY glact_type) FROM glactmst AS tempCode WHERE LEN(glact_acct1_8) = ' + CAST(@Length AS NVARCHAR(10)) + ' GROUP BY glact_acct1_8'
 		END
 
 		INSERT INTO @tblQuery EXEC (@query)			
