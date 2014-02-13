@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE CommitPrintCheckVerification
+CREATE PROCEDURE uspCMCommitPrintCheckVerification
 	@intBankAccountId INT = NULL,
 	@strTransactionId NVARCHAR(40) = NULL,
 	@strBatchId NVARCHAR(20) = NULL,

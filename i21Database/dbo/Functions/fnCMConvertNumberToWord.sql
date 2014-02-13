@@ -1,5 +1,5 @@
 ﻿
-CREATE FUNCTION fn_ConvertNumberToWord(@dblAmount AS NUMERIC(38, 2))	
+CREATE FUNCTION fnCMConvertNumberToWord(@dblAmount AS NUMERIC(38, 2))	
 RETURNS NVARCHAR(4000)
 AS
 BEGIN 
@@ -31,7 +31,7 @@ IF @dblAmount = 0 SET @strReturnValue = 'Zero'
 --SET @intPlaceHolder = CAST(@dblAmount AS INT) / 1000000000000
 SET @intPlaceHolder = cast((CAST(@dblAmount AS numeric(38,0)) / 1000000000000) as INT)
 SET @dblAmount = @dblAmount - (@intPlaceHolder * 1000000000000)
-SELECT @strAmountChild = dbo.fn_HundredsPlaceToWord(@intPlaceHolder)
+SELECT @strAmountChild = dbo.fnCMHundredsPlaceToWord(@intPlaceHolder)
 IF @strAmountChild <> '' 
 	BEGIN
 		SET @strReturnValue = @strAmountChild + 'Trillion'
@@ -43,7 +43,7 @@ SET @strAmountChild = ''
  SET @intPlaceHolder = cast( (CAST(@dblAmount AS numeric(38,0)) / 1000000000) as INT)
 
 SET @dblAmount = @dblAmount - (@intPlaceHolder * 1000000000) 
-SELECT @strAmountChild = dbo.fn_HundredsPlaceToWord(@intPlaceHolder)
+SELECT @strAmountChild = dbo.fnCMHundredsPlaceToWord(@intPlaceHolder)
 IF @strAmountChild <> '' 
 	BEGIN
 		SET @strReturnValue = ' ' + @strReturnValue + ' ' + @strAmountChild + ' Billion'
@@ -54,7 +54,7 @@ SET @strAmountChild = ''
 --SET @intPlaceHolder = CAST(@dblAmount AS INT) / 1000000
 SET @intPlaceHolder = cast((CAST(@dblAmount AS numeric(38,0)) / 1000000) as INT)
 SET @dblAmount = @dblAmount - (@intPlaceHolder * 1000000)
-SELECT @strAmountChild = dbo.fn_HundredsPlaceToWord(@intPlaceHolder)
+SELECT @strAmountChild = dbo.fnCMHundredsPlaceToWord(@intPlaceHolder)
 IF @strAmountChild <> ''
 	BEGIN 
 		SET @strReturnValue = ' ' + @strReturnValue + ' ' + @strAmountChild + ' Million'
@@ -65,7 +65,7 @@ SET @strAmountChild = ''
 -- SET @intPlaceHolder = CAST(@dblAmount AS INT) / 1000
 SET @intPlaceHolder = cast( (CAST(@dblAmount AS float) / 1000) as INT)
 SET @dblAmount = @dblAmount - (@intPlaceHolder * 1000)
-SELECT @strAmountChild = dbo.fn_HundredsPlaceToWord(@intPlaceHolder)
+SELECT @strAmountChild = dbo.fnCMHundredsPlaceToWord(@intPlaceHolder)
 IF @strAmountChild <> '' 
 	BEGIN
 		SET @strReturnValue = ' ' + @strReturnValue + ' ' + @strAmountChild +  ' Thousand'
@@ -76,7 +76,7 @@ SET @strAmountChild = ''
 --SET @intPlaceHolder = CAST(@dblAmount AS INT) / 1
 SET @intPlaceHolder = cast((CAST(@dblAmount AS INT) / 1) as INT)
 SET @dblAmount = @dblAmount - @intPlaceHolder
-SELECT @strAmountChild = dbo.fn_HundredsPlaceToWord(@intPlaceHolder)
+SELECT @strAmountChild = dbo.fnCMHundredsPlaceToWord(@intPlaceHolder)
 IF @strAmountChild <> '' 
 	BEGIN
 		SET @strReturnValue = ' ' + @strReturnValue + ' ' + @strAmountChild 

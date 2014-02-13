@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE GetBankCurrentEndingBalance
+CREATE PROCEDURE uspCMGetBankCurrentEndingBalance
 	@intBankAccountId INT = NULL,
 	@dtmStatementDate DATETIME = NULL,	
 	@dblEndingBalance AS NUMERIC(18, 6) = NULL OUTPUT

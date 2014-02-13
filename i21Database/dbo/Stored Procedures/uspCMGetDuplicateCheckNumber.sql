@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE GetDuplicateCheckNumber
+CREATE PROCEDURE uspCMGetDuplicateCheckNumber
 	@intBankAccountId INT = NULL,
 	@strTransactionId AS NVARCHAR(40) = NULL,
 	@strCheckNo AS NVARCHAR(20) = NULL

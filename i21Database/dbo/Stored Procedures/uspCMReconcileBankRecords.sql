@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE ReconcileBankRecords
+CREATE PROCEDURE uspCMReconcileBankRecords
 	@intBankAccountId INT = NULL,
 	@dtmDate AS DATETIME = NULL
 AS

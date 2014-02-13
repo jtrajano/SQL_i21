@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE ApplyCheckChangeForCheckPrint
+CREATE PROCEDURE uspCMApplyCheckChangeForCheckPrint
 	@intBankAccountId INT = NULL,
 	@strTransactionId NVARCHAR(40) = NULL,
 	@strBatchId NVARCHAR(20) = NULL,

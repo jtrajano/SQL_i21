@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE GenerateCheckNumbers
+CREATE PROCEDURE uspCMGenerateCheckNumbers
 	@intBankAccountId INT = NULL,
 	@intStartNumber INT = NULL,
 	@intEndNumber INT = NULL,
@@ -26,21 +26,21 @@ DECLARE @CHECK_NUMBER_STATUS_UNUSED AS INT = 1
 
 -- Validate the start and end numbers
 IF (@intStartNumber IS NULL OR @intEndNumber IS NULL)
-	GOTO GenerateCheckNumbers_Rollback
+	GOTO uspCMGenerateCheckNumbers_Rollback
 	
 IF (@intStartNumber < 0 OR @intEndNumber < 0)
-	GOTO GenerateCheckNumbers_Rollback
+	GOTO uspCMGenerateCheckNumbers_Rollback
 
 IF (@intStartNumber > @intEndNumber)
-	GOTO GenerateCheckNumbers_Rollback
+	GOTO uspCMGenerateCheckNumbers_Rollback
 
 IF NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblCMBankAccount WHERE intBankAccountId = @intBankAccountId)
-	GOTO GenerateCheckNumbers_Rollback
+	GOTO uspCMGenerateCheckNumbers_Rollback
 
 -- LOOP THRU THE NUMBERS 
 DECLARE @intCheckNumber AS INT 
 SET @intCheckNumber = @intStartNumber
-IF @@ERROR <> 0	GOTO GenerateCheckNumbers_Rollback
+IF @@ERROR <> 0	GOTO uspCMGenerateCheckNumbers_Rollback
 
 WHILE (@intCheckNumber <= @intEndNumber)
 BEGIN
@@ -75,31 +75,31 @@ BEGIN
 				,dtmCreated			= GETDATE()
 				,dtmCheckPrinted	= NULL
 				,intConcurrencyId	= 1	
-		IF @@ERROR <> 0	GOTO GenerateCheckNumbers_Rollback				
+		IF @@ERROR <> 0	GOTO uspCMGenerateCheckNumbers_Rollback				
 	END
 	ELSE 
 	BEGIN 
 		SET @isDuplicateFound = 1
-		IF @@ERROR <> 0	GOTO GenerateCheckNumbers_Rollback
+		IF @@ERROR <> 0	GOTO uspCMGenerateCheckNumbers_Rollback
 	END
 	
 	SET @intCheckNumber = @intCheckNumber + 1
-	IF @@ERROR <> 0	GOTO GenerateCheckNumbers_Rollback	
+	IF @@ERROR <> 0	GOTO uspCMGenerateCheckNumbers_Rollback	
 END
 
 
 --=====================================================================================================================================
 -- 	EXIT ROUTINES
 ---------------------------------------------------------------------------------------------------------------------------------------
-GenerateCheckNumbers_Commit:
+uspCMGenerateCheckNumbers_Commit:
 	COMMIT TRANSACTION
 	SET @returnValue = 1
-	GOTO GenerateCheckNumbers_Exit
+	GOTO uspCMGenerateCheckNumbers_Exit
 	
-GenerateCheckNumbers_Rollback:
+uspCMGenerateCheckNumbers_Rollback:
 	ROLLBACK TRANSACTION 
 	SET @returnValue = -1
 	
-GenerateCheckNumbers_Exit:	
+uspCMGenerateCheckNumbers_Exit:	
 	SET @isDuplicateFound = ISNULL(@isDuplicateFound, 0)
 	RETURN @returnValue

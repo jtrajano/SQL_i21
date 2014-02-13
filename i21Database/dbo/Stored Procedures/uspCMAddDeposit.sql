@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE AddDeposit
+CREATE PROCEDURE uspCMAddDeposit
 	@intBankAccountId INT
 	,@dtmDate DATETIME 
 	,@intGLAccountId INT	
@@ -47,13 +47,13 @@ DECLARE @BANK_DEPOSIT INT = 1
 SELECT	@strTransactionId = strPrefix + CAST(intNumber AS NVARCHAR(20))
 FROM	dbo.tblSMStartingNumber
 WHERE	strTransactionType = @STARTING_NUMBER_DEPOSIT
-IF @@ERROR <> 0	GOTO AddDeposit_Rollback
+IF @@ERROR <> 0	GOTO uspCMAddDeposit_Rollback
 
 -- Increment the next transaction number
 UPDATE	dbo.tblSMStartingNumber
 SET		intNumber += 1
 WHERE	strTransactionType = @STARTING_NUMBER_DEPOSIT
-IF @@ERROR <> 0	GOTO AddDeposit_Rollback
+IF @@ERROR <> 0	GOTO uspCMAddDeposit_Rollback
 
 -- Create the Bank Deposit HEADER
 INSERT INTO tblCMBankTransaction(
@@ -101,7 +101,7 @@ SELECT	strTransactionId			= @strTransactionId
 		,strState					= ''
 		,strCountry					= ''
 		,dblAmount					= @dblAmount
-		,strAmountInWords			= dbo.fn_ConvertNumberToWord(@dblAmount)
+		,strAmountInWords			= dbo.fnCMConvertNumberToWord(@dblAmount)
 		,strMemo					= ISNULL(@strDescription, '')
 		,strReferenceNo				= ''
 		,dtmCheckPrinted			= NULL
@@ -117,7 +117,7 @@ SELECT	strTransactionId			= @strTransactionId
 		,dtmLastModified			= GETDATE()
 		,intConcurrencyId			= 1
 SET @intTransactionId = @@IDENTITY
-IF @@ERROR <> 0	GOTO AddDeposit_Rollback
+IF @@ERROR <> 0	GOTO uspCMAddDeposit_Rollback
 
 -- Create the Bank Deposit DETAIL
 INSERT INTO tblCMBankTransactionDetail(
@@ -150,7 +150,7 @@ SELECT	intTransactionId		= @intTransactionId
 		,intConcurrencyId		= 1
 FROM	tblGLAccount 
 WHERE	intAccountID = @intGLAccountId
-IF @@ERROR <> 0	GOTO AddDeposit_Rollback
+IF @@ERROR <> 0	GOTO uspCMAddDeposit_Rollback
 
 -- Post the transaction 
 BEGIN TRY
@@ -161,23 +161,23 @@ BEGIN TRY
 			,@isSuccessful = @isAddSuccessful OUTPUT
 			,@message_id = @msg_id OUTPUT
 			
-	IF @@ERROR <> 0	GOTO AddDeposit_Rollback	
-	GOTO AddDeposit_Commit
+	IF @@ERROR <> 0	GOTO uspCMAddDeposit_Rollback	
+	GOTO uspCMAddDeposit_Commit
 END TRY
 BEGIN CATCH
-	GOTO AddDeposit_Exit
+	GOTO uspCMAddDeposit_Exit
 END CATCH
 
 --=====================================================================================================================================
 -- 	EXIT ROUTINES
 ---------------------------------------------------------------------------------------------------------------------------------------
-AddDeposit_Commit:
+uspCMAddDeposit_Commit:
 	SET @isAddSuccessful = 1
 	COMMIT TRANSACTION
-	GOTO AddDeposit_Exit
+	GOTO uspCMAddDeposit_Exit
 	
-AddDeposit_Rollback:
+uspCMAddDeposit_Rollback:
 	SET @isAddSuccessful = 0
 	ROLLBACK TRANSACTION 
 	
-AddDeposit_Exit:
+uspCMAddDeposit_Exit:

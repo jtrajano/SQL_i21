@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE ApplyCheckChangeBankReconciliation
+CREATE PROCEDURE uspCMApplyCheckChangeBankReconciliation
 	@intBankAccountId INT = NULL,
 	@ysnClr BIT = NULL,
 	@strSide AS NVARCHAR(10) = 'DEBIT', 

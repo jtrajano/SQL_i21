@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE CheckPrint_ValidatePrintJobs
+CREATE PROCEDURE uspCMCheckPrint_ValidatePrintJobs
 	@intBankAccountId INT = NULL,
 	@ysnPrintJobExists INT = NULL OUTPUT 
 AS

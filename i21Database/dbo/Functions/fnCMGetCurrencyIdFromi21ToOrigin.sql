@@ -1,5 +1,5 @@
 ﻿
-CREATE FUNCTION fn_GetCurrencyIdFromi21ToOrigin(@inti21CurrencyID AS INT)	
+CREATE FUNCTION fnCMGetCurrencyIdFromi21ToOrigin(@inti21CurrencyID AS INT)	
 RETURNS CHAR(3) 
 AS
 BEGIN 

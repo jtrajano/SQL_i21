@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE GetBankBeginningBalance
+CREATE PROCEDURE uspCMGetBankBeginningBalance
 	@intBankAccountId INT = NULL,
 	@dtmDate AS DATETIME = NULL,
 	@dblBalance AS NUMERIC(18, 6) = NULL OUTPUT

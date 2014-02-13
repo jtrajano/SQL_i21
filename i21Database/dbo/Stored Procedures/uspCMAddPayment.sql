@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE AddPayment
+CREATE PROCEDURE uspCMAddPayment
 	@intBankAccountId INT
 	,@dtmDate DATETIME 
 	,@intGLAccountId INT	
@@ -47,13 +47,13 @@ DECLARE @BANK_DEPOSIT INT = 1
 SELECT	@strTransactionId = strPrefix + CAST(intNumber AS NVARCHAR(20))
 FROM	dbo.tblSMStartingNumber
 WHERE	strTransactionType = @STARTING_NUMBER_BANK_TRANSACTION
-IF @@ERROR <> 0	GOTO AddPayment_Rollback
+IF @@ERROR <> 0	GOTO uspCMAddPayment_Rollback
 
 -- Increment the next transaction number
 UPDATE	dbo.tblSMStartingNumber
 SET		intNumber += 1
 WHERE	strTransactionType = @STARTING_NUMBER_BANK_TRANSACTION
-IF @@ERROR <> 0	GOTO AddPayment_Rollback
+IF @@ERROR <> 0	GOTO uspCMAddPayment_Rollback
 
 -- Create the Bank Deposit HEADER
 INSERT INTO tblCMBankTransaction(
@@ -101,7 +101,7 @@ SELECT	strTransactionId			= @strTransactionId
 		,strState					= ''
 		,strCountry					= ''
 		,dblAmount					= @dblAmount * -1
-		,strAmountInWords			= dbo.fn_ConvertNumberToWord(@dblAmount * -1)
+		,strAmountInWords			= dbo.fnCMConvertNumberToWord(@dblAmount * -1)
 		,strMemo					= ISNULL(@strDescription, '')
 		,strReferenceNo				= ''
 		,dtmCheckPrinted			= NULL
@@ -117,7 +117,7 @@ SELECT	strTransactionId			= @strTransactionId
 		,dtmLastModified			= GETDATE()
 		,intConcurrencyId			= 1
 SET @intTransactionId = @@IDENTITY 
-IF @@ERROR <> 0	GOTO AddPayment_Rollback
+IF @@ERROR <> 0	GOTO uspCMAddPayment_Rollback
 
 -- Create the Bank Deposit DETAIL
 INSERT INTO tblCMBankTransactionDetail(
@@ -150,7 +150,7 @@ SELECT	intTransactionId		= @intTransactionId
 		,intConcurrencyId		= 1
 FROM	tblGLAccount 
 WHERE	intAccountID = @intGLAccountId
-IF @@ERROR <> 0	GOTO AddPayment_Rollback
+IF @@ERROR <> 0	GOTO uspCMAddPayment_Rollback
 
 -- Post the transaction 
 BEGIN TRY
@@ -161,23 +161,23 @@ BEGIN TRY
 			,@isSuccessful = @isAddSuccessful OUTPUT
 			,@message_id = @msg_id OUTPUT
 			
-	IF @@ERROR <> 0	GOTO AddPayment_Rollback	
-	GOTO AddPayment_Commit
+	IF @@ERROR <> 0	GOTO uspCMAddPayment_Rollback	
+	GOTO uspCMAddPayment_Commit
 END TRY
 BEGIN CATCH
-	GOTO AddPayment_Rollback
+	GOTO uspCMAddPayment_Rollback
 END CATCH
 
 --=====================================================================================================================================
 -- 	EXIT ROUTINES
 ---------------------------------------------------------------------------------------------------------------------------------------
-AddPayment_Commit:
+uspCMAddPayment_Commit:
 	SET @isAddSuccessful = 1
 	COMMIT TRANSACTION
-	GOTO AddPayment_Exit
+	GOTO uspCMAddPayment_Exit
 	
-AddPayment_Rollback:
+uspCMAddPayment_Rollback:
 	SET @isAddSuccessful = 0
 	ROLLBACK TRANSACTION 
 
-AddPayment_Exit:
+uspCMAddPayment_Exit:

@@ -2,14 +2,14 @@
  '====================================================================================================================================='
    SCRIPT CREATED BY: Feb Montefrio	DATE CREATED: December 26, 2013
   -------------------------------------------------------------------------------------------------------------------------------------						
-   Script Name         :	fn_ConvertOriginDateToSQLDateTime
+   Script Name         :	fnCMConvertOriginDateToSQLDateTime
 
    Description		   :	The origin system saves the date as integer and it is formatted as yyyymmdd. 
 							This function will convert the integer date values to SQL DateTime. 
 							
 */
 
-CREATE FUNCTION fn_ConvertOriginDateToSQLDateTime(@intDate AS INT)	
+CREATE FUNCTION fnCMConvertOriginDateToSQLDateTime(@intDate AS INT)	
 RETURNS DATETIME
 AS
 BEGIN 

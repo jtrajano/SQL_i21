@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE GetBankGLBalance
+CREATE PROCEDURE uspCMGetBankGLBalance
 	@intBankAccountId INT = NULL,
 	@dtmDate AS DATETIME = NULL
 AS

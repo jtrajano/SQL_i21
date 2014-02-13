@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE FindMatchingRecordsForBankRecon
+CREATE PROCEDURE uspCMFindMatchingRecordsForBankRecon
 	@strBankStatementImportId NVARCHAR(40) = NULL,
 	@ysnSuccess AS BIT = 0 OUTPUT
 AS

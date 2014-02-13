@@ -280,7 +280,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 			)	
 			SELECT 
 					apcbk_no					= i.strCbkNo
-					,apcbk_currency				= dbo.fn_GetCurrencyIdFromi21ToOrigin(i.intCurrencyId)
+					,apcbk_currency				= dbo.fnCMGetCurrencyIdFromi21ToOrigin(i.intCurrencyId)
 					,apcbk_password				= i.apcbk_password
 					,apcbk_desc					= bank.strBankName COLLATE SQL_Latin1_General_CP1_CS_AS
 					,apcbk_bank_acct_no			= i.strBankAccountNo COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -303,7 +303,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 					,apcbk_transit_route		= NULL
 					,apcbk_ach_company_id		= NULL
 					,apcbk_ach_bankname			= NULL
-					,apcbk_gl_cash				= dbo.fn_GetGLAccountIdFromi21ToOrigin(i.intGLAccountId)
+					,apcbk_gl_cash				= dbo.fnCMGetGLAccountIdFromi21ToOrigin(i.intGLAccountId)
 					,apcbk_gl_ap				= NULL
 					,apcbk_gl_disc				= NULL
 					,apcbk_gl_wthhld			= NULL
@@ -402,7 +402,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 			-- UPDATE modified record for apcbkmst_origin
 			UPDATE	dbo.apcbkmst_origin 
 			SET		apcbk_no					= i.strCbkNo
-					,apcbk_currency				= dbo.fn_GetCurrencyIdFromi21ToOrigin(i.intCurrencyId)
+					,apcbk_currency				= dbo.fnCMGetCurrencyIdFromi21ToOrigin(i.intCurrencyId)
 					,apcbk_password				= i.apcbk_password
 					,apcbk_desc					= bank.strBankName COLLATE SQL_Latin1_General_CP1_CS_AS
 					,apcbk_bank_acct_no			= i.strBankAccountNo COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -425,7 +425,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 					--,apcbk_transit_route		= NULL
 					--,apcbk_ach_company_id		= NULL
 					--,apcbk_ach_bankname		= NULL
-					,apcbk_gl_cash				= dbo.fn_GetGLAccountIdFromi21ToOrigin(i.intGLAccountId)
+					,apcbk_gl_cash				= dbo.fnCMGetGLAccountIdFromi21ToOrigin(i.intGLAccountId)
 					--,apcbk_gl_ap				= NULL
 					--,apcbk_gl_disc			= NULL
 					--,apcbk_gl_wthhld			= NULL
@@ -483,7 +483,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 			)	
 			SELECT 
 					apcbk_no					= i.strCbkNo
-					,apcbk_currency				= dbo.fn_GetCurrencyIdFromi21ToOrigin(i.intCurrencyId)
+					,apcbk_currency				= dbo.fnCMGetCurrencyIdFromi21ToOrigin(i.intCurrencyId)
 					,apcbk_password				= i.apcbk_password
 					,apcbk_desc					= bank.strBankName COLLATE SQL_Latin1_General_CP1_CS_AS
 					,apcbk_bank_acct_no			= i.strBankAccountNo COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -506,7 +506,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 					,apcbk_transit_route		= NULL
 					,apcbk_ach_company_id		= NULL
 					,apcbk_ach_bankname			= NULL
-					,apcbk_gl_cash				= dbo.fn_GetGLAccountIdFromi21ToOrigin(i.intGLAccountId)
+					,apcbk_gl_cash				= dbo.fnCMGetGLAccountIdFromi21ToOrigin(i.intGLAccountId)
 					,apcbk_gl_ap				= NULL
 					,apcbk_gl_disc				= NULL
 					,apcbk_gl_wthhld			= NULL

@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE CheckPrint_QueuePrintJobs
+CREATE PROCEDURE uspCMCheckPrint_QueuePrintJobs
 	@intBankAccountId INT = NULL,
 	@strTransactionId NVARCHAR(40) = NULL,
 	@strBatchId NVARCHAR(20) = NULL,

@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE GetClearedDeposits
+CREATE PROCEDURE uspCMGetClearedDeposits
 	@intBankAccountId INT = NULL,
 	@dtmStatementDate AS DATETIME = NULL
 AS

@@ -1,5 +1,5 @@
 ﻿
-CREATE FUNCTION fn_OnesPlaceToWord(@dblAmount AS NUMERIC(9, 2))
+CREATE FUNCTION fnCMOnesPlaceToWord(@dblAmount AS NUMERIC(9, 2))
 RETURNS NVARCHAR(2000) 
 AS
 BEGIN 
