@@ -43,7 +43,35 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 	EXEC ('
 		CREATE VIEW [dbo].[vwCPBABusinessSummary]
 		AS
-		select 1 xx
+			select
+			A4GLIdentity = row_number() over (order by a.ptstm_loc_no)
+			,strCustomerNo = a.ptstm_bill_to_cus
+			,strItem = a.ptstm_itm_no
+			,strLocation = a.ptstm_loc_no
+			,strClass = a.ptstm_class
+			,strDescription = b.ptitm_desc
+			,strUnitDescription = b.ptitm_unit
+			,strClassDescription = c.ptcls_desc
+			,strAdjustmentInventory = a.ptstm_adj_inv_yn
+			,agstm_fet_amt = a.ptstm_fet_amt
+			,agstm_set_amt = a.ptstm_set_amt
+			,agstm_sst_amt = a.ptstm_sst_amt
+			,agstm_ppd_amt_applied = null--a.agstm_ppd_amt_applied
+			,dblQuantity = a.ptstm_un
+			,dblAmount = null--a.agstm_sls
+			,dtmShipmentDate = (case len(convert(varchar, a.ptstm_ship_rev_dt)) when 8 then convert(date, cast(convert(varchar, a.ptstm_ship_rev_dt) AS CHAR(12)), 112) else null end)
+			,dblTotalAmount = 0.00
+		from
+			ptstmmst a
+		left outer join
+			ptclsmst c
+			on a.ptstm_class = c.ptcls_class
+		left outer join
+			ptitmmst b
+			on a.ptstm_itm_no = b.ptitm_itm_no
+			and a.ptstm_loc_no = b.ptitm_loc_no 
+		where
+			(a.ptstm_rec_type = ''5'')
 		')
 
 GO
