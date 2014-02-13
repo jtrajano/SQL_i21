@@ -416,7 +416,8 @@
     <Build Include="dbo\Functions\fnCMGetBankGLBalance.sql" />
     <Build Include="dbo\Functions\fnCMGetUnclearedPayments.sql" />
     <Build Include="dbo\Functions\fnCMGetUnclearedDeposits.sql" />
-	<Build Include="dbo\Stored Procedures\usp_PostAuditAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\usp_PostAuditAdjustment.sql" />
+    <Build Include="dbo\Views\vwCMBankReconciliationReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
