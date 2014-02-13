@@ -2,20 +2,31 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="12e2f399-ccf6-48cb-b7e0-2281e95e8557" name="Default" comment="">
-      <change type="DELETED" beforePath="C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\Manual Scripts\7. CM\6. Sync Origin and i21\9. Import Script for apchkmst.sql" afterPath="" />
-      <change type="DELETED" beforePath="C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\Manual Scripts\7. CM\6. Sync Origin and i21\Import Scripts\1. Bank and Bank Accounts Import.sql" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manual Scripts/7. CM/3. Default Data/1. Bank Transaction Types.sql" afterPath="$PROJECT_DIR$/Manual Scripts/7. CM/3. Default Data/1. Bank Transaction Types.sql" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manual Scripts/7. CM/1. Create Table/1. CM Create Tables.sql" afterPath="$PROJECT_DIR$/Manual Scripts/7. CM/1. Create Table/1. CM Create Tables.sql" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manual Scripts/7. CM/6. Sync Origin and i21/Functions/1. fn_GetGLAccountIDFromOriginToi21.sql" afterPath="$PROJECT_DIR$/Manual Scripts/7. CM/6. Sync Origin and i21/Functions/1. fn_GetGLAccountIDFromOriginToi21.sql" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manual Scripts/7. CM/5. Create SP/11. AddDeposit.sql" afterPath="$PROJECT_DIR$/Manual Scripts/7. CM/5. Create SP/11. AddDeposit.sql" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manual Scripts/7. CM/5. Create SP/12. AddPayment.sql" afterPath="$PROJECT_DIR$/Manual Scripts/7. CM/5. Create SP/12. AddPayment.sql" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manual Scripts/7. CM/5. Create SP/3. ReconcileBankRecords.sql" afterPath="$PROJECT_DIR$/Manual Scripts/7. CM/5. Create SP/3. ReconcileBankRecords.sql" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manual Scripts/7. CM/6. Sync Origin and i21/5. Create TRIGGER for apchkmst.sql" afterPath="$PROJECT_DIR$/Manual Scripts/7. CM/6. Sync Origin and i21/5. Create TRIGGER for apchkmst.sql" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manual Scripts/6. Posting/5. Create SP/6. PostCMBankDeposit.sql" afterPath="$PROJECT_DIR$/Manual Scripts/6. Posting/5. Create SP/6. PostCMBankDeposit.sql" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manual Scripts/7. CM/6. Sync Origin and i21/Functions/6. fn_GetNumbersFromString.sql" afterPath="$PROJECT_DIR$/Manual Scripts/7. CM/6. Sync Origin and i21/Functions/6. fn_GetNumbersFromString.sql" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manual Scripts/6. Posting/5. Create SP/7. PostCMBankTransaction.sql" afterPath="$PROJECT_DIR$/Manual Scripts/6. Posting/5. Create SP/7. PostCMBankTransaction.sql" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manual Scripts/6. Posting/5. Create SP/8. PostCMBankTransfer.sql" afterPath="$PROJECT_DIR$/Manual Scripts/6. Posting/5. Create SP/8. PostCMBankTransfer.sql" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Manual Scripts/6. Posting/5. Create SP/9. PostCMMiscChecks.sql" afterPath="$PROJECT_DIR$/Manual Scripts/6. Posting/5. Create SP/9. PostCMMiscChecks.sql" />
+      <change type="DELETED" beforePath="C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\dbo\Functions\fn_ConvertNumberToWord.sql" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\dbo\Functions\fn_ConvertOriginDateToSQLDateTime.sql" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\dbo\Functions\fn_GetCurrencyIdFromOriginToi21.sql" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\dbo\Functions\fn_GetCurrencyIdFromi21ToOrigin.sql" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\dbo\Functions\fn_GetGLAccountIdFromOriginToi21.sql" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\dbo\Functions\fn_GetGLAccountIdFromi21ToOrigin.sql" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\dbo\Stored Procedures\GetBankBalance.sql" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\dbo\Stored Procedures\GetBankBeginningBalance.sql" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\dbo\Stored Procedures\GetBankCurrentEndingBalance.sql" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\dbo\Stored Procedures\GetBankGLBalance.sql" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\dbo\Stored Procedures\GetClearedDeposits.sql" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\dbo\Stored Procedures\GetClearedPayments.sql" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\dbo\Stored Procedures\GetDuplicateCheckNumber.sql" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\dbo\Stored Procedures\GetUnclearedDeposits.sql" afterPath="" />
+      <change type="DELETED" beforePath="C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\dbo\Stored Procedures\GetUnclearedPayments.sql" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/i21.v11.suo" afterPath="$PROJECT_DIR$/i21.v11.suo" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/i21Database/dbo/Stored Procedures/AddDeposit.sql" afterPath="$PROJECT_DIR$/i21Database/dbo/Stored Procedures/AddDeposit.sql" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/i21Database/dbo/Stored Procedures/AddPayment.sql" afterPath="$PROJECT_DIR$/i21Database/dbo/Stored Procedures/AddPayment.sql" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/i21Database/dbo/Stored Procedures/PostCMBankTransfer.sql" afterPath="$PROJECT_DIR$/i21Database/dbo/Stored Procedures/PostCMBankTransfer.sql" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Integration/dbo/Views/apchkmst.sql" afterPath="$PROJECT_DIR$/Integration/dbo/Views/apchkmst.sql" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/i21Database/obj/Debug/i21Database.sqlproj.FileListAbsolute.txt" afterPath="$PROJECT_DIR$/i21Database/obj/Debug/i21Database.sqlproj.FileListAbsolute.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/i21Database/i21Database.sqlproj" afterPath="$PROJECT_DIR$/i21Database/i21Database.sqlproj" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/i21Database/dbo/Stored Procedures/uspCreateBankTransactionPayment.sql" afterPath="$PROJECT_DIR$/i21Database/dbo/Stored Procedures/uspCreateBankTransactionPayment.sql" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/i21Database/dbo/Stored Procedures/uspPostPayment.sql" afterPath="$PROJECT_DIR$/i21Database/dbo/Stored Procedures/uspPostPayment.sql" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Integration/dbo/Views/vwCMBankAccount.sql" afterPath="$PROJECT_DIR$/Integration/dbo/Views/vwCMBankAccount.sql" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="sqlscripts.iws" />
@@ -106,7 +117,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -124,8 +134,18 @@
               <option name="myItemId" value="sqlscripts" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
+          </PATH>
+          <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="Manual Scripts" />
+              <option name="myItemId" value="sqlscripts" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="sqlscripts" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="i21Database" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -139,15 +159,11 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="Manual Scripts" />
+              <option name="myItemId" value="i21Database" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="7. CM" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="6. Sync Origin and i21" />
+              <option name="myItemId" value="Scripts" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -161,246 +177,25 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="Manual Scripts" />
+              <option name="myItemId" value="i21Database" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="7. CM" />
+              <option name="myItemId" value="Scripts" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="6. Sync Origin and i21" />
+              <option name="myItemId" value="Conversion" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="Functions" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sqlscripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sqlscripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Manual Scripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="7. CM" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="5. Create SP" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sqlscripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sqlscripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Manual Scripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="7. CM" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="4. Create Function" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sqlscripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sqlscripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Manual Scripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="7. CM" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="3. Default Data" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sqlscripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sqlscripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Manual Scripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="7. CM" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sqlscripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sqlscripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Manual Scripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="7. CM" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="1. Create Table" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sqlscripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sqlscripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Manual Scripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="6. Posting" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="5. Create SP" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sqlscripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sqlscripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Manual Scripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="6. Posting" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sqlscripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sqlscripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Manual Scripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="6. Posting" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="3. Functions" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sqlscripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sqlscripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Manual Scripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="6. Posting" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="2. Create Type" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sqlscripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sqlscripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Manual Scripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="6. Posting" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="1. Create Table" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sqlscripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sqlscripts" />
+              <option name="myItemId" value="CM" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -408,8 +203,8 @@
     <property name="WebServerToolWindowFactoryState" value="true" />
     <property name="options.lastSelected" value="preferences.pluginManager" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../i21 CashManagement" />
-    <property name="options.searchVisible" value="true" />
     <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="options.searchVisible" value="true" />
   </component>
   <component name="PublishConfig">
     <servers>
@@ -425,15 +220,12 @@
       </server>
     </servers>
   </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21PreDeployment" />
+    </key>
+  </component>
   <component name="RunManager">
-    <configuration default="true" type="DartUnitRunConfigurationType" factoryName="DartUnit">
-      <option name="VMOptions" />
-      <option name="arguments" />
-      <option name="filePath" />
-      <option name="scope" value="ALL" />
-      <option name="testName" />
-      <method />
-    </configuration>
     <configuration default="true" type="DartCommandLineRunConfigurationType" factoryName="Dart Command Line Application">
       <option name="VMOptions" />
       <option name="arguments" />
@@ -442,6 +234,14 @@
       <option name="saveOutputToFile" value="false" />
       <option name="showConsoleOnStdErr" value="false" />
       <option name="showConsoleOnStdOut" value="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="DartUnitRunConfigurationType" factoryName="DartUnit">
+      <option name="VMOptions" />
+      <option name="arguments" />
+      <option name="filePath" />
+      <option name="scope" value="ALL" />
+      <option name="testName" />
       <method />
     </configuration>
     <configuration default="true" type="JavaScriptTestRunnerKarma" factoryName="Karma" singleton="true" config-file="">
@@ -487,15 +287,16 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
+    <frame x="-8" y="-8" width="1382" height="744" extended-state="7" />
     <editor active="false" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3293718" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3293718" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3293718" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Remote Host" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25757575" sideWeight="0.6706282" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25757575" sideWeight="0.6706282" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
@@ -504,11 +305,30 @@
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
+    <layout-to-restore>
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3293718" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3293718" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Remote Host" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="true" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3293718" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25757575" sideWeight="0.6706282" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+    </layout-to-restore>
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
@@ -522,107 +342,16 @@
     <breakpoint-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/Manual Scripts/7. CM/5. Create SP/14. PagedBankReconDepositAndCredit.sql">
+    <entry file="file://$PROJECT_DIR$/i21Database/i21Database.sqlproj">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="16" column="27" selection-start="1043" selection-end="1043" vertical-scroll-proportion="0.0" vertical-offset="86" max-vertical-offset="2550">
+        <state line="316" column="34" selection-start="17546" selection-end="17546" vertical-scroll-proportion="0.0" vertical-offset="5372" max-vertical-offset="7293">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Manual Scripts/7. CM/6. Sync Origin and i21/Functions/1. fn_GetGLAccountIDFromOriginToi21.sql">
+    <entry file="file://$PROJECT_DIR$/i21Database/Scripts/Conversion/CM/1. Import Bank and Bank Accounts from apcbkmst.sql">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="6" column="2" selection-start="532" selection-end="532" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="544">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Manual Scripts/7. CM/6. Sync Origin and i21/Functions/2. fn_GetCurrencyIDFromOriginToi21.sql">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="8" column="0" selection-start="539" selection-end="539" vertical-scroll-proportion="-4.44" vertical-offset="25" max-vertical-offset="578">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Manual Scripts/7. CM/6. Sync Origin and i21/Functions/3. fn_GetCurrencyIDFromi21ToOrigin.sql">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="8" column="38" selection-start="648" selection-end="648" vertical-scroll-proportion="-4.44" vertical-offset="25" max-vertical-offset="697">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Manual Scripts/7. CM/6. Sync Origin and i21/Functions/4. fn_GetGLAccountIDFromi21ToOrigin.sql">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="9" column="39" selection-start="551" selection-end="551" vertical-scroll-proportion="-5.12" vertical-offset="25" max-vertical-offset="578">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Manual Scripts/7. CM/6. Sync Origin and i21/Functions/5. fn_ConvertOriginDateToSQLDateTime.sql">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="8" column="24" selection-start="591" selection-end="591" vertical-scroll-proportion="-4.44" vertical-offset="25" max-vertical-offset="1241">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Manual Scripts/7. CM/6. Sync Origin and i21/8. Create TRIGGER for vwBankAccount.sql">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="8" column="20" selection-start="577" selection-end="577" vertical-scroll-proportion="0.26877472" vertical-offset="0" max-vertical-offset="8330">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Manual Scripts/7. CM/6. Sync Origin and i21/7. CREATE vwBank.sql">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="9" column="3" selection-start="156" selection-end="156" vertical-scroll-proportion="0.28333333" vertical-offset="0" max-vertical-offset="540">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Manual Scripts/7. CM/6. Sync Origin and i21/6. CREATE vwBankAccount.sql">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1343">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Manual Scripts/7. CM/6. Sync Origin and i21/5. Create TRIGGER for apchkmst.sql">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="5" column="3" selection-start="417" selection-end="417" vertical-scroll-proportion="0.16129032" vertical-offset="0" max-vertical-offset="10489">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Manual Scripts/7. CM/6. Sync Origin and i21/3. Create VIEW for apcbkmst.sql">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="521">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Manual Scripts/7. CM/6. Sync Origin and i21/2. DROP legacy tables.sql">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="521">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Manual Scripts/7. CM/6. Sync Origin and i21/1. backup checkbook tables.sql">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="16" column="16" selection-start="237" selection-end="237" vertical-scroll-proportion="0.4848485" vertical-offset="0" max-vertical-offset="561">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Manual Scripts/7. CM/6. Sync Origin and i21/Functions/6. fn_GetNumbersFromString.sql">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="6" column="27" selection-start="427" selection-end="427" vertical-scroll-proportion="0.15487571" vertical-offset="21" max-vertical-offset="544">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Manual Scripts/7. CM/6. Sync Origin and i21/4. Create VIEW for apchkmst.sql">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="500">
+        <state line="8" column="3" selection-start="558" selection-end="558" vertical-scroll-proportion="0.24727273" vertical-offset="0" max-vertical-offset="2839">
           <folding />
         </state>
       </provider>
