@@ -345,7 +345,7 @@ BEGIN
 			,strState					= ''
 			,strCountry					= ''
 			,dblAmount					= A.dblAmount
-			,strAmountInWords			= dbo.fn_ConvertNumberToWord(A.dblAmount)
+			,strAmountInWords			= dbo.fnCMConvertNumberToWord(A.dblAmount)
 			,strMemo					= A.strReferenceFrom
 			,strReferenceNo				= ''
 			,dtmCheckPrinted			= NULL
@@ -382,7 +382,7 @@ BEGIN
 			,strState					= ''
 			,strCountry					= ''
 			,dblAmount					= A.dblAmount
-			,strAmountInWords			= dbo.fn_ConvertNumberToWord(A.dblAmount)
+			,strAmountInWords			= dbo.fnCMConvertNumberToWord(A.dblAmount)
 			,strMemo					= A.strReferenceTo
 			,strReferenceNo				= ''
 			,dtmCheckPrinted			= NULL
