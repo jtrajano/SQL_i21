@@ -1,14 +1,12 @@
-﻿
-CREATE PROCEDURE uspCMGetClearedPayments
+﻿CREATE FUNCTION [dbo].[fnCMGetClearedPayments]
+(
 	@intBankAccountId INT = NULL,
 	@dtmStatementDate AS DATETIME = NULL
+)
+RETURNS NUMERIC(18,6)
 AS
+BEGIN 
 
-SET QUOTED_IDENTIFIER OFF
-SET ANSI_NULLS ON
-SET NOCOUNT ON
-SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
 
 DECLARE @BANK_DEPOSIT INT = 1
 		,@BANK_WITHDRAWAL INT = 2
@@ -26,9 +24,10 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@ORIGIN_WITHDRAWAL AS INT = 14
 		,@ORIGIN_WIRE AS INT = 15
 		,@AP_PAYMENT AS INT = 16
+
+		,@returnBalance AS NUMERIC(18,6)
 		
-SELECT	totalCount = ISNULL(COUNT(1), 0)
-		,totalAmount = ISNULL(SUM(ABS(ISNULL(dblAmount, 0))), 0)
+SELECT	@returnBalance = SUM(ABS(ISNULL(dblAmount, 0)))
 FROM	tblCMBankTransaction 
 WHERE	ysnPosted = 1
 		AND ysnClr = 1
@@ -47,3 +46,7 @@ WHERE	ysnPosted = 1
 			intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT)
 			OR ( dblAmount < 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
 		)
+
+RETURN ISNULL(@returnBalance, 0)
+
+END 

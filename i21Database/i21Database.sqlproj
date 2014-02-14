@@ -417,7 +417,15 @@
     <Build Include="dbo\Functions\fnCMGetUnclearedPayments.sql" />
     <Build Include="dbo\Functions\fnCMGetUnclearedDeposits.sql" />
     <Build Include="dbo\Stored Procedures\usp_PostAuditAdjustment.sql" />
-    <Build Include="dbo\Views\vwCMBankReconciliationReport.sql" />
+    <Build Include="dbo\Functions\fnCMGetClearedPayments.sql" />
+    <Build Include="dbo\Functions\fnCMGetClearedDeposits.sql" />
+    <Build Include="dbo\Functions\fnCMGetBankCurrentEndingBalance.sql" />
+    <Build Include="dbo\Functions\fnCMGetBankBeginningBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMBankReconReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMBankReconClearedPaymentsSubReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMBankReconClearedDepositsSubReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMBankReconUnclearedPaymentsSubReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMBankReconUnclearedDepositsSubReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
