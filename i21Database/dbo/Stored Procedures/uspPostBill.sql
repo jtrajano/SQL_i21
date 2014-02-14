@@ -131,6 +131,13 @@ IF ISNULL(@recap, 0) = 0
 	IF(ISNULL(@post,0) = 0)
 	BEGIN
 		
+		IF(@billBatchId IS NOT NULL)
+		BEGIN
+			UPDATE tblAPBillBatch
+				SET ysnPosted = 0
+				FROM tblAPBillBatch WHERE intBillBatchId = @billBatchId
+		END
+
 		UPDATE tblAPBill
 			SET ysnPosted = 0
 		FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData)
