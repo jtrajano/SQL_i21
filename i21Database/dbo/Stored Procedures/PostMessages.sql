@@ -47,3 +47,7 @@ EXEC sp_addmessage 50010,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50011) EXEC sp_dropmessage 50011, 'us_english'	
 SET @strmessage = 'A failed check is misisng a reason.'
 EXEC sp_addmessage 50011,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50012) EXEC sp_dropmessage 50012, 'us_english'	
+SET @strmessage = 'Check is already voided.'
+EXEC sp_addmessage 50012,11,@strmessage,'us_english','False'

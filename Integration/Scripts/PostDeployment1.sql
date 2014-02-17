@@ -13,4 +13,7 @@ Post-Deployment Script Template
 
 -- DROP temp table created from PreDeployment script
 IF OBJECT_ID('tempdb..##tblOriginMod') IS NOT NULL DROP TABLE ##tblOriginMod
+GO
 
+-- Add the SQL Server custom messages
+EXEC PostMessages
