@@ -26,6 +26,7 @@
     [intBackupCheckEndingNo]           INT            DEFAULT 0 NOT NULL,
     [intEFTNextNo]                     INT            DEFAULT 0 NOT NULL,
     [intEFTBankFileFormatId]           INT            NULL,
+	[intBankStatementImportId]		   INT            NULL,
     [strEFTCompanyId]                  NVARCHAR (20)  COLLATE Latin1_General_CI_AS NULL,
     [strEFTBankName]                   NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [strMICRDescription]               NVARCHAR (500) COLLATE Latin1_General_CI_AS NULL,
@@ -45,7 +46,8 @@
     [intConcurrencyId]                 INT            DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblCMBankAccount] PRIMARY KEY CLUSTERED ([intBankAccountId] ASC),
     CONSTRAINT [FK_tblCMBankAccounttblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
-    CONSTRAINT [FK_tblCMBankFileFormattblCMBankAccount] FOREIGN KEY ([intEFTBankFileFormatId]) REFERENCES [dbo].[tblCMBankFileFormat] ([intBankFileFormatId]),
+    CONSTRAINT [FK_tblCMBankFileFormattblCMBankAccount_EFT] FOREIGN KEY ([intEFTBankFileFormatId]) REFERENCES [dbo].[tblCMBankFileFormat] ([intBankFileFormatId]),
+	CONSTRAINT [FK_tblCMBankFileFormattblCMBankAccount_BankStatement] FOREIGN KEY ([intBankStatementImportId]) REFERENCES [dbo].[tblCMBankFileFormat] ([intBankFileFormatId]),
     CONSTRAINT [FK_tblCMBanktblCMBankAccount] FOREIGN KEY ([intBankId]) REFERENCES [dbo].[tblCMBank] ([intBankId]),
     CONSTRAINT [FK_tblGLAccounttblCMBankAccount] FOREIGN KEY ([intGLAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountID]),
     UNIQUE NONCLUSTERED ([strCbkNo] ASC)
