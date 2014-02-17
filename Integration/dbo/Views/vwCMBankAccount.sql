@@ -33,6 +33,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 				,i21.intBackupCheckStartingNo
 				,i21.intBackupCheckEndingNo
 				,i21.intEFTNextNo
+				,i21.intBankStatementImportId
 				,i21.intEFTBankFileFormatId
 				,i21.strEFTCompanyId
 				,i21.strEFTBankName
@@ -176,6 +177,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 					,intBackupCheckStartingNo
 					,intBackupCheckEndingNo
 					,intEFTNextNo
+					,intBankStatementImportId
 					,intEFTBankFileFormatId
 					,strEFTCompanyId
 					,strEFTBankName
@@ -221,6 +223,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 					,intBackupCheckStartingNo			= i.intBackupCheckStartingNo
 					,intBackupCheckEndingNo				= i.intBackupCheckEndingNo
 					,intEFTNextNo						= i.intEFTNextNo
+					,intBankStatementImportId			= i.intBankStatementImportId
 					,intEFTBankFileFormatId				= i.intEFTBankFileFormatId
 					,strEFTCompanyId					= i.strEFTCompanyId
 					,strEFTBankName						= i.strEFTBankName
@@ -376,6 +379,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 					,intBackupCheckStartingNo			= i.intBackupCheckStartingNo
 					,intBackupCheckEndingNo				= i.intBackupCheckEndingNo
 					,intEFTNextNo						= i.intEFTNextNo
+					,intBankStatementImportId			= i.intBankStatementImportId
 					,intEFTBankFileFormatId				= i.intEFTBankFileFormatId
 					,strEFTCompanyId					= i.strEFTCompanyId
 					,strEFTBankName						= i.strEFTBankName
