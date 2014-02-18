@@ -13,6 +13,10 @@ IF (EXISTS(SELECT * FROM glhstmst LEFT OUTER JOIN tblGLCOACrossReference ON SUBS
 BEGIN	
 	SELECT 'There are accounts that does not exists at iRely Cross Reference. <br/> Kindly verify at Origin.' as Result
 END
+ELSE IF (EXISTS(SELECT * FROM (SELECT SUBSTRING(dtmDate,5,2)+'/01/'+SUBSTRING(dtmDate,1,4) as dtmDate FROM (SELECT CONVERT(VARCHAR(3),glhst_src_id) + CONVERT(VARCHAR(5),glhst_src_seq) + CONVERT(VARCHAR(6),MAX(glhst_period)) AS strJournalID, CONVERT(VARCHAR(12),MAX(glhst_period)) AS dtmDate FROM glhstmst GROUP BY glhst_period, glhst_src_id, glhst_src_seq) tblA) tblB where ISDATE(dtmDate) = 0))
+BEGIN	
+	SELECT 'There are invalid dates on Historical Transactions. <br/> Kindly verify at Origin.' as Result
+END
 ELSE
 BEGIN
 	--+++++++++++++++++++++++++++++++++
@@ -82,7 +86,7 @@ BEGIN
 	--+++++++++++++++++++++++++++++++++
 
 	SELECT 
-		CONVERT(int,1) AS intLineNo,
+		CONVERT(int,glhst_line_no) AS intLineNo,
 		CONVERT(int,1) AS intJournalID,
 		glhst_trans_dt,
 		tblGLAccount.intAccountID,
@@ -114,7 +118,6 @@ BEGIN
 		SUBSTRING(strCurrentExternalID,1,8) = glhst_acct1_8 AND SUBSTRING(strCurrentExternalID,10,8) = glhst_acct9_16 
 	 INNER JOIN tblGLAccount ON tblGLAccount.intAccountID = tblGLCOACrossReference.inti21ID
 	 
-
 	--+++++++++++++++++++++++++++++++++
 	--		 UPDATE COLLATE JOURNAL
 	--+++++++++++++++++++++++++++++++++
@@ -149,38 +152,38 @@ BEGIN
 	--		 ASSIGN TRANSACTION ID BASED ON NEW HEADER GROUPING
 	--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-	SET ROWCOUNT 0
-	UPDATE iRelyImptblGLJournalDetail
-	SET intLineNo = 0
+	--SET ROWCOUNT 0
+	--UPDATE iRelyImptblGLJournalDetail
+	--SET intLineNo = 0
 
-	DECLARE @last1 INT
-	DECLARE @lastprior INT
-	DECLARE @line1 INT
+	--DECLARE @last1 INT
+	--DECLARE @lastprior INT
+	--DECLARE @line1 INT
 
-	SET @line1 = 0
-	SET @last1 = 0
-	SET @lastprior = 0
+	--SET @line1 = 0
+	--SET @last1 = 0
+	--SET @lastprior = 0
 
-	WHILE (SELECT COUNT(*) FROM iRelyImptblGLJournalDetail where intLineNo = 0) > 0
-	BEGIN
-		SELECT @last1= (SELECT MIN(intJournalID) FROM iRelyImptblGLJournalDetail WHERE intLineNo = 0)
+	--WHILE (SELECT COUNT(*) FROM iRelyImptblGLJournalDetail where intLineNo = 0) > 0
+	--BEGIN
+	--	SELECT @last1= (SELECT MIN(intJournalID) FROM iRelyImptblGLJournalDetail WHERE intLineNo = 0)
 
-		IF @last1 <> @lastprior 
-		BEGIN
-			SET @line1 = 0
-		END
+	--	IF @last1 <> @lastprior 
+	--	BEGIN
+	--		SET @line1 = 0
+	--	END
 
-		SET ROWCOUNT 0
-		SELECT @lastprior = @last1
-		SELECT @line1 = (SELECT Max (intLineNo) FROM iRelyImptblGLJournalDetail WHERE intJournalID = @last1)
+	--	SET ROWCOUNT 0
+	--	SELECT @lastprior = @last1
+	--	SELECT @line1 = (SELECT Max (intLineNo) FROM iRelyImptblGLJournalDetail WHERE intJournalID = @last1)
 
-		SELECT @line1 = @line1 + 1
+	--	SELECT @line1 = @line1 + 1
 
-		SET ROWCOUNT 1
-		UPDATE iRelyImptblGLJournalDetail set intLineNo = @line1
-		WHERE  intLineNo = 0 and intJournalID = @last1
+	--	SET ROWCOUNT 1
+	--	UPDATE iRelyImptblGLJournalDetail set intLineNo = @line1
+	--	WHERE  intLineNo = 0 and intJournalID = @last1
 
-	END
+	--END
 	
 
 	--++++++++++++++++++++++++++++
