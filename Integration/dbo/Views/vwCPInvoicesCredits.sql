@@ -54,6 +54,7 @@ GO
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1
 	EXEC ('
 		CREATE VIEW [dbo].[vwCPInvoicesCredits]
+			as
 			select
 			a.A4GLIdentity
 			,agivc_bill_to_cus = a.ptivc_cus_no
