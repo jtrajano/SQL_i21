@@ -72,7 +72,8 @@ DECLARE
 	,@ysnTransactionPostedFlag AS BIT
 	,@ysnTransactionClearedFlag AS BIT	
 	,@intBankAccountId AS INT
-	,@ysnBankAccountIdInactive AS BIT	
+	,@ysnBankAccountIdInactive AS BIT
+	,@ysnCheckVoid AS BIT	
 	
 	-- Table Variables
 	,@RecapTable AS RecapTableType	
@@ -91,7 +92,8 @@ SELECT	TOP 1
 		,@dblAmount = dblAmount
 		,@intUserId = intLastModifiedUserId
 		,@ysnTransactionPostedFlag = ysnPosted
-		,@ysnTransactionClearedFlag = ysnClr		
+		,@ysnTransactionClearedFlag = ysnClr
+		,@ysnCheckVoid = ysnCheckVoid		
 		,@intBankAccountId = intBankAccountId
 FROM	[dbo].tblCMBankTransaction 
 WHERE	strTransactionId = @strTransactionId 
@@ -154,6 +156,14 @@ IF @ysnPost = 0 AND @ysnRecap = 0 AND @ysnTransactionClearedFlag = 1
 BEGIN
 	-- 'The transaction is already cleared.'
 	RAISERROR(50009, 11, 1)
+	GOTO Post_Rollback
+END
+
+-- Check if the Check is already voided.
+IF @ysnRecap = 0 AND @ysnCheckVoid = 1
+BEGIN
+	-- 'Check is already voided.'
+	RAISERROR(50012, 11, 1)
 	GOTO Post_Rollback
 END
 
