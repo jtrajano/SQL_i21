@@ -3,6 +3,7 @@ CREATE PROCEDURE PostCMBankTransfer
 	@ysnPost				BIT		= 0
 	,@ysnRecap				BIT		= 0
 	,@strTransactionId		NVARCHAR(40) = NULL 
+	,@intUserId				INT		= NULL 
 	,@isSuccessful			BIT		= 0 OUTPUT 
 	,@message_id			INT		= 0 OUTPUT 
 AS
@@ -71,12 +72,13 @@ DECLARE
 	,@dtmDate AS DATETIME
 	,@dblAmount AS NUMERIC(18,6)
 	,@strBatchId AS NVARCHAR(40)
-	,@intUserId AS INT
 	,@ysnTransactionPostedFlag AS BIT
 	,@ysnTransactionClearedFlag AS BIT
 	,@intBankAccountIdFrom AS INT
 	,@intBankAccountIdTo AS INT
 	,@ysnBankAccountIdInactive AS BIT
+	,@intCreatedUserId AS INT
+	,@ysnAllowUserSelfPost AS BIT = 0
 	
 	-- Table Variables
 	,@RecapTable AS RecapTableType	
@@ -93,16 +95,23 @@ SELECT	TOP 1
 		@intTransactionId = intTransactionId
 		,@dtmDate = dtmDate
 		,@dblAmount = dblAmount
-		,@intUserId = intLastModifiedUserId
 		,@ysnTransactionPostedFlag = ysnPosted
 		,@intBankAccountIdFrom = intBankAccountIdFrom
 		,@intBankAccountIdTo = intBankAccountIdTo
+		,@intCreatedUserId = intCreatedUserId
 FROM	[dbo].tblCMBankTransfer 
 WHERE	strTransactionId = @strTransactionId 
-IF @@ERROR <> 0	GOTO Post_Rollback		
+IF @@ERROR <> 0	GOTO Post_Rollback	
+
+-- Read the company preference
+SELECT	@ysnAllowUserSelfPost = 1
+FROM	dbo.tblSMPreferences 
+WHERE	strPreference = 'AllowUserSelfPost' 
+		AND LOWER(RTRIM(LTRIM(strValue))) = 'true'		
+IF @@ERROR <> 0	GOTO Post_Rollback			
 		
 --=====================================================================================================================================
--- 	VALIdATION 
+-- 	VALIDATION 
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 -- Validate if the bank transfer id exists. 
@@ -167,6 +176,22 @@ BEGIN
 		-- 'The bank account is inactive.'
 		RAISERROR(50010, 11, 1)
 		GOTO Post_Rollback
+	END
+END 
+
+-- Check Company preference: Allow User Self Post
+IF @ysnAllowUserSelfPost = 1 AND @intUserId <> @intCreatedUserId AND @ysnRecap = 0 
+BEGIN 
+	-- 'You cannot %s transactions you did not create. Please contact your local administrator.'
+	IF @ysnPost = 1	
+	BEGIN 
+		RAISERROR(50013, 11, 1, 'Post')
+		GOTO Post_Rollback
+	END 
+	IF @ysnPost = 0
+	BEGIN
+		RAISERROR(50013, 11, 1, 'Unpost')
+		GOTO Post_Rollback		
 	END
 END 
 
