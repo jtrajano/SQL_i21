@@ -875,4 +875,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intCreatedUserId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="19058593-dd48-41f8-81f3-4bba3000b59d" ChangeDateTime="02/18/2014 01:17:49">
+    <Property Name="ElementName" Value="[dbo].[tblCMDataImportStatus].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMDataImportStatus]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDataImportStatusId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="849fe0f2-b031-4efe-997a-3f13f8b392f6" ChangeDateTime="02/18/2014 01:20:20">
+    <Property Name="ElementName" Value="[dbo].[tblCMDataImportStatus].[intProcessId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMDataImportStatus]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intImportProcessId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a035d13b-5f8d-4c55-8d8e-c454a4e91e26" ChangeDateTime="02/18/2014 01:20:58">
+    <Property Name="ElementName" Value="[dbo].[tblCMDataImportStatus].[ysnExecuted]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMDataImportStatus]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strDescription" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ceda4270-a935-4e29-b106-d2d33ea57725" ChangeDateTime="02/18/2014 01:23:04">
+    <Property Name="ElementName" Value="[dbo].[tblCMDataImportStatus].[dtm]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMDataImportStatus]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dtmImportRun" />
+  </Operation>
 </Operations>
