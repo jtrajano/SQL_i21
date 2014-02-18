@@ -13,7 +13,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNa
 		,gacnt_due_rev_dt = (case len(convert(varchar, a.gacnt_due_rev_dt)) when 8 then convert(date, cast(convert(varchar, a.gacnt_due_rev_dt) AS CHAR(12)), 112) else null end)
 		,a.gacnt_comments
 		,a.gacnt_trk_rail_ind
-		,a.gacnt_pbhcu_ind
+		,gacnt_pbhcu_ind = (case a.gacnt_pbhcu_ind when ''B'' then ''Basis'' when ''P'' then ''Priced'' when ''H'' then ''HTA'' when ''C'' then ''CB'' when ''U'' then rtrim(ltrim(b.gacom_desc))+'' Only'' else '''' end)
 		,a.gacnt_un_bot_basis
 		,a.gacnt_un_cash_prc
 		,a.gacnt_un_bot_prc

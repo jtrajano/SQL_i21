@@ -124,4 +124,7 @@
   <ItemGroup>
     <None Include="dbo\Views\vyuTFTaxCycle.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="dbo\Views\vwCPGASettlementsReports.sql" />
+  </ItemGroup>
 </Project>

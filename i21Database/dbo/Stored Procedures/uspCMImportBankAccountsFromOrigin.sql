@@ -122,8 +122,8 @@ INSERT INTO tblCMBankAccount (
 SELECT			
 		intBankId							= (SELECT TOP 1 A.intBankId FROM tblCMBank A WHERE A.strBankName = LTRIM(RTRIM(ISNULL(i.apcbk_desc, ''))) COLLATE Latin1_General_CI_AS)   
 		,ysnActive							= CASE WHEN i.apcbk_active_yn = 'Y' THEN 1 ELSE 0 END 
-		,intGLAccountId						= dbo.fn_GetGLAccountIdFromOriginToi21(i.apcbk_gl_cash) 
-		,intCurrencyId						= dbo.fn_GetCurrencyIdFromOriginToi21(i.apcbk_currency)
+		,intGLAccountId						= dbo.fnCMGetGLAccountIdFromOriginToi21(i.apcbk_gl_cash) 
+		,intCurrencyId						= dbo.fnCMGetCurrencyIdFromOriginToi21(i.apcbk_currency)
 		,intBankAccountType					= @DEPOSIT_ACCOUNT
 		,strContact							= ''
 		,strBankAccountNo					= ISNULL(i.apcbk_bank_acct_no, '') COLLATE Latin1_General_CI_AS
