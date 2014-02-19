@@ -59,6 +59,7 @@ BEGIN
 	SELECT B.intBillId FROM tblAPBillBatch A
 			LEFT JOIN tblAPBill B	
 				ON A.intBillBatchId = B.intBillBatchId
+	WHERE A.intBillBatchId = @billBatchId
 END
 	
 IF(@beginDate IS NOT NULL)
@@ -141,6 +142,11 @@ IF ISNULL(@recap, 0) = 0
 		UPDATE tblAPBill
 			SET ysnPosted = 0
 		FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+
+		UPDATE tblGLDetail
+			SET ysnIsUnposted = 1
+		WHERE strTransactionID IN (SELECT strBillId FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData))
+			
 
 	END
 	ELSE
