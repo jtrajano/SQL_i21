@@ -217,8 +217,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 
 IF @ysnPost = 1
 BEGIN
-	-- Create the G/L Entries for Misc Checks. 
-	-- 1. DEBIT SIdE
+	-- Create the G/L Entries for Misc Checks. 	
 	INSERT INTO #tmpGLDetail (
 			[strTransactionId]
 			,[intTransactionId]
@@ -251,47 +250,7 @@ BEGIN
 			,[strModuleName]
 			,[strUOMCode]
 	)
-	
-	SELECT	[strTransactionId]			= @strTransactionId
-			,[intTransactionId]		= NULL
-			,[dtmDate]				= @dtmDate
-			,[strBatchId]			= @strBatchId
-			,[intAccountId]			= B.intGLAccountId
-			,[strAccountGroup]		= GLAccntGrp.strAccountGroup
-			,[dblDebit]				= B.dblDebit
-			,[dblCredit]			= B.dblCredit
-			,[dblDebitUnit]			= 0
-			,[dblCreditUnit]		= 0
-			,[strDescription]		= A.strMemo
-			,[strCode]				= @GL_DETAIL_CODE
-			,[strReference]			= A.strPayee
-			,[strJobId]				= NULL
-			,[intCurrencyId]		= A.intCurrencyId
-			,[dblExchangeRate]		= 1
-			,[dtmDateEntered]		= GETDATE()
-			,[dtmTransactionDate]	= A.dtmDate
-			,[strProductId]			= NULL
-			,[strWarehouseId]		= NULL
-			,[strNum]				= A.strReferenceNo
-			,[strCompanyName]		= NULL
-			,[strBillInvoiceNumber] = NULL 
-			,[strJournalLineDescription] = NULL 
-			,[ysnIsUnposted]		= 0 
-			,[intConcurrencyId]		= 1
-			,[intUserId]			= A.intLastModifiedUserId
-			,[strTransactionForm]	= A.strTransactionId
-			,[strModuleName]		= @MODULE_NAME
-			,[strUOMCode]			= NULL 
-	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankTransactionDetail B
-				ON A.intTransactionId = B.intTransactionId
-			INNER JOIN [dbo].tblGLAccount GLAccnt
-				ON B.intGLAccountId = GLAccnt.intAccountID
-			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
-				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
-	WHERE	A.strTransactionId = @strTransactionId		
-	
-	-- 2. CREDIT SIdE
-	UNION ALL 
+	-- 1. CREDIT SIDE
 	SELECT	[strTransactionId]		= @strTransactionId
 			,[intTransactionId]		= NULL
 			,[dtmDate]				= @dtmDate
@@ -329,6 +288,47 @@ BEGIN
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
 	WHERE	A.strTransactionId = @strTransactionId
+		
+	-- 2. DEBIT SIDE
+	UNION ALL 
+	SELECT	[strTransactionId]		= @strTransactionId
+			,[intTransactionId]		= NULL
+			,[dtmDate]				= @dtmDate
+			,[strBatchId]			= @strBatchId
+			,[intAccountId]			= B.intGLAccountId
+			,[strAccountGroup]		= GLAccntGrp.strAccountGroup
+			,[dblDebit]				= B.dblDebit
+			,[dblCredit]			= B.dblCredit
+			,[dblDebitUnit]			= 0
+			,[dblCreditUnit]		= 0
+			,[strDescription]		= B.strDescription
+			,[strCode]				= @GL_DETAIL_CODE
+			,[strReference]			= A.strPayee
+			,[strJobId]				= NULL
+			,[intCurrencyId]		= A.intCurrencyId
+			,[dblExchangeRate]		= 1
+			,[dtmDateEntered]		= GETDATE()
+			,[dtmTransactionDate]	= A.dtmDate
+			,[strProductId]			= NULL
+			,[strWarehouseId]		= NULL
+			,[strNum]				= A.strReferenceNo
+			,[strCompanyName]		= NULL
+			,[strBillInvoiceNumber] = NULL 
+			,[strJournalLineDescription] = NULL 
+			,[ysnIsUnposted]		= 0 
+			,[intConcurrencyId]		= 1
+			,[intUserId]			= A.intLastModifiedUserId
+			,[strTransactionForm]	= A.strTransactionId
+			,[strModuleName]		= @MODULE_NAME
+			,[strUOMCode]			= NULL 
+	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankTransactionDetail B
+				ON A.intTransactionId = B.intTransactionId
+			INNER JOIN [dbo].tblGLAccount GLAccnt
+				ON B.intGLAccountId = GLAccnt.intAccountID
+			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
+				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
+	WHERE	A.strTransactionId = @strTransactionId		
+
 	
 	IF @@ERROR <> 0	GOTO Post_Rollback
 	

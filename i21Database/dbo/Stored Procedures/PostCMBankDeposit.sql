@@ -212,7 +212,6 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 IF @ysnPost = 1
 BEGIN
 	-- Create the G/L Entries for Bank Deposit. 
-	-- 1. DEBIT SIdE
 	INSERT INTO #tmpGLDetail (
 			[strTransactionId]
 			,[intTransactionId]
@@ -245,6 +244,7 @@ BEGIN
 			,[strModuleName]
 			,[strUOMCode]
 	)
+	-- 1. DEBIT SIDE
 	SELECT	[strTransactionId]		= @strTransactionId
 			,[intTransactionId]		= NULL
 			,[dtmDate]				= @dtmDate
@@ -257,7 +257,7 @@ BEGIN
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strMemo
 			,[strCode]				= @GL_DETAIL_CODE
-			,[strReference]			= A.strPayee
+			,[strReference]			= ISNULL(Entity.strName, A.strPayee)
 			,[strJobId]				= NULL
 			,[intCurrencyId]		= A.intCurrencyId
 			,[dblExchangeRate]		= 1
@@ -281,6 +281,8 @@ BEGIN
 				ON BankAccnt.intGLAccountId = GLAccnt.intAccountID
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
+			LEFT JOIN [dbo].tblEntities Entity
+				ON A.intPayeeId = Entity.intEntityId
 	WHERE	A.strTransactionId = @strTransactionId
 	
 	-- 2. CREDIT SIdE
@@ -295,9 +297,9 @@ BEGIN
 			,[dblCredit]			= B.dblCredit
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[strDescription]		= A.strMemo
+			,[strDescription]		= B.strDescription
 			,[strCode]				= @GL_DETAIL_CODE
-			,[strReference]			= A.strPayee
+			,[strReference]			= ISNULL(Entity.strName, A.strMemo)
 			,[strJobId]				= NULL
 			,[intCurrencyId]		= A.intCurrencyId
 			,[dblExchangeRate]		= 1
@@ -321,6 +323,8 @@ BEGIN
 				ON B.intGLAccountId = GLAccnt.intAccountID
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
+			LEFT JOIN [dbo].tblEntities Entity
+				ON B.intEntityId = Entity.intEntityId
 	WHERE	A.strTransactionId = @strTransactionId
 	
 	IF @@ERROR <> 0	GOTO Post_Rollback

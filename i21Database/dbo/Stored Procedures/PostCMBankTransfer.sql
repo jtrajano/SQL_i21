@@ -290,7 +290,7 @@ BEGIN
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strDescription
 			,[strCode]				= @GL_DETAIL_CODE
-			,[strReference]			= A.strReferenceFrom
+			,[strReference]			= A.strReferenceTo
 			,[strJobId]				= NULL
 			,[intCurrencyId]		= NULL
 			,[dblExchangeRate]		= 1

@@ -278,7 +278,7 @@ BEGIN
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strMemo
 			,[strCode]				= @GL_DETAIL_CODE
-			,[strReference]			= A.strPayee
+			,[strReference]			= NULL
 			,[strJobId]				= NULL
 			,[intCurrencyId]		= A.intCurrencyId
 			,[dblExchangeRate]		= 1
@@ -316,9 +316,9 @@ BEGIN
 			,[dblCredit]			= B.dblCredit
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[strDescription]		= A.strMemo
+			,[strDescription]		= B.strDescription
 			,[strCode]				= @GL_DETAIL_CODE
-			,[strReference]			= A.strPayee
+			,[strReference]			= NULL
 			,[strJobId]				= NULL
 			,[intCurrencyId]		= A.intCurrencyId
 			,[dblExchangeRate]		= 1
