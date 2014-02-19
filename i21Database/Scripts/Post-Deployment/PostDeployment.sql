@@ -33,6 +33,7 @@ print 'BEGIN POST DEPLOYMENT'
 -- Financials
 :r .\FIN\DefaultData\AccountGroup.sql
 :r .\FIN\DefaultData\BankTransactionTypes.sql
+:r .\FIN\DefaultData\DataImportStatus.sql
 
 -- Version Update
 :r .\VersionUpdate.sql

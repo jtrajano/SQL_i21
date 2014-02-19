@@ -3,6 +3,7 @@ CREATE PROCEDURE PostCMMiscChecks
 	@ysnPost				BIT		= 0
 	,@ysnRecap				BIT		= 0
 	,@strTransactionId		NVARCHAR(40) = NULL 
+	,@intUserId				INT		= NULL 
 	,@isSuccessful			BIT		= 0 OUTPUT 
 	,@message_id			INT		= 0 OUTPUT 
 AS
@@ -68,11 +69,13 @@ DECLARE
 	,@dblAmount AS NUMERIC(18,6)
 	,@dblAmountDetailTotal AS NUMERIC(18,6)
 	,@strBatchId AS NVARCHAR(40)
-	,@intUserId AS INT
 	,@ysnTransactionPostedFlag AS BIT
 	,@ysnTransactionClearedFlag AS BIT	
 	,@intBankAccountId AS INT
-	,@ysnBankAccountIdInactive AS BIT	
+	,@ysnBankAccountIdInactive AS BIT
+	,@ysnCheckVoid AS BIT	
+	,@intCreatedUserId AS INT
+	,@ysnAllowUserSelfPost AS BIT = 0
 	
 	-- Table Variables
 	,@RecapTable AS RecapTableType	
@@ -89,21 +92,28 @@ SELECT	TOP 1
 		@intTransactionId = intTransactionId
 		,@dtmDate = dtmDate
 		,@dblAmount = dblAmount
-		,@intUserId = intLastModifiedUserId
 		,@ysnTransactionPostedFlag = ysnPosted
-		,@ysnTransactionClearedFlag = ysnClr		
+		,@ysnTransactionClearedFlag = ysnClr
+		,@ysnCheckVoid = ysnCheckVoid		
 		,@intBankAccountId = intBankAccountId
+		,@intCreatedUserId = intCreatedUserId
 FROM	[dbo].tblCMBankTransaction 
 WHERE	strTransactionId = @strTransactionId 
 		AND intBankTransactionTypeId = @BANK_TRANSACTION_TYPE_Id
 IF @@ERROR <> 0	GOTO Post_Rollback		
-		
 		
 -- Read the detail table and populate the variables. 
 SELECT	@dblAmountDetailTotal = SUM(ISNULL(dblDebit, 0) - ISNULL(dblCredit, 0))
 FROM	[dbo].tblCMBankTransactionDetail
 WHERE	intTransactionId = @intTransactionId 
 IF @@ERROR <> 0	GOTO Post_Rollback		
+
+-- Read the company preference
+SELECT	@ysnAllowUserSelfPost = 1
+FROM	dbo.tblSMPreferences 
+WHERE	strPreference = 'AllowUserSelfPost' 
+		AND LOWER(RTRIM(LTRIM(strValue))) = 'true'		
+IF @@ERROR <> 0	GOTO Post_Rollback	
 
 --=====================================================================================================================================
 -- 	VALIdATION 
@@ -157,6 +167,14 @@ BEGIN
 	GOTO Post_Rollback
 END
 
+-- Check if the Check is already voided.
+IF @ysnRecap = 0 AND @ysnCheckVoid = 1
+BEGIN
+	-- 'Check is already voided.'
+	RAISERROR(50012, 11, 1)
+	GOTO Post_Rollback
+END
+
 -- Check if the bank account is inactive
 IF @ysnRecap = 0 
 BEGIN
@@ -173,6 +191,22 @@ BEGIN
 	END
 END 
 
+-- Check Company preference: Allow User Self Post
+IF @ysnAllowUserSelfPost = 1 AND @intUserId <> @intCreatedUserId AND @ysnRecap = 0 
+BEGIN 
+	-- 'You cannot %s transactions you did not create. Please contact your local administrator.'
+	IF @ysnPost = 1	
+	BEGIN 
+		RAISERROR(50013, 11, 1, 'Post')
+		GOTO Post_Rollback
+	END 
+	IF @ysnPost = 0
+	BEGIN
+		RAISERROR(50013, 11, 1, 'Unpost')
+		GOTO Post_Rollback		
+	END
+END 
+
 --=====================================================================================================================================
 -- 	PROCESSING OF THE G/L ENTRIES. 
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -183,8 +217,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 
 IF @ysnPost = 1
 BEGIN
-	-- Create the G/L Entries for Misc Checks. 
-	-- 1. DEBIT SIdE
+	-- Create the G/L Entries for Misc Checks. 	
 	INSERT INTO #tmpGLDetail (
 			[strTransactionId]
 			,[intTransactionId]
@@ -217,47 +250,7 @@ BEGIN
 			,[strModuleName]
 			,[strUOMCode]
 	)
-	
-	SELECT	[strTransactionId]			= @strTransactionId
-			,[intTransactionId]		= NULL
-			,[dtmDate]				= @dtmDate
-			,[strBatchId]			= @strBatchId
-			,[intAccountId]			= B.intGLAccountId
-			,[strAccountGroup]		= GLAccntGrp.strAccountGroup
-			,[dblDebit]				= B.dblDebit
-			,[dblCredit]			= B.dblCredit
-			,[dblDebitUnit]			= 0
-			,[dblCreditUnit]		= 0
-			,[strDescription]		= A.strMemo
-			,[strCode]				= @GL_DETAIL_CODE
-			,[strReference]			= A.strPayee
-			,[strJobId]				= NULL
-			,[intCurrencyId]		= A.intCurrencyId
-			,[dblExchangeRate]		= 1
-			,[dtmDateEntered]		= GETDATE()
-			,[dtmTransactionDate]	= A.dtmDate
-			,[strProductId]			= NULL
-			,[strWarehouseId]		= NULL
-			,[strNum]				= A.strReferenceNo
-			,[strCompanyName]		= NULL
-			,[strBillInvoiceNumber] = NULL 
-			,[strJournalLineDescription] = NULL 
-			,[ysnIsUnposted]		= 0 
-			,[intConcurrencyId]		= 1
-			,[intUserId]			= A.intLastModifiedUserId
-			,[strTransactionForm]	= A.strTransactionId
-			,[strModuleName]		= @MODULE_NAME
-			,[strUOMCode]			= NULL 
-	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankTransactionDetail B
-				ON A.intTransactionId = B.intTransactionId
-			INNER JOIN [dbo].tblGLAccount GLAccnt
-				ON B.intGLAccountId = GLAccnt.intAccountID
-			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
-				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
-	WHERE	A.strTransactionId = @strTransactionId		
-	
-	-- 2. CREDIT SIdE
-	UNION ALL 
+	-- 1. CREDIT SIDE
 	SELECT	[strTransactionId]		= @strTransactionId
 			,[intTransactionId]		= NULL
 			,[dtmDate]				= @dtmDate
@@ -295,6 +288,47 @@ BEGIN
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
 	WHERE	A.strTransactionId = @strTransactionId
+		
+	-- 2. DEBIT SIDE
+	UNION ALL 
+	SELECT	[strTransactionId]		= @strTransactionId
+			,[intTransactionId]		= NULL
+			,[dtmDate]				= @dtmDate
+			,[strBatchId]			= @strBatchId
+			,[intAccountId]			= B.intGLAccountId
+			,[strAccountGroup]		= GLAccntGrp.strAccountGroup
+			,[dblDebit]				= B.dblDebit
+			,[dblCredit]			= B.dblCredit
+			,[dblDebitUnit]			= 0
+			,[dblCreditUnit]		= 0
+			,[strDescription]		= B.strDescription
+			,[strCode]				= @GL_DETAIL_CODE
+			,[strReference]			= A.strPayee
+			,[strJobId]				= NULL
+			,[intCurrencyId]		= A.intCurrencyId
+			,[dblExchangeRate]		= 1
+			,[dtmDateEntered]		= GETDATE()
+			,[dtmTransactionDate]	= A.dtmDate
+			,[strProductId]			= NULL
+			,[strWarehouseId]		= NULL
+			,[strNum]				= A.strReferenceNo
+			,[strCompanyName]		= NULL
+			,[strBillInvoiceNumber] = NULL 
+			,[strJournalLineDescription] = NULL 
+			,[ysnIsUnposted]		= 0 
+			,[intConcurrencyId]		= 1
+			,[intUserId]			= A.intLastModifiedUserId
+			,[strTransactionForm]	= A.strTransactionId
+			,[strModuleName]		= @MODULE_NAME
+			,[strUOMCode]			= NULL 
+	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankTransactionDetail B
+				ON A.intTransactionId = B.intTransactionId
+			INNER JOIN [dbo].tblGLAccount GLAccnt
+				ON B.intGLAccountId = GLAccnt.intAccountID
+			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
+				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
+	WHERE	A.strTransactionId = @strTransactionId		
+
 	
 	IF @@ERROR <> 0	GOTO Post_Rollback
 	

@@ -15,7 +15,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 			,a.agord_loc_no
 			,b.agtrm_desc
 			,a.agord_po_no
-			,a.agord_order_total
+			,agord_order_total = (case a.agord_ship_type + a.agord_type when ''IO'' then a.agord_ship_total else a.agord_order_total end)
 			,a.agord_line_no
 			,a.agord_bill_to_cus
 			,a.agord_ship_type

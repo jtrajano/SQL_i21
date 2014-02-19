@@ -3,11 +3,12 @@ CREATE PROCEDURE PostCMBankDeposit
 	@ysnPost				BIT		= 0
 	,@ysnRecap				BIT		= 0
 	,@strTransactionId		NVARCHAR(40) = NULL 
+	,@intUserId				INT		= NULL 
 	,@isSuccessful			BIT		= 0 OUTPUT 
 	,@message_id			INT		= 0 OUTPUT 
 AS
 
-SET QUOTED_IdENTIFIER OFF
+SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
@@ -35,11 +36,12 @@ DECLARE
 	,@dblAmount AS NUMERIC(18,6)
 	,@dblAmountDetailTotal AS NUMERIC(18,6)
 	,@strBatchId AS NVARCHAR(40)
-	,@intUserId AS INT
 	,@ysnTransactionPostedFlag AS BIT
 	,@ysnTransactionClearedFlag AS BIT
 	,@intBankAccountId AS INT
-	,@ysnBankAccountIdInactive AS BIT	
+	,@ysnBankAccountIdInactive AS BIT
+	,@intCreatedUserId AS INT
+	,@ysnAllowUserSelfPost AS BIT = 0
 	
 	-- Table Variables
 	,@RecapTable AS RecapTableType 
@@ -93,14 +95,21 @@ SELECT	TOP 1
 		@intTransactionId = intTransactionId
 		,@dtmDate = dtmDate
 		,@dblAmount = dblAmount
-		,@intUserId = intLastModifiedUserId
 		,@ysnTransactionPostedFlag = ysnPosted
 		,@ysnTransactionClearedFlag = ysnClr
 		,@intBankAccountId = intBankAccountId
+		,@intCreatedUserId = intCreatedUserId
 FROM	[dbo].tblCMBankTransaction 
 WHERE	strTransactionId = @strTransactionId 
 		AND intBankTransactionTypeId = @BANK_TRANSACTION_TYPE_Id
 IF @@ERROR <> 0	GOTO Post_Rollback				
+
+-- Read the company preference
+SELECT	@ysnAllowUserSelfPost = 1
+FROM	dbo.tblSMPreferences 
+WHERE	strPreference = 'AllowUserSelfPost' 
+		AND LOWER(RTRIM(LTRIM(strValue))) = 'true'
+IF @@ERROR <> 0	GOTO Post_Rollback		
 		
 -- Read the detail table and populate the variables. 
 SELECT	@dblAmountDetailTotal = SUM(ISNULL(dblCredit, 0) - ISNULL(dblDebit, 0))
@@ -176,6 +185,22 @@ BEGIN
 	END
 END 
 
+-- Check Company preference: Allow User Self Post
+IF @ysnAllowUserSelfPost = 1 AND @intUserId <> @intCreatedUserId AND @ysnRecap = 0 
+BEGIN 
+	-- 'You cannot %s transactions you did not create. Please contact your local administrator.'
+	IF @ysnPost = 1	
+	BEGIN 
+		RAISERROR(50013, 11, 1, 'Post')
+		GOTO Post_Rollback
+	END 
+	IF @ysnPost = 0
+	BEGIN
+		RAISERROR(50013, 11, 1, 'Unpost')
+		GOTO Post_Rollback		
+	END
+END 
+
 --=====================================================================================================================================
 -- 	PROCESSING OF THE G/L ENTRIES. 
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -187,7 +212,6 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 IF @ysnPost = 1
 BEGIN
 	-- Create the G/L Entries for Bank Deposit. 
-	-- 1. DEBIT SIdE
 	INSERT INTO #tmpGLDetail (
 			[strTransactionId]
 			,[intTransactionId]
@@ -220,6 +244,7 @@ BEGIN
 			,[strModuleName]
 			,[strUOMCode]
 	)
+	-- 1. DEBIT SIDE
 	SELECT	[strTransactionId]		= @strTransactionId
 			,[intTransactionId]		= NULL
 			,[dtmDate]				= @dtmDate
@@ -232,7 +257,7 @@ BEGIN
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strMemo
 			,[strCode]				= @GL_DETAIL_CODE
-			,[strReference]			= A.strPayee
+			,[strReference]			= ISNULL(Entity.strName, A.strPayee)
 			,[strJobId]				= NULL
 			,[intCurrencyId]		= A.intCurrencyId
 			,[dblExchangeRate]		= 1
@@ -256,6 +281,8 @@ BEGIN
 				ON BankAccnt.intGLAccountId = GLAccnt.intAccountID
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
+			LEFT JOIN [dbo].tblEntities Entity
+				ON A.intPayeeId = Entity.intEntityId
 	WHERE	A.strTransactionId = @strTransactionId
 	
 	-- 2. CREDIT SIdE
@@ -270,9 +297,9 @@ BEGIN
 			,[dblCredit]			= B.dblCredit
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[strDescription]		= A.strMemo
+			,[strDescription]		= B.strDescription
 			,[strCode]				= @GL_DETAIL_CODE
-			,[strReference]			= A.strPayee
+			,[strReference]			= ISNULL(Entity.strName, A.strMemo)
 			,[strJobId]				= NULL
 			,[intCurrencyId]		= A.intCurrencyId
 			,[dblExchangeRate]		= 1
@@ -296,6 +323,8 @@ BEGIN
 				ON B.intGLAccountId = GLAccnt.intAccountID
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
+			LEFT JOIN [dbo].tblEntities Entity
+				ON B.intEntityId = Entity.intEntityId
 	WHERE	A.strTransactionId = @strTransactionId
 	
 	IF @@ERROR <> 0	GOTO Post_Rollback

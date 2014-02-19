@@ -16,3 +16,12 @@ C:\Users\destrada\Documents\i21_sqlscripts\i21Database\bin\Debug\i21Database.dll
 C:\Users\destrada\Documents\i21_sqlscripts\i21Database\bin\Debug\i21Database.pdb
 C:\Users\destrada\Documents\i21_sqlscripts\i21Database\obj\Debug\i21Database.dll
 C:\Users\destrada\Documents\i21_sqlscripts\i21Database\obj\Debug\i21Database.pdb
+C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\bin\Debug\i21Database.dacpac
+C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\bin\Debug\i21Database.dll
+C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\bin\Debug\i21Database.pdb
+C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\obj\Debug\i21Database.dll
+C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\obj\Debug\i21Database.pdb
+C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\obj\Debug\Model.xml
+C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\obj\Debug\refactor.xml
+C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\obj\Debug\postdeploy.sql
+C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\obj\Debug\predeploy.sql
