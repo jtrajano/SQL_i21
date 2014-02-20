@@ -44,16 +44,15 @@ DECLARE @BillBatchId int
 --DECLARRE VARIABLES
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
 SET @recapId = '1'
---=====================================================================================================================================
--- 	POPULATE JOURNALS TO POST TEMPORARY TABLE
----------------------------------------------------------------------------------------------------------------------------------------
+
+
 INSERT INTO #tmpPostBillBatchData SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@param)
 
 SELECT TOP 1 @BillBatchId = intBillBatchId FROM #tmpPostBillBatchData
 
-EXEC uspPostBill  @billBatchId = @BillBatchId, @post = 1, @recap = 0, @userId = @userId, @success = @success OUTPUT, @successfulCount = @successfulCount OUTPUT
+EXEC uspPostBill  @billBatchId = @BillBatchId, @post = @post, @recap = @recap, @userId = @userId, @success = @success OUTPUT, @successfulCount = @successfulCount OUTPUT
 
-IF(@success = 1 AND @successfulCount > 0)
+IF(@success = 1 AND @successfulCount > 0 AND @post = 1)
 BEGIN
 UPDATE tblAPBillBatch
 	SET ysnPosted = 1
