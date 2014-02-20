@@ -122,7 +122,7 @@ BEGIN
 							SELECT @CurrentReportId = Id FROM @ReportIds WHERE Indexs = @Counter
 							INSERT INTO tblRMCriteriaField
 							(intReportId,intCriteriaFieldSelectionId,strFieldName,strDataType,strDescription,strConditions,ysnIsRequired,ysnShow,ysnAllowSort,ysnEditCondition)
-							VALUES (@CurrentReportId,@NCFSId,@NCFSName,'String',@NCFSName,'Equal To',0,1,1,1)
+							VALUES (@CurrentReportId,@NCFSId,@NCFSName,'String',@NCFSName,null,0,1,1,1)
 						
 							SET @Counter = @Counter + 1
 						END
