@@ -35,6 +35,26 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 	EXEC ('
 		CREATE VIEW [dbo].[vwCPPurchases]
 		AS
-		select ''PETRO HERE'' XX
+		select
+			a.A4GLIdentity
+			,agstm_bill_to_cus = a.ptstm_bill_to_cus
+			,agstm_itm_no = a.ptstm_itm_no
+			,agstm_sls = a.ptstm_net
+			,agstm_un = a.ptstm_un
+			,agstm_un_desc = a.ptstm_un_desc
+			,agstm_loc_no = a.ptstm_loc_no
+			,agstm_ship_rev_dt = (case len(convert(varchar, a.ptstm_ship_rev_dt)) when 8 then convert(date, cast(convert(varchar, a.ptstm_ship_rev_dt) AS CHAR(12)), 112) else null end)
+			,a.ptstm_un_prc * a.ptstm_ship_total as agstm_un_prc
+			,agstm_ivc_no = a.ptstm_ivc_no
+			,agitm_desc = b.ptitm_desc
+		from
+			ptstmmst a --agstmmst a
+		left outer join
+			ptitmmst b --agitmmst b
+			on
+				a.ptstm_loc_no = b.ptitm_loc_no
+				and a.ptstm_itm_no = b.ptitm_itm_no 
+		where
+			(a.ptstm_rec_type = 5)
 		')
 GO
