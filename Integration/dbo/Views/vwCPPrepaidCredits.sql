@@ -32,6 +32,23 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 	EXEC ('
 		CREATE VIEW [dbo].[vwCPPrepaidCredits]
 		AS
-		select ''PETRO HERE'' XX
+		select 
+			A4GLIdentity = row_number() over (order by ptcrd_loc_no)
+			,agcrd_cus_no = ptcrd_cus_no
+			,agcrd_loc_no = ptcrd_loc_no
+			,agcrd_cred_ind = ptcrd_cred_ind
+			,agcrd_ref_no = ptcrd_invc_no
+			,agcrd_rev_dt = (case len(convert(varchar, ptcrd_rev_dt)) when 8 then convert(date, cast(convert(varchar, ptcrd_rev_dt) AS CHAR(12)), 112) else null end)
+			,sum(ptcrd_amt - ptcrd_amt_used) as agcrd_amt
+		from ptcrdmst --agcrdmst
+		where
+			(ptcrd_cred_ind = ''P'')
+			and (ptcrd_amt - ptcrd_amt_used <> 0)
+		group by
+			ptcrd_cus_no
+			,ptcrd_loc_no
+			,ptcrd_cred_ind
+			,ptcrd_invc_no
+			,ptcrd_rev_dt
 		')
 GO 
