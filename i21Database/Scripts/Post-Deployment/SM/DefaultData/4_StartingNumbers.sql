@@ -165,6 +165,9 @@ GO
 	SET intNumber = x.intNumber
 	FROM tmpSMStartingNumber x
 	WHERE tblSMStartingNumber.strTransactionType = x.strTransactionType
+GO
+	-- all that starts with 0 should start with 1
+	UPDATE tblSMStartingNumber SET intNumber = 1 WHERE intNumber =0
 
 GO
 	IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tmpSMStartingNumber')
