@@ -966,4 +966,60 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intUserRoleId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="f6d9f8b0-b2ca-42e1-8af2-b8face1820c4" ChangeDateTime="02/24/2014 03:14:13">
+    <Property Name="ElementName" Value="[dbo].[tblSMScreens].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMScreens]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intScreenId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="388e9511-2b73-49ee-9613-c6d9389495b8" ChangeDateTime="02/24/2014 03:46:53">
+    <Property Name="ElementName" Value="[dbo].[tblSMControl].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMControl]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intControlId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5a04dbfc-9d20-4059-97a9-469ecfb3c1e9" ChangeDateTime="02/24/2014 03:47:19">
+    <Property Name="ElementName" Value="[dbo].[tblSMControl].[strControlName]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMControl]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intScreenId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d380fc76-040f-4d90-b4d5-5bd1d0dd542a" ChangeDateTime="02/24/2014 03:50:32">
+    <Property Name="ElementName" Value="[dbo].[tblSMControl].[strControlName]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMControl]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strControlId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a749fe45-3299-4d30-abd8-77d88229c1e5" ChangeDateTime="02/24/2014 03:50:42">
+    <Property Name="ElementName" Value="[dbo].[tblSMControl].[strControlLabel]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMControl]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strControlName" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="2f059bbf-5a95-4938-8cd6-1839fc296e1d" ChangeDateTime="02/24/2014 03:50:47">
+    <Property Name="ElementName" Value="[dbo].[tblSMControl].[strControl]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMControl]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strControlType" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="bd7798a4-cdb0-4ba1-aec1-d4af574567b6" ChangeDateTime="02/24/2014 04:01:12">
+    <Property Name="ElementName" Value="[dbo].[tblSMUserRoleControlPermission].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMUserRoleControlPermission]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intUserRoleControlPermissionId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4b4cd9a3-fdba-4296-82ce-1fe539d3ec76" ChangeDateTime="02/24/2014 05:09:04">
+    <Property Name="ElementName" Value="[dbo].[tblSMUserSecurityControlPermission].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMUserSecurityControlPermission]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intUserSecurityControlPermissionId" />
+  </Operation>
 </Operations>
