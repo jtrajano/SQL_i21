@@ -1,8 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[usp_PostFiscalYear]
-	 @intUserID					INT
-	,@intFiscalYearID			INT
-	,@ysnPost					BIT				= 0
-	,@ysnRecap					BIT				= 0
+	 @intFiscalYearID	AS INT
+	,@ysnPost			AS BIT				= 0
+	,@ysnRecap			AS BIT				= 0
+	,@strBatchID		AS NVARCHAR(100)	= ''
+	,@intUserID			AS INT				= 1
+	,@successfulCount	AS INT				= 0 OUTPUT
 
 AS
 
@@ -55,7 +57,7 @@ DECLARE  @dblRetained			 NUMERIC (18,6)
 		,@strRetainedAcctGroup	 NVARCHAR(50)  
 		,@dtmDate				 DATETIME  
 		,@strCurrencyID			 NVARCHAR(30)
-		,@strBatchID			 NVARCHAR(100)
+		--,@strBatchID			 NVARCHAR(100)
 		,@strAccountID			 NVARCHAR(100)
 		,@intAccountID			 INT
 		
@@ -134,8 +136,8 @@ SELECT
 		,ysnIsUnposted				= 0
 		,intConcurrencyId			= 1
 		,intUserID					= @intUserID
-		,strTransactionForm			= NULL
-		,strModuleName				= NULL
+		,strTransactionForm			= 'Fiscal Year'
+		,strModuleName				= 'General Ledger'
 		,strUOMCode					= NULL		
 		
 		,strAccountID				=	(SELECT TOP 1 strAccountID  FROM tblGLAccount  WHERE intAccountID = tblGLDetail.intAccountID)
@@ -229,8 +231,8 @@ SELECT
 		,ysnIsUnposted			= 0
 		,intConcurrencyId		= 1
 		,intUserID				= @intUserID
-		,strTransactionForm		= NULL
-		,strModuleName			= NULL
+		,strTransactionForm		= 'Fiscal Year'
+		,strModuleName			= 'General Ledger'
 		,strUOMCode				= NULL		
 		
 		,strAccountID			= @strRetainedAccount
@@ -316,7 +318,87 @@ BEGIN
 	UPDATE tblGLFiscalYear SET ysnStatus = 1 WHERE intFiscalYearID = @intFiscalYearID
 	UPDATE tblGLFiscalYearPeriod SET ysnOpen = 1 where intFiscalYearID = @intFiscalYearID
 END
+ELSE IF @ysnPost = 1 and @ysnRecap = 1
+BEGIN
+	-- DELETE Results 1 DAYS OLDER	
+	DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intUserID = @intUserID;
+	
+	WITH Accounts 
+	AS 
+	(
+		SELECT A.[strAccountID], A.[intAccountID], A.[intAccountGroupID], B.[strAccountGroup], C.[dblLbsPerUnit]
+		FROM tblGLAccount A LEFT JOIN tblGLAccountGroup B on A.intAccountGroupID = B.intAccountGroupID
+							LEFT JOIN tblGLAccountUnit  C on C.intAccountUnitID  = A.intAccountUnitID
+	)
+	INSERT INTO tblGLPostRecap (
+		 [strTransactionID]
+		,[intTransactionID]
+		,[intAccountID]
+		,[strAccountID]
+		,[strAccountGroup]
+		,[strDescription]
+		,[strReference]	
+		,[dtmTransactionDate]
+		,[dblDebit]
+		,[dblCredit]
+		,[dblDebitUnit]
+		,[dblCreditUnit]
+		,[dtmDate]
+		,[ysnIsUnposted]
+		,[intConcurrencyId]	
+		,[dblExchangeRate]
+		,[intUserID]
+		,[dtmDateEntered]
+		,[strBatchID]
+		,[strCode]
+		,[strModuleName]
+		,[strTransactionForm]
+	)
+	SELECT 
+		 @strBatchID
+		,@intFiscalYearID
+		,intAccountID
+		,strAccountID
+		,strAccountGroup
+		,strDescription
+		,strReference
+		,dtmTransactionDate
+		,dblDebit
+		,dblCredit
+		,dblDebitUnit
+		,dblCreditUnit
+		,dtmDate
+		,ysnIsUnposted
+		,intConcurrencyId
+		,dblExchangeRate
+		,intUserID
+		,dtmDateEntered
+		,@strBatchID
+		,strCode
+		,strModuleName
+		,strTransactionForm
+	FROM #ConstructGL
 
+END
 
-SELECT * FROM #ConstructGL
 DROP TABLE #ConstructGL
+SET @successfulCount = 1;
+
+GO
+
+
+
+--=====================================================================================================================================
+-- 	SCRIPT EXECUTION 
+---------------------------------------------------------------------------------------------------------------------------------------
+--DECLARE @intCount AS INT
+
+--EXEC [dbo].[usp_PostFiscalYear]
+--			@intFiscalYearID	 = 2,
+--			@ysnPost = 1,
+--			@ysnRecap = 1,								-- WHEN SET TO 1, THEN IT WILL POPULATE tblGLPostRecap THAT CAN BE VIEWED VIA BUFFERED STORE IN SENCHA
+--			@strBatchID = 'BATCH-XXX',							-- COMMA DELIMITED JOURNAL ID TO POST 
+--			@intUserID = 1,							-- USER ID THAT INITIATES POSTING
+--			@successfulCount = @intCount OUTPUT		-- OUTPUT PARAMETER THAT RETURNS TOTAL NUMBER OF SUCCESSFUL RECORDS
+				
+--SELECT @intCount
