@@ -1,8 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[usp_PostFiscalYear]
-	 @intUserID					INT
-	,@intFiscalYearID			INT
-	,@ysnPost					BIT				= 0
-	,@ysnRecap					BIT				= 0
+	 @intFiscalYearID	AS INT
+	,@ysnPost			AS BIT				= 0
+	,@ysnRecap			AS BIT				= 0
+	,@strBatchID		AS NVARCHAR(100)	= ''
+	,@intUserID			AS INT				= 1
+	,@successfulCount	AS INT				= 0 OUTPUT
 
 AS
 
@@ -10,6 +12,12 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 
+BEGIN TRANSACTION;
+
+
+--=====================================================================================================================================
+-- 	DECLARE TEMPORARY TABLES
+---------------------------------------------------------------------------------------------------------------------------------------
 CREATE TABLE #ConstructGL
 (
 	dtmDate						DATETIME
@@ -55,7 +63,7 @@ DECLARE  @dblRetained			 NUMERIC (18,6)
 		,@strRetainedAcctGroup	 NVARCHAR(50)  
 		,@dtmDate				 DATETIME  
 		,@strCurrencyID			 NVARCHAR(30)
-		,@strBatchID			 NVARCHAR(100)
+		--,@strBatchID			 NVARCHAR(100)
 		,@strAccountID			 NVARCHAR(100)
 		,@intAccountID			 INT
 		
@@ -77,7 +85,10 @@ END
 
 SELECT TOP 1 @strCurrencyID = ISNULL(strCurrency, 'USD') FROM tblSMCurrency WHERE strCurrency = 'USD'		
 
--- ++++++++ COMPUTATIONS ON GL ++++++++ --
+
+--=====================================================================================================================================
+-- 	COMPUTATIONS ON GL
+---------------------------------------------------------------------------------------------------------------------------------------
 --	Revenue, Sales	=	Credit - Debit
 --	Expense, COGS	=	Debit  - Credit
 
@@ -134,8 +145,8 @@ SELECT
 		,ysnIsUnposted				= 0
 		,intConcurrencyId			= 1
 		,intUserID					= @intUserID
-		,strTransactionForm			= NULL
-		,strModuleName				= NULL
+		,strTransactionForm			= 'Fiscal Year'
+		,strModuleName				= 'General Ledger'
 		,strUOMCode					= NULL		
 		
 		,strAccountID				=	(SELECT TOP 1 strAccountID  FROM tblGLAccount  WHERE intAccountID = tblGLDetail.intAccountID)
@@ -152,7 +163,9 @@ WHERE	C.strAccountType IN ('Revenue','Sales', 'Expense','Cost of Goods Sold')
 GROUP BY tblGLDetail.intAccountID, C.strAccountType
 
 
--- ++++++++ RETAINED EARNINGS for new Fiscal Year ++++++++ --
+--=====================================================================================================================================
+-- 	RETAINED EARNINGS for new Fiscal Year
+---------------------------------------------------------------------------------------------------------------------------------------
 SET @intAccountID			= (SELECT intAccountID FROM tblGLAccount WHERE strAccountID = @strRetainedAccount)
 SET @strRetainedAcctGroup	= ISNULL((SELECT TOP 1 strAccountGroup FROM tblGLAccount A
 												LEFT JOIN tblGLAccountGroup B
@@ -229,8 +242,8 @@ SELECT
 		,ysnIsUnposted			= 0
 		,intConcurrencyId		= 1
 		,intUserID				= @intUserID
-		,strTransactionForm		= NULL
-		,strModuleName			= NULL
+		,strTransactionForm		= 'Fiscal Year'
+		,strModuleName			= 'General Ledger'
 		,strUOMCode				= NULL		
 		
 		,strAccountID			= @strRetainedAccount
@@ -274,6 +287,8 @@ BEGIN
 	
 	UPDATE tblGLFiscalYear SET ysnStatus = 0 WHERE intFiscalYearID = @intFiscalYearID	
 	UPDATE tblGLFiscalYearPeriod SET ysnOpen = 0 where intFiscalYearID = @intFiscalYearID
+	
+	IF @@ERROR <> 0	GOTO Post_Rollback;
 END	
 ELSE IF @ysnPost = 0 and @ysnRecap = 0
 BEGIN
@@ -315,8 +330,202 @@ BEGIN
 	UPDATE tblGLDetail SET ysnIsUnposted = 1 WHERE strTransactionID = CAST(@intYear as NVARCHAR(10)) + '-' + @strRetainedAccount and ysnIsUnposted = 0
 	UPDATE tblGLFiscalYear SET ysnStatus = 1 WHERE intFiscalYearID = @intFiscalYearID
 	UPDATE tblGLFiscalYearPeriod SET ysnOpen = 1 where intFiscalYearID = @intFiscalYearID
+	
+	IF @@ERROR <> 0	GOTO Post_Rollback;
+END
+ELSE IF @ysnPost = 1 and @ysnRecap = 1
+BEGIN
+	-- DELETE Results 1 DAYS OLDER	
+	DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intUserID = @intUserID;
+	
+	WITH Accounts 
+	AS 
+	(
+		SELECT A.[strAccountID], A.[intAccountID], A.[intAccountGroupID], B.[strAccountGroup], C.[dblLbsPerUnit]
+		FROM tblGLAccount A LEFT JOIN tblGLAccountGroup B on A.intAccountGroupID = B.intAccountGroupID
+							LEFT JOIN tblGLAccountUnit  C on C.intAccountUnitID  = A.intAccountUnitID
+	)
+	INSERT INTO tblGLPostRecap (
+		 [strTransactionID]
+		,[intTransactionID]
+		,[intAccountID]
+		,[strAccountID]
+		,[strAccountGroup]
+		,[strDescription]
+		,[strReference]	
+		,[dtmTransactionDate]
+		,[dblDebit]
+		,[dblCredit]
+		,[dblDebitUnit]
+		,[dblCreditUnit]
+		,[dtmDate]
+		,[ysnIsUnposted]
+		,[intConcurrencyId]	
+		,[dblExchangeRate]
+		,[intUserID]
+		,[dtmDateEntered]
+		,[strBatchID]
+		,[strCode]
+		,[strModuleName]
+		,[strTransactionForm]
+	)
+	SELECT 
+		 @strBatchID
+		,@intFiscalYearID
+		,intAccountID
+		,strAccountID
+		,strAccountGroup
+		,strDescription
+		,strReference
+		,dtmTransactionDate
+		,dblDebit
+		,dblCredit
+		,dblDebitUnit
+		,dblCreditUnit
+		,dtmDate
+		,ysnIsUnposted
+		,intConcurrencyId
+		,dblExchangeRate
+		,intUserID
+		,dtmDateEntered
+		,@strBatchID
+		,strCode
+		,strModuleName
+		,strTransactionForm
+	FROM #ConstructGL
+
+	IF @@ERROR <> 0	GOTO Post_Rollback;
+	
+	GOTO Post_Commit;
+	
 END
 
 
-SELECT * FROM #ConstructGL
-DROP TABLE #ConstructGL
+--=====================================================================================================================================
+-- 	UPDATE GL SUMMARY RECORDS
+---------------------------------------------------------------------------------------------------------------------------------------
+--WITH JournalDetail
+--AS
+--(
+--	SELECT   [dtmDate]		= ISNULL(B.[dtmDate], GETDATE())
+--			,[intAccountID]	= A.[intAccountID]
+--			,[dblDebit]		= CASE	WHEN [dblCredit] < 0 THEN ABS([dblCredit])
+--									WHEN [dblDebit] < 0 THEN 0
+--									ELSE [dblDebit] END 
+--			,[dblCredit]	= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
+--									WHEN [dblCredit] < 0 THEN 0
+--									ELSE [dblCredit] END	
+--	FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B ON A.[intJournalID] = B.[intJournalID]
+--	WHERE B.[intJournalID] IN (SELECT [intJournalID] FROM #tmpValidJournals)
+--)
+UPDATE	tblGLSummary 
+SET		 [dblDebit] = ISNULL(tblGLSummary.[dblDebit], 0) + ISNULL(GLDetailGrouped.[dblDebit], 0)
+		,[dblCredit] = ISNULL(tblGLSummary.[dblCredit], 0) + ISNULL(GLDetailGrouped.[dblCredit], 0)
+		,[intConcurrencyId] = ISNULL([intConcurrencyId], 0) + 1
+FROM	(
+			SELECT	 [dblDebit]		= SUM(ISNULL(B.[dblDebit], 0))
+					,[dblCredit]	= SUM(ISNULL(B.[dblCredit], 0))
+					,[intAccountID] = A.[intAccountID]
+					,[dtmDate]		= ISNULL(CONVERT(DATE, A.[dtmDate]), '') 								
+			FROM tblGLSummary A 
+					INNER JOIN #ConstructGL B 
+					ON CONVERT(DATE, A.[dtmDate]) = CONVERT(DATE, B.[dtmDate]) AND A.[intAccountID] = B.[intAccountID]			
+			GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountID]
+		) AS GLDetailGrouped
+WHERE tblGLSummary.[intAccountID] = GLDetailGrouped.[intAccountID] AND 
+	  ISNULL(CONVERT(DATE, tblGLSummary.[dtmDate]), '') = ISNULL(CONVERT(DATE, GLDetailGrouped.[dtmDate]), '');
+
+IF @@ERROR <> 0	GOTO Post_Rollback;
+
+
+--=====================================================================================================================================
+-- 	INSERT TO GL SUMMARY RECORDS
+---------------------------------------------------------------------------------------------------------------------------------------
+WITH Units
+AS 
+(
+	SELECT	A.[dblLbsPerUnit], B.[intAccountID] 
+	FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitID] = B.[intAccountUnitID]
+)
+--,
+--JournalDetail 
+--AS
+--(
+--	SELECT [dtmDate]		= ISNULL(B.[dtmDate], GETDATE())
+--		,[intAccountID]		= A.[intAccountID]
+--		,[dblDebit]			= CASE	WHEN [dblCredit] < 0 THEN ABS([dblCredit])
+--									WHEN [dblDebit] < 0 THEN 0
+--									ELSE [dblDebit] END 
+--		,[dblCredit]		= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
+--									WHEN [dblCredit] < 0 THEN 0
+--									ELSE [dblCredit] END	
+--		,[dblDebitUnit]		= ISNULL(A.[dblDebitUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountID] = A.[intAccountID]), 0)
+--		,[dblCreditUnit]	= ISNULL(A.[dblCreditUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountID] = A.[intAccountID]), 0)
+--	FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B ON A.[intJournalID] = B.[intJournalID]
+--	WHERE B.intJournalID IN (SELECT [intJournalID] FROM #tmpValidJournals)
+--)
+INSERT INTO tblGLSummary (
+	 [intAccountID]
+	,[dtmDate]
+	,[dblDebit]
+	,[dblCredit]
+	,[dblDebitUnit]
+	,[dblCreditUnit]
+	,[strCode]
+	,[intConcurrencyId]
+)
+SELECT	
+	 [intAccountID]		= A.[intAccountID]
+	,[dtmDate]			= ISNULL(CONVERT(DATE, A.[dtmDate]), '')
+	,[dblDebit]			= SUM(A.[dblDebit])
+	,[dblCredit]		= SUM(A.[dblCredit])
+	,[dblDebitUnit]		= SUM(A.[dblDebitUnit])
+	,[dblCreditUnit]	= SUM(A.[dblCreditUnit])
+	,[strCode] = 'CY'
+	,[intConcurrencyId] = 1
+FROM #ConstructGL A
+WHERE NOT EXISTS 
+		(
+			SELECT TOP 1 1
+			FROM tblGLSummary B
+			WHERE ISNULL(CONVERT(DATE, A.[dtmDate]), '') = ISNULL(CONVERT(DATE, B.[dtmDate]), '') AND 
+				  A.[intAccountID] = B.[intAccountID]
+		)
+GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountID];
+
+
+
+--=====================================================================================================================================
+-- 	FINALIZING STAGE
+---------------------------------------------------------------------------------------------------------------------------------------
+Post_Commit:
+	COMMIT TRANSACTION
+	GOTO Post_Exit
+
+Post_Rollback:
+	ROLLBACK TRANSACTION		            
+	GOTO Post_Exit
+
+Post_Exit:
+	SET @successfulCount = 1;
+	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#ConstructGL')) DROP TABLE #ConstructGL
+
+
+GO
+
+
+
+--=====================================================================================================================================
+-- 	SCRIPT EXECUTION 
+---------------------------------------------------------------------------------------------------------------------------------------
+--DECLARE @intCount AS INT
+
+--EXEC [dbo].[usp_PostFiscalYear]
+--			@intFiscalYearID	 = 2,
+--			@ysnPost = 1,
+--			@ysnRecap = 1,								-- WHEN SET TO 1, THEN IT WILL POPULATE tblGLPostRecap THAT CAN BE VIEWED VIA BUFFERED STORE IN SENCHA
+--			@strBatchID = 'BATCH-XXX',							-- COMMA DELIMITED JOURNAL ID TO POST 
+--			@intUserID = 1,							-- USER ID THAT INITIATES POSTING
+--			@successfulCount = @intCount OUTPUT		-- OUTPUT PARAMETER THAT RETURNS TOTAL NUMBER OF SUCCESSFUL RECORDS
+				
+--SELECT @intCount
