@@ -136,11 +136,11 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 		,vwcus_ar_per3   = ptcus_ar_6190    
 		,vwcus_ar_per4   = ptcus_ar_91120    
 		,vwcus_ar_per5   = ptcus_ar_ov120    
-		,vwcus_pend_ivc   = ISNULL((SELECT SUM(
+		,vwcus_pend_pymt   = ISNULL((SELECT SUM(
 									CASE WHEN vwpye_amt IS NULL THEN 0.00 ELSE vwpye_amt END
 										) FROM vwpyemst WHERE vwpye_cus_no = ptcus_cus_no ),0.00)    
 		,vwcus_cred_reg   = ptcus_cred_reg    
-		,vwcus_pend_pymt  = ISNULL((SELECT SUM(
+		,vwcus_pend_ivc  = ISNULL((SELECT SUM(
 									CASE vwtic_type
 										WHEN ''I'' THEN CASE WHEN vwtic_ship_total IS NULL THEN 0 ELSE vwtic_ship_total END 
 										WHEN ''C'' THEN CASE WHEN vwtic_ship_total IS NULL THEN -0 ELSE 0-vwtic_ship_total END  
@@ -152,7 +152,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 										ELSE vwtic_ship_total
 									END
 								)		
-							FROM vwticmst WHERE vwtic_cus_no = ptcus_cus_no ),0.00)    
+							FROM vwticmst WHERE vwtic_cus_no = ptcus_cus_no AND vwtic_line = 1),0.00)    
 		,vwcus_cred_ga   = CAST(0 AS DECIMAL(18,6))    
 		,vwcus_co_per_ind_cp = CAST(ptcus_co_per_ind_cp AS CHAR(4))  
 		,vwcus_bus_loc_no  = ptcus_bus_loc_no   

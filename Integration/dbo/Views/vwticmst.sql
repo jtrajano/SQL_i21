@@ -22,6 +22,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 		vwtic_ship_total	= pttic_ship_total
 		,vwtic_cus_no	= pttic_cus_no
 		,vwtic_type	= pttic_type
+		,vwtic_line = pttic_line_no
 		FROM
 		ptticmst
 			')
