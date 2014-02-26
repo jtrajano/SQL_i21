@@ -7,7 +7,7 @@ GO
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'CN' and strDBName = db_name()	) = 1
 BEGIN
 	-- AG VIEW
-	IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()	) = 1
+	IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()	) = 1 and (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'EC' and strDBName = db_name()) = 1
 		EXEC ('
 			CREATE VIEW [dbo].[vwCPContracts]
 			AS
@@ -38,7 +38,7 @@ BEGIN
 				and (a.agcnt_line_no <> 0)
 			')
 	-- PT VIEW
-	IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()	) = 1
+	IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()	) = 1 and (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'EC' and strDBName = db_name()) = 1
 		EXEC ('
 			CREATE VIEW [dbo].[vwCPContracts]
 			AS
