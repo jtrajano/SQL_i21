@@ -90,3 +90,6 @@ NO_Rec:
 	RAISERROR(N'There are no records on coctlmst. Deployment terminated.', 16,1)
 
 GO
+
+-- test
+-- test 2
