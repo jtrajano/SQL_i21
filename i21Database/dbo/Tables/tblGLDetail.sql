@@ -23,6 +23,7 @@
     [strCompanyName]            NVARCHAR (150)   COLLATE Latin1_General_CI_AS NULL,
     [strBillInvoiceNumber]      NVARCHAR (35)    COLLATE Latin1_General_CI_AS NULL,
     [strJournalLineDescription] NVARCHAR (250)   COLLATE Latin1_General_CI_AS NULL,
+	[intJournalLineNo]			INT              NULL,
     [ysnIsUnposted]             BIT              NOT NULL,
     [intConcurrencyId]          INT              DEFAULT 1 NOT NULL,
     [intUserID]                 INT              NULL,
