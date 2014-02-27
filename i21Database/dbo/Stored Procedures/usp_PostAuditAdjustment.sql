@@ -398,8 +398,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[strCode]				= A.[strSourceType]
 				,[strModuleName]		= 'General Ledger'
 				,[strTransactionForm]	= A.[strTransactionType]
-				,[strJournalLineDescription] = A.[strDescription]
-				,[intJournalLineNo]		= A.intLineNo
+				,[strJournalLineDescription] = NULL
+				,[intJournalLineNo]		= NULL
 				
 			FROM [dbo].tblGLJournal A 
 			WHERE A.[intJournalID] IN (SELECT TOP 1 [intJournalID] FROM #tmpValidJournals)
