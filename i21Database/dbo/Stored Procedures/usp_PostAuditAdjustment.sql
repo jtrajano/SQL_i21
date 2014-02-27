@@ -192,6 +192,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strCode]
 			,[strModuleName]
 			,[strTransactionForm]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
 		)
 		SELECT 
 			 [strTransactionID]		= B.[strJournalID]
@@ -217,6 +219,9 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strCode]				= B.[strSourceType]
 			,[strModuleName]		= 'General Ledger'
 			,[strTransactionForm]	= B.[strTransactionType]
+			,[strJournalLineDescription] = A.[strDescription]
+			,[intJournalLineNo]		= A.intLineNo
+						
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B 
 			ON A.[intJournalID] = B.[intJournalID]
 		WHERE B.[intJournalID] IN (SELECT [intJournalID] FROM #tmpValidJournals);
@@ -254,6 +259,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[strCode]
 				,[strModuleName]
 				,[strTransactionForm]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
 			)
 			SELECT
 				 [strTransactionID]		= B.[strJournalID]
@@ -279,6 +286,9 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[strCode]				= B.[strSourceType]
 				,[strModuleName]		= 'General Ledger'
 				,[strTransactionForm]	= B.[strTransactionType]
+				,[strJournalLineDescription] = A.[strDescription]
+				,[intJournalLineNo]		= A.intLineNo
+				
 			FROM [dbo].tblGLJournalDetail A 
 				INNER JOIN [dbo].tblGLJournal B 
 					ON A.[intJournalID] = B.[intJournalID]
@@ -365,6 +375,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[strCode]
 				,[strModuleName]
 				,[strTransactionForm]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
 			)
 			SELECT
 				 [strTransactionID]		= (SELECT TOP 1 strJournalID FROM tblGLJournal WHERE intJournalID = (SELECT TOP 1 [intJournalID] FROM #tmpValidJournals))
@@ -386,6 +398,9 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[strCode]				= A.[strSourceType]
 				,[strModuleName]		= 'General Ledger'
 				,[strTransactionForm]	= A.[strTransactionType]
+				,[strJournalLineDescription] = A.[strDescription]
+				,[intJournalLineNo]		= A.intLineNo
+				
 			FROM [dbo].tblGLJournal A 
 			WHERE A.[intJournalID] IN (SELECT TOP 1 [intJournalID] FROM #tmpValidJournals)
 			
@@ -658,32 +673,38 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 WITH JournalDetail
 AS
 (
-	SELECT   [dtmDate]		= ISNULL(A.[dtmDate], GETDATE())
-			,[intAccountID]	= A.[intAccountID]
-			,[dblDebit]		= CASE	WHEN [dblCredit] < 0 THEN ABS([dblCredit])
-									WHEN [dblDebit] < 0 THEN 0
-									ELSE [dblDebit] END 
-			,[dblCredit]	= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
-									WHEN [dblCredit] < 0 THEN 0
-									ELSE [dblCredit] END	
+	SELECT   [dtmDate]			= ISNULL(A.[dtmDate], GETDATE())
+			,[intAccountID]		= A.[intAccountID]
+			,[dblDebit]			= CASE	WHEN [dblCredit] < 0 THEN ABS([dblCredit])
+										WHEN [dblDebit] < 0 THEN 0
+										ELSE [dblDebit] END 
+			,[dblCredit]		= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
+										WHEN [dblCredit] < 0 THEN 0
+										ELSE [dblCredit] END
+			,[dblDebitUnit]		= [dblDebitUnit]
+			,[dblCreditUnit]	= [dblDebitUnit]	
 	FROM [dbo].tblGLDetail A
 	WHERE A.strBatchID = @strBatchID
 )
 UPDATE	tblGLSummary 
-SET		 [dblDebit] = ISNULL(tblGLSummary.[dblDebit], 0) + ISNULL(GLDetailGrouped.[dblDebit], 0)
-		,[dblCredit] = ISNULL(tblGLSummary.[dblCredit], 0) + ISNULL(GLDetailGrouped.[dblCredit], 0)
+SET		 [dblDebit]			= ISNULL(tblGLSummary.[dblDebit], 0) + ISNULL(GLDetailGrouped.[dblDebit], 0)
+		,[dblCredit]		= ISNULL(tblGLSummary.[dblCredit], 0) + ISNULL(GLDetailGrouped.[dblCredit], 0)
+		,[dblDebitUnit]		= ISNULL(tblGLSummary.[dblDebitUnit], 0) + ISNULL(GLDetailGrouped.[dblDebitUnit], 0)
+		,[dblCreditUnit]	= ISNULL(tblGLSummary.[dblCreditUnit], 0) + ISNULL(GLDetailGrouped.[dblCreditUnit], 0)
 		,[intConcurrencyId] = ISNULL([intConcurrencyId], 0) + 1
 FROM	(
 			SELECT	 [dblDebit]		= SUM(ISNULL(B.[dblDebit], 0))
 					,[dblCredit]	= SUM(ISNULL(B.[dblCredit], 0))
+					,[dblDebitUnit]		= SUM(ISNULL(B.[dblDebitUnit], 0))
+					,[dblCreditUnit]	= SUM(ISNULL(B.[dblCreditUnit], 0))
 					,[intAccountID] = A.[intAccountID]
 					,[dtmDate]		= ISNULL(CONVERT(DATE, A.[dtmDate]), '') 								
 			FROM tblGLSummary A 
 					INNER JOIN JournalDetail B 
-					ON CONVERT(DATE, A.[dtmDate]) = CONVERT(DATE, B.[dtmDate]) AND A.[intAccountID] = B.[intAccountID]			
+					ON CONVERT(DATE, A.[dtmDate]) = CONVERT(DATE, B.[dtmDate]) AND A.[intAccountID] = B.[intAccountID] AND A.[strCode] = 'AA'			
 			GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountID]
 		) AS GLDetailGrouped
-WHERE tblGLSummary.[intAccountID] = GLDetailGrouped.[intAccountID] AND 
+WHERE tblGLSummary.[intAccountID] = GLDetailGrouped.[intAccountID] AND tblGLSummary.[strCode] = 'AA' AND 
 	  ISNULL(CONVERT(DATE, tblGLSummary.[dtmDate]), '') = ISNULL(CONVERT(DATE, GLDetailGrouped.[dtmDate]), '');
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
@@ -739,7 +760,7 @@ WHERE NOT EXISTS
 			SELECT TOP 1 1
 			FROM tblGLSummary B
 			WHERE ISNULL(CONVERT(DATE, A.[dtmDate]), '') = ISNULL(CONVERT(DATE, B.[dtmDate]), '') AND 
-				  A.[intAccountID] = B.[intAccountID]
+				  A.[intAccountID] = B.[intAccountID] AND B.[strCode] = 'AA'
 		)
 GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountID];
 

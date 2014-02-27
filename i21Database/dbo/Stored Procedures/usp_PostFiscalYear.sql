@@ -1,4 +1,8 @@
-﻿CREATE PROCEDURE [dbo].[usp_PostFiscalYear]
+﻿
+--=====================================================================================================================================
+-- 	CREATE THE STORED PROCEDURE AFTER DELETING IT
+---------------------------------------------------------------------------------------------------------------------------------------
+CREATE PROCEDURE [dbo].[usp_PostFiscalYear]
 	 @intFiscalYearID	AS INT
 	,@ysnPost			AS BIT				= 0
 	,@ysnRecap			AS BIT				= 0
@@ -29,7 +33,7 @@ CREATE TABLE #ConstructGL
 	,dblDebitUnit				NUMERIC(18, 6)
 	,dblCreditUnit				NUMERIC(18, 6)
 	,strGLDescription			NVARCHAR(300)
-	,strCode					NVARCHAR(50)
+	,strCode					NVARCHAR(50)	COLLATE Latin1_General_CI_AS NOT NULL
 	,strTransactionID			NVARCHAR(100)
 	,strReference				NVARCHAR(500)
 	,strJobID					NVARCHAR(100)
@@ -43,6 +47,7 @@ CREATE TABLE #ConstructGL
 	,strCompanyName				NVARCHAR(300)
 	,strBillInvoiceNumber		NVARCHAR(100)
 	,strJournalLineDescription	NVARCHAR(500)
+	,intJournalLineNo			INT
 	,ysnIsUnposted				BIT
 	,intConcurrencyId			INT
 	,intUserID					INT
@@ -63,7 +68,6 @@ DECLARE  @dblRetained			 NUMERIC (18,6)
 		,@strRetainedAcctGroup	 NVARCHAR(50)  
 		,@dtmDate				 DATETIME  
 		,@strCurrencyID			 NVARCHAR(30)
-		--,@strBatchID			 NVARCHAR(100)
 		,@strAccountID			 NVARCHAR(100)
 		,@intAccountID			 INT
 		
@@ -76,14 +80,7 @@ SET @intYear			= (SELECT TOP 1 CAST(strFiscalYear as INT) FROM tblGLFiscalYear W
 SET @dtmDateFrom		= (SELECT TOP 1 dtmDateFrom FROM tblGLFiscalYear WHERE intFiscalYearID = @intFiscalYearID) 		
 SET @dtmDateTo			= (SELECT TOP 1 dtmDateTo FROM tblGLFiscalYear WHERE intFiscalYearID = @intFiscalYearID) 		
 SET @strRetainedAccount = (SELECT TOP 1 strAccountID FROM tblGLAccount WHERE intAccountID = (SELECT TOP 1 intRetainAccount FROM tblGLFiscalYear WHERE intFiscalYearID = @intFiscalYearID))
-
-IF @ysnPost = 1 and @ysnRecap = 0
-BEGIN
-	UPDATE tblSMStartingNumber SET intNumber = intNumber + 1 WHERE strModule = 'Posting'
-	SET @strBatchID = (SELECT strPrefix + CAST(intNumber as NVARCHAR(20)) FROM tblSMStartingNumber WHERE strModule = 'Posting')
-END
-
-SELECT TOP 1 @strCurrencyID = ISNULL(strCurrency, 'USD') FROM tblSMCurrency WHERE strCurrency = 'USD'		
+SET @strCurrencyID		= (SELECT TOP 1 ISNULL(strValue, 'USD') FROM tblSMPreferences WHERE strPreference = 'defaultCurrency')
 
 
 --=====================================================================================================================================
@@ -142,6 +139,7 @@ SELECT
 		,strCompanyName				= NULL
 		,strBillInvoiceNumber		= NULL
 		,strJournalLineDescription	= NULL
+		,intJournalLineNo			= 0
 		,ysnIsUnposted				= 0
 		,intConcurrencyId			= 1
 		,intUserID					= @intUserID
@@ -239,6 +237,7 @@ SELECT
 		,strCompanyName			= NULL
 		,strBillInvoiceNumber	= NULL
 		,strJournalLineDescription	= NULL
+		,intJournalLineNo		= 0
 		,ysnIsUnposted			= 0
 		,intConcurrencyId		= 1
 		,intUserID				= @intUserID
@@ -277,6 +276,7 @@ BEGIN
 			,strCompanyName
 			,strBillInvoiceNumber
 			,strJournalLineDescription
+			,intJournalLineNo
 			,ysnIsUnposted
 			,intConcurrencyId
 			,intUserID
@@ -292,9 +292,9 @@ BEGIN
 END	
 ELSE IF @ysnPost = 0 and @ysnRecap = 0
 BEGIN
-	INSERT INTO tblGLDetail (dtmDate,strBatchID,intAccountID,strAccountGroup,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,strDescription,strCode,strTransactionID,strReference,strJobID,intCurrencyID,dblExchangeRate,dtmDateEntered,dtmTransactionDate,strProductID,strWarehouseID,strNum,strCompanyName,strBillInvoiceNumber,strJournalLineDescription,ysnIsUnposted,intConcurrencyId,intUserID,strTransactionForm,strModuleName,strUOMCode)
+	INSERT INTO tblGLDetail (dtmDate,strBatchID,intAccountID,strAccountGroup,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,strDescription,strCode,strTransactionID,strReference,strJobID,intCurrencyID,dblExchangeRate,dtmDateEntered,dtmTransactionDate,strProductID,strWarehouseID,strNum,strCompanyName,strBillInvoiceNumber,strJournalLineDescription,intJournalLineNo,ysnIsUnposted,intConcurrencyId,intUserID,strTransactionForm,strModuleName,strUOMCode)
 	SELECT   dtmDate
-			,strBatchID
+			,@strBatchID
 			,intAccountID
 			,strAccountGroup
 			,dblCredit
@@ -318,6 +318,7 @@ BEGIN
 			,strCompanyName
 			,strBillInvoiceNumber
 			,strJournalLineDescription
+			,intJournalLineNo
 			,1 as ysnIsUnposted
 			,intConcurrencyId
 			,intUserID
@@ -400,39 +401,31 @@ BEGIN
 	
 END
 
+IF @@ERROR <> 0	GOTO Post_Rollback;
 
 --=====================================================================================================================================
 -- 	UPDATE GL SUMMARY RECORDS
 ---------------------------------------------------------------------------------------------------------------------------------------
---WITH JournalDetail
---AS
---(
---	SELECT   [dtmDate]		= ISNULL(B.[dtmDate], GETDATE())
---			,[intAccountID]	= A.[intAccountID]
---			,[dblDebit]		= CASE	WHEN [dblCredit] < 0 THEN ABS([dblCredit])
---									WHEN [dblDebit] < 0 THEN 0
---									ELSE [dblDebit] END 
---			,[dblCredit]	= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
---									WHEN [dblCredit] < 0 THEN 0
---									ELSE [dblCredit] END	
---	FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B ON A.[intJournalID] = B.[intJournalID]
---	WHERE B.[intJournalID] IN (SELECT [intJournalID] FROM #tmpValidJournals)
---)
 UPDATE	tblGLSummary 
-SET		 [dblDebit] = ISNULL(tblGLSummary.[dblDebit], 0) + ISNULL(GLDetailGrouped.[dblDebit], 0)
-		,[dblCredit] = ISNULL(tblGLSummary.[dblCredit], 0) + ISNULL(GLDetailGrouped.[dblCredit], 0)
+SET		 [dblDebit]			= ISNULL(tblGLSummary.[dblDebit], 0) + ISNULL(GLDetailGrouped.[dblDebit], 0)
+		,[dblCredit]		= ISNULL(tblGLSummary.[dblCredit], 0) + ISNULL(GLDetailGrouped.[dblCredit], 0)
+		,[dblDebitUnit]		= ISNULL(tblGLSummary.[dblDebitUnit], 0) + ISNULL(GLDetailGrouped.[dblDebitUnit], 0)
+		,[dblCreditUnit]	= ISNULL(tblGLSummary.[dblCreditUnit], 0) + ISNULL(GLDetailGrouped.[dblCreditUnit], 0)
 		,[intConcurrencyId] = ISNULL([intConcurrencyId], 0) + 1
 FROM	(
-			SELECT	 [dblDebit]		= SUM(ISNULL(B.[dblDebit], 0))
-					,[dblCredit]	= SUM(ISNULL(B.[dblCredit], 0))
-					,[intAccountID] = A.[intAccountID]
-					,[dtmDate]		= ISNULL(CONVERT(DATE, A.[dtmDate]), '') 								
+			SELECT	 [dblDebit]			= SUM(ISNULL(B.[dblDebit], 0))
+					,[dblCredit]		= SUM(ISNULL(B.[dblCredit], 0))
+					,[dblDebitUnit]		= SUM(ISNULL(B.[dblDebitUnit], 0))
+					,[dblCreditUnit]	= SUM(ISNULL(B.[dblCreditUnit], 0))
+					,[intAccountID]		= A.[intAccountID]
+					,[dtmDate]			= ISNULL(CONVERT(DATE, A.[dtmDate]), '')
+					,A.[strCode] 								
 			FROM tblGLSummary A 
-					INNER JOIN #ConstructGL B 
-					ON CONVERT(DATE, A.[dtmDate]) = CONVERT(DATE, B.[dtmDate]) AND A.[intAccountID] = B.[intAccountID]			
-			GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountID]
+					INNER JOIN tblGLDetail B 
+					ON CONVERT(DATE, A.[dtmDate]) = CONVERT(DATE, B.[dtmDate]) AND A.[intAccountID] = B.[intAccountID] AND A.[strCode] = B.[strCode] AND B.[strBatchID] = @strBatchID
+			GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountID],A.[strCode]
 		) AS GLDetailGrouped
-WHERE tblGLSummary.[intAccountID] = GLDetailGrouped.[intAccountID] AND 
+WHERE tblGLSummary.[intAccountID] = GLDetailGrouped.[intAccountID] AND tblGLSummary.[strCode] = GLDetailGrouped.[strCode] AND 
 	  ISNULL(CONVERT(DATE, tblGLSummary.[dtmDate]), '') = ISNULL(CONVERT(DATE, GLDetailGrouped.[dtmDate]), '');
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
@@ -447,23 +440,6 @@ AS
 	SELECT	A.[dblLbsPerUnit], B.[intAccountID] 
 	FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitID] = B.[intAccountUnitID]
 )
---,
---JournalDetail 
---AS
---(
---	SELECT [dtmDate]		= ISNULL(B.[dtmDate], GETDATE())
---		,[intAccountID]		= A.[intAccountID]
---		,[dblDebit]			= CASE	WHEN [dblCredit] < 0 THEN ABS([dblCredit])
---									WHEN [dblDebit] < 0 THEN 0
---									ELSE [dblDebit] END 
---		,[dblCredit]		= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
---									WHEN [dblCredit] < 0 THEN 0
---									ELSE [dblCredit] END	
---		,[dblDebitUnit]		= ISNULL(A.[dblDebitUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountID] = A.[intAccountID]), 0)
---		,[dblCreditUnit]	= ISNULL(A.[dblCreditUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountID] = A.[intAccountID]), 0)
---	FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B ON A.[intJournalID] = B.[intJournalID]
---	WHERE B.intJournalID IN (SELECT [intJournalID] FROM #tmpValidJournals)
---)
 INSERT INTO tblGLSummary (
 	 [intAccountID]
 	,[dtmDate]
@@ -481,7 +457,7 @@ SELECT
 	,[dblCredit]		= SUM(A.[dblCredit])
 	,[dblDebitUnit]		= SUM(A.[dblDebitUnit])
 	,[dblCreditUnit]	= SUM(A.[dblCreditUnit])
-	,[strCode] = 'CY'
+	,[strCode] = A.[strCode]
 	,[intConcurrencyId] = 1
 FROM #ConstructGL A
 WHERE NOT EXISTS 
@@ -489,10 +465,11 @@ WHERE NOT EXISTS
 			SELECT TOP 1 1
 			FROM tblGLSummary B
 			WHERE ISNULL(CONVERT(DATE, A.[dtmDate]), '') = ISNULL(CONVERT(DATE, B.[dtmDate]), '') AND 
-				  A.[intAccountID] = B.[intAccountID]
+				  A.[intAccountID] = B.[intAccountID] AND B.[strCode] = A.[strCode]
 		)
-GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountID];
+GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountID], A.[strCode];
 
+IF @@ERROR <> 0	GOTO Post_Rollback;
 
 
 --=====================================================================================================================================
@@ -522,9 +499,9 @@ GO
 
 --EXEC [dbo].[usp_PostFiscalYear]
 --			@intFiscalYearID	 = 2,
---			@ysnPost = 1,
---			@ysnRecap = 1,								-- WHEN SET TO 1, THEN IT WILL POPULATE tblGLPostRecap THAT CAN BE VIEWED VIA BUFFERED STORE IN SENCHA
---			@strBatchID = 'BATCH-XXX',							-- COMMA DELIMITED JOURNAL ID TO POST 
+--			@ysnPost = 0,
+--			@ysnRecap = 0,								-- WHEN SET TO 1, THEN IT WILL POPULATE tblGLPostRecap THAT CAN BE VIEWED VIA BUFFERED STORE IN SENCHA
+--			@strBatchID = 'BATCH-122',							-- COMMA DELIMITED JOURNAL ID TO POST 
 --			@intUserID = 1,							-- USER ID THAT INITIATES POSTING
 --			@successfulCount = @intCount OUTPUT		-- OUTPUT PARAMETER THAT RETURNS TOTAL NUMBER OF SUCCESSFUL RECORDS
 				
