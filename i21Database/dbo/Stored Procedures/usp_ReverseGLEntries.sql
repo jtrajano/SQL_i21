@@ -61,6 +61,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[strCompanyName]
 				,[strBillInvoiceNumber]
 				,[strJournalLineDescription]
+				,[intJournalLineNo]
 				,[ysnIsUnposted]
 				,[intConcurrencyId]
 				,[intUserID]
@@ -91,6 +92,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[strCompanyName]
 				,[strBillInvoiceNumber]
 				,[strJournalLineDescription]
+				,[intJournalLineNo]
 				,ysnIsUnposted		= 1
 				,[intConcurrencyId]
 				,[intUserID]		= @intUserID
@@ -207,10 +209,10 @@ FROM	(
 					,[dtmDate]			= ISNULL(CONVERT(DATE, A.[dtmDate]), '') 								
 			FROM tblGLSummary A 
 					INNER JOIN GLDetail B 
-					ON CONVERT(DATE, A.[dtmDate]) = CONVERT(DATE, B.[dtmDate]) AND A.[intAccountID] = B.[intAccountID]			
+					ON CONVERT(DATE, A.[dtmDate]) = CONVERT(DATE, B.[dtmDate]) AND A.[intAccountID] = B.[intAccountID] AND A.[strCode] = ISNULL(@strCode, '')
 			GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountID]
 		) AS GLDetailGrouped
-WHERE tblGLSummary.[intAccountID] = GLDetailGrouped.[intAccountID] AND 
+WHERE tblGLSummary.[intAccountID] = GLDetailGrouped.[intAccountID] AND tblGLSummary.[strCode] = ISNULL(@strCode, '') AND
 	  ISNULL(CONVERT(DATE, tblGLSummary.[dtmDate]), '') = ISNULL(CONVERT(DATE, GLDetailGrouped.[dtmDate]), '');
 
 IF @@ERROR <> 0	GOTO Post_Rollback;

@@ -46,8 +46,8 @@ IF (ISNULL(@Param, '') <> '')
 	INSERT INTO #tmpPostJournals EXEC (@Param)
 ELSE
 	INSERT INTO #tmpPostJournals SELECT [intJournalID] FROM tblGLJournal	
-
-
+	
+	
 --=====================================================================================================================================
 -- 	UNPOSTING JOURNAL TRANSACTIONS
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -213,6 +213,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strCode]
 			,[strModuleName]
 			,[strTransactionForm]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
 		)
 		SELECT 
 			 [strTransactionID]		= B.[strJournalID]
@@ -238,7 +240,9 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strCode]				= B.[strSourceType]
 			,[strModuleName]		= 'General Ledger'
 			,[strTransactionForm]	= B.[strTransactionType]
-			
+			,[strJournalLineDescription] = A.[strDescription]
+			,[intJournalLineNo]		= A.intLineNo
+
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B 
 			ON A.[intJournalID] = B.[intJournalID]
 		WHERE B.[intJournalID] IN (SELECT [intJournalID] FROM #tmpValidJournals)
@@ -311,7 +315,7 @@ ELSE
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B 
 			ON A.[intJournalID] = B.[intJournalID]
 		WHERE B.[intJournalID] IN (SELECT [intJournalID] FROM #tmpValidJournals)
-				
+
 		--SUMMARY GROUP
 		INSERT INTO tblGLPostRecap (
 			 [strTransactionID]
@@ -361,35 +365,47 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 --=====================================================================================================================================
 -- 	UPDATE GL SUMMARY RECORDS
 ---------------------------------------------------------------------------------------------------------------------------------------
-WITH JournalDetail
+WITH Units
+AS 
+(
+	SELECT	A.[dblLbsPerUnit], B.[intAccountID] 
+	FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitID] = B.[intAccountUnitID]
+),
+JournalDetail
 AS
 (
-	SELECT   [dtmDate]		= ISNULL(B.[dtmDate], GETDATE())
-			,[intAccountID]	= A.[intAccountID]
-			,[dblDebit]		= CASE	WHEN [dblCredit] < 0 THEN ABS([dblCredit])
-									WHEN [dblDebit] < 0 THEN 0
-									ELSE [dblDebit] END 
-			,[dblCredit]	= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
-									WHEN [dblCredit] < 0 THEN 0
-									ELSE [dblCredit] END	
+	SELECT   [dtmDate]			= ISNULL(B.[dtmDate], GETDATE())
+			,[intAccountID]		= A.[intAccountID]
+			,[dblDebit]			= CASE	WHEN [dblCredit] < 0 THEN ABS([dblCredit])
+										WHEN [dblDebit] < 0 THEN 0
+										ELSE [dblDebit] END 
+			,[dblCredit]		= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
+										WHEN [dblCredit] < 0 THEN 0
+										ELSE [dblCredit] END	
+			,[dblDebitUnit]		= ISNULL([dblDebitUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountID] = A.[intAccountID]), 0)
+			,[dblCreditUnit]	= ISNULL([dblCreditUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountID] = A.[intAccountID]), 0)
 	FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B ON A.[intJournalID] = B.[intJournalID]
 	WHERE B.[intJournalID] IN (SELECT [intJournalID] FROM #tmpValidJournals)
 )
 UPDATE	tblGLSummary 
-SET		 [dblDebit] = ISNULL(tblGLSummary.[dblDebit], 0) + ISNULL(GLDetailGrouped.[dblDebit], 0)
-		,[dblCredit] = ISNULL(tblGLSummary.[dblCredit], 0) + ISNULL(GLDetailGrouped.[dblCredit], 0)
+SET		 [dblDebit]			= ISNULL(tblGLSummary.[dblDebit], 0) + ISNULL(GLDetailGrouped.[dblDebit], 0)
+		,[dblCredit]		= ISNULL(tblGLSummary.[dblCredit], 0) + ISNULL(GLDetailGrouped.[dblCredit], 0)
+		,[dblDebitUnit]		= ISNULL(tblGLSummary.[dblDebitUnit], 0) + ISNULL(GLDetailGrouped.[dblDebitUnit], 0)
+		,[dblCreditUnit]	= ISNULL(tblGLSummary.[dblCreditUnit], 0) + ISNULL(GLDetailGrouped.[dblCreditUnit], 0)
 		,[intConcurrencyId] = ISNULL([intConcurrencyId], 0) + 1
 FROM	(
-			SELECT	 [dblDebit]		= SUM(ISNULL(B.[dblDebit], 0))
-					,[dblCredit]	= SUM(ISNULL(B.[dblCredit], 0))
-					,[intAccountID] = A.[intAccountID]
-					,[dtmDate]		= ISNULL(CONVERT(DATE, A.[dtmDate]), '') 								
+			SELECT	 [dblDebit]			= SUM(ISNULL(B.[dblDebit], 0))
+					,[dblCredit]		= SUM(ISNULL(B.[dblCredit], 0))
+					,[dblDebitUnit]		= SUM(ISNULL(B.[dblDebitUnit], 0))
+					,[dblCreditUnit]	= SUM(ISNULL(B.[dblCreditUnit], 0))
+					,[intAccountID]		= A.[intAccountID]
+					,[dtmDate]			= ISNULL(CONVERT(DATE, A.[dtmDate]), '') 								
 			FROM tblGLSummary A 
 					INNER JOIN JournalDetail B 
-					ON CONVERT(DATE, A.[dtmDate]) = CONVERT(DATE, B.[dtmDate]) AND A.[intAccountID] = B.[intAccountID]			
+					ON CONVERT(DATE, A.[dtmDate]) = CONVERT(DATE, B.[dtmDate]) AND A.[intAccountID] = B.[intAccountID] AND A.[strCode] = 'GJ'			
 			GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountID]
 		) AS GLDetailGrouped
-WHERE tblGLSummary.[intAccountID] = GLDetailGrouped.[intAccountID] AND 
+WHERE tblGLSummary.[intAccountID] = GLDetailGrouped.[intAccountID] AND tblGLSummary.[strCode] = 'GJ' AND
 	  ISNULL(CONVERT(DATE, tblGLSummary.[dtmDate]), '') = ISNULL(CONVERT(DATE, GLDetailGrouped.[dtmDate]), '');
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
@@ -445,11 +461,12 @@ WHERE NOT EXISTS
 			SELECT TOP 1 1
 			FROM tblGLSummary B
 			WHERE ISNULL(CONVERT(DATE, A.[dtmDate]), '') = ISNULL(CONVERT(DATE, B.[dtmDate]), '') AND 
-				  A.[intAccountID] = B.[intAccountID]
+				  A.[intAccountID] = B.[intAccountID] AND B.[strCode] = 'GJ'
 		)
 GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountID];
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
+
 
 --=====================================================================================================================================
 -- 	UPDATE JOURNAL TABLE
@@ -627,10 +644,10 @@ GO
 --DECLARE @intCount AS INT
 
 --EXEC [dbo].[usp_PostJournal]
---			@Param	 = 'select intJournalID from tblGLJournal where strJournalID = ''REV-5''',				-- GENERATED BATCH ID
---			@ysnPost = 0,
---			@ysnRecap = 1,								-- WHEN SET TO 1, THEN IT WILL POPULATE tblGLPostRecap THAT CAN BE VIEWED VIA BUFFERED STORE IN SENCHA
---			@strBatchID = 'BATCH-XXX5',							-- COMMA DELIMITED JOURNAL ID TO POST 
+--			@Param	 = 'select intJournalID from tblGLJournal where strJournalID = ''GJ-20''',				-- GENERATED BATCH ID
+--			@ysnPost = 1,
+--			@ysnRecap = 0,								-- WHEN SET TO 1, THEN IT WILL POPULATE tblGLPostRecap THAT CAN BE VIEWED VIA BUFFERED STORE IN SENCHA
+--			@strBatchID = 'BATCH-11231',							-- COMMA DELIMITED JOURNAL ID TO POST 
 --			@strJournalType = 'General Journal',
 --			@intUserID = 1,							-- USER ID THAT INITIATES POSTING
 --			@successfulCount = @intCount OUTPUT		-- OUTPUT PARAMETER THAT RETURNS TOTAL NUMBER OF SUCCESSFUL RECORDS
