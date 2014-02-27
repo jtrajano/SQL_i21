@@ -211,9 +211,9 @@ where	ysnHasGasCheck = 1 '
 	IF(ISNULL(@WhereClause2,'') != '')
 	BEGIN Set @Query = @Query + @WhereClause2 END
 	
-	--EXEC(@Query)
+	EXEC(@Query)
 	
-	select @Query
+	--select @Query
 	
 	
 END
