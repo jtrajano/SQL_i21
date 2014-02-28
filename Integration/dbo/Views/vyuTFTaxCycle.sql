@@ -7,7 +7,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuTF
 	DROP VIEW vyuTFTaxCycle
 
 GO
-IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'TF') = 1
+--IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'TF') = 1
 	EXEC ('
 		CREATE VIEW [dbo].[vwpxcycmst]
 		AS
