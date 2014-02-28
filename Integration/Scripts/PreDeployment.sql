@@ -35,6 +35,7 @@
 :r ..\dbo\Views\vwCPGABusinessSummary.sql
 :r ..\dbo\Views\vwCPGAContractDetail.sql
 :r ..\dbo\Views\vwCPGAContracts.sql
+:r ..\dbo\Views\vwCPGASettlementsReports.sql
 :r ..\dbo\Views\vwCPInvoicesCredits.sql
 :r ..\dbo\Views\vwCPInvoicesCreditsReports.sql
 :r ..\dbo\Views\vwCPOptions.sql
