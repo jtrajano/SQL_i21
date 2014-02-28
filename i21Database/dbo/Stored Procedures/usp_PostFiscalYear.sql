@@ -157,7 +157,7 @@ FROM	tblGLDetail  LEFT JOIN tblGLAccount B
 WHERE	C.strAccountType IN ('Revenue','Sales', 'Expense','Cost of Goods Sold') 
 		AND FLOOR(CAST(CAST(dtmDate AS DATETIME) AS NUMERIC(18,6))) BETWEEN  FLOOR(CAST(@dtmDateFrom AS NUMERIC(18,6))) AND FLOOR(CAST(@dtmDateTo AS NUMERIC(18,6)))
 		AND ysnIsUnposted = 0
-		AND strCode <> 'AA' 
+		--AND strCode <> 'AA' 
 GROUP BY tblGLDetail.intAccountID, C.strAccountType
 
 
@@ -181,7 +181,7 @@ SET @dblRetained =
 			WHERE	C.strAccountType IN ('Revenue','Sales')
 					AND FLOOR(CAST(CAST(dtmDate AS DATETIME) AS NUMERIC(18,6))) BETWEEN  FLOOR(CAST(@dtmDateFrom AS NUMERIC(18,6))) AND FLOOR(CAST(@dtmDateTo AS NUMERIC(18,6)))
 					AND ysnIsUnposted = 0
-					AND strCode <> 'AA'
+					-- AND strCode <> 'AA'
 		), 0) -   
 	ISNULL((  
 			SELECT	SUM(ISNULL(dblDebit, 0)) - SUM(ISNULL(dblCredit, 0))  
@@ -192,7 +192,7 @@ SET @dblRetained =
 			WHERE	C.strAccountType IN ('Expense','Cost of Goods Sold')
 					AND FLOOR(CAST(CAST(dtmDate AS DATETIME) AS NUMERIC(18,6))) BETWEEN  FLOOR(CAST(@dtmDateFrom AS NUMERIC(18,6))) AND FLOOR(CAST(@dtmDateTo AS NUMERIC(18,6)))
 					AND ysnIsUnposted = 0
-					AND strCode <> 'AA'
+					-- AND strCode <> 'AA'
 		), 0)  
 )
 
