@@ -220,8 +220,8 @@ SELECT
 		,strAccountGroup		= @strRetainedAcctGroup
 		,dblDebit				= @dblRetainedDebit
 		,dblCredit				= @dblRetainedCredit
-		,dblDebitUnit			= @dblRetainedDebitUnit
-		,dblCreditUnit			= @dblRetainedCreditUnit
+		,dblDebitUnit			= 0
+		,dblCreditUnit			= 0
 		,strGLDescription		= 'Retained Earnings'
 		,strCode				= 'RE'
 		,strTransactionID		= CAST(@intYear as NVARCHAR(10)) + '-' + @strRetainedAccount
