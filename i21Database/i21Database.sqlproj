@@ -433,6 +433,7 @@
     <Build Include="dbo\Tables\tblCMDataImportStatus.sql" />
     <None Include="Scripts\Post-Deployment\FIN\DefaultData\DataImportStatus.sql" />
     <Build Include="dbo\Views\vyuAPVendor.sql" />
+    <Build Include="dbo\Functions\fn_geti21PeriodFromOriginPeriod.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
