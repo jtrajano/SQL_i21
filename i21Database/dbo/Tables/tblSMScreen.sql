@@ -5,7 +5,7 @@
 	[strScreenName] NVARCHAR(100) NOT NULL, 
     [strNamespace] NVARCHAR(150) NOT NULL, 
     [strModule] NVARCHAR(100) NOT NULL, 
-    [intConcurrencyId] NVARCHAR(50) NOT NULL DEFAULT (1)
+    [intConcurrencyId] INT NOT NULL DEFAULT (1)
 )
 
 GO
