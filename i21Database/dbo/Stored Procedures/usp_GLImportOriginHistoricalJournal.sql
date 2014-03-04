@@ -52,7 +52,7 @@ BEGIN
 	--	   UPDATE POSTING DATE
 	--+++++++++++++++++++++++++++++++++
 
-	UPDATE iRelyImptblGLJournal SET dtmDate = SUBSTRING(dtmDate,5,2)+'/01/'+SUBSTRING(dtmDate,1,4) FROM iRelyImptblGLJournal
+	--UPDATE iRelyImptblGLJournal SET dtmDate = SUBSTRING(dtmDate,5,2)+'/01/'+SUBSTRING(dtmDate,1,4) FROM iRelyImptblGLJournal
 	
 	
 	--+++++++++++++++++++++++++++++++++
@@ -64,7 +64,7 @@ BEGIN
 	SELECT  dtmReverseDate,
 			strJournalID,
 			strTransactionType, 
-			CAST(dtmDate as DATETIME) as dtmDate,
+			CAST((dbo.[fn_geti21PeriodFromOriginPeriod](SUBSTRING(dtmDate,1,4), SUBSTRING(dtmDate,5,2))) as DATETIME) as dtmDate,
 			strReverseLink,
 			intCurrencyID,
 			dblExchangeRate,

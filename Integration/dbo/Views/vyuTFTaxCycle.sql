@@ -9,7 +9,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuTF
 GO
 --IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'TF') = 1
 	EXEC ('
-		CREATE VIEW [dbo].[vwpxcycmst]
+		CREATE VIEW [dbo].[vyuTFTaxCycle]
 		AS
 		SELECT  pxcyc_cycle_id AS vwpxcyc_cycle_id
 				, CAST(pxcyc_seq_no as INT) AS vwpxcyc_seq_no
