@@ -22,6 +22,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@ORIGIN_EFT AS INT = 13
 		,@ORIGIN_WITHDRAWAL AS INT = 14
 		,@ORIGIN_WIRE AS INT = 15
+		,@AP_PAYMENT AS INT = 16
 		
 DECLARE @returnBalance AS NUMERIC(18,6)		
 
@@ -32,7 +33,7 @@ WHERE	ysnPosted = 1
 		AND dblAmount <> 0 
 		AND intBankAccountId = @intBankAccountId
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDate) AS FLOAT)) AS DATETIME)		
-		AND intBankTransactionTypeId IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
+		AND intBankTransactionTypeId IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT)
 
 -- Get bank amounts from Bank Transactions 	
 -- Note: The computations are based on the detail table (tblCMBankTransactionDetail). 
@@ -52,7 +53,7 @@ WHERE	ysnPosted = 1
 		AND dblAmount <> 0 
 		AND intBankAccountId = @intBankAccountId
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDate) AS FLOAT)) AS DATETIME)		
-		AND intBankTransactionTypeId NOT IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @BANK_TRANSACTION, @BANK_WITHDRAWAL, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)		
+		AND intBankTransactionTypeId NOT IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @BANK_TRANSACTION, @BANK_WITHDRAWAL, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT)
 
 RETURN ISNULL(@returnBalance, 0)
 
