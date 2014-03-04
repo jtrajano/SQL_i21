@@ -24,6 +24,7 @@ BEGIN
 		,@ORIGIN_EFT AS INT = 13
 		,@ORIGIN_WITHDRAWAL AS INT = 14
 		,@ORIGIN_WIRE AS INT = 15
+		,@AP_PAYMENT AS INT = 16
 		
 	SELECT	@total = SUM(ISNULL(dblAmount,0))
 	FROM	[dbo].[tblCMBankTransaction]
