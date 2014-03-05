@@ -145,7 +145,7 @@ BEGIN
 	INNER JOIN tblGLJournal ON 
 		tblGLJournal.strJournalID = iRelyImptblGLJournalDetail.glhst_jrnl_no 
 		AND tblGLJournal.strSourceID = glhst_src_seq
-		AND glhst_period = convert(varchar(4),SUBSTRING (convert(varchar(100),dtmDate,101),7,4)) + convert(varchar(4),SUBSTRING(convert(varchar(100),dtmDate,101),1,2))
+		--AND glhst_period = convert(varchar(4),SUBSTRING (convert(varchar(100),dtmDate,101),7,4)) + convert(varchar(4),SUBSTRING(convert(varchar(100),dtmDate,101),1,2))
 
 
 	--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
