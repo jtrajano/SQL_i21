@@ -27,6 +27,7 @@ BEGIN
 	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'iRelyImptblGLJournal') DROP TABLE iRelyImptblGLJournal
 	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'iRelyImptblGLJournalDetail') DROP TABLE iRelyImptblGLJournalDetail
 
+
 	--+++++++++++++++++++++++++++++++++
 	--		 TEMP HEADER JOURNAL
 	--+++++++++++++++++++++++++++++++++	
@@ -55,9 +56,11 @@ BEGIN
 	FROM glhstmst
 	GROUP BY glhst_period, glhst_src_id, glhst_src_seq	
 
+
 	--+++++++++++++++++++++++++++++++++
 	--	   INSERT IMPORT LOGS
 	--+++++++++++++++++++++++++++++++++
+	
 	INSERT INTO tblGLCOAImportLog (strEvent,strIrelySuiteVersion,intUserID,dtmDate,strMachineName,strJournalType,intConcurrencyId)
 					VALUES('Import Origin Historical Journal',(SELECT TOP 1 strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC),@intUserID,GETDATE(),'','',1)
 
@@ -136,6 +139,7 @@ BEGIN
 	 INNER JOIN tblGLCOACrossReference ON 
 		SUBSTRING(strCurrentExternalID,1,8) = glhst_acct1_8 AND SUBSTRING(strCurrentExternalID,10,8) = glhst_acct9_16 
 	 INNER JOIN tblGLAccount ON tblGLAccount.intAccountID = tblGLCOACrossReference.inti21ID
+	 
 	 
 	--+++++++++++++++++++++++++++++++++
 	--		 UPDATE COLLATE JOURNAL
@@ -228,6 +232,14 @@ BEGIN
 								dblUnitsInlbs,strDocument,strComments,strReference,DebitUnitsInlbs,strCorrecting,strSourcePgm,strCheckbookNo,strWorkArea 
 						FROM  #iRelyImptblGLJournalDetail
 						
+						
+	--+++++++++++++++++++++++++++++++++++++
+	--	UPDATE POST DATE JOURNAL [HEADER]
+	--+++++++++++++++++++++++++++++++++++++											
+						
+	UPDATE tblGLJournal SET dtmDate = (SELECT TOP 1 CAST(CAST(MONTH(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) +'/01/'+ CAST(YEAR(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) as DATETIME) as dtmNewDate FROM tblGLJournalDetail 
+                                        WHERE tblGLJournalDetail.intJournalID = tblGLJournal.intJournalID)
+                                        
 						
 	DROP TABLE #iRelyImptblGLJournal						
 	DROP TABLE #iRelyImptblGLJournalDetail
