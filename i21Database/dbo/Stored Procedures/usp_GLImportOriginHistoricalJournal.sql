@@ -6,6 +6,8 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 
+BEGIN TRANSACTION
+
 --+++++++++++++++++++++++++++++++++
 --			VALIDATIONS
 --+++++++++++++++++++++++++++++++++
@@ -56,6 +58,7 @@ BEGIN
 	FROM glhstmst
 	GROUP BY glhst_period, glhst_src_id, glhst_src_seq	
 
+	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 
 	--+++++++++++++++++++++++++++++++++
 	--	   INSERT IMPORT LOGS
@@ -69,6 +72,7 @@ BEGIN
 	INSERT INTO tblGLCOAImportLogDetail (intImportLogID,strEventDescription,strPeriod,strSourceNumber,strSourceSystem,strJournalID,intConcurrencyId)
 		SELECT @intImportLogID,strDescription,dtmDate,strSourceID,strSourceType,strJournalID,1 FROM #iRelyImptblGLJournal
 	
+	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 
 	--+++++++++++++++++++++++++++++++++
 	--	   UPDATE POSTING DATE
@@ -102,6 +106,7 @@ BEGIN
 			strSourceType
 	FROM #iRelyImptblGLJournal
 
+	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 
 	--+++++++++++++++++++++++++++++++++
 	--		 TEMP DETAIL JOURNAL
@@ -140,6 +145,7 @@ BEGIN
 		SUBSTRING(strCurrentExternalID,1,8) = glhst_acct1_8 AND SUBSTRING(strCurrentExternalID,10,8) = glhst_acct9_16 
 	 INNER JOIN tblGLAccount ON tblGLAccount.intAccountID = tblGLCOACrossReference.inti21ID
 	 
+	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 	 
 	--+++++++++++++++++++++++++++++++++
 	--		 UPDATE COLLATE JOURNAL
@@ -157,6 +163,7 @@ BEGIN
 		ALTER COLUMN glhst_src_seq
 			CHAR(5) COLLATE Latin1_General_CI_AS NOT NULL
 
+	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 
 	--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	--		 UPDATE DETAIL [intJournalID] BASED ON HEADER
@@ -170,6 +177,7 @@ BEGIN
 		AND tblGLJournal.strSourceID = glhst_src_seq
 		--AND glhst_period = convert(varchar(4),SUBSTRING (convert(varchar(100),dtmDate,101),7,4)) + convert(varchar(4),SUBSTRING(convert(varchar(100),dtmDate,101),1,2))
 
+	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 
 	--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	--		 ASSIGN TRANSACTION ID BASED ON NEW HEADER GROUPING
@@ -221,6 +229,7 @@ BEGIN
 					+'/'+substring(convert(varchar(10),glhst_trans_dt),1,4) AS DATETIME)
 	FROM #iRelyImptblGLJournalDetail
 
+	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 
 	--+++++++++++++++++++++++++++++++++
 	--	   INSERT JOURNAL [DETAIL]
@@ -232,6 +241,7 @@ BEGIN
 								dblUnitsInlbs,strDocument,strComments,strReference,DebitUnitsInlbs,strCorrecting,strSourcePgm,strCheckbookNo,strWorkArea 
 						FROM  #iRelyImptblGLJournalDetail
 						
+	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 						
 	--+++++++++++++++++++++++++++++++++++++
 	--	UPDATE POST DATE JOURNAL [HEADER]
@@ -239,11 +249,27 @@ BEGIN
 						
 	UPDATE tblGLJournal SET dtmDate = (SELECT TOP 1 CAST(CAST(MONTH(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) +'/01/'+ CAST(YEAR(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) as DATETIME) as dtmNewDate FROM tblGLJournalDetail 
                                         WHERE tblGLJournalDetail.intJournalID = tblGLJournal.intJournalID)
-                                        
-						
-	DROP TABLE #iRelyImptblGLJournal						
-	DROP TABLE #iRelyImptblGLJournalDetail
+                                        						
+	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT	
+                                     
 
 	SELECT 'SUCCESSFULLY IMPORTED'
 						
 END
+	
+--=====================================================================================================================================
+-- 	FINALIZING STAGE
+---------------------------------------------------------------------------------------------------------------------------------------
+COMMIT_INSERT:
+	COMMIT TRANSACTION
+	GOTO IMPORT_EXIT
+	
+ROLLBACK_INSERT:
+	ROLLBACK TRANSACTION		            
+	GOTO IMPORT_EXIT
+
+IMPORT_EXIT:
+	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#iRelyImptblGLJournal')) DROP TABLE #iRelyImptblGLJournal
+	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#iRelyImptblGLJournalDetail')) DROP TABLE #iRelyImptblGLJournalDetail
+
+GO	
