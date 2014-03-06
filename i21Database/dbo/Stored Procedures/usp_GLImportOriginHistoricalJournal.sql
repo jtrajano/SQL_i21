@@ -11,7 +11,10 @@ BEGIN TRANSACTION
 --+++++++++++++++++++++++++++++++++
 --			VALIDATIONS
 --+++++++++++++++++++++++++++++++++
-IF (EXISTS(SELECT * FROM glhstmst LEFT OUTER JOIN tblGLCOACrossReference ON SUBSTRING(strCurrentExternalID,1,8) = glhst_acct1_8 AND SUBSTRING(strCurrentExternalID,10,8) = glhst_acct9_16 WHERE inti21ID IS NULL))
+DECLARE @inti21ID int
+SELECT @inti21ID = 1 FROM glhstmst LEFT OUTER JOIN tblGLCOACrossReference ON SUBSTRING(strCurrentExternalID,1,8) = glhst_acct1_8 AND SUBSTRING(strCurrentExternalID,10,8) = glhst_acct9_16 WHERE inti21ID IS NULL
+
+IF (SELECT isnull(@inti21ID, 0)) > 0
 BEGIN	
 	SELECT 'There are accounts that does not exists at iRely Cross Reference. <br/> Kindly verify at Origin.' as Result
 END
