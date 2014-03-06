@@ -5,6 +5,11 @@
 
 AS
 
+--make first a copy of ssvndmst. this will use to track all vendors already imported
+IF(OBJECT_ID('dbo.tblAPTempVendor') IS NULL)
+	SELECT * INTO tblAPTempVendor FROM ssvndmst
+	-- WHERE ssvndmst.ssvnd_vnd_no IS NULL
+
 IF(@Update = 1 AND @VendorId IS NOT NULL)
 BEGIN
 
@@ -191,7 +196,13 @@ BEGIN
     DECLARE @dtmCreated                DATETIME       
     DECLARE @strTaxState				NVARCHAR(50) 
 
-	SELECT ssvnd_vnd_no INTO #tmpssvndmst FROM ssvndmst
+	--Import only those are not yet imported
+	SELECT ssvnd_vnd_no INTO #tmpssvndmst 
+		FROM ssvndmst
+	LEFT JOIN tblAPVendor
+		ON ssvndmst.ssvnd_vnd_no COLLATE Latin1_General_CI_AS = tblAPVendor.strVendorId COLLATE Latin1_General_CI_AS
+	WHERE tblAPVendor.strVendorId IS NULL
+	ORDER BY ssvndmst.ssvnd_vnd_no
 
 	WHILE (EXISTS(SELECT 1 FROM #tmpssvndmst))
 	BEGIN

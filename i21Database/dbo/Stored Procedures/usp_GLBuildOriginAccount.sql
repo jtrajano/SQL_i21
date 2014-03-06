@@ -178,7 +178,7 @@ SELECT strCode AS strAccountID,
 	   strAccountGroup,
 	   intAccountGroupID,
 	   strAccountSegmentID,	   
-	   intAccountUnitID = (SELECT TOP 1 intAccountUnitID FROM tblGLAccountUnit WHERE strUOMCode = (SELECT TOP 1 gluom_code COLLATE Latin1_General_CI_AS FROM gluommst WHERE A4GLIdentity = CAST(glactmst.glact_uom AS INT))), --glact_uom 
+	   intAccountUnitID = (SELECT TOP 1 intAccountUnitID FROM tblGLAccountUnit WHERE strUOMCode = (SELECT TOP 1 gluom_code COLLATE Latin1_General_CI_AS FROM gluommst WHERE gluom_code = glact_uom)), -- WHERE A4GLIdentity = CAST(glactmst.glact_uom AS INT))), 
 	   ysnSystem = (CASE WHEN glact_sys_acct_yn = 'N' THEN 0 ELSE 1 END), -- glact_sys_acct_yn
 	   ysnActive = (CASE WHEN glact_active_yn = 'N' THEN 0 ELSE 1 END), -- glact_active_yn   
 	   @intUserID AS intUserID,	   
