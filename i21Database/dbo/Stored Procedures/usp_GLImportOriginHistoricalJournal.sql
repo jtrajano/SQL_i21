@@ -19,6 +19,14 @@ BEGIN
 END
 ELSE
 BEGIN
+
+	--+++++++++++++++++++++++++++++++++
+	--		CLEAN-UP TEMP TABLES
+	--+++++++++++++++++++++++++++++++++	
+	
+	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'iRelyImptblGLJournal') DROP TABLE iRelyImptblGLJournal
+	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'iRelyImptblGLJournalDetail') DROP TABLE iRelyImptblGLJournalDetail
+
 	--+++++++++++++++++++++++++++++++++
 	--		 TEMP HEADER JOURNAL
 	--+++++++++++++++++++++++++++++++++	
@@ -43,16 +51,27 @@ BEGIN
 		NULL AS dtmReverseDate,																												-- We should not import reversing transactions	
 		NULL AS dblExchangeRate,																											-- exchange rate
 		NULL AS dtmPosted																												-- date posted--convert(varchar,(12),MAX(glhst_period)) removed per liz	
-	INTO iRelyImptblGLJournal
+	INTO #iRelyImptblGLJournal
 	FROM glhstmst
 	GROUP BY glhst_period, glhst_src_id, glhst_src_seq	
 
+	--+++++++++++++++++++++++++++++++++
+	--	   INSERT IMPORT LOGS
+	--+++++++++++++++++++++++++++++++++
+	INSERT INTO tblGLCOAImportLog (strEvent,strIrelySuiteVersion,intUserID,dtmDate,strMachineName,strJournalType,intConcurrencyId)
+					VALUES('Import Origin Historical Journal',(SELECT TOP 1 strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC),@intUserID,GETDATE(),'','',1)
+
+	DECLARE @intImportLogID INT = (SELECT intImportLogID FROM tblGLCOAImportLog WHERE strEvent = 'Import Origin Historical Journal' AND dtmDate = GETDATE())
+	
+	INSERT INTO tblGLCOAImportLogDetail (intImportLogID,strEventDescription,strPeriod,strSourceNumber,strSourceSystem,strJournalID,intConcurrencyId)
+		SELECT @intImportLogID,strDescription,dtmDate,strSourceID,strSourceType,strJournalID,1 FROM #iRelyImptblGLJournal
+	
 
 	--+++++++++++++++++++++++++++++++++
 	--	   UPDATE POSTING DATE
 	--+++++++++++++++++++++++++++++++++
 
-	--UPDATE iRelyImptblGLJournal SET dtmDate = SUBSTRING(dtmDate,5,2)+'/01/'+SUBSTRING(dtmDate,1,4) FROM iRelyImptblGLJournal
+	--UPDATE #iRelyImptblGLJournal SET dtmDate = SUBSTRING(dtmDate,5,2)+'/01/'+SUBSTRING(dtmDate,1,4) FROM #iRelyImptblGLJournal
 	
 	
 	--+++++++++++++++++++++++++++++++++
@@ -78,7 +97,7 @@ BEGIN
 			strJournalType,
 			strRecurringStatus,
 			strSourceType
-	FROM iRelyImptblGLJournal
+	FROM #iRelyImptblGLJournal
 
 
 	--+++++++++++++++++++++++++++++++++
@@ -112,7 +131,7 @@ BEGIN
 		glhst_src_id,
 		glhst_src_seq,    
 		GETDATE() as gooddate
-	 INTO iRelyImptblGLJournalDetail
+	 INTO #iRelyImptblGLJournalDetail
 	 FROM  glhstmst 
 	 INNER JOIN tblGLCOACrossReference ON 
 		SUBSTRING(strCurrentExternalID,1,8) = glhst_acct1_8 AND SUBSTRING(strCurrentExternalID,10,8) = glhst_acct9_16 
@@ -122,15 +141,15 @@ BEGIN
 	--		 UPDATE COLLATE JOURNAL
 	--+++++++++++++++++++++++++++++++++
 
-	ALTER TABLE iRelyImptblGLJournalDetail
+	ALTER TABLE #iRelyImptblGLJournalDetail
 		ALTER COLUMN glhst_jrnl_no
 			VARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL
 
-	ALTER TABLE iRelyImptblGLJournalDetail
+	ALTER TABLE #iRelyImptblGLJournalDetail
 		ALTER COLUMN glhst_src_id
 			CHAR(3) COLLATE Latin1_General_CI_AS NOT NULL
 
-	ALTER TABLE iRelyImptblGLJournalDetail
+	ALTER TABLE #iRelyImptblGLJournalDetail
 		ALTER COLUMN glhst_src_seq
 			CHAR(5) COLLATE Latin1_General_CI_AS NOT NULL
 
@@ -139,11 +158,11 @@ BEGIN
 	--		 UPDATE DETAIL [intJournalID] BASED ON HEADER
 	--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-	UPDATE iRelyImptblGLJournalDetail 
-		SET iRelyImptblGLJournalDetail.intJournalID = tblGLJournal.intJournalID
-	FROM iRelyImptblGLJournalDetail
+	UPDATE #iRelyImptblGLJournalDetail 
+		SET #iRelyImptblGLJournalDetail.intJournalID = tblGLJournal.intJournalID
+	FROM #iRelyImptblGLJournalDetail
 	INNER JOIN tblGLJournal ON 
-		tblGLJournal.strJournalID = iRelyImptblGLJournalDetail.glhst_jrnl_no 
+		tblGLJournal.strJournalID = #iRelyImptblGLJournalDetail.glhst_jrnl_no 
 		AND tblGLJournal.strSourceID = glhst_src_seq
 		--AND glhst_period = convert(varchar(4),SUBSTRING (convert(varchar(100),dtmDate,101),7,4)) + convert(varchar(4),SUBSTRING(convert(varchar(100),dtmDate,101),1,2))
 
@@ -153,7 +172,7 @@ BEGIN
 	--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	--SET ROWCOUNT 0
-	--UPDATE iRelyImptblGLJournalDetail
+	--UPDATE #iRelyImptblGLJournalDetail
 	--SET intLineNo = 0
 
 	--DECLARE @last1 INT
@@ -164,9 +183,9 @@ BEGIN
 	--SET @last1 = 0
 	--SET @lastprior = 0
 
-	--WHILE (SELECT COUNT(*) FROM iRelyImptblGLJournalDetail where intLineNo = 0) > 0
+	--WHILE (SELECT COUNT(*) FROM #iRelyImptblGLJournalDetail where intLineNo = 0) > 0
 	--BEGIN
-	--	SELECT @last1= (SELECT MIN(intJournalID) FROM iRelyImptblGLJournalDetail WHERE intLineNo = 0)
+	--	SELECT @last1= (SELECT MIN(intJournalID) FROM #iRelyImptblGLJournalDetail WHERE intLineNo = 0)
 
 	--	IF @last1 <> @lastprior 
 	--	BEGIN
@@ -175,12 +194,12 @@ BEGIN
 
 	--	SET ROWCOUNT 0
 	--	SELECT @lastprior = @last1
-	--	SELECT @line1 = (SELECT Max (intLineNo) FROM iRelyImptblGLJournalDetail WHERE intJournalID = @last1)
+	--	SELECT @line1 = (SELECT Max (intLineNo) FROM #iRelyImptblGLJournalDetail WHERE intJournalID = @last1)
 
 	--	SELECT @line1 = @line1 + 1
 
 	--	SET ROWCOUNT 1
-	--	UPDATE iRelyImptblGLJournalDetail set intLineNo = @line1
+	--	UPDATE #iRelyImptblGLJournalDetail set intLineNo = @line1
 	--	WHERE  intLineNo = 0 and intJournalID = @last1
 
 	--END
@@ -192,11 +211,11 @@ BEGIN
 
 	SET ROWCOUNT 0
 
-	UPDATE iRelyImptblGLJournalDetail
+	UPDATE #iRelyImptblGLJournalDetail
 	SET gooddate = CAST(substring(convert(varchar(10),glhst_trans_dt),5,2)
 					+'/'+substring(convert(varchar(10),glhst_trans_dt),7,2)
 					+'/'+substring(convert(varchar(10),glhst_trans_dt),1,4) AS DATETIME)
-	FROM iRelyImptblGLJournalDetail
+	FROM #iRelyImptblGLJournalDetail
 
 
 	--+++++++++++++++++++++++++++++++++
@@ -207,11 +226,11 @@ BEGIN
 								dblUnitsInLBS,strDocument,strComments,strReference,dblDebitUnitsInLBS,strCorrecting,strSourcePgm,strCheckBookNo,strWorkArea)
 						SELECT intLineNo,intJournalID,gooddate,intAccountID,Debit,DebitRate,Credit,CreditRate,DebitUnits,CreditUnits,strDescription,1,
 								dblUnitsInlbs,strDocument,strComments,strReference,DebitUnitsInlbs,strCorrecting,strSourcePgm,strCheckbookNo,strWorkArea 
-						FROM  iRelyImptblGLJournalDetail
+						FROM  #iRelyImptblGLJournalDetail
 						
 						
-	DROP TABLE iRelyImptblGLJournal						
-	DROP TABLE iRelyImptblGLJournalDetail
+	DROP TABLE #iRelyImptblGLJournal						
+	DROP TABLE #iRelyImptblGLJournalDetail
 
 	SELECT 'SUCCESSFULLY IMPORTED'
 						
