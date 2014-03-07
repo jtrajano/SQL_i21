@@ -450,7 +450,10 @@ ELSE
 					ON A.intBankAccountId = GLAccnt.intAccountID
 				INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 					ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
+				INNER JOIN tblAPVendor 
+					ON A.strVendorId = tblAPVendor.strVendorId AND tblAPVendor.ysnWithholding = 1
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		
 		---- DEBIT SIDE
 		UNION ALL 
 		SELECT	CAST(A.intPaymentId AS NVARCHAR(50))--[strPaymentRecordNum]
