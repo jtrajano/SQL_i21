@@ -33,13 +33,35 @@ CREATE TRIGGER trgBillRecordNumber
 ON tblAPBill
 AFTER INSERT
 AS
-	DECLARE @BillId NVARCHAR(50)
+
+DECLARE @inserted TABLE(intBillId INT)
+DECLARE @count INT = 0
+DECLARE @intBillId INT
+DECLARE @BillId NVARCHAR(50)
+
+INSERT INTO @inserted
+SELECT intBillId FROM INSERTED ORDER BY intBillId
+
+WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
+BEGIN
+	
 	EXEC uspSMGetStartingNumber 9, @BillId OUT
+
+	SELECT TOP 1 @intBillId = intBillId FROM @inserted
 	
 	IF(@BillId IS NOT NULL)
 	BEGIN
-	UPDATE tblAPBill
-		SET tblAPBill.strBillId = @BillId
-	FROM tblAPBill A
-		INNER JOIN INSERTED B ON A.intBillId = B.intBillId
+		UPDATE tblAPBill
+			SET tblAPBill.strBillId = @BillId
+		FROM tblAPBill A
+		WHERE A.intBillId = @intBillId
+		--INNER JOIN INSERTED B ON A.intBillId = B.intBillId
+		--WHERE A.strBillId IS NULL
 	END
+
+	DELETE FROM @inserted
+	WHERE intBillId = @intBillId
+
+END
+
+
