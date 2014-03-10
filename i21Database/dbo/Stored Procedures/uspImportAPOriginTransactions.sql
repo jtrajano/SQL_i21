@@ -7,7 +7,11 @@
 AS
 BEGIN
 
-DECLARE @InsertedData TABLE (strBillId NVARCHAR(100))
+DECLARE @InsertedData TABLE (intBillId INT, strBillId NVARCHAR(100))
+DECLARE @insertedBillBatch TABLE(intBillBatchId INT, intBillId INT)
+DECLARE @totalBills INT
+DECLARE @BillId INT
+DECLARE @BillBatchId INT
 
 --Create table that holds all the imported transaction
 IF(OBJECT_ID('dbo.tblAPTempBill') IS NULL)
@@ -30,7 +34,7 @@ BEGIN
 		[ysnPosted], 
 		[ysnPaid], 
 		[dblAmountDue])
-	OUTPUT inserted.strBillId INTO @InsertedData(strBillId)
+	OUTPUT inserted.intBillId INTO @InsertedData(intBillId)
 	--Unposted
 	SELECT 
 		[strVendorId]			=	A.aptrx_vnd_no,
@@ -41,15 +45,17 @@ BEGIN
 		[dtmDate] 				=	CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112),
 		[dtmBillDate] 			=	CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112),
 		[dtmDueDate] 			=	CONVERT(DATE, CAST(A.aptrx_due_rev_dt AS CHAR(12)), 112),
-		[intAccountId] 			=	NULL, --(SELECT TOP 1 inti21ID FROM tblGLCOACrossReference WHERE strExternalID = B.apegl_gl_acct),
+		[intAccountId] 			=	(SELECT TOP 1 inti21ID FROM tblGLCOACrossReference WHERE strExternalID = B.apcbk_gl_ap),
 		[strDescription] 		=	A.aptrx_comment,
 		[dblTotal] 				=	A.aptrx_orig_amt,
 		[ysnPosted] 			=	0,
 		[ysnPaid] 				=	0, --CASE WHEN SUM(ISNULL(B.apegl_gl_amt,0)) = A.aptrx_orig_amt THEN 1 ELSE 0 END,
 		[dblAmountDue]			=	A.aptrx_orig_amt--CASE WHEN B.apegl_ivc_no IS NULL THEN A.aptrx_orig_amt ELSE A.aptrx_orig_amt - SUM(ISNULL(B.apegl_gl_amt,0)) END
 	FROM aptrxmst A
-		LEFT JOIN apeglmst B
-			ON A.aptrx_ivc_no = B.apegl_ivc_no
+		--LEFT JOIN apeglmst B
+		--	ON A.aptrx_ivc_no = B.apegl_ivc_no
+		LEFT JOIN apcbkmst B
+			ON A.aptrx_cbk_no = B.apcbk_no
 		LEFT JOIN tblAPTempBill C
 			ON A.aptrx_ivc_no = C.aptrx_ivc_no
 
@@ -62,32 +68,68 @@ BEGIN
 		A.aptrx_due_rev_dt,
 		A.aptrx_comment,
 		A.aptrx_orig_amt,
-		B.apegl_ivc_no
+		B.apcbk_gl_ap
 
-		----add detail
-		--INSERT INTO tblAPBillDetail(
-		--	[intBillId],
-		--	[strDescription],
-		--	[intAccountId],
-		--	[dblTotal]
-		--)
-		--SELECT 
-		--	[intBillId],
-		--	[strDescription],
-		--	(SELECT TOP 1 inti21ID FROM tblGLCOACrossReference WHERE strExternalID = B.apegl_gl_acct)
-		--	FROM tblAPBill
+		
+	--add detail
+	INSERT INTO tblAPBillDetail(
+		[intBillId],
+		[strDescription],
+		[intAccountId],
+		[dblTotal]
+	)
+	SELECT 
+		A.intBillId,
+		A.strDescription,
+		(SELECT TOP 1 inti21ID FROM tblGLCOACrossReference WHERE strExternalID = C.apegl_gl_acct),
+		C.apegl_gl_amt
+	FROM tblAPBill A
+		INNER JOIN apeglmst C
+			ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = C.apegl_ivc_no COLLATE Latin1_General_CI_AS
 
 		--Add already imported bill
-		--SET IDENTITY_INSERT tblAPTempBill ON
-		--INSERT INTO tblAPTempBill()
-		--SELECT 
-		--	* 
-		--	INTO tblAPTempBill
-		--	FROM aptrxmst A
-		--INNER JOIN @InsertedData B
-		--	ON A.aptrx_vnd_no = B.strBillId
-		--SET IDENTITY_INSERT tblAPTempBill OFF
-		SET @Total = @@ROWCOUNT;
+		SET IDENTITY_INSERT tblAPTempBill ON
+		INSERT INTO tblAPTempBill([aptrx_vnd_no], [aptrx_ivc_no], [aptrx_sys_rev_dt], [aptrx_sys_time], [aptrx_cbk_no], [aptrx_chk_no], [aptrx_trans_type], [aptrx_batch_no],
+		[aptrx_pur_ord_no], [aptrx_po_rcpt_seq], [aptrx_ivc_rev_dt], [aptrx_disc_rev_dt], [aptrx_due_rev_dt], [aptrx_chk_rev_dt], [aptrx_gl_rev_dt], [aptrx_disc_pct], [aptrx_orig_amt],
+		[aptrx_disc_amt], [aptrx_wthhld_amt], [aptrx_net_amt], [aptrx_1099_amt], [aptrx_comment], [aptrx_orig_type], [aptrx_name], [aptrx_recur_yn], [aptrx_currency], [aptrx_currency_rt],
+		[aptrx_currency_cnt], [aptrx_user_id], [aptrx_user_rev_dt], [A4GLIdentity])
+		SELECT 
+			A.* 
+		FROM aptrxmst A
+		INNER JOIN @InsertedData B
+			ON A.aptrx_ivc_no = B.strBillId
+		SET IDENTITY_INSERT tblAPTempBill OFF
+
+			
+	--Create Bill Batch transaction
+	SELECT @totalBills = COUNT(*) FROM @InsertedData
+
+	WHILE((SELECT TOP 1 1 FROM @InsertedData) IS NOT NULL)
+	BEGIN
+
+		SELECT TOP 1 @BillId = intBillId FROM @InsertedData
+
+		INSERT INTO tblAPBillBatch(intAccountId, ysnPosted, dblTotal)
+		--OUTPUT inserted.intBillBatchId, @BillId INTO @insertedBillBatch
+		SELECT 
+			A.intAccountId,
+			0,
+			A.dblTotal
+		FROM tblAPBill A
+		WHERE A.intBillId = @BillId
+
+		SET @BillBatchId = SCOPE_IDENTITY() --GET Last identity value of bill batch
+
+		--UPDATE billbatch of Bill
+		UPDATE tblAPBill
+			SET intBillBatchId = @BillBatchId
+		FROM tblAPBill
+		WHERE intBillId = @BillId
+
+		DELETE FROM @InsertedData WHERE intBillId = @BillId
+	END
+
+	SET @Total = @@ROWCOUNT;
 END
 ELSE
 BEGIN
@@ -106,7 +148,7 @@ BEGIN
 		[ysnPosted], 
 		[ysnPaid], 
 		[dblAmountDue])
-	OUTPUT inserted.strBillId INTO @InsertedData(strBillId)
+	OUTPUT inserted.intBillId INTO @InsertedData(intBillId)
 	--Unposted
 	SELECT 
 		[strVendorId]			=	A.aptrx_vnd_no,
@@ -117,7 +159,7 @@ BEGIN
 		[dtmDate] 				=	CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112),
 		[dtmBillDate] 			=	CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112),
 		[dtmDueDate] 			=	CONVERT(DATE, CAST(A.aptrx_due_rev_dt AS CHAR(12)), 112),
-		[intAccountId] 			=	NULL, --(SELECT TOP 1 inti21ID FROM tblGLCOACrossReference WHERE strExternalID = B.apegl_gl_acct),
+		[intAccountId] 			=	(SELECT TOP 1 inti21ID FROM tblGLCOACrossReference WHERE strExternalID = B.apcbk_gl_ap),
 		[strDescription] 		=	A.aptrx_comment,
 		[dblTotal] 				=	A.aptrx_orig_amt,
 		[ysnPosted] 			=	0,
@@ -125,8 +167,10 @@ BEGIN
 		[dblAmountDue]			=	A.aptrx_orig_amt--CASE WHEN B.apegl_ivc_no IS NULL THEN A.aptrx_orig_amt ELSE A.aptrx_orig_amt - SUM(ISNULL(B.apegl_gl_amt,0)) END
 		
 	FROM aptrxmst A
-		LEFT JOIN apeglmst B
-			ON A.aptrx_ivc_no = B.apegl_ivc_no
+		--LEFT JOIN apeglmst B
+		--	ON A.aptrx_ivc_no = B.apegl_ivc_no
+		LEFT JOIN apcbkmst B
+			ON A.aptrx_cbk_no = B.apcbk_no
 		LEFT JOIN tblAPTempBill C
 			ON A.aptrx_ivc_no = C.aptrx_ivc_no
 		
@@ -143,7 +187,7 @@ BEGIN
 		A.aptrx_due_rev_dt,
 		A.aptrx_comment,
 		A.aptrx_orig_amt,
-		B.apegl_ivc_no
+		B.apcbk_gl_ap
 
 		--UNION
 
@@ -164,23 +208,78 @@ BEGIN
 		--[dblAmountDue]			=	CASE WHEN B.apegl_ivc_no IS NULL THEN A.aptrx_orig_amt ELSE A.aptrx_orig_amt - SUM(ISNULL(B.apegl_gl_amt,0)) END
 		
 		--FROM apivcmst A
+		
+	--add detail
+	INSERT INTO tblAPBillDetail(
+		[intBillId],
+		[strDescription],
+		[intAccountId],
+		[dblTotal]
+	)
+	SELECT 
+		A.intBillId,
+		A.strDescription,
+		(SELECT TOP 1 inti21ID FROM tblGLCOACrossReference WHERE strExternalID = C.apegl_gl_acct),
+		C.apegl_gl_amt
+		FROM tblAPBill A
+		INNER JOIN apeglmst C
+			ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = C.apegl_ivc_no COLLATE Latin1_General_CI_AS
 
+				
+	--Create Bill Batch transaction
+	INSERT INTO tblAPBillBatch(intAccountId, ysnPosted, dblTotal)
+	SELECT 
+		A.intAccountId,
+		0,
+		A.dblTotal
+		FROM tblAPBill A
+		INNER JOIN @InsertedData B
+			ON A.intBillId = B.intBillId
+
+	--Add already imported bill
+	SET IDENTITY_INSERT tblAPTempBill ON
+
+	INSERT INTO tblAPTempBill([aptrx_vnd_no], [aptrx_ivc_no], [aptrx_sys_rev_dt], [aptrx_sys_time], [aptrx_cbk_no], [aptrx_chk_no], [aptrx_trans_type], [aptrx_batch_no],
+	[aptrx_pur_ord_no], [aptrx_po_rcpt_seq], [aptrx_ivc_rev_dt], [aptrx_disc_rev_dt], [aptrx_due_rev_dt], [aptrx_chk_rev_dt], [aptrx_gl_rev_dt], [aptrx_disc_pct], [aptrx_orig_amt],
+	[aptrx_disc_amt], [aptrx_wthhld_amt], [aptrx_net_amt], [aptrx_1099_amt], [aptrx_comment], [aptrx_orig_type], [aptrx_name], [aptrx_recur_yn], [aptrx_currency], [aptrx_currency_rt],
+	[aptrx_currency_cnt], [aptrx_user_id], [aptrx_user_rev_dt], [A4GLIdentity])
+	SELECT 
+		A.* 
+	FROM aptrxmst A
+	INNER JOIN @InsertedData B
+		ON A.aptrx_ivc_no = B.strBillId
+	SET IDENTITY_INSERT tblAPTempBill OFF
 	
+		--Create Bill Batch transaction
+	SELECT @totalBills = COUNT(*) FROM @InsertedData
+
+	WHILE((SELECT TOP 1 1 FROM @InsertedData) IS NOT NULL)
+	BEGIN
+
+		SELECT TOP 1 @BillId = intBillId FROM @InsertedData
+
+		INSERT INTO tblAPBillBatch(intAccountId, ysnPosted, dblTotal)
+		--OUTPUT inserted.intBillBatchId, @BillId INTO @insertedBillBatch
+		SELECT 
+			A.intAccountId,
+			0,
+			A.dblTotal
+		FROM tblAPBill A
+		WHERE A.intBillId = @BillId
+
+		SET @BillBatchId = SCOPE_IDENTITY() --GET Last identity value of bill batch
+
+		--UPDATE billbatch of Bill
+		UPDATE tblAPBill
+			SET intBillBatchId = @BillBatchId
+		FROM tblAPBill
+		WHERE intBillId = @BillId
+
+		DELETE FROM @InsertedData WHERE intBillId = @BillId
+	END
 	
 	SET @Total = @@ROWCOUNT;
 END
 
---Add already imported bill
-SET IDENTITY_INSERT tblAPTempBill ON
-INSERT INTO tblAPTempBill([aptrx_vnd_no], [aptrx_ivc_no], [aptrx_sys_rev_dt], [aptrx_sys_time], [aptrx_cbk_no], [aptrx_chk_no], [aptrx_trans_type], [aptrx_batch_no],
-[aptrx_pur_ord_no], [aptrx_po_rcpt_seq], [aptrx_ivc_rev_dt], [aptrx_disc_rev_dt], [aptrx_due_rev_dt], [aptrx_chk_rev_dt], [aptrx_gl_rev_dt], [aptrx_disc_pct], [aptrx_orig_amt],
-[aptrx_disc_amt], [aptrx_wthhld_amt], [aptrx_net_amt], [aptrx_1099_amt], [aptrx_comment], [aptrx_orig_type], [aptrx_name], [aptrx_recur_yn], [aptrx_currency], [aptrx_currency_rt],
-[aptrx_currency_cnt], [aptrx_user_id], [aptrx_user_rev_dt], [A4GLIdentity])
-SELECT 
-	A.* 
-FROM aptrxmst A
-INNER JOIN @InsertedData B
-	ON A.aptrx_ivc_no = B.strBillId
-SET IDENTITY_INSERT tblAPTempBill OFF
 
 END
