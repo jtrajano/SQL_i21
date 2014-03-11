@@ -5,8 +5,8 @@
     [intPanelId] INT NOT NULL, 
     [strPermission] NVARCHAR(20) NOT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT (1), 
-    CONSTRAINT [FK_tblSMUserRoleDashboardPermission_tblSMUserRole] FOREIGN KEY ([intUserRoleId]) REFERENCES [tblSMUserRole]([intUserRoleID]), 
-    CONSTRAINT [FK_tblSMUserRoleDashboardPermission_tblDBPanel] FOREIGN KEY ([intPanelId]) REFERENCES [tblDBPanel]([intPanelId])
+    CONSTRAINT [FK_tblSMUserRoleDashboardPermission_tblSMUserRole] FOREIGN KEY ([intUserRoleId]) REFERENCES [tblSMUserRole]([intUserRoleID]) ON DELETE CASCADE, 
+    CONSTRAINT [FK_tblSMUserRoleDashboardPermission_tblDBPanel] FOREIGN KEY ([intPanelId]) REFERENCES [tblDBPanel]([intPanelId]) ON DELETE CASCADE
 )
 
 GO

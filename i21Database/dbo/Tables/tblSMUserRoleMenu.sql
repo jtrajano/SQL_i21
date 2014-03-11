@@ -7,7 +7,7 @@
     [intSort]           INT NULL,
     [intConcurrencyId]  INT DEFAULT (1) NOT NULL,
     CONSTRAINT [PK_tblSMUserRoleMenu] PRIMARY KEY CLUSTERED ([intUserRoleMenuID] ASC),
-    CONSTRAINT [FK_tblSMUserRoleMenu_tblSMMasterMenu] FOREIGN KEY ([intMenuID]) REFERENCES [dbo].[tblSMMasterMenu] ([intMenuID]),
-    CONSTRAINT [FK_tblSMUserRoleMenu_tblSMUserRole] FOREIGN KEY ([intUserRoleID]) REFERENCES [dbo].[tblSMUserRole] ([intUserRoleID])
+    CONSTRAINT [FK_tblSMUserRoleMenu_tblSMMasterMenu] FOREIGN KEY ([intMenuID]) REFERENCES [dbo].[tblSMMasterMenu] ([intMenuID]) ON DELETE CASCADE,
+    CONSTRAINT [FK_tblSMUserRoleMenu_tblSMUserRole] FOREIGN KEY ([intUserRoleID]) REFERENCES [dbo].[tblSMUserRole] ([intUserRoleID]) ON DELETE CASCADE
 );
 
