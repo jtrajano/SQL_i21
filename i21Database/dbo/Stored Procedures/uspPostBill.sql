@@ -206,7 +206,7 @@ IF ISNULL(@recap, 0) = 0
 		UNION ALL 
 		SELECT	
 			[strTransactionID] = A.strBillId, 
-			[intAccountID] = A.intAccountId,
+			[intAccountID] = B.intAccountId,
 			[strDescription] = A.strDescription,
 			[strReference] = A.strVendorId,
 			[dtmTransactionDate] = A.dtmDate,
