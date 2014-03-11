@@ -155,6 +155,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bank Stmt Import')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 16
+			,[strTransactionType]	= N'Ticket Number'
+			,[strPrefix]			= N'HDTN-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Help Desk'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Ticket Number')
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
