@@ -46,13 +46,13 @@ DECLARE @BANK_DEPOSIT INT = 1
 -- Initialize the transaction id. 
 SELECT	@strTransactionId = strPrefix + CAST(intNumber AS NVARCHAR(20))
 FROM	dbo.tblSMStartingNumber
-WHERE	strTransactionType = @STARTING_NUMBER_DEPOSIT
+WHERE	strTransactionType = @STARTING_NUMBER_BANK_TRANSACTION
 IF @@ERROR <> 0	GOTO uspCMAddDeposit_Rollback
 
 -- Increment the next transaction number
 UPDATE	dbo.tblSMStartingNumber
 SET		intNumber += 1
-WHERE	strTransactionType = @STARTING_NUMBER_DEPOSIT
+WHERE	strTransactionType = @STARTING_NUMBER_BANK_TRANSACTION
 IF @@ERROR <> 0	GOTO uspCMAddDeposit_Rollback
 
 -- Create the Bank Deposit HEADER
@@ -88,7 +88,7 @@ INSERT INTO tblCMBankTransaction(
 	,intConcurrencyId
 )
 SELECT	strTransactionId			= @strTransactionId
-		,intBankTransactionTypeId	= @BANK_DEPOSIT
+		,intBankTransactionTypeId	= @BANK_TRANSACTION
 		,intBankAccountId			= @intBankAccountId
 		,intCurrencyId				= NULL
 		,dblExchangeRate			= 1
@@ -154,7 +154,7 @@ IF @@ERROR <> 0	GOTO uspCMAddDeposit_Rollback
 
 -- Post the transaction 
 BEGIN TRY
-	EXEC dbo.PostCMBankDeposit 	
+	EXEC dbo.PostCMBankTransaction 	
 			@ysnPost = 1
 			,@ysnRecap = 0
 			,@strTransactionId = @strTransactionId
