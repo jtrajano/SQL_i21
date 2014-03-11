@@ -116,6 +116,8 @@ FROM	#tmpPrintJobSpoolTable
 WHERE	LTRIM(RTRIM(ISNULL(strCheckNo, ''))) <> ''
 IF @@ERROR <> 0 GOTO _ROLLBACK
 
+DECLARE @loop_CheckNumber AS NVARCHAR(20)
+
 -- The code below will assign the check numbers to the transaction that does not have the check number.
 WHILE EXISTS (
 	SELECT	TOP 1 1 
@@ -131,20 +133,27 @@ BEGIN
 
 	-- Get the next check number from the Check Number Audit table. 
 	-- FYI. Start from the next check number. 
+	SET @loop_CheckNumber = NULL
+	
 	SELECT	TOP 1 
-			@strNextCheckNumber = strCheckNo
+			@loop_CheckNumber = strCheckNo
 	FROM	dbo.tblCMCheckNumberAudit
 	WHERE	intBankAccountId = @intBankAccountId			
 			AND strCheckNo >= @strNextCheckNumber
 			AND intCheckNoStatus = @CHECK_NUMBER_STATUS_UNUSED
 			AND strCheckNo NOT IN (SELECT strCheckNo FROM #tmpManuallyAssignedCheckNumbers)
 	ORDER BY intCheckNumberAuditId
-	IF @@ERROR <> 0 GOTO _ROLLBACK
+	IF @@ERROR <> 0 GOTO _ROLLBACK	
 
 	-- If there is NO more available check numbers to complete the print job, abort the process. 
-	IF (LTRIM(RTRIM(ISNULL(@strNextCheckNumber, ''))) = '')
+	IF (LTRIM(RTRIM(ISNULL(@loop_CheckNumber, ''))) = '')
 	BEGIN 
+		RAISERROR(50014, 11, 1)
 		GOTO _ROLLBACK
+	END 
+	ELSE 
+	BEGIN 
+		SET @strNextCheckNumber = @loop_CheckNumber
 	END 
 		
 	-- Assign the check number

@@ -55,3 +55,7 @@ EXEC sp_addmessage 50012,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50013) EXEC sp_dropmessage 50013, 'us_english'	
 SET @strmessage = 'You cannot %s transactions you did not create. Please contact your local administrator.'
 EXEC sp_addmessage 50013,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50014) EXEC sp_dropmessage 50014, 'us_english'	
+SET @strmessage = 'Not enough check numbers. Please generate new check numbers.'
+EXEC sp_addmessage 50014,11,@strmessage,'us_english','False'
