@@ -64,10 +64,12 @@
     <Folder Include="Scripts\Pre-Deployment\1_TM" />
     <Folder Include="Scripts\Pre-Deployment\2_CM" />
     <Folder Include="Scripts\Pre-Deployment\3_DB" />
+    <Folder Include="Scripts\Pre-Deployment\5_CM" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1_DataCleanup.sql" />
     <None Include="i21PreDeployment.publish.xml" />
+    <None Include="Scripts\Pre-Deployment\5_CM\1_DropTriggers.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />

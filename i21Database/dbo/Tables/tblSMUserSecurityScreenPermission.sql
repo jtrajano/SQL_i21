@@ -5,8 +5,8 @@
     [intScreenId] INT NOT NULL, 
 	[strPermission] NVARCHAR(20) NOT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT (1), 
-    CONSTRAINT [FK_tblSMUserSecurityScreenPermission_tblSMUserSecurity] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intUserSecurityID]), 
-    CONSTRAINT [FK_tblSMUserSecurityScreenPermission_tblSMScreen] FOREIGN KEY ([intScreenId]) REFERENCES [tblSMScreen]([intScreenId]) 
+    CONSTRAINT [FK_tblSMUserSecurityScreenPermission_tblSMUserSecurity] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intUserSecurityID]) ON DELETE CASCADE, 
+    CONSTRAINT [FK_tblSMUserSecurityScreenPermission_tblSMScreen] FOREIGN KEY ([intScreenId]) REFERENCES [tblSMScreen]([intScreenId]) ON DELETE CASCADE
 )
 
 GO

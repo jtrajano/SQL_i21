@@ -9,8 +9,8 @@
     [ysnPreview] BIT NOT NULL DEFAULT (1), 
     [ysnPermission] BIT NOT NULL DEFAULT (0), 
     [intConcurrencyId] INT NOT NULL DEFAULT (1), 
-    CONSTRAINT [FK_tblSMUserRoleReportPermission_tblSMUserRole] FOREIGN KEY ([intUserRoleId]) REFERENCES [tblSMUserRole]([intUserRoleID]), 
-    CONSTRAINT [FK_tblSMUserRoleReportPermission_tblRMReport] FOREIGN KEY ([intReportId]) REFERENCES [tblRMReport]([intReportId])
+    CONSTRAINT [FK_tblSMUserRoleReportPermission_tblSMUserRole] FOREIGN KEY ([intUserRoleId]) REFERENCES [tblSMUserRole]([intUserRoleID]) ON DELETE CASCADE, 
+    CONSTRAINT [FK_tblSMUserRoleReportPermission_tblRMReport] FOREIGN KEY ([intReportId]) REFERENCES [tblRMReport]([intReportId]) ON DELETE CASCADE
 )
 
 GO

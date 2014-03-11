@@ -5,8 +5,8 @@
     [intReportId] INT NOT NULL, 
     [strPermission] NVARCHAR(20) NOT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT (1), 
-    CONSTRAINT [FK_tblSMUserRoleFRPermission_tblSMUserRole] FOREIGN KEY ([intUserRoleId]) REFERENCES [tblSMUserRole]([intUserRoleID]),
-	CONSTRAINT [FK_tblSMUserRoleFRPermission_tblFRReport] FOREIGN KEY ([intReportId]) REFERENCES [tblFRReport]([intReportID])
+    CONSTRAINT [FK_tblSMUserRoleFRPermission_tblSMUserRole] FOREIGN KEY ([intUserRoleId]) REFERENCES [tblSMUserRole]([intUserRoleID]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblSMUserRoleFRPermission_tblFRReport] FOREIGN KEY ([intReportId]) REFERENCES [tblFRReport]([intReportID]) ON DELETE CASCADE
 )
 
 GO

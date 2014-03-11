@@ -92,6 +92,7 @@ WHERE	F.intBankAccountId = @intBankAccountId
 		AND F.ysnClr = 0
 		AND F.dblAmount <> 0
 		AND F.dtmCheckPrinted IS NULL
+		AND F.ysnCheckToBePrinted = 1
 IF @@ERROR <> 0 GOTO _ROLLBACK		
 
 -- Check if there are transactions to queue a print job

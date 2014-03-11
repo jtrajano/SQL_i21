@@ -187,6 +187,16 @@ Post_Transaction:
 
 IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN							
+	
+		DECLARE @intCurrencyID	INT
+		DECLARE @dblDailyRate	NUMERIC (18,6)
+		
+		SET @intCurrencyID		= (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE intCurrencyID = (CASE WHEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') > 0 
+																		THEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency')
+																		ELSE (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'USD') END))
+		SET @dblDailyRate		= (SELECT TOP 1 dblDailyRate FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyID);
+
+	
 		WITH Units 
 		AS 
 		(
@@ -206,6 +216,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[dtmDate]
 			,[ysnIsUnposted]
 			,[intConcurrencyId]	
+			,[intCurrencyID]
 			,[dblExchangeRate]
 			,[intUserID]
 			,[dtmDateEntered]
@@ -233,7 +244,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[dtmDate]				= ISNULL(B.[dtmDate], GETDATE())
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
-			,[dblExchangeRate]		= 1
+			,[intCurrencyID]		= @intCurrencyID
+			,[dblExchangeRate]		= @dblDailyRate
 			,[intUserID]			= @intUserID
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchID]			= @strBatchID

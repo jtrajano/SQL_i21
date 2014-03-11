@@ -3,10 +3,11 @@
 	[intControlId] INT NOT NULL PRIMARY KEY IDENTITY, 
     [intScreenId] INT NOT NULL, 
     [strControlId] NVARCHAR(50) NOT NULL, 
-    [strControlName] NVARCHAR(100) NULL, 
-    [strControlType] NCHAR(10) NOT NULL, 
+    [strControlName] NVARCHAR(100) NOT NULL, 
+	[strContainer] NVARCHAR(100) NOT NULL, 
+    [strControlType] NVARCHAR(10) NOT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT (1), 
-    CONSTRAINT [FK_tblSMControl_tblSMScreen] FOREIGN KEY ([intScreenId]) REFERENCES [tblSMScreen]([intScreenId])
+    CONSTRAINT [FK_tblSMControl_tblSMScreen] FOREIGN KEY ([intScreenId]) REFERENCES [tblSMScreen]([intScreenId]) ON DELETE CASCADE
 )
 
 GO
@@ -24,3 +25,7 @@ CREATE INDEX [IX_tblSMControl_strControlName] ON [dbo].[tblSMControl] ([strContr
 GO
 
 CREATE INDEX [IX_tblSMControl_strControlType] ON [dbo].[tblSMControl] ([strControlType])
+
+GO
+
+CREATE INDEX [IX_tblSMControl_strContainer] ON [dbo].[tblSMControl] ([strContainer])
