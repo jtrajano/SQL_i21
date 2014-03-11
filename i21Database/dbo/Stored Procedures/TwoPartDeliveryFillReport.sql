@@ -1,9 +1,8 @@
-﻿
-
-CREATE PROCEDURE [dbo].[TwoPartDeliveryFillReport] (@xmlParam NVARCHAR(MAX)=null)
-AS
-
-
+﻿  
+  
+CREATE PROCEDURE [dbo].[TwoPartDeliveryFillReport] (@xmlParam NVARCHAR(MAX)=null)  
+AS  
+  
 /*set @xmlparam = '<xmlparam><filters><filter><fieldname>strLocation</fieldname><condition>Between</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>strDriverID<
 /fieldname><condition>Equal To</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>strRouteID</fieldname><condition>Between</condition><from /><to /><join>And</joi
 n><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>intNextDeliveryDegreeDay</fieldname><condition>Between</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datat
@@ -156,7 +155,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
  -- This is the number of lines we can fit in one full page without the group header data.   
  -- This is used for overflows.   
  DECLARE @FullPageLimit AS INT  
- SET @FullPageLimit = 18  
+ SET @FullPageLimit = 16  
   
  DECLARE @BlankLimitSuppressor AS BIT  
  SET @BlankLimitSuppressor = 0   
@@ -1247,7 +1246,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
       ,strLine   
       ,intLineNumber   
     )  
-    SELECT TOP 18-- If you change # in the TOP clause, make sure you update the @FullPageLimit with the same number as well.   
+    SELECT TOP 17-- If you change # in the TOP clause, make sure you update the @FullPageLimit with the same number as well.   
       agcus_key  
       ,intSiteNumber   
       ,strLine    

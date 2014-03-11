@@ -436,6 +436,7 @@
     <Build Include="dbo\Functions\fn_geti21PeriodFromOriginPeriod.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCheckNumberAuditReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBankDepositReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleSubReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />

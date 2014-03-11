@@ -68,8 +68,10 @@ DECLARE  @dblRetained			 NUMERIC (18,6)
 		,@strRetainedAcctGroup	 NVARCHAR(50)  
 		,@dtmDate				 DATETIME  
 		,@strCurrencyID			 NVARCHAR(30)
+		,@intCurrencyID			 INT
 		,@strAccountID			 NVARCHAR(100)
-		,@intAccountID			 INT
+		,@intAccountID			 INT		
+		,@dblDailyRate			 NUMERIC (18,6)
 		
 		,@intYear				INT
 		,@dtmDateFrom			DATETIME
@@ -80,7 +82,10 @@ SET @intYear			= (SELECT TOP 1 CAST(strFiscalYear as INT) FROM tblGLFiscalYear W
 SET @dtmDateFrom		= (SELECT TOP 1 dtmDateFrom FROM tblGLFiscalYear WHERE intFiscalYearID = @intFiscalYearID) 		
 SET @dtmDateTo			= (SELECT TOP 1 dtmDateTo FROM tblGLFiscalYear WHERE intFiscalYearID = @intFiscalYearID) 		
 SET @strRetainedAccount = (SELECT TOP 1 strAccountID FROM tblGLAccount WHERE intAccountID = (SELECT TOP 1 intRetainAccount FROM tblGLFiscalYear WHERE intFiscalYearID = @intFiscalYearID))
-SET @strCurrencyID		= (SELECT TOP 1 ISNULL(strValue, 'USD') FROM tblSMPreferences WHERE strPreference = 'defaultCurrency')
+SET @intCurrencyID		= (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE intCurrencyID = (CASE WHEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') > 0 
+																		THEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency')
+																		ELSE (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'USD') END))
+SET @dblDailyRate		= (SELECT dblDailyRate FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyID)
 
 
 --=====================================================================================================================================
@@ -129,8 +134,8 @@ SELECT
 		,strTransactionID			= CAST(@intYear as NVARCHAR(10)) + '-' + @strRetainedAccount
 		,strReference				= 'Fiscal Year'
 		,strJobID					= NULL
-		,intCurrencyID				= (SELECT intCurrencyID FROM tblSMCurrency WHERE strCurrency = @strCurrencyID)
-		,dblExchangeRate			= (SELECT dblDailyRate FROM tblSMCurrency WHERE strCurrency = @strCurrencyID)		
+		,intCurrencyID				= intCurrencyID
+		,dblExchangeRate			= dblExchangeRate		
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= @dtmDateTo
 		,strProductID				= NULL
@@ -158,7 +163,7 @@ WHERE	C.strAccountType IN ('Revenue','Sales', 'Expense','Cost of Goods Sold')
 		AND FLOOR(CAST(CAST(dtmDate AS DATETIME) AS NUMERIC(18,6))) BETWEEN  FLOOR(CAST(@dtmDateFrom AS NUMERIC(18,6))) AND FLOOR(CAST(@dtmDateTo AS NUMERIC(18,6)))
 		AND ysnIsUnposted = 0
 		--AND strCode <> 'AA' 
-GROUP BY tblGLDetail.intAccountID, C.strAccountType
+GROUP BY tblGLDetail.intAccountID, C.strAccountType, tblGLDetail.intCurrencyID, tblGLDetail.dblExchangeRate
 
 
 --=====================================================================================================================================
@@ -227,8 +232,8 @@ SELECT
 		,strTransactionID		= CAST(@intYear as NVARCHAR(10)) + '-' + @strRetainedAccount
 		,strReference			= 'Fiscal Year'
 		,strJobID				= NULL
-		,intCurrencyID			= (SELECT intCurrencyID FROM tblSMCurrency WHERE strCurrency = @strCurrencyID)
-		,dblExchangeRate		= (SELECT dblDailyRate FROM tblSMCurrency WHERE strCurrency = @strCurrencyID)		
+		,intCurrencyID			= @intCurrencyID
+		,dblExchangeRate		= @dblDailyRate		
 		,dtmDateEntered			= GETDATE()
 		,dtmTransactionDate		= @dtmDateTo
 		,strProductID			= NULL
@@ -498,10 +503,10 @@ GO
 --DECLARE @intCount AS INT
 
 --EXEC [dbo].[usp_PostFiscalYear]
---			@intFiscalYearID	 = 2,
---			@ysnPost = 0,
---			@ysnRecap = 0,								-- WHEN SET TO 1, THEN IT WILL POPULATE tblGLPostRecap THAT CAN BE VIEWED VIA BUFFERED STORE IN SENCHA
---			@strBatchID = 'BATCH-122',							-- COMMA DELIMITED JOURNAL ID TO POST 
+--			@intFiscalYearID	 = 3,
+--			@ysnPost = 1,
+--			@ysnRecap = 1,								-- WHEN SET TO 1, THEN IT WILL POPULATE tblGLPostRecap THAT CAN BE VIEWED VIA BUFFERED STORE IN SENCHA
+--			@strBatchID = 'BATCH-2013',							-- COMMA DELIMITED JOURNAL ID TO POST 
 --			@intUserID = 1,							-- USER ID THAT INITIATES POSTING
 --			@successfulCount = @intCount OUTPUT		-- OUTPUT PARAMETER THAT RETURNS TOTAL NUMBER OF SUCCESSFUL RECORDS
 				
