@@ -11,6 +11,7 @@
 */
 
 :r .\DeleteScripts.sql
+
 -- TM
 :r .\1_TM\1_1320_to_1340.sql
 :r .\1_TM\2_DropUniqueConstraints.sql
@@ -23,3 +24,6 @@
 
 -- SM
 :r .\4_SM\1_DataCleanup.sql
+
+-- CM
+:r .\5_CM\1_DropTriggers.sql
