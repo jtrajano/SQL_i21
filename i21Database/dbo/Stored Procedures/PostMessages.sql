@@ -59,3 +59,7 @@ EXEC sp_addmessage 50013,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50014) EXEC sp_dropmessage 50014, 'us_english'	
 SET @strmessage = 'Not enough check numbers. Please generate new check numbers.'
 EXEC sp_addmessage 50014,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50015) EXEC sp_dropmessage 50015, 'us_english'	
+SET @strmessage = 'The transaction id %s already exists. Please ask your local administrator to check the starting numbers setup.'
+EXEC sp_addmessage 50015,11,@strmessage,'us_english','False'
