@@ -2,18 +2,18 @@
 --=====================================================================================================================================
 -- 	CREATE THE STORED PROCEDURE AFTER DELETING IT
 ---------------------------------------------------------------------------------------------------------------------------------------
-CREATE PROCEDURE usp_PostJournal
+CREATE PROCEDURE uspGLPostJournal
 	@Param				AS NVARCHAR(MAX)	= '',	
 	@ysnPost			AS BIT				= 0,
 	@ysnRecap			AS BIT				= 0,
-	@strBatchID			AS NVARCHAR(100)	= '',	
+	@strBatchId			AS NVARCHAR(100)	= '',	
 	@strJournalType		AS NVARCHAR(30)		= '',
-	@intUserID			AS INT				= 1,
+	@intUserId			AS INT				= 1,
 	@successfulCount	AS INT				= 0 OUTPUT
 	
 AS
 
-SET QUOTED_IDENTIFIER OFF
+SET QUOTED_IdENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
@@ -24,18 +24,18 @@ BEGIN TRANSACTION;
 -- 	DECLARE TEMPORARY TABLES
 ---------------------------------------------------------------------------------------------------------------------------------------
 CREATE TABLE #tmpPostJournals (
-	[intJournalID] [int] PRIMARY KEY,
-	UNIQUE (intJournalID)
+	[intJournalId] [int] PRIMARY KEY,
+	UNIQUE (intJournalId)
 );
 
 CREATE TABLE #tmpValidJournals (
-	[intJournalID] [int] PRIMARY KEY,
-	UNIQUE (intJournalID)
+	[intJournalId] [int] PRIMARY KEY,
+	UNIQUE (intJournalId)
 );
 
 CREATE TABLE #tmpReverseJournals (
-	[intJournalID] [int] PRIMARY KEY,
-	UNIQUE (intJournalID)
+	[intJournalId] [int] PRIMARY KEY,
+	UNIQUE (intJournalId)
 );
 
 
@@ -45,7 +45,7 @@ CREATE TABLE #tmpReverseJournals (
 IF (ISNULL(@Param, '') <> '') 
 	INSERT INTO #tmpPostJournals EXEC (@Param)
 ELSE
-	INSERT INTO #tmpPostJournals SELECT [intJournalID] FROM tblGLJournal	
+	INSERT INTO #tmpPostJournals SELECT [intJournalId] FROM tblGLJournal	
 	
 	
 --=====================================================================================================================================
@@ -60,31 +60,31 @@ IF ISNULL(@ysnPost, 0) = 0
 				-- DELETE Results 1 DAY OLDER	
 				DELETE tblGLPostResults WHERE dtmDate < DATEADD(day, -1, GETDATE())
 				
-				INSERT INTO tblGLPostResults (strBatchID,intTransactionID,strTransactionID,strDescription,dtmDate)
-					SELECT @strBatchID as strBatchID
-							,(SELECT TOP 1 intJournalID FROM #tmpPostJournals) as intTransactionID
-							,(SELECT TOP 1 strJournalID FROM tblGLJournal WHERE intJournalID IN (SELECT intJournalID FROM #tmpPostJournals)) as strTransactionID
+				INSERT INTO tblGLPostResults (strBatchId,intTransactionId,strTransactionId,strDescription,dtmDate)
+					SELECT @strBatchId as strBatchId
+							,(SELECT TOP 1 intJournalId FROM #tmpPostJournals) as intTransactionId
+							,(SELECT TOP 1 strJournalId FROM tblGLJournal WHERE intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)) as strTransactionId
 							,strMessage as strDescription
 							,GETDATE() as dtmDate
 					FROM (
-						SELECT DISTINCT A.intJournalID,
-							'You cannot Unpost this General Journal. You must Unpost and Delete the Reversing transaction: ' + A.strJournalID + ' first!' AS strMessage
+						SELECT DISTINCT A.intJournalId,
+							'You cannot Unpost this General Journal. You must Unpost and Delete the Reversing transaction: ' + A.strJournalId + ' first!' AS strMessage
 						FROM tblGLJournal A 
-						WHERE A.strReverseLink IN (SELECT strJournalID FROM tblGLJournal WHERE intJournalID IN (SELECT intJournalID FROM #tmpPostJournals))
+						WHERE A.strReverseLink IN (SELECT strJournalId FROM tblGLJournal WHERE intJournalId IN (SELECT intJournalId FROM #tmpPostJournals))
 					) tmpBatchResults
 			END
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 		
-		IF (NOT EXISTS(SELECT TOP 1 1 FROM tblGLJournal A WHERE A.strReverseLink IN (SELECT strJournalID FROM tblGLJournal WHERE intJournalID IN (SELECT intJournalID FROM #tmpPostJournals))) OR ISNULL(@ysnRecap, 0) = 1)
+		IF (NOT EXISTS(SELECT TOP 1 1 FROM tblGLJournal A WHERE A.strReverseLink IN (SELECT strJournalId FROM tblGLJournal WHERE intJournalId IN (SELECT intJournalId FROM #tmpPostJournals))) OR ISNULL(@ysnRecap, 0) = 1)
 			BEGIN
-				SET @Param = (SELECT strJournalID FROM tblGLJournal WHERE intJournalID IN (SELECT intJournalID FROM #tmpPostJournals))
-				EXEC [dbo].[usp_ReverseGLEntries] @strBatchID, @Param, @ysnRecap, 'GJ', NULL, @intUserID, @intCount	OUT
+				SET @Param = (SELECT strJournalId FROM tblGLJournal WHERE intJournalId IN (SELECT intJournalId FROM #tmpPostJournals))
+				EXEC [dbo].[uspGLReverseGLEntries] @strBatchId, @Param, @ysnRecap, 'GJ', NULL, @intUserId, @intCount	OUT
 				SET @successfulCount = @intCount
 				
 				IF(@intCount > 0)
 				BEGIN
-					UPDATE tblGLJournal SET ysnPosted = 0 WHERE intJournalID IN (SELECT intJournalID FROM #tmpPostJournals)
+					UPDATE tblGLJournal SET ysnPosted = 0 WHERE intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)
 				END									
 			END
 		
@@ -100,61 +100,61 @@ IF ISNULL(@ysnRecap, 0) = 0
 		-- DELETE Results 2 DAYS OLDER	
 		DELETE tblGLPostResults WHERE dtmDate < DATEADD(day, -1, GETDATE())
 		
-		INSERT INTO tblGLPostResults (strBatchID,intTransactionID,strTransactionID,strDescription,dtmDate)
-			SELECT @strBatchID as strBatchID,tmpBatchResults.intJournalID as intTransactionID,tblB.strJournalID as strTransactionID, strMessage as strDescription,GETDATE() as dtmDate
+		INSERT INTO tblGLPostResults (strBatchId,intTransactionId,strTransactionId,strDescription,dtmDate)
+			SELECT @strBatchId as strBatchId,tmpBatchResults.intJournalId as intTransactionId,tblB.strJournalId as strTransactionId, strMessage as strDescription,GETDATE() as dtmDate
 			FROM (
-				SELECT DISTINCT A.intJournalID,
+				SELECT DISTINCT A.intJournalId,
 					'Unable to find an open accounting period to match the transaction date.' AS strMessage
 				FROM tblGLJournal A 
-				WHERE A.intJournalID IN (SELECT intJournalID FROM #tmpPostJournals) AND ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0) = 0  
+				WHERE A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals) AND ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0) = 0  
 				UNION
-				SELECT DISTINCT A.intJournalID,
+				SELECT DISTINCT A.intJournalId,
 					'Unable to find an open accounting period to match the reverse date.' AS strMessage
 				FROM tblGLJournal A 
 				WHERE 0 = CASE WHEN ISNULL(A.dtmReverseDate, '') = '' THEN 1 ELSE ISNULL([dbo].isOpenAccountingDate(A.dtmReverseDate), 0) END 
-					  AND A.intJournalID IN (SELECT intJournalID FROM #tmpPostJournals)
+					  AND A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)
 				UNION
-				SELECT DISTINCT A.intJournalID,
+				SELECT DISTINCT A.intJournalId,
 					'This transaction cannot be posted because the posting date is empty.' AS strMessage
 				FROM tblGLJournal A 
 				WHERE 0 = CASE WHEN ISNULL(A.dtmDate, '') = '' THEN 0 ELSE 1 END 
-					  AND A.intJournalID IN (SELECT intJournalID FROM #tmpPostJournals)
+					  AND A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)
 				UNION
-				SELECT DISTINCT A.intJournalID,
+				SELECT DISTINCT A.intJournalId,
 					'Reverse date must be later than Post Date.' AS strMessage
 				FROM tblGLJournal A 
 				WHERE 0 = CASE WHEN ISNULL(A.dtmReverseDate, '') = '' THEN 1 ELSE 
 							CASE WHEN A.dtmReverseDate <= A.dtmDate THEN 0 ELSE 1 END
-						END AND A.intJournalID IN (SELECT intJournalID FROM #tmpPostJournals)
+						END AND A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)
 				UNION
-				SELECT DISTINCT A.intJournalID,
-					'You cannot post this transaction because it has inactive account id ' + B.strAccountID + '.' AS strMessage
+				SELECT DISTINCT A.intJournalId,
+					'You cannot post this transaction because it has inactive account id ' + B.strAccountId + '.' AS strMessage
 				FROM tblGLJournalDetail A 
-					LEFT OUTER JOIN tblGLAccount B ON A.intAccountID = B.intAccountID
-				WHERE ISNULL(B.ysnActive, 0) = 0 AND A.intJournalID IN (SELECT intJournalID FROM #tmpPostJournals)
+					LEFT OUTER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
+				WHERE ISNULL(B.ysnActive, 0) = 0 AND A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)
 				UNION
-				SELECT DISTINCT A.intJournalID,
+				SELECT DISTINCT A.intJournalId,
 					'You cannot post this transaction because it has invalid account(s).' AS strMessage
 				FROM tblGLJournalDetail A 
-					LEFT OUTER JOIN tblGLAccount B ON A.intAccountID = B.intAccountID
-				WHERE A.intAccountID IS NULL OR 0 = CASE WHEN ISNULL(A.intAccountID, '') = '' THEN 0 ELSE 1 END AND A.intJournalID IN (SELECT intJournalID FROM #tmpPostJournals)					
+					LEFT OUTER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
+				WHERE A.intAccountId IS NULL OR 0 = CASE WHEN ISNULL(A.intAccountId, '') = '' THEN 0 ELSE 1 END AND A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)					
 				UNION 
-				SELECT DISTINCT A.intJournalID,
+				SELECT DISTINCT A.intJournalId,
 					'Unable to post. The transaction is out of balance.' AS strMessage
 				FROM tblGLJournalDetail A 
-				WHERE A.intJournalID IN (SELECT intJournalID FROM #tmpPostJournals)	
-				GROUP BY A.intJournalID		
+				WHERE A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)	
+				GROUP BY A.intJournalId		
 				HAVING SUM(ISNULL(A.dblCredit,0)) <> SUM(ISNULL(A.dblDebit,0)) 
 				--UNION 
-				--SELECT DISTINCT B.intJournalID,
-				--	'You cannot post this transaction because Accounting Unit setup does not match account id ' + C.strAccountID + ' setup.' AS strMessage
+				--SELECT DISTINCT B.intJournalId,
+				--	'You cannot post this transaction because Accounting Unit setup does not match account id ' + C.strAccountId + ' setup.' AS strMessage
 				--FROM tblGLJournalDetail B 
-				--	LEFT OUTER JOIN tblGLAccount C ON B.intAccountID = C.intAccountID
-				--WHERE (ISNULL(B.dblCreditUnit, 0) > 0 OR ISNULL(B.dblDebitUnit, 0) > 0) AND ISNULL(C.intAccountUnitID, 0) = 0 
-				--	AND B.intJournalID IN (SELECT intJournalID FROM #tmpPostJournals)
-				--	GROUP BY B.intJournalID, C.intAccountID, C.strAccountID
+				--	LEFT OUTER JOIN tblGLAccount C ON B.intAccountId = C.intAccountId
+				--WHERE (ISNULL(B.dblCreditUnit, 0) > 0 OR ISNULL(B.dblDebitUnit, 0) > 0) AND ISNULL(C.intAccountUnitId, 0) = 0 
+				--	AND B.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)
+				--	GROUP BY B.intJournalId, C.intAccountId, C.strAccountId
 			) tmpBatchResults
-		LEFT JOIN tblGLJournal tblB ON tmpBatchResults.intJournalID = tblB.intJournalID
+		LEFT JOIN tblGLJournal tblB ON tmpBatchResults.intJournalId = tblB.intJournalId
 	END
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
@@ -164,10 +164,10 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 -- 	POPULATE VALID JOURNALS TEMPORARY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
 INSERT INTO #tmpValidJournals
-	SELECT DISTINCT A.[intJournalID]
+	SELECT DISTINCT A.[intJournalId]
 	FROM tblGLJournal A 
-	WHERE	A.[intJournalID] IN (SELECT B.intJournalID FROM #tmpPostJournals  B
-						WHERE B.intJournalID NOT IN (SELECT intTransactionID FROM tblGLPostResults WHERE strBatchID = @strBatchID GROUP BY intTransactionID)) 
+	WHERE	A.[intJournalId] IN (SELECT B.intJournalId FROM #tmpPostJournals  B
+						WHERE B.intJournalId NOT IN (SELECT intTransactionId FROM tblGLPostResults WHERE strBatchId = @strBatchId GROUP BY intTransactionId)) 
 		AND
 		A.[ysnPosted] = 0 AND
 		A.[strJournalType] = @strJournalType
@@ -188,24 +188,24 @@ Post_Transaction:
 IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN							
 	
-		DECLARE @intCurrencyID	INT
+		DECLARE @intCurrencyId	INT
 		DECLARE @dblDailyRate	NUMERIC (18,6)
 		
-		SET @intCurrencyID		= (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE intCurrencyID = (CASE WHEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') > 0 
+		SET @intCurrencyId		= (SELECT TOP 1 intCurrencyId FROM tblSMCurrency WHERE intCurrencyId = (CASE WHEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') > 0 
 																		THEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency')
-																		ELSE (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'USD') END))
-		SET @dblDailyRate		= (SELECT TOP 1 dblDailyRate FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyID);
+																		ELSE (SELECT TOP 1 intCurrencyId FROM tblSMCurrency WHERE strCurrency = 'USD') END))
+		SET @dblDailyRate		= (SELECT TOP 1 dblDailyRate FROM tblSMCurrency WHERE intCurrencyId = @intCurrencyId);
 
 	
 		WITH Units 
 		AS 
 		(
-			SELECT	A.[dblLbsPerUnit], B.[intAccountID] 
-			FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitID] = B.[intAccountUnitID]
+			SELECT	A.[dblLbsPerUnit], B.[intAccountId] 
+			FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
 		)
 		INSERT INTO tblGLDetail (
-			 [strTransactionID]
-			,[intAccountID]
+			 [strTransactionId]
+			,[intAccountId]
 			,[strDescription]
 			,[strReference]	
 			,[dtmTransactionDate]
@@ -216,11 +216,11 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[dtmDate]
 			,[ysnIsUnposted]
 			,[intConcurrencyId]	
-			,[intCurrencyID]
+			,[intCurrencyId]
 			,[dblExchangeRate]
-			,[intUserID]
+			,[intUserId]
 			,[dtmDateEntered]
-			,[strBatchID]
+			,[strBatchId]
 			,[strCode]
 			,[strModuleName]
 			,[strTransactionForm]
@@ -228,8 +228,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intJournalLineNo]
 		)
 		SELECT 
-			 [strTransactionID]		= B.[strJournalID]
-			,[intAccountID]			= A.[intAccountID]
+			 [strTransactionId]		= B.[strJournalId]
+			,[intAccountId]			= A.[intAccountId]
 			,[strDescription]		= A.[strDescription]
 			,[strReference]			= A.[strReference]
 			,[dtmTransactionDate]	= A.[dtmDate]
@@ -239,16 +239,16 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[dblCredit]			= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
 											WHEN [dblCredit] < 0 THEN 0
 											ELSE [dblCredit] END	
-			,[dblDebitUnit]			= ISNULL(A.[dblDebitUnit], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountID] = A.[intAccountID]), 0)
-			,[dblCreditUnit]		= ISNULL(A.[dblCreditUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountID] = A.[intAccountID]), 0)
+			,[dblDebitUnit]			= ISNULL(A.[dblDebitUnit], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
+			,[dblCreditUnit]		= ISNULL(A.[dblCreditUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
 			,[dtmDate]				= ISNULL(B.[dtmDate], GETDATE())
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
-			,[intCurrencyID]		= @intCurrencyID
+			,[intCurrencyId]		= @intCurrencyId
 			,[dblExchangeRate]		= @dblDailyRate
-			,[intUserID]			= @intUserID
+			,[intUserId]			= @intUserId
 			,[dtmDateEntered]		= GETDATE()
-			,[strBatchID]			= @strBatchID
+			,[strBatchId]			= @strBatchId
 			,[strCode]				= B.[strSourceType]
 			,[strModuleName]		= 'General Ledger'
 			,[strTransactionForm]	= B.[strTransactionType]
@@ -256,28 +256,28 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intJournalLineNo]		= A.intLineNo
 
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B 
-			ON A.[intJournalID] = B.[intJournalID]
-		WHERE B.[intJournalID] IN (SELECT [intJournalID] FROM #tmpValidJournals)
+			ON A.[intJournalId] = B.[intJournalId]
+		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM #tmpValidJournals)
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
 ELSE
 	BEGIN
 		-- DELETE Results 1 DAYS OLDER	
-		DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intUserID = @intUserID;
+		DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intUserId = @intUserId;
 		
 		WITH Accounts 
 		AS 
 		(
-			SELECT A.[strAccountID], A.[intAccountID], A.[intAccountGroupID], B.[strAccountGroup], C.[dblLbsPerUnit]
-			FROM tblGLAccount A LEFT JOIN tblGLAccountGroup B on A.intAccountGroupID = B.intAccountGroupID
-								LEFT JOIN tblGLAccountUnit  C on C.intAccountUnitID  = A.intAccountUnitID
+			SELECT A.[strAccountId], A.[intAccountId], A.[intAccountGroupId], B.[strAccountGroup], C.[dblLbsPerUnit]
+			FROM tblGLAccount A LEFT JOIN tblGLAccountGroup B on A.intAccountGroupId = B.intAccountGroupId
+								LEFT JOIN tblGLAccountUnit  C on C.intAccountUnitId  = A.intAccountUnitId
 		)
 		INSERT INTO tblGLPostRecap (
-			 [strTransactionID]
-			,[intTransactionID]
-			,[intAccountID]
-			,[strAccountID]
+			 [strTransactionId]
+			,[intTransactionId]
+			,[intAccountId]
+			,[strAccountId]
 			,[strAccountGroup]
 			,[strDescription]
 			,[strReference]	
@@ -290,19 +290,19 @@ ELSE
 			,[ysnIsUnposted]
 			,[intConcurrencyId]	
 			,[dblExchangeRate]
-			,[intUserID]
+			,[intUserId]
 			,[dtmDateEntered]
-			,[strBatchID]
+			,[strBatchId]
 			,[strCode]
 			,[strModuleName]
 			,[strTransactionForm]
 		)
 		SELECT 
-			 [strTransactionID]		= B.[strJournalID]
-			,[intTransactionID]		= B.[intJournalID]
-			,[intAccountID]			= A.[intAccountID]
-			,[strAccountID]			= (SELECT [strAccountID] FROM Accounts WHERE [intAccountID] = A.[intAccountID])
-			,[strAccountGroup]		= (SELECT [strAccountGroup] FROM Accounts WHERE [intAccountID] = A.[intAccountID])
+			 [strTransactionId]		= B.[strJournalId]
+			,[intTransactionId]		= B.[intJournalId]
+			,[intAccountId]			= A.[intAccountId]
+			,[strAccountId]			= (SELECT [strAccountId] FROM Accounts WHERE [intAccountId] = A.[intAccountId])
+			,[strAccountGroup]		= (SELECT [strAccountGroup] FROM Accounts WHERE [intAccountId] = A.[intAccountId])
 			,[strDescription]		= A.[strDescription]
 			,[strReference]			= A.[strReference]
 			,[dtmTransactionDate]	= A.[dtmDate]
@@ -312,26 +312,26 @@ ELSE
 			,[dblCredit]			= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
 											WHEN [dblCredit] < 0 THEN 0
 											ELSE [dblCredit] END	
-			,[dblDebitUnit]			= ISNULL(A.[dblDebitUnit], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Accounts WHERE [intAccountID] = A.[intAccountID]), 0)
-			,[dblCreditUnit]		= ISNULL(A.[dblCreditUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Accounts WHERE [intAccountID] = A.[intAccountID]), 0)
+			,[dblDebitUnit]			= ISNULL(A.[dblDebitUnit], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Accounts WHERE [intAccountId] = A.[intAccountId]), 0)
+			,[dblCreditUnit]		= ISNULL(A.[dblCreditUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Accounts WHERE [intAccountId] = A.[intAccountId]), 0)
 			,[dtmDate]				= ISNULL(B.[dtmDate], GETDATE())
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[dblExchangeRate]		= 1
-			,[intUserID]			= @intUserID
+			,[intUserId]			= @intUserId
 			,[dtmDateEntered]		= GETDATE()
-			,[strBatchID]			= @strBatchID
+			,[strBatchId]			= @strBatchId
 			,[strCode]				= B.[strSourceType]
 			,[strModuleName]		= 'General Ledger'
 			,[strTransactionForm]	= B.[strTransactionType]
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B 
-			ON A.[intJournalID] = B.[intJournalID]
-		WHERE B.[intJournalID] IN (SELECT [intJournalID] FROM #tmpValidJournals)
+			ON A.[intJournalId] = B.[intJournalId]
+		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM #tmpValidJournals)
 
 		--SUMMARY GROUP
 		INSERT INTO tblGLPostRecap (
-			 [strTransactionID]
-			,[intTransactionID]
+			 [strTransactionId]
+			,[intTransactionId]
 			,[dblDebit]
 			,[dblCredit]
 			,[dblDebitUnit]
@@ -340,15 +340,15 @@ ELSE
 			,[dblExchangeRate]
 			,[dtmDateEntered]
 			,[ysnIsUnposted]
-			,[intUserID]
-			,[strBatchID]
+			,[intUserId]
+			,[strBatchId]
 			,[strCode]
 			,[strModuleName]
 			,[strTransactionForm]
 		)
 		SELECT 
-			 [strTransactionID]
-			,[intTransactionID]		
+			 [strTransactionId]
+			,[intTransactionId]		
 			,SUM([dblDebit])
 			,SUM([dblCredit])
 			,SUM([dblDebitUnit])
@@ -357,14 +357,14 @@ ELSE
 			,[dblExchangeRate]
 			,[dtmDateEntered]
 			,[ysnIsUnposted]
-			,[intUserID]	
-			,[strBatchID]	
+			,[intUserId]	
+			,[strBatchId]	
 			,[strCode]				
 			,[strModuleName]
 			,[strTransactionForm]
 		FROM [dbo].tblGLPostRecap A
-		WHERE A.[strBatchID] = @strBatchID and A.[intUserID] = @intUserID
-		GROUP BY [strTransactionID],[intTransactionID],[dtmDate],[dblExchangeRate],[dtmDateEntered],[ysnIsUnposted],[intUserID],[strBatchID],[strCode],[strModuleName],[strTransactionForm]
+		WHERE A.[strBatchId] = @strBatchId and A.[intUserId] = @intUserId
+		GROUP BY [strTransactionId],[intTransactionId],[dtmDate],[dblExchangeRate],[dtmDateEntered],[ysnIsUnposted],[intUserId],[strBatchId],[strCode],[strModuleName],[strTransactionForm]
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 
@@ -380,24 +380,24 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 WITH Units
 AS 
 (
-	SELECT	A.[dblLbsPerUnit], B.[intAccountID] 
-	FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitID] = B.[intAccountUnitID]
+	SELECT	A.[dblLbsPerUnit], B.[intAccountId] 
+	FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
 ),
 JournalDetail
 AS
 (
 	SELECT   [dtmDate]			= ISNULL(B.[dtmDate], GETDATE())
-			,[intAccountID]		= A.[intAccountID]
+			,[intAccountId]		= A.[intAccountId]
 			,[dblDebit]			= CASE	WHEN [dblCredit] < 0 THEN ABS([dblCredit])
 										WHEN [dblDebit] < 0 THEN 0
 										ELSE [dblDebit] END 
 			,[dblCredit]		= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
 										WHEN [dblCredit] < 0 THEN 0
 										ELSE [dblCredit] END	
-			,[dblDebitUnit]		= ISNULL([dblDebitUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountID] = A.[intAccountID]), 0)
-			,[dblCreditUnit]	= ISNULL([dblCreditUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountID] = A.[intAccountID]), 0)
-	FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B ON A.[intJournalID] = B.[intJournalID]
-	WHERE B.[intJournalID] IN (SELECT [intJournalID] FROM #tmpValidJournals)
+			,[dblDebitUnit]		= ISNULL([dblDebitUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
+			,[dblCreditUnit]	= ISNULL([dblCreditUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
+	FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B ON A.[intJournalId] = B.[intJournalId]
+	WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM #tmpValidJournals)
 )
 UPDATE	tblGLSummary 
 SET		 [dblDebit]			= ISNULL(tblGLSummary.[dblDebit], 0) + ISNULL(GLDetailGrouped.[dblDebit], 0)
@@ -410,14 +410,14 @@ FROM	(
 					,[dblCredit]		= SUM(ISNULL(B.[dblCredit], 0))
 					,[dblDebitUnit]		= SUM(ISNULL(B.[dblDebitUnit], 0))
 					,[dblCreditUnit]	= SUM(ISNULL(B.[dblCreditUnit], 0))
-					,[intAccountID]		= A.[intAccountID]
+					,[intAccountId]		= A.[intAccountId]
 					,[dtmDate]			= ISNULL(CONVERT(DATE, A.[dtmDate]), '') 								
 			FROM tblGLSummary A 
 					INNER JOIN JournalDetail B 
-					ON CONVERT(DATE, A.[dtmDate]) = CONVERT(DATE, B.[dtmDate]) AND A.[intAccountID] = B.[intAccountID] AND A.[strCode] = 'GJ'			
-			GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountID]
+					ON CONVERT(DATE, A.[dtmDate]) = CONVERT(DATE, B.[dtmDate]) AND A.[intAccountId] = B.[intAccountId] AND A.[strCode] = 'GJ'			
+			GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountId]
 		) AS GLDetailGrouped
-WHERE tblGLSummary.[intAccountID] = GLDetailGrouped.[intAccountID] AND tblGLSummary.[strCode] = 'GJ' AND
+WHERE tblGLSummary.[intAccountId] = GLDetailGrouped.[intAccountId] AND tblGLSummary.[strCode] = 'GJ' AND
 	  ISNULL(CONVERT(DATE, tblGLSummary.[dtmDate]), '') = ISNULL(CONVERT(DATE, GLDetailGrouped.[dtmDate]), '');
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
@@ -429,27 +429,27 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 WITH Units
 AS 
 (
-	SELECT	A.[dblLbsPerUnit], B.[intAccountID] 
-	FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitID] = B.[intAccountUnitID]
+	SELECT	A.[dblLbsPerUnit], B.[intAccountId] 
+	FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
 ),
 JournalDetail 
 AS
 (
 	SELECT [dtmDate]		= ISNULL(B.[dtmDate], GETDATE())
-		,[intAccountID]		= A.[intAccountID]
+		,[intAccountId]		= A.[intAccountId]
 		,[dblDebit]			= CASE	WHEN [dblCredit] < 0 THEN ABS([dblCredit])
 									WHEN [dblDebit] < 0 THEN 0
 									ELSE [dblDebit] END 
 		,[dblCredit]		= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
 									WHEN [dblCredit] < 0 THEN 0
 									ELSE [dblCredit] END	
-		,[dblDebitUnit]		= ISNULL(A.[dblDebitUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountID] = A.[intAccountID]), 0)
-		,[dblCreditUnit]	= ISNULL(A.[dblCreditUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountID] = A.[intAccountID]), 0)
-	FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B ON A.[intJournalID] = B.[intJournalID]
-	WHERE B.intJournalID IN (SELECT [intJournalID] FROM #tmpValidJournals)
+		,[dblDebitUnit]		= ISNULL(A.[dblDebitUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
+		,[dblCreditUnit]	= ISNULL(A.[dblCreditUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
+	FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B ON A.[intJournalId] = B.[intJournalId]
+	WHERE B.intJournalId IN (SELECT [intJournalId] FROM #tmpValidJournals)
 )
 INSERT INTO tblGLSummary (
-	 [intAccountID]
+	 [intAccountId]
 	,[dtmDate]
 	,[dblDebit]
 	,[dblCredit]
@@ -459,7 +459,7 @@ INSERT INTO tblGLSummary (
 	,[intConcurrencyId]
 )
 SELECT	
-	 [intAccountID]		= A.[intAccountID]
+	 [intAccountId]		= A.[intAccountId]
 	,[dtmDate]			= ISNULL(CONVERT(DATE, A.[dtmDate]), '')
 	,[dblDebit]			= SUM(A.[dblDebit])
 	,[dblCredit]		= SUM(A.[dblCredit])
@@ -473,9 +473,9 @@ WHERE NOT EXISTS
 			SELECT TOP 1 1
 			FROM tblGLSummary B
 			WHERE ISNULL(CONVERT(DATE, A.[dtmDate]), '') = ISNULL(CONVERT(DATE, B.[dtmDate]), '') AND 
-				  A.[intAccountID] = B.[intAccountID] AND B.[strCode] = 'GJ'
+				  A.[intAccountId] = B.[intAccountId] AND B.[strCode] = 'GJ'
 		)
-GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountID];
+GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountId];
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
@@ -486,7 +486,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 UPDATE tblGLJournal
 SET [ysnPosted] = 1
 	,[dtmPosted] = GETDATE()
-WHERE [intJournalID] IN (SELECT [intJournalID] FROM #tmpValidJournals);
+WHERE [intJournalId] IN (SELECT [intJournalId] FROM #tmpValidJournals);
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
@@ -494,13 +494,13 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 --=====================================================================================================================================
 -- 	UPDATE RESULT
 ---------------------------------------------------------------------------------------------------------------------------------------
-INSERT INTO tblGLPostResults (strBatchID,intTransactionID,strTransactionID,strDescription,dtmDate)
-	SELECT @strBatchID as strBatchID,intJournalID as intTransactionID,strJournalID as strTransactionID, strMessage as strDescription,GETDATE() as dtmDate
+INSERT INTO tblGLPostResults (strBatchId,intTransactionId,strTransactionId,strDescription,dtmDate)
+	SELECT @strBatchId as strBatchId,intJournalId as intTransactionId,strJournalId as strTransactionId, strMessage as strDescription,GETDATE() as dtmDate
 	FROM (
-		SELECT DISTINCT A.intJournalID,A.strJournalID,
+		SELECT DISTINCT A.intJournalId,A.strJournalId,
 			'Transaction successfully posted.' AS strMessage
 		FROM tblGLJournal A 
-		WHERE A.intJournalID IN (SELECT intJournalID FROM #tmpValidJournals)
+		WHERE A.intJournalId IN (SELECT intJournalId FROM #tmpValidJournals)
 	) B
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
@@ -515,9 +515,9 @@ SET @successfulCount = ISNULL(@successfulCount,0) + (SELECT COUNT(*) FROM #tmpVa
 --=====================================================================================================================================
 -- 	REVERSE JOURNAL
 ---------------------------------------------------------------------------------------------------------------------------------------
-INSERT INTO #tmpReverseJournals (intJournalID)
-SELECT A.intJournalID FROM #tmpValidJournals A
-	INNER JOIN tblGLJournal B ON A.intJournalID = B.intJournalID	
+INSERT INTO #tmpReverseJournals (intJournalId)
+SELECT A.intJournalId FROM #tmpValidJournals A
+	INNER JOIN tblGLJournal B ON A.intJournalId = B.intJournalId	
 	WHERE B.dtmReverseDate IS NOT NULL
 
 IF EXISTS (SELECT 1 FROM #tmpReverseJournals)
@@ -526,59 +526,59 @@ BEGIN
 
 	WHILE EXISTS(SELECT 1 FROM #tmpReverseJournals)
 	BEGIN
-		DECLARE @intJournalID INT = (SELECT TOP 1 intJournalID FROM #tmpReverseJournals)
-		DECLARE @strJournalID NVARCHAR(100) = ''
+		DECLARE @intJournalId INT = (SELECT TOP 1 intJournalId FROM #tmpReverseJournals)
+		DECLARE @strJournalId NVARCHAR(100) = ''
 		
-		EXEC [dbo].uspSMGetStartingNumber 5, @strJournalID OUTPUT 		
+		EXEC [dbo].uspSMGetStartingNumber 5, @strJournalId OUTPUT 		
 		
 		INSERT INTO tblGLJournal (
 				 [dtmReverseDate]
-				,[strJournalID]
+				,[strJournalId]
 				,[strTransactionType]
 				,[dtmDate]
 				,[strReverseLink]
-				,[intCurrencyID]
+				,[intCurrencyId]
 				,[dblExchangeRate]
 				,[dtmPosted]
 				,[strDescription]
 				,[ysnPosted]
 				,[intConcurrencyId]
 				,[dtmJournalDate]
-				,[intUserID]
-				,[strSourceID]
+				,[intUserId]
+				,[strSourceId]
 				,[strJournalType]
 				,[strRecurringStatus]
 				,[strSourceType]
 				)
 			SELECT 
 				 NULL
-				,@strJournalID
+				,@strJournalId
 				,[strTransactionType]
 				,[dtmReverseDate]
-				,A.strJournalID
-				,[intCurrencyID]
+				,A.strJournalId
+				,[intCurrencyId]
 				,[dblExchangeRate]
 				,0
-				,'Reversing transaction for ' + A.strJournalID
+				,'Reversing transaction for ' + A.strJournalId
 				,[ysnPosted]
 				,[intConcurrencyId]
 				,[dtmJournalDate]
-				,[intUserID]
-				,[strSourceID]
+				,[intUserId]
+				,[strSourceId]
 				,'Reversal Journal'
 				,NULL
 				,[strSourceType]
 			FROM [dbo].tblGLJournal A
-			WHERE A.intJournalID = @intJournalID
+			WHERE A.intJournalId = @intJournalId
 			
-			DECLARE @intJournalID_NEW INT = (SELECT TOP 1 intJournalID FROM tblGLJournal WHERE strJournalID = @strJournalID)
-			INSERT INTO #tmpValidJournals (intJournalID) SELECT @intJournalID_NEW
+			DECLARE @intJournalId_NEW INT = (SELECT TOP 1 intJournalId FROM tblGLJournal WHERE strJournalId = @strJournalId)
+			INSERT INTO #tmpValidJournals (intJournalId) SELECT @intJournalId_NEW
 		 
 		 INSERT INTO tblGLJournalDetail (
 				 [intLineNo]
-				,[intJournalID]
+				,[intJournalId]
 				,[dtmDate]
-				,[intAccountID]
+				,[intAccountId]
 				,[dblDebit]
 				,[dblDebitRate]
 				,[dblCredit]
@@ -599,9 +599,9 @@ BEGIN
 				)
 			SELECT 
 				 [intLineNo]
-				,@intJournalID_NEW
+				,@intJournalId_NEW
 				,[dtmDate]
-				,[intAccountID]			
+				,[intAccountId]			
 				,[dblCredit]
 				,[dblCreditRate]
 				,[dblDebit]
@@ -620,9 +620,9 @@ BEGIN
 				,[strCheckBookNo]
 				,[strWorkArea]
 			FROM [dbo].tblGLJournalDetail A
-			WHERE A.intJournalID = @intJournalID
+			WHERE A.intJournalId = @intJournalId
 							
-		DELETE #tmpReverseJournals WHERE intJournalID = @intJournalID
+		DELETE #tmpReverseJournals WHERE intJournalId = @intJournalId
 	END 	
 	
 	GOTO Post_Transaction;
@@ -644,9 +644,9 @@ Post_Rollback:
 	GOTO Post_Exit
 
 Post_Exit:
-	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#tmpPostJournals')) DROP TABLE #tmpPostJournals
-	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#tmpValidJournals')) DROP TABLE #tmpValidJournals
-	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#tmpReverseJournals')) DROP TABLE #tmpReverseJournals		
+	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE Id = OBJECT_Id('TEMPDB..#tmpPostJournals')) DROP TABLE #tmpPostJournals
+	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE Id = OBJECT_Id('TEMPDB..#tmpValidJournals')) DROP TABLE #tmpValidJournals
+	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE Id = OBJECT_Id('TEMPDB..#tmpReverseJournals')) DROP TABLE #tmpReverseJournals		
 GO
 
 
@@ -656,12 +656,12 @@ GO
 --DECLARE @intCount AS INT
 
 --EXEC [dbo].[usp_PostJournal]
---			@Param	 = 'select intJournalID from tblGLJournal where strJournalID = ''GJ-20''',				-- GENERATED BATCH ID
+--			@Param	 = 'select intJournalId from tblGLJournal where strJournalId = ''GJ-20''',				-- GENERATED BATCH Id
 --			@ysnPost = 1,
 --			@ysnRecap = 0,								-- WHEN SET TO 1, THEN IT WILL POPULATE tblGLPostRecap THAT CAN BE VIEWED VIA BUFFERED STORE IN SENCHA
---			@strBatchID = 'BATCH-11231',							-- COMMA DELIMITED JOURNAL ID TO POST 
+--			@strBatchId = 'BATCH-11231',							-- COMMA DELIMITED JOURNAL Id TO POST 
 --			@strJournalType = 'General Journal',
---			@intUserID = 1,							-- USER ID THAT INITIATES POSTING
+--			@intUserId = 1,							-- USER Id THAT INITIATES POSTING
 --			@successfulCount = @intCount OUTPUT		-- OUTPUT PARAMETER THAT RETURNS TOTAL NUMBER OF SUCCESSFUL RECORDS
 				
 --SELECT @intCount

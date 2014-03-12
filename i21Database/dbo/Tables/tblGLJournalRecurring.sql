@@ -1,10 +1,10 @@
 ﻿CREATE TABLE [dbo].[tblGLJournalRecurring] (
-    [intJournalRecurringID] INT              IDENTITY (1, 1) NOT NULL,
-    [strJournalRecurringID] NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
+    [intJournalRecurringId] INT              IDENTITY (1, 1) NOT NULL,
+    [strJournalRecurringId] NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
     [strDescription]        NVARCHAR (100)   COLLATE Latin1_General_CI_AS NULL,
-    [strStoreID]            NVARCHAR (20)    COLLATE Latin1_General_CI_AS NULL,
+    [strStoreId]            NVARCHAR (20)    COLLATE Latin1_General_CI_AS NULL,
     [dtmDate]               DATETIME         NULL,
-    [intCurrencyID]         INT              NULL,
+    [intCurrencyId]         INT              NULL,
     [dblExchangeRate]       NUMERIC (38, 20) NULL,
     [strReference]          NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]      INT              DEFAULT 1 NOT NULL,
@@ -21,6 +21,6 @@
     [dtmLastDueDate]        DATETIME         NULL,
     [intMonthInterval]      INT              NULL,
     [dtmReverseDate]        DATETIME         NULL,
-    CONSTRAINT [PK_tblGLJournalRecurring] PRIMARY KEY CLUSTERED ([intJournalRecurringID] ASC)
+    CONSTRAINT [PK_tblGLJournalRecurring] PRIMARY KEY CLUSTERED ([intJournalRecurringId] ASC)
 );
 

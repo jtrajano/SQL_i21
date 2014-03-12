@@ -1,11 +1,11 @@
 ﻿CREATE TABLE [dbo].[tblGLBudget] (
-    [intBudgetID]       INT             IDENTITY (1, 1) NOT NULL,
+    [intBudgetId]       INT             IDENTITY (1, 1) NOT NULL,
     [intBudgetCode]     INT             NOT NULL,
     [strPeriod]         NVARCHAR (50)   COLLATE Latin1_General_CI_AS NOT NULL,
     [dtmStartDate]      DATETIME        NULL,
-    [intFiscalYearID]   INT             NOT NULL,
-    [intAccountID]      INT             NOT NULL,
-    [intAccountGroupID] INT             NULL,
+    [intFiscalYearId]   INT             NOT NULL,
+    [intAccountId]      INT             NOT NULL,
+    [intAccountGroupId] INT             NULL,
     [curActual]         NUMERIC (18, 6) NULL,
     [intSort]           INT             NULL,
     [dtmEndDate]        DATETIME        NULL,
@@ -16,9 +16,9 @@
     [curOperPlan]       NUMERIC (18, 6) NULL,
     [intConcurrencyId]  INT             DEFAULT 1 NOT NULL,
     [ysnSelect]         BIT             NULL,
-    CONSTRAINT [PK_tblGLBudget] PRIMARY KEY CLUSTERED ([intBudgetID] ASC),
-    CONSTRAINT [FK_tblGLBudget_tblGLAccount] FOREIGN KEY ([intAccountID]) REFERENCES [dbo].[tblGLAccount] ([intAccountID]),
+    CONSTRAINT [PK_tblGLBudget] PRIMARY KEY CLUSTERED ([intBudgetId] ASC),
+    CONSTRAINT [FK_tblGLBudget_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
     CONSTRAINT [FK_tblGLBudget_tblGLBudgetCode] FOREIGN KEY ([intBudgetCode]) REFERENCES [dbo].[tblGLBudgetCode] ([intBudgetCode]),
-    CONSTRAINT [FK_tblGLBudget_tblGLFiscalYear] FOREIGN KEY ([intFiscalYearID]) REFERENCES [dbo].[tblGLFiscalYear] ([intFiscalYearID])
+    CONSTRAINT [FK_tblGLBudget_tblGLFiscalYear] FOREIGN KEY ([intFiscalYearId]) REFERENCES [dbo].[tblGLFiscalYear] ([intFiscalYearId])
 );
 

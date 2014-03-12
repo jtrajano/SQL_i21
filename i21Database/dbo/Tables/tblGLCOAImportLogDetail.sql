@@ -1,13 +1,13 @@
 ﻿CREATE TABLE [dbo].[tblGLCOAImportLogDetail] (
-    [intImportLogDetailID] INT            IDENTITY (1, 1) NOT NULL,
-    [intImportLogID]       INT            NULL,
+    [intImportLogDetailId] INT            IDENTITY (1, 1) NOT NULL,
+    [intImportLogId]       INT            NULL,
     [strEventDescription]  NVARCHAR (200) COLLATE Latin1_General_CI_AS NULL,
     [strPeriod]            NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strSourceNumber]      NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strSourceSystem]      NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
-    [strJournalID]         NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
+    [strJournalId]         NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]     INT            DEFAULT 1 NOT NULL,
-    CONSTRAINT [PK_tblGLCOAImportLogDetail] PRIMARY KEY CLUSTERED ([intImportLogDetailID] ASC),
-    CONSTRAINT [FK_tblGLCOAImportLogDetail_tblGLCOAImportLog] FOREIGN KEY ([intImportLogID]) REFERENCES [dbo].[tblGLCOAImportLog] ([intImportLogID])
+    CONSTRAINT [PK_tblGLCOAImportLogDetail] PRIMARY KEY CLUSTERED ([intImportLogDetailId] ASC),
+    CONSTRAINT [FK_tblGLCOAImportLogDetail_tblGLCOAImportLog] FOREIGN KEY ([intImportLogId]) REFERENCES [dbo].[tblGLCOAImportLog] ([intImportLogId])
 );
 

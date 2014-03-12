@@ -1,7 +1,7 @@
-﻿CREATE VIEW [dbo].[vyu_GLAccountGroupView]
+﻿CREATE VIEW [dbo].[vyuGLAccountGroupView]
 AS
-SELECT     intAccountGroupID, AccountGroupSub, strAccountType, AccountGroup, intParentGroupID, intSort
-FROM         (SELECT     A.intAccountGroupID, B.strAccountGroup AS AccountGroupSub, A.strAccountType, A.strAccountGroup AS AccountGroup, A.intParentGroupID, A.intSort
+SELECT     intAccountGroupId, AccountGroupSub, strAccountType, AccountGroup, intParentGroupId, intSort
+FROM         (SELECT     A.intAccountGroupId, B.strAccountGroup AS AccountGroupSub, A.strAccountType, A.strAccountGroup AS AccountGroup, A.intParentGroupId, A.intSort
                        FROM          dbo.tblGLAccountGroup AS A LEFT OUTER JOIN
-                                              dbo.tblGLAccountGroup AS B ON A.intAccountGroupID = B.intParentGroupID) AS X
+                                              dbo.tblGLAccountGroup AS B ON A.intAccountGroupId = B.intParentGroupId) AS X
 WHERE  AccountGroupSub IS NULL

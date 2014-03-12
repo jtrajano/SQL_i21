@@ -1,8 +1,8 @@
-﻿CREATE PROCEDURE  [dbo].[usp_GLBuildAccountTemporary]
-@intUserID INT
+﻿CREATE PROCEDURE  [dbo].[uspGLBuildAccountTemporary]
+@intUserId INT
 AS
 
-SET QUOTED_IDENTIFIER OFF
+SET QUOTED_IdENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 
@@ -13,10 +13,10 @@ CREATE TABLE #TempResults
 	,strSegment					NVARCHAR(50)
 	,strDescription				NVARCHAR(300)
 	,strAccountGroup			NVARCHAR(50)
-    ,intAccountGroupID			INT
-    ,intAccountSegmentID		INT
-    ,intAccountStructureID		INT
-    ,strAccountSegmentID		NVARCHAR(100)
+    ,intAccountGroupId			INT
+    ,intAccountSegmentId		INT
+    ,intAccountStructureId		INT
+    ,strAccountSegmentId		NVARCHAR(100)
 )
 
 CREATE TABLE #PrimaryAccounts
@@ -26,22 +26,22 @@ CREATE TABLE #PrimaryAccounts
 	,strSegment					NVARCHAR(50)
 	,strDescription				NVARCHAR(300)
 	,strAccountGroup			NVARCHAR(50)	
-    ,intAccountGroupID			INT
-    ,intAccountSegmentID		INT
-    ,intAccountStructureID		INT
-    ,strAccountSegmentID		NVARCHAR(100)
+    ,intAccountGroupId			INT
+    ,intAccountSegmentId		INT
+    ,intAccountStructureId		INT
+    ,strAccountSegmentId		NVARCHAR(100)
 )
 
 INSERT INTO #PrimaryAccounts
-SELECT a.strCode,'', '', a.strDescription, b.strAccountGroup, a.intAccountGroupID, x.intAccountSegmentID, a.intAccountStructureID, x.intAccountSegmentID AS strAccountSegmentID
+SELECT a.strCode,'', '', a.strDescription, b.strAccountGroup, a.intAccountGroupId, x.intAccountSegmentId, a.intAccountStructureId, x.intAccountSegmentId AS strAccountSegmentId
 FROM tblGLTempAccountToBuild x
 LEFT JOIN tblGLAccountSegment a 
-ON x.intAccountSegmentID = a.intAccountSegmentID
+ON x.intAccountSegmentId = a.intAccountSegmentId
 LEFT JOIN tblGLAccountGroup b
-ON a.intAccountGroupID = b.intAccountGroupID
+ON a.intAccountGroupId = b.intAccountGroupId
 LEFT JOIN tblGLAccountStructure c
-ON a.intAccountStructureID = c.intAccountStructureID
-WHERE x.intUserID = @intUserID and c.strType = 'Primary'
+ON a.intAccountStructureId = c.intAccountStructureId
+WHERE x.intUserId = @intUserId and c.strType = 'Primary'
 
 CREATE TABLE #ConstructAccount
 (
@@ -50,21 +50,21 @@ CREATE TABLE #ConstructAccount
 	,strSegment					NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
 	,strDescription				NVARCHAR(300)
 	,strAccountGroup			NVARCHAR(50)
-	,intAccountGroupID			INT
-	,intAccountSegmentID		INT
-	,intAccountStructureID		INT
-	,strAccountSegmentID		NVARCHAR(100)
+	,intAccountGroupId			INT
+	,intAccountSegmentId		INT
+	,intAccountStructureId		INT
+	,strAccountSegmentId		NVARCHAR(100)
 )
 
 CREATE TABLE #Structure
 (
 	 strMask				NVARCHAR(100)
 	,strType				NVARCHAR(17)
-	,intAccountStructureID	INT
+	,intAccountStructureId	INT
 )
 
 INSERT INTO #Structure 
-SELECT strMask, strType, intAccountStructureID
+SELECT strMask, strType, intAccountStructureId
 FROM tblGLAccountStructure WHERE strType <> 'Divider'
 ORDER BY intSort DESC
 
@@ -72,20 +72,20 @@ CREATE TABLE #Segments
 (
 	 strCode 					NVARCHAR(150)
 	,strDescription 	        NVARCHAR(300)
-    ,intAccountStructureID		INT
-	,intAccountSegmentID		INT
-	,strAccountSegmentID		NVARCHAR(100)
+    ,intAccountStructureId		INT
+	,intAccountSegmentId		INT
+	,strAccountSegmentId		NVARCHAR(100)
 )
 
 
 INSERT INTO #Segments
-SELECT a.strCode, a.strDescription, a.intAccountStructureID, a.intAccountSegmentID, a.intAccountSegmentID AS strAccountSegmentID
+SELECT a.strCode, a.strDescription, a.intAccountStructureId, a.intAccountSegmentId, a.intAccountSegmentId AS strAccountSegmentId
 FROM tblGLTempAccountToBuild x
 LEFT JOIN tblGLAccountSegment a 
-ON x.intAccountSegmentID = a.intAccountSegmentID
+ON x.intAccountSegmentId = a.intAccountSegmentId
 LEFT JOIN tblGLAccountStructure c
-ON a.intAccountStructureID = c.intAccountStructureID
-WHERE x.intUserID = @intUserID and c.strType = 'Segment'
+ON a.intAccountStructureId = c.intAccountStructureId
+WHERE x.intUserId = @intUserId and c.strType = 'Segment'
 ORDER BY a.strCode
 
 DECLARE @iStructureType INT
@@ -97,7 +97,7 @@ SET @strDivider = (Select Top 1 strMask from tblGLAccountStructure where strType
 
 WHILE EXISTS(SELECT 1 FROM #Structure)
 BEGIN
-	SELECT @strMask = strMask, @strType = strType, @iStructureType = intAccountStructureID FROM #Structure
+	SELECT @strMask = strMask, @strType = strType, @iStructureType = intAccountStructureId FROM #Structure
 	IF @strType = 'Primary' 
 		BEGIN
 			IF NOT EXISTS (SELECT 1 FROM #ConstructAccount)
@@ -106,7 +106,7 @@ BEGIN
 								
 				INSERT INTO #TempResults
 				SELECT PA.strCode, REPLICATE('0',(select 8 - intLength from tblGLAccountStructure where strType = 'Primary')) + PA.strCode AS strPrimary, '' as strSegment, PA.strDescription,
-					PA.strAccountGroup, PA.intAccountGroupID, PA.intAccountStructureID, PA.intAccountSegmentID, PA.intAccountSegmentID AS strAccountSegmentID
+					PA.strAccountGroup, PA.intAccountGroupId, PA.intAccountStructureId, PA.intAccountSegmentId, PA.intAccountSegmentId AS strAccountSegmentId
 				FROM #PrimaryAccounts PA
 			 END
 			ELSE
@@ -117,23 +117,23 @@ BEGIN
 				
 					INSERT INTO #TempResults
 					SELECT CA.strCode + @strDivider + PA.strCode AS strCode, CA.strPrimary + @strDivider + PA.strCode AS strPrimary, '' as strSegment, CA.strDescription + @strDivider + PA.strDescription AS strDescription,
-						PA.strAccountGroup, PA.intAccountGroupID, PA.intAccountStructureID, PA.intAccountSegmentID, PA.intAccountSegmentID AS strAccountSegmentID
+						PA.strAccountGroup, PA.intAccountGroupId, PA.intAccountStructureId, PA.intAccountSegmentId, PA.intAccountSegmentId AS strAccountSegmentId
 					FROM #ConstructAccount CA, #PrimaryAccounts PA
-					WHERE PA.intAccountStructureID = @iStructureType
+					WHERE PA.intAccountStructureId = @iStructureType
 				END
 			 END
-			DELETE FROM #PrimaryAccounts WHERE intAccountStructureID = @iStructureType
+			DELETE FROM #PrimaryAccounts WHERE intAccountStructureId = @iStructureType
 		END
 
 	ELSE IF @strType = 'Segment'
 		BEGIN
-			IF EXISTS(SELECT 1 FROM #Segments WHERE intAccountStructureID = @iStructureType) AND EXISTS (SELECT 1 FROM #Segments)
+			IF EXISTS(SELECT 1 FROM #Segments WHERE intAccountStructureId = @iStructureType) AND EXISTS (SELECT 1 FROM #Segments)
 				BEGIN
 					IF NOT EXISTS (SELECT 1 FROM #ConstructAccount)
 					 BEGIN
-  						INSERT INTO #TempResults ([strCode], [strPrimary], [strSegment], [strDescription], [intAccountStructureID], [intAccountSegmentID], [strAccountSegmentID])
-						SELECT S.strCode, S.strCode, S.strCode, S.strDescription, S.intAccountStructureID, S.intAccountSegmentID, S.intAccountSegmentID AS strAccountSegmentID FROM #Segments S  
-						WHERE S.intAccountStructureID = @iStructureType										
+  						INSERT INTO #TempResults ([strCode], [strPrimary], [strSegment], [strDescription], [intAccountStructureId], [intAccountSegmentId], [strAccountSegmentId])
+						SELECT S.strCode, S.strCode, S.strCode, S.strDescription, S.intAccountStructureId, S.intAccountSegmentId, S.intAccountSegmentId AS strAccountSegmentId FROM #Segments S  
+						WHERE S.intAccountStructureId = @iStructureType										
 					 END
 					ELSE
 					 BEGIN
@@ -141,14 +141,14 @@ BEGIN
 						BEGIN
 							TRUNCATE TABLE #TempResults
 
-							INSERT INTO #TempResults ([strCode], [strPrimary], [strSegment], [strDescription], [strAccountGroup], [intAccountGroupID], [intAccountStructureID], [intAccountSegmentID], [strAccountSegmentID])
+							INSERT INTO #TempResults ([strCode], [strPrimary], [strSegment], [strDescription], [strAccountGroup], [intAccountGroupId], [intAccountStructureId], [intAccountSegmentId], [strAccountSegmentId])
 							SELECT CA.strCode + @strDivider + S.strCode AS strCode, strPrimary, CA.strSegment + '' + S.strCode AS strSegment, CA.strDescription + @strDivider + S.strDescription AS strDescription
-								 ,CA.strAccountGroup, CA.intAccountGroupID, CA.intAccountStructureID, S.intAccountSegmentID, CA.strAccountSegmentID + ';' + CAST(S.intAccountSegmentID as NVARCHAR(50)) AS strAccountSegmentID
+								 ,CA.strAccountGroup, CA.intAccountGroupId, CA.intAccountStructureId, S.intAccountSegmentId, CA.strAccountSegmentId + ';' + CAST(S.intAccountSegmentId as NVARCHAR(50)) AS strAccountSegmentId
 							FROM #ConstructAccount CA, #Segments S
-							WHERE S.intAccountStructureID = @iStructureType  							
+							WHERE S.intAccountStructureId = @iStructureType  							
 					    END
 					 END
-					DELETE FROM #Segments WHERE intAccountStructureID = @iStructureType
+					DELETE FROM #Segments WHERE intAccountStructureId = @iStructureType
 				END
 			ELSE
 				BEGIN
@@ -159,31 +159,31 @@ BEGIN
 	TRUNCATE TABLE #ConstructAccount
 
 	INSERT INTO #ConstructAccount
-	SELECT strCode,strPrimary,strSegment,strDescription,strAccountGroup,intAccountGroupID,intAccountSegmentID,intAccountStructureID,strAccountSegmentID FROM #TempResults
+	SELECT strCode,strPrimary,strSegment,strDescription,strAccountGroup,intAccountGroupId,intAccountSegmentId,intAccountStructureId,strAccountSegmentId FROM #TempResults
 
-	DELETE FROM #Structure WHERE intAccountStructureID = @iStructureType	
+	DELETE FROM #Structure WHERE intAccountStructureId = @iStructureType	
 END
 
-IF EXISTS (SELECT * FROM tblGLTempAccount WHERE intUserID = @intUserID)
+IF EXISTS (SELECT * FROM tblGLTempAccount WHERE intUserId = @intUserId)
 BEGIN
-	DELETE tblGLTempAccount WHERE intUserID = @intUserID
+	DELETE tblGLTempAccount WHERE intUserId = @intUserId
 END
 
 INSERT INTO tblGLTempAccount
-SELECT strCode AS strAccountID, 
+SELECT strCode AS strAccountId, 
 	   strPrimary, 
 	   strSegment,
 	   strDescription,
 	   strAccountGroup,
-	   intAccountGroupID,
-	   strAccountSegmentID,	   
-	   intAccountUnitID = NULL,
+	   intAccountGroupId,
+	   strAccountSegmentId,	   
+	   intAccountUnitId = NULL,
 	   ysnSystem = 1,
 	   ysnActive = 1,
-	   @intUserID AS intUserID,	   
+	   @intUserId AS intUserId,	   
 	   getDate() AS dtmCreated	   	   
 FROM #ConstructAccount
-WHERE strCode NOT IN (SELECT strAccountID FROM tblGLAccount)	   
+WHERE strCode NOT IN (SELECT strAccountId FROM tblGLAccount)	   
 ORDER BY strCode		
 
 
@@ -193,4 +193,4 @@ DROP TABLE #Structure
 DROP TABLE #Segments
 DROP TABLE #ConstructAccount
 
-DELETE tblGLTempAccountToBuild WHERE intUserID = @intUserID
+DELETE tblGLTempAccountToBuild WHERE intUserId = @intUserId

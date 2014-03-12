@@ -1,5 +1,5 @@
 ﻿CREATE TABLE [dbo].[tblGLAccountStructure] (
-    [intAccountStructureID]  INT            IDENTITY (1, 1) NOT NULL,
+    [intAccountStructureId]  INT            IDENTITY (1, 1) NOT NULL,
     [intStructureType]       INT            NOT NULL,
     [strStructureName]       NVARCHAR (25)  COLLATE Latin1_General_CI_AS NULL,
     [strType]                NVARCHAR (7)   COLLATE Latin1_General_CI_AS NULL,
@@ -11,6 +11,6 @@
     [intStartingPosition]    INT            NULL,
     [intLegacyLength]        INT            NULL,
     [strOtherSoftwareColumn] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
-    CONSTRAINT [PK_GLAccountStructure_AccountStructureID] PRIMARY KEY CLUSTERED ([intAccountStructureID] ASC)
+    CONSTRAINT [PK_GLAccountStructure_AccountStructureId] PRIMARY KEY CLUSTERED ([intAccountStructureId] ASC)
 );
 

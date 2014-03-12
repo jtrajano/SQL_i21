@@ -2,12 +2,12 @@
 --=====================================================================================================================================
 -- 	CREATE THE STORED PROCEDURE AFTER DELETING IT
 ---------------------------------------------------------------------------------------------------------------------------------------
-CREATE PROCEDURE [dbo].[usp_PostFiscalYear]
-	 @intFiscalYearID	AS INT
+CREATE PROCEDURE [dbo].[uspGLPostFiscalYear]
+	 @intFiscalYearId	AS INT
 	,@ysnPost			AS BIT				= 0
 	,@ysnRecap			AS BIT				= 0
-	,@strBatchID		AS NVARCHAR(100)	= ''
-	,@intUserID			AS INT				= 1
+	,@strBatchId		AS NVARCHAR(100)	= ''
+	,@intUserId			AS INT				= 1
 	,@successfulCount	AS INT				= 0 OUTPUT
 
 AS
@@ -25,8 +25,8 @@ BEGIN TRANSACTION;
 CREATE TABLE #ConstructGL
 (
 	dtmDate						DATETIME
-	,strBatchID					NVARCHAR(100)
-	,intAccountID				INT
+	,strBatchId					NVARCHAR(100)
+	,intAccountId				INT
 	,strAccountGroup			NVARCHAR(50)
 	,dblDebit					NUMERIC(18, 6)
 	,dblCredit					NUMERIC(18, 6)
@@ -34,15 +34,15 @@ CREATE TABLE #ConstructGL
 	,dblCreditUnit				NUMERIC(18, 6)
 	,strGLDescription			NVARCHAR(300)
 	,strCode					NVARCHAR(50)	COLLATE Latin1_General_CI_AS NOT NULL
-	,strTransactionID			NVARCHAR(100)
+	,strTransactionId			NVARCHAR(100)
 	,strReference				NVARCHAR(500)
-	,strJobID					NVARCHAR(100)
-	,intCurrencyID				INT
+	,strJobId					NVARCHAR(100)
+	,intCurrencyId				INT
 	,dblExchangeRate			NUMERIC(18, 6)
 	,dtmDateEntered				DATETIME
 	,dtmTransactionDate			DATETIME
-	,strProductID				NVARCHAR(100)
-	,strWarehouseID				NVARCHAR(100)
+	,strProductId				NVARCHAR(100)
+	,strWarehouseId				NVARCHAR(100)
 	,strNum						NVARCHAR(200)
 	,strCompanyName				NVARCHAR(300)
 	,strBillInvoiceNumber		NVARCHAR(100)
@@ -50,12 +50,12 @@ CREATE TABLE #ConstructGL
 	,intJournalLineNo			INT
 	,ysnIsUnposted				BIT
 	,intConcurrencyId			INT
-	,intUserID					INT
+	,intUserId					INT
 	,strTransactionForm			NVARCHAR(510)
 	,strModuleName				NVARCHAR(510)
 	,strUOMCode					NVARCHAR(50)
 	
-	,strAccountID				NVARCHAR(100)
+	,strAccountId				NVARCHAR(100)
 	,strDescription				NVARCHAR(300)
 )
 
@@ -67,10 +67,10 @@ DECLARE  @dblRetained			 NUMERIC (18,6)
 		,@dblRetainedCreditUnit	 NUMERIC (18,6)
 		,@strRetainedAcctGroup	 NVARCHAR(50)  
 		,@dtmDate				 DATETIME  
-		,@strCurrencyID			 NVARCHAR(30)
-		,@intCurrencyID			 INT
-		,@strAccountID			 NVARCHAR(100)
-		,@intAccountID			 INT		
+		,@strCurrencyId			 NVARCHAR(30)
+		,@intCurrencyId			 INT
+		,@strAccountId			 NVARCHAR(100)
+		,@intAccountId			 INT		
 		,@dblDailyRate			 NUMERIC (18,6)
 		
 		,@intYear				INT
@@ -78,14 +78,14 @@ DECLARE  @dblRetained			 NUMERIC (18,6)
 		,@dtmDateTo				DATETIME
 		,@strRetainedAccount	NVARCHAR(50)	= ''
 		
-SET @intYear			= (SELECT TOP 1 CAST(strFiscalYear as INT) FROM tblGLFiscalYear WHERE intFiscalYearID = @intFiscalYearID) 		
-SET @dtmDateFrom		= (SELECT TOP 1 dtmDateFrom FROM tblGLFiscalYear WHERE intFiscalYearID = @intFiscalYearID) 		
-SET @dtmDateTo			= (SELECT TOP 1 dtmDateTo FROM tblGLFiscalYear WHERE intFiscalYearID = @intFiscalYearID) 		
-SET @strRetainedAccount = (SELECT TOP 1 strAccountID FROM tblGLAccount WHERE intAccountID = (SELECT TOP 1 intRetainAccount FROM tblGLFiscalYear WHERE intFiscalYearID = @intFiscalYearID))
-SET @intCurrencyID		= (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE intCurrencyID = (CASE WHEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') > 0 
+SET @intYear			= (SELECT TOP 1 CAST(strFiscalYear as INT) FROM tblGLFiscalYear WHERE intFiscalYearId = @intFiscalYearId) 		
+SET @dtmDateFrom		= (SELECT TOP 1 dtmDateFrom FROM tblGLFiscalYear WHERE intFiscalYearId = @intFiscalYearId) 		
+SET @dtmDateTo			= (SELECT TOP 1 dtmDateTo FROM tblGLFiscalYear WHERE intFiscalYearId = @intFiscalYearId) 		
+SET @strRetainedAccount = (SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = (SELECT TOP 1 intRetainAccount FROM tblGLFiscalYear WHERE intFiscalYearId = @intFiscalYearId))
+SET @intCurrencyId		= (SELECT TOP 1 intCurrencyId FROM tblSMCurrency WHERE intCurrencyId = (CASE WHEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') > 0 
 																		THEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency')
-																		ELSE (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'USD') END))
-SET @dblDailyRate		= (SELECT dblDailyRate FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyID)
+																		ELSE (SELECT TOP 1 intCurrencyId FROM tblSMCurrency WHERE strCurrency = 'USD') END))
+SET @dblDailyRate		= (SELECT dblDailyRate FROM tblSMCurrency WHERE intCurrencyId = @intCurrencyId)
 
 
 --=====================================================================================================================================
@@ -97,10 +97,10 @@ SET @dblDailyRate		= (SELECT dblDailyRate FROM tblSMCurrency WHERE intCurrencyID
 INSERT INTO #ConstructGL
 SELECT		
 		dtmDate						= @dtmDateTo
-		,strBatchID					= @strBatchID
-		,intAccountID				= tblGLDetail.intAccountID
+		,strBatchId					= @strBatchId
+		,intAccountId				= tblGLDetail.intAccountId
 		,strAccountGroup			= (SELECT TOP 1 A.strAccountGroup  FROM tblGLAccountGroup A LEFT JOIN tblGLAccount B 
-											ON A.intAccountGroupID = B.intAccountGroupID WHERE B.intAccountID = tblGLDetail.intAccountID)
+											ON A.intAccountGroupId = B.intAccountGroupId WHERE B.intAccountId = tblGLDetail.intAccountId)
 		,dblDebit					=	CASE WHEN C.strAccountType = 'Revenue' or C.strAccountType = 'Sales' THEN (  
 											CASE WHEN SUM((ISNULL(dblCredit,0) - ISNULL(dblDebit,0))) > 0 THEN ABS(SUM(ISNULL(dblCredit,0) - ISNULL(dblDebit,0)))  
 											ELSE 0 END)  
@@ -131,15 +131,15 @@ SELECT
 											END    
 		,strGLDescription			= 'Closed Fiscal Year'
 		,strCode					= 'CY'
-		,strTransactionID			= CAST(@intYear as NVARCHAR(10)) + '-' + @strRetainedAccount
+		,strTransactionId			= CAST(@intYear as NVARCHAR(10)) + '-' + @strRetainedAccount
 		,strReference				= 'Fiscal Year'
-		,strJobID					= NULL
-		,intCurrencyID				= intCurrencyID
+		,strJobId					= NULL
+		,intCurrencyId				= intCurrencyId
 		,dblExchangeRate			= dblExchangeRate		
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= @dtmDateTo
-		,strProductID				= NULL
-		,strWarehouseID				= NULL
+		,strProductId				= NULL
+		,strWarehouseId				= NULL
 		,strNum						= NULL
 		,strCompanyName				= NULL
 		,strBillInvoiceNumber		= NULL
@@ -147,32 +147,31 @@ SELECT
 		,intJournalLineNo			= 0
 		,ysnIsUnposted				= 0
 		,intConcurrencyId			= 1
-		,intUserID					= @intUserID
+		,intUserId					= @intUserId
 		,strTransactionForm			= 'Fiscal Year'
 		,strModuleName				= 'General Ledger'
 		,strUOMCode					= NULL		
 		
-		,strAccountID				=	(SELECT TOP 1 strAccountID  FROM tblGLAccount  WHERE intAccountID = tblGLDetail.intAccountID)
-		,strDescription				=	(SELECT TOP 1 strDescription  FROM tblGLAccount  WHERE intAccountID = tblGLDetail.intAccountID)			
+		,strAccountId				=	(SELECT TOP 1 strAccountId  FROM tblGLAccount  WHERE intAccountId = tblGLDetail.intAccountId)
+		,strDescription				=	(SELECT TOP 1 strDescription  FROM tblGLAccount  WHERE intAccountId = tblGLDetail.intAccountId)			
 		
 FROM	tblGLDetail  LEFT JOIN tblGLAccount B 
-			ON tblGLDetail.intAccountID = B.intAccountID 
+			ON tblGLDetail.intAccountId = B.intAccountId 
 		LEFT JOIN tblGLAccountGroup C
-			ON B.intAccountGroupID = C.intAccountGroupID
+			ON B.intAccountGroupId = C.intAccountGroupId
 WHERE	C.strAccountType IN ('Revenue','Sales', 'Expense','Cost of Goods Sold') 
 		AND FLOOR(CAST(CAST(dtmDate AS DATETIME) AS NUMERIC(18,6))) BETWEEN  FLOOR(CAST(@dtmDateFrom AS NUMERIC(18,6))) AND FLOOR(CAST(@dtmDateTo AS NUMERIC(18,6)))
 		AND ysnIsUnposted = 0
-		--AND strCode <> 'AA' 
-GROUP BY tblGLDetail.intAccountID, C.strAccountType, tblGLDetail.intCurrencyID, tblGLDetail.dblExchangeRate
+GROUP BY tblGLDetail.intAccountId, C.strAccountType, tblGLDetail.intCurrencyId, tblGLDetail.dblExchangeRate
 
 
 --=====================================================================================================================================
 -- 	RETAINED EARNINGS for new Fiscal Year
 ---------------------------------------------------------------------------------------------------------------------------------------
-SET @intAccountID			= (SELECT intAccountID FROM tblGLAccount WHERE strAccountID = @strRetainedAccount)
+SET @intAccountId			= (SELECT intAccountId FROM tblGLAccount WHERE strAccountId = @strRetainedAccount)
 SET @strRetainedAcctGroup	= ISNULL((SELECT TOP 1 strAccountGroup FROM tblGLAccount A
 												LEFT JOIN tblGLAccountGroup B
-												ON A.intAccountGroupID = B.intAccountGroupID WHERE A.strAccountID = @strRetainedAccount), '')
+												ON A.intAccountGroupId = B.intAccountGroupId WHERE A.strAccountId = @strRetainedAccount), '')
 SET @dtmDate				= DATEADD(DAY, 1 ,CAST(FLOOR(CAST(CAST(@dtmDateTo AS DATETIME) AS NUMERIC(18,6))) AS DATETIME))
 SET @dblRetained =   
 (  
@@ -180,24 +179,22 @@ SET @dblRetained =
 	ISNULL((  
 			SELECT	SUM(ISNULL(dblCredit, 0)) - SUM(ISNULL(dblDebit, 0))  
 			FROM	tblGLDetail INNER JOIN tblGLAccount B
-						ON tblGLDetail.intAccountID = B.intAccountID  
+						ON tblGLDetail.intAccountId = B.intAccountId  
 						LEFT JOIN tblGLAccountGroup C
-						ON B.intAccountGroupID = C.intAccountGroupID
+						ON B.intAccountGroupId = C.intAccountGroupId
 			WHERE	C.strAccountType IN ('Revenue','Sales')
 					AND FLOOR(CAST(CAST(dtmDate AS DATETIME) AS NUMERIC(18,6))) BETWEEN  FLOOR(CAST(@dtmDateFrom AS NUMERIC(18,6))) AND FLOOR(CAST(@dtmDateTo AS NUMERIC(18,6)))
 					AND ysnIsUnposted = 0
-					-- AND strCode <> 'AA'
 		), 0) -   
 	ISNULL((  
 			SELECT	SUM(ISNULL(dblDebit, 0)) - SUM(ISNULL(dblCredit, 0))  
 			FROM	tblGLDetail INNER JOIN tblGLAccount  B
-						ON tblGLDetail.intAccountID = B.intAccountID  
+						ON tblGLDetail.intAccountId = B.intAccountId  
 						LEFT JOIN tblGLAccountGroup C
-						ON B.intAccountGroupID = C.intAccountGroupID
+						ON B.intAccountGroupId = C.intAccountGroupId
 			WHERE	C.strAccountType IN ('Expense','Cost of Goods Sold')
 					AND FLOOR(CAST(CAST(dtmDate AS DATETIME) AS NUMERIC(18,6))) BETWEEN  FLOOR(CAST(@dtmDateFrom AS NUMERIC(18,6))) AND FLOOR(CAST(@dtmDateTo AS NUMERIC(18,6)))
 					AND ysnIsUnposted = 0
-					-- AND strCode <> 'AA'
 		), 0)  
 )
 
@@ -220,8 +217,8 @@ END
 INSERT INTO #ConstructGL
 SELECT			
 		dtmDate					= @dtmDateTo
-		,strBatchID				= @strBatchID
-		,intAccountID			= @intAccountID
+		,strBatchId				= @strBatchId
+		,intAccountId			= @intAccountId
 		,strAccountGroup		= @strRetainedAcctGroup
 		,dblDebit				= @dblRetainedDebit
 		,dblCredit				= @dblRetainedCredit
@@ -229,15 +226,15 @@ SELECT
 		,dblCreditUnit			= 0
 		,strGLDescription		= 'Retained Earnings'
 		,strCode				= 'RE'
-		,strTransactionID		= CAST(@intYear as NVARCHAR(10)) + '-' + @strRetainedAccount
+		,strTransactionId		= CAST(@intYear as NVARCHAR(10)) + '-' + @strRetainedAccount
 		,strReference			= 'Fiscal Year'
-		,strJobID				= NULL
-		,intCurrencyID			= @intCurrencyID
+		,strJobId				= NULL
+		,intCurrencyId			= @intCurrencyId
 		,dblExchangeRate		= @dblDailyRate		
 		,dtmDateEntered			= GETDATE()
 		,dtmTransactionDate		= @dtmDateTo
-		,strProductID			= NULL
-		,strWarehouseID			= NULL
+		,strProductId			= NULL
+		,strWarehouseId			= NULL
 		,strNum					= NULL
 		,strCompanyName			= NULL
 		,strBillInvoiceNumber	= NULL
@@ -245,13 +242,13 @@ SELECT
 		,intJournalLineNo		= 0
 		,ysnIsUnposted			= 0
 		,intConcurrencyId		= 1
-		,intUserID				= @intUserID
+		,intUserId				= @intUserId
 		,strTransactionForm		= 'Fiscal Year'
 		,strModuleName			= 'General Ledger'
 		,strUOMCode				= NULL		
 		
-		,strAccountID			= @strRetainedAccount
-		,strDescription			= (SELECT TOP 1 strDescription FROM tblGLAccount where strAccountID = @strRetainedAccount )
+		,strAccountId			= @strRetainedAccount
+		,strDescription			= (SELECT TOP 1 strDescription FROM tblGLAccount where strAccountId = @strRetainedAccount )
 
 
 IF @ysnPost = 1 and @ysnRecap = 0
@@ -259,8 +256,8 @@ BEGIN
 	-- +++++ INSERT TO GL TABLE +++++ --	
 	INSERT INTO tblGLDetail
 	SELECT   dtmDate
-			,strBatchID
-			,intAccountID
+			,strBatchId
+			,intAccountId
 			,strAccountGroup
 			,dblDebit
 			,dblCredit
@@ -268,15 +265,15 @@ BEGIN
 			,dblCreditUnit
 			,strGLDescription as strDescription
 			,strCode
-			,strTransactionID
+			,strTransactionId
 			,strReference
-			,strJobID
-			,intCurrencyID
+			,strJobId
+			,intCurrencyId
 			,dblExchangeRate
 			,dtmDateEntered
 			,dtmTransactionDate
-			,strProductID
-			,strWarehouseID
+			,strProductId
+			,strWarehouseId
 			,strNum
 			,strCompanyName
 			,strBillInvoiceNumber
@@ -284,23 +281,23 @@ BEGIN
 			,intJournalLineNo
 			,ysnIsUnposted
 			,intConcurrencyId
-			,intUserID
+			,intUserId
 			,strTransactionForm
 			,strModuleName
 			,strUOMCode
 	FROM #ConstructGL
 	
-	UPDATE tblGLFiscalYear SET ysnStatus = 0 WHERE intFiscalYearID = @intFiscalYearID	
-	UPDATE tblGLFiscalYearPeriod SET ysnOpen = 0 where intFiscalYearID = @intFiscalYearID
+	UPDATE tblGLFiscalYear SET ysnStatus = 0 WHERE intFiscalYearId = @intFiscalYearId	
+	UPDATE tblGLFiscalYearPeriod SET ysnOpen = 0 where intFiscalYearId = @intFiscalYearId
 	
 	IF @@ERROR <> 0	GOTO Post_Rollback;
 END	
 ELSE IF @ysnPost = 0 and @ysnRecap = 0
 BEGIN
-	INSERT INTO tblGLDetail (dtmDate,strBatchID,intAccountID,strAccountGroup,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,strDescription,strCode,strTransactionID,strReference,strJobID,intCurrencyID,dblExchangeRate,dtmDateEntered,dtmTransactionDate,strProductID,strWarehouseID,strNum,strCompanyName,strBillInvoiceNumber,strJournalLineDescription,intJournalLineNo,ysnIsUnposted,intConcurrencyId,intUserID,strTransactionForm,strModuleName,strUOMCode)
+	INSERT INTO tblGLDetail (dtmDate,strBatchId,intAccountId,strAccountGroup,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,strDescription,strCode,strTransactionId,strReference,strJobId,intCurrencyId,dblExchangeRate,dtmDateEntered,dtmTransactionDate,strProductId,strWarehouseId,strNum,strCompanyName,strBillInvoiceNumber,strJournalLineDescription,intJournalLineNo,ysnIsUnposted,intConcurrencyId,intUserId,strTransactionForm,strModuleName,strUOMCode)
 	SELECT   dtmDate
-			,@strBatchID
-			,intAccountID
+			,@strBatchId
+			,intAccountId
 			,strAccountGroup
 			,dblCredit
 			,dblDebit			
@@ -310,15 +307,15 @@ BEGIN
 								   ELSE 'Retained Earnings'
 								   END
 			,strCode
-			,strTransactionID
+			,strTransactionId
 			,strReference
-			,strJobID
-			,intCurrencyID
+			,strJobId
+			,intCurrencyId
 			,dblExchangeRate
 			,GETDATE() as dtmDateEntered
 			,dtmTransactionDate
-			,strProductID
-			,strWarehouseID
+			,strProductId
+			,strWarehouseId
 			,strNum
 			,strCompanyName
 			,strBillInvoiceNumber
@@ -326,36 +323,36 @@ BEGIN
 			,intJournalLineNo
 			,1 as ysnIsUnposted
 			,intConcurrencyId
-			,intUserID
+			,intUserId
 			,strTransactionForm
 			,strModuleName
 			,strUOMCode
 	FROM tblGLDetail
-	WHERE strTransactionID = CAST(@intYear as NVARCHAR(10)) + '-' + @strRetainedAccount and ysnIsUnposted = 0
+	WHERE strTransactionId = CAST(@intYear as NVARCHAR(10)) + '-' + @strRetainedAccount and ysnIsUnposted = 0
 	
-	UPDATE tblGLDetail SET ysnIsUnposted = 1 WHERE strTransactionID = CAST(@intYear as NVARCHAR(10)) + '-' + @strRetainedAccount and ysnIsUnposted = 0
-	UPDATE tblGLFiscalYear SET ysnStatus = 1 WHERE intFiscalYearID = @intFiscalYearID
-	UPDATE tblGLFiscalYearPeriod SET ysnOpen = 1 where intFiscalYearID = @intFiscalYearID
+	UPDATE tblGLDetail SET ysnIsUnposted = 1 WHERE strTransactionId = CAST(@intYear as NVARCHAR(10)) + '-' + @strRetainedAccount and ysnIsUnposted = 0
+	UPDATE tblGLFiscalYear SET ysnStatus = 1 WHERE intFiscalYearId = @intFiscalYearId
+	UPDATE tblGLFiscalYearPeriod SET ysnOpen = 1 where intFiscalYearId = @intFiscalYearId
 	
 	IF @@ERROR <> 0	GOTO Post_Rollback;
 END
 ELSE IF @ysnPost = 1 and @ysnRecap = 1
 BEGIN
 	-- DELETE Results 1 DAYS OLDER	
-	DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intUserID = @intUserID;
+	DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intUserId = @intUserId;
 	
 	WITH Accounts 
 	AS 
 	(
-		SELECT A.[strAccountID], A.[intAccountID], A.[intAccountGroupID], B.[strAccountGroup], C.[dblLbsPerUnit]
-		FROM tblGLAccount A LEFT JOIN tblGLAccountGroup B on A.intAccountGroupID = B.intAccountGroupID
-							LEFT JOIN tblGLAccountUnit  C on C.intAccountUnitID  = A.intAccountUnitID
+		SELECT A.[strAccountId], A.[intAccountId], A.[intAccountGroupId], B.[strAccountGroup], C.[dblLbsPerUnit]
+		FROM tblGLAccount A LEFT JOIN tblGLAccountGroup B on A.intAccountGroupId = B.intAccountGroupId
+							LEFT JOIN tblGLAccountUnit  C on C.intAccountUnitId  = A.intAccountUnitId
 	)
 	INSERT INTO tblGLPostRecap (
-		 [strTransactionID]
-		,[intTransactionID]
-		,[intAccountID]
-		,[strAccountID]
+		 [strTransactionId]
+		,[intTransactionId]
+		,[intAccountId]
+		,[strAccountId]
 		,[strAccountGroup]
 		,[strDescription]
 		,[strReference]	
@@ -368,18 +365,18 @@ BEGIN
 		,[ysnIsUnposted]
 		,[intConcurrencyId]	
 		,[dblExchangeRate]
-		,[intUserID]
+		,[intUserId]
 		,[dtmDateEntered]
-		,[strBatchID]
+		,[strBatchId]
 		,[strCode]
 		,[strModuleName]
 		,[strTransactionForm]
 	)
 	SELECT 
-		 @strBatchID
-		,@intFiscalYearID
-		,intAccountID
-		,strAccountID
+		 @strBatchId
+		,@intFiscalYearId
+		,intAccountId
+		,strAccountId
 		,strAccountGroup
 		,strDescription
 		,strReference
@@ -392,9 +389,9 @@ BEGIN
 		,ysnIsUnposted
 		,intConcurrencyId
 		,dblExchangeRate
-		,intUserID
+		,intUserId
 		,dtmDateEntered
-		,@strBatchID
+		,@strBatchId
 		,strCode
 		,strModuleName
 		,strTransactionForm
@@ -422,15 +419,15 @@ FROM	(
 					,[dblCredit]		= SUM(ISNULL(B.[dblCredit], 0))
 					,[dblDebitUnit]		= SUM(ISNULL(B.[dblDebitUnit], 0))
 					,[dblCreditUnit]	= SUM(ISNULL(B.[dblCreditUnit], 0))
-					,[intAccountID]		= A.[intAccountID]
+					,[intAccountId]		= A.[intAccountId]
 					,[dtmDate]			= ISNULL(CONVERT(DATE, A.[dtmDate]), '')
 					,A.[strCode] 								
 			FROM tblGLSummary A 
 					INNER JOIN tblGLDetail B 
-					ON CONVERT(DATE, A.[dtmDate]) = CONVERT(DATE, B.[dtmDate]) AND A.[intAccountID] = B.[intAccountID] AND A.[strCode] = B.[strCode] AND B.[strBatchID] = @strBatchID
-			GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountID],A.[strCode]
+					ON CONVERT(DATE, A.[dtmDate]) = CONVERT(DATE, B.[dtmDate]) AND A.[intAccountId] = B.[intAccountId] AND A.[strCode] = B.[strCode] AND B.[strBatchId] = @strBatchId
+			GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountId],A.[strCode]
 		) AS GLDetailGrouped
-WHERE tblGLSummary.[intAccountID] = GLDetailGrouped.[intAccountID] AND tblGLSummary.[strCode] = GLDetailGrouped.[strCode] AND 
+WHERE tblGLSummary.[intAccountId] = GLDetailGrouped.[intAccountId] AND tblGLSummary.[strCode] = GLDetailGrouped.[strCode] AND 
 	  ISNULL(CONVERT(DATE, tblGLSummary.[dtmDate]), '') = ISNULL(CONVERT(DATE, GLDetailGrouped.[dtmDate]), '');
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
@@ -442,11 +439,11 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 WITH Units
 AS 
 (
-	SELECT	A.[dblLbsPerUnit], B.[intAccountID] 
-	FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitID] = B.[intAccountUnitID]
+	SELECT	A.[dblLbsPerUnit], B.[intAccountId] 
+	FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
 )
 INSERT INTO tblGLSummary (
-	 [intAccountID]
+	 [intAccountId]
 	,[dtmDate]
 	,[dblDebit]
 	,[dblCredit]
@@ -456,7 +453,7 @@ INSERT INTO tblGLSummary (
 	,[intConcurrencyId]
 )
 SELECT	
-	 [intAccountID]		= A.[intAccountID]
+	 [intAccountId]		= A.[intAccountId]
 	,[dtmDate]			= ISNULL(CONVERT(DATE, A.[dtmDate]), '')
 	,[dblDebit]			= SUM(A.[dblDebit])
 	,[dblCredit]		= SUM(A.[dblCredit])
@@ -470,9 +467,9 @@ WHERE NOT EXISTS
 			SELECT TOP 1 1
 			FROM tblGLSummary B
 			WHERE ISNULL(CONVERT(DATE, A.[dtmDate]), '') = ISNULL(CONVERT(DATE, B.[dtmDate]), '') AND 
-				  A.[intAccountID] = B.[intAccountID] AND B.[strCode] = A.[strCode]
+				  A.[intAccountId] = B.[intAccountId] AND B.[strCode] = A.[strCode]
 		)
-GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountID], A.[strCode];
+GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountId], A.[strCode];
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
@@ -490,7 +487,7 @@ Post_Rollback:
 
 Post_Exit:
 	SET @successfulCount = 1;
-	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#ConstructGL')) DROP TABLE #ConstructGL
+	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE Id = OBJECT_Id('TEMPDB..#ConstructGL')) DROP TABLE #ConstructGL
 
 
 GO
@@ -503,11 +500,11 @@ GO
 --DECLARE @intCount AS INT
 
 --EXEC [dbo].[usp_PostFiscalYear]
---			@intFiscalYearID	 = 3,
+--			@intFiscalYearId	 = 3,
 --			@ysnPost = 1,
 --			@ysnRecap = 1,								-- WHEN SET TO 1, THEN IT WILL POPULATE tblGLPostRecap THAT CAN BE VIEWED VIA BUFFERED STORE IN SENCHA
---			@strBatchID = 'BATCH-2013',							-- COMMA DELIMITED JOURNAL ID TO POST 
---			@intUserID = 1,							-- USER ID THAT INITIATES POSTING
+--			@strBatchId = 'BATCH-2013',							-- COMMA DELIMITED JOURNAL Id TO POST 
+--			@intUserId = 1,							-- USER Id THAT INITIATES POSTING
 --			@successfulCount = @intCount OUTPUT		-- OUTPUT PARAMETER THAT RETURNS TOTAL NUMBER OF SUCCESSFUL RECORDS
 				
 --SELECT @intCount

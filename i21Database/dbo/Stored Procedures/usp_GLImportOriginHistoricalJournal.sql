@@ -1,8 +1,8 @@
-﻿CREATE PROCEDURE  [dbo].[usp_GLImportOriginHistoricalJournal]
-@intUserID INT
+﻿CREATE PROCEDURE  [dbo].[uspGLImportOriginHistoricalJournal]
+@intUserId INT
 AS
 
-SET QUOTED_IDENTIFIER OFF
+SET QUOTED_IdENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 
@@ -11,14 +11,14 @@ BEGIN TRANSACTION
 --+++++++++++++++++++++++++++++++++
 --			VALIDATIONS
 --+++++++++++++++++++++++++++++++++
-DECLARE @inti21ID int
-SELECT @inti21ID = 1 FROM glhstmst LEFT OUTER JOIN tblGLCOACrossReference ON SUBSTRING(strCurrentExternalID,1,8) = glhst_acct1_8 AND SUBSTRING(strCurrentExternalID,10,8) = glhst_acct9_16 WHERE inti21ID IS NULL
+DECLARE @inti21Id int
+SELECT @inti21Id = 1 FROM glhstmst LEFT OUTER JOIN tblGLCOACrossReference ON SUBSTRING(strCurrentExternalId,1,8) = glhst_acct1_8 AND SUBSTRING(strCurrentExternalId,10,8) = glhst_acct9_16 WHERE inti21Id IS NULL
 
-IF (SELECT isnull(@inti21ID, 0)) > 0
+IF (SELECT isnull(@inti21Id, 0)) > 0
 BEGIN	
 	SELECT 'There are accounts that does not exists at iRely Cross Reference. <br/> Kindly verify at Origin.' as Result
 END
-ELSE IF (EXISTS(SELECT * FROM (SELECT SUBSTRING(dtmDate,5,2)+'/01/'+SUBSTRING(dtmDate,1,4) as dtmDate FROM (SELECT CONVERT(VARCHAR(3),glhst_src_id) + CONVERT(VARCHAR(5),glhst_src_seq) + CONVERT(VARCHAR(6),MAX(glhst_period)) AS strJournalID, CONVERT(VARCHAR(12),MAX(glhst_period)) AS dtmDate FROM glhstmst GROUP BY glhst_period, glhst_src_id, glhst_src_seq) tblA) tblB where ISDATE(dtmDate) = 0))
+ELSE IF (EXISTS(SELECT * FROM (SELECT SUBSTRING(dtmDate,5,2)+'/01/'+SUBSTRING(dtmDate,1,4) as dtmDate FROM (SELECT CONVERT(VARCHAR(3),glhst_src_id) + CONVERT(VARCHAR(5),glhst_src_seq) + CONVERT(VARCHAR(6),MAX(glhst_period)) AS strJournalId, CONVERT(VARCHAR(12),MAX(glhst_period)) AS dtmDate FROM glhstmst GROUP BY glhst_period, glhst_src_id, glhst_src_seq) tblA) tblB where ISDATE(dtmDate) = 0))
 BEGIN	
 	SELECT 'There are invalid dates on Historical Transactions. <br/> Kindly verify at Origin.' as Result
 END
@@ -37,19 +37,19 @@ BEGIN
 	--		 TEMP HEADER JOURNAL
 	--+++++++++++++++++++++++++++++++++	
 
-	DECLARE @intCurrencyID NVARCHAR(100) = (select intCurrencyID from tblSMCurrency where strCurrency = 'USD')
+	DECLARE @intCurrencyId NVARCHAR(100) = (select intCurrencyId from tblSMCurrency where strCurrency = 'USD')
 
 	SELECT 
-		CONVERT(VARCHAR(3),glhst_src_id) + CONVERT(VARCHAR(5),glhst_src_seq) + CONVERT(VARCHAR(6),MAX(glhst_period)) AS strJournalID,
+		CONVERT(VARCHAR(3),glhst_src_id) + CONVERT(VARCHAR(5),glhst_src_seq) + CONVERT(VARCHAR(6),MAX(glhst_period)) AS strJournalId,
 		CONVERT(VARCHAR(12),MAX(glhst_period)) AS dtmDate,																					-- took the max period for the unique transaction - glhst_period controls posting period.	
 		MAX(glhst_ref) AS strDescription,																									-- strDescription
 		'General Journal' AS strTransactionType,																							-- Hard coded the transaction type
 		'Adjusted Legacy Journal' AS strJournalType,																						-- Hard coded transaction type.	
-		glhst_src_seq AS strSourceID,
+		glhst_src_seq AS strSourceId,
 		glhst_src_id AS strSourceType,
-		@intCurrencyID AS intCurrencyID,																									-- intCurrencyID
+		@intCurrencyId AS intCurrencyId,																									-- intCurrencyId
 		0 AS ysnPosted,																														-- ysnPosted	
-		@intUserID AS intUserID,																											-- intUserID
+		@intUserId AS intUserId,																											-- intUserId
 		1 AS intConcurrencyId,																											-- intConcurrencyId
 		NULL AS strReverseLink,
 		NULL AS strRecurringStatus,
@@ -67,13 +67,13 @@ BEGIN
 	--	   INSERT IMPORT LOGS
 	--+++++++++++++++++++++++++++++++++
 	
-	INSERT INTO tblGLCOAImportLog (strEvent,strIrelySuiteVersion,intUserID,dtmDate,strMachineName,strJournalType,intConcurrencyId)
-					VALUES('Import Origin Historical Journal',(SELECT TOP 1 strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC),@intUserID,GETDATE(),'','',1)
+	INSERT INTO tblGLCOAImportLog (strEvent,strIrelySuiteVersion,intUserId,dtmDate,strMachineName,strJournalType,intConcurrencyId)
+					VALUES('Import Origin Historical Journal',(SELECT TOP 1 strVersionNo FROM tblSMBuildNumber ORDER BY intVersionId DESC),@intUserId,GETDATE(),'','',1)
 
-	DECLARE @intImportLogID INT = (SELECT intImportLogID FROM tblGLCOAImportLog WHERE strEvent = 'Import Origin Historical Journal' AND dtmDate = GETDATE())
+	DECLARE @intImportLogId INT = (SELECT intImportLogId FROM tblGLCOAImportLog WHERE strEvent = 'Import Origin Historical Journal' AND dtmDate = GETDATE())
 	
-	INSERT INTO tblGLCOAImportLogDetail (intImportLogID,strEventDescription,strPeriod,strSourceNumber,strSourceSystem,strJournalID,intConcurrencyId)
-		SELECT @intImportLogID,strDescription,dtmDate,strSourceID,strSourceType,strJournalID,1 FROM #iRelyImptblGLJournal
+	INSERT INTO tblGLCOAImportLogDetail (intImportLogId,strEventDescription,strPeriod,strSourceNumber,strSourceSystem,strJournalId,intConcurrencyId)
+		SELECT @intImportLogId,strDescription,dtmDate,strSourceId,strSourceType,strJournalId,1 FROM #iRelyImptblGLJournal
 	
 	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 
@@ -88,22 +88,22 @@ BEGIN
 	--	   INSERT JOURNAL [HEADER]
 	--+++++++++++++++++++++++++++++++++
 
-	INSERT tblGLJournal (dtmReverseDate,strJournalID,strTransactionType, dtmDate,strReverseLink,intCurrencyID,dblExchangeRate,dtmPosted,strDescription,
-							ysnPosted,intConcurrencyId,dtmJournalDate,intUserID,strSourceID,strJournalType,strRecurringStatus,strSourceType)
+	INSERT tblGLJournal (dtmReverseDate,strJournalId,strTransactionType, dtmDate,strReverseLink,intCurrencyId,dblExchangeRate,dtmPosted,strDescription,
+							ysnPosted,intConcurrencyId,dtmJournalDate,intUserId,strSourceId,strJournalType,strRecurringStatus,strSourceType)
 	SELECT  dtmReverseDate,
-			strJournalID,
+			strJournalId,
 			strTransactionType, 
 			CAST((dbo.[fn_geti21PeriodFromOriginPeriod](SUBSTRING(dtmDate,1,4), SUBSTRING(dtmDate,5,2))) as DATETIME) as dtmDate,
 			strReverseLink,
-			intCurrencyID,
+			intCurrencyId,
 			dblExchangeRate,
 			dtmPosted,
 			strDescription,
 			ysnPosted,
 			intConcurrencyId,
 			dtmJournalDate,
-			intUserID,
-			strSourceID,
+			intUserId,
+			strSourceId,
 			strJournalType,
 			strRecurringStatus,
 			strSourceType
@@ -117,9 +117,9 @@ BEGIN
 
 	SELECT 
 		CONVERT(int,glhst_line_no) AS intLineNo,
-		CONVERT(int,1) AS intJournalID,
+		CONVERT(int,1) AS intJournalId,
 		glhst_trans_dt,
-		tblGLAccount.intAccountID,
+		tblGLAccount.intAccountId,
 		CASE WHEN glhst_dr_cr_ind='D' THEN glhst_amt ELSE 0 END AS Debit,									-- use debit indicator to show debit column.
 		0 AS DebitRate,																						-- debit rate
 		CASE WHEN (glhst_dr_cr_ind='C' OR glhst_dr_cr_ind IS NULL) THEN glhst_amt ELSE 0 END AS Credit,
@@ -127,7 +127,7 @@ BEGIN
 		CASE WHEN glhst_units>0 THEN glhst_units ELSE 0 END AS DebitUnits,
 		CASE WHEN glhst_units<0 THEN glhst_units*-1 ELSE 0 END AS CreditUnits,
 		glhst_ref AS strDescription,
-		NULL AS intCurrencyID,
+		NULL AS intCurrencyId,
 		0 AS dblUnitsInlbs,
 		glhst_doc AS strDocument,
 		glhst_comments AS strComments,
@@ -145,8 +145,8 @@ BEGIN
 	 INTO #iRelyImptblGLJournalDetail
 	 FROM  glhstmst 
 	 INNER JOIN tblGLCOACrossReference ON 
-		SUBSTRING(strCurrentExternalID,1,8) = glhst_acct1_8 AND SUBSTRING(strCurrentExternalID,10,8) = glhst_acct9_16 
-	 INNER JOIN tblGLAccount ON tblGLAccount.intAccountID = tblGLCOACrossReference.inti21ID
+		SUBSTRING(strCurrentExternalId,1,8) = glhst_acct1_8 AND SUBSTRING(strCurrentExternalId,10,8) = glhst_acct9_16 
+	 INNER JOIN tblGLAccount ON tblGLAccount.intAccountId = tblGLCOACrossReference.inti21Id
 	 
 	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 	 
@@ -169,21 +169,21 @@ BEGIN
 	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 
 	--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	--		 UPDATE DETAIL [intJournalID] BASED ON HEADER
+	--		 UPDATE DETAIL [intJournalId] BASED ON HEADER
 	--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	UPDATE #iRelyImptblGLJournalDetail 
-		SET #iRelyImptblGLJournalDetail.intJournalID = tblGLJournal.intJournalID
+		SET #iRelyImptblGLJournalDetail.intJournalId = tblGLJournal.intJournalId
 	FROM #iRelyImptblGLJournalDetail
 	INNER JOIN tblGLJournal ON 
-		tblGLJournal.strJournalID = #iRelyImptblGLJournalDetail.glhst_jrnl_no 
-		AND tblGLJournal.strSourceID = glhst_src_seq
+		tblGLJournal.strJournalId = #iRelyImptblGLJournalDetail.glhst_jrnl_no 
+		AND tblGLJournal.strSourceId = glhst_src_seq
 		--AND glhst_period = convert(varchar(4),SUBSTRING (convert(varchar(100),dtmDate,101),7,4)) + convert(varchar(4),SUBSTRING(convert(varchar(100),dtmDate,101),1,2))
 
 	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 
 	--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	--		 ASSIGN TRANSACTION ID BASED ON NEW HEADER GROUPING
+	--		 ASSIGN TRANSACTION Id BASED ON NEW HEADER GROUPING
 	--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	--SET ROWCOUNT 0
@@ -200,7 +200,7 @@ BEGIN
 
 	--WHILE (SELECT COUNT(*) FROM #iRelyImptblGLJournalDetail where intLineNo = 0) > 0
 	--BEGIN
-	--	SELECT @last1= (SELECT MIN(intJournalID) FROM #iRelyImptblGLJournalDetail WHERE intLineNo = 0)
+	--	SELECT @last1= (SELECT MIN(intJournalId) FROM #iRelyImptblGLJournalDetail WHERE intLineNo = 0)
 
 	--	IF @last1 <> @lastprior 
 	--	BEGIN
@@ -209,13 +209,13 @@ BEGIN
 
 	--	SET ROWCOUNT 0
 	--	SELECT @lastprior = @last1
-	--	SELECT @line1 = (SELECT Max (intLineNo) FROM #iRelyImptblGLJournalDetail WHERE intJournalID = @last1)
+	--	SELECT @line1 = (SELECT Max (intLineNo) FROM #iRelyImptblGLJournalDetail WHERE intJournalId = @last1)
 
 	--	SELECT @line1 = @line1 + 1
 
 	--	SET ROWCOUNT 1
 	--	UPDATE #iRelyImptblGLJournalDetail set intLineNo = @line1
-	--	WHERE  intLineNo = 0 and intJournalID = @last1
+	--	WHERE  intLineNo = 0 and intJournalId = @last1
 
 	--END
 	
@@ -238,9 +238,9 @@ BEGIN
 	--	   INSERT JOURNAL [DETAIL]
 	--+++++++++++++++++++++++++++++++++
 
-	INSERT tblGLJournalDetail (intLineNo,intJournalID,dtmDate,intAccountID,dblDebit,dblDebitRate,dblCredit,dblCreditRate,dblDebitUnit,dblCreditUnit,strDescription,intConcurrencyId,
+	INSERT tblGLJournalDetail (intLineNo,intJournalId,dtmDate,intAccountId,dblDebit,dblDebitRate,dblCredit,dblCreditRate,dblDebitUnit,dblCreditUnit,strDescription,intConcurrencyId,
 								dblUnitsInLBS,strDocument,strComments,strReference,dblDebitUnitsInLBS,strCorrecting,strSourcePgm,strCheckBookNo,strWorkArea)
-						SELECT intLineNo,intJournalID,gooddate,intAccountID,Debit,DebitRate,Credit,CreditRate,DebitUnits,CreditUnits,strDescription,1,
+						SELECT intLineNo,intJournalId,gooddate,intAccountId,Debit,DebitRate,Credit,CreditRate,DebitUnits,CreditUnits,strDescription,1,
 								dblUnitsInlbs,strDocument,strComments,strReference,DebitUnitsInlbs,strCorrecting,strSourcePgm,strCheckbookNo,strWorkArea 
 						FROM  #iRelyImptblGLJournalDetail
 						
@@ -251,7 +251,7 @@ BEGIN
 	--+++++++++++++++++++++++++++++++++++++											
 						
 	UPDATE tblGLJournal SET dtmDate = (SELECT TOP 1 CAST(CAST(MONTH(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) +'/01/'+ CAST(YEAR(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) as DATETIME) as dtmNewDate FROM tblGLJournalDetail 
-                                        WHERE tblGLJournalDetail.intJournalID = tblGLJournal.intJournalID)
+                                        WHERE tblGLJournalDetail.intJournalId = tblGLJournal.intJournalId)
                                         						
 	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT	
                                      
@@ -272,7 +272,7 @@ ROLLBACK_INSERT:
 	GOTO IMPORT_EXIT
 
 IMPORT_EXIT:
-	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#iRelyImptblGLJournal')) DROP TABLE #iRelyImptblGLJournal
-	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#iRelyImptblGLJournalDetail')) DROP TABLE #iRelyImptblGLJournalDetail
+	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE Id = OBJECT_Id('TEMPDB..#iRelyImptblGLJournal')) DROP TABLE #iRelyImptblGLJournal
+	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE Id = OBJECT_Id('TEMPDB..#iRelyImptblGLJournalDetail')) DROP TABLE #iRelyImptblGLJournalDetail
 
 GO	

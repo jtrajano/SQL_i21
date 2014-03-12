@@ -1,8 +1,8 @@
-﻿CREATE VIEW [dbo].[vyu_GLFiscalYearPeriod]
+﻿CREATE VIEW [dbo].[vyuGLFiscalYearPeriod]
 AS
 
-SELECT A.[intGLFiscalYearPeriodID]
-	,A.[intFiscalYearID]
+SELECT A.[intGLFiscalYearPeriodId]
+	,A.[intFiscalYearId]
 	,A.[strPeriod]
 	,A.[dtmStartDate]
 	,A.[dtmEndDate]
@@ -12,4 +12,4 @@ SELECT A.[intGLFiscalYearPeriodID]
 
 FROM tblGLFiscalYearPeriod A
 INNER JOIN tblGLFiscalYear B
-ON A.intFiscalYearID = B.intFiscalYearID
+ON A.intFiscalYearId = B.intFiscalYearId

@@ -1,21 +1,21 @@
-﻿CREATE PROCEDURE  [dbo].[usp_GLAccountOriginSync]
-@intUserID INT
+﻿CREATE PROCEDURE  [dbo].[uspGLAccountOriginSync]
+@intUserId INT
 AS
 
-SET QUOTED_IDENTIFIER OFF
+SET QUOTED_IdENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 
 -- +++++ TO TEMP TABLE +++++ --
 SELECT * INTO #TempUpdateCrossReference
-FROM tblGLCOACrossReference WHERE intLegacyReferenceID IS NULL
+FROM tblGLCOACrossReference WHERE intLegacyReferenceId IS NULL
 
 -- +++++ SYNC ACCOUNTS +++++ --
 WHILE EXISTS(SELECT 1 FROM #TempUpdateCrossReference)
 BEGIN
-	DECLARE @ID_update INT = (SELECT TOP 1 inti21ID FROM #TempUpdateCrossReference)
-	DECLARE @ACCOUNT_update varchar(200) = (SELECT TOP 1 REPLACE(strCurrentExternalID,'-','') FROM #TempUpdateCrossReference WHERE inti21ID = @ID_update)
-	DECLARE @TYPE_update varchar(200) = (SELECT TOP 1 strAccountType FROM tblGLAccount LEFT JOIN tblGLAccountGroup ON tblGLAccount.intAccountGroupID = tblGLAccountGroup.intAccountGroupID WHERE intAccountID = @ID_update)
+	DECLARE @Id_update INT = (SELECT TOP 1 inti21Id FROM #TempUpdateCrossReference)
+	DECLARE @ACCOUNT_update varchar(200) = (SELECT TOP 1 REPLACE(strCurrentExternalId,'-','') FROM #TempUpdateCrossReference WHERE inti21Id = @Id_update)
+	DECLARE @TYPE_update varchar(200) = (SELECT TOP 1 strAccountType FROM tblGLAccount LEFT JOIN tblGLAccountGroup ON tblGLAccount.intAccountGroupId = tblGLAccountGroup.intAccountGroupId WHERE intAccountId = @Id_update)
 	DECLARE @LegacyType_update varchar(200) = ''
 	DECLARE @LegacySide_update varchar(200) = ''
 	
@@ -57,8 +57,8 @@ BEGIN
 		
 	IF EXISTS(SELECT TOP 1 1 FROM glactmst WHERE [glact_acct1_8] = CONVERT(INT, SUBSTRING(@ACCOUNT_update,1,8)) and [glact_acct9_16] = CONVERT(INT, SUBSTRING(@ACCOUNT_update,9,16)))
 	BEGIN		
-		UPDATE tblGLCOACrossReference SET intLegacyReferenceID = (SELECT TOP 1 A4GLIdentity FROM glactmst WHERE [glact_acct1_8] = CONVERT(INT, SUBSTRING(@ACCOUNT_update,1,8)) and [glact_acct9_16] = CONVERT(INT, SUBSTRING(@ACCOUNT_update,9,16))) 
-				WHERE inti21ID = @ID_update		
+		UPDATE tblGLCOACrossReference SET intLegacyReferenceId = (SELECT TOP 1 A4GLIdentity FROM glactmst WHERE [glact_acct1_8] = CONVERT(INT, SUBSTRING(@ACCOUNT_update,1,8)) and [glact_acct9_16] = CONVERT(INT, SUBSTRING(@ACCOUNT_update,9,16))) 
+				WHERE inti21Id = @Id_update		
 	END
 	ELSE
 	BEGIN
@@ -88,19 +88,19 @@ BEGIN
 			@LegacySide_update,
 			'',
 			'',
-			(SELECT TOP 1 A4GLIdentity FROM gluommst WHERE CAST(gluom_code AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = (SELECT TOP 1 strUOMCode FROM tblGLAccountUnit WHERE tblGLAccountUnit.intAccountUnitID = tblGLAccount.intAccountUnitID)), --glact_uom 
+			(SELECT TOP 1 A4GLIdentity FROM gluommst WHERE CAST(gluom_code AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = (SELECT TOP 1 strUOMCode FROM tblGLAccountUnit WHERE tblGLAccountUnit.intAccountUnitId = tblGLAccount.intAccountUnitId)), --glact_uom 
 			'',
 			(CASE WHEN ysnActive = 0 THEN 'N' ELSE 'Y' END) as glact_active_yn,
 			(CASE WHEN ysnSystem = 0 THEN 'N' ELSE 'Y' END) as glact_sys_acct_yn,
 			'',
 			'',
 			'',
-			@intUserID,
+			@intUserId,
 			CONVERT(INT, CONVERT(VARCHAR(8), GETDATE(), 112))
-		FROM tblGLAccount WHERE intAccountID = @ID_update
+		FROM tblGLAccount WHERE intAccountId = @Id_update
 		
-		UPDATE tblGLCOACrossReference SET intLegacyReferenceID = (SELECT TOP 1 A4GLIdentity FROM glactmst ORDER BY A4GLIdentity DESC) WHERE inti21ID = @ID_update		
+		UPDATE tblGLCOACrossReference SET intLegacyReferenceId = (SELECT TOP 1 A4GLIdentity FROM glactmst ORDER BY A4GLIdentity DESC) WHERE inti21Id = @Id_update		
 	END
 					
-	DELETE FROM #TempUpdateCrossReference WHERE inti21ID = @ID_update
+	DELETE FROM #TempUpdateCrossReference WHERE inti21Id = @Id_update
 END

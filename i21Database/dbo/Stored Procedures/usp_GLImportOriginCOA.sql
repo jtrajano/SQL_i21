@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE  [dbo].[usp_GLImportOriginCOA]
+﻿CREATE PROCEDURE  [dbo].[uspGLImportOriginCOA]
 @ysnStructure	BIT = 0,
 @ysnPrimary		BIT = 0,
 @ysnSegment		BIT = 0,
@@ -8,7 +8,7 @@
 @result			NVARCHAR(500) = '' OUTPUT
 AS
 
-SET QUOTED_IDENTIFIER OFF
+SET QUOTED_IdENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 
@@ -66,36 +66,36 @@ BEGIN
 		INSERT INTO @tblQuery EXEC (@query)			
 
 		UPDATE @tblQuery
-		SET glact_type = (SELECT intAccountGroupID FROM tblGLAccountGroup WHERE strAccountType = 'Asset' and intParentGroupID = 0)
+		SET glact_type = (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountType = 'Asset' and intParentGroupId = 0)
 		WHERE glact_type = 'A'
 
 		UPDATE @tblQuery
-		SET glact_type = (SELECT intAccountGroupID FROM tblGLAccountGroup WHERE strAccountType = 'Expense' and intParentGroupID = 0)
+		SET glact_type = (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountType = 'Expense' and intParentGroupId = 0)
 		WHERE glact_type = 'E'
 
 		UPDATE @tblQuery
-		SET glact_type = (SELECT intAccountGroupID FROM tblGLAccountGroup WHERE strAccountType = 'Liability' and intParentGroupID = 0)
+		SET glact_type = (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountType = 'Liability' and intParentGroupId = 0)
 		WHERE glact_type = 'L'
 
 		UPDATE @tblQuery
-		SET glact_type = (SELECT intAccountGroupID FROM tblGLAccountGroup WHERE strAccountType = 'Cost of Goods Sold' and intParentGroupID = 0)
+		SET glact_type = (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountType = 'Cost of Goods Sold' and intParentGroupId = 0)
 		WHERE glact_type = 'C'
 
 		UPDATE @tblQuery
-		SET glact_type = (SELECT intAccountGroupID FROM tblGLAccountGroup WHERE strAccountType = 'Sales' and intParentGroupID = 0)
+		SET glact_type = (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountType = 'Sales' and intParentGroupId = 0)
 		WHERE glact_type = 'I'
 
 		UPDATE @tblQuery
-		SET glact_type = (SELECT intAccountGroupID FROM tblGLAccountGroup WHERE strAccountType = 'Equity' and intParentGroupID = 0)
+		SET glact_type = (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountType = 'Equity' and intParentGroupId = 0)
 		WHERE glact_type = 'Q'
 		
-		DELETE tblGLAccountSegment where intAccountStructureID IN (SELECT intAccountStructureID FROM tblGLAccountStructure WHERE strType = 'Primary')		
+		DELETE tblGLAccountSegment where intAccountStructureId IN (SELECT intAccountStructureId FROM tblGLAccountStructure WHERE strType = 'Primary')		
 		
 		INSERT tblGLAccountSegment
 			(strCode
 			,strDescription
-			,intAccountStructureID
-			,intAccountGroupID
+			,intAccountStructureId
+			,intAccountGroupId
 			,ysnActive
 			,ysnSelected
 			,ysnBuild
@@ -103,7 +103,7 @@ BEGIN
 		SELECT
 			SegmentCode
 			,CodeDescription
-			,(SELECT TOP 1 intAccountStructureID FROM tblGLAccountStructure WHERE strType = 'Primary')
+			,(SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = 'Primary')
 			,glact_type = CASE WHEN glact_type = '' THEN NULL ELSE glact_type END
 			,1
 			,0
@@ -132,13 +132,13 @@ BEGIN
 			GROUP BY glprc_sub_acct									
 									
 			
-		DELETE tblGLAccountSegment where intAccountStructureID IN (SELECT intAccountStructureID FROM tblGLAccountStructure WHERE strType = 'Segment')
+		DELETE tblGLAccountSegment where intAccountStructureId IN (SELECT intAccountStructureId FROM tblGLAccountStructure WHERE strType = 'Segment')
 		
 		INSERT tblGLAccountSegment
 			(strCode
 			,strDescription
-			,intAccountStructureID
-			,intAccountGroupID
+			,intAccountStructureId
+			,intAccountGroupId
 			,ysnActive
 			,ysnSelected
 			,ysnBuild
@@ -146,7 +146,7 @@ BEGIN
 		SELECT
 			REPLICATE('0', (select len(max(SegmentCode)) from #segments) - len(SegmentCode)) + '' + CAST(SegmentCode AS NVARCHAR(50)) SegmentCode
 			,glprc_desc
-			,(SELECT TOP 1 intAccountStructureID FROM tblGLAccountStructure WHERE strType = 'Segment')
+			,(SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = 'Segment')
 			,null
 			,1
 			,0
@@ -172,14 +172,14 @@ BEGIN
 	BEGIN
 		INSERT INTO tblGLTempAccountToBuild
 		SELECT
-			intAccountSegmentID
+			intAccountSegmentId
 			,0
 			,dtmCreated = getDate()
 		FROM
 		tblGLAccountSegment				
 		
-		EXEC usp_GLBuildOriginAccount  0
-		EXEC usp_GLBuildAccount 0				
+		EXEC uspGLBuildOriginAccount  0
+		EXEC uspGLBuildAccount 0				
 	END	
 	
 	SET @result = 'SUCCESSFULLY IMPORTED'
