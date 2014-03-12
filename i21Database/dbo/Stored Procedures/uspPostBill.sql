@@ -42,6 +42,9 @@ CREATE TABLE #tmpInvalidBillData (
 	[strTransactionId] [NVARCHAR](50)
 );
 
+IF(@batchId IS NULL)
+	EXEC uspSMGetStartingNumber 3, @batchId OUT
+
 --DECLARRE VARIABLES
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
 SET @recapId = '1'

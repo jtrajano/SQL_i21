@@ -45,9 +45,9 @@ DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
 SET @recapId = '1'
 
 --SET BatchId
-IF(@batchId IS NULL)
+IF(ISNULL(@batchId,'') = '')
 BEGIN
-	EXEC uspSMGetStartingNumber 3, @batchId
+	EXEC uspSMGetStartingNumber 3, @batchId OUT
 END
 
 --=====================================================================================================================================
@@ -151,10 +151,15 @@ IF ISNULL(@recap, 0) = 0
 							ON B.intBillId = C.intBillId
 					WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
-		--UPDATE tblCMBankTransaction
-		--	SET ysnPosted = 0
-		--FROM tblAPPayment A
-		--	WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		UPDATE tblGLDetail
+			SET tblGLDetail.ysnIsUnposted = 1
+		FROM tblAPPayment A
+			INNER JOIN tblGLDetail B
+				ON A.strPaymentRecordNum = B.strTransactionID
+
+		--DELETE IF NOT CHECK PAYMENT
+		DELETE FROM tblCMBankTransaction
+		WHERE strTransactionId IN (SELECT strPaymentRecordNum FROM tblAPPayment WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData) AND intPaymentMethod != 3)
 
 	END
 	ELSE
@@ -240,6 +245,8 @@ IF ISNULL(@recap, 0) = 0
 					ON A.intBankAccountId = GLAccnt.intAccountID
 				INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 					ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
+				INNER JOIN tblAPVendor 
+					ON A.strVendorId = tblAPVendor.strVendorId AND tblAPVendor.ysnWithholding = 1
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 		---- DEBIT SIDE
 		UNION ALL 
