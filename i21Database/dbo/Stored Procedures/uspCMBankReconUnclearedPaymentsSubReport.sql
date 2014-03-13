@@ -148,6 +148,6 @@ WHERE	BankTrans.ysnPosted = 1
 				END	
 		AND (
 			-- Filter for all the bank payments and debits:
-			BankTrans.intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
+			BankTrans.intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT)
 			OR ( BankTrans.dblAmount < 0 AND BankTrans.intBankTransactionTypeId = @BANK_TRANSACTION )
 		)		
