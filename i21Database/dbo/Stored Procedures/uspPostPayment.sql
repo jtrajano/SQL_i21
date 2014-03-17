@@ -37,7 +37,8 @@ CREATE TABLE #tmpPayablePostData (
 CREATE TABLE #tmpPayableInvalidData (
 	[strError] [NVARCHAR](100),
 	[strTransactionType] [NVARCHAR](50),
-	[strTransactionId] [NVARCHAR](50)
+	[strTransactionId] [NVARCHAR](50),
+	[strBatchNumber] [NVARCHAR](50)
 );
 
 --DECLARRE VARIABLES
@@ -81,7 +82,8 @@ INSERT INTO #tmpPayableInvalidData
 	SELECT 
 		'Unable to find an open fiscal year period to match the transaction date.',
 		'Payable',
-		A.intPaymentId
+		A.intPaymentId,
+		@batchId
 	FROM tblAPPayment A 
 	WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
 		0 = ISNULL([dbo].isOpenAccountingDate(A.[dtmDatePaid]), 0)
@@ -91,7 +93,8 @@ INSERT INTO #tmpPayableInvalidData
 	SELECT 
 		'The debit and credit amounts are not balanced.',
 		'Payable',
-		A.intPaymentId
+		A.intPaymentId,
+		@batchId
 	FROM tblAPPayment A 
 	WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
 		A.dblAmountPaid <> (SELECT SUM(dblPayment) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)
@@ -101,7 +104,8 @@ INSERT INTO #tmpPayableInvalidData
 	SELECT 
 		'The transaction is already posted.',
 		'Payable',
-		A.intPaymentId
+		A.intPaymentId,
+		@batchId
 	FROM tblAPPayment A 
 	WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
 		A.ysnPosted = 1
@@ -112,7 +116,7 @@ SET @totalInvalid = (SELECT COUNT(*) #tmpPayableInvalidData)
 IF(@totalInvalid > 0)
 BEGIN
 
-	INSERT INTO tblAPInvalidTransaction(strError, strTransactionId, strTransactionType)
+	INSERT INTO tblAPInvalidTransaction(strError, strTransactionId, strTransactionType, strBatchNumber)
 	SELECT * FROM #tmpPayableInvalidData
 
 	SET @invalidCount = @totalInvalid
