@@ -3,6 +3,7 @@
 	@DateTo	DATE = NULL,
 	@PeriodFrom	INT = NULL,
 	@PeriodTo	INT = NULL,
+	@UserId INT,
 	@Total INT OUTPUT
 AS
 BEGIN
@@ -33,7 +34,8 @@ BEGIN
 		[dblTotal], 
 		[ysnPosted], 
 		[ysnPaid], 
-		[dblAmountDue])
+		[dblAmountDue],
+		[intUserId])
 	OUTPUT inserted.intBillId INTO @InsertedData(intBillId)
 	--Unposted
 	SELECT 
@@ -50,7 +52,8 @@ BEGIN
 		[dblTotal] 				=	A.aptrx_orig_amt,
 		[ysnPosted] 			=	0,
 		[ysnPaid] 				=	0, --CASE WHEN SUM(ISNULL(B.apegl_gl_amt,0)) = A.aptrx_orig_amt THEN 1 ELSE 0 END,
-		[dblAmountDue]			=	A.aptrx_orig_amt--CASE WHEN B.apegl_ivc_no IS NULL THEN A.aptrx_orig_amt ELSE A.aptrx_orig_amt - SUM(ISNULL(B.apegl_gl_amt,0)) END
+		[dblAmountDue]			=	A.aptrx_orig_amt,--CASE WHEN B.apegl_ivc_no IS NULL THEN A.aptrx_orig_amt ELSE A.aptrx_orig_amt - SUM(ISNULL(B.apegl_gl_amt,0)) END
+		[intUserId]				=	@UserId
 	FROM aptrxmst A
 		--LEFT JOIN apeglmst B
 		--	ON A.aptrx_ivc_no = B.apegl_ivc_no
@@ -109,12 +112,13 @@ BEGIN
 
 		SELECT TOP 1 @BillId = intBillId FROM @InsertedData
 
-		INSERT INTO tblAPBillBatch(intAccountId, ysnPosted, dblTotal)
+		INSERT INTO tblAPBillBatch(intAccountId, ysnPosted, dblTotal, intUserId)
 		--OUTPUT inserted.intBillBatchId, @BillId INTO @insertedBillBatch
 		SELECT 
 			A.intAccountId,
 			0,
-			A.dblTotal
+			A.dblTotal,
+			@UserId
 		FROM tblAPBill A
 		WHERE A.intBillId = @BillId
 
@@ -147,7 +151,8 @@ BEGIN
 		[dblTotal], 
 		[ysnPosted], 
 		[ysnPaid], 
-		[dblAmountDue])
+		[dblAmountDue],
+		[intUserId])
 	OUTPUT inserted.intBillId INTO @InsertedData(intBillId)
 	--Unposted
 	SELECT 
@@ -164,8 +169,8 @@ BEGIN
 		[dblTotal] 				=	A.aptrx_orig_amt,
 		[ysnPosted] 			=	0,
 		[ysnPaid] 				=	0, --CASE WHEN SUM(ISNULL(B.apegl_gl_amt,0)) = A.aptrx_orig_amt THEN 1 ELSE 0 END,
-		[dblAmountDue]			=	A.aptrx_orig_amt--CASE WHEN B.apegl_ivc_no IS NULL THEN A.aptrx_orig_amt ELSE A.aptrx_orig_amt - SUM(ISNULL(B.apegl_gl_amt,0)) END
-		
+		[dblAmountDue]			=	A.aptrx_orig_amt,--CASE WHEN B.apegl_ivc_no IS NULL THEN A.aptrx_orig_amt ELSE A.aptrx_orig_amt - SUM(ISNULL(B.apegl_gl_amt,0)) END
+		[intUserId]				=	@UserId
 	FROM aptrxmst A
 		--LEFT JOIN apeglmst B
 		--	ON A.aptrx_ivc_no = B.apegl_ivc_no
@@ -227,11 +232,12 @@ BEGIN
 
 				
 	--Create Bill Batch transaction
-	INSERT INTO tblAPBillBatch(intAccountId, ysnPosted, dblTotal)
+	INSERT INTO tblAPBillBatch(intAccountId, ysnPosted, dblTotal, intUserId)
 	SELECT 
 		A.intAccountId,
 		0,
-		A.dblTotal
+		A.dblTotal,
+		@UserId
 		FROM tblAPBill A
 		INNER JOIN @InsertedData B
 			ON A.intBillId = B.intBillId

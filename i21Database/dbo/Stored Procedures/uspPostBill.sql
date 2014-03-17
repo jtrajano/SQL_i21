@@ -42,6 +42,9 @@ CREATE TABLE #tmpInvalidBillData (
 	[strTransactionId] [NVARCHAR](50)
 );
 
+IF(@batchId IS NULL)
+	EXEC uspSMGetStartingNumber 3, @batchId OUT
+
 --DECLARRE VARIABLES
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
 SET @recapId = '1'
@@ -206,7 +209,7 @@ IF ISNULL(@recap, 0) = 0
 		UNION ALL 
 		SELECT	
 			[strTransactionID] = A.strBillId, 
-			[intAccountID] = A.intAccountId,
+			[intAccountID] = B.intAccountId,
 			[strDescription] = A.strDescription,
 			[strReference] = A.strVendorId,
 			[dtmTransactionDate] = A.dtmDate,
@@ -332,8 +335,9 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 --=====================================================================================================================================
 -- 	RETURN TOTAL NUMBER OF VALID JOURNALS
 ---------------------------------------------------------------------------------------------------------------------------------------
-SELECT @successfulCount = COUNT(*) FROM #tmpPostBillData
-
+DECLARE @totalRecords INT
+SELECT @totalRecords = COUNT(*) FROM #tmpPostBillData
+SET @successfulCount = @totalRecords
 --=====================================================================================================================================
 -- 	FINALIZING STAGE
 ---------------------------------------------------------------------------------------------------------------------------------------

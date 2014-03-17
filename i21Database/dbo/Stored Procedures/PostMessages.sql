@@ -59,3 +59,23 @@ EXEC sp_addmessage 50013,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50014) EXEC sp_dropmessage 50014, 'us_english'	
 SET @strmessage = 'Not enough check numbers. Please generate new check numbers.'
 EXEC sp_addmessage 50014,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50015) EXEC sp_dropmessage 50015, 'us_english'	
+SET @strmessage = 'The transaction id %s already exists. Please ask your local administrator to check the starting numbers setup.'
+EXEC sp_addmessage 50015,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50016) EXEC sp_dropmessage 50016, 'us_english'	
+SET @strmessage = 'Unable to delete checkbook because it is used in the A/P Invoice file.'
+EXEC sp_addmessage 50016,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50017) EXEC sp_dropmessage 50017, 'us_english'	
+SET @strmessage = 'Unable to delete checkbook because it is used in the Check History file.'
+EXEC sp_addmessage 50017,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50018) EXEC sp_dropmessage 50018, 'us_english'	
+SET @strmessage = 'Unable to delete checkbook because it is used in the A/P Transaction file.'
+EXEC sp_addmessage 50018,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50019) EXEC sp_dropmessage 50019, 'us_english'	
+SET @strmessage = 'Duplicate checkbook id found.'
+EXEC sp_addmessage 50019,11,@strmessage,'us_english','False'
