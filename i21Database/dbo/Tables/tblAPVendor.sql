@@ -7,7 +7,7 @@
     [intPaymentMethodId]        INT            NOT NULL,
     [intShipViaId]              INT            NULL,
     [intTaxCodeId]              INT            NULL,
-    [intGLAccountExpenseId]     INT            NULL,
+    [intGLAccountExpenseId]     INT            NOT NULL ,
     [strFederalTaxId]           NVARCHAR (MAX) NULL,
     [intTermsId]                NVARCHAR (MAX) NULL,
     [intVendorType]             INT            NOT NULL,

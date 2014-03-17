@@ -90,7 +90,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 				WHERE	ISNULL(d.strCbkNo, '''') <> ''''
 			)
 			BEGIN
-				RAISERROR(50012, 11, 1)	-- ''Unable to delete checkbook because it is used in the A/P Invoice file.''
+				RAISERROR(50016, 11, 1)	-- ''Unable to delete checkbook because it is used in the A/P Invoice file.''
 				GOTO EXIT_TRIGGER
 			END
 			IF @@ERROR <> 0 GOTO EXIT_TRIGGER
@@ -103,7 +103,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 				WHERE	ISNULL(d.strCbkNo, '''') <> ''''
 			)
 			BEGIN
-				RAISERROR(50013, 11, 1)	-- ''Unable to delete checkbook because it is used in the Check History file.''
+				RAISERROR(50017, 11, 1)	-- ''Unable to delete checkbook because it is used in the Check History file.''
 				GOTO EXIT_TRIGGER
 			END
 			IF @@ERROR <> 0 GOTO EXIT_TRIGGER
@@ -116,7 +116,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 				WHERE	ISNULL(d.strCbkNo, '''') <> ''''
 			)
 			BEGIN
-				RAISERROR(50014, 11, 1)	-- ''Unable to delete checkbook because it is used in the A/P Transaction file.''
+				RAISERROR(50018, 11, 1)	-- ''Unable to delete checkbook because it is used in the A/P Transaction file.''
 				GOTO EXIT_TRIGGER
 			END
 			IF @@ERROR <> 0 GOTO EXIT_TRIGGER
@@ -348,7 +348,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 						)
 			)
 			BEGIN 
-				RAISERROR(50011, 11, 1)	-- ''Duplicate checkbook id found.''
+				RAISERROR(50019, 11, 1)	-- ''Duplicate checkbook id found.''
 				GOTO EXIT_TRIGGER
 			END 
 
