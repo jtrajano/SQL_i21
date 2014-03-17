@@ -137,7 +137,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 					'You cannot post this transaction because it has invalid account(s).' AS strMessage
 				FROM tblGLJournalDetail A 
 					LEFT OUTER JOIN tblGLAccount B ON A.intAccountID = B.intAccountID
-				WHERE A.intAccountID IS NULL OR 0 = CASE WHEN ISNULL(A.intAccountID, '') = '' THEN 0 ELSE 1 END AND A.intJournalID IN (SELECT intJournalID FROM #tmpPostJournals)					
+				WHERE (A.intAccountID IS NULL OR 0 = CASE WHEN ISNULL(A.intAccountID, '') = '' THEN 0 ELSE 1 END) AND A.intJournalID IN (SELECT intJournalID FROM #tmpPostJournals)					
 				UNION 
 				SELECT DISTINCT A.intJournalID,
 					'Unable to post. The transaction is out of balance.' AS strMessage
