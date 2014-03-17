@@ -155,6 +155,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 				--	GROUP BY B.intJournalID, C.intAccountID, C.strAccountID
 			) tmpBatchResults
 		LEFT JOIN tblGLJournal tblB ON tmpBatchResults.intJournalID = tblB.intJournalID
+		WHERE strMessage != ''
 	END
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
