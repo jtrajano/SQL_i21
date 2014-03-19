@@ -30,7 +30,7 @@ print 'BEGIN POST DEPLOYMENT'
 -- Tank Management
 -- :r .\TM\1_OriginIndexing.sql
 
-Canned Panels
+-- Canned Panels
 :r .\DB\1_CannedPanels.sql
 
 -- Financials
