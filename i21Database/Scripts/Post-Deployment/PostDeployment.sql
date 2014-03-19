@@ -30,6 +30,9 @@ print 'BEGIN POST DEPLOYMENT'
 -- Tank Management
 -- :r .\TM\1_OriginIndexing.sql
 
+Canned Panels
+:r .\DB\1_CannedPanels.sql
+
 -- Financials
 :r .\FIN\DefaultData\AccountGroup.sql
 :r .\FIN\DefaultData\BankTransactionTypes.sql
