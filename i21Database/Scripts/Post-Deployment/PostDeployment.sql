@@ -31,7 +31,7 @@ print 'BEGIN POST DEPLOYMENT'
 -- :r .\TM\1_OriginIndexing.sql
 
 -- Canned Panels
-:r .\DB\1_CannedPanels.sql
+-- :r .\DB\1_CannedPanels.sql
 
 -- Financials
 :r .\FIN\DefaultData\AccountGroup.sql
