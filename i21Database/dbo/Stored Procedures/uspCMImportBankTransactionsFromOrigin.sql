@@ -20,7 +20,7 @@
 	   3. uspCMImportBankReconciliationFromOrigin
 */
 
-CREATE PROCEDURE [dbo].[uspCMImportBankTransactionsFromOrigin]
+ALTER PROCEDURE [dbo].[uspCMImportBankTransactionsFromOrigin]
 AS
 
 -- Declare the transaction types (constant)
@@ -163,7 +163,10 @@ INSERT INTO dbo.tblCMCheckNumberAudit (
 		,dtmCheckPrinted
 )
 SELECT	intBankAccountId	= A.intBankAccountId
-		,strCheckNo			= REPLICATE('0', 20 - LEN(A.strReferenceNo)) + A.strReferenceNo
+		,strCheckNo			=	CASE	
+									WHEN ISNUMERIC(A.strReferenceNo) = 1 THEN REPLICATE('0', 20 - LEN(A.strReferenceNo)) + A.strReferenceNo
+									ELSE A.strReferenceNo
+								END
 		,intCheckNoStatus	= CASE WHEN A.ysnCheckVoid = 1 THEN @CHECK_NUMBER_STATUS_VOID ELSE @CHECK_NUMBER_STATUS_PRINTED END
 		,strRemarks			= CASE WHEN A.ysnCheckVoid = 1 THEN 'Voided from ' + A.strTransactionId ELSE '' END
 		,intTransactionId	= A.intTransactionId
