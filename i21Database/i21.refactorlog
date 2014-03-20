@@ -1022,4 +1022,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intUserSecurityControlPermissionId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="6215ee58-6090-4a73-aaec-cc517a24c2a1" ChangeDateTime="03/20/2014 08:24:01">
+    <Property Name="ElementName" Value="[dbo].[tblCMBankReconciliationAudit].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMBankReconciliationAudit]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intBankReconciliationAuditId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="995e507b-cec1-4288-abac-9046f2b7a7d9" ChangeDateTime="03/20/2014 08:24:47">
+    <Property Name="ElementName" Value="[dbo].[tblCMBankReconciliationAudit].[intUserId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMBankReconciliationAudit]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnClr" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="fea59384-ae00-496e-8c13-14b6c075c397" ChangeDateTime="03/20/2014 08:25:53">
+    <Property Name="ElementName" Value="[dbo].[tblCMBankReconciliationAudit].[dtmDate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMBankReconciliationAudit]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dtmDateReconciled" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="07f33b45-b5e7-4bc2-a5b4-36c60734536a" ChangeDateTime="03/20/2014 08:27:34">
+    <Property Name="ElementName" Value="[dbo].[tblCMBankReconciliationAudit].[intConcurrencyId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMBankReconciliationAudit]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dtmLog" />
+  </Operation>
 </Operations>
