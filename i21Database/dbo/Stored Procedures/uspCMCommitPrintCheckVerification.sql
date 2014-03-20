@@ -106,7 +106,7 @@ BEGIN
 		SELECT	intBankAccountId	= A.intBankAccountId
 				,strCheckNo			= A.strCheckNo
 				,intCheckNoStatus	= CASE WHEN A.ysnFail = 1 THEN @CHECK_NUMBER_STATUS_WASTED ELSE @CHECK_NUMBER_STATUS_PRINTED END 
-				,strRemarks			= CASE WHEN A.ysnFail = 1 THEN A.strReason ELSE '' END 
+				,strRemarks			= 'Manually entered check number.' + CASE WHEN A.ysnFail = 1 AND LEN(ISNULL(A.strReason, '')) > 0 THEN ' ' + A.strReason ELSE '' END 
 				,intTransactionId	= A.intTransactionId
 				,strTransactionId	= A.strTransactionId
 				,intUserId			= @intUserId

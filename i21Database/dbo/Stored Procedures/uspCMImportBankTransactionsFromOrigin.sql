@@ -153,7 +153,21 @@ WHERE	f.intBankAccountId IS NOT NULL
 		AND dbo.fnCMConvertOriginDateToSQLDateTime(apchk_gl_rev_dt) IS NOT NULL
 IF @@ERROR <> 0 GOTO EXIT_INSERT
 
--- Insert the check numbers from the imported origin checks
+-- Check number audit process: 
+-- 1 of 2: Update the status of an existing record in the check number audit table. 
+UPDATE	dbo.tblCMCheckNumberAudit
+SET		intCheckNoStatus = CASE WHEN f.ysnCheckVoid = 1 THEN @CHECK_NUMBER_STATUS_VOID ELSE @CHECK_NUMBER_STATUS_PRINTED END
+		,strRemarks			= CASE WHEN f.ysnCheckVoid = 1 THEN 'Voided from origin.' ELSE 'Generated from origin.' END
+		,intTransactionId	= f.intTransactionId
+		,strTransactionId	= f.strTransactionId
+FROM	dbo.tblCMBankTransaction f INNER JOIN dbo.tblCMCheckNumberAudit a
+			ON a.intBankAccountId = f.intBankAccountId
+			AND a.strCheckNo = f.strReferenceNo
+WHERE	f.intBankTransactionTypeId = @ORIGIN_CHECKS
+		AND a.intCheckNoStatus = @CHECK_NUMBER_STATUS_UNUSED
+IF @@ERROR <> 0 GOTO EXIT_INSERT
+
+-- 2 of 2: Insert a check number record to the audit table if it does not exists. 
 INSERT INTO dbo.tblCMCheckNumberAudit (
 		intBankAccountId
 		,strCheckNo
@@ -165,26 +179,26 @@ INSERT INTO dbo.tblCMCheckNumberAudit (
 		,dtmCreated
 		,dtmCheckPrinted
 )
-SELECT	intBankAccountId	= A.intBankAccountId
+SELECT	intBankAccountId	= f.intBankAccountId
 		,strCheckNo			=	CASE	
-									WHEN ISNUMERIC(A.strReferenceNo) = 1 THEN REPLICATE('0', 20 - LEN(A.strReferenceNo)) + A.strReferenceNo
-									ELSE A.strReferenceNo
+									WHEN ISNUMERIC(f.strReferenceNo) = 1 THEN REPLICATE('0', 20 - LEN(f.strReferenceNo)) + f.strReferenceNo
+									ELSE f.strReferenceNo
 								END
-		,intCheckNoStatus	= CASE WHEN A.ysnCheckVoid = 1 THEN @CHECK_NUMBER_STATUS_VOID ELSE @CHECK_NUMBER_STATUS_PRINTED END
-		,strRemarks			= CASE WHEN A.ysnCheckVoid = 1 THEN 'Voided from ' + A.strTransactionId ELSE '' END
-		,intTransactionId	= A.intTransactionId
-		,strTransactionId	= A.strTransactionId
-		,intUserId			= A.intCreatedUserId
+		,intCheckNoStatus	= CASE WHEN f.ysnCheckVoid = 1 THEN @CHECK_NUMBER_STATUS_VOID ELSE @CHECK_NUMBER_STATUS_PRINTED END
+		,strRemarks			= CASE WHEN f.ysnCheckVoid = 1 THEN 'Voided from origin.' ELSE 'Generated from origin.' END
+		,intTransactionId	= f.intTransactionId
+		,strTransactionId	= f.strTransactionId
+		,intUserId			= f.intCreatedUserId
 		,dtmCreated			= GETDATE()
 		,dtmCheckPrinted	= GETDATE()
-FROM	tblCMBankTransaction A
-WHERE	A.intBankTransactionTypeId = @ORIGIN_CHECKS
+FROM	dbo.tblCMBankTransaction f 
+WHERE	f.intBankTransactionTypeId = @ORIGIN_CHECKS
 		AND NOT EXISTS (
 			SELECT	TOP 1 1 
-			FROM	tblCMCheckNumberAudit 
-			WHERE	strTransactionId = A.strTransactionId 
-					AND strCheckNo = A.strReferenceNo
-					AND intBankAccountId = A.intBankAccountId
+			FROM	tblCMCheckNumberAudit
+			WHERE	intBankAccountId = f.intBankAccountId
+					AND strTransactionId = f.strTransactionId
+					AND strCheckNo = f.strReferenceNo
 		)
 IF @@ERROR <> 0 GOTO EXIT_INSERT
 
