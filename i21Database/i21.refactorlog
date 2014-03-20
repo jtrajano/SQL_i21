@@ -1050,4 +1050,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="dtmLog" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="52f26df1-b9d3-4e40-a3db-d9fffd205997" ChangeDateTime="03/20/2014 11:34:42">
+    <Property Name="ElementName" Value="[dbo].[tblTMFillMethod].[intFillMethodId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMFillMethod]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intFillMethodID" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="16893dbf-41ca-4df3-8b2d-d4cd3016943a" ChangeDateTime="03/20/2014 11:34:50">
+    <Property Name="ElementName" Value="[dbo].[tblTMFillMethod].[intFillMethodID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMFillMethod]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intFillMethodId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5b9489ee-0238-49da-86dc-fdc31dd6ece4" ChangeDateTime="03/20/2014 11:35:20">
+    <Property Name="ElementName" Value="[dbo].[tblTMSite].[intFillMethodId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMSite]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intFillMethodID" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c4d8b9f9-908c-40d6-a556-ced3a5cedd26" ChangeDateTime="03/20/2014 11:35:38">
+    <Property Name="ElementName" Value="[dbo].[tblTMSite].[intFillMethodID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMSite]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intFillMethodId" />
+  </Operation>
 </Operations>
