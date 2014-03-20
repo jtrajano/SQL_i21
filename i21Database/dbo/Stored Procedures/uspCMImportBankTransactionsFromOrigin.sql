@@ -20,7 +20,7 @@
 	   3. uspCMImportBankReconciliationFromOrigin
 */
 
-ALTER PROCEDURE [dbo].[uspCMImportBankTransactionsFromOrigin]
+CREATE PROCEDURE [dbo].[uspCMImportBankTransactionsFromOrigin]
 AS
 
 -- Declare the transaction types (constant)
@@ -121,7 +121,10 @@ SELECT
 		,strMemo					=	RTRIM(LTRIM(ISNULL(i.apchk_comment_1, ''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_2))) > 0 THEN CHAR(13) ELSE '' END +
 										RTRIM(LTRIM(ISNULL(i.apchk_comment_2, ''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_3))) > 0 THEN CHAR(13) ELSE '' END +
 										RTRIM(LTRIM(ISNULL(i.apchk_comment_3, ''))) 
-		,strReferenceNo				=	RTRIM(LTRIM(i.apchk_chk_no))
+		,strReferenceNo				=	CASE	
+											WHEN ISNUMERIC(i.apchk_chk_no) = 1 THEN REPLICATE('0', 20 - LEN(RTRIM(LTRIM(i.apchk_chk_no)))) + RTRIM(LTRIM(i.apchk_chk_no))
+											ELSE RTRIM(LTRIM(i.apchk_chk_no))
+										END
 		,dtmCheckPrinted			=	NULL
 		,ysnCheckToBePrinted		=	1
 		,ysnCheckVoid				=	CASE
