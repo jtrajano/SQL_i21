@@ -44,7 +44,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
   ,0 as ysnOnHold   
   ,'' as strHoldReason  
   ,'' as strOnHold  
-  ,0 as intFillMethodID   
+  ,0 as intFillMethodId   
   ,'' as strCity   
   ,'' as strState   
   ,'' as strZipCode  
@@ -385,7 +385,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
   ,ysnOnHold bit  
   ,strHoldReason nvarchar(100)  
   ,strOnHold nvarchar(20)  
-  ,intFillMethodID int  
+  ,intFillMethodId int  
   ,strCity nvarchar(50)  
   ,strState nvarchar(50)  
   ,strZipCode nvarchar(50)-- 26  
@@ -489,7 +489,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
       When 0 then  
        ''No''  
       End) as strOnHold  
-     ,C.intFillMethodID  
+     ,C.intFillMethodId  
      ,strCity =  
       CASE WHEN C.strSiteAddress IS NOT NULL THEN '', '' + C.strCity  
         ELSE C.strCity    
@@ -541,10 +541,10 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
      ,strProductID = G.vwitm_no   
      ,strProductDescription = G.vwitm_desc   
      ,strRouteID = (SELECT TOP 1 r.strRouteID FROM tblTMRoute r WHERE r.intRouteID = C.intRouteID)   
-     ,strFillMethod = (SELECT TOP 1 strFillMethod FROM tblTMFillMethod tt WHERE tt.intFillMethodID = C.intFillMethodID)   
+     ,strFillMethod = (SELECT TOP 1 strFillMethod FROM tblTMFillMethod tt WHERE tt.intFillMethodId = C.intFillMethodId)   
      ,strBetweenDlvry =   
       CAST(  
-       CASE WHEN C.intFillMethodID = 1 THEN  
+       CASE WHEN C.intFillMethodId = 1 THEN  
           CASE WHEN (SELECT COUNT(intSiteID)FROM tblTMSiteJulianCalendar t WHERE t.intSiteID = C.intSiteID) > 1 THEN ''Varies''  
             WHEN (SELECT COUNT(intSiteID)FROM tblTMSiteJulianCalendar t WHERE t.intSiteID = C.intSiteID) = 1 THEN  
             CASE WHEN K.intRecurPattern = 0 THEN CAST(K.intRecurInterval AS VARCHAR(50))   
