@@ -4,6 +4,7 @@
     [intWithholdAccountId] INT             NULL,
     [intDiscountAccountId] INT             NULL,
     [dblWithholdPercent]   DECIMAL (18, 6) NULL,
+    [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     PRIMARY KEY CLUSTERED ([intPreferenceId] ASC)
 );
 

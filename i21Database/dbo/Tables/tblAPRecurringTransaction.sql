@@ -11,6 +11,7 @@
     [ysnDue]           BIT           NULL,
     [intGroupId]       INT           NULL,
     [intDayofMonth]    INT           NULL,
+    [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     PRIMARY KEY CLUSTERED ([intRecurringId] ASC)
 );
 

@@ -6,6 +6,7 @@
     [strReference]       NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [dblTotal]           DECIMAL (18, 2) NOT NULL,
     [intUserId] INT NULL, 
+    [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_dbo.tblAPBillBatches] PRIMARY KEY CLUSTERED ([intBillBatchId] ASC)
 );
 
