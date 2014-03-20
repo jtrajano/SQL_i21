@@ -39,6 +39,15 @@ DECLARE @BANK_DEPOSIT AS INT = 1
 		,@ORIGIN_EFT AS INT = 13			-- POSITIVE AMOUNT, INDICATOR: N/A, APCHK_CHK_NO PREFIX: 'E'		
 		,@ORIGIN_WITHDRAWAL AS INT = 14		-- POSITIVE AMOUNT, INDICATOR: N/A, APCHK_CHK_NO PREFIX: NONE
 		,@ORIGIN_WIRE AS INT = 15			-- POSITIVE AMOUNT, INDICATOR: N/A, APCHK_CHK_NO PREFIX: 'W'
+		,@AP_PAYMENT AS INT = 16
+
+		-- Constant variables for Check number status. 
+		,@CHECK_NUMBER_STATUS_UNUSED AS INT = 1
+		,@CHECK_NUMBER_STATUS_USED AS INT = 2
+		,@CHECK_NUMBER_STATUS_PRINTED AS INT = 3
+		,@CHECK_NUMBER_STATUS_VOID AS INT = 4
+		,@CHECK_NUMBER_STATUS_WASTED AS INT = 5
+		,@CHECK_NUMBER_STATUS_FOR_PRINT_VERIFICATION AS INT = 6
 		
 		-- Declare the local variables. 
 		,@intBankAccountId AS INT	
@@ -139,6 +148,38 @@ FROM	dbo.tblCMBankAccount f INNER JOIN apchkmst i
 WHERE	f.intBankAccountId IS NOT NULL
 		AND i.apchk_chk_amt <> 0
 		AND dbo.fnCMConvertOriginDateToSQLDateTime(apchk_gl_rev_dt) IS NOT NULL
+IF @@ERROR <> 0 GOTO EXIT_INSERT
+
+-- Insert the check numbers from the imported origin checks
+INSERT INTO dbo.tblCMCheckNumberAudit (
+		intBankAccountId
+		,strCheckNo
+		,intCheckNoStatus
+		,strRemarks
+		,intTransactionId
+		,strTransactionId
+		,intUserId
+		,dtmCreated
+		,dtmCheckPrinted
+)
+SELECT	intBankAccountId	= A.intBankAccountId
+		,strCheckNo			= REPLICATE('0', 20 - LEN(A.strReferenceNo)) + A.strReferenceNo
+		,intCheckNoStatus	= CASE WHEN A.ysnCheckVoid = 1 THEN @CHECK_NUMBER_STATUS_VOID ELSE @CHECK_NUMBER_STATUS_PRINTED END
+		,strRemarks			= CASE WHEN A.ysnCheckVoid = 1 THEN 'Voided from ' + A.strTransactionId ELSE '' END
+		,intTransactionId	= A.intTransactionId
+		,strTransactionId	= A.strTransactionId
+		,intUserId			= A.intCreatedUserId
+		,dtmCreated			= GETDATE()
+		,dtmCheckPrinted	= GETDATE()
+FROM	tblCMBankTransaction A
+WHERE	A.intBankTransactionTypeId = @ORIGIN_CHECKS
+		AND NOT EXISTS (
+			SELECT	TOP 1 1 
+			FROM	tblCMCheckNumberAudit 
+			WHERE	strTransactionId = A.strTransactionId 
+					AND strCheckNo = A.strReferenceNo
+					AND intBankAccountId = A.intBankAccountId
+		)
 IF @@ERROR <> 0 GOTO EXIT_INSERT
 
 EXIT_INSERT: 
