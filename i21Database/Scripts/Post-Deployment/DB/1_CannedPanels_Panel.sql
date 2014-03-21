@@ -1,5 +1,7 @@
-﻿/*******************  BEGIN UPDATING canned panels on table Panel *******************/
+﻿
+/*******************  BEGIN UPDATING canned panels on table Panel *******************/
 print('/*******************  BEGIN UPDATING canned panels  *******************/')
+
 print('/*******************  CREATE TEMPORARY table for canned panels  *******************/')
 Create TABLE #TampCannedPanels 
 (

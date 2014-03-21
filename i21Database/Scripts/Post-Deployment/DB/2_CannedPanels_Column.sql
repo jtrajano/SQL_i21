@@ -1,5 +1,6 @@
 ﻿/*******************  BEGIN UPDATING canned panels on table Panel Column*******************/
 print('/*******************  BEGIN UPDATING canned panels column *******************/')
+GO
 print('/*******************  CREATE TEMPORARY table for canned panels column *******************/')
 Create TABLE #TampCannedPanelColumn 
 (

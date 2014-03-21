@@ -381,7 +381,6 @@
     <Build Include="dbo\User Defined Types\RecapTableType.sql" />
     <None Include="Script.PreDeployment1.sql" />
     <None Include="Script.PostDeployment1.sql" />
-    <None Include="Scripts\Post-Deployment\DB\1_CannedPanels.sql" />
     <None Include="Scripts\Post-Deployment\FIN\DefaultData\AccountGroup.sql" />
     <None Include="Scripts\Post-Deployment\FIN\DefaultData\BankTransactionTypes.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\1_SM\1_ZipCodeData.sql" />
@@ -450,9 +449,9 @@
     <Build Include="dbo\Stored Procedures\uspCMBankDepositReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleSubReport.sql" />
     <Build Include="dbo\Tables\tblCMBankReconciliationAudit.sql" />
-    <Build Include="Scripts\Post-Deployment\DB\1_CannedPanels_Panel.sql" />
-    <Build Include="Scripts\Post-Deployment\DB\2_CannedPanels_Column.sql" />
-    <Build Include="Scripts\Post-Deployment\DB\3_CannedPanels_Format.sql" />
+    <None Include="Scripts\Post-Deployment\DB\1_CannedPanels_Panel.sql" />
+    <None Include="Scripts\Post-Deployment\DB\2_CannedPanels_Column.sql" />
+    <None Include="Scripts\Post-Deployment\DB\3_CannedPanels_Format.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
