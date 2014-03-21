@@ -645,9 +645,9 @@ Post_Rollback:
 	GOTO Post_Exit
 
 Post_Exit:
-	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#tmpPostJournals')) DROP TABLE #tmpPostJournals
-	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#tmpValidJournals')) DROP TABLE #tmpValidJournals
-	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#tmpReverseJournals')) DROP TABLE #tmpReverseJournals		
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects where id = object_id('tempdb..#tmpPostJournals')) DROP TABLE #tmpPostJournals
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects where id = object_id('tempdb..#tmpValidJournals')) DROP TABLE #tmpValidJournals
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects where id = object_id('tempdb..#tmpReverseJournals')) DROP TABLE #tmpReverseJournals		
 GO
 
 
