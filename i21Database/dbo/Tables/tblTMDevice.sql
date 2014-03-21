@@ -25,7 +25,7 @@
     [intParentDeviceID]        INT             DEFAULT 0 NULL,
     [intInventoryStatusTypeID] INT             DEFAULT 0 NULL,
     [intTankTypeID]            INT             DEFAULT 0 NULL,
-    [intMeterTypeID]           INT             DEFAULT 0 NULL,
+    [intMeterTypeId]           INT             DEFAULT 0 NULL,
     [intRegulatorTypeID]       INT             DEFAULT 0 NULL,
     [intLinkedToTankID]        INT             DEFAULT 0 NULL,
     [strMeterStatus]           NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
@@ -39,7 +39,7 @@
     CONSTRAINT [FK_tblTMDevice_tblTMDeviceType] FOREIGN KEY ([intDeviceTypeID]) REFERENCES [dbo].[tblTMDeviceType] ([intDeviceTypeID]),
     CONSTRAINT [FK_tblTMDevice_tblTMInventoryStatus] FOREIGN KEY ([intInventoryStatusTypeID]) REFERENCES [dbo].[tblTMInventoryStatusType] ([intInventoryStatusTypeID]) ON UPDATE CASCADE,
     CONSTRAINT [FK_tblTMDevice_tblTMLease] FOREIGN KEY ([intLeaseID]) REFERENCES [dbo].[tblTMLease] ([intLeaseID]) ON DELETE SET NULL,
-    CONSTRAINT [FK_tblTMDevice_tblTMMeterType] FOREIGN KEY ([intMeterTypeID]) REFERENCES [dbo].[tblTMMeterType] ([intMeterTypeID]),
+    CONSTRAINT [FK_tblTMDevice_tblTMMeterType] FOREIGN KEY ([intMeterTypeId]) REFERENCES [dbo].[tblTMMeterType] ([intMeterTypeId]),
     CONSTRAINT [FK_tblTMDevice_tblTMRegulatorType] FOREIGN KEY ([intRegulatorTypeID]) REFERENCES [dbo].[tblTMRegulatorType] ([intRegulatorTypeID]),
     CONSTRAINT [FK_tblTMDevice_tblTMTankType] FOREIGN KEY ([intTankTypeID]) REFERENCES [dbo].[tblTMTankType] ([intTankTypeID])
 );
