@@ -1078,4 +1078,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intFillMethodId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="2868e87e-5538-41ed-bf2f-80ef05539f69" ChangeDateTime="03/21/2014 07:59:00">
+    <Property Name="ElementName" Value="[dbo].[tblTMDevice].[intMeterTypeID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMDevice]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intMeterTypeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ff5ae6d7-10aa-4e53-844c-f7f48ec87ec3" ChangeDateTime="03/21/2014 07:59:55">
+    <Property Name="ElementName" Value="[dbo].[tblTMMeterType].[intMeterTypeID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMMeterType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intMeterTypeId" />
+  </Operation>
 </Operations>
