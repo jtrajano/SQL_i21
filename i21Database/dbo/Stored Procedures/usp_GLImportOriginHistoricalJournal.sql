@@ -272,7 +272,7 @@ ROLLBACK_INSERT:
 	GOTO IMPORT_EXIT
 
 IMPORT_EXIT:
-	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#iRelyImptblGLJournal')) DROP TABLE #iRelyImptblGLJournal
-	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#iRelyImptblGLJournalDetail')) DROP TABLE #iRelyImptblGLJournalDetail
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects where id = object_id('tempdb..#iRelyImptblGLJournal')) DROP TABLE #iRelyImptblGLJournal
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects where id = object_id('tempdb..#iRelyImptblGLJournalDetail')) DROP TABLE #iRelyImptblGLJournalDetail
 
 GO	
