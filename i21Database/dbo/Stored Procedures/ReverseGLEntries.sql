@@ -3,10 +3,10 @@
 -- 	CREATE THE STORED PROCEDURE AFTER DELETING IT
 ---------------------------------------------------------------------------------------------------------------------------------------
 CREATE PROCEDURE ReverseGLEntries
-	@strTransactionID	NVARCHAR(40) = NULL
+	@strTransactionId	NVARCHAR(40) = NULL
 	,@strCode			NVARCHAR(10) = NULL
 	,@dtmDateReverse	DATETIME = NULL 
-	,@intUserID			INT = NULL 
+	,@intUserId			INT = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -21,16 +21,16 @@ SET ANSI_WARNINGS OFF
 
 DECLARE 
 	-- Local variables 
-	@strBatchID AS NVARCHAR(40)
+	@strBatchId AS NVARCHAR(40)
 
 --=====================================================================================================================================
 -- 	INITIALIZATION 
 ---------------------------------------------------------------------------------------------------------------------------------------
 
--- Retrieve the GL Batch ID in tblGLDetail for the transaction to Unpost/Reverse. 
-SELECT	@strBatchID = MAX(strBatchID)
+-- Retrieve the GL Batch Id in tblGLDetail for the transaction to Unpost/Reverse. 
+SELECT	@strBatchId = MAX(strBatchID)
 FROM	tblGLDetail
-WHERE	strTransactionID = @strTransactionID
+WHERE	strTransactionID = @strTransactionId
 		AND ysnIsUnposted = 0
 		AND strCode = ISNULL(@strCode, strCode)
 
@@ -46,10 +46,10 @@ WHERE	strTransactionID = @strTransactionID
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 INSERT INTO #tmpGLDetail (
-		[strTransactionID]
+		[strTransactionId]
 		,[dtmDate]
-		,[strBatchID]
-		,[intAccountID]
+		,[strBatchId]
+		,[intAccountId]
 		,[strAccountGroup]
 		,[dblDebit]
 		,[dblCredit]
@@ -58,20 +58,20 @@ INSERT INTO #tmpGLDetail (
 		,[strDescription]
 		,[strCode]
 		,[strReference]
-		,[strJobID]
-		,[intCurrencyID]
+		,[strJobId]
+		,[intCurrencyId]
 		,[dblExchangeRate]
 		,[dtmDateEntered]
 		,[dtmTransactionDate]
-		,[strProductID]
-		,[strWarehouseID]
+		,[strProductId]
+		,[strWarehouseId]
 		,[strNum]
 		,[strCompanyName]
 		,[strBillInvoiceNumber]
 		,[strJournalLineDescription]
 		,[ysnIsUnposted]
 		,[intConcurrencyId]
-		,[intUserID]
+		,[intUserId]
 		,[strTransactionForm]
 		,[strModuleName]
 		,[strUOMCode]
@@ -101,12 +101,12 @@ SELECT	[strTransactionID]
 		,[strJournalLineDescription]
 		,ysnIsUnposted		= 1
 		,[intConcurrencyId]
-		,[intUserID]		= @intUserID
+		,[intUserID]		= @intUserId
 		,[strTransactionForm]
 		,[strModuleName]
 		,[strUOMCode]
 FROM	tblGLDetail 
-WHERE	strBatchID = @strBatchID
+WHERE	strBatchID = @strBatchId
 ORDER BY intGLDetailID
 
 --=====================================================================================================================================
@@ -114,7 +114,7 @@ ORDER BY intGLDetailID
 ---------------------------------------------------------------------------------------------------------------------------------------
 UPDATE	tblGLDetail
 SET		ysnIsUnposted = 1
-WHERE	strTransactionID = @strTransactionID
+WHERE	strTransactionID = @strTransactionId
 
 --=====================================================================================================================================
 -- 	EXIT ROUTINES
