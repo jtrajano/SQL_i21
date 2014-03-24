@@ -1092,4 +1092,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intMeterTypeId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="a2602a07-8521-4239-b235-cd3774fb4a97" ChangeDateTime="03/24/2014 04:59:47">
+    <Property Name="ElementName" Value="[dbo].[tblTMInventoryStatusType].[intInventoryStatusTypeID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMInventoryStatusType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInventoryStatusTypeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="971a113f-db69-4592-be0b-825672de3bd3" ChangeDateTime="03/24/2014 05:00:10">
+    <Property Name="ElementName" Value="[dbo].[tblTMDevice].[intInventoryStatusTypeID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMDevice]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInventoryStatusTypeId" />
+  </Operation>
 </Operations>
