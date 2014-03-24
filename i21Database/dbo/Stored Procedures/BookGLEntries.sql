@@ -27,7 +27,7 @@ DECLARE @dblDebitCreditBalance NUMERIC(18,2)
 --------------------------------------------------------------------------------------------------------------------------------------
 
 -- Check if the required temporary table is not missing. If missing, throw an error. 
-IF NOT EXISTS (	SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID(N'[TEMPDB]..[#tmpGLDetail]'))
+IF NOT EXISTS (	SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID(N'[tempdb]..[#tmpGLDetail]'))
 BEGIN 
 	-- 'Invalid G/L temp table.'
 	RAISERROR (50002,11,1)
