@@ -1106,4 +1106,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intInventoryStatusTypeId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="ca81fb0c-fa22-4531-b695-9938d7e2f789" ChangeDateTime="03/24/2014 11:17:19">
+    <Property Name="ElementName" Value="[dbo].[tblTMTankType].[intTankTypeID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMTankType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTankTypeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ff974e2f-198a-4b85-882c-62d648c7632e" ChangeDateTime="03/24/2014 11:18:15">
+    <Property Name="ElementName" Value="[dbo].[tblTMDevice].[intDeviceTypeID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMDevice]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDeviceTypeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e063eff2-66f4-49bc-ba3f-605656365635" ChangeDateTime="03/24/2014 11:18:34">
+    <Property Name="ElementName" Value="[dbo].[tblTMDevice].[intTankTypeID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMDevice]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTankTypeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="7a7e64f4-4498-496f-93c7-23e09ea0d943" ChangeDateTime="03/24/2014 11:28:43">
+    <Property Name="ElementName" Value="[dbo].[tblTMDeviceType].[intDeviceTypeID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMDeviceType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDeviceTypeId" />
+  </Operation>
 </Operations>
