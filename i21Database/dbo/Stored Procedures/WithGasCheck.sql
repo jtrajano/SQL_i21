@@ -164,7 +164,7 @@ FROM
 	, E.strSerialNumber
 	, E.intTankSize
 	, E.strOwnership
-	,(Select Top 1 tt.strTankType From tblTMTankType tt Where tt.intTankTypeID = E.intTankTypeID) AS [strTankType]
+	,(Select Top 1 tt.strTankType From tblTMTankType tt Where tt.intTankTypeId = E.intTankTypeId) AS [strTankType]
 	, (Case C.ysnActive
 		When 1 then
 			''Active''
