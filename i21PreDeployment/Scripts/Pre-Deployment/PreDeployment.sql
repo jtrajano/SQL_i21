@@ -10,6 +10,11 @@
 --------------------------------------------------------------------------------------
 */
 
+-- Validate Origin records
+-- --coctlmst
+:r .\UpdateValidation\1_CheckCoctlmst.sql
+
+-- Delete Objects
 :r .\DeleteScripts.sql
 
 -- TM

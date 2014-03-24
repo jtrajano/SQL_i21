@@ -65,12 +65,14 @@
     <Folder Include="Scripts\Pre-Deployment\2_CM" />
     <Folder Include="Scripts\Pre-Deployment\3_DB" />
     <Folder Include="Scripts\Pre-Deployment\5_CM" />
+    <Folder Include="Scripts\Pre-Deployment\UpdateValidation" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1_DataCleanup.sql" />
     <None Include="i21PreDeployment.publish.xml" />
     <None Include="Scripts\Pre-Deployment\5_CM\1_DropTriggers.sql" />
     <None Include="Scripts\Pre-Deployment\1_TM\3_1410_to_1420.sql" />
+    <None Include="Scripts\Pre-Deployment\UpdateValidation\1_CheckCoctlmst.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
