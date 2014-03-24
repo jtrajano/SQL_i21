@@ -13,8 +13,8 @@ SET ANSI_WARNINGS OFF
 DELETE tblGLDetailRecap
 FROM	tblGLDetailRecap A INNER JOIN @RecapTable B
 			ON (
-				A.strTransactionID = B.strTransactionID
-				OR A.intTransactionID = B.intTransactionID
+				A.strTransactionID = B.strTransactionId
+				OR A.intTransactionID = B.intTransactionId
 			)
 			AND  A.strCode = B.strCode
 
@@ -47,11 +47,11 @@ INSERT INTO tblGLDetailRecap (
 		,[strUOMCode]	
 )
 -- RETRIEVE THE DATA FROM THE TABLE VARIABLE. 
-SELECT	[strTransactionID]		
-		,[intTransactionID]		
+SELECT	[strTransactionId]		
+		,[intTransactionId]		
 		,[dtmDate]				
-		,[strBatchID]			
-		,[intAccountID]			
+		,[strBatchId]			
+		,[intAccountId]			
 		,[strAccountGroup]		
 		,[dblDebit]				
 		,[dblCredit]			
@@ -60,14 +60,14 @@ SELECT	[strTransactionID]
 		,[strDescription]		
 		,[strCode]				
 		,[strReference]			
-		,[strJobID]				
-		,[intCurrencyID]		
+		,[strJobId]				
+		,[intCurrencyId]		
 		,[dblExchangeRate]		
 		,[dtmDateEntered]		
 		,[dtmTransactionDate]	
 		,[ysnIsUnposted]		
 		,[intConcurrencyId]		
-		,[intUserID]			
+		,[intUserId]			
 		,[strTransactionForm]	
 		,[strModuleName]		
 		,[strUOMCode]	

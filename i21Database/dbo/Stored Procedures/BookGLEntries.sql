@@ -36,7 +36,7 @@ END
 
 -- When doing a post or unpost, check for any invalid G/L Account ids. 
 -- When doing a recap, ignore any invalid G/L account id's. 
-IF EXISTS (SELECT TOP 1 1 FROM #tmpGLDetail WHERE intAccountID IS NULL AND @ysnRecap = 0)
+IF EXISTS (SELECT TOP 1 1 FROM #tmpGLDetail WHERE intAccountId IS NULL AND @ysnRecap = 0)
 BEGIN 
 	-- 'Failed. Invalid G/L account id found.'
 	RAISERROR (50002,11,1)
@@ -59,7 +59,7 @@ END
 -- It ensures the amounts are using valid account id's (existing and active account id's)
 SELECT	@dblDebitCreditBalance = SUM(dblDebit) - SUM(dblCredit) 
 FROM	#tmpGLDetail INNER JOIN tblGLAccount
-			ON #tmpGLDetail.intAccountID = tblGLAccount.intAccountID
+			ON #tmpGLDetail.intAccountId = tblGLAccount.intAccountID
 WHERE	ISNULL(tblGLAccount.ysnActive, 0) = 1
 
 IF ISNULL(@dblDebitCreditBalance, 0) <> 0
@@ -146,9 +146,9 @@ INSERT INTO tblGLDetail (
 		,intConcurrencyId	
 )
 SELECT 
-		strBatchID
+		strBatchId
 		,dtmDate	
-		,intAccountID
+		,intAccountId
 		,strAccountGroup
 		,dblDebit
 		,dblCredit
@@ -156,21 +156,21 @@ SELECT
 		,dblCreditUnit
 		,strDescription
 		,strCode
-		,strTransactionID
+		,strTransactionId
 		,strReference
-		,strJobID
-		,intCurrencyID
+		,strJobId
+		,intCurrencyId
 		,dblExchangeRate
 		,dtmDateEntered
 		,dtmTransactionDate
-		,strProductID
-		,strWarehouseID
+		,strProductId
+		,strWarehouseId
 		,strNum
 		,strCompanyName
 		,strBillInvoiceNumber
 		,strJournalLineDescription
 		,ysnIsUnposted
-		,intUserID
+		,intUserId
 		,strTransactionForm
 		,strModuleName
 		,strUOMCode
@@ -193,7 +193,7 @@ FROM	(
 					,dtmDate	= ISNULL(CONVERT(VARCHAR(10), B.dtmDate, 112), '') 								
 			FROM	tblGLSummary A INNER JOIN #tmpGLDetail B
 						ON CONVERT(VARCHAR(10), A.dtmDate, 112) = CONVERT(VARCHAR(10), B.dtmDate, 112)
-						AND A.intAccountID = B.intAccountID			
+						AND A.intAccountID = B.intAccountId
 			WHERE	@ysnRecap = 0 
 			GROUP BY	ISNULL(CONVERT(VARCHAR(10), B.dtmDate, 112), ''), 
 						A.intAccountID
@@ -212,7 +212,7 @@ INSERT INTO tblGLSummary (
 		,dblCreditUnit
 		,intConcurrencyId
 )
-SELECT	#tmpGLDetail.intAccountID
+SELECT	#tmpGLDetail.intAccountId
 		,ISNULL(CONVERT(VARCHAR(10), #tmpGLDetail.dtmDate, 112), '')
 		,SUM(#tmpGLDetail.dblDebit)
 		,SUM(#tmpGLDetail.dblCredit)
@@ -224,11 +224,11 @@ WHERE	NOT EXISTS (
 			SELECT	TOP 1 1
 			FROM	tblGLSummary
 			WHERE	ISNULL(CONVERT(VARCHAR(10), #tmpGLDetail.dtmDate, 112), '') = ISNULL(CONVERT(VARCHAR(10), tblGLSummary.dtmDate, 112), '') 
-					AND #tmpGLDetail.intAccountID = tblGLSummary.intAccountID
+					AND #tmpGLDetail.intAccountId = tblGLSummary.intAccountID
 		)
 		AND @ysnRecap = 0
 GROUP BY	ISNULL(CONVERT(VARCHAR(10), #tmpGLDetail.dtmDate, 112), ''), 
-			#tmpGLDetail.intAccountID
+			#tmpGLDetail.intAccountId
 
 
 --=====================================================================================================================================
