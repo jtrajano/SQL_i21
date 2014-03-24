@@ -167,9 +167,9 @@ BEGIN
 	WHERE intBankAccountId = @intBankAccountId
 	
 	-- 2.7. Drop the temp table. 
-	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE Id = OBJECT_Id('TEMPDB..#tmpClearedTransactions')) DROP TABLE #tmpClearedTransactions
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpClearedTransactions')) DROP TABLE #tmpClearedTransactions
 END
 
 -- 3. Drop the temp table. 
-IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE Id = OBJECT_Id('TEMPDB..#tmpBankAccounts')) DROP TABLE #tmpBankAccounts
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBankAccounts')) DROP TABLE #tmpBankAccounts
 GO 

@@ -445,4 +445,4 @@ Recap_Rollback:
 -- Clean-up routines:
 -- Delete all temporary tables used during the post transaction. 
 Post_Exit:
-	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE Id = OBJECT_Id('TEMPDB..#tmpGLDetail')) DROP TABLE #tmpGLDetail
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpGLDetail')) DROP TABLE #tmpGLDetail
