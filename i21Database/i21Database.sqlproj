@@ -252,7 +252,7 @@
     <Build Include="dbo\Tables\tblSMShipVia.sql" />
     <Build Include="dbo\Tables\tblSMStartingNumber.sql" />
     <Build Include="dbo\Tables\tblSMTerm.sql" />
-    <Build Include="dbo\Tables\tblSMUserMenu.sql" />
+    <Build Include="dbo\Tables\tblSMUserSecurityMenu.sql" />
     <Build Include="dbo\Tables\tblSMUserRole.sql" />
     <Build Include="dbo\Tables\tblSMUserRoleMenu.sql" />
     <Build Include="dbo\Tables\tblSMUserSecurity.sql" />
