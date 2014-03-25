@@ -1,5 +1,5 @@
 ﻿/*
-	This stored procedure is use to Queue print jobs. 
+	This stored procedure is used to Queue print jobs. 
 	1. It assign check numbers to those transaction set as "To Be Printed". 
 	2. It updates the Check Number Audit. 
 	3. It creates new audit log records for manually entered check numbers. 
@@ -203,26 +203,32 @@ SELECT
 FROM	#tmpPrintJobSpoolTable
 IF @@ERROR <> 0 GOTO _ROLLBACK
 
--- Update the next check number in the bank accounts table
-IF ( ISNUMERIC(@strNextCheckNumber) = 1)
-BEGIN 
-	-- Get the next check number 
-	SELECT TOP 1 
-			@strNextCheckNumber = strCheckNo
-	FROM	dbo.tblCMCheckNumberAudit
-	WHERE	intBankAccountId = @intBankAccountId			
-			AND strCheckNo > @strNextCheckNumber
-			AND intCheckNoStatus = @CHECK_NUMBER_STATUS_UNUSED
-	ORDER BY intCheckNumberAuditId
+-- Retrieve the highest check number entered for the print queue. 
+SET @strNextCheckNumber = NULL 
+SELECT	TOP 1 
+		@strNextCheckNumber = MAX(dbo.fnAddZeroPrefixes(strCheckNo))
+FROM	#tmpPrintJobSpoolTable
+WHERE	ISNUMERIC(strCheckNo) = 1
 
+-- Increment the next check number 
+IF (@strNextCheckNumber IS NOT NULL)
+BEGIN 
 	-- Update the next check number 
 	UPDATE	dbo.tblCMBankAccount
-	SET		intCheckNextNo = CAST(@strNextCheckNumber AS INT)
+	SET		intCheckNextNo = CAST(dbo.fnAddZeroPrefixes(@strNextCheckNumber) AS INT) + 1
 	WHERE	intBankAccountId = @intBankAccountId
 			AND ISNULL(@strNextCheckNumber, '') <> ''
+			AND intCheckNextNo <= CAST(dbo.fnAddZeroPrefixes(@strNextCheckNumber) AS INT)
+	IF @@ERROR <> 0 GOTO _ROLLBACK
 
-	
-	
+	-- Update the next check number to the checkbook in origin.
+	UPDATE	dbo.apcbkmst_origin
+	SET		apcbk_next_chk_no = CAST(dbo.fnAddZeroPrefixes(@strNextCheckNumber) AS INT) + 1
+	FROM	dbo.apcbkmst_origin O INNER JOIN dbo.tblCMBankAccount f
+				ON f.strCbkNo = O.apcbk_no COLLATE Latin1_General_CI_AS
+	WHERE	f.intBankAccountId = @intBankAccountId
+			AND ISNULL(@strNextCheckNumber, '') <> ''
+			AND O.apcbk_next_chk_no <= CAST(dbo.fnAddZeroPrefixes(@strNextCheckNumber) AS INT)  
 	IF @@ERROR <> 0 GOTO _ROLLBACK
 END 
 
