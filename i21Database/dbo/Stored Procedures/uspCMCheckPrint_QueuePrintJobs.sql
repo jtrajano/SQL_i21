@@ -109,8 +109,7 @@ END
 
 -- Get the next check number from the bank account table
 SELECT TOP 1 
-		@strNextCheckNumber = REPLICATE('0', 20 - LEN(CAST(
-		intCheckNextNo AS NVARCHAR(20)))) + CAST(intCheckNextNo AS NVARCHAR(20))
+		@strNextCheckNumber = dbo.fnCMAddZeroPrefixes(intCheckNextNo)		
 FROM	dbo.tblCMBankAccount
 WHERE	intBankAccountId = @intBankAccountId
 IF @@ERROR <> 0 GOTO _ROLLBACK
@@ -221,6 +220,8 @@ BEGIN
 	SET		intCheckNextNo = CAST(@strNextCheckNumber AS INT)
 	WHERE	intBankAccountId = @intBankAccountId
 			AND ISNULL(@strNextCheckNumber, '') <> ''
+
+	
 	
 	IF @@ERROR <> 0 GOTO _ROLLBACK
 END 

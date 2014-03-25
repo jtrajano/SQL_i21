@@ -50,7 +50,7 @@ BEGIN
 		SELECT	TOP 1 1 
 		FROM	dbo.tblCMCheckNumberAudit 
 		WHERE	intBankAccountId = @intBankAccountId 
-				AND strCheckNo = REPLICATE('0', 20 - LEN(CAST(@intCheckNumber AS NVARCHAR(20)))) + CAST(@intCheckNumber AS NVARCHAR(20))
+				AND strCheckNo = dbo.fnCMAddZeroPrefixes(@intCheckNumber)	
 	)
 	BEGIN 
 		INSERT INTO dbo.tblCMCheckNumberAudit(
@@ -65,7 +65,7 @@ BEGIN
 				,dtmCheckPrinted
 				,intConcurrencyId
 		)
-		SELECT	strCheckNo			= REPLICATE('0', 20 - LEN(CAST(@intCheckNumber AS NVARCHAR(20)))) + CAST(@intCheckNumber AS NVARCHAR(20))
+		SELECT	strCheckNo			= dbo.fnCMAddZeroPrefixes(@intCheckNumber) 
 				,intBankAccountId	= @intBankAccountId
 				,intCheckNoStatus	= @CHECK_NUMBER_STATUS_UNUSED
 				,strRemarks			= NULL
