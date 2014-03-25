@@ -26,7 +26,7 @@
     [intInventoryStatusTypeId] INT             DEFAULT 0 NULL,
     [intTankTypeId]            INT             DEFAULT 0 NULL,
     [intMeterTypeId]           INT             DEFAULT 0 NULL,
-    [intRegulatorTypeID]       INT             DEFAULT 0 NULL,
+    [intRegulatorTypeId]       INT             DEFAULT 0 NULL,
     [intLinkedToTankID]        INT             DEFAULT 0 NULL,
     [strMeterStatus]           NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [dblMeterReading]          NUMERIC (18, 6) DEFAULT 0 NULL,
@@ -37,10 +37,10 @@
     CONSTRAINT [FK_tblTMDevice_tblTMDeployedStatus] FOREIGN KEY ([intDeployedStatusID]) REFERENCES [dbo].[tblTMDeployedStatus] ([intDeployedStatusID]) ON DELETE SET NULL,
     CONSTRAINT [FK_tblTMDevice_tblTMDevice] FOREIGN KEY ([intParentDeviceID]) REFERENCES [dbo].[tblTMDevice] ([intDeviceID]),
     CONSTRAINT [FK_tblTMDevice_tblTMDeviceType] FOREIGN KEY ([intDeviceTypeId]) REFERENCES [dbo].[tblTMDeviceType] ([intDeviceTypeId]),
-    CONSTRAINT [FK_tblTMDevice_tblTMInventoryStatus] FOREIGN KEY ([intInventoryStatusTypeId]) REFERENCES [dbo].[tblTMInventoryStatusType] ([intInventoryStatusTypeId]) ON UPDATE CASCADE,
+    CONSTRAINT [FK_tblTMDevice_tblTMInventoryStatus] FOREIGN KEY ([intInventoryStatusTypeId]) REFERENCES [dbo].[tblTMInventoryStatusType] ([intInventoryStatusTypeId]),
     CONSTRAINT [FK_tblTMDevice_tblTMLease] FOREIGN KEY ([intLeaseID]) REFERENCES [dbo].[tblTMLease] ([intLeaseID]) ON DELETE SET NULL,
     CONSTRAINT [FK_tblTMDevice_tblTMMeterType] FOREIGN KEY ([intMeterTypeId]) REFERENCES [dbo].[tblTMMeterType] ([intMeterTypeId]),
-    CONSTRAINT [FK_tblTMDevice_tblTMRegulatorType] FOREIGN KEY ([intRegulatorTypeID]) REFERENCES [dbo].[tblTMRegulatorType] ([intRegulatorTypeID]),
+    CONSTRAINT [FK_tblTMDevice_tblTMRegulatorType] FOREIGN KEY ([intRegulatorTypeId]) REFERENCES [dbo].[tblTMRegulatorType] ([intRegulatorTypeId]),
     CONSTRAINT [FK_tblTMDevice_tblTMTankType] FOREIGN KEY ([intTankTypeId]) REFERENCES [dbo].[tblTMTankType] ([intTankTypeId])
 );
 
