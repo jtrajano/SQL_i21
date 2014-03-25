@@ -296,7 +296,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 					,apcbk_stmt_lock_rev_dt		= i.apcbk_stmt_lock_rev_dt
 					,apcbk_gl_close_rev_dt		= i.apcbk_gl_close_rev_dt
 					,apcbk_bal					= NULL
-					,apcbk_next_chk_no			= NULL
+					,apcbk_next_chk_no			= i.intCheckNextNo
 					,apcbk_next_eft_no			= NULL 
 					,apcbk_check_format_cs		= i.apcbk_check_format_cs
 					,apcbk_laser_down_lines		= i.apcbk_laser_down_lines
@@ -313,8 +313,8 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 					,apcbk_gl_curr				= 0
 					,apcbk_active_yn			= CASE WHEN i.ysnActive = 1 THEN ''Y'' ELSE ''N'' END 
 					,apcbk_bnk_no				= NULL
-					,apcbk_user_id				= NULL 
-					,apcbk_user_rev_dt			= 0
+					,apcbk_user_id				= dbo.fnCMConverti21UserIdtoOrigin(i.intCreatedUserId)
+					,apcbk_user_rev_dt			= CONVERT(VARCHAR(10), i.dtmLastModified, 112)
 			FROM	inserted i INNER JOIN dbo.tblCMBank bank
 						ON i.intBankId = bank.intBankId
 			WHERE	ISNULL(i.strCbkNo, '''') <> ''''
@@ -419,7 +419,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 					,apcbk_stmt_lock_rev_dt		= i.apcbk_stmt_lock_rev_dt
 					,apcbk_gl_close_rev_dt		= i.apcbk_gl_close_rev_dt
 					--,apcbk_bal				= NULL
-					--,apcbk_next_chk_no		= NULL
+					,apcbk_next_chk_no			= i.intCheckNextNo
 					--,apcbk_next_eft_no		= NULL 
 					,apcbk_check_format_cs		= i.apcbk_check_format_cs
 					,apcbk_laser_down_lines		= i.apcbk_laser_down_lines
@@ -436,8 +436,8 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 					--,apcbk_gl_curr			= 0
 					,apcbk_active_yn			= CASE WHEN i.ysnActive = 1 THEN ''Y'' ELSE ''N'' END 
 					--,apcbk_bnk_no				= NULL
-					--,apcbk_user_id			= NULL 
-					--,apcbk_user_rev_dt		= 0	
+					,apcbk_user_id				= dbo.fnCMConverti21UserIdtoOrigin(i.intLastModifiedUserId)
+					,apcbk_user_rev_dt			= CONVERT(VARCHAR(10), i.dtmLastModified, 112)
 			FROM	inserted i INNER JOIN deleted d
 						ON i.intBankAccountId = d.intBankAccountId
 					INNER JOIN dbo.apcbkmst_origin origin
@@ -500,7 +500,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 					,apcbk_stmt_lock_rev_dt		= i.apcbk_stmt_lock_rev_dt
 					,apcbk_gl_close_rev_dt		= i.apcbk_gl_close_rev_dt
 					,apcbk_bal					= NULL
-					,apcbk_next_chk_no			= NULL
+					,apcbk_next_chk_no			= i.intCheckNextNo
 					,apcbk_next_eft_no			= NULL 
 					,apcbk_check_format_cs		= i.apcbk_check_format_cs
 					,apcbk_laser_down_lines		= i.apcbk_laser_down_lines
@@ -517,8 +517,8 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 					,apcbk_gl_curr				= 0
 					,apcbk_active_yn			= CASE WHEN i.ysnActive = 1 THEN ''Y'' ELSE ''N'' END 
 					,apcbk_bnk_no				= NULL
-					,apcbk_user_id				= NULL 
-					,apcbk_user_rev_dt			= 0
+					,apcbk_user_id				= dbo.fnCMConverti21UserIdtoOrigin(i.intLastModifiedUserId)
+					,apcbk_user_rev_dt			= CONVERT(VARCHAR(10), i.dtmLastModified, 112)
 			FROM	inserted i INNER JOIN dbo.tblCMBank bank
 						ON i.intBankId = bank.intBankId
 			WHERE	ISNULL(i.strCbkNo, '''') <> ''''

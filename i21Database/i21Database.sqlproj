@@ -452,6 +452,9 @@
     <None Include="Scripts\Post-Deployment\DB\1_CannedPanels_Panel.sql" />
     <None Include="Scripts\Post-Deployment\DB\2_CannedPanels_Column.sql" />
     <None Include="Scripts\Post-Deployment\DB\3_CannedPanels_Format.sql" />
+    <Build Include="dbo\Functions\fnCMAddZeroPrefixes.sql" />
+    <Build Include="dbo\Functions\fnCMConvertOriginUserIdtoi21.sql" />
+    <Build Include="dbo\Functions\fnCMConverti21UserIdtoOrigin.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />

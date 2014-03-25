@@ -121,10 +121,7 @@ SELECT
 		,strMemo					=	RTRIM(LTRIM(ISNULL(i.apchk_comment_1, ''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_2))) > 0 THEN CHAR(13) ELSE '' END +
 										RTRIM(LTRIM(ISNULL(i.apchk_comment_2, ''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_3))) > 0 THEN CHAR(13) ELSE '' END +
 										RTRIM(LTRIM(ISNULL(i.apchk_comment_3, ''))) 
-		,strReferenceNo				=	CASE	
-											WHEN ISNUMERIC(i.apchk_chk_no) = 1 THEN REPLICATE('0', 20 - LEN(RTRIM(LTRIM(i.apchk_chk_no)))) + RTRIM(LTRIM(i.apchk_chk_no))
-											ELSE RTRIM(LTRIM(i.apchk_chk_no))
-										END
+		,strReferenceNo				=	dbo.fnCMAddZeroPrefixes(i.apchk_chk_no)
 		,dtmCheckPrinted			=	NULL
 		,ysnCheckToBePrinted		=	1
 		,ysnCheckVoid				=	CASE
@@ -141,9 +138,9 @@ SELECT
 											ELSE 0
 										END
 		,dtmDateReconciled			=	dbo.fnCMConvertOriginDateToSQLDateTime(i.apchk_clear_rev_dt)
-		,intCreatedUserId			=	i.apchk_user_id
+		,intCreatedUserId			=	dbo.fnCMConvertOriginUserIdtoi21(i.apchk_user_id)
 		,dtmCreated					=	dbo.fnCMConvertOriginDateToSQLDateTime(i.apchk_user_rev_dt)
-		,intLastModifiedUserId		=	i.apchk_user_id
+		,intLastModifiedUserId		=	dbo.fnCMConvertOriginUserIdtoi21(i.apchk_user_id)
 		,dtmLastModified			=	dbo.fnCMConvertOriginDateToSQLDateTime(i.apchk_rev_dt)
 		,intConcurrencyId			=	1
 FROM	dbo.tblCMBankAccount f INNER JOIN apchkmst i
@@ -180,10 +177,7 @@ INSERT INTO dbo.tblCMCheckNumberAudit (
 		,dtmCheckPrinted
 )
 SELECT	intBankAccountId	= f.intBankAccountId
-		,strCheckNo			=	CASE	
-									WHEN ISNUMERIC(f.strReferenceNo) = 1 THEN REPLICATE('0', 20 - LEN(f.strReferenceNo)) + f.strReferenceNo
-									ELSE f.strReferenceNo
-								END
+		,strCheckNo			= dbo.fnCMAddZeroPrefixes(f.strReferenceNo)	
 		,intCheckNoStatus	= CASE WHEN f.ysnCheckVoid = 1 THEN @CHECK_NUMBER_STATUS_VOID ELSE @CHECK_NUMBER_STATUS_PRINTED END
 		,strRemarks			= CASE WHEN f.ysnCheckVoid = 1 THEN 'Voided from origin.' ELSE 'Generated from origin.' END
 		,intTransactionId	= f.intTransactionId
