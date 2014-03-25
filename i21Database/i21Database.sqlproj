@@ -451,13 +451,6 @@
     <Build Include="dbo\Functions\fnCMAddZeroPrefixes.sql" />
     <Build Include="dbo\Functions\fnCMConvertOriginUserIdtoi21.sql" />
     <Build Include="dbo\Functions\fnCMConverti21UserIdtoOrigin.sql" />
-    <Build Include="dbo\Tables\tblEntityType.sql" />
-    <Build Include="dbo\Tables\tblEntityToContact.sql" />
-    <Build Include="dbo\Tables\tblEntityNote.sql" />
-    <Build Include="dbo\Tables\tblEntityLocation.sql" />
-    <Build Include="dbo\Tables\tblEntityEFTInformation.sql" />
-    <Build Include="dbo\Tables\tblEntityContact.sql" />
-    <Build Include="dbo\Tables\tblEntity.sql" />
     <Build Include="dbo\Tables\tblARTerritoryDetail.sql" />
     <Build Include="dbo\Tables\tblARTerritory.sql" />
     <Build Include="dbo\Tables\tblARStatementFooter.sql" />
@@ -479,6 +472,14 @@
     <Build Include="dbo\Tables\tblARCustomerCardFueling.sql" />
     <Build Include="dbo\Tables\tblARCustomer.sql" />
     <Build Include="dbo\Tables\tblARAccountStatus.sql" />
+    <Build Include="dbo\Tables\tblARServiceCharge.sql" />
+    <Build Include="dbo\Tables\tblEntityType.sql" />
+    <Build Include="dbo\Tables\tblEntityToContact.sql" />
+    <Build Include="dbo\Tables\tblEntityNote.sql" />
+    <Build Include="dbo\Tables\tblEntityLocation.sql" />
+    <Build Include="dbo\Tables\tblEntityEFTInformation.sql" />
+    <Build Include="dbo\Tables\tblEntityContact.sql" />
+    <Build Include="dbo\Tables\tblEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
