@@ -206,7 +206,7 @@ IF @@ERROR <> 0 GOTO _ROLLBACK
 -- Retrieve the highest check number entered for the print queue. 
 SET @strNextCheckNumber = NULL 
 SELECT	TOP 1 
-		@strNextCheckNumber = MAX(dbo.fnAddZeroPrefixes(strCheckNo))
+		@strNextCheckNumber = MAX(dbo.fnCMAddZeroPrefixes(strCheckNo))
 FROM	#tmpPrintJobSpoolTable
 WHERE	ISNUMERIC(strCheckNo) = 1
 
@@ -215,20 +215,20 @@ IF (@strNextCheckNumber IS NOT NULL)
 BEGIN 
 	-- Update the next check number 
 	UPDATE	dbo.tblCMBankAccount
-	SET		intCheckNextNo = CAST(dbo.fnAddZeroPrefixes(@strNextCheckNumber) AS INT) + 1
+	SET		intCheckNextNo = CAST(dbo.fnCMAddZeroPrefixes(@strNextCheckNumber) AS INT) + 1
 	WHERE	intBankAccountId = @intBankAccountId
 			AND ISNULL(@strNextCheckNumber, '') <> ''
-			AND intCheckNextNo <= CAST(dbo.fnAddZeroPrefixes(@strNextCheckNumber) AS INT)
+			AND intCheckNextNo <= CAST(dbo.fnCMAddZeroPrefixes(@strNextCheckNumber) AS INT)
 	IF @@ERROR <> 0 GOTO _ROLLBACK
 
 	-- Update the next check number to the checkbook in origin.
 	UPDATE	dbo.apcbkmst_origin
-	SET		apcbk_next_chk_no = CAST(dbo.fnAddZeroPrefixes(@strNextCheckNumber) AS INT) + 1
+	SET		apcbk_next_chk_no = CAST(dbo.fnCMAddZeroPrefixes(@strNextCheckNumber) AS INT) + 1
 	FROM	dbo.apcbkmst_origin O INNER JOIN dbo.tblCMBankAccount f
 				ON f.strCbkNo = O.apcbk_no COLLATE Latin1_General_CI_AS
 	WHERE	f.intBankAccountId = @intBankAccountId
 			AND ISNULL(@strNextCheckNumber, '') <> ''
-			AND O.apcbk_next_chk_no <= CAST(dbo.fnAddZeroPrefixes(@strNextCheckNumber) AS INT)  
+			AND O.apcbk_next_chk_no <= CAST(dbo.fnCMAddZeroPrefixes(@strNextCheckNumber) AS INT)  
 	IF @@ERROR <> 0 GOTO _ROLLBACK
 END 
 
