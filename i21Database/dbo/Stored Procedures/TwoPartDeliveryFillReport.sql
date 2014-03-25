@@ -915,7 +915,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
     LEFT JOIN tblTMDevice E   
      ON D.intDeviceID = E.intDeviceID AND ysnAppliance = 0    
     LEFT JOIN tblTMDeviceType F   
-     ON E.intDeviceTypeID = F.intDeviceTypeID  
+     ON E.intDeviceTypeId = F.intDeviceTypeId  
   WHERE E.intDeviceID IS NOT NULL   
     AND F.strDeviceType IN ('Tank','TANK')  
     AND B.vwcus_key = @agcus_key  
@@ -1019,7 +1019,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
       ON D.intDeviceID = E.intDeviceID   
       AND ysnAppliance = 0  
      LEFT JOIN tblTMDeviceType F   
-      ON E.intDeviceTypeID = F.intDeviceTypeID  
+      ON E.intDeviceTypeId = F.intDeviceTypeId
     WHERE E.intDeviceID IS NOT NULL   
       AND UPPER(F.strDeviceType) = 'REGULATOR'  
       AND B.vwcus_key = @agcus_key   
