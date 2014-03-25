@@ -138,9 +138,9 @@ SELECT
 											ELSE 0
 										END
 		,dtmDateReconciled			=	dbo.fnCMConvertOriginDateToSQLDateTime(i.apchk_clear_rev_dt)
-		,intCreatedUserId			=	i.apchk_user_id
+		,intCreatedUserId			=	dbo.fnCMConvertOriginUserIdtoi21(i.apchk_user_id)
 		,dtmCreated					=	dbo.fnCMConvertOriginDateToSQLDateTime(i.apchk_user_rev_dt)
-		,intLastModifiedUserId		=	i.apchk_user_id
+		,intLastModifiedUserId		=	dbo.fnCMConvertOriginUserIdtoi21(i.apchk_user_id)
 		,dtmLastModified			=	dbo.fnCMConvertOriginDateToSQLDateTime(i.apchk_rev_dt)
 		,intConcurrencyId			=	1
 FROM	dbo.tblCMBankAccount f INNER JOIN apchkmst i
