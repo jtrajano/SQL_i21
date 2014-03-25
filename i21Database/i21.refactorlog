@@ -1134,4 +1134,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intDeviceTypeId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="4e588d23-a2c7-4aac-8602-cfffc9870b40" ChangeDateTime="03/25/2014 05:48:51">
+    <Property Name="ElementName" Value="[dbo].[tblTMRegulatorType].[intRegulatorTypeID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMRegulatorType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intRegulatorTypeId" />
+  </Operation>
 </Operations>
