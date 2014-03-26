@@ -10,4 +10,4 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-SELECT dblAmount = [dbo].[fnCMGetUnclearedDeposits](@intBankAccountId, @dtmStatementDate)
+SELECT dblAmount = [dbo].[fnGetUnclearedDeposits](@intBankAccountId, @dtmStatementDate)

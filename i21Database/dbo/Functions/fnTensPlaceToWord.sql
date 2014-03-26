@@ -1,5 +1,5 @@
 ﻿
-CREATE FUNCTION fnCMTensPlaceToWord(@dblAmount AS NUMERIC(9, 2))
+CREATE FUNCTION fnTensPlaceToWord(@dblAmount AS NUMERIC(9, 2))
 RETURNS	NVARCHAR(2000)
 AS
 BEGIN
@@ -12,7 +12,7 @@ IF @dblAmount > 99 or @dblAmount < 0 RETURN ''
 
 SET @intPlaceHolder = @dblAmount / 10
 IF @dblAmount < 10
-	SELECT @strReturnValue = dbo.fnCMOnesPlaceToWord(@dblAmount)
+	SELECT @strReturnValue = dbo.fnOnesPlaceToWord(@dblAmount)
 ELSE IF @intPlaceHolder = 1
 BEGIN
 	SELECT @strReturnValue =	CASE WHEN @dblAmount = 10 THEN 'Ten'
@@ -39,7 +39,7 @@ BEGIN
 									 WHEN @intPlaceHolder = 9 THEN 'Ninety'
 								END	
 	SET @intPlaceHolder = @dblAmount - (10 * @intPlaceHolder)
-	SELECT @strAmountChild = dbo.fnCMOnesPlaceToWord(@intPlaceHolder)
+	SELECT @strAmountChild = dbo.fnOnesPlaceToWord(@intPlaceHolder)
 	IF @strAmountChild <> '' SELECT @strReturnValue = @strReturnValue + '-' + @strAmountChild 	
 END
 

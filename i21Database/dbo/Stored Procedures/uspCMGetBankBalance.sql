@@ -11,4 +11,4 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 SELECT	intBankAccountId = @intBankAccountId,
-		dblBalance = [dbo].[fnCMGetBankBalance] (@intBankAccountId, @dtmDate)
+		dblBalance = [dbo].[fnGetBankBalance] (@intBankAccountId, @dtmDate)

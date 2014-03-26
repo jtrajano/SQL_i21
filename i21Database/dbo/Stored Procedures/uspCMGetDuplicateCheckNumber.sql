@@ -41,6 +41,6 @@ WHERE	strTransactionId <> @strTransactionId
 		AND intBankTransactionTypeId IN (@MISC_CHECKS, @ORIGIN_CHECKS, @AP_PAYMENT)
 		AND (
 			strReferenceNo = @strCheckNo 
-			OR strReferenceNo = dbo.fnCMAddZeroPrefixes(@strCheckNo)
+			OR strReferenceNo = dbo.fnAddZeroPrefixes(@strCheckNo)
 		)
 		AND @strCheckNo <> ''

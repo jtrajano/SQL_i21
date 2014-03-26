@@ -1,4 +1,4 @@
-﻿CREATE FUNCTION [dbo].[fnCMGetClearedDeposits]
+﻿CREATE FUNCTION [dbo].[fnGetClearedDeposits]
 (
 	@intBankAccountId INT = NULL,
 	@dtmStatementDate AS DATETIME = NULL

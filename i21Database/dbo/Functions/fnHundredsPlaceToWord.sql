@@ -1,5 +1,5 @@
 ﻿
-CREATE FUNCTION fnCMHundredsPlaceToWord(@dblAmount AS NUMERIC(9, 2))
+CREATE FUNCTION fnHundredsPlaceToWord(@dblAmount AS NUMERIC(9, 2))
 RETURNS NVARCHAR(2000)
 AS
 BEGIN 
@@ -16,7 +16,7 @@ SET @intPlaceHolder = @dblAmount / 100
 IF @dblAmount < 100 
 	BEGIN
 		SET @intPlaceHolder = @dblAmount 
-		SELECT @strAmountChild = dbo.fnCMTensPlaceToWord(@intPlaceHolder)
+		SELECT @strAmountChild = dbo.fnTensPlaceToWord(@intPlaceHolder)
 		IF @strAmountChild <> '' SELECT @strReturnValue = @strAmountChild		
 	END
 ELSE
@@ -33,7 +33,7 @@ BEGIN
 										WHEN @intPlaceHolder = 9 THEN 'Nine Hundred'
 								END
 		SET @intPlaceHolder = @dblAmount - (100 * @intPlaceHolder)
-		SELECT @strAmountChild = dbo.fnCMTensPlaceToWord(@intPlaceHolder)
+		SELECT @strAmountChild = dbo.fnTensPlaceToWord(@intPlaceHolder)
 		IF @strAmountChild <> '' SET @strReturnValue = @strReturnValue + ' ' + @strAmountChild				
 	END
 END

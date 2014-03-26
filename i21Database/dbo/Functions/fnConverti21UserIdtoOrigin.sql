@@ -1,5 +1,5 @@
 ﻿-- This function retrieves the user id from i21 and tries to get its equivalent in Origin. 
-CREATE FUNCTION [dbo].[fnCMConverti21UserIdtoOrigin](@intUserId AS INT)
+CREATE FUNCTION [dbo].[fnConverti21UserIdtoOrigin](@intUserId AS INT)
 RETURNS CHAR(16)
 AS
 BEGIN 

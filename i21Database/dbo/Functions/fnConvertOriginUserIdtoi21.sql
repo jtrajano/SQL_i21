@@ -1,5 +1,5 @@
 ﻿-- This function retrieves the user id from Origin and tries to get its equivalent in i21. 
-CREATE FUNCTION [dbo].[fnCMConvertOriginUserIdtoi21](@user_id AS NVARCHAR(MAX))
+CREATE FUNCTION [dbo].[fnConvertOriginUserIdtoi21](@user_id AS NVARCHAR(MAX))
 RETURNS INT
 AS
 BEGIN 

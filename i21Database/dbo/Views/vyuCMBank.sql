@@ -1,5 +1,5 @@
 ﻿
-CREATE VIEW [dbo].vwCMBank
+CREATE VIEW [dbo].vyuCMBank
 AS 
 
 SELECT * FROM tblCMBank

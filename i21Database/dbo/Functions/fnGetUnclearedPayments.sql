@@ -1,4 +1,4 @@
-﻿CREATE FUNCTION [dbo].[fnCMGetUnclearedPayments]
+﻿CREATE FUNCTION [dbo].[fnGetUnclearedPayments]
 (
 	@intBankAccountId INT = NULL,
 	@dtmStatementDate AS DATETIME = NULL

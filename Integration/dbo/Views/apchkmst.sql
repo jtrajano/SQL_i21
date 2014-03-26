@@ -10,7 +10,7 @@
 			')
 
 		EXEC('
-			CREATE TRIGGER trg_delete_apchkmst
+			CREATE TRIGGER trgInsteadOfDeleteCMApchkmst
 			ON [dbo].apchkmst
 			INSTEAD OF DELETE
 			AS
@@ -88,7 +88,7 @@
 			')
 
 		EXEC ('
-			CREATE TRIGGER trg_insert_apchkmst
+			CREATE TRIGGER trgInsteadOfInsertCMApchkmst
 			ON [dbo].apchkmst
 			INSTEAD OF INSERT
 			AS
@@ -258,9 +258,9 @@
 															WHEN i.apchk_chk_amt < 0 THEN @ORIGIN_DEPOSIT
 														END
 						,intBankAccountId			=	f.intBankAccountId
-						,intCurrencyId				=	dbo.fnCMGetCurrencyIdFromOriginToi21(i.apchk_currency_cnt)
+						,intCurrencyId				=	dbo.fnGetCurrencyIdFromOriginToi21(i.apchk_currency_cnt)
 						,dblExchangeRate			=	ISNULL(i.apchk_currency_rt, 1)
-						,dtmDate					=	dbo.fnCMConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt)
+						,dtmDate					=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt)
 						,strPayee					=	RTRIM(LTRIM(ISNULL(i.apchk_name, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_1))) > 0 THEN '', ''  ELSE '''' END +
 														RTRIM(LTRIM(ISNULL(i.apchk_payee_1, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_2))) > 0 THEN '', ''  ELSE '''' END +
 														RTRIM(LTRIM(ISNULL(i.apchk_payee_2, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_3))) > 0 THEN '', ''  ELSE '''' END +
@@ -274,12 +274,12 @@
 						,strState					=	RTRIM(LTRIM(i.apchk_st))
 						,strCountry					=	NULL
 						,dblAmount					=	ABS(i.apchk_chk_amt) -- Import as a positive AMOUNT value. 
-						,strAmountInWords			=	dbo.fnCMConvertNumberToWord(ABS(i.apchk_chk_amt))
+						,strAmountInWords			=	dbo.fnConvertNumberToWord(ABS(i.apchk_chk_amt))
 						,strMemo					=	RTRIM(LTRIM(ISNULL(i.apchk_comment_1, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_2))) > 0 THEN CHAR(13) ELSE '''' END +
 														RTRIM(LTRIM(ISNULL(i.apchk_comment_2, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_3))) > 0 THEN CHAR(13) ELSE '''' END +
 														RTRIM(LTRIM(ISNULL(i.apchk_comment_3, ''''))) 
-						,strReferenceNo				=	dbo.fnCMAddZeroPrefixes(i.apchk_chk_no)
-						,dtmCheckPrinted			=	dbo.fnCMConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt)
+						,strReferenceNo				=	dbo.fnAddZeroPrefixes(i.apchk_chk_no)
+						,dtmCheckPrinted			=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt)
 						,ysnCheckToBePrinted		=	1
 						,ysnCheckVoid				=	CASE
 															WHEN i.apchk_void_ind = ''Y'' THEN 1
@@ -294,17 +294,17 @@
 															WHEN i.apchk_cleared_ind = ''C'' THEN 1
 															ELSE 0
 														END
-						,dtmDateReconciled			=	dbo.fnCMConvertOriginDateToSQLDateTime(i.apchk_clear_rev_dt)
-						,intCreatedUserId			=	dbo.fnCMConvertOriginUserIdtoi21(i.apchk_user_id)
-						,dtmCreated					=	dbo.fnCMConvertOriginDateToSQLDateTime(i.apchk_user_rev_dt)
-						,intLastModifiedUserId		=	dbo.fnCMConvertOriginUserIdtoi21(i.apchk_user_id)
-						,dtmLastModified			=	dbo.fnCMConvertOriginDateToSQLDateTime(i.apchk_rev_dt)
+						,dtmDateReconciled			=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_clear_rev_dt)
+						,intCreatedUserId			=	dbo.fnConvertOriginUserIdtoi21(i.apchk_user_id)
+						,dtmCreated					=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_user_rev_dt)
+						,intLastModifiedUserId		=	dbo.fnConvertOriginUserIdtoi21(i.apchk_user_id)
+						,dtmLastModified			=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt)
 						,intConcurrencyId			=	1
 				FROM	dbo.tblCMBankAccount f INNER JOIN inserted i
 							ON f.strCbkNo = i.apchk_cbk_no COLLATE Latin1_General_CI_AS
 				WHERE	f.intBankAccountId IS NOT NULL
 						AND i.apchk_chk_amt <> 0
-						AND dbo.fnCMConvertOriginDateToSQLDateTime(apchk_gl_rev_dt) IS NOT NULL
+						AND dbo.fnConvertOriginDateToSQLDateTime(apchk_gl_rev_dt) IS NOT NULL
 				IF @@ERROR <> 0 GOTO EXIT_TRIGGER	 
 	
 				-- Check number audit process: 
@@ -340,7 +340,7 @@
 						,dtmCheckPrinted
 				)
 				SELECT	intBankAccountId	= f.intBankAccountId
-						,strCheckNo			= dbo.fnCMAddZeroPrefixes(f.strReferenceNo)	
+						,strCheckNo			= dbo.fnAddZeroPrefixes(f.strReferenceNo)	
 						,intCheckNoStatus	= CASE WHEN f.ysnCheckVoid = 1 THEN @CHECK_NUMBER_STATUS_VOID ELSE @CHECK_NUMBER_STATUS_PRINTED END
 						,strRemarks			= CASE WHEN f.ysnCheckVoid = 1 THEN ''Voided from origin.'' ELSE ''Generated from origin.'' END
 						,intTransactionId	= f.intTransactionId
@@ -387,7 +387,7 @@
 			')
 
 	EXEC ('
-			CREATE TRIGGER trg_update_apchkmst
+			CREATE TRIGGER trgInsteadOfUpdateCMApchkmst
 			ON [dbo].apchkmst
 			INSTEAD OF UPDATE
 			AS
@@ -533,9 +533,9 @@
 																WHEN i.apchk_chk_amt < 0 THEN @ORIGIN_DEPOSIT
 															END
 							,intBankAccountId			=	f.intBankAccountId
-							,intCurrencyId				=	dbo.fnCMGetCurrencyIdFromOriginToi21(i.apchk_currency_cnt)
+							,intCurrencyId				=	dbo.fnGetCurrencyIdFromOriginToi21(i.apchk_currency_cnt)
 							,dblExchangeRate			=	ISNULL(i.apchk_currency_rt, 1)
-							,dtmDate					=	dbo.fnCMConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt)
+							,dtmDate					=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt)
 							,strPayee					=	RTRIM(LTRIM(ISNULL(i.apchk_name, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_1))) > 0 THEN '', ''  ELSE '''' END +
 															RTRIM(LTRIM(ISNULL(i.apchk_payee_1, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_2))) > 0 THEN '', ''  ELSE '''' END +
 															RTRIM(LTRIM(ISNULL(i.apchk_payee_2, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_3))) > 0 THEN '', ''  ELSE '''' END +
@@ -549,12 +549,12 @@
 							,strState					=	RTRIM(LTRIM(i.apchk_st))
 							,strCountry					=	NULL
 							,dblAmount					=	ABS(i.apchk_chk_amt) -- Import as a positive AMOUNT value. 
-							,strAmountInWords			=	dbo.fnCMConvertNumberToWord(ABS(i.apchk_chk_amt))
+							,strAmountInWords			=	dbo.fnConvertNumberToWord(ABS(i.apchk_chk_amt))
 							,strMemo					=	RTRIM(LTRIM(ISNULL(i.apchk_comment_1, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_2))) > 0 THEN CHAR(13) ELSE '''' END +
 															RTRIM(LTRIM(ISNULL(i.apchk_comment_2, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_3))) > 0 THEN CHAR(13) ELSE '''' END +
 															RTRIM(LTRIM(ISNULL(i.apchk_comment_3, ''''))) 
-							,strReferenceNo				=	dbo.fnCMAddZeroPrefixes(i.apchk_chk_no)
-							,dtmCheckPrinted			=	dbo.fnCMConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt) 
+							,strReferenceNo				=	dbo.fnAddZeroPrefixes(i.apchk_chk_no)
+							,dtmCheckPrinted			=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt) 
 							,ysnCheckToBePrinted		=	1
 							,ysnCheckVoid				=	CASE
 																WHEN i.apchk_void_ind = ''Y'' THEN 1
@@ -569,17 +569,17 @@
 																WHEN i.apchk_cleared_ind = ''C'' THEN 1
 																ELSE 0
 															END
-							,dtmDateReconciled			=	dbo.fnCMConvertOriginDateToSQLDateTime(i.apchk_clear_rev_dt)
-							,intCreatedUserId			=	dbo.fnCMConvertOriginUserIdtoi21(i.apchk_user_id)
-							,dtmCreated					=	dbo.fnCMConvertOriginDateToSQLDateTime(i.apchk_user_rev_dt)
-							,intLastModifiedUserId		=	dbo.fnCMConvertOriginUserIdtoi21(i.apchk_user_id)
-							,dtmLastModified			=	dbo.fnCMConvertOriginDateToSQLDateTime(i.apchk_rev_dt)
+							,dtmDateReconciled			=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_clear_rev_dt)
+							,intCreatedUserId			=	dbo.fnConvertOriginUserIdtoi21(i.apchk_user_id)
+							,dtmCreated					=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_user_rev_dt)
+							,intLastModifiedUserId		=	dbo.fnConvertOriginUserIdtoi21(i.apchk_user_id)
+							,dtmLastModified			=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt)
 							,intConcurrencyId			=	1
 					FROM	dbo.tblCMBankAccount f INNER JOIN inserted i
 								ON f.strCbkNo = i.apchk_cbk_no COLLATE Latin1_General_CI_AS  	
 					WHERE	f.intBankAccountId IS NOT NULL
 							AND i.apchk_chk_amt <> 0
-							AND dbo.fnCMConvertOriginDateToSQLDateTime(apchk_gl_rev_dt) IS NOT NULL				
+							AND dbo.fnConvertOriginDateToSQLDateTime(apchk_gl_rev_dt) IS NOT NULL				
 					IF @@ERROR <> 0 GOTO EXIT_TRIGGER	
 				END		
 				ELSE 
@@ -604,9 +604,9 @@
 																WHEN i.apchk_chk_amt < 0 THEN @ORIGIN_DEPOSIT
 															END
 							,intBankAccountId			=	e.intBankAccountId
-							,intCurrencyId				=	dbo.fnCMGetCurrencyIdFromOriginToi21(i.apchk_currency_cnt)
+							,intCurrencyId				=	dbo.fnGetCurrencyIdFromOriginToi21(i.apchk_currency_cnt)
 							,dblExchangeRate			=	ISNULL(i.apchk_currency_rt, 1)
-							,dtmDate					=	dbo.fnCMConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt)
+							,dtmDate					=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt)
 							,strPayee					=	RTRIM(LTRIM(ISNULL(i.apchk_name, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_1))) > 0 THEN '', ''  ELSE '''' END +
 															RTRIM(LTRIM(ISNULL(i.apchk_payee_1, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_2))) > 0 THEN '', ''  ELSE '''' END +
 															RTRIM(LTRIM(ISNULL(i.apchk_payee_2, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_3))) > 0 THEN '', ''  ELSE '''' END +
@@ -620,12 +620,12 @@
 							,strState					=	RTRIM(LTRIM(i.apchk_st))
 							,strCountry					=	NULL
 							,dblAmount					=	ABS(i.apchk_chk_amt) -- Import as a positive AMOUNT value. 
-							,strAmountInWords			=	dbo.fnCMConvertNumberToWord(ABS(i.apchk_chk_amt))
+							,strAmountInWords			=	dbo.fnConvertNumberToWord(ABS(i.apchk_chk_amt))
 							,strMemo					=	RTRIM(LTRIM(ISNULL(i.apchk_comment_1, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_2))) > 0 THEN CHAR(13) ELSE '''' END +
 															RTRIM(LTRIM(ISNULL(i.apchk_comment_2, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_3))) > 0 THEN CHAR(13) ELSE '''' END +
 															RTRIM(LTRIM(ISNULL(i.apchk_comment_3, ''''))) 
-							,strReferenceNo				=	dbo.fnCMAddZeroPrefixes(i.apchk_chk_no)
-							,dtmCheckPrinted			=	dbo.fnCMConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt)
+							,strReferenceNo				=	dbo.fnAddZeroPrefixes(i.apchk_chk_no)
+							,dtmCheckPrinted			=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt)
 							,ysnCheckToBePrinted		=	1
 							,ysnCheckVoid				=	CASE
 																WHEN i.apchk_void_ind = ''Y'' THEN 1
@@ -640,11 +640,11 @@
 																WHEN i.apchk_cleared_ind = ''C'' THEN 1
 																ELSE 0
 															END
-							,dtmDateReconciled			=	dbo.fnCMConvertOriginDateToSQLDateTime(i.apchk_clear_rev_dt)
-							,intCreatedUserId			=	dbo.fnCMConvertOriginUserIdtoi21(i.apchk_user_id)
-							,dtmCreated					=	dbo.fnCMConvertOriginDateToSQLDateTime(i.apchk_user_rev_dt)
-							,intLastModifiedUserId		=	dbo.fnCMConvertOriginUserIdtoi21(i.apchk_user_id)
-							,dtmLastModified			=	dbo.fnCMConvertOriginDateToSQLDateTime(i.apchk_rev_dt)
+							,dtmDateReconciled			=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_clear_rev_dt)
+							,intCreatedUserId			=	dbo.fnConvertOriginUserIdtoi21(i.apchk_user_id)
+							,dtmCreated					=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_user_rev_dt)
+							,intLastModifiedUserId		=	dbo.fnConvertOriginUserIdtoi21(i.apchk_user_id)
+							,dtmLastModified			=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt)
 							,intConcurrencyId			=	f.intConcurrencyId + 1
 					FROM	inserted i INNER JOIN dbo.tblCMBankTransaction f
 								ON f.strLink = ( CAST(i.apchk_cbk_no AS NVARCHAR(2)) 
@@ -658,7 +658,7 @@
 								AND e.intBankAccountId = f.intBankAccountId				
 					WHERE	e.intBankAccountId IS NOT NULL
 							AND i.apchk_chk_amt <> 0
-							AND dbo.fnCMConvertOriginDateToSQLDateTime(apchk_gl_rev_dt) IS NOT NULL
+							AND dbo.fnConvertOriginDateToSQLDateTime(apchk_gl_rev_dt) IS NOT NULL
 							AND f.ysnClr = 0
 					IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 				END
@@ -696,7 +696,7 @@
 						,dtmCheckPrinted
 				)
 				SELECT	intBankAccountId	= f.intBankAccountId
-						,strCheckNo			= dbo.fnCMAddZeroPrefixes(f.strReferenceNo)
+						,strCheckNo			= dbo.fnAddZeroPrefixes(f.strReferenceNo)
 						,intCheckNoStatus	= CASE WHEN f.ysnCheckVoid = 1 THEN @CHECK_NUMBER_STATUS_VOID ELSE @CHECK_NUMBER_STATUS_PRINTED END
 						,strRemarks			= CASE WHEN f.ysnCheckVoid = 1 THEN ''Voided from origin.'' ELSE ''Generated from origin.'' END
 						,intTransactionId	= f.intTransactionId

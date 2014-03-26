@@ -9,7 +9,6 @@
                SELECT * FROM [$(TableName)]					
 --------------------------------------------------------------------------------------
 */
-
 :r .\LoadModules.sql
 
 -- CASH MANAGEMENT
@@ -17,7 +16,7 @@
 :r ..\dbo\Views\apchkmst.sql
 :r ..\dbo\Views\vwapivcmst.sql
 :r ..\dbo\Views\vwclsmst.sql
-:r ..\dbo\Views\vwCMBankAccount.sql
+:r ..\dbo\Views\vyuCMBankAccount.sql
 :r ..\dbo\Views\vwcmtmst.sql
 
 :r ..\dbo\Views\vwcntmst.sql

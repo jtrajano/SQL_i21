@@ -1,8 +1,6 @@
 ﻿
 -- This function add zero prefixes to a numeric string. This is commonly used on check numbers. 
-
-
-CREATE FUNCTION [dbo].[fnCMAddZeroPrefixes](@strCheckNumber AS NVARCHAR(MAX))
+CREATE FUNCTION [dbo].[fnAddZeroPrefixes](@strCheckNumber AS NVARCHAR(MAX))
 RETURNS NVARCHAR(20)
 AS
 BEGIN 
