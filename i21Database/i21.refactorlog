@@ -1141,4 +1141,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intRegulatorTypeId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="2ffa1038-4c5b-445f-a7ff-b0efbc52cfb4" ChangeDateTime="03/26/2014 08:39:56">
+    <Property Name="ElementName" Value="[dbo].[tblTMDevice].[intLeaseID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMDevice]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intLeaseId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="1dde7881-8270-4cbb-b3a0-68ce730d08ae" ChangeDateTime="03/26/2014 08:40:28">
+    <Property Name="ElementName" Value="[dbo].[tblTMLease].[intLeaseID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMLease]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intLeaseId" />
+  </Operation>
 </Operations>

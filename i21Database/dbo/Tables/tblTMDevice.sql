@@ -20,7 +20,7 @@
     [dblEstimatedGalTank]      NUMERIC (18, 6) DEFAULT 0 NULL,
     [intMeterCycle]            INT             DEFAULT 0 NOT NULL,
     [intDeviceTypeId]          INT             DEFAULT 0 NULL,
-    [intLeaseID]               INT             DEFAULT 0 NULL,
+    [intLeaseId]               INT             DEFAULT 0 NULL,
     [intDeployedStatusID]      INT             DEFAULT 0 NULL,
     [intParentDeviceID]        INT             DEFAULT 0 NULL,
     [intInventoryStatusTypeId] INT             DEFAULT 0 NULL,
@@ -38,7 +38,7 @@
     CONSTRAINT [FK_tblTMDevice_tblTMDevice] FOREIGN KEY ([intParentDeviceID]) REFERENCES [dbo].[tblTMDevice] ([intDeviceID]),
     CONSTRAINT [FK_tblTMDevice_tblTMDeviceType] FOREIGN KEY ([intDeviceTypeId]) REFERENCES [dbo].[tblTMDeviceType] ([intDeviceTypeId]),
     CONSTRAINT [FK_tblTMDevice_tblTMInventoryStatus] FOREIGN KEY ([intInventoryStatusTypeId]) REFERENCES [dbo].[tblTMInventoryStatusType] ([intInventoryStatusTypeId]),
-    CONSTRAINT [FK_tblTMDevice_tblTMLease] FOREIGN KEY ([intLeaseID]) REFERENCES [dbo].[tblTMLease] ([intLeaseID]) ON DELETE SET NULL,
+    CONSTRAINT [FK_tblTMDevice_tblTMLease] FOREIGN KEY ([intLeaseId]) REFERENCES [dbo].[tblTMLease] ([intLeaseId]) ON DELETE SET NULL,
     CONSTRAINT [FK_tblTMDevice_tblTMMeterType] FOREIGN KEY ([intMeterTypeId]) REFERENCES [dbo].[tblTMMeterType] ([intMeterTypeId]),
     CONSTRAINT [FK_tblTMDevice_tblTMRegulatorType] FOREIGN KEY ([intRegulatorTypeId]) REFERENCES [dbo].[tblTMRegulatorType] ([intRegulatorTypeId]),
     CONSTRAINT [FK_tblTMDevice_tblTMTankType] FOREIGN KEY ([intTankTypeId]) REFERENCES [dbo].[tblTMTankType] ([intTankTypeId])
