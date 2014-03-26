@@ -212,7 +212,7 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 -- Get the batch post id. 
-EXEC [dbo].uspSMGetStartingNumber @STARTING_NUM_TRANSACTION_TYPE_Id, @strBatchId OUTPUT 
+EXEC dbo.uspSMGetStartingNumber @STARTING_NUM_TRANSACTION_TYPE_Id, @strBatchId OUTPUT 
 IF @@ERROR <> 0	GOTO Post_Rollback
 
 IF @ysnPost = 1
@@ -342,7 +342,7 @@ END
 ELSE IF @ysnPost = 0
 BEGIN
 	-- Reverse the G/L entries
-	EXEC [dbo].ReverseGLEntries @strTransactionId, @GL_DETAIL_CODE, NULL, @intUserId	
+	EXEC dbo.uspCMReverseGLEntries @strTransactionId, @GL_DETAIL_CODE, NULL, @intUserId	
 	IF @@ERROR <> 0	GOTO Post_Rollback
 	
 	-- Update the posted flag in the transaction table
@@ -356,7 +356,7 @@ END
 --=====================================================================================================================================
 -- 	Book the G/L ENTRIES to tblGLDetail (The G/L Ledger detail table)
 ---------------------------------------------------------------------------------------------------------------------------------------
-EXEC [dbo].[BookGLEntries] @ysnPost, @ysnRecap, @isSuccessful OUTPUT, @message_id OUTPUT
+EXEC dbo.uspCMBookGLEntries @ysnPost, @ysnRecap, @isSuccessful OUTPUT, @message_id OUTPUT
 IF @isSuccessful = 0 GOTO Post_Rollback
 
 --=====================================================================================================================================
@@ -439,7 +439,7 @@ Post_Rollback:
 Recap_Rollback: 
 	SET @isSuccessful = 1
 	ROLLBACK TRANSACTION 
-	EXEC PostRecap @RecapTable
+	EXEC uspCMPostRecap @RecapTable
 	GOTO Post_Exit
 	
 -- Clean-up routines:
