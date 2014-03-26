@@ -14,9 +14,9 @@
     [intTaxCodeId]        INT            NULL,
     [intTermsId]          INT            NULL,
     [intWarehouseId]      INT            NULL,
-    [intConcurrencyId]    INT            CONSTRAINT [DF_tblEntityLocations_intConcurrencyId] DEFAULT ((0)) NOT NULL,
-    CONSTRAINT [PK_dbo.tblEntityLocations] PRIMARY KEY CLUSTERED ([intEntityLocationId] ASC),
-    CONSTRAINT [FK_dbo.tblEntityLocations_dbo.tblEntities_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]) ON DELETE CASCADE
+    [intConcurrencyId]    INT            CONSTRAINT [DF_tblEntityLocation_intConcurrencyId] DEFAULT ((0)) NOT NULL,
+    CONSTRAINT [PK_dbo.tblEntityLocation] PRIMARY KEY CLUSTERED ([intEntityLocationId] ASC),
+    CONSTRAINT [FK_dbo.tblEntityLocation_dbo.tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]) ON DELETE CASCADE
 );
 
 
