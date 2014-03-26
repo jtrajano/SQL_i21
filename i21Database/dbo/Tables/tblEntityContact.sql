@@ -16,7 +16,7 @@
     [strTimezone]        NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [ysnPortalAccess]    BIT             CONSTRAINT [DF_tblEntityContact_ysnPortalAccess] DEFAULT ((0)) NOT NULL,
     [imgContactPhoto]    VARBINARY (MAX) NULL,
-    [intConcurrencyId]   INT             CONSTRAINT [DF_tblEntityContacts_intConcurrencyId] DEFAULT ((0)) NOT NULL,
+    [intConcurrencyId]   INT             CONSTRAINT [DF_tblEntityContact_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblEntityContact] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
     CONSTRAINT [FK_tblEntityContact_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId])
 );
