@@ -180,25 +180,25 @@ AS
 (
 	SELECT   [dtmDate]		= ISNULL(A.[dtmDate], GETDATE())
 			,[intAccountId]	= A.[intAccountId]
-			,[dblDebit]		= CASE	WHEN [dblCredit] < 0 THEN ABS([dblCredit])
-									WHEN [dblDebit] < 0 THEN 0
-									ELSE [dblDebit] END 
-			,[dblCredit]	= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
+			,[dblDebit]		= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
 									WHEN [dblCredit] < 0 THEN 0
-									ELSE [dblCredit] END	
-			,[dblDebitUnit]		= CASE	WHEN [dblCreditUnit] < 0 THEN ABS([dblCreditUnit])
-									WHEN [dblDebitUnit] < 0 THEN 0
-									ELSE [dblDebitUnit] END 
-			,[dblCreditUnit]	= CASE	WHEN [dblDebitUnit] < 0 THEN ABS([dblDebitUnit])
+									ELSE [dblCredit] END 
+			,[dblCredit]	= CASE	WHEN [dblCredit] < 0 THEN ABS([dblCredit])
+									WHEN [dblDebit] < 0 THEN 0
+									ELSE [dblDebit] END									
+			,[dblDebitUnit]		= CASE	WHEN [dblDebitUnit] < 0 THEN ABS([dblDebitUnit])
 									WHEN [dblCreditUnit] < 0 THEN 0
-									ELSE [dblCreditUnit] END	
+									ELSE [dblCreditUnit] END
+			,[dblCreditUnit]	= CASE	WHEN [dblCreditUnit] < 0 THEN ABS([dblCreditUnit])
+									WHEN [dblDebitUnit] < 0 THEN 0
+									ELSE [dblDebitUnit] END	
 	FROM [dbo].tblGLDetail A WHERE A.[strTransactionId] = @strTransactionId AND ysnIsUnposted = 0 AND strCode = ISNULL(@strCode, strCode)
 )
 UPDATE	tblGLSummary 
-SET		 [dblDebit] = ISNULL(tblGLSummary.[dblDebit], 0) + ISNULL(GLDetailGrouped.[dblDebit], 0)
-		,[dblCredit] = ISNULL(tblGLSummary.[dblCredit], 0) + ISNULL(GLDetailGrouped.[dblCredit], 0)
-		,[dblDebitUnit] = ISNULL(tblGLSummary.[dblDebitUnit], 0) + ISNULL(GLDetailGrouped.[dblDebitUnit], 0)
-		,[dblCreditUnit] = ISNULL(tblGLSummary.[dblCreditUnit], 0) + ISNULL(GLDetailGrouped.[dblCreditUnit], 0)
+SET		 [dblDebit] = ISNULL(tblGLSummary.[dblDebit], 0) - ISNULL(GLDetailGrouped.[dblDebit], 0)
+		,[dblCredit] = ISNULL(tblGLSummary.[dblCredit], 0) - ISNULL(GLDetailGrouped.[dblCredit], 0)
+		,[dblDebitUnit] = ISNULL(tblGLSummary.[dblDebitUnit], 0) - ISNULL(GLDetailGrouped.[dblDebitUnit], 0)
+		,[dblCreditUnit] = ISNULL(tblGLSummary.[dblCreditUnit], 0) - ISNULL(GLDetailGrouped.[dblCreditUnit], 0)
 		,[intConcurrencyId] = ISNULL([intConcurrencyId], 0) + 1
 FROM	(
 			SELECT	 [dblDebit]			= SUM(ISNULL(B.[dblCredit], 0))

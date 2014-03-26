@@ -487,7 +487,7 @@ Post_Rollback:
 
 Post_Exit:
 	SET @successfulCount = 1;
-	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE Id = OBJECT_Id('TEMPDB..#ConstructGL')) DROP TABLE #ConstructGL
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#ConstructGL')) DROP TABLE #ConstructGL
 
 
 GO
