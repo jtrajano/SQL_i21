@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE PostCMBankTransaction
+CREATE PROCEDURE uspCMPostBankTransaction
 	@ysnPost				BIT		= 0
 	,@ysnRecap				BIT		= 0
 	,@strTransactionId		NVARCHAR(40) = NULL 

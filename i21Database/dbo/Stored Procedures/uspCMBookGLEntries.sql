@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE BookGLEntries
+CREATE PROCEDURE uspCMBookGLEntries
 	@ysnPost		BIT	= 0
 	,@ysnRecap		BIT	= 0
 	,@isSuccessful	BIT = 0 OUTPUT

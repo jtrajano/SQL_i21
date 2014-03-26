@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE PostRecap
+CREATE PROCEDURE uspCMPostRecap
 	@RecapTable RecapTableType READONLY 
 AS
 

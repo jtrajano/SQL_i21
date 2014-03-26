@@ -2,7 +2,7 @@
 --=====================================================================================================================================
 -- 	CREATE THE STORED PROCEDURE AFTER DELETING IT
 ---------------------------------------------------------------------------------------------------------------------------------------
-CREATE PROCEDURE ReverseGLEntries
+CREATE PROCEDURE uspCMReverseGLEntries
 	@strTransactionId	NVARCHAR(40) = NULL
 	,@strCode			NVARCHAR(10) = NULL
 	,@dtmDateReverse	DATETIME = NULL 
