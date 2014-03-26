@@ -158,10 +158,6 @@
     <Build Include="dbo\Tables\tblDBPanelFormat.sql" />
     <Build Include="dbo\Tables\tblDBPanelTab.sql" />
     <Build Include="dbo\Tables\tblDBPanelUser.sql" />
-    <Build Include="dbo\Tables\tblEntities.sql" />
-    <Build Include="dbo\Tables\tblEntityContacts.sql" />
-    <Build Include="dbo\Tables\tblEntityLocations.sql" />
-    <Build Include="dbo\Tables\tblEntityTypes.sql" />
     <Build Include="dbo\Tables\tblFRCalculation.sql" />
     <Build Include="dbo\Tables\tblFRCalculationFormula.sql" />
     <Build Include="dbo\Tables\tblFRColumn.sql" />
@@ -455,6 +451,35 @@
     <Build Include="dbo\Functions\fnAddZeroPrefixes.sql" />
     <Build Include="dbo\Functions\fnConvertOriginUserIdtoi21.sql" />
     <Build Include="dbo\Functions\fnConverti21UserIdtoOrigin.sql" />
+    <Build Include="dbo\Tables\tblARTerritoryDetail.sql" />
+    <Build Include="dbo\Tables\tblARTerritory.sql" />
+    <Build Include="dbo\Tables\tblARStatementFooter.sql" />
+    <Build Include="dbo\Tables\tblARSalespersonNote.sql" />
+    <Build Include="dbo\Tables\tblARSalesperson.sql" />
+    <Build Include="dbo\Tables\tblARMarketZone.sql" />
+    <Build Include="dbo\Tables\tblARCustomerSplitDetail.sql" />
+    <Build Include="dbo\Tables\tblARCustomerSplit.sql" />
+    <Build Include="dbo\Tables\tblARCustomerSpecialPrice.sql" />
+    <Build Include="dbo\Tables\tblARCustomerPortalPermission.sql" />
+    <Build Include="dbo\Tables\tblARCustomerPortalMenu.sql" />
+    <Build Include="dbo\Tables\tblARCustomerMessage.sql" />
+    <Build Include="dbo\Tables\tblARCustomerFreightXRef.sql" />
+    <Build Include="dbo\Tables\tblARCustomerFieldXRef.sql" />
+    <Build Include="dbo\Tables\tblARCustomerFarm.sql" />
+    <Build Include="dbo\Tables\tblARCustomerContractDetail.sql" />
+    <Build Include="dbo\Tables\tblARCustomerContract.sql" />
+    <Build Include="dbo\Tables\tblARCustomerCategoryPrice.sql" />
+    <Build Include="dbo\Tables\tblARCustomerCardFueling.sql" />
+    <Build Include="dbo\Tables\tblARCustomer.sql" />
+    <Build Include="dbo\Tables\tblARAccountStatus.sql" />
+    <Build Include="dbo\Tables\tblARServiceCharge.sql" />
+    <Build Include="dbo\Tables\tblEntityType.sql" />
+    <Build Include="dbo\Tables\tblEntityToContact.sql" />
+    <Build Include="dbo\Tables\tblEntityNote.sql" />
+    <Build Include="dbo\Tables\tblEntityLocation.sql" />
+    <Build Include="dbo\Tables\tblEntityEFTInformation.sql" />
+    <Build Include="dbo\Tables\tblEntityContact.sql" />
+    <Build Include="dbo\Tables\tblEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
