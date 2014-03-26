@@ -1,5 +1,5 @@
 ﻿
-CREATE FUNCTION fnCMGetCurrencyIdFromOriginToi21(@strOriginCurrencyId AS NVARCHAR(3))	
+CREATE FUNCTION fnGetCurrencyIdFromOriginToi21(@strOriginCurrencyId AS NVARCHAR(3))	
 RETURNS INT 
 AS
 BEGIN 

@@ -1,4 +1,4 @@
-﻿CREATE FUNCTION [dbo].[fnCMGetBankBalance]
+﻿CREATE FUNCTION [dbo].[fnGetBankBalance]
 (
 	@intBankAccountId INT = NULL,
 	@dtmDate AS DATETIME = NULL

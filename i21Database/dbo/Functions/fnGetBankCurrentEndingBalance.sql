@@ -1,4 +1,4 @@
-﻿CREATE FUNCTION [dbo].[fnCMGetBankCurrentEndingBalance]
+﻿CREATE FUNCTION [dbo].[fnGetBankCurrentEndingBalance]
 (
 	@intBankAccountId INT = NULL,
 	@dtmStatementDate DATETIME = NULL

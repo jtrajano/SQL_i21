@@ -64,9 +64,9 @@ SELECT	strBankName				= LTRIM(RTRIM(ISNULL(QUERY.apcbk_desc, ''))) COLLATE Latin
 		,strWebsite				= ''	
 		,strEmail				= ''
 		,strRTN					= (SELECT TOP 1 ISNULL(CAST(A.apcbk_transit_route AS NVARCHAR(12)), '') FROM apcbkmst A WHERE A.apcbk_desc = QUERY.apcbk_desc) 
-		,intCreatedUserId		= (SELECT TOP 1 dbo.fnCMConvertOriginUserIdtoi21(A.apcbk_user_id) FROM apcbkmst A WHERE A.apcbk_desc = QUERY.apcbk_desc) 
+		,intCreatedUserId		= (SELECT TOP 1 dbo.fnConvertOriginUserIdtoi21(A.apcbk_user_id) FROM apcbkmst A WHERE A.apcbk_desc = QUERY.apcbk_desc) 
 		,dtmCreated				= GETDATE()
-		,intLastModifiedUserId	= (SELECT TOP 1 dbo.fnCMConvertOriginUserIdtoi21(A.apcbk_user_id) FROM apcbkmst A WHERE A.apcbk_desc = QUERY.apcbk_desc) 
+		,intLastModifiedUserId	= (SELECT TOP 1 dbo.fnConvertOriginUserIdtoi21(A.apcbk_user_id) FROM apcbkmst A WHERE A.apcbk_desc = QUERY.apcbk_desc) 
 		,dtmLastModified		= GETDATE()
 		,intConcurrencyId		= 1
 FROM	(	SELECT	DISTINCT 
@@ -124,8 +124,8 @@ INSERT INTO tblCMBankAccount (
 SELECT			
 		intBankId							= (SELECT TOP 1 A.intBankId FROM tblCMBank A WHERE A.strBankName = LTRIM(RTRIM(ISNULL(i.apcbk_desc, ''))) COLLATE Latin1_General_CI_AS)   
 		,ysnActive							= CASE WHEN i.apcbk_active_yn = 'Y' THEN 1 ELSE 0 END 
-		,intGLAccountId						= dbo.fnCMGetGLAccountIdFromOriginToi21(i.apcbk_gl_cash) 
-		,intCurrencyId						= dbo.fnCMGetCurrencyIdFromOriginToi21(i.apcbk_currency)
+		,intGLAccountId						= dbo.fnGetGLAccountIdFromOriginToi21(i.apcbk_gl_cash) 
+		,intCurrencyId						= dbo.fnGetCurrencyIdFromOriginToi21(i.apcbk_currency)
 		,intBankAccountType					= @DEPOSIT_ACCOUNT
 		,strContact							= ''
 		,strBankAccountNo					= ISNULL(i.apcbk_bank_acct_no, '') COLLATE Latin1_General_CI_AS
@@ -159,9 +159,9 @@ SELECT
 		,intMICRCheckNoPosition				= @CHECKNO_LEFT
 		,strMICRLeftSymbol					= 'C'
 		,strMICRRightSymbol					= 'C'
-		,intCreatedUserId					= dbo.fnCMConvertOriginUserIdtoi21(i.apcbk_user_id)
+		,intCreatedUserId					= dbo.fnConvertOriginUserIdtoi21(i.apcbk_user_id)
 		,dtmCreated							= GETDATE()
-		,intLastModifiedUserId				= dbo.fnCMConvertOriginUserIdtoi21(i.apcbk_user_id)
+		,intLastModifiedUserId				= dbo.fnConvertOriginUserIdtoi21(i.apcbk_user_id)
 		,dtmLastModified					= GETDATE()
 		,intConcurrencyId					= 1
 		,strCbkNo							= i.apcbk_no	

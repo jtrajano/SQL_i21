@@ -1,9 +1,9 @@
-﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCMBankAccount')
-	DROP VIEW vwCMBankAccount
+﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCMBankAccount')
+	DROP VIEW vyuCMBankAccount
 
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 	EXEC ('
-		CREATE VIEW [dbo].vwCMBankAccount
+		CREATE VIEW [dbo].vyuCMBankAccount
 		WITH SCHEMABINDING
 		AS 
 
@@ -71,8 +71,8 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 		')
 
 	EXEC('
-		CREATE TRIGGER trg_delete_vwCMBankAccount
-		ON [dbo].vwCMBankAccount
+		CREATE TRIGGER trg_delete_vyuCMBankAccount
+		ON [dbo].vyuCMBankAccount
 		INSTEAD OF DELETE
 		AS
 		BEGIN 
@@ -142,8 +142,8 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 		END
 		')
 	EXEC('
-		CREATE TRIGGER trg_insert_vwCMBankAccount
-		ON [dbo].vwCMBankAccount
+		CREATE TRIGGER trg_insert_vyuCMBankAccount
+		ON [dbo].vyuCMBankAccount
 		INSTEAD OF INSERT
 		AS
 		BEGIN 
@@ -283,7 +283,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 			)	
 			SELECT 
 					apcbk_no					= i.strCbkNo
-					,apcbk_currency				= dbo.fnCMGetCurrencyIdFromi21ToOrigin(i.intCurrencyId)
+					,apcbk_currency				= dbo.fnGetCurrencyIdFromi21ToOrigin(i.intCurrencyId)
 					,apcbk_password				= i.apcbk_password
 					,apcbk_desc					= bank.strBankName COLLATE SQL_Latin1_General_CP1_CS_AS
 					,apcbk_bank_acct_no			= i.strBankAccountNo COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -306,14 +306,14 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 					,apcbk_transit_route		= NULL
 					,apcbk_ach_company_id		= NULL
 					,apcbk_ach_bankname			= NULL
-					,apcbk_gl_cash				= dbo.fnCMGetGLAccountIdFromi21ToOrigin(i.intGLAccountId)
+					,apcbk_gl_cash				= dbo.fnGetGLAccountIdFromi21ToOrigin(i.intGLAccountId)
 					,apcbk_gl_ap				= NULL
 					,apcbk_gl_disc				= NULL
 					,apcbk_gl_wthhld			= NULL
 					,apcbk_gl_curr				= 0
 					,apcbk_active_yn			= CASE WHEN i.ysnActive = 1 THEN ''Y'' ELSE ''N'' END 
 					,apcbk_bnk_no				= NULL
-					,apcbk_user_id				= dbo.fnCMConverti21UserIdtoOrigin(i.intCreatedUserId)
+					,apcbk_user_id				= dbo.fnConverti21UserIdtoOrigin(i.intCreatedUserId)
 					,apcbk_user_rev_dt			= CONVERT(VARCHAR(10), i.dtmLastModified, 112)
 			FROM	inserted i INNER JOIN dbo.tblCMBank bank
 						ON i.intBankId = bank.intBankId
@@ -327,8 +327,8 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 		')
 
 	EXEC('
-		CREATE TRIGGER trg_update_vwCMBankAccount
-		ON [dbo].vwCMBankAccount
+		CREATE TRIGGER trg_update_vyuCMBankAccount
+		ON [dbo].vyuCMBankAccount
 		INSTEAD OF UPDATE
 		AS
 		BEGIN 
@@ -406,7 +406,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 			-- UPDATE modified record for apcbkmst_origin
 			UPDATE	dbo.apcbkmst_origin 
 			SET		apcbk_no					= i.strCbkNo
-					,apcbk_currency				= dbo.fnCMGetCurrencyIdFromi21ToOrigin(i.intCurrencyId)
+					,apcbk_currency				= dbo.fnGetCurrencyIdFromi21ToOrigin(i.intCurrencyId)
 					,apcbk_password				= i.apcbk_password
 					,apcbk_desc					= bank.strBankName COLLATE SQL_Latin1_General_CP1_CS_AS
 					,apcbk_bank_acct_no			= i.strBankAccountNo COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -429,14 +429,14 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 					--,apcbk_transit_route		= NULL
 					--,apcbk_ach_company_id		= NULL
 					--,apcbk_ach_bankname		= NULL
-					,apcbk_gl_cash				= dbo.fnCMGetGLAccountIdFromi21ToOrigin(i.intGLAccountId)
+					,apcbk_gl_cash				= dbo.fnGetGLAccountIdFromi21ToOrigin(i.intGLAccountId)
 					--,apcbk_gl_ap				= NULL
 					--,apcbk_gl_disc			= NULL
 					--,apcbk_gl_wthhld			= NULL
 					--,apcbk_gl_curr			= 0
 					,apcbk_active_yn			= CASE WHEN i.ysnActive = 1 THEN ''Y'' ELSE ''N'' END 
 					--,apcbk_bnk_no				= NULL
-					,apcbk_user_id				= dbo.fnCMConverti21UserIdtoOrigin(i.intLastModifiedUserId)
+					,apcbk_user_id				= dbo.fnConverti21UserIdtoOrigin(i.intLastModifiedUserId)
 					,apcbk_user_rev_dt			= CONVERT(VARCHAR(10), i.dtmLastModified, 112)
 			FROM	inserted i INNER JOIN deleted d
 						ON i.intBankAccountId = d.intBankAccountId
@@ -487,7 +487,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 			)	
 			SELECT 
 					apcbk_no					= i.strCbkNo
-					,apcbk_currency				= dbo.fnCMGetCurrencyIdFromi21ToOrigin(i.intCurrencyId)
+					,apcbk_currency				= dbo.fnGetCurrencyIdFromi21ToOrigin(i.intCurrencyId)
 					,apcbk_password				= i.apcbk_password
 					,apcbk_desc					= bank.strBankName COLLATE SQL_Latin1_General_CP1_CS_AS
 					,apcbk_bank_acct_no			= i.strBankAccountNo COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -510,14 +510,14 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 					,apcbk_transit_route		= NULL
 					,apcbk_ach_company_id		= NULL
 					,apcbk_ach_bankname			= NULL
-					,apcbk_gl_cash				= dbo.fnCMGetGLAccountIdFromi21ToOrigin(i.intGLAccountId)
+					,apcbk_gl_cash				= dbo.fnGetGLAccountIdFromi21ToOrigin(i.intGLAccountId)
 					,apcbk_gl_ap				= NULL
 					,apcbk_gl_disc				= NULL
 					,apcbk_gl_wthhld			= NULL
 					,apcbk_gl_curr				= 0
 					,apcbk_active_yn			= CASE WHEN i.ysnActive = 1 THEN ''Y'' ELSE ''N'' END 
 					,apcbk_bnk_no				= NULL
-					,apcbk_user_id				= dbo.fnCMConverti21UserIdtoOrigin(i.intLastModifiedUserId)
+					,apcbk_user_id				= dbo.fnConverti21UserIdtoOrigin(i.intLastModifiedUserId)
 					,apcbk_user_rev_dt			= CONVERT(VARCHAR(10), i.dtmLastModified, 112)
 			FROM	inserted i INNER JOIN dbo.tblCMBank bank
 						ON i.intBankId = bank.intBankId
