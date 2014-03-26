@@ -47,7 +47,7 @@
     [dtmLastDeliveryDate]         DATETIME        DEFAULT 0 NULL,
     [dtmNextDeliveryDate]         DATETIME        DEFAULT 0 NULL,
     [strCountry]                  NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
-    [intFillMethodID]             INT             DEFAULT 0 NULL,
+    [intFillMethodId]             INT             DEFAULT 0 NULL,
     [intHoldReasonID]             INT             DEFAULT 0 NULL,
     [dblYTDGals2SeasonsAgo]       NUMERIC (18, 6) DEFAULT 0 NULL,
     [intTaxLocale1]               INT             DEFAULT 0 NULL,
@@ -81,7 +81,7 @@
     CONSTRAINT [PK_tblTMSite] PRIMARY KEY CLUSTERED ([intSiteID] ASC),
     CONSTRAINT [FK_tblTMSite_tblTMClock] FOREIGN KEY ([intClockID]) REFERENCES [dbo].[tblTMClock] ([intClockID]),
     CONSTRAINT [FK_tblTMSite_tblTMCustomer] FOREIGN KEY ([intCustomerID]) REFERENCES [dbo].[tblTMCustomer] ([intCustomerID]),
-    CONSTRAINT [FK_tblTMSite_tblTMFillMethod] FOREIGN KEY ([intFillMethodID]) REFERENCES [dbo].[tblTMFillMethod] ([intFillMethodID]),
+    CONSTRAINT [FK_tblTMSite_tblTMFillMethod] FOREIGN KEY ([intFillMethodId]) REFERENCES [dbo].[tblTMFillMethod] ([intFillMethodId]),
     CONSTRAINT [FK_tblTMSite_tblTMHoldReason] FOREIGN KEY ([intHoldReasonID]) REFERENCES [dbo].[tblTMHoldReason] ([intHoldReasonID]),
     CONSTRAINT [FK_tblTMSite_tblTMSite] FOREIGN KEY ([intParentSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID])
 );

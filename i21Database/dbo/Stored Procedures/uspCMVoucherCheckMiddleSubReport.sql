@@ -108,7 +108,7 @@ SELECT	TOP 15
 		,BD.dblCredit
 FROM	[dbo].[tblCMBankTransactionDetail] BD INNER JOIN [dbo].[tblGLAccount] Accnt
 			ON BD.intGLAccountId = Accnt.intAccountID
-		LEFT JOIN [dbo].[tblEntities] E
+		LEFT JOIN [dbo].[tblEntity] E
 			ON BD.intEntityId = E.intEntityId
 WHERE	BD.intTransactionId >= ISNULL(@intTransactionIdFrom, BD.intTransactionId)
 		AND BD.intTransactionId <= ISNULL(@intTransactionIdTo, BD.intTransactionId)

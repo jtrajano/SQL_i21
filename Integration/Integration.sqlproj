@@ -66,7 +66,7 @@
     <None Include="dbo\Views\apchkmst.sql" />
     <None Include="dbo\Views\vwapivcmst.sql" />
     <None Include="dbo\Views\vwclsmst.sql" />
-    <None Include="dbo\Views\vwCMBankAccount.sql" />
+    <None Include="dbo\Views\vyuCMBankAccount.sql" />
     <None Include="dbo\Views\vwcmtmst.sql" />
     <None Include="dbo\Views\vwcntmst.sql" />
     <None Include="dbo\Views\vyuTMOriginOption.sql" />

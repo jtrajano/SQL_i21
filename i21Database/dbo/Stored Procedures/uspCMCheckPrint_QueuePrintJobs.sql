@@ -1,4 +1,10 @@
-﻿
+﻿/*
+	This stored procedure is used to Queue print jobs. 
+	1. It assign check numbers to those transaction set as "To Be Printed". 
+	2. It updates the Check Number Audit. 
+	3. It creates new audit log records for manually entered check numbers. 
+	4. It updates the next check number. 
+*/
 CREATE PROCEDURE uspCMCheckPrint_QueuePrintJobs
 	@intBankAccountId INT = NULL,
 	@strTransactionId NVARCHAR(40) = NULL,
@@ -103,8 +109,7 @@ END
 
 -- Get the next check number from the bank account table
 SELECT TOP 1 
-		@strNextCheckNumber = REPLICATE('0', 20 - LEN(CAST(
-		intCheckNextNo AS NVARCHAR(20)))) + CAST(intCheckNextNo AS NVARCHAR(20))
+		@strNextCheckNumber = dbo.fnAddZeroPrefixes(intCheckNextNo)		
 FROM	dbo.tblCMBankAccount
 WHERE	intBankAccountId = @intBankAccountId
 IF @@ERROR <> 0 GOTO _ROLLBACK
@@ -198,12 +203,32 @@ SELECT
 FROM	#tmpPrintJobSpoolTable
 IF @@ERROR <> 0 GOTO _ROLLBACK
 
--- Update the next check number in the bank accounts table
-IF ( ISNUMERIC(@strNextCheckNumber) = 1)
+-- Retrieve the highest check number entered for the print queue. 
+SET @strNextCheckNumber = NULL 
+SELECT	TOP 1 
+		@strNextCheckNumber = MAX(dbo.fnAddZeroPrefixes(strCheckNo))
+FROM	#tmpPrintJobSpoolTable
+WHERE	ISNUMERIC(strCheckNo) = 1
+
+-- Increment the next check number 
+IF (@strNextCheckNumber IS NOT NULL)
 BEGIN 
-	UPDATE dbo.tblCMBankAccount
-	SET intCheckNextNo = CAST(@strNextCheckNumber AS INT)
-	WHERE intBankAccountId = @intBankAccountId
+	-- Update the next check number 
+	UPDATE	dbo.tblCMBankAccount
+	SET		intCheckNextNo = CAST(dbo.fnAddZeroPrefixes(@strNextCheckNumber) AS INT) + 1
+	WHERE	intBankAccountId = @intBankAccountId
+			AND ISNULL(@strNextCheckNumber, '') <> ''
+			AND intCheckNextNo <= CAST(dbo.fnAddZeroPrefixes(@strNextCheckNumber) AS INT)
+	IF @@ERROR <> 0 GOTO _ROLLBACK
+
+	-- Update the next check number to the checkbook in origin.
+	UPDATE	dbo.apcbkmst_origin
+	SET		apcbk_next_chk_no = CAST(dbo.fnAddZeroPrefixes(@strNextCheckNumber) AS INT) + 1
+	FROM	dbo.apcbkmst_origin O INNER JOIN dbo.tblCMBankAccount f
+				ON f.strCbkNo = O.apcbk_no COLLATE Latin1_General_CI_AS
+	WHERE	f.intBankAccountId = @intBankAccountId
+			AND ISNULL(@strNextCheckNumber, '') <> ''
+			AND O.apcbk_next_chk_no <= CAST(dbo.fnAddZeroPrefixes(@strNextCheckNumber) AS INT)  
 	IF @@ERROR <> 0 GOTO _ROLLBACK
 END 
 

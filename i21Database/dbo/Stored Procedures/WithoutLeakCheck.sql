@@ -150,7 +150,7 @@ FROM
 	, E.strSerialNumber
 	, E.intTankSize
 	, E.strOwnership
-	,(Select Top 1 tt.strTankType From tblTMTankType tt Where tt.intTankTypeID = E.intTankTypeID) AS [strTankType]
+	,(Select Top 1 tt.strTankType From tblTMTankType tt Where tt.intTankTypeId = E.intTankTypeId) AS [strTankType]
 	, (Case C.ysnActive
 		When 1 then
 			''Active''
@@ -172,7 +172,7 @@ FROM
 						INNER JOIN vwcusmst X on Y.intCustomerNumber = X.A4GLIdentity
 						INNER JOIN tblTMSiteDevice W ON Z.intSiteID =W.intSiteID
 						INNER JOIN tblTMDevice V ON W.intDeviceID = V.intDeviceID 
-						INNER JOIN tblTMDeviceType U ON ISNULL(V.intDeviceTypeID,0) = ISNULL(U.intDeviceTypeID,-1)
+						INNER JOIN tblTMDeviceType U ON ISNULL(V.intDeviceTypeId,0) = ISNULL(U.intDeviceTypeId,-1)
 						WHERE
 						V.ysnAppliance = 0
 						AND V.intInventoryStatusTypeID = 2 
@@ -185,7 +185,7 @@ FROM
 	INNER JOIN vwcusmst B on A.intCustomerNumber = B.A4GLIdentity
 	INNER JOIN tblTMSiteDevice D ON C.intSiteID =D.intSiteID
 	INNER JOIN tblTMDevice E ON D.intDeviceID = E.intDeviceID 
-	INNER JOIN tblTMDeviceType G ON ISNULL(E.intDeviceTypeID,0) = ISNULL(G.intDeviceTypeID,-1) 
+	INNER JOIN tblTMDeviceType G ON ISNULL(E.intDeviceTypeId,0) = ISNULL(G.intDeviceTypeId,-1) 
 	WHERE
 	E.ysnAppliance = 0
 	and E.intInventoryStatusTypeID = 2 

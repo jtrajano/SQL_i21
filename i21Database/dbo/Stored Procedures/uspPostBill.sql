@@ -39,8 +39,12 @@ CREATE TABLE #tmpPostBillData (
 CREATE TABLE #tmpInvalidBillData (
 	[strError] [NVARCHAR](100),
 	[strTransactionType] [NVARCHAR](50),
-	[strTransactionId] [NVARCHAR](50)
+	[strTransactionId] [NVARCHAR](50),
+	[strBatchNumber] [NVARCHAR](50)
 );
+
+IF(@batchId IS NULL)
+	EXEC uspSMGetStartingNumber 3, @batchId OUT
 
 --DECLARRE VARIABLES
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
@@ -81,31 +85,34 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 --Fiscal Year
-INSERT INTO #tmpInvalidBillData
+INSERT INTO #tmpInvalidBillData(strError, strTransactionId, strTransactionType, strBatchNumber)
 	SELECT 
 		'Unable to find an open fiscal year period to match the transaction date.',
 		'Payable',
-		A.intBillId
+		A.intBillId,
+		@billBatchId
 	FROM tblAPBill A 
 	WHERE  A.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
 		0 = ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0)
 
 --NOT BALANCE
-INSERT INTO #tmpInvalidBillData
+INSERT INTO #tmpInvalidBillData(strError, strTransactionId, strTransactionType, strBatchNumber)
 	SELECT 
 		'The debit and credit amounts are not balanced.',
 		'Payable',
-		A.intBillId
+		A.intBillId,
+		@billBatchId
 	FROM tblAPBill A 
 	WHERE  A.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
 		A.dblTotal <> (SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = A.intBillId)
 
 --ALREADY POSTED
-INSERT INTO #tmpInvalidBillData
+INSERT INTO #tmpInvalidBillData(strError, strTransactionId, strTransactionType, strBatchNumber)
 	SELECT 
 		'The transaction is already posted.',
 		'Payable',
-		A.intBillId
+		A.intBillId,
+		@billBatchId
 	FROM tblAPBill A 
 	WHERE  A.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
 		A.ysnPosted = 1
@@ -120,6 +127,11 @@ BEGIN
 	SELECT * FROM #tmpInvalidBillData
 
 	SET @invalidCount = @totalInvalid
+
+	--DELETE Invalid Transaction From temp table
+	DELETE FROM #tmpPostBillData
+	FROM tblAPInvalidTransaction
+	WHERE #tmpPostBillData.intBillId = CAST(tblAPInvalidTransaction.strTransactionId AS INT)
 
 END
 
@@ -206,7 +218,7 @@ IF ISNULL(@recap, 0) = 0
 		UNION ALL 
 		SELECT	
 			[strTransactionID] = A.strBillId, 
-			[intAccountID] = A.intAccountId,
+			[intAccountID] = B.intAccountId,
 			[strDescription] = A.strDescription,
 			[strReference] = A.strVendorId,
 			[dtmTransactionDate] = A.dtmDate,
@@ -332,8 +344,9 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 --=====================================================================================================================================
 -- 	RETURN TOTAL NUMBER OF VALID JOURNALS
 ---------------------------------------------------------------------------------------------------------------------------------------
-SELECT @successfulCount = COUNT(*) FROM #tmpPostBillData
-
+DECLARE @totalRecords INT
+SELECT @totalRecords = COUNT(*) FROM #tmpPostBillData
+SET @successfulCount = @totalRecords
 --=====================================================================================================================================
 -- 	FINALIZING STAGE
 ---------------------------------------------------------------------------------------------------------------------------------------

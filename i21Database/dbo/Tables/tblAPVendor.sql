@@ -7,7 +7,7 @@
     [intPaymentMethodId]        INT            NOT NULL,
     [intShipViaId]              INT            NULL,
     [intTaxCodeId]              INT            NULL,
-    [intGLAccountExpenseId]     INT            NULL,
+    [intGLAccountExpenseId]     INT            NOT NULL ,
     [strFederalTaxId]           NVARCHAR (MAX) NULL,
     [intTermsId]                NVARCHAR (MAX) NULL,
     [intVendorType]             INT            NOT NULL,
@@ -29,6 +29,7 @@
     [dtmLastModified]           DATETIME       NULL,
     [dtmCreated]                DATETIME       NULL,
     [strTaxState]               NVARCHAR (50)  NULL,
+    [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_dbo.tblAPVendor] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
     CONSTRAINT [FK_dbo.tblAPVendor_dbo.tblEntities_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntities] ([intEntityId]),
     CONSTRAINT [APVendorId_Unique] UNIQUE NONCLUSTERED ([strVendorId] ASC)

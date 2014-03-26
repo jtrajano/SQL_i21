@@ -103,14 +103,14 @@ SELECT	intBankAccountId				= BankAccnt.intBankAccountId
 		,strCbkNo						= BankAccnt.strCbkNo
 		,strBankName					= Bank.strBankName
 		,strGLAccountId					= GL.strAccountID
-		,dblGLBalance					= [dbo].[fnCMGetBankGLBalance](BankAccnt.intBankAccountId, @dtmStatementDate) 
-		,dblBankAccountBalance			= [dbo].[fnCMGetBankBalance](BankAccnt.intBankAccountId, @dtmStatementDate)
-		,dblPriorReconEndingBalance		= [dbo].[fnCMGetBankBeginningBalance](BankAccnt.intBankAccountId, @dtmStatementDate)
-		,dblClearedPayments				= [dbo].[fnCMGetClearedPayments](BankAccnt.intBankAccountId, @dtmStatementDate)
-		,dblClearedDeposits				= [dbo].[fnCMGetClearedDeposits](BankAccnt.intBankAccountId, @dtmStatementDate)
-		,dblBankStatementEndingBalance	= [dbo].[fnCMGetBankCurrentEndingBalance](BankAccnt.intBankAccountId, @dtmStatementDate)
-		,dblUnclearedPayments			= [dbo].[fnCMGetUnclearedPayments](BankAccnt.intBankAccountId, @dtmStatementDate)
-		,dblUnclearedDeposits			= [dbo].[fnCMGetUnclearedDeposits](BankAccnt.intBankAccountId, @dtmStatementDate)
+		,dblGLBalance					= [dbo].[fnGetBankGLBalance](BankAccnt.intBankAccountId, @dtmStatementDate) 
+		,dblBankAccountBalance			= [dbo].[fnGetBankBalance](BankAccnt.intBankAccountId, @dtmStatementDate)
+		,dblPriorReconEndingBalance		= [dbo].[fnGetBankBeginningBalance](BankAccnt.intBankAccountId, @dtmStatementDate)
+		,dblClearedPayments				= [dbo].[fnGetClearedPayments](BankAccnt.intBankAccountId, @dtmStatementDate)
+		,dblClearedDeposits				= [dbo].[fnGetClearedDeposits](BankAccnt.intBankAccountId, @dtmStatementDate)
+		,dblBankStatementEndingBalance	= [dbo].[fnGetBankCurrentEndingBalance](BankAccnt.intBankAccountId, @dtmStatementDate)
+		,dblUnclearedPayments			= [dbo].[fnGetUnclearedPayments](BankAccnt.intBankAccountId, @dtmStatementDate)
+		,dblUnclearedDeposits			= [dbo].[fnGetUnclearedDeposits](BankAccnt.intBankAccountId, @dtmStatementDate)
 FROM	dbo.tblCMBankAccount BankAccnt INNER JOIN dbo.tblCMBank Bank
 			ON BankAccnt.intBankId = Bank.intBankId
 		INNER JOIN dbo.tblGLAccount GL

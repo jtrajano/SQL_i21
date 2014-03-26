@@ -37,7 +37,8 @@ CREATE TABLE #tmpPayablePostData (
 CREATE TABLE #tmpPayableInvalidData (
 	[strError] [NVARCHAR](100),
 	[strTransactionType] [NVARCHAR](50),
-	[strTransactionId] [NVARCHAR](50)
+	[strTransactionId] [NVARCHAR](50),
+	[strBatchNumber] [NVARCHAR](50)
 );
 
 --DECLARRE VARIABLES
@@ -45,9 +46,9 @@ DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
 SET @recapId = '1'
 
 --SET BatchId
-IF(@batchId IS NULL)
+IF(ISNULL(@batchId,'') = '')
 BEGIN
-	EXEC uspSMGetStartingNumber 3, @batchId
+	EXEC uspSMGetStartingNumber 3, @batchId OUT
 END
 
 --=====================================================================================================================================
@@ -81,7 +82,8 @@ INSERT INTO #tmpPayableInvalidData
 	SELECT 
 		'Unable to find an open fiscal year period to match the transaction date.',
 		'Payable',
-		A.intPaymentId
+		A.intPaymentId,
+		@batchId
 	FROM tblAPPayment A 
 	WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
 		0 = ISNULL([dbo].isOpenAccountingDate(A.[dtmDatePaid]), 0)
@@ -91,7 +93,8 @@ INSERT INTO #tmpPayableInvalidData
 	SELECT 
 		'The debit and credit amounts are not balanced.',
 		'Payable',
-		A.intPaymentId
+		A.intPaymentId,
+		@batchId
 	FROM tblAPPayment A 
 	WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
 		A.dblAmountPaid <> (SELECT SUM(dblPayment) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)
@@ -101,7 +104,8 @@ INSERT INTO #tmpPayableInvalidData
 	SELECT 
 		'The transaction is already posted.',
 		'Payable',
-		A.intPaymentId
+		A.intPaymentId,
+		@batchId
 	FROM tblAPPayment A 
 	WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
 		A.ysnPosted = 1
@@ -112,7 +116,7 @@ SET @totalInvalid = (SELECT COUNT(*) #tmpPayableInvalidData)
 IF(@totalInvalid > 0)
 BEGIN
 
-	INSERT INTO tblAPInvalidTransaction(strError, strTransactionId, strTransactionType)
+	INSERT INTO tblAPInvalidTransaction(strError, strTransactionId, strTransactionType, strBatchNumber)
 	SELECT * FROM #tmpPayableInvalidData
 
 	SET @invalidCount = @totalInvalid
@@ -151,10 +155,15 @@ IF ISNULL(@recap, 0) = 0
 							ON B.intBillId = C.intBillId
 					WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
-		--UPDATE tblCMBankTransaction
-		--	SET ysnPosted = 0
-		--FROM tblAPPayment A
-		--	WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		UPDATE tblGLDetail
+			SET tblGLDetail.ysnIsUnposted = 1
+		FROM tblAPPayment A
+			INNER JOIN tblGLDetail B
+				ON A.strPaymentRecordNum = B.strTransactionID
+
+		--DELETE IF NOT CHECK PAYMENT
+		DELETE FROM tblCMBankTransaction
+		WHERE strTransactionId IN (SELECT strPaymentRecordNum FROM tblAPPayment WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData) AND intPaymentMethod != 3)
 
 	END
 	ELSE
@@ -240,6 +249,8 @@ IF ISNULL(@recap, 0) = 0
 					ON A.intBankAccountId = GLAccnt.intAccountID
 				INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 					ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
+				INNER JOIN tblAPVendor 
+					ON A.strVendorId = tblAPVendor.strVendorId AND tblAPVendor.ysnWithholding = 1
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 		---- DEBIT SIDE
 		UNION ALL 
@@ -340,7 +351,7 @@ IF ISNULL(@recap, 0) = 0
 			[strState] = '',
 			[strCountry] = '',
 			[dblAmount] = A.dblAmountPaid,
-			[strAmountInWords] = dbo.fnCMConvertNumberToWord(A.dblAmountPaid),
+			[strAmountInWords] = dbo.fnConvertNumberToWord(A.dblAmountPaid),
 			[strMemo] = '',
 			[strReferenceNo] = '',
 			[ysnCheckToBePrinted] = 0,

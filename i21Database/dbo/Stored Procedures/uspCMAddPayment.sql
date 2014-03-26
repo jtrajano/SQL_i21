@@ -55,6 +55,13 @@ SET		intNumber += 1
 WHERE	strTransactionType = @STARTING_NUMBER_BANK_TRANSACTION
 IF @@ERROR <> 0	GOTO uspCMAddPayment_Rollback
 
+-- Check for duplicate transaction id. 
+IF EXISTS (SELECT TOP 1 1 FROM [dbo].[tblCMBankTransaction] WHERE strTransactionId = @strTransactionId)
+BEGIN
+	RAISERROR(50015, 11, 1, @strTransactionId)
+	GOTO uspCMAddPayment_Rollback
+END
+
 -- Create the Bank Deposit HEADER
 INSERT INTO tblCMBankTransaction(
 	strTransactionId
@@ -101,7 +108,7 @@ SELECT	strTransactionId			= @strTransactionId
 		,strState					= ''
 		,strCountry					= ''
 		,dblAmount					= @dblAmount * -1
-		,strAmountInWords			= dbo.fnCMConvertNumberToWord(@dblAmount * -1)
+		,strAmountInWords			= dbo.fnConvertNumberToWord(@dblAmount * -1)
 		,strMemo					= ISNULL(@strDescription, '')
 		,strReferenceNo				= ''
 		,dtmCheckPrinted			= NULL

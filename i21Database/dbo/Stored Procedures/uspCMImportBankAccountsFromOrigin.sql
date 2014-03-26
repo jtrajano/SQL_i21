@@ -52,8 +52,7 @@ INSERT INTO tblCMBank (
 		,dtmLastModified
 		,intConcurrencyId
 	)
-SELECT DISTINCT 
-		strBankName				= LTRIM(RTRIM(ISNULL(i.apcbk_desc, ''))) COLLATE Latin1_General_CI_AS
+SELECT	strBankName				= LTRIM(RTRIM(ISNULL(QUERY.apcbk_desc, ''))) COLLATE Latin1_General_CI_AS
 		,strContact				= ''
 		,strAddress				= ''
 		,strZipCode				= ''
@@ -64,14 +63,17 @@ SELECT DISTINCT
 		,strFax					= ''
 		,strWebsite				= ''	
 		,strEmail				= ''
-		,strRTN					= (SELECT TOP 1 ISNULL(CAST(A.apcbk_transit_route AS NVARCHAR(12)), '') FROM apcbkmst A WHERE A.apcbk_desc = i.apcbk_desc) --ISNULL(CAST(i.apcbk_transit_route AS NVARCHAR(12)), '') COLLATE Latin1_General_CI_AS
-		,intCreatedUserId		= NULL
+		,strRTN					= (SELECT TOP 1 ISNULL(CAST(A.apcbk_transit_route AS NVARCHAR(12)), '') FROM apcbkmst A WHERE A.apcbk_desc = QUERY.apcbk_desc) 
+		,intCreatedUserId		= (SELECT TOP 1 dbo.fnConvertOriginUserIdtoi21(A.apcbk_user_id) FROM apcbkmst A WHERE A.apcbk_desc = QUERY.apcbk_desc) 
 		,dtmCreated				= GETDATE()
-		,intLastModifiedUserId	= NULL
+		,intLastModifiedUserId	= (SELECT TOP 1 dbo.fnConvertOriginUserIdtoi21(A.apcbk_user_id) FROM apcbkmst A WHERE A.apcbk_desc = QUERY.apcbk_desc) 
 		,dtmLastModified		= GETDATE()
 		,intConcurrencyId		= 1
-FROM	apcbkmst i
-WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBank WHERE strBankName = LTRIM(RTRIM(ISNULL(i.apcbk_desc, ''))) COLLATE Latin1_General_CI_AS)
+FROM	(	SELECT	DISTINCT 
+					i.apcbk_desc
+			FROM	apcbkmst i
+		) QUERY
+WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBank WHERE strBankName = LTRIM(RTRIM(ISNULL(QUERY.apcbk_desc, ''))) COLLATE Latin1_General_CI_AS)
 
 -- Insert new record in tblCMBankAccount
 INSERT INTO tblCMBankAccount (
@@ -122,8 +124,8 @@ INSERT INTO tblCMBankAccount (
 SELECT			
 		intBankId							= (SELECT TOP 1 A.intBankId FROM tblCMBank A WHERE A.strBankName = LTRIM(RTRIM(ISNULL(i.apcbk_desc, ''))) COLLATE Latin1_General_CI_AS)   
 		,ysnActive							= CASE WHEN i.apcbk_active_yn = 'Y' THEN 1 ELSE 0 END 
-		,intGLAccountId						= dbo.fnCMGetGLAccountIdFromOriginToi21(i.apcbk_gl_cash) 
-		,intCurrencyId						= dbo.fnCMGetCurrencyIdFromOriginToi21(i.apcbk_currency)
+		,intGLAccountId						= dbo.fnGetGLAccountIdFromOriginToi21(i.apcbk_gl_cash) 
+		,intCurrencyId						= dbo.fnGetCurrencyIdFromOriginToi21(i.apcbk_currency)
 		,intBankAccountType					= @DEPOSIT_ACCOUNT
 		,strContact							= ''
 		,strBankAccountNo					= ISNULL(i.apcbk_bank_acct_no, '') COLLATE Latin1_General_CI_AS
@@ -157,9 +159,9 @@ SELECT
 		,intMICRCheckNoPosition				= @CHECKNO_LEFT
 		,strMICRLeftSymbol					= 'C'
 		,strMICRRightSymbol					= 'C'
-		,intCreatedUserId					= NULL
+		,intCreatedUserId					= dbo.fnConvertOriginUserIdtoi21(i.apcbk_user_id)
 		,dtmCreated							= GETDATE()
-		,intLastModifiedUserId				= NULL
+		,intLastModifiedUserId				= dbo.fnConvertOriginUserIdtoi21(i.apcbk_user_id)
 		,dtmLastModified					= GETDATE()
 		,intConcurrencyId					= 1
 		,strCbkNo							= i.apcbk_no	

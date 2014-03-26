@@ -51,7 +51,7 @@ BEGIN
 		[strState] = '',
 		[strCountry] = '',
 		[dblAmount] = A.dblAmountPaid,
-		[strAmountInWords] = dbo.fnCMConvertNumberToWord(A.dblAmountPaid),
+		[strAmountInWords] = dbo.fnConvertNumberToWord(A.dblAmountPaid),
 		[strMemo] = NULL,
 		[strReferenceNo] = NULL,
 		[ysnCheckToBePrinted] = 0,
