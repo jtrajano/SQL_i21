@@ -1155,4 +1155,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intLeaseId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="5bf07835-d096-41b0-a228-efe37bff21bd" ChangeDateTime="03/27/2014 04:01:48">
+    <Property Name="ElementName" Value="[dbo].[tblTMLease].[intLeaseCodeID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMLease]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intLeaseCodeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="1ca749e6-3ae5-4dba-b440-adafc6e0b1fd" ChangeDateTime="03/27/2014 04:02:05">
+    <Property Name="ElementName" Value="[dbo].[tblTMLeaseCode].[intLeaseCodeID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMLeaseCode]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intLeaseCodeId" />
+  </Operation>
 </Operations>
