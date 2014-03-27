@@ -6,7 +6,7 @@ BEGIN
 
 	DECLARE @intCurrencyId INT
 
-	SELECT	@intCurrencyId = intCurrencyID
+	SELECT	@intCurrencyId = intCurrencyId
 	FROM	dbo.tblSMCurrency 
 	WHERE	strCurrency = @strOriginCurrencyId
 

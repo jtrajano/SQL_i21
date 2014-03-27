@@ -9,7 +9,7 @@ BEGIN
 	SELECT	@sscur_key = sscur_key
 	FROM	dbo.sscurmst curL INNER JOIN dbo.tblSMCurrency curi21
 				ON LTRIM(RTRIM(UPPER(curi21.strCurrency))) = LTRIM(RTRIM(UPPER(curL.sscur_key))) COLLATE Latin1_General_CI_AS 
-	WHERE	curi21.intCurrencyID = @inti21CurrencyID
+	WHERE	curi21.intCurrencyId = @inti21CurrencyID
 				
 	RETURN @sscur_key COLLATE SQL_Latin1_General_CP1_CS_AS
 END

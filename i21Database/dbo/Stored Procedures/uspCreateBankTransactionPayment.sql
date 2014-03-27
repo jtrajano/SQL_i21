@@ -37,10 +37,10 @@ BEGIN
 		[intConcurrencyId]
 	)
 	SELECT
-		[strTransactionID] = A.strPaymentRecordNum,
+		[strTransactionId] = A.strPaymentRecordNum,
 		[intBankTransactionTypeID] = (SELECT TOP 1 intBankTransactionTypeId FROM tblCMBankTransactionType WHERE strBankTransactionTypeName = 'AP Payment'),
 		[intBankAccountID] = A.intBankAccountId,
-		[intCurrencyID] = A.intCurrencyId,
+		[intCurrencyId] = A.intCurrencyId,
 		[dblExchangeRate] = 0,
 		[dtmDate] = A.dtmDatePaid,
 		[strPayee] = (SELECT TOP 1 strName FROM tblEntities WHERE intEntityId = B.intEntityId),

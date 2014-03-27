@@ -156,7 +156,7 @@ SELECT	intTransactionId		= @intTransactionId
 		,dtmLastModified		= GETDATE()
 		,intConcurrencyId		= 1
 FROM	tblGLAccount 
-WHERE	intAccountID = @intGLAccountId
+WHERE	intAccountId = @intGLAccountId
 IF @@ERROR <> 0	GOTO uspCMAddDeposit_Rollback
 
 -- Post the transaction 

@@ -101,13 +101,13 @@ SET @intTransactionIdTo = CASE WHEN ISNULL(@intTransactionIdTo, 0) = 0 THEN NULL
 SELECT	TOP 15 
 		BD.intTransactionDetailId
 		,BD.intTransactionId
-		,Accnt.strAccountID
+		,Accnt.strAccountId
 		,BD.strDescription
 		,E.strName
 		,BD.dblDebit
 		,BD.dblCredit
 FROM	[dbo].[tblCMBankTransactionDetail] BD INNER JOIN [dbo].[tblGLAccount] Accnt
-			ON BD.intGLAccountId = Accnt.intAccountID
+			ON BD.intGLAccountId = Accnt.intAccountId
 		LEFT JOIN [dbo].[tblEntity] E
 			ON BD.intEntityId = E.intEntityId
 WHERE	BD.intTransactionId >= ISNULL(@intTransactionIdFrom, BD.intTransactionId)

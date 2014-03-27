@@ -299,9 +299,9 @@ BEGIN
 	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankAccount BankAccnt
 				ON A.intBankAccountId = BankAccnt.intBankAccountId
 			INNER JOIN [dbo].tblGLAccount GLAccnt
-				ON BankAccnt.intGLAccountId = GLAccnt.intAccountID
+				ON BankAccnt.intGLAccountId = GLAccnt.intAccountId
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
-				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
+				ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
 	WHERE	A.strTransactionId = @strTransactionId
 	
 	-- 2. CREDIT SIdE
@@ -339,9 +339,9 @@ BEGIN
 	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankTransactionDetail B
 				ON A.intTransactionId = B.intTransactionId
 			INNER JOIN [dbo].tblGLAccount GLAccnt
-				ON B.intGLAccountId = GLAccnt.intAccountID
+				ON B.intGLAccountId = GLAccnt.intAccountId
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
-				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
+				ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
 	WHERE	A.strTransactionId = @strTransactionId
 	
 	IF @@ERROR <> 0	GOTO Post_Rollback

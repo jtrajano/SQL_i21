@@ -28,9 +28,9 @@ DECLARE
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 -- Retrieve the GL Batch Id in tblGLDetail for the transaction to Unpost/Reverse. 
-SELECT	@strBatchId = MAX(strBatchID)
+SELECT	@strBatchId = MAX(strBatchId)
 FROM	tblGLDetail
-WHERE	strTransactionID = @strTransactionId
+WHERE	strTransactionId = @strTransactionId
 		AND ysnIsUnposted = 0
 		AND strCode = ISNULL(@strCode, strCode)
 
@@ -76,10 +76,10 @@ INSERT INTO #tmpGLDetail (
 		,[strModuleName]
 		,[strUOMCode]
 )
-SELECT	[strTransactionID]
+SELECT	[strTransactionId]
 		,dtmDate			= ISNULL(@dtmDateReverse, [dtmDate]) -- If date is provided, use date reverse as the date for unposting the transaction.
-		,[strBatchID]
-		,[intAccountID]
+		,[strBatchId]
+		,[intAccountId]
 		,[strAccountGroup]
 		,dblDebit			= [dblCredit]		-- (Debit -> Credit)
 		,dblCredit			= [dblDebit]		-- (Debit <- Credit)
@@ -88,33 +88,33 @@ SELECT	[strTransactionID]
 		,[strDescription]
 		,[strCode]
 		,[strReference]
-		,[strJobID]
-		,[intCurrencyID]
+		,[strJobId]
+		,[intCurrencyId]
 		,[dblExchangeRate]
 		,dtmDateEntered		= GETDATE()
 		,[dtmTransactionDate]
-		,[strProductID]
-		,[strWarehouseID]
+		,[strProductId]
+		,[strWarehouseId]
 		,[strNum]
 		,[strCompanyName]
 		,[strBillInvoiceNumber]
 		,[strJournalLineDescription]
 		,ysnIsUnposted		= 1
 		,[intConcurrencyId]
-		,[intUserID]		= @intUserId
+		,[intUserId]		= @intUserId
 		,[strTransactionForm]
 		,[strModuleName]
 		,[strUOMCode]
 FROM	tblGLDetail 
-WHERE	strBatchID = @strBatchId
-ORDER BY intGLDetailID
+WHERE	strBatchId = @strBatchId
+ORDER BY intGLDetailId
 
 --=====================================================================================================================================
 -- 	UPDATE THE Is Unposted Flag IN THE tblGLDetail TABLE. 
 ---------------------------------------------------------------------------------------------------------------------------------------
 UPDATE	tblGLDetail
 SET		ysnIsUnposted = 1
-WHERE	strTransactionID = @strTransactionId
+WHERE	strTransactionId = @strTransactionId
 
 --=====================================================================================================================================
 -- 	EXIT ROUTINES

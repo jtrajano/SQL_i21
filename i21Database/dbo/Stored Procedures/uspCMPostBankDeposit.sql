@@ -278,9 +278,9 @@ BEGIN
 	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankAccount BankAccnt
 				ON A.intBankAccountId = BankAccnt.intBankAccountId
 			INNER JOIN [dbo].tblGLAccount GLAccnt
-				ON BankAccnt.intGLAccountId = GLAccnt.intAccountID
+				ON BankAccnt.intGLAccountId = GLAccnt.intAccountId
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
-				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
+				ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
 			LEFT JOIN [dbo].tblEntity Entity
 				ON A.intPayeeId = Entity.intEntityId
 	WHERE	A.strTransactionId = @strTransactionId
@@ -320,9 +320,9 @@ BEGIN
 	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankTransactionDetail B
 				ON A.intTransactionId = B.intTransactionId
 			INNER JOIN [dbo].tblGLAccount GLAccnt
-				ON B.intGLAccountId = GLAccnt.intAccountID
+				ON B.intGLAccountId = GLAccnt.intAccountId
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
-				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
+				ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
 			LEFT JOIN [dbo].tblEntity Entity
 				ON B.intEntityId = Entity.intEntityId
 	WHERE	A.strTransactionId = @strTransactionId

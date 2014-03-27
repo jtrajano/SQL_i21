@@ -243,7 +243,7 @@ BEGIN
 			,[intTransactionId]		= NULL
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
-			,[intAccountId]			= GLAccnt.intAccountID
+			,[intAccountId]			= GLAccnt.intAccountId
 			,[strAccountGroup]		= GLAccntGrp.strAccountGroup
 			,[dblDebit]				= 0
 			,[dblCredit]			= A.dblAmount
@@ -270,9 +270,9 @@ BEGIN
 			,[strModuleName]		= @MODULE_NAME
 			,[strUOMCode]			= NULL 
 	FROM	[dbo].tblCMBankTransfer A INNER JOIN [dbo].tblGLAccount GLAccnt
-				ON A.intGLAccountIdFrom = GLAccnt.intAccountID
+				ON A.intGLAccountIdFrom = GLAccnt.intAccountId
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
-				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
+				ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
 	WHERE	A.strTransactionId = @strTransactionId
 	
 	
@@ -282,7 +282,7 @@ BEGIN
 			,[intTransactionId]		= NULL
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
-			,[intAccountId]			= GLAccnt.intAccountID
+			,[intAccountId]			= GLAccnt.intAccountId
 			,[strAccountGroup]		= GLAccntGrp.strAccountGroup
 			,[dblDebit]				= A.dblAmount
 			,[dblCredit]			= 0
@@ -309,9 +309,9 @@ BEGIN
 			,[strModuleName]		= @MODULE_NAME
 			,[strUOMCode]			= NULL 
 	FROM	[dbo].tblCMBankTransfer A INNER JOIN [dbo].tblGLAccount GLAccnt
-				ON A.intGLAccountIdTo = GLAccnt.intAccountID		
+				ON A.intGLAccountIdTo = GLAccnt.intAccountId		
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
-				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
+				ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
 	WHERE	A.strTransactionId = @strTransactionId
 	
 	IF @@ERROR <> 0	GOTO Post_Rollback
@@ -386,9 +386,9 @@ BEGIN
 			,dtmLastModified			= GETDATE()
 			,intConcurrencyId			= 1	
 	FROM	[dbo].tblCMBankTransfer A INNER JOIN [dbo].tblGLAccount GLAccnt
-				ON A.intGLAccountIdFrom = GLAccnt.intAccountID		
+				ON A.intGLAccountIdFrom = GLAccnt.intAccountId		
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
-				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
+				ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
 	WHERE	A.strTransactionId = @strTransactionId
 	
 	-- Bank Transaction Debit
@@ -423,9 +423,9 @@ BEGIN
 			,dtmLastModified			= GETDATE()
 			,intConcurrencyId			= 1	
 	FROM	[dbo].tblCMBankTransfer A INNER JOIN [dbo].tblGLAccount GLAccnt
-				ON A.intGLAccountIdFrom = GLAccnt.intAccountID		
+				ON A.intGLAccountIdFrom = GLAccnt.intAccountId		
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
-				ON GLAccnt.intAccountGroupID = GLAccntGrp.intAccountGroupID
+				ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
 	WHERE	A.strTransactionId = @strTransactionId	
 	IF @@ERROR <> 0	GOTO Post_Rollback
 	

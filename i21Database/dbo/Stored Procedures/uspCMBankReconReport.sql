@@ -102,7 +102,7 @@ SELECT	intBankAccountId				= BankAccnt.intBankAccountId
 		,dtmStatementDate				= @dtmStatementDate
 		,strCbkNo						= BankAccnt.strCbkNo
 		,strBankName					= Bank.strBankName
-		,strGLAccountId					= GL.strAccountID
+		,strGLAccountId					= GL.strAccountId
 		,dblGLBalance					= [dbo].[fnGetBankGLBalance](BankAccnt.intBankAccountId, @dtmStatementDate) 
 		,dblBankAccountBalance			= [dbo].[fnGetBankBalance](BankAccnt.intBankAccountId, @dtmStatementDate)
 		,dblPriorReconEndingBalance		= [dbo].[fnGetBankBeginningBalance](BankAccnt.intBankAccountId, @dtmStatementDate)
@@ -114,6 +114,6 @@ SELECT	intBankAccountId				= BankAccnt.intBankAccountId
 FROM	dbo.tblCMBankAccount BankAccnt INNER JOIN dbo.tblCMBank Bank
 			ON BankAccnt.intBankId = Bank.intBankId
 		INNER JOIN dbo.tblGLAccount GL
-			ON BankAccnt.intGLAccountId = GL.intAccountID
+			ON BankAccnt.intGLAccountId = GL.intAccountId
 WHERE	BankAccnt.intBankAccountId BETWEEN @intBankAccountIdFrom AND @intBankAccountIdTo
 		AND @dtmStatementDate IS NOT NULL

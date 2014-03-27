@@ -4,11 +4,11 @@ RETURNS INT
 AS
 BEGIN 
 
-	DECLARE @intAccountID INT
+	DECLARE @intAccountId INT
 
-	SELECT	@intAccountID = inti21ID 
+	SELECT	@intAccountId = inti21Id 
 	FROM	dbo.tblGLCOACrossReference 
-	WHERE	strExternalID = @strOriginAccountId
+	WHERE	strExternalId = @strOriginAccountId
 
-	RETURN @intAccountID
+	RETURN @intAccountId
 END

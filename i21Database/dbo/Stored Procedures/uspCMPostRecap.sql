@@ -13,7 +13,7 @@ SET ANSI_WARNINGS OFF
 DELETE tblGLDetailRecap
 FROM	tblGLDetailRecap A INNER JOIN @RecapTable B
 			ON (
-				A.strTransactionID = B.strTransactionId
+				A.strTransactionId = B.strTransactionId
 				OR A.intTransactionID = B.intTransactionId
 			)
 			AND  A.strCode = B.strCode
@@ -21,11 +21,11 @@ FROM	tblGLDetailRecap A INNER JOIN @RecapTable B
 -- INSERT THE RECAP DATA. 
 -- THE RECAP DATA WILL BE STORED IN A PERMANENT TABLE SO THAT WE CAN QUERY IT LATER USING A BUFFERED STORE. 
 INSERT INTO tblGLDetailRecap (
-		[strTransactionID]		
-		,[intTransactionID]		
+		[strTransactionId]		
+		,[intTransactionId]		
 		,[dtmDate]				
-		,[strBatchID]			
-		,[intAccountID]			
+		,[strBatchId]			
+		,[intAccountId]			
 		,[strAccountGroup]		
 		,[dblDebit]				
 		,[dblCredit]			
@@ -34,14 +34,14 @@ INSERT INTO tblGLDetailRecap (
 		,[strDescription]		
 		,[strCode]				
 		,[strReference]			
-		,[strJobID]				
-		,[intCurrencyID]		
+		,[strJobId]				
+		,[intCurrencyId]		
 		,[dblExchangeRate]		
 		,[dtmDateEntered]		
 		,[dtmTransactionDate]	
 		,[ysnIsUnposted]		
 		,[intConcurrencyId]		
-		,[intUserID]			
+		,[intUserId]			
 		,[strTransactionForm]	
 		,[strModuleName]		
 		,[strUOMCode]	
