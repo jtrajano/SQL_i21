@@ -4,9 +4,9 @@
     [dblDebit]              DECIMAL (18, 6) DEFAULT 0 NOT NULL,
     [intBankTransactionId]  INT             NULL,
     [strBankTransactionId]  NVARCHAR (40)   COLLATE Latin1_General_CI_AS NULL,
-    [intCreatedUserID]      INT             NULL,
+    [intCreatedUserId]      INT             NULL,
     [dtmCreated]            DATETIME        NULL,
-    [intLastModifiedUserID] INT             NULL,
+    [intLastModifiedUserId] INT             NULL,
     [dtmLastModified]       DATETIME        NULL,
     [intConcurrencyId]      INT             DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblCMUndepositedFund] PRIMARY KEY CLUSTERED ([intUndepositedFundId] ASC)
