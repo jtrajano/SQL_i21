@@ -157,7 +157,7 @@ IF ISNULL(@recap, 0) = 0
 
 		UPDATE tblGLDetail
 			SET ysnIsUnposted = 1
-		WHERE strTransactionID IN (SELECT strBillId FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData))
+		WHERE strTransactionId IN (SELECT strBillId FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData))
 			
 
 	END
@@ -166,12 +166,12 @@ IF ISNULL(@recap, 0) = 0
 		WITH Units 
 		AS 
 		(
-			SELECT	A.[dblLbsPerUnit], B.[intAccountID] 
-			FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitID] = B.[intAccountUnitID]
+			SELECT	A.[dblLbsPerUnit], B.[intAccountId] 
+			FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
 		)
 		INSERT INTO tblGLDetail (
-			[strTransactionID], 
-			[intAccountID],
+			[strTransactionId], 
+			[intAccountId],
 			[strDescription],
 			[strReference],
 			[dtmTransactionDate],
@@ -183,24 +183,24 @@ IF ISNULL(@recap, 0) = 0
 			[ysnIsUnposted],
 			[intConcurrencyId],
 			[dblExchangeRate],
-			[intUserID],
+			[intUserId],
 			[dtmDateEntered],
-			[strBatchID],
+			[strBatchId],
 			[strCode],
 			[strModuleName],
 			[strTransactionForm]
 		)
 		--CREDIT
 		SELECT	
-			[strTransactionID] = A.strBillId, 
-			[intAccountID] = A.intAccountId,
+			[strTransactionId] = A.strBillId, 
+			[intAccountId] = A.intAccountId,
 			[strDescription] = A.strDescription,
 			[strReference] = A.strVendorId,
 			[dtmTransactionDate] = A.dtmDate,
 			[dblDebit] = 0,
 			[dblCredit] = A.dblTotal,
-			[dblDebitUnit]			= ISNULL(A.[dblTotal], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountID] = A.[intAccountId]), 0),
-			[dblCreditUnit]		= ISNULL(A.[dblTotal], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountID] = A.[intAccountId]), 0),
+			[dblDebitUnit]			= ISNULL(A.[dblTotal], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0),
+			[dblCreditUnit]		= ISNULL(A.[dblTotal], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0),
 			[dtmDate] = A.dtmDate,
 			[ysnIsUnposted] = 0,
 			[intConcurrencyId] = 1,
@@ -217,15 +217,15 @@ IF ISNULL(@recap, 0) = 0
 		--DEBIT
 		UNION ALL 
 		SELECT	
-			[strTransactionID] = A.strBillId, 
-			[intAccountID] = B.intAccountId,
+			[strTransactionId] = A.strBillId, 
+			[intAccountId] = B.intAccountId,
 			[strDescription] = A.strDescription,
 			[strReference] = A.strVendorId,
 			[dtmTransactionDate] = A.dtmDate,
 			[dblDebit] = B.dblTotal, --Bill Detail
 			[dblCredit] = 0, -- Bill
-			[dblDebitUnit]			= ISNULL(A.[dblTotal], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountID] = A.[intAccountId]), 0),
-			[dblCreditUnit]		= ISNULL(A.[dblTotal], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountID] = A.[intAccountId]), 0),
+			[dblDebitUnit]			= ISNULL(A.[dblTotal], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0),
+			[dblCreditUnit]		= ISNULL(A.[dblTotal], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0),
 			[dtmDate] = A.dtmDate,
 			[ysnIsUnposted] = 0,
 			[intConcurrencyId] = 1,
@@ -254,8 +254,8 @@ ELSE
 		WITH Units 
 		AS 
 		(
-			SELECT	A.[dblLbsPerUnit], B.[intAccountID] 
-			FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitID] = B.[intAccountUnitID]
+			SELECT	A.[dblLbsPerUnit], B.[intAccountId] 
+			FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
 		)
 		INSERT INTO tblGLRecap (
 			 [strTransactionId]
@@ -279,15 +279,15 @@ ELSE
 			,[strTransactionForm]
 		)
 		SELECT	
-			[strTransactionID] = A.strBillId, 
-			[intAccountID] = A.intAccountId,
+			[strTransactionId] = A.strBillId, 
+			[intAccountId] = A.intAccountId,
 			[strDescription] = A.strDescription,
 			[strReference] = A.strVendorId,
 			[dtmTransactionDate] = A.dtmDate,
 			[dblDebit] = 0,
 			[dblCredit] = A.dblTotal,
-			[dblDebitUnit]			= ISNULL(A.[dblTotal], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountID] = A.[intAccountId]), 0),
-			[dblCreditUnit]		= ISNULL(A.[dblTotal], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountID] = A.[intAccountId]), 0),
+			[dblDebitUnit]			= ISNULL(A.[dblTotal], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0),
+			[dblCreditUnit]		= ISNULL(A.[dblTotal], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0),
 			[dtmDate] = A.dtmDate,
 			[ysnIsUnposted] = 0,
 			[intConcurrencyId] = 1,
@@ -304,15 +304,15 @@ ELSE
 		--DEBIT
 		UNION ALL 
 		SELECT	
-			[strTransactionID] = A.strBillId, 
-			[intAccountID] = A.intAccountId,
+			[strTransactionId] = A.strBillId, 
+			[intAccountId] = A.intAccountId,
 			[strDescription] = A.strDescription,
 			[strReference] = A.strVendorId,
 			[dtmTransactionDate] = A.dtmDate,
 			[dblDebit] = B.dblTotal,
 			[dblCredit] = 0,
-			[dblDebitUnit]			= ISNULL(A.[dblTotal], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountID] = A.[intAccountId]), 0),
-			[dblCreditUnit]		= ISNULL(A.[dblTotal], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountID] = A.[intAccountId]), 0),
+			[dblDebitUnit]			= ISNULL(A.[dblTotal], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0),
+			[dblCreditUnit]		= ISNULL(A.[dblTotal], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0),
 			[dtmDate] = A.dtmDate,
 			[ysnIsUnposted] = 0,
 			[intConcurrencyId] = 1,

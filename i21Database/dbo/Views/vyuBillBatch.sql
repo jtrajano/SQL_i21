@@ -2,6 +2,6 @@
 AS
 SELECT 
 	A.*,
-	B.strAccountID AS strAccountId
+	B.strAccountId AS strAccountId
 FROM tblAPBillBatch A
-		INNER JOIN tblGLAccount B ON A.intAccountId = B.intAccountID
+		INNER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId

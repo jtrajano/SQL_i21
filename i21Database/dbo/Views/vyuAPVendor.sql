@@ -27,7 +27,7 @@ SELECT
 	C.intShipViaId,
 	C.intTaxCodeId,
 	ISNULL(C.intTermsId, 0) intTermsId,
-	C.strContactName,
+	--C.strContactName,
 	C.strCountry,
 	C.strNotes,
 	C.strState,
@@ -35,19 +35,19 @@ SELECT
 	D.strEmail,
 	D.strEmail2,
 	D.strFax,
-	D.strLocationName,
+	--D.strLocationName,
 	D.strMobile,
 	D.strPhone,
 	D.strPhone2,
 	D.strTitle,
 	E.strCurrency
 FROM
-		tblEntities A
+		tblEntity A
 	INNER JOIN tblAPVendor B
 		ON A.intEntityId = B.intEntityId
-	INNER JOIN tblEntityLocations C
+	INNER JOIN tblEntityLocation C
 		ON B.intEntityLocationId = C.intEntityLocationId
-	INNER JOIN tblEntityContacts D
+	INNER JOIN tblEntityContact D
 		ON B.intEntityContactId = D.intEntityContactId
 	LEFT JOIN tblSMCurrency E
 		ON B.intCurrencyId = E.intCurrencyID

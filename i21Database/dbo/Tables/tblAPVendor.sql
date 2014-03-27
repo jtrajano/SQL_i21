@@ -31,7 +31,7 @@
     [strTaxState]               NVARCHAR (50)  NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_dbo.tblAPVendor] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
-    CONSTRAINT [FK_dbo.tblAPVendor_dbo.tblEntities_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntities] ([intEntityId]),
+    CONSTRAINT [FK_dbo.tblAPVendor_dbo.tblEntities_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
     CONSTRAINT [APVendorId_Unique] UNIQUE NONCLUSTERED ([strVendorId] ASC)
 );
 
