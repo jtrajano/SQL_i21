@@ -1183,4 +1183,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intLastModifiedUserId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="99560746-9a61-4065-8d2f-fdb536fc65e8" ChangeDateTime="03/27/2014 07:35:38">
+    <Property Name="ElementName" Value="[dbo].[tblTMLease].[intBillToCustomerID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMLease]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intBillToCustomerId" />
+  </Operation>
 </Operations>

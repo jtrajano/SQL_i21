@@ -3,7 +3,7 @@
     [intLeaseId]              INT           IDENTITY (1, 1) NOT NULL,
     [intLeaseCodeId]          INT           DEFAULT 0 NULL,
     [strLeaseNumber]          NVARCHAR (50) COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
-    [intBillToCustomerID]     INT           DEFAULT 0 NULL,
+    [intBillToCustomerId]     INT           DEFAULT 0 NULL,
     [ysnLeaseToOwn]           BIT           DEFAULT 0 NULL,
     [strLeaseStatus]          NVARCHAR (50) COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [strBillingFrequency]     NVARCHAR (50) COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,

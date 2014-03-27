@@ -71,3 +71,12 @@ BEGIN
 END
 GO
 
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblTMLease]') AND type in (N'U')) 
+BEGIN
+	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intBillToCustomerId' AND OBJECT_ID = OBJECT_ID(N'tblTMLease')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intBillToCustomerID' AND OBJECT_ID = OBJECT_ID(N'tblTMLease'))
+    BEGIN
+        EXEC sp_rename 'tblTMLease.intBillToCustomerID', 'intBillToCustomerId' , 'COLUMN'
+    END
+END
+GO
+
