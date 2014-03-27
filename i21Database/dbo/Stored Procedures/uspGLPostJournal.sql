@@ -2,7 +2,7 @@
 --=====================================================================================================================================
 -- 	CREATE THE STORED PROCEDURE AFTER DELETING IT
 ---------------------------------------------------------------------------------------------------------------------------------------
-CREATE PROCEDURE uspGLPostJournal
+CREATE PROCEDURE [dbo].[uspGLPostJournal]
 	@Param				AS NVARCHAR(MAX)	= '',	
 	@ysnPost			AS BIT				= 0,
 	@ysnRecap			AS BIT				= 0,

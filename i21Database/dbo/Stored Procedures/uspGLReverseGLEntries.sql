@@ -2,7 +2,7 @@
 --=====================================================================================================================================
 -- 	CREATE THE STORED PROCEDURE AFTER DELETING IT
 ---------------------------------------------------------------------------------------------------------------------------------------
-CREATE PROCEDURE uspGLReverseGLEntries
+CREATE PROCEDURE [dbo].[uspGLReverseGLEntries]
 	 @strBatchId		AS NVARCHAR(100)	= ''
 	,@strTransactionId	NVARCHAR(40)	= NULL
 	,@ysnRecap			AS BIT			= 0

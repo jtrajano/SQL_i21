@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspGLBuildTempCOASegment
+﻿CREATE PROCEDURE [dbo].[uspGLBuildTempCOASegment]
 	
 AS
 BEGIN

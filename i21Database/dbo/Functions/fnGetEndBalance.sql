@@ -1,4 +1,4 @@
-﻿CREATE FUNCTION [dbo].[fn_getEndBalance](@strAccountID nvarchar(50),@dtmDate datetime,@AA nvarchar(50) = '')
+﻿CREATE FUNCTION [dbo].[fnGetEndBalance](@strAccountId nvarchar(50),@dtmDate datetime,@AA nvarchar(50) = '')
 RETURNS decimal(18,6)
 AS
 BEGIN
@@ -10,12 +10,12 @@ BEGIN
 				END)  
 		
 	FROM tblGLAccount A
-		LEFT JOIN tblGLAccountGroup B ON A.intAccountGroupID = B.intAccountGroupID
-		LEFT JOIN tblGLSummary C ON A.intAccountID = C.intAccountID
-	WHERE strAccountID = @strAccountID and dtmDate <= @dtmDate
+		LEFT JOIN tblGLAccountGroup B ON A.intAccountGroupId = B.intAccountGroupId
+		LEFT JOIN tblGLSummary C ON A.intAccountId = C.intAccountId
+	WHERE strAccountId = @strAccountId and dtmDate <= @dtmDate
 			and 1 = CASE WHEN strCode in ('CY', 'RE') and cast(floor(cast(dtmDate as float)) as datetime) = @dtmDate THEN 0 ELSE 1 END
 			and strCode <> @AA
-	GROUP BY strAccountID
+	GROUP BY strAccountId
 
 	RETURN @endBalance
 END
