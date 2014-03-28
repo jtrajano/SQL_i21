@@ -47,7 +47,7 @@ BEGIN
 		[dtmDate] 				=	CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112),
 		[dtmBillDate] 			=	CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112),
 		[dtmDueDate] 			=	CONVERT(DATE, CAST(A.aptrx_due_rev_dt AS CHAR(12)), 112),
-		[intAccountId] 			=	(SELECT TOP 1 inti21ID FROM tblGLCOACrossReference WHERE strExternalID = B.apcbk_gl_ap),
+		[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
 		[strDescription] 		=	A.aptrx_comment,
 		[dblTotal] 				=	A.aptrx_orig_amt,
 		[ysnPosted] 			=	0,
@@ -84,7 +84,7 @@ BEGIN
 	SELECT 
 		A.intBillId,
 		A.strDescription,
-		(SELECT TOP 1 inti21ID FROM tblGLCOACrossReference WHERE strExternalID = C.apegl_gl_acct),
+		(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.apegl_gl_acct),
 		C.apegl_gl_amt
 	FROM tblAPBill A
 		INNER JOIN apeglmst C
@@ -164,7 +164,7 @@ BEGIN
 		[dtmDate] 				=	CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112),
 		[dtmBillDate] 			=	CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112),
 		[dtmDueDate] 			=	CONVERT(DATE, CAST(A.aptrx_due_rev_dt AS CHAR(12)), 112),
-		[intAccountId] 			=	(SELECT TOP 1 inti21ID FROM tblGLCOACrossReference WHERE strExternalID = B.apcbk_gl_ap),
+		[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
 		[strDescription] 		=	A.aptrx_comment,
 		[dblTotal] 				=	A.aptrx_orig_amt,
 		[ysnPosted] 			=	0,
@@ -224,7 +224,7 @@ BEGIN
 	SELECT 
 		A.intBillId,
 		A.strDescription,
-		(SELECT TOP 1 inti21ID FROM tblGLCOACrossReference WHERE strExternalID = C.apegl_gl_acct),
+		(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.apegl_gl_acct),
 		C.apegl_gl_amt
 		FROM tblAPBill A
 		INNER JOIN apeglmst C

@@ -35,7 +35,7 @@ BEGIN
 		ssvnd_pay_to = strVendorPayToId,
 		ssvnd_currency = E.strCurrency,
 		ssvnd_1099_name = str1099Name,
-		ssvnd_gl_pur = F.strExternalID
+		ssvnd_gl_pur = F.strExternalId
 	FROM
 		tblEntities A
 	INNER JOIN tblAPVendor B
@@ -47,7 +47,7 @@ BEGIN
 	LEFT JOIN tblSMCurrency E
 		ON B.intCurrencyId = E.intCurrencyID
 	LEFT JOIN tblGLCOACrossReference F
-		ON B.intGLAccountExpenseId = F.inti21ID
+		ON B.intGLAccountExpenseId = F.inti21Id
 	WHERE ssvndmst.ssvnd_vnd_no = @VendorId
 
 RETURN;
@@ -105,7 +105,7 @@ BEGIN
 		strVendorPayToId,
 		E.strCurrency,
 		str1099Name,
-		F.strExternalID
+		F.strExternalId
 	FROM
 		tblEntities A
 	INNER JOIN tblAPVendor B
@@ -117,7 +117,7 @@ BEGIN
 	LEFT JOIN tblSMCurrency E
 		ON B.intCurrencyId = E.intCurrencyID
 	LEFT JOIN tblGLCOACrossReference F
-		ON B.intGLAccountExpenseId = F.inti21ID
+		ON B.intGLAccountExpenseId = F.inti21Id
 	WHERE strVendorId = @VendorId
 	RETURN;
 END
@@ -251,7 +251,7 @@ BEGIN
 			@intPaymentMethodId       	= NULL,
 			@intShipViaId             	= NULL,
 			@intVendorTaxCodeId     	= NULL,
-			@intGLAccountExpenseId    	= (SELECT TOP 1 inti21ID FROM tblGLCOACrossReference WHERE strExternalID = CONVERT(NVARCHAR(50),ssvnd_gl_pur)),
+			@intGLAccountExpenseId    	= (SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CONVERT(NVARCHAR(50),ssvnd_gl_pur)),
 			@strFederalTaxId          	= ssvnd_fed_tax_id,
 			@intTermsId               	= NULL,
 			@strVendorAccountNum      	= NULL,

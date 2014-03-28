@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE uspCMPostRecap
+﻿CREATE PROCEDURE uspCMPostRecap
 	@RecapTable RecapTableType READONLY 
 AS
 
@@ -14,7 +13,7 @@ DELETE tblGLDetailRecap
 FROM	tblGLDetailRecap A INNER JOIN @RecapTable B
 			ON (
 				A.strTransactionId = B.strTransactionId
-				OR A.intTransactionID = B.intTransactionId
+				OR A.intTransactionId = B.intTransactionId
 			)
 			AND  A.strCode = B.strCode
 
