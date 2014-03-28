@@ -82,10 +82,10 @@ SET @intYear			= (SELECT TOP 1 CAST(strFiscalYear as INT) FROM tblGLFiscalYear W
 SET @dtmDateFrom		= (SELECT TOP 1 dtmDateFrom FROM tblGLFiscalYear WHERE intFiscalYearId = @intFiscalYearId) 		
 SET @dtmDateTo			= (SELECT TOP 1 dtmDateTo FROM tblGLFiscalYear WHERE intFiscalYearId = @intFiscalYearId) 		
 SET @strRetainedAccount = (SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = (SELECT TOP 1 intRetainAccount FROM tblGLFiscalYear WHERE intFiscalYearId = @intFiscalYearId))
-SET @intCurrencyId		= (SELECT TOP 1 intCurrencyId FROM tblSMCurrency WHERE intCurrencyId = (CASE WHEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') > 0 
+SET @intCurrencyId		= (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE intCurrencyID = (CASE WHEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') > 0 
 																		THEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency')
-																		ELSE (SELECT TOP 1 intCurrencyId FROM tblSMCurrency WHERE strCurrency = 'USD') END))
-SET @dblDailyRate		= (SELECT dblDailyRate FROM tblSMCurrency WHERE intCurrencyId = @intCurrencyId)
+																		ELSE (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'USD') END))
+SET @dblDailyRate		= (SELECT dblDailyRate FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId)
 
 
 --=====================================================================================================================================

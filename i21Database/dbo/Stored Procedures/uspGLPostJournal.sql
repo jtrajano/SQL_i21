@@ -191,10 +191,10 @@ IF ISNULL(@ysnRecap, 0) = 0
 		DECLARE @intCurrencyId	INT
 		DECLARE @dblDailyRate	NUMERIC (18,6)
 		
-		SET @intCurrencyId		= (SELECT TOP 1 intCurrencyId FROM tblSMCurrency WHERE intCurrencyId = (CASE WHEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') > 0 
+		SET @intCurrencyId		= (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE intCurrencyID = (CASE WHEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') > 0 
 																		THEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency')
-																		ELSE (SELECT TOP 1 intCurrencyId FROM tblSMCurrency WHERE strCurrency = 'USD') END))
-		SET @dblDailyRate		= (SELECT TOP 1 dblDailyRate FROM tblSMCurrency WHERE intCurrencyId = @intCurrencyId);
+																		ELSE (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'USD') END))
+		SET @dblDailyRate		= (SELECT TOP 1 dblDailyRate FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId);
 
 	
 		WITH Units 

@@ -37,7 +37,7 @@ BEGIN
 	--		 TEMP HEADER JOURNAL
 	--+++++++++++++++++++++++++++++++++	
 
-	DECLARE @intCurrencyId NVARCHAR(100) = (select intCurrencyId from tblSMCurrency where strCurrency = 'USD')
+	DECLARE @intCurrencyId NVARCHAR(100) = (select intCurrencyID from tblSMCurrency where strCurrency = 'USD')
 
 	SELECT 
 		CONVERT(VARCHAR(3),glhst_src_id) + CONVERT(VARCHAR(5),glhst_src_seq) + CONVERT(VARCHAR(6),MAX(glhst_period)) AS strJournalId,
@@ -68,7 +68,7 @@ BEGIN
 	--+++++++++++++++++++++++++++++++++
 	
 	INSERT INTO tblGLCOAImportLog (strEvent,strIrelySuiteVersion,intUserId,dtmDate,strMachineName,strJournalType,intConcurrencyId)
-					VALUES('Import Origin Historical Journal',(SELECT TOP 1 strVersionNo FROM tblSMBuildNumber ORDER BY intVersionId DESC),@intUserId,GETDATE(),'','',1)
+					VALUES('Import Origin Historical Journal',(SELECT TOP 1 strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC),@intUserId,GETDATE(),'','',1)
 
 	DECLARE @intImportLogId INT = (SELECT intImportLogId FROM tblGLCOAImportLog WHERE strEvent = 'Import Origin Historical Journal' AND dtmDate = GETDATE())
 	
