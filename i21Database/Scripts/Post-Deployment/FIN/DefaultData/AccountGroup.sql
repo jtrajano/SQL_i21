@@ -1,7 +1,7 @@
 ﻿GO
 	PRINT N'BEGIN INSERT DEFAULT ACCOUNT GROUP'
 GO
---	SET IDENTITY_INSERT [dbo].[tblGLAccountGroup] ON
+--	SET IdENTITY_INSERT [dbo].[tblGLAccountGroup] ON
 --GO
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountGroup WHERE strAccountGroup = N'Asset' AND strAccountType = N'Asset')
 	BEGIN
@@ -36,7 +36,7 @@ GO
 		INSERT [dbo].[tblGLAccountGroup] ([strAccountGroup], [strAccountType], [intParentGroupId], [intGroup], [intSort], [intConcurrencyId], [intAccountBegin], [intAccountEnd], [strAccountGroupNamespace]) VALUES (N'Payables', N'Liability', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Liability' AND strAccountType = N'Liability') , 1, 20000, 1, NULL, NULL, NULL)
 	END
 GO
---	SET IDENTITY_INSERT [dbo].[tblGLAccountGroup] OFF
+--	SET IdENTITY_INSERT [dbo].[tblGLAccountGroup] OFF
 --GO
 	PRINT N'END INSERT DEFAULT ACCOUNT GROUP'
 GO
