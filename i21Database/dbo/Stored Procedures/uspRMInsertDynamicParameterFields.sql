@@ -27,7 +27,7 @@ BEGIN
 		Name NVARCHAR(MAX)
 	)
 
-	--GET REPORT ID'S
+	--GET REPORT Id'S
 	INSERT INTO @ReportIds
 	SELECT report.intReportId
 	FROM tblRMDatasource datasource
@@ -37,7 +37,7 @@ BEGIN
 	or datasource.strQuery LIKE '%tblGLTempCOASegment%' 
 
 	--CREATE DYNAMIC ACCOUNT STRUCTURE
-	EXEC usp_GLBuildTempCOASegment
+	EXEC uspGLBuildTempCOASegment
 
 	--STORE DYNAMIC COLUMNS
 	INSERT INTO @DynamicColumns
@@ -59,7 +59,7 @@ BEGIN
 		IF EXISTS (SELECT * FROM tblRMCriteriaFieldSelection WHERE strSource = 'tempDASTable' or strSource = 'tblGLTempCOASegment' or strSource IS NULL)
 			BEGIN
 				
-				--STORE CFS ID's 
+				--STORE CFS Id's 
 				INSERT INTO @CFS
 				SELECT intCriteriaFieldSelectionId 
 				FROM tblRMCriteriaFieldSelection
@@ -87,7 +87,7 @@ BEGIN
 				SET @CFSSource = 'tblGLTempCOASegment'
 				SELECT TOP 1 @CFSConnectionId = intConnectionId FROM tblRMConnection
 				SELECT @CFSFieldName = AccntStrcture FROM @DynamicColumns
-				IF (@CFSFieldName != 'intAccountID' AND @CFSFieldName != 'strAccountID')
+				IF (@CFSFieldName != 'intAccountId' AND @CFSFieldName != 'strAccountId')
 					BEGIN
 						INSERT INTO tblRMCriteriaFieldSelection
 						(strName,intConnectionId,strFieldName,strCaption,strValueField,strDisplayField,ysnDistinct,strSource,intFieldSourceType)
@@ -101,7 +101,7 @@ BEGIN
 				WHERE strSource = 'tempDASTable' 
 				or strSource = 'tblGLTempCOASegment'
 		
-				--DELETE CURRENT AccntStrcture TO AVOID ENDLESSLOOP
+				--DELETE CURRENT AccntStrcture TO AVOId ENDLESSLOOP
 				DELETE @DynamicColumns WHERE AccntStrcture = @CFSFieldName
 			END
 			
