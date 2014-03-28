@@ -66,6 +66,7 @@
     <Folder Include="Scripts\Pre-Deployment\3_DB" />
     <Folder Include="Scripts\Pre-Deployment\5_CM" />
     <Folder Include="Scripts\Pre-Deployment\UpdateValidation" />
+    <Folder Include="Scripts\Pre-Deployment\6_GL" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1_DataCleanup.sql" />
@@ -91,5 +92,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\3_DB\1_1340_to_1410.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\6_GL\1_1410_to_1420.sql" />
   </ItemGroup>
 </Project>
