@@ -33,3 +33,6 @@
 
 -- CM
 :r .\5_CM\1_DropTriggers.sql
+
+-- GL
+:r .\6_GL\1_1410_to_1420.sql
