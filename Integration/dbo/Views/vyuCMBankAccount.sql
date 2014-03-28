@@ -2,6 +2,7 @@
 	DROP VIEW vyuCMBankAccount
 
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
+BEGIN
 	EXEC ('
 		CREATE VIEW [dbo].vyuCMBankAccount
 		WITH SCHEMABINDING
@@ -141,6 +142,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 
 		END
 		')
+
 	EXEC('
 		CREATE TRIGGER trg_insert_vyuCMBankAccount
 		ON [dbo].vyuCMBankAccount
@@ -528,4 +530,5 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 		EXIT_TRIGGER:
 		END
 		')
+END
 GO
