@@ -250,6 +250,15 @@ BEGIN
 END
 GO
 
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblGLAccountStructure]') AND type in (N'U')) 
+BEGIN
+	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intOriginLength' AND OBJECT_ID = OBJECT_ID(N'tblGLAccountStructure')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intLegacyLength' AND OBJECT_ID = OBJECT_ID(N'tblGLAccountStructure'))
+    BEGIN
+        EXEC sp_rename 'tblGLAccountStructure.intLegacyLength', 'intOriginLength' , 'COLUMN'
+    END
+END
+GO
+
 IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblGLAccountTemplate]') AND type in (N'U')) 
 BEGIN
 	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intGLAccountTemplateId' AND OBJECT_ID = OBJECT_ID(N'tblGLAccountTemplate')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intGLAccountTemplateID' AND OBJECT_ID = OBJECT_ID(N'tblGLAccountTemplate'))
