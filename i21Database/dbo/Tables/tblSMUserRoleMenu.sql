@@ -1,13 +1,13 @@
 ﻿CREATE TABLE [dbo].[tblSMUserRoleMenu] (
-    [intUserRoleMenuID] INT IDENTITY (1, 1) NOT NULL,
-    [intUserRoleID]     INT NOT NULL,
-    [intMenuID]         INT NOT NULL,
-    [intParentMenuID]   INT NULL,
+    [intUserRoleMenuId] INT IDENTITY (1, 1) NOT NULL,
+    [intUserRoleId]     INT NOT NULL,
+    [intMenuId]         INT NOT NULL,
+    [intParentMenuId]   INT NULL,
     [ysnVisible]        BIT CONSTRAINT [DF_tblSMUserRoleMenu_ysnVisible] DEFAULT ((1)) NOT NULL,
     [intSort]           INT NULL,
     [intConcurrencyId]  INT DEFAULT (1) NOT NULL,
-    CONSTRAINT [PK_tblSMUserRoleMenu] PRIMARY KEY CLUSTERED ([intUserRoleMenuID] ASC),
-    CONSTRAINT [FK_tblSMUserRoleMenu_tblSMMasterMenu] FOREIGN KEY ([intMenuID]) REFERENCES [dbo].[tblSMMasterMenu] ([intMenuID]) ON DELETE CASCADE,
-    CONSTRAINT [FK_tblSMUserRoleMenu_tblSMUserRole] FOREIGN KEY ([intUserRoleID]) REFERENCES [dbo].[tblSMUserRole] ([intUserRoleID]) ON DELETE CASCADE
+    CONSTRAINT [PK_tblSMUserRoleMenu] PRIMARY KEY CLUSTERED ([intUserRoleMenuId] ASC),
+    CONSTRAINT [FK_tblSMUserRoleMenu_tblSMMasterMenu] FOREIGN KEY ([intMenuId]) REFERENCES [dbo].[tblSMMasterMenu] ([intMenuID]) ON DELETE CASCADE,
+    CONSTRAINT [FK_tblSMUserRoleMenu_tblSMUserRole] FOREIGN KEY ([intUserRoleId]) REFERENCES [dbo].[tblSMUserRole] ([intUserRoleID]) ON DELETE CASCADE
 );
 
