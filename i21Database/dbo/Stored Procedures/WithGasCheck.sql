@@ -185,7 +185,7 @@ FROM
 						INNER JOIN tblTMCustomer Y ON Z.intCustomerID = Y.intCustomerID
 						INNER JOIN vwcusmst X on Y.intCustomerNumber = X.A4GLIdentity
 						INNER JOIN tblTMSiteDevice W ON Z.intSiteID =W.intSiteID
-						INNER JOIN tblTMDevice V ON W.intDeviceID = V.intDeviceID 
+						INNER JOIN tblTMDevice V ON W.intDeviceId = V.intDeviceId 
 						INNER JOIN tblTMDeviceType U ON ISNULL(V.intDeviceTypeId,0) = ISNULL(U.intDeviceTypeId,-1)
 						WHERE
 						V.ysnAppliance = 0
@@ -198,7 +198,7 @@ FROM
 	INNER JOIN tblTMCustomer A ON C.intCustomerID = A.intCustomerID
 	INNER JOIN vwcusmst B on A.intCustomerNumber = B.A4GLIdentity
 	INNER JOIN tblTMSiteDevice D ON C.intSiteID =D.intSiteID
-	INNER JOIN tblTMDevice E ON D.intDeviceID = E.intDeviceID 
+	INNER JOIN tblTMDevice E ON D.intDeviceId = E.intDeviceId 
 	INNER JOIN tblTMDeviceType G ON ISNULL(E.intDeviceTypeId,0) = ISNULL(G.intDeviceTypeId,-1) 
 	WHERE
 	E.ysnAppliance = 0

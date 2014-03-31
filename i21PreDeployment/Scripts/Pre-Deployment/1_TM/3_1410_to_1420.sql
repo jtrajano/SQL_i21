@@ -80,3 +80,22 @@ BEGIN
 END
 GO
 
+---------intDeviceID-------------------------
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblTMEvent]') AND type in (N'U')) 
+BEGIN
+	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intDeviceId' AND OBJECT_ID = OBJECT_ID(N'tblTMEvent')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intDeviceID' AND OBJECT_ID = OBJECT_ID(N'tblTMEvent'))
+    BEGIN
+        EXEC sp_rename 'tblTMEvent.intDeviceID', 'intDeviceId' , 'COLUMN'
+    END
+END
+GO
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblTMSiteDevice]') AND type in (N'U')) 
+BEGIN
+	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intDeviceId' AND OBJECT_ID = OBJECT_ID(N'tblTMSiteDevice')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intDeviceID' AND OBJECT_ID = OBJECT_ID(N'tblTMSiteDevice'))
+    BEGIN
+        EXEC sp_rename 'tblTMSiteDevice.intDeviceID', 'intDeviceId' , 'COLUMN'
+    END
+END
+GO
+

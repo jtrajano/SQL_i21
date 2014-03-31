@@ -5,7 +5,7 @@
     [intEventTypeID]        INT            DEFAULT 0 NOT NULL,
     [intPerformerID]        INT            DEFAULT 0 NULL,
     [intUserID]             INT            DEFAULT 0 NOT NULL,
-    [intDeviceID]           INT            DEFAULT 0 NULL,
+    [intDeviceId]           INT            DEFAULT 0 NULL,
     [dtmLastUpdated]        DATETIME       DEFAULT 0 NULL,
     [strDeviceOwnership]    NVARCHAR (20)  COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [strDeviceSerialNumber] NVARCHAR (20)  COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
