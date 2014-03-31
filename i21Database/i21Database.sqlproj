@@ -488,6 +488,21 @@
     <Build Include="dbo\Stored Procedures\uspCMFixStartingNumbers.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateUserSecurityMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateUserSecurityMenus.sql" />
+    <Build Include="dbo\Tables\tblHDEmailSetup.sql" />
+    <Build Include="dbo\Tables\tblHDGroupUserConfig.sql" />
+    <Build Include="dbo\Tables\tblHDJobCode.sql" />
+    <Build Include="dbo\Tables\tblHDModule.sql" />
+    <Build Include="dbo\Tables\tblHDSetting.sql" />
+    <Build Include="dbo\Tables\tblHDTicket.sql" />
+    <Build Include="dbo\Tables\tblHDTicketComment.sql" />
+    <Build Include="dbo\Tables\tblHDTicketGroup.sql" />
+    <Build Include="dbo\Tables\tblHDTicketHoursWorked.sql" />
+    <Build Include="dbo\Tables\tblHDTicketNote.sql" />
+    <Build Include="dbo\Tables\tblHDTicketPriority.sql" />
+    <Build Include="dbo\Tables\tblHDTicketProduct.sql" />
+    <Build Include="dbo\Tables\tblHDTicketStatus.sql" />
+    <Build Include="dbo\Tables\tblHDTicketType.sql" />
+    <Build Include="dbo\Tables\tblHDVersion.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
