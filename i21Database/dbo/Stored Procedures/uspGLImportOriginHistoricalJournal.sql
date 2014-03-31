@@ -18,9 +18,13 @@ IF (SELECT isnull(@inti21Id, 0)) > 0
 BEGIN	
 	SELECT 'There are accounts that does not exists at iRely Cross Reference. <br/> Kindly verify at Origin.' as Result
 END
-ELSE IF (EXISTS(SELECT * FROM (SELECT SUBSTRING(dtmDate,5,2)+'/01/'+SUBSTRING(dtmDate,1,4) as dtmDate FROM (SELECT CONVERT(VARCHAR(3),glhst_src_id) + CONVERT(VARCHAR(5),glhst_src_seq) + CONVERT(VARCHAR(6),MAX(glhst_period)) AS strJournalId, CONVERT(VARCHAR(12),MAX(glhst_period)) AS dtmDate FROM glhstmst GROUP BY glhst_period, glhst_src_id, glhst_src_seq) tblA) tblB where ISDATE(dtmDate) = 0))
+ELSE IF (EXISTS(SELECT TOP 1 1 FROM (SELECT SUBSTRING(dtmDate,5,2)+'/01/'+SUBSTRING(dtmDate,1,4) as dtmDate FROM (SELECT CONVERT(VARCHAR(3),glhst_src_id) + CONVERT(VARCHAR(5),glhst_src_seq) + CONVERT(VARCHAR(6),MAX(glhst_period)) AS strJournalId, CONVERT(VARCHAR(12),MAX(glhst_period)) AS dtmDate FROM glhstmst GROUP BY glhst_period, glhst_src_id, glhst_src_seq) tblA) tblB where ISDATE(dtmDate) = 0))
 BEGIN	
 	SELECT 'There are invalid dates on Historical Transactions. <br/> Kindly verify at Origin.' as Result
+END
+ELSE IF (EXISTS(SELECT TOP 1 1 FROM glhstmst where LEN(glhst_trans_dt) <> 8))
+BEGIN	
+	SELECT 'There are invalid dates on Historical Transaction Details. <br/> Kindly verify at Origin.' as Result
 END
 ELSE
 BEGIN
