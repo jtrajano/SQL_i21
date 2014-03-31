@@ -2,6 +2,7 @@
     [intUserSecurityMenuId]     INT IDENTITY (1, 1) NOT NULL,
     [intUserSecurityId]         INT NOT NULL,
 	[intMenuId]         INT NOT NULL,
+	[intParentMenuId]   INT NULL,
     [ysnVisible]        BIT CONSTRAINT [DF_tblSMUserSecurityMenu_ysnVisible] DEFAULT ((1)) NOT NULL,
     [intSort]           INT NULL,
     [intConcurrencyId]  INT DEFAULT (1) NOT NULL,
