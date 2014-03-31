@@ -487,6 +487,7 @@
     <Build Include="dbo\Stored Procedures\uspSMBuildSecurityMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateUserRoleMenus.sql" />
     <Build Include="dbo\Functions\uspSMUpdateUserSecurityMenus.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMFixStartingNumbers.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
