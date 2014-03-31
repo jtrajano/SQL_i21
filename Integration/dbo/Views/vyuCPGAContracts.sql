@@ -1,5 +1,5 @@
-﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPGAContracts')
-	DROP VIEW vwCPGAContracts
+﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCPGAContracts')
+	DROP VIEW vyuCPGAContracts
 
 -- GRAINS DEPENDENT
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBName = db_name()	) = 1 and
@@ -7,7 +7,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNa
 	(SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'gacntmst') = 1 and
 	(SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'gacommst') = 1
 	EXEC ('
-	CREATE VIEW [dbo].[vwCPGAContracts]
+	CREATE VIEW [dbo].[vyuCPGAContracts]
 	AS
 	select
 		a.gacnt_loc_no

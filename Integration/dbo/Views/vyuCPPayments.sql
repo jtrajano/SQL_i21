@@ -1,9 +1,9 @@
-﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPPayments')
-	DROP VIEW vwCPPayments
+﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCPPayments')
+	DROP VIEW vyuCPPayments
 
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()	) = 1 and (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'EC' and strDBName = db_name()) = 1
 	EXEC ('
-		CREATE VIEW [dbo].[vwCPPayments]
+		CREATE VIEW [dbo].[vyuCPPayments]
 		AS
 		select
 			p.A4GLIdentity
@@ -26,7 +26,7 @@ GO
 -- PT VIEW 
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()	) = 1 and (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'EC' and strDBName = db_name()) = 1
 	EXEC ('
-		CREATE VIEW [dbo].[vwCPPayments]
+		CREATE VIEW [dbo].[vyuCPPayments]
 		AS
 			select
 			p.A4GLIdentity

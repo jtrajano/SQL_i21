@@ -1,11 +1,11 @@
-﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPPurchaseDetail')
-	DROP VIEW vwCPPurchaseDetail
+﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCPPurchaseDetail')
+	DROP VIEW vyuCPPurchaseDetail
 GO
 
 -- AG VIEW
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()	) = 1 and (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'EC' and strDBName = db_name()) = 1
 	EXEC ('
-		CREATE VIEW [dbo].[vwCPPurchaseDetail]
+		CREATE VIEW [dbo].[vyuCPPurchaseDetail]
 		AS
 		select distinct
 			a.A4GLIdentity
@@ -30,7 +30,7 @@ GO
 -- PT VIEW
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()	) = 1 and (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'EC' and strDBName = db_name()) = 1
 	EXEC ('
-		CREATE VIEW [dbo].[vwCPPurchaseDetail]
+		CREATE VIEW [dbo].[vyuCPPurchaseDetail]
 		AS
 		SELECT DISTINCT
 			A4GLIdentity = 0

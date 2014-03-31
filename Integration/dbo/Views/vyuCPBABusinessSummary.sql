@@ -1,11 +1,11 @@
-﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPBABusinessSummary')
-	DROP VIEW vwCPBABusinessSummary
+﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCPBABusinessSummary')
+	DROP VIEW vyuCPBABusinessSummary
 
 GO
 -- AG VIEW
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()	) = 1 and (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'EC' and strDBName = db_name()) = 1
 	EXEC ('
-		CREATE VIEW [dbo].[vwCPBABusinessSummary]
+		CREATE VIEW [dbo].[vyuCPBABusinessSummary]
 		AS
 		select
 			A4GLIdentity = row_number() over (order by a.agstm_loc_no)
@@ -41,7 +41,7 @@ GO
 -- PT VIEW
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()	) = 1 and (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'EC' and strDBName = db_name()) = 1
 	EXEC ('
-		CREATE VIEW [dbo].[vwCPBABusinessSummary]
+		CREATE VIEW [dbo].[vyuCPBABusinessSummary]
 		AS
 			select
 			A4GLIdentity = row_number() over (order by a.ptstm_loc_no)

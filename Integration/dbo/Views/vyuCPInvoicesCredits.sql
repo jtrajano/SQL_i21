@@ -1,11 +1,11 @@
-﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPInvoicesCredits')
-	DROP VIEW vwCPInvoicesCredits
+﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCPInvoicesCredits')
+	DROP VIEW vyuCPInvoicesCredits
 GO
 
 -- AG VIEW
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()) = 1 and (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'EC' and strDBName = db_name()) = 1
 	EXEC ('
-		CREATE VIEW [dbo].[vwCPInvoicesCredits]
+		CREATE VIEW [dbo].[vyuCPInvoicesCredits]
 		AS
 		select
 			a.A4GLIdentity
@@ -53,7 +53,7 @@ GO
 -- PT VIEW
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1 and (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'EC' and strDBName = db_name()) = 1
 	EXEC ('
-		CREATE VIEW [dbo].[vwCPInvoicesCredits]
+		CREATE VIEW [dbo].[vyuCPInvoicesCredits]
 			as
 			select
 			a.A4GLIdentity

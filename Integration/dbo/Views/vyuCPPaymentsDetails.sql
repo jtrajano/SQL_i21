@@ -1,9 +1,9 @@
-﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPPaymentsDetails')
-	DROP VIEW vwCPPaymentsDetails
+﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCPPaymentsDetails')
+	DROP VIEW vyuCPPaymentsDetails
 GO
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()	) = 1 and (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'EC' and strDBName = db_name()) = 1
 	EXEC ('
-		CREATE VIEW [dbo].[vwCPPaymentsDetails]
+		CREATE VIEW [dbo].[vyuCPPaymentsDetails]
 		AS
 		select
 			strCustomerName = rtrim(ltrim(c.agcus_first_name)) + '' '' + rtrim(ltrim(c.agcus_last_name))
@@ -74,7 +74,7 @@ GO
 
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()	) = 1 and (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'EC' and strDBName = db_name()) = 1
 	EXEC ('
-		CREATE VIEW [dbo].[vwCPPaymentsDetails]
+		CREATE VIEW [dbo].[vyuCPPaymentsDetails]
 		AS
 		SELECT strCustomerName = ''''
 			,strCustomerNo = ''''

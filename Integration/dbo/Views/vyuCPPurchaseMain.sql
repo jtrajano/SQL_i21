@@ -1,8 +1,8 @@
 ﻿/*
-IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPPurchaseMain')
-	DROP VIEW vwCPPurchaseMain
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCPPurchaseMain')
+	DROP VIEW vyuCPPurchaseMain
 GO
-CREATE VIEW [dbo].[vwCPPurchaseMain]
+CREATE VIEW [dbo].[vyuCPPurchaseMain]
 AS
 
 select distinct
@@ -15,7 +15,7 @@ select distinct
 	,strUnitDescription = agstm_un_desc
 	,dblAmount = sum(agstm_amount)
 from
-	vwCPPurchaseDetail
+	vyuCPPurchaseDetail
 group by
 	agstm_bill_to_cus
 	,agstm_itm_no
@@ -27,13 +27,13 @@ group by
 GO
 */
 
-IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPPurchaseMain')
-	DROP VIEW vwCPPurchaseMain
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCPPurchaseMain')
+	DROP VIEW vyuCPPurchaseMain
 GO
 
-IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPPurchaseDetail')
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCPPurchaseDetail')
 	EXEC('
-	CREATE VIEW [dbo].[vwCPPurchaseMain]
+	CREATE VIEW [dbo].[vyuCPPurchaseMain]
 	AS
 	select distinct
 		 id = row_number() over (order by agstm_bill_to_cus)
@@ -45,7 +45,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPP
 		,strUnitDescription = agstm_un_desc
 		,dblAmount = sum(agstm_amount)
 	from
-		vwCPPurchaseDetail
+		vyuCPPurchaseDetail
 	group by
 		agstm_bill_to_cus
 		,agstm_itm_no

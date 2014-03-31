@@ -1,5 +1,5 @@
-﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPGAContractDetail')
-	DROP VIEW vwCPGAContractDetail
+﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCPGAContractDetail')
+	DROP VIEW vyuCPGAContractDetail
 
 -- GRAINS DEPENDENT
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBName = db_name()) = 1 and
@@ -7,7 +7,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNa
 	(SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'gacntmst') = 1 and
 	(SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'gacommst') = 1
 	EXEC ('
-		CREATE VIEW [dbo].[vwCPGAContractDetail]
+		CREATE VIEW [dbo].[vyuCPGAContractDetail]
 		AS
 		select
 			A4GLIdentity = row_number() over (order by a.gacnt_cnt_no)

@@ -1,10 +1,10 @@
-﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPPrepaidCredits')
-	DROP VIEW vwCPPrepaidCredits
+﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCPPrepaidCredits')
+	DROP VIEW vyuCPPrepaidCredits
 GO
 -- AG VIEW
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()	) = 1 and (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'EC' and strDBName = db_name()) = 1
 	EXEC ('
-		CREATE VIEW [dbo].[vwCPPrepaidCredits]
+		CREATE VIEW [dbo].[vyuCPPrepaidCredits]
 		AS
 		select 
 			A4GLIdentity = row_number() over (order by agcrd_loc_no)
@@ -30,7 +30,7 @@ GO
 -- PT VIEW
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()	) = 1 and (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'EC' and strDBName = db_name()) = 1
 	EXEC ('
-		CREATE VIEW [dbo].[vwCPPrepaidCredits]
+		CREATE VIEW [dbo].[vyuCPPrepaidCredits]
 		AS
 		select 
 			A4GLIdentity = row_number() over (order by ptcrd_loc_no)

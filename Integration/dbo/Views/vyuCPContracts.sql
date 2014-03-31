@@ -1,6 +1,6 @@
 ﻿
-IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPContracts')
-	DROP VIEW vwCPContracts
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCPContracts')
+	DROP VIEW vyuCPContracts
 GO
 
 --CONTRACTS DEPENDENT
@@ -9,7 +9,7 @@ BEGIN
 	-- AG VIEW
 	IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()	) = 1 and (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'EC' and strDBName = db_name()) = 1
 		EXEC ('
-			CREATE VIEW [dbo].[vwCPContracts]
+			CREATE VIEW [dbo].[vyuCPContracts]
 			AS
 			select distinct
 				a.A4GLIdentity
@@ -40,7 +40,7 @@ BEGIN
 	-- PT VIEW
 	IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()	) = 1 and (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'EC' and strDBName = db_name()) = 1
 		EXEC ('
-			CREATE VIEW [dbo].[vwCPContracts]
+			CREATE VIEW [dbo].[vyuCPContracts]
 			AS
 			select distinct
 				a.A4GLIdentity
