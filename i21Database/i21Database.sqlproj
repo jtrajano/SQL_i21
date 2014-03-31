@@ -352,7 +352,6 @@
     <Build Include="dbo\Stored Procedures\uspCMReconcileBankRecords.sql" />
     <Build Include="dbo\Stored Procedures\uspCMReverseGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\TwoPartDeliveryFillReport.sql" />
-    <Build Include="dbo\Stored Procedures\usp_BuildMenuPermissions.sql" />
     <Build Include="dbo\Stored Procedures\uspGLAccountClone.sql" />
     <Build Include="dbo\Stored Procedures\uspGLAccountOriginSync.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildAccount.sql" />
@@ -486,8 +485,9 @@
     <Build Include="dbo\Tables\tblSMAttachment.sql" />
     <Build Include="dbo\Stored Procedures\uspSMBuildSecurityMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateUserRoleMenus.sql" />
-    <Build Include="dbo\Functions\uspSMUpdateUserSecurityMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspCMFixStartingNumbers.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMUpdateUserSecurityMenus.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMUpdateUserSecurityMenus.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
