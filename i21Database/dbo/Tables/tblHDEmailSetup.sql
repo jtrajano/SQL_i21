@@ -7,7 +7,7 @@
 	[strSMTPServer] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[intSMTPPort] [int] NULL,
 	[strEncryptedConnection] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
-	[ysnRequiresAuthen] [bit] NULL,
+	[ysnRequiresAuthentication] [bit] NULL,
 	[strUserName] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strPassword] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL,

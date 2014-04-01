@@ -1211,4 +1211,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intDeviceId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="cc4a437d-2769-447f-8165-56ed65700bbe" ChangeDateTime="04/01/2014 02:22:01">
+    <Property Name="ElementName" Value="[dbo].[tblHDJobCode].[intRate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblHDJobCode]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblRate" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4eaba56f-9fa4-4c95-9b0c-758921ffa38b" ChangeDateTime="04/01/2014 02:22:34">
+    <Property Name="ElementName" Value="[dbo].[tblHDEmailSetup].[ysnRequiresAuthen]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblHDEmailSetup]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnRequiresAuthentication" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c7c5c0f2-bdbf-4dfd-9db6-1946a6f3b2f9" ChangeDateTime="04/01/2014 02:23:16">
+    <Property Name="ElementName" Value="[dbo].[tblHDTicketHoursWorked].[intRate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblHDTicketHoursWorked]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblRate" />
+  </Operation>
 </Operations>
