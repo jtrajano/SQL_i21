@@ -2,33 +2,40 @@
 print('/*******************  BEGIN UPDATING canned panels column *******************/')
 GO
 print('/*******************  CREATE TEMPORARY table for canned panels column *******************/')
+
+
 Create TABLE #TampCannedPanelColumn 
 (
-	[intPanelColumnId] [int] NOT NULL,
-	[intPanelId] [int] NOT NULL,
-	[strColumn] [nvarchar](max) NULL,
-	[strCaption] [nvarchar](max) NULL,
-	[intWidth] [smallint] NOT NULL,
-	[strAlignment] [nvarchar](max) NULL,
-	[strArea] [nvarchar](max) NULL,
-	[strFooter] [nvarchar](max) NULL,
-	[strFormat] [nvarchar](max) NULL,
-	[intSort] [smallint] NOT NULL,
-	[strFormatTrue] [nvarchar](max) NULL,
-	[strFormatFalse] [nvarchar](max) NULL,
-	[strDrillDownColumn] [nvarchar](max) NULL,
-	[ysnVisible] [bit] NOT NULL,
-	[strType] [nvarchar](max) NULL,
-	[strAxis] [nvarchar](max) NULL,
-	[strUserName] [nvarchar](max) NULL,
-	[intUserId] [int] NOT NULL,
-	[intDonut] [smallint] NOT NULL,
-	[intMinInterval] [smallint] NOT NULL,
-	[intMaxInterval] [smallint] NOT NULL,
-	[intStepInterval] [smallint] NOT NULL,
-	[strIntervalFormat] [nvarchar](max) NULL,
-	[ysnHiddenColumn] [bit] NOT NULL,	
-	[intCannedPanelId] [int] NOT NULL	 	
+	[intPanelColumnId]   INT            NOT NULL,
+    [intPanelId]         INT            NOT NULL,
+    [strColumn]          NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [strCaption]         NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [intWidth]           SMALLINT       DEFAULT ((30)) NOT NULL,
+    [strAlignment]       NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [strArea]            NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [strFooter]          NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [strFormat]          NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [intSort]            SMALLINT       NOT NULL,
+    [strFormatTrue]      NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [strFormatFalse]     NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [strDrillDownColumn] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [ysnVisible]         BIT            DEFAULT ((0)) NOT NULL,
+    [strType]            NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [strAxis]            NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+
+    [strUserName]        NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [intUserId]          INT            NOT NULL,
+    [intDonut]           SMALLINT       NOT NULL,
+    [intMinInterval]     SMALLINT       DEFAULT ((0)) NOT NULL,
+    [intMaxInterval]     SMALLINT       DEFAULT ((0)) NOT NULL,
+    [intStepInterval]    SMALLINT       DEFAULT ((0)) NOT NULL,
+    [strIntervalFormat]  NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [ysnHiddenColumn]    BIT            DEFAULT ((0)) NOT NULL,
+    [intCannedPanelId] INT NOT NULL DEFAULT ((0)), 
+
+	-- on this build
+	--[intConcurrencyId ]  INT            DEFAULT ((1)) NOT NULL,
+	 	
 )
 
 print('/*******************  BEGIN INSERTING canned panels on temporary panel column table  *******************/')

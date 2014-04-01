@@ -23,34 +23,34 @@
 
 
 -- CUSTOMER PORTAL
-:r ..\dbo\Views\vwCPAgcusMst.sql
-:r ..\dbo\Views\vwCPBABusinessSummary.sql
-:r ..\dbo\Views\vwCPPaymentsDetails.sql
+:r ..\dbo\Views\vyuCPAgcusMst.sql
+:r ..\dbo\Views\vyuCPBABusinessSummary.sql
+:r ..\dbo\Views\vyuCPPaymentsDetails.sql
 
-:r ..\dbo\Views\vwCPBillingAccountPayments.sql
-:r ..\dbo\Views\vwCPContracts.sql
-:r ..\dbo\Views\vwCPCurrentCashBids.sql
-:r ..\dbo\Views\vwCPDatabaseDate.sql
-:r ..\dbo\Views\vwCPGABusinessSummary.sql
-:r ..\dbo\Views\vwCPGAContractDetail.sql
-:r ..\dbo\Views\vwCPGAContracts.sql
-:r ..\dbo\Views\vwCPGASettlementsReports.sql
-:r ..\dbo\Views\vwCPInvoicesCredits.sql
-:r ..\dbo\Views\vwCPInvoicesCreditsReports.sql
-:r ..\dbo\Views\vwCPOptions.sql
-:r ..\dbo\Views\vwCPOrders.sql
-:r ..\dbo\Views\vwCPPayments.sql
+:r ..\dbo\Views\vyuCPBillingAccountPayments.sql
+:r ..\dbo\Views\vyuCPContracts.sql
+:r ..\dbo\Views\vyuCPCurrentCashBids.sql
+:r ..\dbo\Views\vyuCPDatabaseDate.sql
+:r ..\dbo\Views\vyuCPGABusinessSummary.sql
+:r ..\dbo\Views\vyuCPGAContractDetail.sql
+:r ..\dbo\Views\vyuCPGAContracts.sql
+:r ..\dbo\Views\vyuCPGASettlementsReports.sql
+:r ..\dbo\Views\vyuCPInvoicesCredits.sql
+:r ..\dbo\Views\vyuCPInvoicesCreditsReports.sql
+:r ..\dbo\Views\vyuCPOptions.sql
+:r ..\dbo\Views\vyuCPOrders.sql
+:r ..\dbo\Views\vyuCPPayments.sql
 
-:r ..\dbo\Views\vwCPPendingInvoices.sql
-:r ..\dbo\Views\vwCPPendingPayments.sql
-:r ..\dbo\Views\vwCPPrepaidCredits.sql
-:r ..\dbo\Views\vwCPProductionHistory.sql
-:r ..\dbo\Views\vwCPPurchaseDetail.sql
-:r ..\dbo\Views\vwCPPurchaseMain.sql
-:r ..\dbo\Views\vwCPPurchases.sql
-:r ..\dbo\Views\vwCPPurchasesDetail.sql
-:r ..\dbo\Views\vwCPSettlements.sql
-:r ..\dbo\Views\vwCPStorage.sql
+:r ..\dbo\Views\vyuCPPendingInvoices.sql
+:r ..\dbo\Views\vyuCPPendingPayments.sql
+:r ..\dbo\Views\vyuCPPrepaidCredits.sql
+:r ..\dbo\Views\vyuCPProductionHistory.sql
+:r ..\dbo\Views\vyuCPPurchaseDetail.sql
+:r ..\dbo\Views\vyuCPPurchaseMain.sql
+:r ..\dbo\Views\vyuCPPurchases.sql
+:r ..\dbo\Views\vyuCPPurchasesDetail.sql
+:r ..\dbo\Views\vyuCPSettlements.sql
+:r ..\dbo\Views\vyuCPStorage.sql
 
 -- TANK MANAGEMENT
 :r ..\dbo\Views\vyuTMOriginOption.sql

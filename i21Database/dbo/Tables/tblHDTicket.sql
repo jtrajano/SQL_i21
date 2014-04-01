@@ -1,0 +1,25 @@
+﻿CREATE TABLE [dbo].[tblHDTicket]
+(
+	[intTicketId] [int] IDENTITY(1,1) NOT NULL,
+	[strTicketNumber] [nvarchar](20) NOT NULL,
+	[strSubject] [nvarchar](200) COLLATE Latin1_General_CI_AS NOT NULL,
+	[intTicketTypeId] [int] NOT NULL,
+	[intTicketStatusId] [int] NOT NULL,
+	[intTicketPriorityId] [int] NOT NULL,
+	[intTicketProductId] [int] NULL,
+	[intModuleId] [int] NULL,
+	[intVersionId] [int] NULL,
+	[intAssignedTo] [int] NULL,
+	[intCreatedUserId] [int] NULL,
+	[dtmCreated] [datetime] NULL,
+	[intLastModifiedUserId] [int] NULL,
+	[dtmLastModified] [datetime] NULL,
+	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
+	CONSTRAINT [PK_tblHDTicket] PRIMARY KEY CLUSTERED ([intTicketId] ASC),
+    CONSTRAINT [FK_Ticket_TicketType] FOREIGN KEY ([intTicketTypeId]) REFERENCES [dbo].[tblHDTicketType] ([intTicketTypeId]),
+    CONSTRAINT [FK_Ticket_TicketStatus] FOREIGN KEY ([intTicketStatusId]) REFERENCES [dbo].[tblHDTicketStatus] ([intTicketStatusId]),
+    CONSTRAINT [FK_Ticket_TicketPriority] FOREIGN KEY ([intTicketPriorityId]) REFERENCES [dbo].[tblHDTicketPriority] ([intTicketPriorityId]),
+    CONSTRAINT [FK_Ticket_TicketProduct] FOREIGN KEY ([intTicketProductId]) REFERENCES [dbo].[tblHDTicketProduct] ([intTicketProductId]),
+    CONSTRAINT [FK_Ticket_Module] FOREIGN KEY ([intModuleId]) REFERENCES [dbo].[tblHDModule] ([intModuleId]),
+    CONSTRAINT [FK_Ticket_Version] FOREIGN KEY ([intVersionId]) REFERENCES [dbo].[tblHDVersion] ([intVersionId])
+)
