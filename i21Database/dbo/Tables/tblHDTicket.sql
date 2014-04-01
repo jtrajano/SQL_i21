@@ -14,7 +14,6 @@
 	[dtmCreated] [datetime] NULL,
 	[intLastModifiedUserId] [int] NULL,
 	[dtmLastModified] [datetime] NULL,
-	[strWatchers] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicket] PRIMARY KEY CLUSTERED ([intTicketId] ASC),
     CONSTRAINT [FK_Ticket_TicketType] FOREIGN KEY ([intTicketTypeId]) REFERENCES [dbo].[tblHDTicketType] ([intTicketTypeId]),

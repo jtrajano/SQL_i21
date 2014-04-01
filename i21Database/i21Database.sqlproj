@@ -503,6 +503,7 @@
     <Build Include="dbo\Tables\tblHDTicketStatus.sql" />
     <Build Include="dbo\Tables\tblHDTicketType.sql" />
     <Build Include="dbo\Tables\tblHDVersion.sql" />
+    <Build Include="dbo\Tables\tblHDTicketWatcher.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
