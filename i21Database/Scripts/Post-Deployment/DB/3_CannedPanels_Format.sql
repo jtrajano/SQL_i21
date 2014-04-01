@@ -4,21 +4,24 @@ print('/*******************  BEGIN UPDATING canned panels format ***************
 print('/*******************  CREATE TEMPORARY table for canned panels format *******************/')
 Create TABLE #TampCannedPanelFormat 
 (
-	[intPanelFormatId] [int] NOT NULL,
-	[strColumn] [nvarchar](max) NULL,
-	[strCondition] [nvarchar](max) NULL,
-	[strValue1] [nvarchar](max) NULL,
-	[strValue2] [nvarchar](max) NULL,
-	[intBackColor] [int] NOT NULL,
-	[strFontStyle] [nvarchar](max) NULL,
-	[intFontColor] [int] NOT NULL,
-	[strApplyTo] [nvarchar](max) NULL,
-	[intPanelId] [int] NOT NULL,
-	[intUserId] [int] NOT NULL,
-	[intSort] [smallint] NOT NULL,
-	[strType] [nvarchar](max) NULL,
-	[ysnVisible] [bit] NOT NULL,
-	[intCannedPanelId] [int] NOT NULL		
+
+	[intPanelFormatId]  INT            NOT NULL,
+    [strColumn]         NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [strCondition]      NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [strValue1]         NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [strValue2]         NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [intBackColor]      INT            NOT NULL,
+    [strFontStyle]      NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [intFontColor]      INT            NOT NULL,
+    [strApplyTo]        NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [intPanelId]        INT            NOT NULL,
+    [intUserId]         INT            NOT NULL,
+    [intSort]           SMALLINT       NOT NULL,
+    [strType]           NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [ysnVisible]        BIT            NOT NULL,
+    [intCannedPanelId] INT NOT NULL DEFAULT ((0)), 
+	
+	--[intConcurrencyId ] INT            DEFAULT ((1)) NOT NULL,
 )
 
 print('/*******************  BEGIN INSERTING canned panels on temporary panel format table  *******************/')
