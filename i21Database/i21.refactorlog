@@ -1232,4 +1232,60 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="dblRate" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="df6991bf-edb7-4b7e-9ad8-277338c0be3f" ChangeDateTime="04/02/2014 02:32:17">
+    <Property Name="ElementName" Value="[dbo].[tblSMCompanyLocation].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMCompanyLocation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCompanyLocationId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="fd9c60aa-6118-498b-ad2f-969579df9398" ChangeDateTime="04/02/2014 02:33:56">
+    <Property Name="ElementName" Value="[dbo].[tblSMCompanyLocation].[intZipPostal]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMCompanyLocation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intZipPostalId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ebaaa74b-5418-4396-9d73-f3e542e487b0" ChangeDateTime="04/02/2014 05:55:54">
+    <Property Name="ElementName" Value="[dbo].[tblSMCompanyLocation].[strSkipSalesmanDefault]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMCompanyLocation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnSkipSalesmanDefault" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="75f93639-2a78-479a-abd9-9889e3a73403" ChangeDateTime="04/02/2014 05:55:58">
+    <Property Name="ElementName" Value="[dbo].[tblSMCompanyLocation].[strPrintCashReceipts]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMCompanyLocation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnPrintCashReceipts" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="997e90dd-3c14-462b-a2e8-17fd54769c28" ChangeDateTime="04/02/2014 05:56:07">
+    <Property Name="ElementName" Value="[dbo].[tblSMCompanyLocation].[strSalesTaxByLocation]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMCompanyLocation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnSalesTaxByLocation" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5c9ae75d-3500-407b-aa40-bfbaa6100ac1" ChangeDateTime="04/02/2014 05:56:11">
+    <Property Name="ElementName" Value="[dbo].[tblSMCompanyLocation].[strOutofStockWarning]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMCompanyLocation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnOutofStockWarning" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="424927ee-9999-4a49-af32-179418b10bf3" ChangeDateTime="04/02/2014 05:56:21">
+    <Property Name="ElementName" Value="[dbo].[tblSMCompanyLocation].[strLotOverdrawnWarning]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMCompanyLocation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnLotOverdrawnWarning" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="27949018-173c-4c4a-90bf-c9c4676908c6" ChangeDateTime="04/02/2014 05:56:42">
+    <Property Name="ElementName" Value="[dbo].[tblSMCompanyLocation].[strPrintContractBalance]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMCompanyLocation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnPrintContractBalance" />
+  </Operation>
 </Operations>
