@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblSMLicenseAcceptance]
 (
-	[intLicenseAcceptanceId] INT NOT NULL PRIMARY KEY, 
+	[intLicenseAcceptanceId] INT NOT NULL PRIMARY KEY IDENTITY, 
     [intUserSecurityId] INT NOT NULL, 
     [strEULAVersion] NVARCHAR(50) NOT NULL, 
     [dtmDateAccepted] DATE NOT NULL, 
