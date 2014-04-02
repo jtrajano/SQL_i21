@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblSMCompanyLocation]
 (
-	[intCompanyLocationId] INT NOT NULL PRIMARY KEY, 
+	[intCompanyLocationId] INT NOT NULL PRIMARY KEY IDENTITY, 
     [strLocationName] NVARCHAR(50) NOT NULL, 
     [strLocationType] NVARCHAR(50) NOT NULL, 
     [strAddress] NVARCHAR(MAX) NULL, 

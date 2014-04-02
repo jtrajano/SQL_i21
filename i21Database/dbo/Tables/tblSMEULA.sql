@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblSMEULA]
 (
-	[intEULAId] INT NOT NULL PRIMARY KEY, 
+	[intEULAId] INT NOT NULL PRIMARY KEY IDENTITY, 
     [strVersionNumber] NVARCHAR(50) NOT NULL, 
     [strText] NVARCHAR(MAX) NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT (1)
