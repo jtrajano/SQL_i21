@@ -6,8 +6,6 @@
 	[strIcon] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL,
- CONSTRAINT [PK_tblHDTicketType] PRIMARY KEY CLUSTERED 
-(
-	[intTicketTypeId] ASC
-)
+ CONSTRAINT [PK_tblHDTicketType] PRIMARY KEY CLUSTERED ([intTicketTypeId] ASC),
+ CONSTRAINT [UNQ_tblHDTicketType] UNIQUE ([strType])
 )
