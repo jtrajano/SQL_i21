@@ -9,5 +9,5 @@
 	[dtmLastModified] [datetime] NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicketComment] PRIMARY KEY CLUSTERED ([intTicketCommentId] ASC),
-    CONSTRAINT [FK_TicketComment_Ticket] FOREIGN KEY ([intTicketId]) REFERENCES [dbo].[tblHDTicket] ([intTicketId])
+    CONSTRAINT [FK_TicketComment_Ticket] FOREIGN KEY ([intTicketId]) REFERENCES [dbo].[tblHDTicket] ([intTicketId]) on delete cascade
 )

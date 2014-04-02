@@ -9,5 +9,5 @@
 	[dtmEOLDate] [date] NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	CONSTRAINT [PK_tblHDVersion] PRIMARY KEY CLUSTERED ([intVersionId] ASC),
-    CONSTRAINT [FK_Version_TicketProduct] FOREIGN KEY ([intTicketProductId]) REFERENCES [dbo].[tblHDTicketProduct] ([intTicketProductId]),
+    CONSTRAINT [FK_Version_TicketProduct] FOREIGN KEY ([intTicketProductId]) REFERENCES [dbo].[tblHDTicketProduct] ([intTicketProductId]) on delete cascade
 )
