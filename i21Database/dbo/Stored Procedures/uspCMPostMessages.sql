@@ -79,3 +79,7 @@ EXEC sp_addmessage 50018,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50019) EXEC sp_dropmessage 50019, 'us_english'	
 SET @strmessage = 'Duplicate checkbook id found.'
 EXEC sp_addmessage 50019,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50020) EXEC sp_dropmessage 50020, 'us_english'	
+SET @strmessage = 'Cannot post a zero-value transaction.'
+EXEC sp_addmessage 50020,11,@strmessage,'us_english','False'

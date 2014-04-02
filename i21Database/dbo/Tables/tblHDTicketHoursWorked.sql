@@ -14,6 +14,6 @@
 	[intJobCodeId] [int] NOT NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicketHoursWorked] PRIMARY KEY CLUSTERED ([intTicketHoursWorkedId] ASC),
-    CONSTRAINT [FK_TicketHoursWorked_Ticket] FOREIGN KEY ([intTicketId]) REFERENCES [dbo].[tblHDTicket] ([intTicketId]),
+    CONSTRAINT [FK_TicketHoursWorked_Ticket] FOREIGN KEY ([intTicketId]) REFERENCES [dbo].[tblHDTicket] ([intTicketId])  on delete cascade,
     CONSTRAINT [FK_TicketHoursWorked_JobCode] FOREIGN KEY ([intJobCodeId]) REFERENCES [dbo].[tblHDJobCode] ([intJobCodeId])
 )

@@ -116,7 +116,7 @@ WHERE	strPreference = 'AllowUserSelfPost'
 IF @@ERROR <> 0	GOTO Post_Rollback	
 
 --=====================================================================================================================================
--- 	VALIdATION 
+-- 	VALIDATION 
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 -- Validate if the Misc Checks exists. 
@@ -206,6 +206,15 @@ BEGIN
 		GOTO Post_Rollback		
 	END
 END 
+
+-- Check if amount is zero. 
+IF @dblAmount = 0 AND @ysnPost = 1 AND @ysnRecap = 0
+BEGIN 
+	-- Cannot post a zero-value transaction.
+	RAISERROR(50020, 11, 1)
+	GOTO Post_Rollback
+END 
+
 
 --=====================================================================================================================================
 -- 	PROCESSING OF THE G/L ENTRIES. 

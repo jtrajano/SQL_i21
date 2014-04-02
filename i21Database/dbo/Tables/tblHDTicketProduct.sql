@@ -5,8 +5,6 @@
 	[strDescription] [nvarchar](150) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL,
- CONSTRAINT [PK_tblHDTicketProduct] PRIMARY KEY CLUSTERED 
-(
-	[intTicketProductId] ASC
-)
+ CONSTRAINT [PK_tblHDTicketProduct] PRIMARY KEY CLUSTERED ([intTicketProductId] ASC),
+ CONSTRAINT [UNQ_tblHDTicketProduct] UNIQUE ([strProduct])
 )

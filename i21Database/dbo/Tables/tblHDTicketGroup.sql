@@ -5,5 +5,6 @@
     [strDescription] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1,
-	CONSTRAINT [PK_tblHDTicketGroup] PRIMARY KEY CLUSTERED ([intTicketGroupId] ASC)
+	CONSTRAINT [PK_tblHDTicketGroup] PRIMARY KEY CLUSTERED ([intTicketGroupId] ASC),
+	CONSTRAINT [UNQ_tblHDTicketGroup] UNIQUE ([strGroup])
 )

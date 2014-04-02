@@ -8,8 +8,6 @@
 	[strBackColor] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL,
- CONSTRAINT [PK_tblHDTicketStatus] PRIMARY KEY CLUSTERED 
-(
-	[intTicketStatusId] ASC
-)
+ CONSTRAINT [PK_tblHDTicketStatus] PRIMARY KEY CLUSTERED ([intTicketStatusId] ASC),
+ CONSTRAINT [UNQ_tblHDTicketStatus] UNIQUE ([strStatus])
 )
