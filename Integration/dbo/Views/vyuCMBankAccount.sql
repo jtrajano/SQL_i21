@@ -152,6 +152,18 @@ BEGIN
 
 		SET NOCOUNT ON 
 
+			-- Check for duplicate values in apcbk_no
+			IF EXISTS (
+				SELECT	TOP 1 1 
+				FROM	dbo.apcbkmst_origin o
+				WHERE	o.apcbk_no COLLATE Latin1_General_CI_AS IN (SELECT DISTINCT i.strCbkNo FROM inserted i)				
+			)
+			BEGIN 
+				-- The record being created already exists in origin. Remove the duplicate record from origin or do a conversion.
+				RAISERROR(50021, 11, 1)
+				GOTO EXIT_TRIGGER
+			END		
+
 			-- Proceed in inserting the record the base table (tblCMBankAccount)			
 			INSERT INTO tblCMBankAccount (
 					intBankId
