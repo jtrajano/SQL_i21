@@ -49,6 +49,7 @@
     [intFilterId]           INT             NULL,
     [intConcurrencyId ]     INT             DEFAULT ((1)) NOT NULL,
     [intCannedPanelId] INT NOT NULL DEFAULT ((0)), 
+    [strSortValue] NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL, 
     CONSTRAINT [PK_dbo.tblDBPanel] PRIMARY KEY CLUSTERED ([intPanelId] ASC),
     CONSTRAINT [FK_dbo.tblDBPanelFilter_dbo.tblDBPanel_intFilterId] FOREIGN KEY ([intFilterId]) REFERENCES [dbo].[tblDBPanelFilter] ([intFilterId]),
 	CONSTRAINT [FK_dbo.tblRMConnection_dbo.tblDBPanel_intConnectionId] FOREIGN KEY ([intConnectionId]) REFERENCES [dbo].[tblRMConnection] ([intConnectionId])
