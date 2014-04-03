@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblSMUserSecurity] (
     [intUserSecurityID] INT            IDENTITY (1, 1) NOT NULL,
     [intUserRoleID]     INT            NOT NULL,
-	[intCompanyLocationId]     INT     NOT NULL,
+	[intCompanyLocationId]     INT     NULL,
     [strUserName]       NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
     [strFullName]       NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
     [strPassword]       NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
