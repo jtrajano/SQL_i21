@@ -5,6 +5,7 @@
     [strFullName]       NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
     [strPassword]       NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
 	[strOverridePassword] NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
+	[strDashboardRole]  NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [strFirstName]      NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [strMiddleName]     NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL DEFAULT (''),
     [strLastName]       NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
