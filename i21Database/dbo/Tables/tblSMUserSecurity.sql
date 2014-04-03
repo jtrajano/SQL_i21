@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblSMUserSecurity] (
     [intUserSecurityID] INT            IDENTITY (1, 1) NOT NULL,
-    [intUserRoleID]     INT            NULL,
+    [intUserRoleID]     INT            NOT NULL,
+	[intCompanyLocationId]     INT     NOT NULL,
     [strUserName]       NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
     [strFullName]       NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
     [strPassword]       NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
@@ -21,6 +22,7 @@
     [ysnAdmin]          BIT            DEFAULT ((0)) NOT NULL,
     [intConcurrencyId]  INT            DEFAULT (1) NOT NULL,
     CONSTRAINT [PK_User] PRIMARY KEY CLUSTERED ([intUserSecurityID] ASC),
-    CONSTRAINT [FK_UserSecurity_UserRole] FOREIGN KEY ([intUserRoleID]) REFERENCES [dbo].[tblSMUserRole] ([intUserRoleID])
+    CONSTRAINT [FK_UserSecurity_UserRole] FOREIGN KEY ([intUserRoleID]) REFERENCES [dbo].[tblSMUserRole] ([intUserRoleID]),
+	CONSTRAINT [FK_UserSecurity_CompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId])
 );
 
