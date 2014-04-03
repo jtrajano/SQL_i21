@@ -71,3 +71,7 @@
 
 -- TAX FORMS
 :r ..\dbo\Views\vyuTFTaxCycle.sql
+
+
+-- HELP DESK
+:r ..\dbo\Views\vyuHDUserDetail.sql

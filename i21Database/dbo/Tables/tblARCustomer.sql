@@ -67,7 +67,8 @@
     CONSTRAINT [PK_dbo.tblARCustomer] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
     CONSTRAINT [FK_tblARCustomer_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
     CONSTRAINT [FK_tblARCustomer_tblEntityLocation] FOREIGN KEY ([intDefaultLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId]) ON DELETE SET DEFAULT,
-    CONSTRAINT [FK_tblARCustomer_tblEntityToContact] FOREIGN KEY ([intDefaultContactId]) REFERENCES [dbo].[tblEntityToContact] ([intEntityToContactId]) ON DELETE SET DEFAULT
+    CONSTRAINT [FK_tblARCustomer_tblEntityToContact] FOREIGN KEY ([intDefaultContactId]) REFERENCES [dbo].[tblEntityToContact] ([intEntityToContactId]) ON DELETE SET DEFAULT,
+    CONSTRAINT [UKstrCusomerNumber] UNIQUE NONCLUSTERED ([strCustomerNumber] ASC)
 );
 
 
