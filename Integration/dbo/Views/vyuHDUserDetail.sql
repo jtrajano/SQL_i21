@@ -21,6 +21,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'HD' and strDBNa
 			,us.strLastName
 			,us.strEmail
 			,ysni21User = 1
+			,imgPhoto = null
 			,intConcurrencyId = 1
 		from
 			tblSMUserSecurity us,
@@ -45,6 +46,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'HD' and strDBNa
 			,strLastName = ec.strEmail
 			,strEmail = ec.strEmail
 			,ysni21User = 0
+			,imgPhoto = ec.imgContactPhoto
 			,intConcurrencyId = 1
 		from
 			tblEntity en,
