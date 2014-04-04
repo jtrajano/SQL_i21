@@ -190,17 +190,21 @@ FROM	(
 			SELECT	dblDebit	= SUM(ISNULL(B.dblDebit, 0))
 					,dblCredit	= SUM(ISNULL(B.dblCredit, 0))
 					,A.intAccountId
-					,dtmDate	= ISNULL(CONVERT(VARCHAR(10), B.dtmDate, 112), '') 								
+					,dtmDate	= ISNULL(CONVERT(VARCHAR(10), B.dtmDate, 112), '')
+					,B.strCode						
 			FROM	tblGLSummary A INNER JOIN #tmpGLDetail B
 						ON CONVERT(VARCHAR(10), A.dtmDate, 112) = CONVERT(VARCHAR(10), B.dtmDate, 112)
 						AND A.intAccountId = B.intAccountId
+						AND A.strCode = B.strCode 
 			WHERE	@ysnRecap = 0 
 			GROUP BY	ISNULL(CONVERT(VARCHAR(10), B.dtmDate, 112), ''), 
-						A.intAccountId
+						A.intAccountId,
+						B.strCode
 		) AS tmpGLDetailGrouped
 WHERE	tblGLSummary.intAccountId = tmpGLDetailGrouped.intAccountId
 		AND ISNULL(CONVERT(VARCHAR(10), tblGLSummary.dtmDate, 112), '') = ISNULL(CONVERT(VARCHAR(10), tmpGLDetailGrouped.dtmDate, 112), '')
 		AND @ysnRecap = 0
+		AND tblGLSummary.strCode = tmpGLDetailGrouped.strCode 
 
 -- INSERT RECORDS TO THE SUMMARY TABLE
 INSERT INTO tblGLSummary (
@@ -210,6 +214,7 @@ INSERT INTO tblGLSummary (
 		,dblCredit
 		,dblDebitUnit
 		,dblCreditUnit
+		,strCode
 		,intConcurrencyId
 )
 SELECT	#tmpGLDetail.intAccountId
@@ -218,6 +223,7 @@ SELECT	#tmpGLDetail.intAccountId
 		,SUM(#tmpGLDetail.dblCredit)
 		,SUM(#tmpGLDetail.dblDebitUnit)
 		,SUM(#tmpGLDetail.dblCreditUnit)
+		,#tmpGLDetail.strCode
 		,1
 FROM	#tmpGLDetail
 WHERE	NOT EXISTS (
@@ -225,10 +231,12 @@ WHERE	NOT EXISTS (
 			FROM	tblGLSummary
 			WHERE	ISNULL(CONVERT(VARCHAR(10), #tmpGLDetail.dtmDate, 112), '') = ISNULL(CONVERT(VARCHAR(10), tblGLSummary.dtmDate, 112), '') 
 					AND #tmpGLDetail.intAccountId = tblGLSummary.intAccountId
+					AND #tmpGLDetail.strCode = tblGLSummary.strCode
 		)
 		AND @ysnRecap = 0
 GROUP BY	ISNULL(CONVERT(VARCHAR(10), #tmpGLDetail.dtmDate, 112), ''), 
-			#tmpGLDetail.intAccountId
+			#tmpGLDetail.intAccountId,
+			#tmpGLDetail.strCode
 
 
 --=====================================================================================================================================

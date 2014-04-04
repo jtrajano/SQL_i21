@@ -99,3 +99,34 @@ BEGIN
 END
 GO
 
+
+/********************** strRouteID,intRouteID ******************/
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblTMRoute]') AND type in (N'U')) 
+BEGIN
+	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'strRouteId' AND OBJECT_ID = OBJECT_ID(N'tblTMRoute')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'strRouteID' AND OBJECT_ID = OBJECT_ID(N'tblTMRoute'))
+    BEGIN
+        EXEC sp_rename 'tblTMRoute.strRouteID', 'strRouteId' , 'COLUMN'
+    END
+END
+GO
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblTMSite]') AND type in (N'U')) 
+BEGIN
+	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intRouteId' AND OBJECT_ID = OBJECT_ID(N'tblTMSite')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intRouteID' AND OBJECT_ID = OBJECT_ID(N'tblTMSite'))
+    BEGIN
+        EXEC sp_rename 'tblTMSite.intRouteID', 'intRouteId' , 'COLUMN'
+    END
+END
+GO
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblTMSite]') AND type in (N'U')) 
+BEGIN
+	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'strRouteId' AND OBJECT_ID = OBJECT_ID(N'tblTMSite')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'strRouteID' AND OBJECT_ID = OBJECT_ID(N'tblTMSite'))
+    BEGIN
+        EXEC sp_rename 'tblTMSite.strRouteID', 'strRouteId' , 'COLUMN'
+    END
+END
+GO
+
+/*****************************************************************/

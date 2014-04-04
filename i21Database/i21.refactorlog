@@ -1288,4 +1288,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="ysnPrintContractBalance" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="7a6392f1-d491-4a3f-b167-073839eb226c" ChangeDateTime="04/04/2014 06:44:33">
+    <Property Name="ElementName" Value="[dbo].[tblTMRoute].[intRouteID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMRoute]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intRouteId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="10704629-0e57-4d46-bb40-245de673bbda" ChangeDateTime="04/04/2014 06:44:36">
+    <Property Name="ElementName" Value="[dbo].[tblTMRoute].[strRouteID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMRoute]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strRouteId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="14fa43b2-6d73-48c1-8b01-87cbc3e38687" ChangeDateTime="04/04/2014 06:45:30">
+    <Property Name="ElementName" Value="[dbo].[tblTMSite].[strRouteID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMSite]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strRouteId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3a35cc92-d28d-482c-832f-e29f21ba45e2" ChangeDateTime="04/04/2014 06:53:28">
+    <Property Name="ElementName" Value="[dbo].[tblTMSite].[intRouteID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMSite]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intRouteId" />
+  </Operation>
 </Operations>

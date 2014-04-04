@@ -48,6 +48,6 @@ FROM
 	INNER JOIN tblEntityLocation C
 		ON B.intEntityLocationId = C.intEntityLocationId
 	INNER JOIN tblEntityContact D
-		ON B.intEntityContactId = D.intEntityContactId
+		ON B.intEntityContactId = D.intEntityId
 	LEFT JOIN tblSMCurrency E
 		ON B.intCurrencyId = E.intCurrencyID
