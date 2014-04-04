@@ -7,7 +7,7 @@
     [intSort]           INT NULL,
     [intConcurrencyId]  INT DEFAULT (1) NOT NULL,
     CONSTRAINT [PK_tblSMUserSecurityMenu] PRIMARY KEY CLUSTERED ([intUserSecurityMenuId] ASC),
-    CONSTRAINT [FK_tblSMUserSecurityMenu_tblSMUserSecurity] FOREIGN KEY ([intUserSecurityId]) REFERENCES [dbo].[tblSMUserSecurity] ([intUserSecurityID]),
-	CONSTRAINT [FK_tblSMUserSecurityMenu_tblSMMasterMenu] FOREIGN KEY ([intMenuId]) REFERENCES [dbo].[tblSMMasterMenu] ([intMenuID])
+    CONSTRAINT [FK_tblSMUserSecurityMenu_tblSMUserSecurity] FOREIGN KEY ([intUserSecurityId]) REFERENCES [dbo].[tblSMUserSecurity] ([intUserSecurityID]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblSMUserSecurityMenu_tblSMMasterMenu] FOREIGN KEY ([intMenuId]) REFERENCES [dbo].[tblSMMasterMenu] ([intMenuID]) ON DELETE CASCADE
 );
 
