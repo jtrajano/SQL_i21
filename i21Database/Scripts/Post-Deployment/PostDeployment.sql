@@ -20,6 +20,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\4_StartingNumbers.sql
 :r .\SM\DefaultData\5_CompanySetup.sql
 :r .\SM\DefaultData\6_Preferences.sql
+:r .\SM\DefaultData\7_EULA.sql
 :r .\SM\SMDataMigrations.sql
 
 -- Canned Report
