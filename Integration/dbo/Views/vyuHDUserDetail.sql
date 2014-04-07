@@ -1,7 +1,7 @@
 ﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuHDUserDetail')
 	DROP VIEW vyuHDUserDetail
 
--- GRAINS DEPENDENT
+-- HELP DESK DEPENDENT
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'HD' and strDBName = db_name()) = 1
 	EXEC ('
 		CREATE VIEW [dbo].[vyuCPStorage]
@@ -55,4 +55,5 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'HD' and strDBNa
 		where
 			cus.intEntityId = en.intEntityId
 			and ec.intEntityId = en.intEntityId
-		')
+		'
+		)
