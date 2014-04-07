@@ -34,13 +34,13 @@ CREATE VIEW [dbo].[vwDispatch]
 	DriverID = G.vwsls_slsmn_id,
 	NextDeliveryDegreeDay = B.intNextDeliveryDegreeDay,
 	isDispatched = A.ysnDispatched,
-	RouteName = E.strRouteID,
-	RouteID = E.intRouteID
+	RouteName = E.strRouteId,
+	RouteID = E.intRouteId
 	FROM tblTMDispatch A
 	INNER JOIN tblTMSite B ON A.intSiteID = B.intSiteID
 	INNER JOIN tblTMCustomer C ON B.intCustomerID = C.intCustomerID
 	INNER JOIN tblTMClock D ON D.intClockID = B.intClockID
-	INNER JOIN tblTMRoute E ON B.intRouteID = E.intRouteID
+	INNER JOIN tblTMRoute E ON B.intRouteId = E.intRouteId
 	INNER JOIN vwitmmst F ON CAST(F.A4GLIdentity AS INT) = B.intProduct 
 	INNER JOIN vwslsmst G ON CAST(G.A4GLIdentity AS INT) = A.intDriverID
 	INNER JOIN vwcusmst H ON H.A4GLIdentity = C.intCustomerNumber
