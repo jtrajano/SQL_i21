@@ -1316,4 +1316,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intRouteId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="13a81e28-c5db-4b04-b1da-44360e6fddc6" ChangeDateTime="04/07/2014 09:52:45">
+    <Property Name="ElementName" Value="[dbo].[tblTMSite].[intFillGroupID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMSite]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intFillGroupId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="1e3d9790-9da3-445a-8655-af68097a36f4" ChangeDateTime="04/07/2014 09:53:01">
+    <Property Name="ElementName" Value="[dbo].[tblTMFillGroup].[intFillGroupID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMFillGroup]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intFillGroupId" />
+  </Operation>
 </Operations>
