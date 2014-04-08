@@ -1337,4 +1337,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intTankTownshipId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="77dc2714-dbf6-4de5-8137-5c24743d1d7e" ChangeDateTime="04/08/2014 06:56:17">
+    <Property Name="ElementName" Value="[dbo].[tblTMDevice].[intTankSize]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMDevice]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblTankSize" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e877aa84-ff29-4b3b-86ba-dc9ae44179c1" ChangeDateTime="04/08/2014 06:56:24">
+    <Property Name="ElementName" Value="[dbo].[tblTMDevice].[intTankCapacity]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMDevice]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblTankCapacity" />
+  </Operation>
 </Operations>

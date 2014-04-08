@@ -158,3 +158,25 @@ END
 GO
 
 /*****************************************************************/
+
+
+/*************intTankCapacity, intTankSize ***********************/
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblTMDevice]') AND type in (N'U')) 
+BEGIN
+	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'dblTankCapacity' AND OBJECT_ID = OBJECT_ID(N'tblTMDevice')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intTankCapacity' AND OBJECT_ID = OBJECT_ID(N'tblTMDevice'))
+    BEGIN
+        EXEC sp_rename 'tblTMDevice.intTankCapacity', 'dblTankCapacity' , 'COLUMN'
+    END
+END
+GO
+
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblTMDevice]') AND type in (N'U')) 
+BEGIN
+	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'dblTankSize' AND OBJECT_ID = OBJECT_ID(N'tblTMDevice')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intTankSize' AND OBJECT_ID = OBJECT_ID(N'tblTMDevice'))
+    BEGIN
+        EXEC sp_rename 'tblTMDevice.intTankSize', 'dblTankSize' , 'COLUMN'
+    END
+END
+GO
+/****************************************************************/

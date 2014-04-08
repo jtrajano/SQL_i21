@@ -901,7 +901,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
         '<b>' + @Gaps + 'Type: ' + '</b>' +  
         CAST( ISNULL((SELECT TOP 1 ISNULL(tt.strTankType, '') From tblTMTankType tt Where tt.intTankTypeId = E.intTankTypeId),'') AS CHAR(23) ) +  
         '<b>' + @Gaps + 'Capacity: '+ '</b>' +  
-        CAST( ISNULL(CAST(CONVERT(VARCHAR,CONVERT(MONEY,ISNULL(E.intTankCapacity, 0)),1) AS VARCHAR(50)), '') AS CHAR(10) )  
+        CAST( ISNULL(CAST(CONVERT(VARCHAR,CONVERT(MONEY,ISNULL(E.dblTankCapacity, 0)),1) AS VARCHAR(50)), '') AS CHAR(10) )  
        , ' '  
        ,'&#160;'   
       ) +   

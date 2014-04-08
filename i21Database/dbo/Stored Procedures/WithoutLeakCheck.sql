@@ -36,7 +36,7 @@ BEGIN
 		  ,Getdate() AS dtmDate
 		  ,0 AS intSiteID
 		  ,0 AS intSiteNumber
-		  ,0 AS intTankSize
+		  ,0 AS dblTankSize
 		  ,0 AS intTotalTanks
 		  ,'' AS SiteStatus
 		  ,'' AS strLocation
@@ -148,7 +148,7 @@ FROM
 	, C.intSiteID
 	, C.intSiteNumber
 	, E.strSerialNumber
-	, E.intTankSize
+	, E.dblTankSize
 	, E.strOwnership
 	,(Select Top 1 tt.strTankType From tblTMTankType tt Where tt.intTankTypeId = E.intTankTypeId) AS [strTankType]
 	, (Case C.ysnActive
