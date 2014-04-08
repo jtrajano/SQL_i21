@@ -2,7 +2,10 @@
 	DROP VIEW vyuHDUserDetail
 
 -- HELP DESK DEPENDENT
-IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'HD' and strDBName = db_name()) = 1
+--IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'HD' and strDBName = db_name()) = 1
+
+-- Always create - temporary
+IF  1 = 1
 	EXEC ('
 		CREATE VIEW [dbo].[vyuHDUserDetail]
 		AS
