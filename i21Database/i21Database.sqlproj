@@ -512,6 +512,7 @@
     <Build Include="dbo\Tables\tblARCustomerBuyback.sql" />
     <Build Include="dbo\Tables\tblARCustomer.sql" />
     <Build Include="dbo\Tables\tblARAccountStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMBuildCustomTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
