@@ -1330,4 +1330,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intFillGroupId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="6af6c165-f1fa-4087-b231-8333a5eea71c" ChangeDateTime="04/08/2014 03:18:12">
+    <Property Name="ElementName" Value="[dbo].[tblTMTankTownship].[intTankTownshipID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMTankTownship]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTankTownshipId" />
+  </Operation>
 </Operations>

@@ -72,7 +72,7 @@
     [dtmLastReadingUpdate]        DATETIME        NULL,
     [intFillGroupId]              INT             NULL,
     [intRouteId]                  INT             NULL,
-    [intTankTownshipID]           INT             NULL,
+    [intTankTownshipId]           INT             NULL,
     [dtmForecastedDelivery]       DATETIME        NULL,
     [intParentSiteID]             INT             NULL,
     [intDeliveryTermID]           INT             NULL,
@@ -85,6 +85,7 @@
     CONSTRAINT [FK_tblTMSite_tblTMHoldReason] FOREIGN KEY ([intHoldReasonID]) REFERENCES [dbo].[tblTMHoldReason] ([intHoldReasonID]),
     CONSTRAINT [FK_tblTMSite_tblTMSite] FOREIGN KEY ([intParentSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID]),
 	CONSTRAINT [FK_tblTMSite_tblTMRoute] FOREIGN KEY (intRouteId) REFERENCES [dbo].[tblTMRoute] (intRouteId),
-	CONSTRAINT [FK_tblTMSite_tblTMFillGroup] FOREIGN KEY (intFillGroupId) REFERENCES [dbo].[tblTMFillGroup] (intFillGroupId)
+	CONSTRAINT [FK_tblTMSite_tblTMFillGroup] FOREIGN KEY (intFillGroupId) REFERENCES [dbo].[tblTMFillGroup] (intFillGroupId),
+	CONSTRAINT [FK_tblTMSite_tblTMTankTownship] FOREIGN KEY (intTankTownshipId) REFERENCES [dbo].[tblTMTankTownship] (intTankTownshipId)
 );
 
