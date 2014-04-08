@@ -66,7 +66,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
   ,'' as strFillGroupCode   
   ,'' as strDescription   
   ,0 as ysnActive   
-  ,0 as intFillGroupID   
+  ,0 as intFillGroupId   
   ,'' as strDriverName   
   ,'' as strDriverID   
   ,getdate() as dtmRequestedDate   
@@ -407,7 +407,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
   ,strFillGroupCode nvarchar(50)  
   ,strDescription nvarchar(100)  
   ,ysnActive varchar(10)  
-  ,intFillGroupID int  
+  ,intFillGroupId int  
   ,strDriverName nvarchar(100)-- 19  
   ,strDriverID nvarchar(50)-- 18  
   ,dtmRequestedDate DateTime  
@@ -533,7 +533,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
        WHEN 1 THEN ''Yes''  
        WHEN 0 THEN ''No''  
       END  
-     ,I.intFillGroupID  
+     ,I.intFillGroupId  
      ,J.vwsls_name as strDriverName  
      ,strDriverID = J.vwsls_slsmn_id   
      ,F.dtmRequestedDate  
@@ -572,7 +572,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
      LEFT JOIN tblTMClock H   
       ON H.intClockID = C.intClockID  
      LEFT JOIN tblTMFillGroup I   
-      ON I.intFillGroupID = C.intFillGroupID  
+      ON I.intFillGroupId = C.intFillGroupId  
      LEFT JOIN vwslsmst J   
       ON J.A4GLIdentity = C.intDriverID  
      LEFT JOIN tblTMSiteJulianCalendar K   
@@ -1065,7 +1065,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
     ,c.strSiteAddress  
     ,strSiteDescription = c.strDescription   
     ,strFillGroupCode = ISNULL(d.strFillGroupCode, '')   
-    ,d.intFillGroupID   
+    ,d.intFillGroupId   
     ,d.strDescription  
     ,ysnActive =   
       CASE d.ysnActive  
@@ -1079,8 +1079,8 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
     LEFT JOIN tblTMSite c   
      ON b.intCustomerID = c.intCustomerID   
     LEFT JOIN tblTMFillGroup d   
-     ON d.intFillGroupID = c.intFillGroupID  
-  WHERE c.intFillGroupID IS NOT NULL   
+     ON d.intFillGroupId = c.intFillGroupId 
+  WHERE c.intFillGroupId IS NOT NULL   
     AND c.ysnActive   = 1   
     AND a.vwcus_active_yn = 'Y'   
     AND (ysnOnHold = 0 OR dtmOnHoldEndDate < GETDATE())   
@@ -1093,7 +1093,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
     ,c.strSiteAddress  
     ,c.strDescription  
     ,d.strFillGroupCode  
-    ,d.intFillGroupID   
+    ,d.intFillGroupId   
     ,d.ysnActive  
     ,d.strDescription    
     
