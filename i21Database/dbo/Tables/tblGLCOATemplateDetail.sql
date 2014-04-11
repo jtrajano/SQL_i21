@@ -9,6 +9,6 @@
     CONSTRAINT [PK_tblGLAccountTemplateDetail] PRIMARY KEY CLUSTERED ([intAccountTemplateDetailId] ASC),
     CONSTRAINT [FK_tblGLAccountTemplateDetail_tblGLAccountGroup] FOREIGN KEY ([intAccountGroupId]) REFERENCES [dbo].[tblGLAccountGroup] ([intAccountGroupId]),
     CONSTRAINT [FK_tblGLAccountTemplateDetail_tblGLAccountStructure] FOREIGN KEY ([intAccountStructureId]) REFERENCES [dbo].[tblGLAccountStructure] ([intAccountStructureId]),
-    CONSTRAINT [FK_tblGLAccountTemplateDetail_tblGLAccountTemplate] FOREIGN KEY ([intAccountTemplateId]) REFERENCES [dbo].[tblGLCOATemplate] ([intAccountTemplateId])
+    CONSTRAINT [FK_tblGLAccountTemplateDetail_tblGLAccountTemplate] FOREIGN KEY ([intAccountTemplateId]) REFERENCES [dbo].[tblGLCOATemplate] ([intAccountTemplateId]) ON DELETE CASCADE
 );
 

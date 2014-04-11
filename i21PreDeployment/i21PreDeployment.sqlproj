@@ -68,6 +68,7 @@
     <Folder Include="Scripts\Pre-Deployment\UpdateValidation" />
     <Folder Include="Scripts\Pre-Deployment\6_GL" />
     <Folder Include="Scripts\Pre-Deployment\7_AR" />
+    <Folder Include="Scripts\Pre-Deployment\8_AP" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1_DataCleanup.sql" />
@@ -76,6 +77,7 @@
     <None Include="Scripts\Pre-Deployment\1_TM\3_1410_to_1420.sql" />
     <None Include="Scripts\Pre-Deployment\UpdateValidation\1_CheckCoctlmst.sql" />
     <None Include="Scripts\Pre-Deployment\7_AR\1_1410_to_1420.sql" />
+    <None Include="Scripts\Pre-Deployment\8_AP\1_1410_to_1420.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />

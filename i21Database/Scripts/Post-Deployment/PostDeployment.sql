@@ -42,6 +42,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\FIN\DefaultData\BankTransactionTypes.sql
 :r .\FIN\DefaultData\DataImportStatus.sql
 
+--Accounts Receivable
+:r .\AR\EntityTableDataFix.sql
+
 -- Version Update
 :r .\VersionUpdate.sql
 

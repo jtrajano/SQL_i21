@@ -123,6 +123,7 @@
     <Folder Include="Scripts\Post-Deployment\SM\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\TM" />
     <Folder Include="Scripts\Post-Deployment\Optional Run\2_Reports" />
+    <Folder Include="Scripts\Post-Deployment\AR" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -513,6 +514,7 @@
     <Build Include="dbo\Tables\tblARCustomer.sql" />
     <Build Include="dbo\Tables\tblARAccountStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspSMBuildCustomTable.sql" />
+    <Build Include="dbo\Functions\fnGetUserDefaultLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
@@ -522,5 +524,6 @@
     <None Include="i1410AG.local.publish.xml" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\7_EULA.sql" />
     <None Include="Scripts\Post-Deployment\SM\SMDataMigrations.sql" />
+    <None Include="Scripts\Post-Deployment\AR\EntityTableDataFix.sql" />
   </ItemGroup>
 </Project>
