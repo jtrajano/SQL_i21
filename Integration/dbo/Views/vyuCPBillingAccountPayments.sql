@@ -17,6 +17,10 @@ SELECT
 GO
 */
 
+-- DELETE OLD VIEW
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPBillingAccountPayments')
+	DROP VIEW vwCPBillingAccountPayments
+GO
 IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCPBillingAccountPayments')
 	DROP VIEW vyuCPBillingAccountPayments
 GO

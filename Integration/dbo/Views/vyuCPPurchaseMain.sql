@@ -26,7 +26,9 @@ group by
 
 GO
 */
-
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPPurchaseMain')
+	DROP VIEW vwCPPurchaseMain
+GO
 IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCPPurchaseMain')
 	DROP VIEW vyuCPPurchaseMain
 GO

@@ -1,4 +1,7 @@
-﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCPPendingPayments')
+﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPPendingPayments')
+	DROP VIEW vwCPPendingPayments
+GO
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCPPendingPayments')
 	DROP VIEW vyuCPPendingPayments
 GO
 -- AG VIEW

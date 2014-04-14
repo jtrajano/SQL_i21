@@ -1,4 +1,7 @@
-﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCPGASettlementsReports')
+﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPGASettlementsReports')
+	DROP VIEW vwCPGASettlementsReports
+GO
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCPGASettlementsReports')
 	DROP VIEW vyuCPGASettlementsReports
 GO
 -- GRAINS DEPENDENT
