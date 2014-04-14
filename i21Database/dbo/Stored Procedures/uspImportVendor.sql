@@ -111,9 +111,9 @@ BEGIN
 	INNER JOIN tblAPVendor B
 		ON A.intEntityId = B.intEntityId
 	INNER JOIN tblEntityLocations C		
-		ON B.intEntityLocationId = C.intEntityLocationId
+		ON B.intDefaultLocationId = C.intEntityLocationId
 	INNER JOIN tblEntityContacts D
-		ON B.intEntityContactId = D.intEntityContactId
+		ON B.intDefaultContactId = D.intEntityContactId
 	LEFT JOIN tblSMCurrency E
 		ON B.intCurrencyId = E.intCurrencyID
 	LEFT JOIN tblGLCOACrossReference F
