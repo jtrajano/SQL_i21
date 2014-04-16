@@ -8,6 +8,6 @@
     [dblUnit]                        NUMERIC (18, 6) NULL,
     CONSTRAINT [PK_tblGLAccountReallocationDetail] PRIMARY KEY CLUSTERED ([intAccountReallocationDetailId] ASC),
     CONSTRAINT [FK_tblGLAccountReallocationDetail_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-    CONSTRAINT [FK_tblGLAccountReallocationDetail_tblGLAccountReallocation] FOREIGN KEY ([intAccountReallocationId]) REFERENCES [dbo].[tblGLAccountReallocation] ([intAccountReallocationId])
+    CONSTRAINT [FK_tblGLAccountReallocationDetail_tblGLAccountReallocation] FOREIGN KEY ([intAccountReallocationId]) REFERENCES [dbo].[tblGLAccountReallocation] ([intAccountReallocationId]) ON DELETE CASCADE
 );
 
