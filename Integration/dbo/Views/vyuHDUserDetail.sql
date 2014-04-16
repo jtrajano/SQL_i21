@@ -14,6 +14,7 @@ IF  1 = 1
 			,us.strFullName
 			,us.strPhone
 			,strTimeZone = ''''
+			,strLocation = us.strLocation
 			,strSLAPlan = ''''
 			,strReplyDue = ''''
 			,intUserId = us.intUserSecurityID
@@ -39,6 +40,7 @@ IF  1 = 1
 			,strFullName = ec.strEmail
 			,strPhone = ec.strPhone
 			,strTimeZone = ''''
+			,strLocation = el.strCity
 			,strSLAPlan = ''''
 			,strReplyDue = ''''
 			,intUserId = en.intEntityId
@@ -54,9 +56,11 @@ IF  1 = 1
 		from
 			tblEntity en,
 			tblEntityContact ec,
-			tblARCustomer cus
+			tblARCustomer cus,
+			tblEntityLocation el
 		where
 			cus.intEntityId = en.intEntityId
 			and ec.intEntityId = en.intEntityId
+			and el.intEntityId = en.intEntityId
 		'
 		)
