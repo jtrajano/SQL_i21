@@ -363,10 +363,10 @@
     <Build Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournal.sql" />
     <Build Include="dbo\Stored Procedures\uspGLPostFiscalYear.sql" />
     <Build Include="dbo\Stored Procedures\uspCreateBankTransactionPayment.sql" />
-    <Build Include="dbo\Stored Procedures\uspImportAPOriginTransactions.sql" />
-    <Build Include="dbo\Stored Procedures\uspImportVendor.sql" />
-    <Build Include="dbo\Stored Procedures\uspPostBill.sql" />
-    <Build Include="dbo\Stored Procedures\uspPostBillBatch.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportOriginTransactions.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportVendor.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPPostBill.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPPostBillBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspPostPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspRMInsertDynamicParameterFields.sql" />
     <Build Include="dbo\Stored Procedures\WithGasCheck.sql" />
