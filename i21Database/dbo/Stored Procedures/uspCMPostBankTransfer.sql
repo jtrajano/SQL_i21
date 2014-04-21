@@ -62,6 +62,7 @@ DECLARE
 	,@STARTING_NUM_TRANSACTION_TYPE_Id AS INT	= 3	-- Starting number for GL Detail table. Ex: 'BATCH-1234',
 	,@GL_DETAIL_CODE AS NVARCHAR(10)			= 'BTFR' -- String code used in GL Detail table. 
 	,@MODULE_NAME AS NVARCHAR(100)				= 'Cash Management' -- Module where this posting code belongs.
+	,@TRANSACTION_FORM AS NVARCHAR(100)			= 'Bank Transfer'
 	,@BANK_TRANSFER_WD AS INT					= 9 -- Transaction code for Bank Transfer Withdrawal. It also refers to as Bank Transfer FROM.
 	,@BANK_TRANSFER_DEP AS INT					= 10 -- Transaction code for Bank Transfer Deposit. It also refers to as Bank Transfer TO. 
 	,@BANK_TRANSFER_WD_PREFIX AS NVARCHAR(3)	= '-WD'
@@ -195,6 +196,14 @@ BEGIN
 	END
 END 
 
+-- Check if amount is zero. 
+IF @dblAmount = 0 AND @ysnPost = 1 AND @ysnRecap = 0
+BEGIN 
+	-- Cannot post a zero-value transaction.
+	RAISERROR(50020, 11, 1)
+	GOTO Post_Rollback
+END 
+
 --=====================================================================================================================================
 -- 	PROCESSING OF THE G/L ENTRIES. 
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -266,7 +275,7 @@ BEGIN
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId
-			,[strTransactionForm]	= A.strTransactionId
+			,[strTransactionForm]	= @TRANSACTION_FORM
 			,[strModuleName]		= @MODULE_NAME
 			,[strUOMCode]			= NULL 
 	FROM	[dbo].tblCMBankTransfer A INNER JOIN [dbo].tblGLAccount GLAccnt
@@ -305,7 +314,7 @@ BEGIN
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId
-			,[strTransactionForm]	= A.strTransactionId
+			,[strTransactionForm]	= @TRANSACTION_FORM
 			,[strModuleName]		= @MODULE_NAME
 			,[strUOMCode]			= NULL 
 	FROM	[dbo].tblCMBankTransfer A INNER JOIN [dbo].tblGLAccount GLAccnt

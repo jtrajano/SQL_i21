@@ -19,7 +19,7 @@
     [ysnPrintDeliveryTicket]      BIT             DEFAULT 0 NULL,
     [ysnAdjustBurnRate]           BIT             DEFAULT 0 NULL,
     [intDriverID]                 INT             DEFAULT 0 NULL,
-    [strRouteID]                  NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
+    [strRouteId]                  NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
     [strSequenceID]               NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [dblYTDGalsThisSeason]        NUMERIC (18, 6) DEFAULT 0 NULL,
     [dblYTDGalsLastSeason]        NUMERIC (18, 6) DEFAULT 0 NULL,
@@ -70,9 +70,9 @@
     [strLocation]                 NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ((0)) NULL,
     [intRoute]                    INT             NULL,
     [dtmLastReadingUpdate]        DATETIME        NULL,
-    [intFillGroupID]              INT             NULL,
-    [intRouteID]                  INT             NULL,
-    [intTankTownshipID]           INT             NULL,
+    [intFillGroupId]              INT             NULL,
+    [intRouteId]                  INT             NULL,
+    [intTankTownshipId]           INT             NULL,
     [dtmForecastedDelivery]       DATETIME        NULL,
     [intParentSiteID]             INT             NULL,
     [intDeliveryTermID]           INT             NULL,
@@ -83,6 +83,9 @@
     CONSTRAINT [FK_tblTMSite_tblTMCustomer] FOREIGN KEY ([intCustomerID]) REFERENCES [dbo].[tblTMCustomer] ([intCustomerID]),
     CONSTRAINT [FK_tblTMSite_tblTMFillMethod] FOREIGN KEY ([intFillMethodId]) REFERENCES [dbo].[tblTMFillMethod] ([intFillMethodId]),
     CONSTRAINT [FK_tblTMSite_tblTMHoldReason] FOREIGN KEY ([intHoldReasonID]) REFERENCES [dbo].[tblTMHoldReason] ([intHoldReasonID]),
-    CONSTRAINT [FK_tblTMSite_tblTMSite] FOREIGN KEY ([intParentSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID])
+    CONSTRAINT [FK_tblTMSite_tblTMSite] FOREIGN KEY ([intParentSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID]),
+	CONSTRAINT [FK_tblTMSite_tblTMRoute] FOREIGN KEY (intRouteId) REFERENCES [dbo].[tblTMRoute] (intRouteId),
+	CONSTRAINT [FK_tblTMSite_tblTMFillGroup] FOREIGN KEY (intFillGroupId) REFERENCES [dbo].[tblTMFillGroup] (intFillGroupId),
+	CONSTRAINT [FK_tblTMSite_tblTMTankTownship] FOREIGN KEY (intTankTownshipId) REFERENCES [dbo].[tblTMTankTownship] (intTankTownshipId)
 );
 

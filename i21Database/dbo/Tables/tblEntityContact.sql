@@ -1,6 +1,5 @@
 ﻿CREATE TABLE [dbo].[tblEntityContact] (
     [intEntityId]        INT             NOT NULL,
-    [intEntityContactId] INT             NOT NULL,
     [strTitle]           NVARCHAR (35)   COLLATE Latin1_General_CI_AS NULL,
     [strDepartment]      NVARCHAR (30)   COLLATE Latin1_General_CI_AS NULL,
     [strMobile]          NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,

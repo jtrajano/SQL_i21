@@ -14,7 +14,7 @@
     [strRentalStatus]         NVARCHAR (20) COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [dtmLastLeaseBillingDate] DATETIME      NULL,
     CONSTRAINT [PK_tblTMLease] PRIMARY KEY CLUSTERED ([intLeaseId] ASC),
-    CONSTRAINT [FK_tblTMLease_tblTMLeaseCode] FOREIGN KEY ([intLeaseCodeId]) REFERENCES [dbo].[tblTMLeaseCode] ([intLeaseCodeId]) ON DELETE SET NULL,
+    CONSTRAINT [FK_tblTMLease_tblTMLeaseCode] FOREIGN KEY ([intLeaseCodeId]) REFERENCES [dbo].[tblTMLeaseCode] ([intLeaseCodeId]),
     CONSTRAINT [UQ_tblTMLease_strLeaseNumber] UNIQUE NONCLUSTERED ([strLeaseNumber] ASC)
 );
 

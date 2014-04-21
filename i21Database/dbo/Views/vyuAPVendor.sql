@@ -46,8 +46,8 @@ FROM
 	INNER JOIN tblAPVendor B
 		ON A.intEntityId = B.intEntityId
 	INNER JOIN tblEntityLocation C
-		ON B.intEntityLocationId = C.intEntityLocationId
+		ON B.intDefaultLocationId = C.intEntityLocationId
 	INNER JOIN tblEntityContact D
-		ON B.intEntityContactId = D.intEntityContactId
+		ON B.intDefaultContactId = D.intEntityId
 	LEFT JOIN tblSMCurrency E
 		ON B.intCurrencyId = E.intCurrencyID

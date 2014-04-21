@@ -4,7 +4,7 @@ CREATE PROCEDURE [dbo].[TwoPartDeliveryFillReport] (@xmlParam NVARCHAR(MAX)=null
 AS  
   
 /*set @xmlparam = '<xmlparam><filters><filter><fieldname>strLocation</fieldname><condition>Between</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>strDriverID<
-/fieldname><condition>Equal To</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>strRouteID</fieldname><condition>Between</condition><from /><to /><join>And</joi
+/fieldname><condition>Equal To</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>strRouteId</fieldname><condition>Between</condition><from /><to /><join>And</joi
 n><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>intNextDeliveryDegreeDay</fieldname><condition>Between</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datat
 ype>Integer</datatype></filter><filter><fieldname>dtmNextDeliveryDate</fieldname><condition>Between</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>dtmRequeste
 dDate</fieldname><condition>Between</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>DateTime</datatype></filter><filter><fieldname>strFillMethod</fieldname><condition>Equal To</condition><from /><to /><jo
@@ -66,7 +66,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
   ,'' as strFillGroupCode   
   ,'' as strDescription   
   ,0 as ysnActive   
-  ,0 as intFillGroupID   
+  ,0 as intFillGroupId   
   ,'' as strDriverName   
   ,'' as strDriverID   
   ,getdate() as dtmRequestedDate   
@@ -74,7 +74,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
   ,'' as strProductID   
   ,'' as strProductDescription   
   ,'' as strFillMethod   
-  ,'' as strRouteID   
+  ,'' as strRouteId   
   ,'' as strBetweenDlvry   
   ,'' as strLocation   
   , '' as strLine  
@@ -96,7 +96,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
  DECLARE @strFillMethod AS VARCHAR(100)  
  DECLARE @TermDesc AS NVARCHAR(100)  
  DECLARE @RTE_SQID AS VARCHAR(100)  
- DECLARE @strRouteID AS VARCHAR (50)  
+ DECLARE @strRouteId AS VARCHAR (50)  
  DECLARE @strSequenceID AS VARCHAR (50)  
  DECLARE @strBetweenDlvry AS NVARCHAR(100)  
  DECLARE @dtmLastDeliveryDate AS DATETIME  
@@ -246,7 +246,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
  --RouteID  
  SELECT @FromRouteID = [from]  
     ,@ToRouteID = [to]  
- FROM @temp_params where [fieldname] = 'strRouteID'  
+ FROM @temp_params where [fieldname] = 'strRouteId'  
    
  --FillMethod  
  SELECT @FromFillMethod = [from]  
@@ -317,7 +317,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
    
  --strRouteID  
  IF (ISNULL(@FromRouteID,'') != '')  
- BEGIN SET @WhereClause = @WhereClause + ' AND strRouteID BETWEEN ''' + @FromRouteID + ''' AND ''' + @ToRouteID + '''' END  
+ BEGIN SET @WhereClause = @WhereClause + ' AND strRouteId BETWEEN ''' + @FromRouteID + ''' AND ''' + @ToRouteID + '''' END  
   
  --strFillMethod  
  IF (ISNULL(@FromFillMethod,'') != '')  
@@ -407,14 +407,14 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
   ,strFillGroupCode nvarchar(50)  
   ,strDescription nvarchar(100)  
   ,ysnActive varchar(10)  
-  ,intFillGroupID int  
+  ,intFillGroupId int  
   ,strDriverName nvarchar(100)-- 19  
   ,strDriverID nvarchar(50)-- 18  
   ,dtmRequestedDate DateTime  
   ,dblQuantity numeric(18,6)  
   ,strProductID nvarchar(50)-- 4  
   ,strProductDescription nvarchar(max)-- 5  
-  ,strRouteID nvarchar(50)  
+  ,strRouteId nvarchar(50)  
   ,strFillMethod nvarchar(max)-- 10   
   ,strBetweenDlvry NVARCHAR(100)-- 13  
   ,strLocation nvarchar(50)-- 27  
@@ -533,14 +533,14 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
        WHEN 1 THEN ''Yes''  
        WHEN 0 THEN ''No''  
       END  
-     ,I.intFillGroupID  
+     ,I.intFillGroupId  
      ,J.vwsls_name as strDriverName  
      ,strDriverID = J.vwsls_slsmn_id   
      ,F.dtmRequestedDate  
      ,dblQuantity = COALESCE(F.dblQuantity,0.0)   
      ,strProductID = G.vwitm_no   
      ,strProductDescription = G.vwitm_desc   
-     ,strRouteID = (SELECT TOP 1 r.strRouteID FROM tblTMRoute r WHERE r.intRouteID = C.intRouteID)   
+     ,strRouteId = (SELECT TOP 1 r.strRouteId FROM tblTMRoute r WHERE r.intRouteId = C.intRouteId)   
      ,strFillMethod = (SELECT TOP 1 strFillMethod FROM tblTMFillMethod tt WHERE tt.intFillMethodId = C.intFillMethodId)   
      ,strBetweenDlvry =   
       CAST(  
@@ -572,7 +572,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
      LEFT JOIN tblTMClock H   
       ON H.intClockID = C.intClockID  
      LEFT JOIN tblTMFillGroup I   
-      ON I.intFillGroupID = C.intFillGroupID  
+      ON I.intFillGroupId = C.intFillGroupId  
      LEFT JOIN vwslsmst J   
       ON J.A4GLIdentity = C.intDriverID  
      LEFT JOIN tblTMSiteJulianCalendar K   
@@ -602,8 +602,8 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
    ,dblProductCost -- 9   
    ,strFillMethod -- 10   
    ,TermDesc  
-   ,RTE_SQID = strRouteID + '-' + strSequenceID -- 12  
-   ,strRouteID  
+   ,RTE_SQID = strRouteId + '-' + strSequenceID -- 12  
+   ,strRouteId  
    ,strSequenceID  
    ,strBetweenDlvry -- 13  
    ,dtmLastDeliveryDate -- 14  
@@ -668,7 +668,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
  ALTER TABLE #tmpDetailToCut ALTER COLUMN strFillMethod VARCHAR(100) NULL  
  ALTER TABLE #tmpDetailToCut ALTER COLUMN TermDesc NVARCHAR(100) NULL  
  ALTER TABLE #tmpDetailToCut ALTER COLUMN RTE_SQID VARCHAR(100) NULL  
- ALTER TABLE #tmpDetailToCut ALTER COLUMN strRouteID VARCHAR(50) NULL  
+ ALTER TABLE #tmpDetailToCut ALTER COLUMN strRouteId VARCHAR(50) NULL  
  ALTER TABLE #tmpDetailToCut ALTER COLUMN strSequenceID VARCHAR(50) NULL  
  ALTER TABLE #tmpDetailToCut ALTER COLUMN strBetweenDlvry NVARCHAR(100) NULL  
  ALTER TABLE #tmpDetailToCut ALTER COLUMN dtmLastDeliveryDate DATETIME NULL  
@@ -721,7 +721,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
  ALTER TABLE #tmpResult ALTER COLUMN strFillMethod VARCHAR(100) NULL  
  ALTER TABLE #tmpResult ALTER COLUMN TermDesc NVARCHAR(100) NULL  
  ALTER TABLE #tmpResult ALTER COLUMN RTE_SQID VARCHAR(100) NULL  
- ALTER TABLE #tmpResult ALTER COLUMN strRouteID VARCHAR(50) NULL  
+ ALTER TABLE #tmpResult ALTER COLUMN strRouteId VARCHAR(50) NULL  
  ALTER TABLE #tmpResult ALTER COLUMN strSequenceID VARCHAR(50) NULL  
  ALTER TABLE #tmpResult ALTER COLUMN strBetweenDlvry NVARCHAR(100) NULL  
  ALTER TABLE #tmpResult ALTER COLUMN dtmLastDeliveryDate DATETIME NULL  
@@ -778,7 +778,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
     ,@strFillMethod = strFillMethod  
     ,@TermDesc = TermDesc  
     ,@RTE_SQID = RTE_SQID  
-    ,@strRouteID = strRouteID  
+    ,@strRouteId = strRouteId  
     ,@strSequenceID = strSequenceID  
     ,@strBetweenDlvry = strBetweenDlvry  
     ,@dtmLastDeliveryDate = dtmLastDeliveryDate  
@@ -901,7 +901,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
         '<b>' + @Gaps + 'Type: ' + '</b>' +  
         CAST( ISNULL((SELECT TOP 1 ISNULL(tt.strTankType, '') From tblTMTankType tt Where tt.intTankTypeId = E.intTankTypeId),'') AS CHAR(23) ) +  
         '<b>' + @Gaps + 'Capacity: '+ '</b>' +  
-        CAST( ISNULL(CAST(CONVERT(VARCHAR,CONVERT(MONEY,ISNULL(E.intTankCapacity, 0)),1) AS VARCHAR(50)), '') AS CHAR(10) )  
+        CAST( ISNULL(CAST(CONVERT(VARCHAR,CONVERT(MONEY,ISNULL(E.dblTankCapacity, 0)),1) AS VARCHAR(50)), '') AS CHAR(10) )  
        , ' '  
        ,'&#160;'   
       ) +   
@@ -1065,7 +1065,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
     ,c.strSiteAddress  
     ,strSiteDescription = c.strDescription   
     ,strFillGroupCode = ISNULL(d.strFillGroupCode, '')   
-    ,d.intFillGroupID   
+    ,d.intFillGroupId   
     ,d.strDescription  
     ,ysnActive =   
       CASE d.ysnActive  
@@ -1079,8 +1079,8 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
     LEFT JOIN tblTMSite c   
      ON b.intCustomerID = c.intCustomerID   
     LEFT JOIN tblTMFillGroup d   
-     ON d.intFillGroupID = c.intFillGroupID  
-  WHERE c.intFillGroupID IS NOT NULL   
+     ON d.intFillGroupId = c.intFillGroupId 
+  WHERE c.intFillGroupId IS NOT NULL   
     AND c.ysnActive   = 1   
     AND a.vwcus_active_yn = 'Y'   
     AND (ysnOnHold = 0 OR dtmOnHoldEndDate < GETDATE())   
@@ -1093,7 +1093,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
     ,c.strSiteAddress  
     ,c.strDescription  
     ,d.strFillGroupCode  
-    ,d.intFillGroupID   
+    ,d.intFillGroupId   
     ,d.ysnActive  
     ,d.strDescription    
     
@@ -1368,7 +1368,7 @@ me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to />
     ,strFillMethod = @strFillMethod  
     ,TermDesc = @TermDesc  
     ,RTE_SQID = ISNULL(@RTE_SQID,'')  
-    ,strRouteID = ISNULL(@strRouteID,'')  
+    ,strRouteId = ISNULL(@strRouteId,'')  
     ,strSequenceID = @strSequenceID  
     ,strBetweenDlvry = (CASE WHEN ISNUMERIC(@strBetweenDlvry) = 1 THEN CONVERT(VARCHAR,CONVERT(MONEY,ISNULL(@strBetweenDlvry,0)),1) ELSE ISNULL(@strBetweenDlvry,'') END)  
     ,dtmLastDeliveryDate = ISNULL(@dtmLastDeliveryDate,'')  

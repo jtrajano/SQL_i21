@@ -20,6 +20,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\4_StartingNumbers.sql
 :r .\SM\DefaultData\5_CompanySetup.sql
 :r .\SM\DefaultData\6_Preferences.sql
+:r .\SM\DefaultData\7_EULA.sql
+:r .\SM\SMDataMigrations.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
@@ -39,6 +41,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\FIN\DefaultData\AccountGroup.sql
 :r .\FIN\DefaultData\BankTransactionTypes.sql
 :r .\FIN\DefaultData\DataImportStatus.sql
+
+--Accounts Receivable
+:r .\AR\EntityTableDataFix.sql
 
 -- Version Update
 :r .\VersionUpdate.sql

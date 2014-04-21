@@ -41,9 +41,9 @@ BEGIN
 	INNER JOIN tblAPVendor B
 		ON A.intEntityId = B.intEntityId
 	INNER JOIN tblEntityLocations C
-		ON B.intEntityLocationId = C.intEntityLocationId
+		ON B.intDefaultLocationId = C.intEntityLocationId
 	INNER JOIN tblEntityContacts D
-		ON B.intEntityContactId = D.intEntityContactId
+		ON B.intDefaultContactId = D.intEntityContactId
 	LEFT JOIN tblSMCurrency E
 		ON B.intCurrencyId = E.intCurrencyID
 	LEFT JOIN tblGLCOACrossReference F
@@ -111,9 +111,9 @@ BEGIN
 	INNER JOIN tblAPVendor B
 		ON A.intEntityId = B.intEntityId
 	INNER JOIN tblEntityLocations C		
-		ON B.intEntityLocationId = C.intEntityLocationId
+		ON B.intDefaultLocationId = C.intEntityLocationId
 	INNER JOIN tblEntityContacts D
-		ON B.intEntityContactId = D.intEntityContactId
+		ON B.intDefaultContactId = D.intEntityContactId
 	LEFT JOIN tblSMCurrency E
 		ON B.intCurrencyId = E.intCurrencyID
 	LEFT JOIN tblGLCOACrossReference F
@@ -296,7 +296,7 @@ BEGIN
 		DECLARE @EntityLocationId INT
 		SET @EntityLocationId = SCOPE_IDENTITY()
 
-		INSERT [dbo].[tblAPVendor]	([intEntityId], [intEntityLocationId], [intEntityContactId], [intCurrencyId], [strVendorPayToId], [intPaymentMethodId], [intShipViaId], [intTaxCodeId], [intGLAccountExpenseId], [strFederalTaxId], [intTermsId], [intVendorType], [strVendorId], [strVendorAccountNum], [str1099Name], [str1099Type], [str1099Category], [ysnPymtCtrlActive], [ysnPymtCtrlAlwaysDiscount], [ysnPymtCtrlEFTActive], [ysnPymtCtrlHold], [ysnPrint1099], [ysnWithholding], [ysnW9Signed], [dblCreditLimit], [intCreatedUserId], [intLastModifiedUserId], [dtmLastModified], [dtmCreated], [strTaxState])
+		INSERT [dbo].[tblAPVendor]	([intEntityId], [intDefaultLocationId], [intDefaultContactId], [intCurrencyId], [strVendorPayToId], [intPaymentMethodId], [intShipViaId], [intTaxCodeId], [intGLAccountExpenseId], [strFederalTaxId], [intTermsId], [intVendorType], [strVendorId], [strVendorAccountNum], [str1099Name], [str1099Type], [str1099Category], [ysnPymtCtrlActive], [ysnPymtCtrlAlwaysDiscount], [ysnPymtCtrlEFTActive], [ysnPymtCtrlHold], [ysnPrint1099], [ysnWithholding], [ysnW9Signed], [dblCreditLimit], [intCreatedUserId], [intLastModifiedUserId], [dtmLastModified], [dtmCreated], [strTaxState])
 		VALUES						(@EntityId, @EntityLocationId, @EntityContactId, @intCurrencyId, @strVendorPayToId, ISNULL(@intPaymentMethodId,0), @intShipViaId, @intVendorTaxCodeId, ISNULL(@intGLAccountExpenseId,0), @strFederalTaxId, @intVendorTermsId, @intVendorType, @originVendor, @strVendorAccountNum, @str1099Name, @str1099Type, @str1099Category, @ysnPymtCtrlActive, ISNULL(@ysnPymtCtrlAlwaysDiscount,0), ISNULL(@ysnPymtCtrlEFTActive,0), @ysnPymtCtrlHold, @ysnPrint1099, @ysnWithholding, @ysnW9Signed, @dblCreditLimit, @intCreatedUserId, @intLastModifiedUserId, @dtmLastModified, @dtmCreated, @strTaxState)
 
 		IF(@@ERROR <> 0) 

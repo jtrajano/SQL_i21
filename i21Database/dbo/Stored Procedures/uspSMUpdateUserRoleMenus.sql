@@ -56,7 +56,7 @@ BEGIN TRY
 		print @UserSecurityID
 		EXEC uspSMUpdateUserSecurityMenus @UserSecurityID
 		
-		DELETE FROM #tmpUserSecurities WHERE intUserSecurityId = @UserSecurityID
+		DELETE FROM #tmpUserSecurities WHERE intUserSecurityID = @UserSecurityID
 	END
 
 	-- Drop temporary tables

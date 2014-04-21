@@ -161,7 +161,7 @@ IF @@ERROR <> 0	GOTO uspCMAddPayment_Rollback
 
 -- Post the transaction 
 BEGIN TRY
-	EXEC dbo.PostCMBankTransaction 	
+	EXEC dbo.uspCMPostBankTransaction
 			@ysnPost = 1
 			,@ysnRecap = 0
 			,@strTransactionId = @strTransactionId

@@ -1,10 +1,13 @@
 ﻿CREATE TABLE [dbo].[tblSMUpload] (
     [intUploadId]       INT              IDENTITY (1, 1) NOT NULL,
-    [strFileName]       NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NOT NULL,
+    [intAttachmentId]   INT              NULL,
     [strFileIdentifier] UNIQUEIDENTIFIER NOT NULL,
-    [strScreen]         NVARCHAR (50)    COLLATE Latin1_General_CI_AS NOT NULL,
+    [blbFile]           VARBINARY (MAX)  NULL,
     [dtmDateUploaded]   DATETIME         NOT NULL,
     [intConcurrencyId]  INT              NOT NULL,
-    CONSTRAINT [PK_tblUpload] PRIMARY KEY CLUSTERED ([intUploadId] ASC)
+    CONSTRAINT [PK_tblUpload] PRIMARY KEY CLUSTERED ([intUploadId] ASC),
+    CONSTRAINT [FK_tblSMUpload_tblSMAttachment] FOREIGN KEY ([intAttachmentId]) REFERENCES [dbo].[tblSMAttachment] ([intAttachmentId]) ON DELETE CASCADE
 );
+
+
 

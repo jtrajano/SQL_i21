@@ -161,13 +161,13 @@ IF @@ERROR <> 0	GOTO uspCMAddDeposit_Rollback
 
 -- Post the transaction 
 BEGIN TRY
-	EXEC dbo.PostCMBankTransaction 	
+	EXEC dbo.uspCMPostBankTransaction
 			@ysnPost = 1
 			,@ysnRecap = 0
 			,@strTransactionId = @strTransactionId
 			,@isSuccessful = @isAddSuccessful OUTPUT
 			,@message_id = @msg_id OUTPUT
-			
+
 	IF @@ERROR <> 0	GOTO uspCMAddDeposit_Rollback	
 	GOTO uspCMAddDeposit_Commit
 END TRY

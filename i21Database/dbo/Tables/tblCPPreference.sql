@@ -1,0 +1,25 @@
+﻿CREATE TABLE [dbo].[tblCPPreference]
+(
+		[intPreferenceId] [int] IDENTITY(1,1) NOT NULL,
+	[dtmMinSearchDate] [datetime] NULL,
+	[dtmMaxSearchDate] [datetime] NULL,
+	[ysnAG] [bit] NULL,
+	[ysnAGCardFueling] [bit] NULL,
+	[ysnDegreeDay] [bit] NULL,
+	[ysnGrain] [bit] NULL,
+	[ysnTargetPricing] [bit] NULL,
+	[ysnLoadScheduling] [bit] NULL,
+	[ysnPetrolac] [bit] NULL,
+	[ysnPetrolacCardFueling] [bit] NULL,
+	[ysnTankManagement] [bit] NULL,
+	[ysnPetronage] [bit] NULL,
+	[ysnOffline] [bit] NULL,
+	[dtmOfflineDate] [datetime] NULL,
+	[dtmOfflineTime] [datetime] NULL,
+	[strOfflineMessage] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+	[strOfflineWarningMessage] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+	[strCustomerPortalEmail] [nvarchar](150) COLLATE Latin1_General_CI_AS NULL,
+	[strOnlinePaymentEmail] [nvarchar](150) COLLATE Latin1_General_CI_AS NULL,
+	[intConcurrencyId] [int] NOT NULL, 
+    CONSTRAINT [PK_tblCPPreference] PRIMARY KEY ([intPreferenceId])
+)

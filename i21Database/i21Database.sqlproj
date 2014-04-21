@@ -123,6 +123,7 @@
     <Folder Include="Scripts\Post-Deployment\SM\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\TM" />
     <Folder Include="Scripts\Post-Deployment\Optional Run\2_Reports" />
+    <Folder Include="Scripts\Post-Deployment\AR" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -449,28 +450,6 @@
     <Build Include="dbo\Functions\fnAddZeroPrefixes.sql" />
     <Build Include="dbo\Functions\fnConvertOriginUserIdtoi21.sql" />
     <Build Include="dbo\Functions\fnConverti21UserIdtoOrigin.sql" />
-    <Build Include="dbo\Tables\tblARTerritoryDetail.sql" />
-    <Build Include="dbo\Tables\tblARTerritory.sql" />
-    <Build Include="dbo\Tables\tblARStatementFooter.sql" />
-    <Build Include="dbo\Tables\tblARSalespersonNote.sql" />
-    <Build Include="dbo\Tables\tblARSalesperson.sql" />
-    <Build Include="dbo\Tables\tblARMarketZone.sql" />
-    <Build Include="dbo\Tables\tblARCustomerSplitDetail.sql" />
-    <Build Include="dbo\Tables\tblARCustomerSplit.sql" />
-    <Build Include="dbo\Tables\tblARCustomerSpecialPrice.sql" />
-    <Build Include="dbo\Tables\tblARCustomerPortalPermission.sql" />
-    <Build Include="dbo\Tables\tblARCustomerPortalMenu.sql" />
-    <Build Include="dbo\Tables\tblARCustomerMessage.sql" />
-    <Build Include="dbo\Tables\tblARCustomerFreightXRef.sql" />
-    <Build Include="dbo\Tables\tblARCustomerFieldXRef.sql" />
-    <Build Include="dbo\Tables\tblARCustomerFarm.sql" />
-    <Build Include="dbo\Tables\tblARCustomerContractDetail.sql" />
-    <Build Include="dbo\Tables\tblARCustomerContract.sql" />
-    <Build Include="dbo\Tables\tblARCustomerCategoryPrice.sql" />
-    <Build Include="dbo\Tables\tblARCustomerCardFueling.sql" />
-    <Build Include="dbo\Tables\tblARCustomer.sql" />
-    <Build Include="dbo\Tables\tblARAccountStatus.sql" />
-    <Build Include="dbo\Tables\tblARServiceCharge.sql" />
     <Build Include="dbo\Tables\tblEntityType.sql" />
     <Build Include="dbo\Tables\tblEntityToContact.sql" />
     <Build Include="dbo\Tables\tblEntityNote.sql" />
@@ -488,6 +467,57 @@
     <Build Include="dbo\Stored Procedures\uspCMFixStartingNumbers.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateUserSecurityMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateUserSecurityMenus.sql" />
+    <Build Include="dbo\Tables\tblHDEmailSetup.sql" />
+    <Build Include="dbo\Tables\tblHDGroupUserConfig.sql" />
+    <Build Include="dbo\Tables\tblHDJobCode.sql" />
+    <Build Include="dbo\Tables\tblHDModule.sql" />
+    <Build Include="dbo\Tables\tblHDSetting.sql" />
+    <Build Include="dbo\Tables\tblHDTicket.sql" />
+    <Build Include="dbo\Tables\tblHDTicketComment.sql" />
+    <Build Include="dbo\Tables\tblHDTicketGroup.sql" />
+    <Build Include="dbo\Tables\tblHDTicketHoursWorked.sql" />
+    <Build Include="dbo\Tables\tblHDTicketNote.sql" />
+    <Build Include="dbo\Tables\tblHDTicketPriority.sql" />
+    <Build Include="dbo\Tables\tblHDTicketProduct.sql" />
+    <Build Include="dbo\Tables\tblHDTicketStatus.sql" />
+    <Build Include="dbo\Tables\tblHDTicketType.sql" />
+    <Build Include="dbo\Tables\tblHDVersion.sql" />
+    <Build Include="dbo\Tables\tblHDTicketWatcher.sql" />
+    <Build Include="dbo\Tables\tblSMEULA.sql" />
+    <Build Include="dbo\Tables\tblSMLicenseAcceptance.sql" />
+    <Build Include="dbo\Tables\tblSMCompanyLocation.sql" />
+    <Build Include="dbo\Tables\tblARTerritoryDetail.sql" />
+    <Build Include="dbo\Tables\tblARTerritory.sql" />
+    <Build Include="dbo\Tables\tblARStatementFooter.sql" />
+    <Build Include="dbo\Tables\tblARServiceCharge.sql" />
+    <Build Include="dbo\Tables\tblARSalespersonNote.sql" />
+    <Build Include="dbo\Tables\tblARSalesperson.sql" />
+    <Build Include="dbo\Tables\tblARMarketZone.sql" />
+    <Build Include="dbo\Tables\tblARCustomerSplitDetail.sql" />
+    <Build Include="dbo\Tables\tblARCustomerSplit.sql" />
+    <Build Include="dbo\Tables\tblARCustomerSpecialPrice.sql" />
+    <Build Include="dbo\Tables\tblARCustomerQuote.sql" />
+    <Build Include="dbo\Tables\tblARCustomerPortalPermission.sql" />
+    <Build Include="dbo\Tables\tblARCustomerPortalMenu.sql" />
+    <Build Include="dbo\Tables\tblARCustomerMessage.sql" />
+    <Build Include="dbo\Tables\tblARCustomerGroupDetail.sql" />
+    <Build Include="dbo\Tables\tblARCustomerGroup.sql" />
+    <Build Include="dbo\Tables\tblARCustomerFreightXRef.sql" />
+    <Build Include="dbo\Tables\tblARCustomerFieldXRef.sql" />
+    <Build Include="dbo\Tables\tblARCustomerFarm.sql" />
+    <Build Include="dbo\Tables\tblARCustomerContractDetail.sql" />
+    <Build Include="dbo\Tables\tblARCustomerContract.sql" />
+    <Build Include="dbo\Tables\tblARCustomerCommission.sql" />
+    <Build Include="dbo\Tables\tblARCustomerCategoryPrice.sql" />
+    <Build Include="dbo\Tables\tblARCustomerCardFueling.sql" />
+    <Build Include="dbo\Tables\tblARCustomerBuyback.sql" />
+    <Build Include="dbo\Tables\tblARCustomer.sql" />
+    <Build Include="dbo\Tables\tblARAccountStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMBuildCustomTable.sql" />
+    <Build Include="dbo\Functions\fnGetUserDefaultLocation.sql" />
+    <Build Include="dbo\Tables\tblCPPreference.sql" />
+    <Build Include="dbo\Tables\tblHDUpload.sql" />
+    <Build Include="dbo\Tables\tblARInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
@@ -495,5 +525,8 @@
   <ItemGroup>
     <None Include="i21Database.publish.xml" />
     <None Include="i1410AG.local.publish.xml" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\7_EULA.sql" />
+    <None Include="Scripts\Post-Deployment\SM\SMDataMigrations.sql" />
+    <None Include="Scripts\Post-Deployment\AR\EntityTableDataFix.sql" />
   </ItemGroup>
 </Project>

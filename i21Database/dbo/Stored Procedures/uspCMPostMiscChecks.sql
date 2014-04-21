@@ -62,6 +62,7 @@ DECLARE
 	,@STARTING_NUM_TRANSACTION_TYPE_Id AS INT = 3	-- Starting number for GL Detail table. Ex: 'BATCH-1234',
 	,@GL_DETAIL_CODE AS NVARCHAR(10) = 'MCHK'		-- String code used in GL Detail table. 
 	,@MODULE_NAME AS NVARCHAR(100) = 'Cash Management' -- Module where this posting code belongs. 
+	,@TRANSACTION_FORM AS NVARCHAR(100) = 'Miscellaneous Checks'
 	
 	-- Local Variables
 	,@intTransactionId AS INT
@@ -116,7 +117,7 @@ WHERE	strPreference = 'AllowUserSelfPost'
 IF @@ERROR <> 0	GOTO Post_Rollback	
 
 --=====================================================================================================================================
--- 	VALIdATION 
+-- 	VALIDATION 
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 -- Validate if the Misc Checks exists. 
@@ -207,6 +208,15 @@ BEGIN
 	END
 END 
 
+-- Check if amount is zero. 
+IF @dblAmount = 0 AND @ysnPost = 1 AND @ysnRecap = 0
+BEGIN 
+	-- Cannot post a zero-value transaction.
+	RAISERROR(50020, 11, 1)
+	GOTO Post_Rollback
+END 
+
+
 --=====================================================================================================================================
 -- 	PROCESSING OF THE G/L ENTRIES. 
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -278,7 +288,7 @@ BEGIN
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId
-			,[strTransactionForm]	= A.strTransactionId
+			,[strTransactionForm]	= @TRANSACTION_FORM
 			,[strModuleName]		= @MODULE_NAME
 			,[strUOMCode]			= NULL 
 	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankAccount BankAccnt
@@ -318,7 +328,7 @@ BEGIN
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId
-			,[strTransactionForm]	= A.strTransactionId
+			,[strTransactionForm]	= @TRANSACTION_FORM
 			,[strModuleName]		= @MODULE_NAME
 			,[strUOMCode]			= NULL 
 	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankTransactionDetail B

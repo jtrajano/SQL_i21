@@ -208,14 +208,12 @@ BEGIN
 	FROM	dbo.tblSMStartingNumber
 	WHERE	strTransactionType = @strTransactionType
 
-	IF EXISTS (SELECT TOP 1 1 FROM dbo.tblCMBankTransaction WHERE strTransactionId = @strTransactionId)
+	IF EXISTS (SELECT TOP 1 1 FROM dbo.tblCMBankStatementImport WHERE strBankStatementImportId = @strTransactionId)
 	BEGIN 
 		-- Retrieve the Max transaction id. 
 		SET @strTransactionId = NULL
-		SELECT	@strTransactionId = MAX(strTransactionId)			
-		FROM	dbo.tblCMBankTransaction t INNER JOIN dbo.tblCMBankTransactionType t_type
-					ON t.intBankTransactionTypeId = t_type.intBankTransactionTypeId
-		WHERE	t_type.strBankTransactionTypeName = @strTransactionType
+		SELECT	@strTransactionId = MAX(strBankStatementImportId)			
+		FROM	dbo.tblCMBankStatementImport t 
 		
 		IF (@strTransactionId IS NOT NULL)	
 		BEGIN 	
