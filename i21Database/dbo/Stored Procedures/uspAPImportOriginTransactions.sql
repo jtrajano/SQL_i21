@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspImportAPOriginTransactions
+﻿CREATE PROCEDURE uspAPImportOriginTransactions
 	@DateFrom	DATE = NULL,
 	@DateTo	DATE = NULL,
 	@PeriodFrom	INT = NULL,
