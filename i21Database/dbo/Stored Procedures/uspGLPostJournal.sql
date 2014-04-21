@@ -60,12 +60,14 @@ IF ISNULL(@ysnPost, 0) = 0
 				-- DELETE Results 1 DAY OLDER	
 				DELETE tblGLPostResults WHERE dtmDate < DATEADD(day, -1, GETDATE())
 				
-				INSERT INTO tblGLPostResults (strBatchId,intTransactionId,strTransactionId,strDescription,dtmDate)
+				INSERT INTO tblGLPostResult (strBatchId,intTransactionId,strTransactionId,strDescription,dtmDate,intUserId,strTransactionType)
 					SELECT @strBatchId as strBatchId
 							,(SELECT TOP 1 intJournalId FROM #tmpPostJournals) as intTransactionId
 							,(SELECT TOP 1 strJournalId FROM tblGLJournal WHERE intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)) as strTransactionId
 							,strMessage as strDescription
 							,GETDATE() as dtmDate
+							,@intUserId,
+							@strJournalType
 					FROM (
 						SELECT DISTINCT A.intJournalId,
 							'You cannot Unpost this General Journal. You must Unpost and Delete the Reversing transaction: ' + A.strJournalId + ' first!' AS strMessage
@@ -100,8 +102,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 		-- DELETE Results 2 DAYS OLDER	
 		DELETE tblGLPostResults WHERE dtmDate < DATEADD(day, -1, GETDATE())
 		
-		INSERT INTO tblGLPostResults (strBatchId,intTransactionId,strTransactionId,strDescription,dtmDate)
-			SELECT @strBatchId as strBatchId,tmpBatchResults.intJournalId as intTransactionId,tblB.strJournalId as strTransactionId, strMessage as strDescription,GETDATE() as dtmDate
+		INSERT INTO tblGLPostResult (strBatchId,intTransactionId,strTransactionId,strDescription,dtmDate,intUserId,strTransactionType)
+			SELECT @strBatchId as strBatchId,tmpBatchResults.intJournalId as intTransactionId,tblB.strJournalId as strTransactionId, strMessage as strDescription,GETDATE() as dtmDate,@intUserId,@strJournalType
 			FROM (
 				SELECT DISTINCT A.intJournalId,
 					'Unable to find an open accounting period to match the transaction date.' AS strMessage
@@ -137,7 +139,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 					'You cannot post this transaction because it has invalid account(s).' AS strMessage
 				FROM tblGLJournalDetail A 
 					LEFT OUTER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
-				WHERE A.intAccountId IS NULL OR 0 = CASE WHEN ISNULL(A.intAccountId, '') = '' THEN 0 ELSE 1 END AND A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)					
+				WHERE (A.intAccountId IS NULL OR 0 = CASE WHEN ISNULL(A.intAccountId, '') = '' THEN 0 ELSE 1 END) AND A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)					
 				UNION 
 				SELECT DISTINCT A.intJournalId,
 					'Unable to post. The transaction is out of balance.' AS strMessage
@@ -167,7 +169,7 @@ INSERT INTO #tmpValidJournals
 	SELECT DISTINCT A.[intJournalId]
 	FROM tblGLJournal A 
 	WHERE	A.[intJournalId] IN (SELECT B.intJournalId FROM #tmpPostJournals  B
-						WHERE B.intJournalId NOT IN (SELECT intTransactionId FROM tblGLPostResults WHERE strBatchId = @strBatchId GROUP BY intTransactionId)) 
+						WHERE B.intJournalId NOT IN (SELECT intTransactionId FROM tblGLPostResult WHERE strBatchId = @strBatchId GROUP BY intTransactionId)) 
 		AND
 		A.[ysnPosted] = 0 AND
 		A.[strJournalType] = @strJournalType
@@ -494,8 +496,8 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 --=====================================================================================================================================
 -- 	UPDATE RESULT
 ---------------------------------------------------------------------------------------------------------------------------------------
-INSERT INTO tblGLPostResults (strBatchId,intTransactionId,strTransactionId,strDescription,dtmDate)
-	SELECT @strBatchId as strBatchId,intJournalId as intTransactionId,strJournalId as strTransactionId, strMessage as strDescription,GETDATE() as dtmDate
+INSERT INTO tblGLPostResult (strBatchId,intTransactionId,strTransactionId,strDescription,dtmDate,intUserId,strTransactionType)
+	SELECT @strBatchId as strBatchId,intJournalId as intTransactionId,strJournalId as strTransactionId, strMessage as strDescription,GETDATE() as dtmDate,@intUserId,@strJournalType
 	FROM (
 		SELECT DISTINCT A.intJournalId,A.strJournalId,
 			'Transaction successfully posted.' AS strMessage
