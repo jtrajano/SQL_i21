@@ -4,7 +4,7 @@ CREATE PROCEDURE uspCMAddPayment
 	,@dtmDate DATETIME 
 	,@intGLAccountId INT	
 	,@dblAmount NUMERIC(18,6)
-	,@strDescription NVARCHAR(250)
+	,@strDescription NVARCHAR(255)
 	,@intUserId INT
 	,@isAddSuccessful BIT = 0 OUTPUT
 AS

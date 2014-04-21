@@ -4,7 +4,7 @@
     [dtmDate]                  DATETIME        NOT NULL,
     [intBankTransactionTypeId] INT             NOT NULL,
     [dblAmount]                DECIMAL (18, 6) DEFAULT 0 NOT NULL,
-    [strDescription]           NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
+    [strDescription]           NVARCHAR (255)  COLLATE Latin1_General_CI_AS NULL,
     [intBankAccountIdFrom]     INT             NOT NULL,
     [intGLAccountIdFrom]       INT             NOT NULL,
     [strReferenceFrom]         NVARCHAR (150)  COLLATE Latin1_General_CI_AS NULL,

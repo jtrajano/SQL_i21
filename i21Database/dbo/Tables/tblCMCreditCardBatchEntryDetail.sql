@@ -5,7 +5,7 @@
     [strPayee]                        NVARCHAR (300) COLLATE Latin1_General_CI_AS NULL,
     [intPayeeId]                      INT            NULL,
     [intGLAccountId]                  INT            NOT NULL,
-    [strMemo]                         NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
+    [strMemo]                         NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
     [intTransactionId]                INT            NULL,
     [intCreatedUserId]                INT            NULL,
     [dtmCreated]                      DATETIME       NULL,

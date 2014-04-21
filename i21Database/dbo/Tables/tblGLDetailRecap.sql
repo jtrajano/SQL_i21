@@ -10,7 +10,7 @@
     [dblCredit]          NUMERIC (18, 6)  NULL,
     [dblDebitUnit]       NUMERIC (18, 6)  NULL,
     [dblCreditUnit]      NUMERIC (18, 6)  NULL,
-    [strDescription]     NVARCHAR (250)   COLLATE Latin1_General_CI_AS NULL,
+    [strDescription]     NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
     [strCode]            NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
     [strReference]       NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
     [strJobId]           NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,

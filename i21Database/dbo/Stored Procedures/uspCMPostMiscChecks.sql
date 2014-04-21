@@ -33,7 +33,7 @@ CREATE TABLE #tmpGLDetail (
 	,[dblCredit]				[numeric](18, 6) NULL
 	,[dblDebitUnit]				[numeric](18, 6) NULL
 	,[dblCreditUnit]			[numeric](18, 6) NULL
-	,[strDescription]			[nvarchar](250)  COLLATE Latin1_General_CI_AS NULL
+	,[strDescription]			[nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
 	,[strCode]					[nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
 	,[strReference]				[nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
 	,[strJobId]					[nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
@@ -271,7 +271,7 @@ BEGIN
 			,[dblCredit]			= A.dblAmount
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
-			,[strDescription]		= A.strMemo
+			,[strDescription]		= GLAccnt.strDescription
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= A.strPayee
 			,[strJobId]				= NULL
