@@ -15,7 +15,7 @@
     [strCountry]               NVARCHAR (75)    COLLATE Latin1_General_CI_AS NULL,
     [dblAmount]                DECIMAL (18, 6)  DEFAULT 0 NOT NULL,
     [strAmountInWords]         NVARCHAR (250)   COLLATE Latin1_General_CI_AS NULL,
-    [strMemo]                  NVARCHAR (250)   COLLATE Latin1_General_CI_AS NULL,
+    [strMemo]                  NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
     [strReferenceNo]           NVARCHAR (20)    COLLATE Latin1_General_CI_AS NULL,
     [dtmCheckPrinted]          DATETIME         NULL,
     [ysnCheckToBePrinted]      BIT              DEFAULT 0 NOT NULL,

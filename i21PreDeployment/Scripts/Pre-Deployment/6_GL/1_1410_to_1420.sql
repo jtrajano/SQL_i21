@@ -1221,3 +1221,12 @@ BEGIN
     END
 END
 GO
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblGLCOAAdjustment]') AND type in (N'U')) 
+BEGIN
+	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'ysnPosted' AND OBJECT_ID = OBJECT_ID(N'tblGLCOAAdjustment')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'ysnposted' AND OBJECT_ID = OBJECT_ID(N'tblGLCOAAdjustment'))
+    BEGIN
+        EXEC sp_rename 'tblGLCOAAdjustment.ysnposted', 'ysnPosted' , 'COLUMN'
+    END
+END
+GO
