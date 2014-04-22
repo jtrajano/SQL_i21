@@ -16,7 +16,7 @@ BEGIN TRANSACTION
 SELECT intUserRoleID
 INTO #tmpUserRoles
 FROM tblSMUserRole
-WHERE (ysnAdmin = 1 OR @AdministratorOnly = 0)
+WHERE ((ysnAdmin = 1 AND strName = 'ADMIN') OR @AdministratorOnly = 0)
 
 --Update Root Folder Menus parent to zero (0)
 UPDATE tblSMMasterMenu
