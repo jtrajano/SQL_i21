@@ -282,10 +282,15 @@ BEGIN
 					,dtmCheckPrinted			=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt)
 					,ysnCheckToBePrinted		=	1
 					,ysnCheckVoid				=	CASE
-														WHEN i.apchk_void_ind = ''Y'' THEN 1
+														WHEN i.apchk_void_ind IN (''C'', ''V'') THEN 1
 														ELSE 0
 													END
-					,ysnPosted					=	1
+
+													-- Mark a record as posted if it is not voided. 
+					,ysnPosted					=	CASE
+														WHEN i.apchk_void_ind IN (''C'', ''V'') THEN 0
+														ELSE 1
+													END
 					,strLink					=	CAST(apchk_cbk_no AS NVARCHAR(2)) 
 													+ CAST(apchk_rev_dt AS NVARCHAR(10)) 
 													+ CAST(apchk_trx_ind AS NVARCHAR(1)) 
@@ -557,10 +562,15 @@ BEGIN
 						,dtmCheckPrinted			=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt) 
 						,ysnCheckToBePrinted		=	1
 						,ysnCheckVoid				=	CASE
-															WHEN i.apchk_void_ind = ''Y'' THEN 1
+															WHEN i.apchk_void_ind IN (''C'', ''V'') THEN 1
 															ELSE 0
 														END
-						,ysnPosted					=	1
+
+														-- Mark a record as posted if it is not voided. 
+						,ysnPosted					=	CASE
+															WHEN i.apchk_void_ind IN (''C'', ''V'') THEN 0
+															ELSE 1
+														END
 						,strLink					=	CAST(apchk_cbk_no AS NVARCHAR(2)) 
 														+ CAST(apchk_rev_dt AS NVARCHAR(10)) 
 														+ CAST(apchk_trx_ind AS NVARCHAR(1)) 
@@ -628,10 +638,15 @@ BEGIN
 						,dtmCheckPrinted			=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt)
 						,ysnCheckToBePrinted		=	1
 						,ysnCheckVoid				=	CASE
-															WHEN i.apchk_void_ind = ''Y'' THEN 1
+															WHEN i.apchk_void_ind IN (''C'', ''V'') THEN 1
 															ELSE 0
 														END
-						,ysnPosted					=	1
+
+														-- Mark a record as posted if it is not voided. 
+						,ysnPosted					=	CASE
+															WHEN i.apchk_void_ind IN (''C'', ''V'') THEN 0
+															ELSE 1
+														END
 						,strLink					=	CAST(apchk_cbk_no AS NVARCHAR(2)) 
 														+ CAST(apchk_rev_dt AS NVARCHAR(10)) 
 														+ CAST(apchk_trx_ind AS NVARCHAR(1)) 
