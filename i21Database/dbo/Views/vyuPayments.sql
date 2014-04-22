@@ -8,5 +8,5 @@ SELECT
 	FROM tblAPPayment A
 		LEFT JOIN tblCMBankAccount B
 			ON A.intBankAccountId = B.intBankAccountId
-		INNER JOIN tblCMBank C
+		LEFT JOIN tblCMBank C
 			ON B.intBankId = C.intBankId
