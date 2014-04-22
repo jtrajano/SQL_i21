@@ -4,7 +4,7 @@
     [intUserId]          INT            NULL,
     [dtmDate]            DATETIME       NULL,
     [memNotes]           NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
-    [ysnposted]          BIT            NULL,
+    [ysnPosted]          BIT            NULL,
     [intConcurrencyId]   INT            DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblGLCOAAdjustment] PRIMARY KEY CLUSTERED ([intCOAAdjustmentId] ASC)
 );
