@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspPostPayment
+﻿CREATE PROCEDURE uspAPPostPayment
 	@batchId			AS NVARCHAR(20)		= NULL,
 	@transactionType	AS NVARCHAR(30)		= NULL,
 	@post				AS BIT				= 0,
@@ -599,5 +599,5 @@ Post_Rollback:
 	GOTO Post_Exit
 
 Post_Exit:
-	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#tmpPayablePostData')) DROP TABLE #tmpPayablePostData
-	IF EXISTS (SELECT 1 FROM TEMPDB..SYSOBJECTS WHERE ID = OBJECT_ID('TEMPDB..#tmpValidData')) DROP TABLE #tmpPayableInvalidData
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE ID = OBJECT_ID('tempdb..#tmpPayablePostData')) DROP TABLE #tmpPayablePostData
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE ID = OBJECT_ID('tempdb..#tmpValidData')) DROP TABLE #tmpPayableInvalidData
