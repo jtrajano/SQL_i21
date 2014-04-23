@@ -260,7 +260,7 @@ BEGIN
 					,intBankAccountId			=	f.intBankAccountId
 					,intCurrencyId				=	dbo.fnGetCurrencyIdFromOriginToi21(i.apchk_currency_cnt)
 					,dblExchangeRate			=	ISNULL(i.apchk_currency_rt, 1)
-					,dtmDate					=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt)
+					,dtmDate					=	ISNULL(dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt), dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt))
 					,strPayee					=	RTRIM(LTRIM(ISNULL(i.apchk_name, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_1))) > 0 THEN '', ''  ELSE '''' END +
 													RTRIM(LTRIM(ISNULL(i.apchk_payee_1, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_2))) > 0 THEN '', ''  ELSE '''' END +
 													RTRIM(LTRIM(ISNULL(i.apchk_payee_2, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_3))) > 0 THEN '', ''  ELSE '''' END +
@@ -279,7 +279,7 @@ BEGIN
 													RTRIM(LTRIM(ISNULL(i.apchk_comment_2, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_3))) > 0 THEN CHAR(13) ELSE '''' END +
 													RTRIM(LTRIM(ISNULL(i.apchk_comment_3, ''''))) 
 					,strReferenceNo				=	dbo.fnAddZeroPrefixes(i.apchk_chk_no)
-					,dtmCheckPrinted			=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt)
+					,dtmCheckPrinted			=	ISNULL(dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt), dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt))
 					,ysnCheckToBePrinted		=	1
 					,ysnCheckVoid				=	CASE
 														WHEN i.apchk_void_ind IN (''C'', ''V'') THEN 1
@@ -309,7 +309,7 @@ BEGIN
 						ON f.strCbkNo = i.apchk_cbk_no COLLATE Latin1_General_CI_AS
 			WHERE	f.intBankAccountId IS NOT NULL
 					AND i.apchk_chk_amt <> 0
-					AND dbo.fnConvertOriginDateToSQLDateTime(apchk_gl_rev_dt) IS NOT NULL
+					AND ISNULL(dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt), dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt)) IS NOT NULL
 			IF @@ERROR <> 0 GOTO EXIT_TRIGGER	 
 	
 			-- Check number audit process: 
@@ -540,7 +540,7 @@ BEGIN
 						,intBankAccountId			=	f.intBankAccountId
 						,intCurrencyId				=	dbo.fnGetCurrencyIdFromOriginToi21(i.apchk_currency_cnt)
 						,dblExchangeRate			=	ISNULL(i.apchk_currency_rt, 1)
-						,dtmDate					=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt)
+						,dtmDate					=	ISNULL(dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt), dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt))
 						,strPayee					=	RTRIM(LTRIM(ISNULL(i.apchk_name, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_1))) > 0 THEN '', ''  ELSE '''' END +
 														RTRIM(LTRIM(ISNULL(i.apchk_payee_1, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_2))) > 0 THEN '', ''  ELSE '''' END +
 														RTRIM(LTRIM(ISNULL(i.apchk_payee_2, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_3))) > 0 THEN '', ''  ELSE '''' END +
@@ -559,7 +559,7 @@ BEGIN
 														RTRIM(LTRIM(ISNULL(i.apchk_comment_2, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_3))) > 0 THEN CHAR(13) ELSE '''' END +
 														RTRIM(LTRIM(ISNULL(i.apchk_comment_3, ''''))) 
 						,strReferenceNo				=	dbo.fnAddZeroPrefixes(i.apchk_chk_no)
-						,dtmCheckPrinted			=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt) 
+						,dtmCheckPrinted			=	ISNULL(dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt), dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt)) 
 						,ysnCheckToBePrinted		=	1
 						,ysnCheckVoid				=	CASE
 															WHEN i.apchk_void_ind IN (''C'', ''V'') THEN 1
@@ -589,7 +589,7 @@ BEGIN
 							ON f.strCbkNo = i.apchk_cbk_no COLLATE Latin1_General_CI_AS  	
 				WHERE	f.intBankAccountId IS NOT NULL
 						AND i.apchk_chk_amt <> 0
-						AND dbo.fnConvertOriginDateToSQLDateTime(apchk_gl_rev_dt) IS NOT NULL				
+						AND ISNULL(dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt), dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt)) IS NOT NULL				
 				IF @@ERROR <> 0 GOTO EXIT_TRIGGER	
 			END		
 			ELSE 
@@ -616,7 +616,7 @@ BEGIN
 						,intBankAccountId			=	e.intBankAccountId
 						,intCurrencyId				=	dbo.fnGetCurrencyIdFromOriginToi21(i.apchk_currency_cnt)
 						,dblExchangeRate			=	ISNULL(i.apchk_currency_rt, 1)
-						,dtmDate					=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt)
+						,dtmDate					=	ISNULL(dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt), dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt))
 						,strPayee					=	RTRIM(LTRIM(ISNULL(i.apchk_name, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_1))) > 0 THEN '', ''  ELSE '''' END +
 														RTRIM(LTRIM(ISNULL(i.apchk_payee_1, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_2))) > 0 THEN '', ''  ELSE '''' END +
 														RTRIM(LTRIM(ISNULL(i.apchk_payee_2, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_3))) > 0 THEN '', ''  ELSE '''' END +
@@ -635,7 +635,7 @@ BEGIN
 														RTRIM(LTRIM(ISNULL(i.apchk_comment_2, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_3))) > 0 THEN CHAR(13) ELSE '''' END +
 														RTRIM(LTRIM(ISNULL(i.apchk_comment_3, ''''))) 
 						,strReferenceNo				=	dbo.fnAddZeroPrefixes(i.apchk_chk_no)
-						,dtmCheckPrinted			=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt)
+						,dtmCheckPrinted			=	ISNULL(dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt), dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt))
 						,ysnCheckToBePrinted		=	1
 						,ysnCheckVoid				=	CASE
 															WHEN i.apchk_void_ind IN (''C'', ''V'') THEN 1
@@ -673,7 +673,7 @@ BEGIN
 							AND e.intBankAccountId = f.intBankAccountId				
 				WHERE	e.intBankAccountId IS NOT NULL
 						AND i.apchk_chk_amt <> 0
-						AND dbo.fnConvertOriginDateToSQLDateTime(apchk_gl_rev_dt) IS NOT NULL
+						AND ISNULL(dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt), dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt)) IS NOT NULL
 						AND f.ysnClr = 0
 				IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 			END
