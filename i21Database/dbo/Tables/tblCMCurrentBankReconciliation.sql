@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblCMCurrentBankReconciliation] (
     [intBankAccountId]           INT          NOT NULL,
-    [dblStatementOpeningBalance] DECIMAL (18) DEFAULT 0 NOT NULL,
-    [dblStatementEndingBalance]  DECIMAL (18) DEFAULT 0 NOT NULL,
+    [dblStatementOpeningBalance] DECIMAL(18,6) DEFAULT 0 NOT NULL,
+    [dblStatementEndingBalance]  DECIMAL(18,6) DEFAULT 0 NOT NULL,
     [intLastModifiedUserId]      INT          NULL,
     [dtmLastModified]            DATETIME     NULL,
     [intConcurrencyId]           INT          DEFAULT 1 NOT NULL,
