@@ -367,7 +367,6 @@
     <Build Include="dbo\Stored Procedures\uspAPImportVendor.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBill.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBillBatch.sql" />
-    <Build Include="dbo\Stored Procedures\uspPostPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspRMInsertDynamicParameterFields.sql" />
     <Build Include="dbo\Stored Procedures\WithGasCheck.sql" />
     <Build Include="dbo\Stored Procedures\WithLeakCheck.sql" />
@@ -518,6 +517,7 @@
     <Build Include="dbo\Tables\tblCPPreference.sql" />
     <Build Include="dbo\Tables\tblHDUpload.sql" />
     <Build Include="dbo\Tables\tblARInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPPostPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
