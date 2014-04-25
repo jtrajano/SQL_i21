@@ -1351,4 +1351,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="dblTankCapacity" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="61b753d1-c5aa-456c-9efa-c9a64e9e8162" ChangeDateTime="04/24/2014 01:24:43">
+    <Property Name="ElementName" Value="[dbo].[tblSMUserSecurityMenuFavorite].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMUserSecurityMenuFavorite]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intUserSecurityMenuFavoriteId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3d37deef-04a5-441e-a92f-d6e7ea5e946c" ChangeDateTime="04/24/2014 01:25:44">
+    <Property Name="ElementName" Value="[dbo].[tblSMUserSecurityMenuFavorite].[intUserSecurityId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMUserSecurityMenuFavorite]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intUserSecurityMenuId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="6e86435f-0189-4a5f-83ed-a0400ae63907" ChangeDateTime="04/24/2014 01:25:54">
+    <Property Name="ElementName" Value="[dbo].[tblSMUserSecurityMenuFavorite].[int]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMUserSecurityMenuFavorite]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intConcurrencyId" />
+  </Operation>
 </Operations>
