@@ -114,6 +114,14 @@ IF ISNULL(@ysnRecap, 0) = 0
 				FROM tblGLJournalDetail A 
 					LEFT OUTER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
 				WHERE (A.intAccountId IS NULL OR 0 = CASE WHEN ISNULL(A.intAccountId, '') = '' THEN 0 ELSE 1 END) AND A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)					
+				UNION
+				SELECT DISTINCT A.intJournalId,
+					'You cannot post empty transaction.' AS strMessage
+				FROM tblGLJournal A 
+				LEFT JOIN tblGLJournalDetail B ON A.intJournalId = B.intJournalId
+				WHERE A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)	
+				GROUP BY A.intJournalId						
+				HAVING COUNT(B.intJournalId) < 1
 				UNION 
 				SELECT DISTINCT A.intJournalId,
 					'Unable to post. The transaction is out of balance.' AS strMessage
