@@ -97,7 +97,7 @@ BEGIN
 	SELECT  dtmReverseDate,
 			strJournalId,
 			strTransactionType, 
-			CAST((dbo.[fn_geti21PeriodFromOriginPeriod](SUBSTRING(dtmDate,1,4), SUBSTRING(dtmDate,5,2))) as DATETIME) as dtmDate,
+			CAST((dbo.[fnGeti21PeriodFromOriginPeriod](SUBSTRING(dtmDate,1,4), SUBSTRING(dtmDate,5,2))) as DATETIME) as dtmDate,
 			strReverseLink,
 			intCurrencyId,
 			dblExchangeRate,

@@ -85,7 +85,7 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 --Fiscal Year
-INSERT INTO #tmpInvalidBillData(strError, strTransactionId, strTransactionType, strBatchNumber)
+INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber)
 	SELECT 
 		'Unable to find an open fiscal year period to match the transaction date.',
 		'Payable',
@@ -96,7 +96,7 @@ INSERT INTO #tmpInvalidBillData(strError, strTransactionId, strTransactionType, 
 		0 = ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0)
 
 --NOT BALANCE
-INSERT INTO #tmpInvalidBillData(strError, strTransactionId, strTransactionType, strBatchNumber)
+INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber)
 	SELECT 
 		'The debit and credit amounts are not balanced.',
 		'Payable',
@@ -107,23 +107,26 @@ INSERT INTO #tmpInvalidBillData(strError, strTransactionId, strTransactionType, 
 		A.dblTotal <> (SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = A.intBillId)
 
 --ALREADY POSTED
-INSERT INTO #tmpInvalidBillData(strError, strTransactionId, strTransactionType, strBatchNumber)
-	SELECT 
-		'The transaction is already posted.',
-		'Payable',
-		A.intBillId,
-		@billBatchId
-	FROM tblAPBill A 
-	WHERE  A.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
-		A.ysnPosted = 1
+IF(ISNULL(@post,0) = 0)
+BEGIN
+	INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber)
+		SELECT 
+			'The transaction is already posted.',
+			'Payable',
+			A.intBillId,
+			@billBatchId
+		FROM tblAPBill A 
+		WHERE  A.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
+			A.ysnPosted = 1
 
-DECLARE @totalInvalid INT = 0
-SET @totalInvalid = (SELECT COUNT(*) #tmpInvalidBillData)
+	DECLARE @totalInvalid INT = 0
+	SET @totalInvalid = (SELECT COUNT(*) #tmpInvalidBillData)
+END
 
 IF(@totalInvalid > 0)
 BEGIN
 
-	INSERT INTO tblAPInvalidTransaction(strError, strTransactionId, strTransactionType, strBatchNumber)
+	INSERT INTO tblAPInvalidTransaction(strError, strTransactionType, strTransactionId, strBatchNumber)
 	SELECT * FROM #tmpInvalidBillData
 
 	SET @invalidCount = @totalInvalid
