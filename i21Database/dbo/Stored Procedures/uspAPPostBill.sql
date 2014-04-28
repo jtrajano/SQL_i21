@@ -107,18 +107,21 @@ INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, 
 		A.dblTotal <> (SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = A.intBillId)
 
 --ALREADY POSTED
-INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber)
-	SELECT 
-		'The transaction is already posted.',
-		'Payable',
-		A.intBillId,
-		@billBatchId
-	FROM tblAPBill A 
-	WHERE  A.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
-		A.ysnPosted = 1
+IF(ISNULL(@post,0) = 0)
+BEGIN
+	INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber)
+		SELECT 
+			'The transaction is already posted.',
+			'Payable',
+			A.intBillId,
+			@billBatchId
+		FROM tblAPBill A 
+		WHERE  A.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
+			A.ysnPosted = 1
 
-DECLARE @totalInvalid INT = 0
-SET @totalInvalid = (SELECT COUNT(*) #tmpInvalidBillData)
+	DECLARE @totalInvalid INT = 0
+	SET @totalInvalid = (SELECT COUNT(*) #tmpInvalidBillData)
+END
 
 IF(@totalInvalid > 0)
 BEGIN
