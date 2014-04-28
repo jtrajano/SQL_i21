@@ -178,7 +178,7 @@ SELECT strCode AS strAccountId,
 	   intAccountGroupId,
 	   strAccountSegmentId,	   
 	   intAccountUnitId = NULL,
-	   ysnSystem = 1,
+	   ysnSystem = 0,
 	   ysnActive = 1,
 	   @intUserId AS intUserId,	   
 	   getDate() AS dtmCreated	   	   
