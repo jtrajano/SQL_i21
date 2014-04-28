@@ -529,5 +529,6 @@
     <None Include="Scripts\Post-Deployment\SM\DefaultData\7_EULA.sql" />
     <None Include="Scripts\Post-Deployment\SM\SMDataMigrations.sql" />
     <None Include="Scripts\Post-Deployment\AR\EntityTableDataFix.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\8_Country.sql" />
   </ItemGroup>
 </Project>
