@@ -42,6 +42,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\FIN\DefaultData\AccountGroup.sql
 :r .\FIN\DefaultData\BankTransactionTypes.sql
 :r .\FIN\DefaultData\DataImportStatus.sql
+:r .\FIN\GLEntryDataFix.sql
 
 --Accounts Receivable
 :r .\AR\EntityTableDataFix.sql

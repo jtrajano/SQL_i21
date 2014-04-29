@@ -1,4 +1,9 @@
-﻿IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblGLAccount]') AND type in (N'U')) 
+﻿
+--=====================================================================================================================================
+-- 	UPDATE FIELD CASING (ID to Id)
+---------------------------------------------------------------------------------------------------------------------------------------
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblGLAccount]') AND type in (N'U')) 
 BEGIN
 	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intAccountId' AND OBJECT_ID = OBJECT_ID(N'tblGLAccount')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intAccountID' AND OBJECT_ID = OBJECT_ID(N'tblGLAccount'))
     BEGIN
@@ -1230,3 +1235,4 @@ BEGIN
     END
 END
 GO
+

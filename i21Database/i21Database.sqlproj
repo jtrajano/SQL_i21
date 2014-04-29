@@ -530,5 +530,6 @@
     <None Include="Scripts\Post-Deployment\SM\SMDataMigrations.sql" />
     <None Include="Scripts\Post-Deployment\AR\EntityTableDataFix.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\8_Country.sql" />
+    <None Include="Scripts\Post-Deployment\FIN\GLEntryDataFix.sql" />
   </ItemGroup>
 </Project>
