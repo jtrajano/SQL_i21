@@ -259,7 +259,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intUserId]			= @intUserId
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= B.[strSourceType]
+			,[strCode]				= 'GJ'
 			,[strModuleName]		= 'General Ledger'
 			,[strTransactionForm]	= B.[strTransactionType]
 			,[strJournalLineDescription] = A.[strDescription]
@@ -331,7 +331,7 @@ ELSE
 			,[intUserId]			= @intUserId
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= B.[strSourceType]
+			,[strCode]				= 'GJ'
 			,[strModuleName]		= 'General Ledger'
 			,[strTransactionForm]	= B.[strTransactionType]
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B 

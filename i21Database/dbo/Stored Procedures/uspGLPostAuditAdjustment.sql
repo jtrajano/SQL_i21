@@ -224,7 +224,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intUserId]			= @intUserId
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= B.[strSourceType]
+			,[strCode]				= 'AA'
 			,[strModuleName]		= 'General Ledger'
 			,[strTransactionForm]	= B.[strTransactionType]
 			,[strJournalLineDescription] = A.[strDescription]
@@ -291,7 +291,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[intUserId]			= @intUserId
 				,[dtmDateEntered]		= GETDATE()
 				,[strBatchId]			= @strBatchId
-				,[strCode]				= B.[strSourceType]
+				,[strCode]				= 'AA'
 				,[strModuleName]		= 'General Ledger'
 				,[strTransactionForm]	= B.[strTransactionType]
 				,[strJournalLineDescription] = A.[strDescription]
@@ -403,7 +403,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[intUserId]			= @intUserId
 				,[dtmDateEntered]		= GETDATE()
 				,[strBatchId]			= @strBatchId
-				,[strCode]				= A.[strSourceType]
+				,[strCode]				= 'AA'
 				,[strModuleName]		= 'General Ledger'
 				,[strTransactionForm]	= A.[strTransactionType]
 				,[strJournalLineDescription] = NULL
@@ -478,7 +478,7 @@ ELSE
 			,[intUserId]			= @intUserId
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= B.[strSourceType]
+			,[strCode]				= 'AA'
 			,[strModuleName]		= 'General Ledger'
 			,[strTransactionForm]	= B.[strTransactionType]
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B 
@@ -546,7 +546,7 @@ ELSE
 				,[intUserId]			= @intUserId
 				,[dtmDateEntered]		= GETDATE()
 				,[strBatchId]			= @strBatchId
-				,[strCode]				= B.[strSourceType]
+				,[strCode]				= 'AA'
 				,[strModuleName]		= 'General Ledger'
 				,[strTransactionForm]	= B.[strTransactionType]
 			FROM [dbo].tblGLJournalDetail A 
@@ -659,7 +659,7 @@ ELSE
 				,[intUserId]			= @intUserId
 				,[dtmDateEntered]		= GETDATE()
 				,[strBatchId]			= @strBatchId
-				,[strCode]				= A.[strSourceType]
+				,[strCode]				= 'AA'
 				,[strModuleName]		= 'General Ledger'
 				,[strTransactionForm]	= A.[strTransactionType]
 			FROM [dbo].tblGLJournal A 
