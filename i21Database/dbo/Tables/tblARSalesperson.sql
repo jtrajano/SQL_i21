@@ -31,6 +31,7 @@
     [strDispatchNotification] NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strTextMessage]          NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]        INT             CONSTRAINT [DF_tblARSalesperson_intConcurrencyId] DEFAULT ((0)) NOT NULL,
-    CONSTRAINT [PK_tblARSalesperson] PRIMARY KEY CLUSTERED ([intSalespersonId] ASC)
+    CONSTRAINT [PK_tblARSalesperson] PRIMARY KEY CLUSTERED ([intSalespersonId] ASC),
+	CONSTRAINT [UKstrSalespersonId] UNIQUE NONCLUSTERED ([strSalespersonId] ASC)
 );
 
