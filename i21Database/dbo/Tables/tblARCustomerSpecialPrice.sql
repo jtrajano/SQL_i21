@@ -11,7 +11,7 @@
     [strLineNote]       NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [dtmBeginDate]      DATETIME        NULL,
     [dtmEndDate]        DATETIME        NULL,
-    [ysnConsignable]    BIT             NULL,
+    [ysnConsignable]    BIT             NOT NULL DEFAULT ((0)),
     [strRackVendorId]   NVARCHAR (15)   COLLATE Latin1_General_CI_AS NULL,
     [strRackItemNumber] NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]  INT             NOT NULL,

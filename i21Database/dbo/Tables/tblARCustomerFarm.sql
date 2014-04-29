@@ -8,7 +8,7 @@
     [strDefaultLocation]  NVARCHAR (3)   COLLATE Latin1_General_CI_AS NULL,
     [strAcres]            NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strFSANumber]        NVARCHAR (10)  COLLATE Latin1_General_CI_AS NULL,
-    [ysnObsolete]         BIT            NULL,
+    [ysnObsolete]         BIT            NOT NULL DEFAULT ((0)),
     [strLatitudeDegrees]  NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strLatitudeNS]       NVARCHAR (10)  COLLATE Latin1_General_CI_AS NULL,
     [strLongitudeDegrees] NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
