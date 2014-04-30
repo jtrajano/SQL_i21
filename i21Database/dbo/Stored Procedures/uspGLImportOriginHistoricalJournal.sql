@@ -26,6 +26,10 @@ ELSE IF (EXISTS(SELECT TOP 1 1 FROM glhstmst where LEN(glhst_trans_dt) <> 8))
 BEGIN	
 	SELECT 'There are invalid dates on Historical Transaction Details. <br/> Kindly verify at Origin.' as Result
 END
+ELSE IF (EXISTS(SELECT TOP 1 1 FROM glactmst WHERE glact_acct9_16 NOT IN (SELECT glprc_sub_acct FROM glprcmst)))
+BEGIN	
+	SELECT 'Some profit center does not exists at profit center master table. <br/> Kindly verify at Origin.' as Result
+END
 ELSE
 BEGIN
 
