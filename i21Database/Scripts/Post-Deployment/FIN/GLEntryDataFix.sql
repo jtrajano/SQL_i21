@@ -1,5 +1,4 @@
 ﻿
-
 --=====================================================================================================================================
 -- 	Normalize strCode 
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -12,6 +11,12 @@ UPDATE tblGLDetail SET strCode = 'GJ' WHERE strTransactionForm = 'General Journa
 
 UPDATE tblGLDetail SET strModuleName = 'General Ledger' WHERE strTransactionForm = 'General Journal' AND strModuleName is NULL
 UPDATE tblGLDetail SET strModuleName = 'General Ledger' WHERE strTransactionForm = 'Audit Adjustment' AND strModuleName is NULL
+
+--=====================================================================================================================================
+-- 	Normalize ysnSystem
+---------------------------------------------------------------------------------------------------------------------------------------
+
+UPDATE tblGLAccount SET ysnSystem = 0 WHERE ysnSystem is NULL
 
 --=====================================================================================================================================
 -- 	Repopulate GL Summary
