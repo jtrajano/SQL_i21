@@ -11,10 +11,13 @@ SET ANSI_WARNINGS OFF
 BEGIN TRANSACTION
 
 
-
 	DECLARE @UserRoleID INT
 	SELECT @UserRoleID = intUserRoleID FROM tblSMUserSecurity 
 	WHERE intUserSecurityID = @UserSecurityID
+	
+	DECLARE @IsAdmin BIT
+	-- Get whether User Role has administrative rights
+	SELECT @IsAdmin = ysnAdmin FROM tblSMUserRole WHERE intUserRoleID = @UserRoleID
 
 	-- Delete non existing User Security Menus for affected users
 	DELETE FROM tblSMUserSecurityMenu
@@ -24,7 +27,7 @@ BEGIN TRANSACTION
 	
 	-- Apply User Role Menus into User Menus
 	INSERT INTO tblSMUserSecurityMenu(intUserSecurityId, intMenuId, ysnVisible, intSort)
-	SELECT @UserSecurityID, intMenuId, ysnVisible = 1, intSort = intMenuId FROM tblSMUserRoleMenu
+	SELECT @UserSecurityID, intMenuId, @IsAdmin, intSort = intMenuId FROM tblSMUserRoleMenu
 	WHERE ysnVisible = 1 
 		AND intMenuId NOT IN (SELECT intMenuId FROM tblSMUserSecurityMenu 
 								WHERE intUserSecurityId = @UserSecurityID)
