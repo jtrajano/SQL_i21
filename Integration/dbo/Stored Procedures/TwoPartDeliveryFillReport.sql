@@ -1,5 +1,6 @@
 ﻿  
-DROP PROCEDURE [dbo].[TwoPartDeliveryFillReport]  
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[TwoPartDeliveryFillReport]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].[TwoPartDeliveryFillReport]
 GO
 
 CREATE PROCEDURE [dbo].[TwoPartDeliveryFillReport] (@xmlParam NVARCHAR(MAX)=null)  
