@@ -58,7 +58,7 @@ IF ISNULL(@ysnPost, 0) = 0
 		IF ISNULL(@ysnRecap, 0) = 0
 			BEGIN
 				-- DELETE Results 1 DAY OLDER	
-				DELETE tblGLPostResults WHERE dtmDate < DATEADD(day, -1, GETDATE())
+				DELETE tblGLPostResult WHERE dtmDate < DATEADD(day, -1, GETDATE())
 				
 				INSERT INTO tblGLPostResult (strBatchId,intTransactionId,strTransactionId,strDescription,dtmDate,intUserId,strTransactionType)
 					SELECT @strBatchId as strBatchId
@@ -100,7 +100,7 @@ IF ISNULL(@ysnPost, 0) = 0
 IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN
 		-- DELETE Results 2 DAYS OLDER	
-		DELETE tblGLPostResults WHERE dtmDate < DATEADD(day, -1, GETDATE())
+		DELETE tblGLPostResult WHERE dtmDate < DATEADD(day, -1, GETDATE())
 		
 		INSERT INTO tblGLPostResult (strBatchId,intTransactionId,strTransactionId,strDescription,dtmDate,intUserId,strTransactionType)
 			SELECT @strBatchId as strBatchId,tmpBatchResults.intJournalId as intTransactionId,tblB.strJournalId as strTransactionId, strMessage as strDescription,GETDATE() as dtmDate,@intUserId,@strJournalType
@@ -259,7 +259,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intUserId]			= @intUserId
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= B.[strSourceType]
+			,[strCode]				= 'GJ'
 			,[strModuleName]		= 'General Ledger'
 			,[strTransactionForm]	= B.[strTransactionType]
 			,[strJournalLineDescription] = A.[strDescription]
@@ -331,7 +331,7 @@ ELSE
 			,[intUserId]			= @intUserId
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= B.[strSourceType]
+			,[strCode]				= 'GJ'
 			,[strModuleName]		= 'General Ledger'
 			,[strTransactionForm]	= B.[strTransactionType]
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B 

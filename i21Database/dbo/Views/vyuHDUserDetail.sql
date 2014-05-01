@@ -1,22 +1,12 @@
-﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuHDUserDetail')
-	DROP VIEW vyuHDUserDetail
-
--- HELP DESK DEPENDENT
---IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'HD' and strDBName = db_name()) = 1
-
--- Always create - temporary
-IF  1 = 1
-	EXEC ('
-		CREATE VIEW [dbo].[vyuHDUserDetail]
-		AS
-		select
-			strCustomer = ''i21 User''
+﻿CREATE VIEW [dbo].[vyuHDUserDetail]
+	AS select
+			strCustomer = 'i21 User'
 			,us.strFullName
 			,us.strPhone
-			,strTimeZone = ''''
+			,strTimeZone = ''
 			,strLocation = us.strLocation
-			,strSLAPlan = ''''
-			,strReplyDue = ''''
+			,strSLAPlan = ''
+			,strReplyDue = ''
 			,intUserId = us.intUserSecurityID
 			,ur.strName
 			,us.strUserName
@@ -39,10 +29,10 @@ IF  1 = 1
 			strCustomerNumber = cus.strCustomerNumber
 			,strFullName = ec.strEmail
 			,strPhone = ec.strPhone
-			,strTimeZone = ''''
+			,strTimeZone = ''
 			,strLocation = el.strCity
-			,strSLAPlan = ''''
-			,strReplyDue = ''''
+			,strSLAPlan = ''
+			,strReplyDue = ''
 			,intUserId = en.intEntityId
 			,strName = ec.strEmail
 			,strUserName = ec.strEmail
@@ -62,5 +52,3 @@ IF  1 = 1
 			cus.intEntityId = en.intEntityId
 			and ec.intEntityId = en.intEntityId
 			and el.intEntityId = en.intEntityId
-		'
-		)

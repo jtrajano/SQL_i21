@@ -6,7 +6,7 @@
     [strType]          NVARCHAR (25)   NULL,
     [dblTotal]         NUMERIC (18, 6) NULL,
     [dblAmountPaid]    NUMERIC (18, 6) NULL,
-    [ysnPaid]          BIT             NOT NULL,
+    [ysnPaid]          BIT             NOT NULL DEFAULT ((0)),
     [dblAmountDue]     NUMERIC (18, 6) NULL,
     [intConcurrencyId] INT             CONSTRAINT [DF_tblARInvoice_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARInvoice] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC)

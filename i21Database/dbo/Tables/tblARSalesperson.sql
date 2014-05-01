@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblARSalesperson] (
     [intSalespersonId]        INT             IDENTITY (1, 1) NOT NULL,
-    [strSalespersonId]        NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strSalespersonId]        NVARCHAR (3)  COLLATE Latin1_General_CI_AS NULL,
     [strName]                 NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [dtmBirthDate]            DATETIME        NULL,
     [strGender]               NVARCHAR (6)    COLLATE Latin1_General_CI_AS NULL,
@@ -25,12 +25,13 @@
     [dtmHired]                DATETIME        NULL,
     [dtmTerminated]           DATETIME        NULL,
     [strReason]               NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [ysnActive]               BIT             NULL,
+    [ysnActive]               BIT             NOT NULL DEFAULT ((1)),
     [strCommission]           NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [dblPercent]              NUMERIC (18, 6) NULL,
     [strDispatchNotification] NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strTextMessage]          NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]        INT             CONSTRAINT [DF_tblARSalesperson_intConcurrencyId] DEFAULT ((0)) NOT NULL,
-    CONSTRAINT [PK_tblARSalesperson] PRIMARY KEY CLUSTERED ([intSalespersonId] ASC)
+    CONSTRAINT [PK_tblARSalesperson] PRIMARY KEY CLUSTERED ([intSalespersonId] ASC),
+	CONSTRAINT [UKstrSalespersonId] UNIQUE NONCLUSTERED ([strSalespersonId] ASC)
 );
 

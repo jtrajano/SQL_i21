@@ -352,7 +352,6 @@
     <Build Include="dbo\Stored Procedures\uspCMPostRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspCMReconcileBankRecords.sql" />
     <Build Include="dbo\Stored Procedures\uspCMReverseGLEntries.sql" />
-    <Build Include="dbo\Stored Procedures\TwoPartDeliveryFillReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGLAccountClone.sql" />
     <Build Include="dbo\Stored Procedures\uspGLAccountOriginSync.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildAccount.sql" />
@@ -519,6 +518,7 @@
     <Build Include="dbo\Tables\tblARInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostPayment.sql" />
     <Build Include="dbo\Tables\tblSMUserSecurityMenuFavorite.sql" />
+    <Build Include="dbo\Views\vyuHDUserDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
@@ -530,5 +530,6 @@
     <None Include="Scripts\Post-Deployment\SM\SMDataMigrations.sql" />
     <None Include="Scripts\Post-Deployment\AR\EntityTableDataFix.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\8_Country.sql" />
+    <None Include="Scripts\Post-Deployment\FIN\GLEntryDataFix.sql" />
   </ItemGroup>
 </Project>

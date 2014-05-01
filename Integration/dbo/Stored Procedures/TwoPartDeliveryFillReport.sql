@@ -1,5 +1,7 @@
 ﻿  
-  
+DROP PROCEDURE [dbo].[TwoPartDeliveryFillReport]  
+GO
+
 CREATE PROCEDURE [dbo].[TwoPartDeliveryFillReport] (@xmlParam NVARCHAR(MAX)=null)  
 AS  
   

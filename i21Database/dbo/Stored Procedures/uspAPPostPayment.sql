@@ -504,6 +504,11 @@ UPDATE tblSMStartingNumber
 SET [intNumber] = ISNULL([intNumber], 0) + 1
 WHERE [strTransactionType] = 'Batch Post';
 
+--DELETE PAYMENT DETAIL WITH PAYMENT AMOUNT
+DELETE FROM tblAPPaymentDetail
+WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+AND dblPayment = 0
+
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
 --=====================================================================================================================================

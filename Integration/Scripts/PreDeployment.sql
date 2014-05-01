@@ -67,11 +67,8 @@
 :r ..\dbo\Views\vwtaxmst.sql
 :r ..\dbo\Views\vwtrmmst.sql
 :r ..\dbo\Views\vwDispatch.sql
+:r "..\dbo\Stored Procedures\TwoPartDeliveryFillReport.sql"
 
 
 -- TAX FORMS
 :r ..\dbo\Views\vyuTFTaxCycle.sql
-
-
--- HELP DESK
-:r ..\dbo\Views\vyuHDUserDetail.sql

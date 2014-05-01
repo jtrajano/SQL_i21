@@ -104,6 +104,7 @@ BEGIN
 END
 GO
 IF NOT EXISTS (SELECT TOP 1 1 FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[FK_tblTMDispatch_tblTMSite1]') AND parent_object_id = OBJECT_ID(N'[dbo].[tblTMDispatch]'))
+AND EXISTS(select 1  from INFORMATION_SCHEMA.TABLES where TABLE_NAME = N'tblTMDispatch' and TABLE_TYPE = N'BASE TABLE')
 BEGIN
     ALTER TABLE [dbo].[tblTMDispatch] WITH CHECK ADD  CONSTRAINT [FK_tblTMDispatch_tblTMSite1] FOREIGN KEY([intSiteID])
     REFERENCES [dbo].[tblTMSite] ([intSiteID])
@@ -165,20 +166,25 @@ BEGIN
     EXEC sp_rename 'tblTMWorkOrder.intWorkStatusID', 'intWorkStatusTypeID', 'COLUMN'
 END
 GO
- 
----Update data in tblTMDispatch
-    UPDATE tblTMDispatch
-    SET intSiteID = intDispatchID
-    WHERE isnull(intSiteID, '') = ''
+
+IF EXISTS(select 1  from INFORMATION_SCHEMA.TABLES where TABLE_NAME = N'tblTMDispatch' and TABLE_TYPE = N'BASE TABLE')
+BEGIN
+	---Update data in tblTMDispatch
+		UPDATE tblTMDispatch
+		SET intSiteID = intDispatchID
+		WHERE isnull(intSiteID, '') = ''
+END
 GO
- 
- 
----Update data in tblTMApplianceType
-UPDATE tblTMApplianceType
-SET ysnDefault = 0
-WHERE ysnDefault IS NULL 
- 
+
+ IF EXISTS(select 1  from INFORMATION_SCHEMA.TABLES where TABLE_NAME = N'tblTMApplianceType' and TABLE_TYPE = N'BASE TABLE')
+BEGIN
+	---Update data in tblTMApplianceType
+	UPDATE tblTMApplianceType
+	SET ysnDefault = 0
+	WHERE ysnDefault IS NULL 
+END
 GO
+
 -- BEGIN DROP TRASH VIEWS
     /****** Object:  View [dbo].[vwCSSearch]     ******/
     IF OBJECT_ID(N'dbo.vwCSSearch', N'V') IS NOT NULL

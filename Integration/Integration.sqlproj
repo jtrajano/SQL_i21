@@ -61,6 +61,7 @@
     <Folder Include="dbo" />
     <Folder Include="dbo\Views" />
     <Folder Include="Scripts" />
+    <Folder Include="dbo\Stored Procedures" />
   </ItemGroup>
   <ItemGroup>
     <None Include="dbo\Views\apchkmst.sql" />
@@ -128,6 +129,6 @@
     <None Include="dbo\Views\vyuCPGASettlementsReports.sql" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="dbo\Views\vyuHDUserDetail.sql" />
+    <None Include="dbo\Stored Procedures\TwoPartDeliveryFillReport.sql" />
   </ItemGroup>
 </Project>

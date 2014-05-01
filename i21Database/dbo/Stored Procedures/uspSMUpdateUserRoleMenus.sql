@@ -10,6 +10,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @UserSecurityID INT
+DECLARE @IsAdmin BIT
 
 BEGIN TRANSACTION
 
@@ -21,6 +22,9 @@ WHERE intUserRoleID = @UserRoleID
 
 BEGIN TRY
 
+	-- Get whether User Role has administrative rights
+	SELECT @IsAdmin = ysnAdmin FROM tblSMUserRole WHERE intUserRoleID = @UserRoleID
+	
 	-- Check whether or not to build the specified user role according to the Master Menus
 	IF (@BuildUserRole = 1)
 	BEGIN
@@ -31,7 +35,7 @@ BEGIN TRY
 		
 		-- Iterate through all affected user roles and apply Master Menus
 		INSERT INTO tblSMUserRoleMenu(intUserRoleId, intMenuId, ysnVisible, intSort)
-		SELECT @UserRoleID, intMenuID, ysnVisible = 1, intSort = intMenuID FROM tblSMMasterMenu
+		SELECT @UserRoleID, intMenuID, @IsAdmin, intSort = intMenuID FROM tblSMMasterMenu
 		WHERE intMenuID NOT IN (SELECT intMenuId FROM tblSMUserRoleMenu WHERE intUserRoleId = @UserRoleID)
 		
 		UPDATE tblSMUserRoleMenu
