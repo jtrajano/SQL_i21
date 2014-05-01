@@ -33,6 +33,17 @@ BEGIN TRANSACTION
 								WHERE intUserSecurityId = @UserSecurityID)
 		AND intUserRoleId = @UserRoleID
 	
+	IF (@IsAdmin = 0)
+	BEGIN
+		DELETE FROM tblSMUserSecurityMenu
+		WHERE intUserSecurityId = @UserSecurityID
+		AND intMenuId IN (SELECT intMenuID FROM tblSMMasterMenu
+							WHERE ((strMenuName = 'Admin' 
+									AND strCommand = 'i21' 
+									AND intParentMenuID = 0) 
+								OR intParentMenuID IN (1, 10)))
+	END
+	
 	UPDATE tblSMUserSecurityMenu
 	SET intParentMenuId = tblPatch.intUserParentID
 	FROM (
