@@ -277,6 +277,7 @@ IF ISNULL(@recap, 0) = 0
 				LEFT JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		AND B.dblPayment <> 0
 		
 
 		-- Update the posted flag in the transaction table
@@ -435,6 +436,7 @@ ELSE
 			LEFT JOIN tblAPPaymentDetail B 
 				ON A.intPaymentId = B.intPaymentId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		AND B.dblPayment <> 0
 		--Withheld
 		UNION
 		SELECT
@@ -490,6 +492,7 @@ ELSE
 				LEFT JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		AND B.dblPayment <> 0
 		--GROUP BY A.intPaymentId, B.intAccountId, A.dtmDatePaid
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
