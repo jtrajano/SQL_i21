@@ -352,7 +352,6 @@
     <Build Include="dbo\Stored Procedures\uspCMPostRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspCMReconcileBankRecords.sql" />
     <Build Include="dbo\Stored Procedures\uspCMReverseGLEntries.sql" />
-    <Build Include="dbo\Stored Procedures\TwoPartDeliveryFillReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGLAccountClone.sql" />
     <Build Include="dbo\Stored Procedures\uspGLAccountOriginSync.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildAccount.sql" />
