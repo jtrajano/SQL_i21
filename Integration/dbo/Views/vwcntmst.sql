@@ -2,8 +2,8 @@
 IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwcntmst')
 	DROP VIEW vwcntmst
 
--- CONTRACTS DEPENDENT
-IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'CN' and strDBName = db_name()	) = 1
+
+
 -- AG VIEW
 	IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()	) = 1
 		EXEC ('
@@ -38,9 +38,13 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'CN' and strDBNa
 
 			FROM agcntmst
 			')
-			
--- PT VIEW
+		
+-- CONTRACTS DEPENDENT	
+-- PT VIEW 
+IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'CN' and strDBName = db_name()	) = 1
+BEGIN
 	IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()	) = 1
+	BEGIN
 		EXEC ('
 			CREATE VIEW [dbo].[vwcntmst]
 			AS
@@ -72,6 +76,8 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'CN' and strDBNa
 			,A4GLIdentity = CAST(A4GLIdentity   AS INT)
 			FROM ptcntmst
 			')
+	END
+END
 			
 GO
 
