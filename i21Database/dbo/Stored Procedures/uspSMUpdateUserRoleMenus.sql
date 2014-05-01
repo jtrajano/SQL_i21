@@ -38,6 +38,17 @@ BEGIN TRY
 		SELECT @UserRoleID, intMenuID, @IsAdmin, intSort = intMenuID FROM tblSMMasterMenu
 		WHERE intMenuID NOT IN (SELECT intMenuId FROM tblSMUserRoleMenu WHERE intUserRoleId = @UserRoleID)
 		
+		IF (@IsAdmin = 0)
+		BEGIN
+			DELETE FROM tblSMUserRoleMenu
+			WHERE intUserRoleId = @UserRoleID
+			AND intMenuId IN (SELECT intMenuID FROM tblSMMasterMenu
+								WHERE ((strMenuName = 'Admin' 
+										AND strCommand = 'i21' 
+										AND intParentMenuID = 0) 
+									OR intParentMenuID IN (1, 10)))
+		END
+		
 		UPDATE tblSMUserRoleMenu
 		SET intParentMenuId = tblPatch.intRoleParentID
 		FROM (
