@@ -129,9 +129,6 @@
     <None Include="dbo\Views\vyuCPGASettlementsReports.sql" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="dbo\Views\vyuHDUserDetail.sql" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="dbo\Stored Procedures\TwoPartDeliveryFillReport.sql" />
   </ItemGroup>
 </Project>
