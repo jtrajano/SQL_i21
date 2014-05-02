@@ -79,30 +79,30 @@ IF ISNULL(@ysnRecap, 0) = 0
 		INSERT INTO tblGLPostResult (strBatchId,intTransactionId,strTransactionId,strDescription,dtmDate,intUserId,strTransactionType)
 			SELECT @strBatchId as strBatchId,tmpBatchResults.intJournalId as intTransactionId,tblB.strJournalId as strTransactionId, strMessage as strDescription,GETDATE() as dtmDate,@intUserId,@strJournalType
 			FROM (
-				SELECT DISTINCT A.intJournalId,
-					'Unable to find an open fiscal year period to match the transaction date.' AS strMessage
-				FROM tblGLJournal A 
-				WHERE A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals) AND ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0) = 0  
-				UNION
-				SELECT DISTINCT A.intJournalId,
-					'Unable to find an open fiscal year period to match the reverse date.' AS strMessage
-				FROM tblGLJournal A 
-				WHERE 0 = CASE WHEN ISNULL(A.dtmReverseDate, '') = '' THEN 1 ELSE ISNULL([dbo].isOpenAccountingDate(A.dtmReverseDate), 0) END 
-					  AND A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)
-				UNION
+				--SELECT DISTINCT A.intJournalId,
+				--	'Unable to find an open fiscal year period to match the transaction date.' AS strMessage
+				--FROM tblGLJournal A 
+				--WHERE A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals) AND ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0) = 0  
+				--UNION
+				--SELECT DISTINCT A.intJournalId,
+				--	'Unable to find an open fiscal year period to match the reverse date.' AS strMessage
+				--FROM tblGLJournal A 
+				--WHERE 0 = CASE WHEN ISNULL(A.dtmReverseDate, '') = '' THEN 1 ELSE ISNULL([dbo].isOpenAccountingDate(A.dtmReverseDate), 0) END 
+				--	  AND A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)
+				--UNION
 				SELECT DISTINCT A.intJournalId,
 					'This transaction cannot be posted because the posting date is empty.' AS strMessage
 				FROM tblGLJournal A 
 				WHERE 0 = CASE WHEN ISNULL(A.dtmDate, '') = '' THEN 0 ELSE 1 END 
 					  AND A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)
 				UNION
-				SELECT DISTINCT A.intJournalId,
-					'Reverse date must be later than Post Date.' AS strMessage
-				FROM tblGLJournal A 
-				WHERE 0 = CASE WHEN ISNULL(A.dtmReverseDate, '') = '' THEN 1 ELSE 
-							CASE WHEN A.dtmReverseDate <= A.dtmDate THEN 0 ELSE 1 END
-						END AND A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)
-				UNION
+				--SELECT DISTINCT A.intJournalId,
+				--	'Reverse date must be later than Post Date.' AS strMessage
+				--FROM tblGLJournal A 
+				--WHERE 0 = CASE WHEN ISNULL(A.dtmReverseDate, '') = '' THEN 1 ELSE 
+				--			CASE WHEN A.dtmReverseDate <= A.dtmDate THEN 0 ELSE 1 END
+				--		END AND A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)
+				--UNION
 				SELECT DISTINCT A.intJournalId,
 					'You cannot post this transaction because it has inactive account id ' + B.strAccountId + '.' AS strMessage
 				FROM tblGLJournalDetail A 
