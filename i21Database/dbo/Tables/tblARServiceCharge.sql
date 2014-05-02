@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblARServiceCharge] (
     [intServiceChargeId]     INT             IDENTITY (1, 1) NOT NULL,
-    [intServiceChargeCode]   INT             NOT NULL,
+    [strServiceChargeCode]   NVARCHAR(2)             NOT NULL,
     [strCalculationType]     NVARCHAR (50)   COLLATE Latin1_General_CI_AS NOT NULL,
     [strDescription]         NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
     [dblServiceChargeAPR]    NUMERIC (18, 2) NULL,
@@ -13,6 +13,6 @@
     [intOriginChargeId]      INT             NULL,
     [intConcurrencyId]       INT             NOT NULL,
     CONSTRAINT [PK_tblARServiceCharge] PRIMARY KEY CLUSTERED ([intServiceChargeId] ASC),
-    CONSTRAINT [UKintServiceChargeCode] UNIQUE NONCLUSTERED ([intServiceChargeCode] ASC)
+    CONSTRAINT [UKintServiceChargeCode] UNIQUE NONCLUSTERED ([strServiceChargeCode] ASC)
 );
 
