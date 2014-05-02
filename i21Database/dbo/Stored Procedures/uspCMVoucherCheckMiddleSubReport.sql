@@ -52,7 +52,6 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 
 -- Declare the variables.
 DECLARE @intTransactionIdFrom AS INT
-		,@intTransactionIdTo AS INT
 
 		-- Declare the variables for the XML parameter
 		,@xmlDocumentId AS INT
@@ -89,13 +88,11 @@ WITH (
 
 -- Gather the variables values from the xml table. 
 SELECT	@intTransactionIdFrom = [from]
-		,@intTransactionIdTo = [to]
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'intTransactionId'
 
 -- Sanitize the parameters
 SET @intTransactionIdFrom = CASE WHEN ISNULL(@intTransactionIdFrom, 0) = 0 THEN NULL ELSE @intTransactionIdFrom END
-SET @intTransactionIdTo = CASE WHEN ISNULL(@intTransactionIdTo, 0) = 0 THEN NULL ELSE @intTransactionIdTo END
 
 -- Report Query:
 SELECT	TOP 15 
@@ -110,5 +107,5 @@ FROM	[dbo].[tblCMBankTransactionDetail] BD INNER JOIN [dbo].[tblGLAccount] Accnt
 			ON BD.intGLAccountId = Accnt.intAccountId
 		LEFT JOIN [dbo].[tblEntity] E
 			ON BD.intEntityId = E.intEntityId
-WHERE	BD.intTransactionId >= ISNULL(@intTransactionIdFrom, BD.intTransactionId)
-		AND BD.intTransactionId <= ISNULL(@intTransactionIdTo, BD.intTransactionId)
+WHERE	BD.intTransactionId = ISNULL(@intTransactionIdFrom, BD.intTransactionId)
+
