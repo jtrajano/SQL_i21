@@ -13,6 +13,6 @@
     [intOriginChargeId]      INT             NULL,
     [intConcurrencyId]       INT             NOT NULL,
     CONSTRAINT [PK_tblARServiceCharge] PRIMARY KEY CLUSTERED ([intServiceChargeId] ASC),
-    CONSTRAINT [UKintServiceChargeCode] UNIQUE NONCLUSTERED ([strServiceChargeCode] ASC)
+    CONSTRAINT [UKstrServiceChargeCode] UNIQUE NONCLUSTERED ([strServiceChargeCode] ASC)
 );
 

@@ -10,6 +10,7 @@
     [strBudgetStatementDescription] NVARCHAR (255)  COLLATE Latin1_General_CI_AS NULL,
     [strComments]                   NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]              INT             NOT NULL,
-    CONSTRAINT [PK_tblARStatementFooter] PRIMARY KEY CLUSTERED ([intStatementFooterId] ASC)
+    CONSTRAINT [PK_tblARStatementFooter] PRIMARY KEY CLUSTERED ([intStatementFooterId] ASC),
+	CONSTRAINT [UKstrStatementCode] UNIQUE NONCLUSTERED ([strStatementCode] ASC)
 );
 
