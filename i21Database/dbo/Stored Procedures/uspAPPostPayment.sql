@@ -344,7 +344,7 @@ IF ISNULL(@recap, 0) = 0
 			[intCurrencyID] = A.intCurrencyId,
 			[dblExchangeRate] = 0,
 			[dtmDate] = A.dtmDatePaid,
-			[strPayee] = (SELECT TOP 1 strName FROM tblEntities WHERE intEntityId = B.intEntityId),
+			[strPayee] = (SELECT TOP 1 strName FROM tblEntity WHERE intEntityId = B.intEntityId),
 			[intPayeeID] = B.intEntityId,
 			[strAddress] = '',
 			[strZipCode] = '',
