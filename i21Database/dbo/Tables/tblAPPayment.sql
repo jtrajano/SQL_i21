@@ -2,7 +2,7 @@
     [intPaymentId]        INT             IDENTITY (1, 1) NOT NULL,
     [intAccountId]        INT             NOT NULL,
     [intBankAccountId]    INT             NOT NULL,
-    [intPaymentMethod]    INT             NOT NULL,
+    [intPaymentMethodId]    INT             NOT NULL,
     [intCurrencyId]       INT             NOT NULL,
     [strVendorId]         NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NOT NULL,
     [strPaymentInfo]      NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
