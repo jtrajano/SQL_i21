@@ -12,8 +12,8 @@
     <OutputType>Database</OutputType>
     <RootPath>
     </RootPath>
-    <RootNamespace>AgViews</RootNamespace>
-    <AssemblyName>AgViews</AssemblyName>
+    <RootNamespace>Integration</RootNamespace>
+    <AssemblyName>Integration</AssemblyName>
     <ModelCollation>1033,CS</ModelCollation>
     <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
     <DeployToDatabase>True</DeployToDatabase>
