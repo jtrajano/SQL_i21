@@ -7,6 +7,7 @@
     [strDescription]      NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
     [strAcres]            NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]    INT           NOT NULL,
-    CONSTRAINT [PK_tblARCustomerSplit] PRIMARY KEY CLUSTERED ([intSplitId] ASC)
+    CONSTRAINT [PK_tblARCustomerSplit] PRIMARY KEY CLUSTERED ([intSplitId] ASC),
+	CONSTRAINT [UKstrSplitNumber] UNIQUE NONCLUSTERED ([strSplitNumber] ASC)
 );
 
