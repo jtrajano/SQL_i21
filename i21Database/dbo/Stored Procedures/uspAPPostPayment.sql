@@ -116,7 +116,7 @@ SET @totalInvalid = (SELECT COUNT(*) #tmpPayableInvalidData)
 IF(@totalInvalid > 0)
 BEGIN
 
-	INSERT INTO tblAPInvalidTransaction(strError, strTransactionId, strTransactionType, strBatchNumber)
+	INSERT INTO tblAPInvalidTransaction(strError, strTransactionType, strTransactionId, strBatchNumber)
 	SELECT * FROM #tmpPayableInvalidData
 
 	SET @invalidCount = @totalInvalid

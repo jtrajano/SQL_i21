@@ -88,18 +88,28 @@ END
 INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber)
 	SELECT 
 		'Unable to find an open fiscal year period to match the transaction date.',
-		'Payable',
+		'Bill',
 		A.intBillId,
 		@billBatchId
 	FROM tblAPBill A 
 	WHERE  A.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
 		0 = ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0)
 
+INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber)
+	SELECT 
+		'No terms has been specified.',
+		'Bill',
+		A.intBillId,
+		@billBatchId
+	FROM tblAPBill A 
+	WHERE  A.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
+		0 = A.intTermsId
+
 --NOT BALANCE
 INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber)
 	SELECT 
 		'The debit and credit amounts are not balanced.',
-		'Payable',
+		'Bill',
 		A.intBillId,
 		@billBatchId
 	FROM tblAPBill A 
@@ -112,7 +122,7 @@ BEGIN
 	INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber)
 		SELECT 
 			'The transaction is already posted.',
-			'Payable',
+			'Bill',
 			A.intBillId,
 			@billBatchId
 		FROM tblAPBill A 
