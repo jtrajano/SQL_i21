@@ -2,7 +2,8 @@
 print('/*******************  BEGIN UPDATING canned panels column *******************/')
 GO
 print('/*******************  CREATE TEMPORARY table for canned panels column *******************/')
-
+IF OBJECT_ID('tempdb..#TampCannedPanelColumn') IS NOT NULL
+    DROP TABLE #TampCannedPanelColumn
 
 Create TABLE #TampCannedPanelColumn 
 (
