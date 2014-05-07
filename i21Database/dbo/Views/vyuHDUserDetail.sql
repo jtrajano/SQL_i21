@@ -44,7 +44,7 @@
 			,imgPhoto = ec.imgContactPhoto
 			,intConcurrencyId = 1
 		from
-			tblARCustomer cus
-			left outer join tblEntityContact ec on ec.intEntityId = cus.intEntityId
-			left outer join tblEntity en on en.intEntityId = cus.intEntityId
-			left outer join tblEntityLocation el on el.intEntityId = cus.intEntityId
+			tblEntityContact ec
+			left outer join tblARCustomer cus on cus.intEntityId = ec.intEntityId
+			left outer join tblEntity en on en.intEntityId = ec.intEntityId
+			left outer join tblEntityLocation el on el.intEntityId = ec.intEntityId
