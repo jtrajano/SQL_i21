@@ -7,8 +7,8 @@
     "codeClass": null,
     "userConfig": {
         "border": null,
-        "container|padding": null,
-        "designer|userAlias": "ipagingstatusbar",
+        "container|padding": "0 0 0 1",
+        "designer|userAlias": "ipagingstatusbar101",
         "designer|userClassName": "StatusbarPaging",
         "floating": null,
         "frame": null,
@@ -52,8 +52,30 @@
             "userConfig": {
                 "designer|displayName": null,
                 "icon": null,
+                "iconCls": "small-support",
+                "itemId": "btnSupport",
+                "layout|flex": null,
+                "tabIndex": -1,
+                "text": null,
+                "tooltip": "Click for support on this screen"
+            },
+            "configAlternates": {
+                "tooltip": "string"
+            },
+            "designerId": "dbffd8e8-4e5b-4224-b7a2-b4fa71258338"
+        },
+        {
+            "type": "Ext.button.Button",
+            "reference": {
+                "name": "items",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "designer|displayName": null,
+                "icon": null,
                 "iconCls": "small-light-bulb-off",
-                "itemId": "btnDisplayField",
+                "itemId": "btnFieldname",
                 "layout|flex": null,
                 "tabIndex": -1,
                 "text": null,
@@ -62,7 +84,7 @@
             "configAlternates": {
                 "tooltip": "string"
             },
-            "designerId": "b6becf95-7548-4017-9886-1e103bd9f435"
+            "designerId": "bf39f47d-84c2-4c68-a3b3-4b6bf906fc50"
         },
         {
             "type": "Ext.toolbar.Separator",
@@ -86,7 +108,7 @@
             "codeClass": null,
             "userConfig": {
                 "designer|displayName": null,
-                "itemId": "lblStatus",
+                "itemId": "lblReady",
                 "layout|flex": null,
                 "layout|margins": "0 5",
                 "text": "Ready"

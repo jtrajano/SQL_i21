@@ -9,7 +9,7 @@
         "designer|userAlias": "filter",
         "designer|userClassName": "Filter",
         "height": 23,
-        "width": 277
+        "width": 199
     },
     "designerId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4",
     "cn": [
@@ -22,7 +22,7 @@
             "codeClass": null,
             "userConfig": {
                 "fieldLabel": "Filter",
-                "itemId": "txtFilter",
+                "itemId": "txtFitlerGrid",
                 "labelWidth": 35,
                 "margin": "0 0 0 5",
                 "onTrigger1Click": null,

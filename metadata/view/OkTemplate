@@ -11,7 +11,7 @@
         "defaultFocus": null,
         "designer|userAlias": "oktemplate",
         "designer|userClassName": "OkTemplate",
-        "height": 360,
+        "height": 449,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
@@ -23,7 +23,7 @@
         "minimizable": null,
         "modal": true,
         "title": "OK Template",
-        "width": 487
+        "width": 587
     },
     "designerId": "d68dd158-b609-47a4-a734-9e059390fa50",
     "cn": [

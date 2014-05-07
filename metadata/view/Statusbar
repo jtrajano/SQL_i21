@@ -6,7 +6,8 @@
     },
     "codeClass": null,
     "userConfig": {
-        "designer|userAlias": "istatusbar",
+        "container|padding": "0 0 0 1",
+        "designer|userAlias": "istatusbar101",
         "designer|userClassName": "Statusbar",
         "itemId": "tlbStatusbar",
         "width": 1265
@@ -45,8 +46,30 @@
             "userConfig": {
                 "designer|displayName": null,
                 "icon": null,
+                "iconCls": "small-support",
+                "itemId": "btnSupport",
+                "layout|flex": null,
+                "tabIndex": -1,
+                "text": null,
+                "tooltip": "Click for support on this screen"
+            },
+            "configAlternates": {
+                "tooltip": "string"
+            },
+            "designerId": "c27d8083-53cf-4bc6-953a-4a3d52fbaf39"
+        },
+        {
+            "type": "Ext.button.Button",
+            "reference": {
+                "name": "items",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "designer|displayName": null,
+                "icon": null,
                 "iconCls": "small-light-bulb-off",
-                "itemId": "btnDisplayField",
+                "itemId": "btnFieldName",
                 "layout|flex": null,
                 "tabIndex": -1,
                 "text": null,
@@ -55,7 +78,7 @@
             "configAlternates": {
                 "tooltip": "string"
             },
-            "designerId": "f8f35a4a-dcd0-48e3-8762-3b7c5a1b3c44"
+            "designerId": "db860dc7-2ef2-4f78-9b68-cedff068cfbe"
         },
         {
             "type": "Ext.toolbar.Separator",
