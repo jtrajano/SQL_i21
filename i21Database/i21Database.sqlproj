@@ -521,6 +521,8 @@
     <Build Include="dbo\Views\vyuHDUserDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSMResetOriginMenus.sql" />
     <Build Include="dbo\Views\vyuHDTicket.sql" />
+    <Build Include="dbo\Views\vyuSMUserRoleMenu.sql" />
+    <Build Include="dbo\Views\vyuSMUserSecurityMenu.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
