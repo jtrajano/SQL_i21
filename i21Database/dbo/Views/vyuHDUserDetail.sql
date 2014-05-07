@@ -44,11 +44,7 @@
 			,imgPhoto = ec.imgContactPhoto
 			,intConcurrencyId = 1
 		from
-			tblEntity en,
-			tblEntityContact ec,
-			tblARCustomer cus,
-			tblEntityLocation el
-		where
-			cus.intEntityId = en.intEntityId
-			and ec.intEntityId = en.intEntityId
-			and el.intEntityId = en.intEntityId
+			tblEntity en
+			left outer join tblEntityContact ec on ec.intEntityId = en.intEntityId
+			left outer join tblARCustomer cus on cus.intEntityId = en.intEntityId
+			left outer join tblEntityLocation el on el.intEntityId = en.intEntityId
