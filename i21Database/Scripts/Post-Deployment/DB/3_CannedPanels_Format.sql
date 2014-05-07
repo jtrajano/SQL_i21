@@ -1,6 +1,10 @@
 ﻿GO
 /*******************  BEGIN UPDATING canned panels on table Panel Format*******************/
 print('/*******************  BEGIN UPDATING canned panels format *******************/')
+
+IF OBJECT_ID('tempdb..#TampCannedPanelFormat') IS NOT NULL
+    DROP TABLE #TampCannedPanelFormat
+
 print('/*******************  CREATE TEMPORARY table for canned panels format *******************/')
 Create TABLE #TampCannedPanelFormat 
 (
