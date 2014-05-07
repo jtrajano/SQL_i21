@@ -26,7 +26,7 @@
 		union all
 
 		select
-			strCustomerNumber = cus.strCustomerNumber
+			strCustomer = cus.strCustomerNumber
 			,strFullName = ec.strEmail
 			,strPhone = ec.strPhone
 			,strTimeZone = ''
