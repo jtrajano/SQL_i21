@@ -523,6 +523,7 @@
     <Build Include="dbo\Views\vyuHDTicket.sql" />
     <Build Include="dbo\Views\vyuSMUserRoleMenu.sql" />
     <Build Include="dbo\Views\vyuSMUserSecurityMenu.sql" />
+    <Build Include="dbo\Views\vyuHDCustomerDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
