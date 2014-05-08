@@ -17,7 +17,7 @@
     [strMenuPermission] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL DEFAULT (''),
     [strMenu]           NVARCHAR (MAX) COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [strForm]           NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL DEFAULT (''),
-    [strFavorite]       NVARCHAR (MAX) COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
+    [strFavorite]       NVARCHAR (MAX) COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [ysnDisabled]       BIT            DEFAULT ((0)) NOT NULL,
     [ysnAdmin]          BIT            DEFAULT ((0)) NOT NULL,
     [intConcurrencyId]  INT            DEFAULT (1) NOT NULL,
