@@ -2,7 +2,7 @@
     [intCategoryPriceId] INT             IDENTITY (1, 1) NOT NULL,
     [intEntityId]        INT             NOT NULL,
     [strCategory]        NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
-    [dtmBeginDate]       DATETIME        NULL,
+    [dtmBeginDate]       DATETIME        NOT NULL,
     [dtmEndDate]         DATETIME        NULL,
     [dblDiscount]        NUMERIC (18, 6) NULL,
     [strNotes]           NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,

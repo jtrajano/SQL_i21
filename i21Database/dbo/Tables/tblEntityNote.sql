@@ -1,8 +1,8 @@
 ﻿CREATE TABLE [dbo].[tblEntityNote] (
     [intEntityNoteId]  INT            IDENTITY (1, 1) NOT NULL,
     [intEntityId]      INT            NOT NULL,
-    [dtmDate]          DATETIME       NULL,
-    [dtmTime]          DATETIME       NULL,
+    [dtmDate]          DATETIME       NOT NULL,
+    [dtmTime]          DATETIME       NOT NULL,
     [intDuration]      INT            NULL,
     [strName]          NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [strSubject]       NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,

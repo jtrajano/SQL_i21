@@ -9,7 +9,7 @@
     [dblCostToUse]      NUMERIC (18, 6) NULL,
     [dblDeviation]      NUMERIC (18, 6) NULL,
     [strLineNote]       NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
-    [dtmBeginDate]      DATETIME        NULL,
+    [dtmBeginDate]      DATETIME        NOT NULL,
     [dtmEndDate]        DATETIME        NULL,
     [ysnConsignable]    BIT             NOT NULL DEFAULT ((0)),
     [strRackVendorId]   NVARCHAR (15)   COLLATE Latin1_General_CI_AS NULL,
