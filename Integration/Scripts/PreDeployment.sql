@@ -51,6 +51,7 @@
 :r ..\dbo\Views\vyuCPPurchasesDetail.sql
 :r ..\dbo\Views\vyuCPSettlements.sql
 :r ..\dbo\Views\vyuCPStorage.sql
+:r ..\dbo\Views\vyuCPCustomer.sql
 
 -- TANK MANAGEMENT
 :r ..\dbo\Views\vyuTMOriginOption.sql
@@ -68,6 +69,8 @@
 :r ..\dbo\Views\vwtrmmst.sql
 :r ..\dbo\Views\vwDispatch.sql
 :r "..\dbo\Stored Procedures\TwoPartDeliveryFillReport.sql"
+:r "..\dbo\Stored Procedures\uspAPImportBillTransactions.sql"
+:r "..\dbo\Stored Procedures\uspAPImportVendor.sql"
 
 
 -- TAX FORMS

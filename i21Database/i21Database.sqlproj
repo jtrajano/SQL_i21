@@ -124,6 +124,7 @@
     <Folder Include="Scripts\Post-Deployment\TM" />
     <Folder Include="Scripts\Post-Deployment\Optional Run\2_Reports" />
     <Folder Include="Scripts\Post-Deployment\AR" />
+    <Folder Include="Scripts\Post-Deployment\TM\DefaultData" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -362,8 +363,6 @@
     <Build Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournal.sql" />
     <Build Include="dbo\Stored Procedures\uspGLPostFiscalYear.sql" />
     <Build Include="dbo\Stored Procedures\uspCreateBankTransactionPayment.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPImportOriginTransactions.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPImportVendor.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBill.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBillBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspRMInsertDynamicParameterFields.sql" />
@@ -524,6 +523,13 @@
     <Build Include="dbo\Views\vyuSMUserRoleMenu.sql" />
     <Build Include="dbo\Views\vyuSMUserSecurityMenu.sql" />
     <Build Include="dbo\Views\vyuHDCustomerDetail.sql" />
+    <None Include="Scripts\Post-Deployment\TM\DefaultData\3_DeviceType.sql" />
+    <None Include="Scripts\Post-Deployment\TM\DefaultData\4_MeterType.sql" />
+    <None Include="Scripts\Post-Deployment\TM\DefaultData\5_FillMethodType.sql" />
+    <None Include="Scripts\Post-Deployment\TM\DefaultData\6_InventoryStatusType.sql" />
+    <None Include="Scripts\Post-Deployment\TM\DefaultData\7_WorkStatusType.sql" />
+    <None Include="Scripts\Post-Deployment\TM\DefaultData\8_WorkToDoItem.sql" />
+    <None Include="Scripts\Post-Deployment\TM\DefaultData\9_WorkCloseReason.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
@@ -536,5 +542,7 @@
     <None Include="Scripts\Post-Deployment\AR\EntityTableDataFix.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\8_Country.sql" />
     <None Include="Scripts\Post-Deployment\FIN\GLEntryDataFix.sql" />
+    <None Include="Scripts\Post-Deployment\TM\DefaultData\1_PreferenceCompany.sql" />
+    <None Include="Scripts\Post-Deployment\TM\DefaultData\2_EventType.sql" />
   </ItemGroup>
 </Project>

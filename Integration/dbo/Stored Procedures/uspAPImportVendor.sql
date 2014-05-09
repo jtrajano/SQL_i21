@@ -1,4 +1,10 @@
-﻿CREATE PROCEDURE uspAPImportVendor
+﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'uspAPImportBillTransactions')
+	DROP VIEW uspAPImportBillTransactions
+
+IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
+BEGIN
+	EXEC ('
+CREATE PROCEDURE [dbo].[uspAPImportVendor]
 	@VendorId NVARCHAR(50) = NULL,
 	@Update BIT = 0,
 	@Total INT = 0 OUTPUT
@@ -6,7 +12,7 @@
 AS
 
 --make first a copy of ssvndmst. this will use to track all vendors already imported
-IF(OBJECT_ID('dbo.tblAPTempVendor') IS NULL)
+IF(OBJECT_ID(''dbo.tblAPTempVendor'') IS NULL)
 	SELECT * INTO tblAPTempVendor FROM ssvndmst
 	-- WHERE ssvndmst.ssvnd_vnd_no IS NULL
 
@@ -14,24 +20,24 @@ IF(@Update = 1 AND @VendorId IS NOT NULL)
 BEGIN
 
 	UPDATE ssvndmst
-		SET ssvnd_co_per_ind = CASE WHEN B.intVendorType = 0 THEN 'P' ELSE 'C' END,
+		SET ssvnd_co_per_ind = CASE WHEN B.intVendorType = 0 THEN ''P'' ELSE ''C'' END,
 		ssvnd_name = A.strName,
 		ssvnd_addr_1 = CASE WHEN CHARINDEX(CHAR(10), C.strAddress) > 0 THEN SUBSTRING(C.strAddress, 0, CHARINDEX(CHAR(10),C.strAddress)) ELSE C.strAddress END,
 		ssvnd_addr_2 = CASE WHEN CHARINDEX(CHAR(10), C.strAddress) > 0 THEN SUBSTRING(C.strAddress, CHARINDEX(CHAR(10),C.strAddress), LEN(C.strAddress)) ELSE NULL END,
 		ssvnd_city = C.strCity,
 		ssvnd_st = C.strState,
 		ssvnd_zip = C.strZipCode,
-		ssvnd_phone = ISNULL(D.strPhone, ''),
+		ssvnd_phone = ISNULL(D.strPhone, ''''),
 		ssvnd_phone2 = D.strPhone2,
 		ssvnd_contact = A.strName,
-		ssvnd_1099_yn = CASE WHEN A.ysnPrint1099 = 0 THEN 'N' ELSE 'Y' END,
-		ssvnd_wthhld_yn = CASE WHEN B.ysnWithholding = 0 THEN 'N' ELSE 'Y' END,
-		ssvnd_pay_ctl_ind = (CASE WHEN ysnPymtCtrlActive = 1 THEN 'A'
-			 WHEN ysnPymtCtrlAlwaysDiscount = 1 THEN 'D'
-			 WHEN ysnPymtCtrlEFTActive = 1  THEN 'E'
-			 WHEN ysnPymtCtrlHold = 1 THEN 'H' END),
+		ssvnd_1099_yn = CASE WHEN A.ysnPrint1099 = 0 THEN ''N'' ELSE ''Y'' END,
+		ssvnd_wthhld_yn = CASE WHEN B.ysnWithholding = 0 THEN ''N'' ELSE ''Y'' END,
+		ssvnd_pay_ctl_ind = (CASE WHEN ysnPymtCtrlActive = 1 THEN ''A''
+			 WHEN ysnPymtCtrlAlwaysDiscount = 1 THEN ''D''
+			 WHEN ysnPymtCtrlEFTActive = 1  THEN ''E''
+			 WHEN ysnPymtCtrlHold = 1 THEN ''H'' END),
 		ssvnd_fed_tax_id = A.strFederalTaxId,
-		--ssvnd_w9_signed_rev_dt = CASE WHEN ysnW9Signed = 0 THEN 'N' ELSE 'Y' END,
+		--ssvnd_w9_signed_rev_dt = CASE WHEN ysnW9Signed = 0 THEN ''N'' ELSE ''Y'' END,
 		ssvnd_pay_to = strVendorPayToId,
 		ssvnd_currency = E.strCurrency,
 		ssvnd_1099_name = A.str1099Name,
@@ -84,22 +90,22 @@ BEGIN
 	)
 	SELECT 
 		strVendorId,
-		CASE WHEN intVendorType = 0 THEN 'C' ELSE 'P' END,
+		CASE WHEN intVendorType = 0 THEN ''C'' ELSE ''P'' END,
 		A.strName,
 		CASE WHEN CHARINDEX(CHAR(10), C.strAddress) > 0 THEN SUBSTRING(C.strAddress, 0, CHARINDEX(CHAR(10),C.strAddress)) ELSE C.strAddress END,
 		CASE WHEN CHARINDEX(CHAR(10), C.strAddress) > 0 THEN SUBSTRING(C.strAddress, CHARINDEX(CHAR(10),C.strAddress), LEN(C.strAddress)) ELSE NULL END,
 		strCity,
 		strState,
 		strZipCode,
-		ISNULL(C.strPhone,''),
+		ISNULL(C.strPhone,''''),
 		strPhone2,
 		A.strName,
-		CASE WHEN ysnPrint1099 = 0 THEN 'N' ELSE 'Y' END,
-		CASE WHEN ysnWithholding = 0 THEN 'N' ELSE 'Y' END,
-		CASE WHEN ysnPymtCtrlActive = 1 THEN 'A'
-			 WHEN ysnPymtCtrlAlwaysDiscount = 1 THEN 'D'
-			 WHEN ysnPymtCtrlEFTActive = 1  THEN 'E'
-			 WHEN ysnPymtCtrlHold = 1 THEN 'H' END,
+		CASE WHEN ysnPrint1099 = 0 THEN ''N'' ELSE ''Y'' END,
+		CASE WHEN ysnWithholding = 0 THEN ''N'' ELSE ''Y'' END,
+		CASE WHEN ysnPymtCtrlActive = 1 THEN ''A''
+			 WHEN ysnPymtCtrlAlwaysDiscount = 1 THEN ''D''
+			 WHEN ysnPymtCtrlEFTActive = 1  THEN ''E''
+			 WHEN ysnPymtCtrlHold = 1 THEN ''H'' END,
 		strFederalTaxId,
 		CONVERT(VARCHAR(8), GETDATE(), 112),
 		strVendorPayToId,
@@ -126,7 +132,7 @@ IF(@Update = 0 AND @VendorId IS NULL)
 BEGIN
 	
 	--1 Time synchronization here
-	PRINT '1 Time Vendor Synchronization'
+	PRINT ''1 Time Vendor Synchronization''
 
 	DECLARE @originVendor NVARCHAR(50)
 
@@ -219,21 +225,21 @@ BEGIN
 		SELECT TOP 1
 			--Entities
 			@strName = ssvnd_name,
-			@strWebsite = '',
-			@strInternalNotes = '',
-			@ysnPrint1099   = CASE WHEN ssvnd_1099_yn = 'Y' THEN 1 ELSE 0 END,
+			@strWebsite = '''',
+			@strInternalNotes = '''',
+			@ysnPrint1099   = CASE WHEN ssvnd_1099_yn = ''Y'' THEN 1 ELSE 0 END,
 			@str1099Name    = ssvnd_1099_name,
-			@str1099Form	= '',
-			@str1099Type	= '',
+			@str1099Form	= '''',
+			@str1099Type	= '''',
 			@strFederalTaxId	= ssvnd_fed_tax_id,
 			@dtmW9Signed	= CASE WHEN ssvnd_w9_signed_rev_dt = 0 THEN NULL ELSE CONVERT(DATE, CAST(ssvnd_w9_signed_rev_dt AS CHAR(12)), 112) END,
 
 			--Contacts
-			@strTitle = '',
+			@strTitle = '''',
 			@strContactName = ssvnd_contact,
 			@strDepartment = NULL,
 			@strMobile     = NULL,
-			@strPhone      = ISNULL(ssvnd_phone,'') + ' ' + ISNULL(ssvnd_phone_ext,''),
+			@strPhone      = ISNULL(ssvnd_phone,'''') + '' '' + ISNULL(ssvnd_phone_ext,''''),
 			@strPhone2     = NULL,
 			@strEmail      = NULL,
 			@strEmail2     = NULL,
@@ -248,7 +254,7 @@ BEGIN
 
 			--Locations
 			@strLocationName = @strName,
-			@strAddress      = ISNULL(ssvnd_addr_1,'') + CHAR(10) + ISNULL(ssvnd_addr_2,''),
+			@strAddress      = ISNULL(ssvnd_addr_1,'''') + CHAR(10) + ISNULL(ssvnd_addr_2,''''),
 			@strCity         = ssvnd_city,
 			@strCountry      = (SELECT TOP 1 strCountry FROM tblSMZipCode WHERE strState COLLATE Latin1_General_CI_AS = ssvnd_st COLLATE Latin1_General_CI_AS),
 			@strState        = ssvnd_st,
@@ -263,7 +269,7 @@ BEGIN
 			@intWarehouseId  = NULL,
 			
 			--Vendors
-			@intVendorType				= CASE WHEN ssvnd_co_per_ind = 'C' THEN 0 ELSE 1 END,
+			@intVendorType				= CASE WHEN ssvnd_co_per_ind = ''C'' THEN 0 ELSE 1 END,
 			@originVendor				= ssvnd_vnd_no,
 			@intCurrencyId				= (SELECT TOP 1 intConcurrencyId FROM tblSMCurrency WHERE strCurrency COLLATE Latin1_General_CI_AS = ssvnd_currency COLLATE Latin1_General_CI_AS),
 			@strVendorPayToId         	= ssvnd_pay_to,
@@ -271,11 +277,11 @@ BEGIN
 			@intVendorTaxCodeId     	= NULL,
 			@intGLAccountExpenseId    	= (SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CONVERT(NVARCHAR(50),ssvnd_gl_pur)),
 			@strVendorAccountNum      	= NULL,
-			@ysnPymtCtrlActive        	= CASE WHEN ssvnd_pay_ctl_ind = 'A' THEN 1 ELSE 0 END,
-			@ysnPymtCtrlAlwaysDiscount	= CASE WHEN ssvnd_pay_ctl_ind = 'D' THEN 1 ELSE 0 END,
-			@ysnPymtCtrlEFTActive     	= CASE WHEN ssvnd_pay_ctl_ind = 'E' THEN 1 ELSE 0 END,
-			@ysnPymtCtrlHold          	= CASE WHEN ssvnd_pay_ctl_ind = 'H' THEN 1 ELSE 0 END,
-			@ysnWithholding           	= CASE WHEN ssvnd_wthhld_yn = 'N' THEN 0 ELSE 1 END,
+			@ysnPymtCtrlActive        	= CASE WHEN ssvnd_pay_ctl_ind = ''A'' THEN 1 ELSE 0 END,
+			@ysnPymtCtrlAlwaysDiscount	= CASE WHEN ssvnd_pay_ctl_ind = ''D'' THEN 1 ELSE 0 END,
+			@ysnPymtCtrlEFTActive     	= CASE WHEN ssvnd_pay_ctl_ind = ''E'' THEN 1 ELSE 0 END,
+			@ysnPymtCtrlHold          	= CASE WHEN ssvnd_pay_ctl_ind = ''H'' THEN 1 ELSE 0 END,
+			@ysnWithholding           	= CASE WHEN ssvnd_wthhld_yn = ''N'' THEN 0 ELSE 1 END,
 			@dblCreditLimit           	= ISNULL(ssvnd_future_bal,0),
 			@intCreatedUserId         	= NULL,
 			@intLastModifiedUserId    	= NULL,
@@ -340,4 +346,7 @@ BEGIN
 	
 SET @Total = @@ROWCOUNT
 
+END
+
+	')
 END
