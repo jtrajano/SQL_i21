@@ -363,8 +363,6 @@
     <Build Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournal.sql" />
     <Build Include="dbo\Stored Procedures\uspGLPostFiscalYear.sql" />
     <Build Include="dbo\Stored Procedures\uspCreateBankTransactionPayment.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPImportOriginTransactions.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPImportVendor.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBill.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBillBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspRMInsertDynamicParameterFields.sql" />
@@ -524,6 +522,7 @@
     <Build Include="dbo\Views\vyuHDTicket.sql" />
     <Build Include="dbo\Views\vyuSMUserRoleMenu.sql" />
     <Build Include="dbo\Views\vyuSMUserSecurityMenu.sql" />
+    <Build Include="dbo\Views\vyuHDCustomerDetail.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\3_DeviceType.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\4_MeterType.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\5_FillMethodType.sql" />
