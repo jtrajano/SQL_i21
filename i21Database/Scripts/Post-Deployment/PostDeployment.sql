@@ -32,6 +32,16 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- Tank Management
 -- :r .\TM\1_OriginIndexing.sql
+:r .\TM\DefaultData\1_PreferenceCompany.sql
+:r .\TM\DefaultData\2_EventType.sql
+:r .\TM\DefaultData\3_DeviceType.sql
+:r .\TM\DefaultData\4_MeterType.sql
+:r .\TM\DefaultData\5_FillMethodType.sql
+:r .\TM\DefaultData\6_InventoryStatusType.sql
+:r .\TM\DefaultData\7_WorkStatusType.sql
+:r .\TM\DefaultData\8_WorkToDoItem.sql
+:r .\TM\DefaultData\9_WorkCloseReason.sql
+
 
 -- Canned Panels
 :r .\DB\1_CannedPanels_Panel.sql

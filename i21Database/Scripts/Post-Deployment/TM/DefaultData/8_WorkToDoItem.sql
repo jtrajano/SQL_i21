@@ -1,0 +1,18 @@
+﻿GO
+	PRINT N'BEGIN INSERT DEFAULT TM WORK TODO ITEM'
+GO
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblTMWorkToDoItem]') AND type in (N'U')) 
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM [dbo].tblTMWorkToDoItem WHERE strToDoItem = 'PICK UP TANK') INSERT INTO tblTMWorkToDoItem (strToDoItem,ysnDefault) VALUES ('PICK UP TANK', 1)
+	IF NOT EXISTS(SELECT TOP 1 1 FROM [dbo].tblTMWorkToDoItem WHERE strToDoItem = 'LEAK CHECK') INSERT INTO tblTMWorkToDoItem (strToDoItem,ysnDefault) VALUES ('LEAK CHECK', 1)
+	IF NOT EXISTS(SELECT TOP 1 1 FROM [dbo].tblTMWorkToDoItem WHERE strToDoItem = 'GAS CHECK') INSERT INTO tblTMWorkToDoItem (strToDoItem,ysnDefault) VALUES ('GAS CHECK', 1)
+	IF NOT EXISTS(SELECT TOP 1 1 FROM [dbo].tblTMWorkToDoItem WHERE strToDoItem = 'MARK THE LINE') INSERT INTO tblTMWorkToDoItem (strToDoItem,ysnDefault) VALUES ('MARK THE LINE', 1)
+	IF NOT EXISTS(SELECT TOP 1 1 FROM [dbo].tblTMWorkToDoItem WHERE strToDoItem = 'LABOR') INSERT INTO tblTMWorkToDoItem (strToDoItem,ysnDefault) VALUES ('LABOR', 1)
+	IF NOT EXISTS(SELECT TOP 1 1 FROM [dbo].tblTMWorkToDoItem WHERE strToDoItem = 'SET TANK') INSERT INTO tblTMWorkToDoItem (strToDoItem,ysnDefault) VALUES ('SET TANK', 1)
+	IF NOT EXISTS(SELECT TOP 1 1 FROM [dbo].tblTMWorkToDoItem WHERE strToDoItem = 'BURY LINE') INSERT INTO tblTMWorkToDoItem (strToDoItem,ysnDefault) VALUES ('BURY LINE', 1)
+END
+
+GO
+	PRINT N'END INSERT DEFAULT TM WORK TODO ITEM'
+GO
