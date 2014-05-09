@@ -37,6 +37,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 			,agcus_pend_pymt
 			,agcus_cred_ga
 			,agcus_ytd_pur
+			,agcus_ytd_pur_pt = null
 			,agcus_ytd_sls
 			,agcus_ytd_srvchr
 			,agcus_last_ivc_rev_dt
@@ -83,7 +84,8 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 			,agcus_pend_ivc = null
 			,agcus_pend_pymt = null
 			,agcus_cred_ga = null
-			,agcus_ytd_pur = ptcus_purchs_ytd
+			,agcus_ytd_pur = null
+			,agcus_ytd_pur_pt = ptcus_purchs_ytd
 			,agcus_ytd_sls = ptcus_ytd_sales
 			,agcus_ytd_srvchr = ptcus_ytd_srvchr
 			,agcus_last_ivc_rev_dt = ptcus_last_ivc_rev_dt
