@@ -69,6 +69,8 @@
 :r ..\dbo\Views\vwtrmmst.sql
 :r ..\dbo\Views\vwDispatch.sql
 :r "..\dbo\Stored Procedures\TwoPartDeliveryFillReport.sql"
+:r "..\dbo\Stored Procedures\uspAPImportBillTransactions.sql"
+:r "..\dbo\Stored Procedures\uspAPImportVendor.sql"
 
 
 -- TAX FORMS

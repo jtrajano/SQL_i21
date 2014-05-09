@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspAPImportVendor
+﻿CREATE PROCEDURE [dbo].[uspAPImportVendor]
 	@VendorId NVARCHAR(50) = NULL,
 	@Update BIT = 0,
 	@Total INT = 0 OUTPUT
