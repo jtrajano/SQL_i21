@@ -20,9 +20,9 @@ ELSE IF ((SELECT COUNT(*) FROM (SELECT DISTINCT(LEN(glact_acct1_8)) AS SegmentCo
 BEGIN
 	SET @result = 'There are accounts with different lengths. <br/> Kindly verify at Origin GL.'
 END
-ELSE IF (EXISTS(SELECT TOP 1 1 FROM glactmst WHERE glact_acct9_16 NOT IN (SELECT glprc_sub_acct FROM glprcmst)))
+ELSE IF (EXISTS(SELECT TOP 1 1 FROM glactmst WHERE glact_acct9_16 NOT IN (SELECT glprc_sub_acct FROM glprcmst)) and @ysnOverride = 0)
 BEGIN	
-	SELECT 'Some profit center does not exists at profit center master table. <br/> Kindly verify at Origin.' as Result
+	SET @result = 'Some profit center does not exists at profit center master table. <br/> Kindly verify at Origin.'
 END
 ELSE
 BEGIN
