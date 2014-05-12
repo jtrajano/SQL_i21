@@ -35,21 +35,21 @@ Ext.define('Inventory.view.Item', {
         'Ext.grid.column.Number',
         'Ext.grid.column.CheckColumn',
         'Ext.grid.View',
+        'Ext.form.field.Checkbox',
+        'Ext.form.Label',
         'Ext.selection.CheckboxModel',
-        'Ext.grid.column.Date',
-        'Ext.grid.column.Boolean',
         'Ext.toolbar.Paging'
     ],
 
-    height: 567,
+    height: 630,
     hidden: false,
-    minHeight: 547,
-    minWidth: 914,
-    width: 914,
+    minHeight: 630,
+    minWidth: 950,
+    width: 950,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
-    title: 'Item',
+    title: 'Item: 000000015 - Ultralow Sulfur #2 Diesel',
     maximizable: true,
 
     initComponent: function() {
@@ -450,39 +450,355 @@ Ext.define('Inventory.view.Item', {
                                             items: [
                                                 {
                                                     xtype: 'panel',
-                                                    title: 'AG'
+                                                    title: 'Sales',
+                                                    layout: {
+                                                        type: 'hbox',
+                                                        align: 'stretch',
+                                                        padding: 5
+                                                    },
+                                                    items: [
+                                                        {
+                                                            xtype: 'container',
+                                                            flex: 1,
+                                                            layout: {
+                                                                type: 'vbox',
+                                                                align: 'stretch'
+                                                            },
+                                                            items: [
+                                                                {
+                                                                    xtype: 'combobox',
+                                                                    fieldLabel: 'Patronage',
+                                                                    labelWidth: 110
+                                                                },
+                                                                {
+                                                                    xtype: 'combobox',
+                                                                    fieldLabel: 'Tax Class',
+                                                                    labelWidth: 110
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Stocked Item',
+                                                                    labelWidth: 110
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Dyed Fuel',
+                                                                    labelWidth: 110
+                                                                },
+                                                                {
+                                                                    xtype: 'combobox',
+                                                                    fieldLabel: 'Barcode Print',
+                                                                    labelWidth: 110
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'MSDS Required',
+                                                                    labelWidth: 110
+                                                                },
+                                                                {
+                                                                    xtype: 'textfield',
+                                                                    fieldLabel: 'EPA Number',
+                                                                    labelWidth: 110
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Inbound Tax',
+                                                                    labelWidth: 110
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Outbound Tax',
+                                                                    labelWidth: 110
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Restricted Chemical',
+                                                                    labelWidth: 110
+                                                                },
+                                                                {
+                                                                    xtype: 'panel',
+                                                                    flex: 1,
+                                                                    title: 'Tank Management',
+                                                                    layout: {
+                                                                        type: 'vbox',
+                                                                        align: 'stretch',
+                                                                        padding: 5
+                                                                    },
+                                                                    items: [
+                                                                        {
+                                                                            xtype: 'checkboxfield',
+                                                                            fieldLabel: 'Tank Required',
+                                                                            labelWidth: 110
+                                                                        },
+                                                                        {
+                                                                            xtype: 'checkboxfield',
+                                                                            fieldLabel: 'Available for TM',
+                                                                            labelWidth: 110
+                                                                        },
+                                                                        {
+                                                                            xtype: 'textfield',
+                                                                            fieldLabel: 'Default % Full',
+                                                                            labelWidth: 110
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            xtype: 'container',
+                                                            flex: 1,
+                                                            margins: '0 7',
+                                                            layout: {
+                                                                type: 'vbox',
+                                                                align: 'stretch'
+                                                            },
+                                                            items: [
+                                                                {
+                                                                    xtype: 'panel',
+                                                                    bodyPadding: 5,
+                                                                    title: 'RINS',
+                                                                    layout: {
+                                                                        type: 'vbox',
+                                                                        align: 'stretch'
+                                                                    },
+                                                                    items: [
+                                                                        {
+                                                                            xtype: 'combobox',
+                                                                            fieldLabel: 'Fuel Inspect Fee',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'combobox',
+                                                                            fieldLabel: 'RIN Required',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'combobox',
+                                                                            fieldLabel: 'RIN Fuel Type',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'textfield',
+                                                                            fieldLabel: '% Denaturant',
+                                                                            labelWidth: 125
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    xtype: 'panel',
+                                                                    margins: '5 0 0 0',
+                                                                    bodyPadding: 5,
+                                                                    title: 'Feed',
+                                                                    layout: {
+                                                                        type: 'vbox',
+                                                                        align: 'stretch'
+                                                                    },
+                                                                    items: [
+                                                                        {
+                                                                            xtype: 'checkboxfield',
+                                                                            fieldLabel: 'Tonnage Tax',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'checkboxfield',
+                                                                            fieldLabel: 'Lot Tracking',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'checkboxfield',
+                                                                            fieldLabel: 'Load tracking',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'combobox',
+                                                                            fieldLabel: 'Formula Level',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'textfield',
+                                                                            fieldLabel: 'Mix Order',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'checkboxfield',
+                                                                            fieldLabel: 'Hand Add Ingredients',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'combobox',
+                                                                            fieldLabel: 'Medication Tag',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'combobox',
+                                                                            fieldLabel: 'Ingredient Tag',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'textfield',
+                                                                            fieldLabel: 'Volume Rebate Group',
+                                                                            labelWidth: 125
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            xtype: 'container',
+                                                            flex: 1,
+                                                            layout: {
+                                                                type: 'vbox',
+                                                                align: 'stretch'
+                                                            },
+                                                            items: [
+                                                                {
+                                                                    xtype: 'combobox',
+                                                                    fieldLabel: 'Physical Item',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Extend on Pick Ticket',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Export EDI',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Hazard Material',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Material Fee',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Auto Calculate Freight',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'combobox',
+                                                                    fieldLabel: 'Freight Method',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'textfield',
+                                                                    fieldLabel: 'Freight Rate',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'combobox',
+                                                                    fieldLabel: 'Freight Vendor',
+                                                                    labelWidth: 125
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
                                                 },
                                                 {
                                                     xtype: 'panel',
-                                                    title: 'BOT'
+                                                    title: 'Point of Sale'
                                                 },
                                                 {
                                                     xtype: 'panel',
-                                                    title: 'Commodity'
+                                                    title: 'Location/Store',
+                                                    layout: {
+                                                        type: 'vbox',
+                                                        align: 'stretch',
+                                                        padding: 7
+                                                    },
+                                                    items: [
+                                                        {
+                                                            xtype: 'panel',
+                                                            bodyPadding: 5,
+                                                            title: 'Dialy Menu',
+                                                            items: [
+                                                                {
+                                                                    xtype: 'textfield',
+                                                                    fieldLabel: 'Label'
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            xtype: 'panel',
+                                                            margins: '10 0 0 0 ',
+                                                            bodyPadding: 5,
+                                                            title: 'Maintenance',
+                                                            items: [
+                                                                {
+                                                                    xtype: 'textfield',
+                                                                    fieldLabel: 'Label'
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            xtype: 'panel',
+                                                            margins: '10 0 0 0 ',
+                                                            bodyPadding: 5,
+                                                            title: 'Financial Reports',
+                                                            items: [
+                                                                {
+                                                                    xtype: 'textfield',
+                                                                    fieldLabel: 'Label'
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            xtype: 'panel',
+                                                            margins: '10 0 0 0 ',
+                                                            bodyPadding: 5,
+                                                            title: 'Reports',
+                                                            layout: {
+                                                                type: 'vbox',
+                                                                align: 'stretch'
+                                                            },
+                                                            items: [
+                                                                {
+                                                                    xtype: 'label',
+                                                                    padding: '5 0 0 0 ',
+                                                                    text: 'My Label'
+                                                                },
+                                                                {
+                                                                    xtype: 'label',
+                                                                    padding: '5 0 0 0 ',
+                                                                    text: 'My Label'
+                                                                },
+                                                                {
+                                                                    xtype: 'label',
+                                                                    padding: '5 0 0 0 ',
+                                                                    text: 'My Label'
+                                                                },
+                                                                {
+                                                                    xtype: 'label',
+                                                                    padding: '5 0 0 0 ',
+                                                                    text: 'My Label'
+                                                                },
+                                                                {
+                                                                    xtype: 'label',
+                                                                    padding: '5 0 0 0 ',
+                                                                    text: 'My Label'
+                                                                },
+                                                                {
+                                                                    xtype: 'label',
+                                                                    padding: '5 0 0 0 ',
+                                                                    text: 'My Label'
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    xtype: 'panel',
+                                                    title: 'UPC'
                                                 },
                                                 {
                                                     xtype: 'panel',
                                                     title: 'xRef'
-                                                },
-                                                {
-                                                    xtype: 'panel',
-                                                    title: 'Quality Specifications'
-                                                },
-                                                {
-                                                    xtype: 'panel',
-                                                    title: 'Commodity'
-                                                },
-                                                {
-                                                    xtype: 'panel',
-                                                    title: 'UOM'
-                                                },
-                                                {
-                                                    xtype: 'panel',
-                                                    title: 'Location/Store'
-                                                },
-                                                {
-                                                    xtype: 'panel',
-                                                    title: 'Detail'
                                                 }
                                             ]
                                         }
@@ -687,95 +1003,62 @@ Ext.define('Inventory.view.Item', {
                                 },
                                 {
                                     xtype: 'panel',
-                                    layout: 'fit',
+                                    bodyPadding: 10,
                                     title: 'Commodity',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'stretch'
+                                    },
                                     items: [
                                         {
-                                            xtype: 'gridpanel',
-                                            margin: -1,
-                                            dockedItems: [
+                                            xtype: 'container',
+                                            flex: 1,
+                                            layout: {
+                                                type: 'vbox',
+                                                align: 'stretch'
+                                            },
+                                            items: [
                                                 {
-                                                    xtype: 'toolbar',
-                                                    dock: 'top',
-                                                    itemId: 'tlbGridOptions',
-                                                    layout: {
-                                                        type: 'hbox',
-                                                        padding: '0 0 0 1'
-                                                    },
-                                                    items: [
-                                                        {
-                                                            xtype: 'button',
-                                                            itemId: 'btnEdit',
-                                                            iconCls: 'small-edit',
-                                                            tabIndex: -1,
-                                                            text: 'Edit'
-                                                        },
-                                                        {
-                                                            xtype: 'button',
-                                                            itemId: 'btnDelete',
-                                                            iconCls: 'small-delete',
-                                                            tabIndex: -1,
-                                                            text: 'Delete'
-                                                        },
-                                                        {
-                                                            xtype: 'tbseparator'
-                                                        },
-                                                        {
-                                                            xtype: 'filter'
-                                                        }
-                                                    ]
+                                                    xtype: 'combobox',
+                                                    fieldLabel: 'Commodity'
+                                                },
+                                                {
+                                                    xtype: 'textfield',
+                                                    fieldLabel: 'GA Shrink Factor'
+                                                },
+                                                {
+                                                    xtype: 'combobox',
+                                                    fieldLabel: 'Origin'
+                                                },
+                                                {
+                                                    xtype: 'combobox',
+                                                    fieldLabel: 'Product Type'
+                                                },
+                                                {
+                                                    xtype: 'combobox',
+                                                    fieldLabel: 'Region'
+                                                },
+                                                {
+                                                    xtype: 'combobox',
+                                                    fieldLabel: 'Season'
+                                                },
+                                                {
+                                                    xtype: 'combobox',
+                                                    fieldLabel: 'Class'
+                                                },
+                                                {
+                                                    xtype: 'combobox',
+                                                    fieldLabel: 'Product Line'
                                                 }
-                                            ],
-                                            columns: [
-                                                {
-                                                    xtype: 'datecolumn',
-                                                    width: 93,
-                                                    dataIndex: 'date',
-                                                    text: 'Date'
-                                                },
-                                                {
-                                                    xtype: 'gridcolumn',
-                                                    dataIndex: 'string',
-                                                    text: 'Invoice No.',
-                                                    flex: 1
-                                                },
-                                                {
-                                                    xtype: 'gridcolumn',
-                                                    dataIndex: 'string',
-                                                    text: 'Transaction Type',
-                                                    flex: 1
-                                                },
-                                                {
-                                                    xtype: 'numbercolumn',
-                                                    align: 'right',
-                                                    dataIndex: 'number',
-                                                    text: 'Total',
-                                                    flex: 1
-                                                },
-                                                {
-                                                    xtype: 'numbercolumn',
-                                                    align: 'right',
-                                                    dataIndex: 'number',
-                                                    text: 'Amount Paid',
-                                                    flex: 1
-                                                },
-                                                {
-                                                    xtype: 'booleancolumn',
-                                                    width: 45,
-                                                    dataIndex: 'bool',
-                                                    text: 'Paid'
-                                                },
-                                                {
-                                                    xtype: 'numbercolumn',
-                                                    align: 'right',
-                                                    dataIndex: 'number',
-                                                    text: 'Amount Due',
-                                                    flex: 1
-                                                }
-                                            ],
-                                            selModel: Ext.create('Ext.selection.CheckboxModel', {
-
-                                            })
+                                            ]
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 1.5,
+                                            layout: {
+                                                type: 'vbox',
+                                                align: 'stretch'
+                                            }
                                         }
                                     ]
                                 },
@@ -843,13 +1126,13 @@ Ext.define('Inventory.view.Item', {
                                                 {
                                                     xtype: 'gridcolumn',
                                                     dataIndex: 'string',
-                                                    text: 'Type',
+                                                    text: 'Comment Type',
                                                     flex: 1
                                                 },
                                                 {
                                                     xtype: 'gridcolumn',
                                                     dataIndex: 'string',
-                                                    text: 'Notes',
+                                                    text: 'Comments',
                                                     flex: 3
                                                 }
                                             ],
