@@ -45,6 +45,6 @@
 			,intConcurrencyId = 1
 		from
 			tblEntityContact ec
-			left outer join tblARCustomer cus on cus.intEntityId = ec.intEntityId
-			left outer join tblEntity en on en.intEntityId = ec.intEntityId
-			left outer join tblEntityLocation el on el.intEntityId = ec.intEntityId
+			left outer join tblARCustomer cus on cus.intEntityId = (select et.intEntityId from tblEntityToContact et where et.intContactId = ec.intEntityId)
+			left outer join tblEntity en on en.intEntityId = (select et.intEntityId from tblEntityToContact et where et.intEntityToContactId = ec.intEntityId)
+			left outer join tblEntityLocation el on el.intEntityId = (select et.intEntityId from tblEntityToContact et where et.intEntityToContactId = ec.intEntityId)
