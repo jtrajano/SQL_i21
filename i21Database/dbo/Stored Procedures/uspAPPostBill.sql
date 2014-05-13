@@ -70,7 +70,7 @@ IF(@beginDate IS NOT NULL)
 BEGIN
 	INSERT INTO #tmpPostBillData
 	SELECT intBillId FROM tblAPBill
-	WHERE dtmDate BETWEEN @beginDate AND @endDate
+	WHERE DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) BETWEEN @beginDate AND @endDate
 END
 
 IF(@beginTransaction IS NOT NULL)
