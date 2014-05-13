@@ -1,5 +1,10 @@
-﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwapivcmst')
+﻿GO
+
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwapivcmst')
 	DROP VIEW vwapivcmst
+
+GO
+
 
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 EXEC ('
@@ -38,3 +43,5 @@ EXEC ('
 	, A4GLIdentity = CAST(A4GLIdentity   AS INT)
 	FROM apivcmst
 ')
+GO
+

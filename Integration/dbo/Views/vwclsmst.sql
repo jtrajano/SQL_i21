@@ -1,4 +1,6 @@
-﻿
+﻿GO
+
+
 IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwclsmst')
 	DROP VIEW vwclsmst
 
@@ -40,4 +42,5 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT') = 1
 			FROM ptclsmst
 	')
 	
-	
+GO
+

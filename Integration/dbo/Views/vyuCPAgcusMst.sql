@@ -1,4 +1,7 @@
-﻿-- DELETE OLD VIEW
+﻿GO
+
+
+-- DELETE OLD VIEW
 IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPAgcusMst')
 	DROP VIEW vwCPAgcusMst
 GO

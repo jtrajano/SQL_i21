@@ -1,5 +1,9 @@
-﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'uspAPImportBillTransactions')
-	DROP VIEW uspAPImportBillTransactions
+﻿GO
+
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspAPImportVendor')
+	DROP PROCEDURE uspAPImportVendor
+GO
+
 
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN

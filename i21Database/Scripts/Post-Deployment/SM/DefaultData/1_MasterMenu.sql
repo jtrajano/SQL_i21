@@ -396,3 +396,33 @@ GO
 	SET intParentMenuID = 0
 	WHERE strMenuName = 'Common Info' AND strModuleName = 'System Manager' AND strType = 'Folder'
 GO
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bill by General Ledger' AND strType = 'Report' AND strModuleName = 'Accounts Payable')
+	UPDATE tblSMMasterMenu
+	SET strMenuName = 'AP Transactions by GL Account'
+	WHERE strMenuName = 'Bill by General Ledger' AND strType = 'Report' AND strModuleName = 'Accounts Payable'
+GO
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Check History Payment Detail' AND strType = 'Report' AND strModuleName = 'Accounts Payable')
+	DELETE FROM tblSMMasterMenu
+	WHERE strMenuName = 'Check History Payment Detail' AND strType = 'Report' AND strModuleName = 'Accounts Payable'
+GO
+	UPDATE tblSMMasterMenu
+	SET strCommand = REPLACE(strCommand, 'Dashboard.Controller', 'Dashboard.controller')
+	WHERE strModuleName = 'Dashboard'
+GO
+-- moved to 14.3
+GO
+	DELETE FROM tblSMMasterMenu where strMenuName = 'Paid Bills History' and strModuleName = 'Accounts Payable' and strType = 'Screen' 
+	DELETE FROM tblSMMasterMenu where strMenuName = 'Posted Payables' and strModuleName = 'Accounts Payable' and strType = 'Screen' 
+GO
+--update missing commands
+	UPDATE tblSMMasterMenu
+	SET strCommand = 'AccountsPayable.controller.PrintChecks'
+	where strMenuName = 'Print Checks' and strModuleName = 'Accounts Payable' and strType = 'Screen' and strCommand = ''
+GO
+	UPDATE tblSMMasterMenu
+	SET strCommand = strMenuName
+	WHERE 
+		strMenuName in ('Open Payables', 'Vendor History', 'Cash Requirements', 'Check Register', 'AP Transactions by GL Account')
+		AND strType = 'Report'
+		AND strCommand = ''
+GO

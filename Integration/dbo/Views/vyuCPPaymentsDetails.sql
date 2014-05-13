@@ -1,4 +1,6 @@
-﻿
+﻿GO
+
+
 IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPPaymentsDetails')
 	DROP VIEW vwCPPaymentsDetails
 GO
@@ -92,6 +94,3 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 			,strInvoiceNo = ''''
 		')
 GO
-
-
-

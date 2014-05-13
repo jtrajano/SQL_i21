@@ -135,4 +135,7 @@
     <None Include="dbo\Stored Procedures\uspAPImportBillTransactions.sql" />
     <None Include="dbo\Stored Procedures\uspAPImportVendor.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="dbo\Views\vyuCPCustomer.sql" />
+  </ItemGroup>
 </Project>
