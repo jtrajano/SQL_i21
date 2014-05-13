@@ -30,6 +30,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 			,a.agivc_bal_due
 			,a.agivc_pend_disc
 			,a.agivc_no_payments
+			,agivc_no_payments_pt = null
 			,a.agivc_adj_inv_yn
 			,a.agivc_srvchr_cd
 			,agivc_disc_rev_dt = (case len(convert(varchar, a.agivc_disc_rev_dt)) when 8 then convert(date, cast(convert(varchar, a.agivc_disc_rev_dt) AS CHAR(12)), 112) else null end)
@@ -77,7 +78,8 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 			,agivc_amt_paid = a.ptivc_amt_applied --a.agivc_amt_paid
 			,agivc_bal_due = a.ptivc_bal_due
 			,agivc_pend_disc = a.ptivc_pend_disc
-			,agivc_no_payments = a.ptivc_no_payments
+			,agivc_no_payments = null
+			,agivc_no_payments_pt = a.ptivc_no_payments
 			,agivc_adj_inv_yn = a.ptivc_adj_inv_yn
 			,agivc_srvchr_cd = null --a.agivc_srvchr_cd
 			,agivc_disc_rev_dt = (case len(convert(varchar, a.ptivc_gl_rev_dt)) when 8 then convert(date, cast(convert(varchar, a.ptivc_gl_rev_dt) AS CHAR(12)), 112) else null end)

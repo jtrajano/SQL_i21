@@ -532,6 +532,7 @@
     <None Include="Scripts\Post-Deployment\TM\DefaultData\9_WorkCloseReason.sql" />
     <Build Include="dbo\Tables\tblRMPrintingFilter.sql" />
     <Build Include="dbo\Tables\tblRMPrintingOption.sql" />
+    <None Include="Scripts\Post-Deployment\TM\DefaultData\10_RegulatorType.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
