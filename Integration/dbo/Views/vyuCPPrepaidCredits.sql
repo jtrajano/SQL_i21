@@ -1,4 +1,6 @@
-﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPPrepaidCredits')
+﻿GO
+
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPPrepaidCredits')
 	DROP VIEW vwCPPrepaidCredits
 GO
 IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCPPrepaidCredits')

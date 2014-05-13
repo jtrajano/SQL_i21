@@ -1,4 +1,6 @@
-﻿IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPInvoicesCredits')
+﻿GO
+
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCPInvoicesCredits')
 	DROP VIEW vwCPInvoicesCredits
 GO
 IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCPInvoicesCredits')

@@ -287,7 +287,7 @@ IF ISNULL(@recap, 0) = 0
 		WHERE	intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		UPDATE tblAPPaymentDetail
-			SET tblAPPaymentDetail.dblAmountDue = B.dblAmountDue - B.dblPayment
+			SET tblAPPaymentDetail.dblAmountDue = (B.dblTotal) - (B.dblPayment + B.dblDiscount)
 		FROM tblAPPayment A
 			LEFT JOIN tblAPPaymentDetail B
 				ON A.intPaymentId = B.intPaymentId
