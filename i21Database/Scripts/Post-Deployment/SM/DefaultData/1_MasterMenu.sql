@@ -396,3 +396,12 @@ GO
 	SET intParentMenuID = 0
 	WHERE strMenuName = 'Common Info' AND strModuleName = 'System Manager' AND strType = 'Folder'
 GO
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bill by General Ledger' AND strType = 'Report' AND strModuleName = 'Accounts Payable')
+	UPDATE tblSMMasterMenu
+	SET strMenuName = 'AP Transactions by GL Account'
+	WHERE strMenuName = 'Bill by General Ledger' AND strType = 'Report' AND strModuleName = 'Accounts Payable'
+GO
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Check History Payment Detail' AND strType = 'Report' AND strModuleName = 'Accounts Payable')
+	DELETE FROM tblSMMasterMenu
+	WHERE strMenuName = 'Check History Payment Detail' AND strType = 'Report' AND strModuleName = 'Accounts Payable'
+GO
