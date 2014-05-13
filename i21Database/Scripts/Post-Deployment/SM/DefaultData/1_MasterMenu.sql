@@ -405,3 +405,7 @@ GO
 	DELETE FROM tblSMMasterMenu
 	WHERE strMenuName = 'Check History Payment Detail' AND strType = 'Report' AND strModuleName = 'Accounts Payable'
 GO
+	UPDATE tblSMMasterMenu
+	SET strCommand = REPLACE(strCommand, 'Dashboard.Controller', 'Dashboard.controller')
+	WHERE strModuleName = 'Dashboard'
+GO
