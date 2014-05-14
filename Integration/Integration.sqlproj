@@ -138,4 +138,7 @@
   <ItemGroup>
     <None Include="dbo\Views\vyuCPCustomer.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="dbo\Views\vyuCPAgcrdMst.sql" />
+  </ItemGroup>
 </Project>
