@@ -141,4 +141,10 @@
   <ItemGroup>
     <None Include="dbo\Views\vyuCPAgcrdMst.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="dbo\Views\vyuCPGAContractHistory.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dbo\Views\vyuCPGAContractOption.sql" />
+  </ItemGroup>
 </Project>
