@@ -52,6 +52,7 @@
 :r ..\dbo\Views\vyuCPSettlements.sql
 :r ..\dbo\Views\vyuCPStorage.sql
 :r ..\dbo\Views\vyuCPCustomer.sql
+:r ..\dbo\Views\vyuCPAgcrdMst.sql
 
 -- TANK MANAGEMENT
 :r ..\dbo\Views\vyuTMOriginOption.sql
