@@ -366,10 +366,6 @@
     <Build Include="dbo\Stored Procedures\uspAPPostBill.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBillBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspRMInsertDynamicParameterFields.sql" />
-    <Build Include="dbo\Stored Procedures\WithGasCheck.sql" />
-    <Build Include="dbo\Stored Procedures\WithLeakCheck.sql" />
-    <Build Include="dbo\Stored Procedures\WithoutGasCheck.sql" />
-    <Build Include="dbo\Stored Procedures\WithoutLeakCheck.sql" />
     <Build Include="dbo\User Defined Types\RecapTableType.sql" />
     <None Include="Script.PreDeployment1.sql" />
     <None Include="Script.PostDeployment1.sql" />

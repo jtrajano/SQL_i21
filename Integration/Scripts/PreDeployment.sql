@@ -53,6 +53,8 @@
 :r ..\dbo\Views\vyuCPStorage.sql
 :r ..\dbo\Views\vyuCPCustomer.sql
 :r ..\dbo\Views\vyuCPAgcrdMst.sql
+:r ..\dbo\Views\vyuCPGAContractHistory.sql
+:r ..\dbo\Views\vyuCPGAContractOption.sql
 
 -- TANK MANAGEMENT
 :r ..\dbo\Views\vyuTMOriginOption.sql
@@ -70,6 +72,11 @@
 :r ..\dbo\Views\vwtrmmst.sql
 :r ..\dbo\Views\vwDispatch.sql
 :r "..\dbo\Stored Procedures\TwoPartDeliveryFillReport.sql"
+:r "..\dbo\Stored Procedures\uspTMGetConsumptionWithGasCheck.sql"
+:r "..\dbo\Stored Procedures\uspTMGetConsumptionWithLeakCheck.sql"
+:r "..\dbo\Stored Procedures\uspTMGetConsumptionWithoutLeakCheck.sql"
+
+
 :r "..\dbo\Stored Procedures\uspAPImportBillTransactions.sql"
 :r "..\dbo\Stored Procedures\uspAPImportVendor.sql"
 

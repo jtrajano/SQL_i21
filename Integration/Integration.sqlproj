@@ -112,6 +112,7 @@
     <None Include="Views.publish.xml" />
     <None Include="Scripts\LoadModules.sql" />
     <None Include="Integration.publish.xml" />
+    <None Include="dbo\Stored Procedures\uspTMGetConsumptionWithoutGasCheck.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
@@ -140,5 +141,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="dbo\Views\vyuCPAgcrdMst.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dbo\Stored Procedures\uspTMGetConsumptionWithGasCheck.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dbo\Stored Procedures\uspTMGetConsumptionWithLeakCheck.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dbo\Stored Procedures\uspTMGetConsumptionWithoutLeakCheck.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dbo\Views\vyuCPGAContractHistory.sql" />
+    <None Include="dbo\Views\vyuCPGAContractOption.sql" />
   </ItemGroup>
 </Project>
