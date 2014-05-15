@@ -26,6 +26,7 @@
     [dtmDateReconciled]        DATETIME         NULL,
 	[intBankStatementImportId] INT              NULL,
     [intCreatedUserId]         INT              NULL,
+	[intCompanyLocationId]     INT              NULL,
     [dtmCreated]               DATETIME         NULL,
     [intLastModifiedUserId]    INT              NULL,
     [dtmLastModified]          DATETIME         NULL,
@@ -33,6 +34,7 @@
     CONSTRAINT [PK_tblCMBankTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC),
     CONSTRAINT [FK_tblCMBankAccounttblCMBankTransaction] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]),
     CONSTRAINT [FK_tblCMBankTransactiontblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [dbo].[tblSMCurrency] (intCurrencyID),
+	CONSTRAINT [FK_tblCMBankTransactiontblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] (intCompanyLocationId),
     UNIQUE NONCLUSTERED ([strTransactionId] ASC)
 );
 
