@@ -25,17 +25,16 @@ BEGIN
 	IF EXISTS (SELECT TOP 1 1 FROM dbo.tblCMBankTransaction WHERE strTransactionId = @strTransactionId)
 	BEGIN 
 		-- Retrieve the Max transaction id. 
-		SET @strTransactionId = NULL
-		SELECT	@strTransactionId = MAX(strTransactionId)			
+		SET @intNumber = NULL
+		
+		-- Retrieve the highest number part in the transaction id. 
+		SELECT	@intNumber = MAX(CAST(REPLACE(strTransactionId, @strPrefix, '') AS INT))			
 		FROM	dbo.tblCMBankTransaction t INNER JOIN dbo.tblCMBankTransactionType t_type
 					ON t.intBankTransactionTypeId = t_type.intBankTransactionTypeId
 		WHERE	t_type.strBankTransactionTypeName = @strTransactionType
 		
-		IF (@strTransactionId IS NOT NULL)	
+		IF (@intNumber IS NOT NULL)	
 		BEGIN 	
-			-- Extract the number part in the transaction id. 
-			SET @intNumber = CAST(REPLACE(@strTransactionId, @strPrefix, '') AS INT) 
-			
 			-- Update the next transaction id. 
 			UPDATE	dbo.tblSMStartingNumber
 			SET		intNumber = @intNumber + 1 
@@ -62,17 +61,16 @@ BEGIN
 	IF EXISTS (SELECT TOP 1 1 FROM dbo.tblCMBankTransaction WHERE strTransactionId = @strTransactionId)
 	BEGIN 
 		-- Retrieve the Max transaction id. 
-		SET @strTransactionId = NULL
-		SELECT	@strTransactionId = MAX(strTransactionId)			
+		SET @intNumber = NULL
+		
+		-- Retrieve the highest number part in the transaction id. 
+		SELECT	@intNumber = MAX(CAST(REPLACE(strTransactionId, @strPrefix, '') AS INT))	
 		FROM	dbo.tblCMBankTransaction t INNER JOIN dbo.tblCMBankTransactionType t_type
 					ON t.intBankTransactionTypeId = t_type.intBankTransactionTypeId
 		WHERE	t_type.strBankTransactionTypeName = @strTransactionType
 		
-		IF (@strTransactionId IS NOT NULL)	
-		BEGIN 	
-			-- Extract the number part in the transaction id. 
-			SET @intNumber = CAST(REPLACE(@strTransactionId, @strPrefix, '') AS INT) 
-			
+		IF (@intNumber IS NOT NULL)	
+		BEGIN 		
 			-- Update the next transaction id. 
 			UPDATE	dbo.tblSMStartingNumber
 			SET		intNumber = @intNumber + 1 
@@ -97,20 +95,17 @@ BEGIN
 	FROM	dbo.tblSMStartingNumber
 	WHERE	strTransactionType = @strTransactionType
 
-	IF EXISTS (SELECT TOP 1 1 FROM dbo.tblCMBankTransaction WHERE strTransactionId = @strTransactionId)
+	IF EXISTS (SELECT TOP 1 1 FROM dbo.tblCMBankTransfer WHERE strTransactionId = @strTransactionId)
 	BEGIN 
 		-- Retrieve the Max transaction id. 
-		SET @strTransactionId = NULL
-		SELECT	@strTransactionId = MAX(strTransactionId)			
-		FROM	dbo.tblCMBankTransaction t INNER JOIN dbo.tblCMBankTransactionType t_type
-					ON t.intBankTransactionTypeId = t_type.intBankTransactionTypeId
-		WHERE	t_type.strBankTransactionTypeName = @strTransactionType
+		SET @intNumber = NULL
 		
-		IF (@strTransactionId IS NOT NULL)	
+		-- Retrieve the highest number part in the transaction id. 
+		SELECT	@intNumber = MAX(CAST(REPLACE(strTransactionId, @strPrefix, '') AS INT))	
+		FROM	dbo.tblCMBankTransfer 
+		
+		IF (@intNumber IS NOT NULL)	
 		BEGIN 	
-			-- Extract the number part in the transaction id. 
-			SET @intNumber = CAST(REPLACE(@strTransactionId, @strPrefix, '') AS INT) 
-			
 			-- Update the next transaction id. 
 			UPDATE	dbo.tblSMStartingNumber
 			SET		intNumber = @intNumber + 1 
@@ -137,17 +132,16 @@ BEGIN
 	IF EXISTS (SELECT TOP 1 1 FROM dbo.tblCMBankTransaction WHERE strTransactionId = @strTransactionId)
 	BEGIN 
 		-- Retrieve the Max transaction id. 
-		SET @strTransactionId = NULL
-		SELECT	@strTransactionId = MAX(strTransactionId)			
+		SET @intNumber = NULL
+		
+		-- Retrieve the highest number part in the transaction id. 
+		SELECT	@intNumber = MAX(CAST(REPLACE(strTransactionId, @strPrefix, '') AS INT))	
 		FROM	dbo.tblCMBankTransaction t INNER JOIN dbo.tblCMBankTransactionType t_type
 					ON t.intBankTransactionTypeId = t_type.intBankTransactionTypeId
 		WHERE	t_type.strBankTransactionTypeName = @strTransactionType
 		
-		IF (@strTransactionId IS NOT NULL)	
+		IF (@intNumber IS NOT NULL)	
 		BEGIN 	
-			-- Extract the number part in the transaction id. 
-			SET @intNumber = CAST(REPLACE(@strTransactionId, @strPrefix, '') AS INT) 
-			
 			-- Update the next transaction id. 
 			UPDATE	dbo.tblSMStartingNumber
 			SET		intNumber = @intNumber + 1 
@@ -174,17 +168,16 @@ BEGIN
 	IF EXISTS (SELECT TOP 1 1 FROM dbo.tblCMBankTransaction WHERE strTransactionId = @strTransactionId)
 	BEGIN 
 		-- Retrieve the Max transaction id. 
-		SET @strTransactionId = NULL
-		SELECT	@strTransactionId = MAX(strTransactionId)			
+		SET @intNumber = NULL
+		
+		-- Retrieve the highest number part in the transaction id. 
+		SELECT	@intNumber = MAX(CAST(REPLACE(strTransactionId, @strPrefix, '') AS INT))			
 		FROM	dbo.tblCMBankTransaction t INNER JOIN dbo.tblCMBankTransactionType t_type
 					ON t.intBankTransactionTypeId = t_type.intBankTransactionTypeId
 		WHERE	t_type.strBankTransactionTypeName = @strTransactionType
 		
-		IF (@strTransactionId IS NOT NULL)	
-		BEGIN 	
-			-- Extract the number part in the transaction id. 
-			SET @intNumber = CAST(REPLACE(@strTransactionId, @strPrefix, '') AS INT) 
-			
+		IF (@intNumber IS NOT NULL)	
+		BEGIN
 			-- Update the next transaction id. 
 			UPDATE	dbo.tblSMStartingNumber
 			SET		intNumber = @intNumber + 1 
@@ -211,15 +204,14 @@ BEGIN
 	IF EXISTS (SELECT TOP 1 1 FROM dbo.tblCMBankStatementImport WHERE strBankStatementImportId = @strTransactionId)
 	BEGIN 
 		-- Retrieve the Max transaction id. 
-		SET @strTransactionId = NULL
-		SELECT	@strTransactionId = MAX(strBankStatementImportId)			
-		FROM	dbo.tblCMBankStatementImport t 
+		SET @intNumber = NULL
 		
-		IF (@strTransactionId IS NOT NULL)	
+		-- Retrieve the highest number part in the transaction id. 
+		SELECT	@intNumber = MAX(CAST(REPLACE(strBankStatementImportId, @strPrefix, '') AS INT))	
+		FROM	dbo.tblCMBankStatementImport
+		
+		IF (@intNumber IS NOT NULL)	
 		BEGIN 	
-			-- Extract the number part in the transaction id. 
-			SET @intNumber = CAST(REPLACE(@strTransactionId, @strPrefix, '') AS INT) 
-			
 			-- Update the next transaction id. 
 			UPDATE	dbo.tblSMStartingNumber
 			SET		intNumber = @intNumber + 1 
