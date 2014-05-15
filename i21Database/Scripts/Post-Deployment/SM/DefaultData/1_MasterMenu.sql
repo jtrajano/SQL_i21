@@ -426,3 +426,8 @@ GO
 		AND strType = 'Report'
 		AND strCommand = ''
 GO
+	IF EXISTS(SELECT * FROM tblSMMasterMenu WHERE strMenuName = 'Import Legacy Users' AND strModuleName = 'System Manager' AND strType = 'Screen')
+	UPDATE tblSMMasterMenu 
+	SET strMenuName = 'Import Origin Users'
+	WHERE strMenuName = 'Import Legacy Users' AND strModuleName = 'System Manager' AND strType = 'Screen'
+GO
