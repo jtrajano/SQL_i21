@@ -152,7 +152,7 @@
     <None Include="dbo\Stored Procedures\uspTMGetConsumptionWithoutLeakCheck.sql" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="dbo\Views\vyuCPGAContractHistory.sql" />
-    <Build Include="dbo\Views\vyuCPGAContractOption.sql" />
+    <None Include="dbo\Views\vyuCPGAContractHistory.sql" />
+    <None Include="dbo\Views\vyuCPGAContractOption.sql" />
   </ItemGroup>
 </Project>

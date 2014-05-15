@@ -7,7 +7,7 @@
     [ysnUnlimitedQty]     BIT            NOT NULL DEFAULT ((0)),
     [dtmDateMade]         DATETIME       NULL,
     [dtmDateDue]          DATETIME       NULL,
-    [ysnPrepaid]          BIT            NOT NULL DEFAULT ((0)),
+    [strPrepaid]		  NVARCHAR (6)	 COLLATE Latin1_General_CI_AS NULL,
     [strComments]         NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [ysnAllowSubstitutes] BIT            NOT NULL DEFAULT ((0)),
     [ysnMaxPrice]         BIT            NOT NULL DEFAULT ((0)),

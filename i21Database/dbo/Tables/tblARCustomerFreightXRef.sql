@@ -1,8 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblARCustomerFreightXRef] (
     [intFreightXRefId]  INT             IDENTITY (1, 1) NOT NULL,
     [intEntityId]       INT             NOT NULL,
-    [strTerminalVendor] NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
-    [strVendorName]     NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
+    [intTerminalVendorId] INT   COLLATE Latin1_General_CI_AS NULL,
     [strClassCode]      NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [ysnFreightOnly]    BIT             NOT NULL DEFAULT ((0)),
     [strFreightType]    NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,

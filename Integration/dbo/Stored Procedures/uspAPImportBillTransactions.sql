@@ -17,7 +17,10 @@ BEGIN
 	AS
 	BEGIN
 
-	DECLARE @InsertedData TABLE (intBillId INT, strBillId NVARCHAR(100), ysnPosted BIT)
+	--CREATE TEMP TABLE TO BYPASS EXECUTING FIXING STARTING NUMBERS
+	SELECT @@ROWCOUNT AS TestColumn INTO #tblTempAPByPassFixStartingNumber
+
+	DECLARE @InsertedData TABLE (intBillId INT, strBillId NVARCHAR(100), ysnPosted BIT, ysnPaid BIT)
 	DECLARE @insertedBillBatch TABLE(intBillBatchId INT, intBillId INT)
 	DECLARE @totalBills INT
 	DECLARE @BillId INT
@@ -43,11 +46,11 @@ BEGIN
 			[intAccountId], 
 			[strDescription], 
 			[dblTotal], 
-			[ysnPaid], 
 			[dblAmountDue],
 			[intUserId],
-			[ysnPosted])
-		OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted INTO @InsertedData
+			[ysnPosted],
+			[ysnPaid])
+		OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid INTO @InsertedData
 		--Unposted
 		SELECT 
 			[strVendorId]			=	A.aptrx_vnd_no,
@@ -61,10 +64,10 @@ BEGIN
 			[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
 			[strDescription] 		=	A.aptrx_comment,
 			[dblTotal] 				=	A.aptrx_orig_amt,
-			[ysnPaid] 				=	0, --CASE WHEN SUM(ISNULL(B.apegl_gl_amt,0)) = A.aptrx_orig_amt THEN 1 ELSE 0 END,
 			[dblAmountDue]			=	A.aptrx_orig_amt,--CASE WHEN B.apegl_ivc_no IS NULL THEN A.aptrx_orig_amt ELSE A.aptrx_orig_amt - SUM(ISNULL(B.apegl_gl_amt,0)) END
 			[intUserId]				=	@UserId,
-			[ysnPosted]				=	0
+			[ysnPosted]				=	0,
+			[ysnPaid]				=	0
 		FROM aptrxmst A
 			--LEFT JOIN apeglmst B
 			--	ON A.aptrx_ivc_no = B.apegl_ivc_no
@@ -97,10 +100,10 @@ BEGIN
 			[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
 			[strDescription] 		=	A.apivc_comment,
 			[dblTotal] 				=	A.apivc_orig_amt,
-			[ysnPaid] 				=	0, --CASE WHEN SUM(ISNULL(B.apegl_gl_amt,0)) = A.apivc_orig_amt THEN 1 ELSE 0 END,
 			[dblAmountDue]			=	A.apivc_orig_amt,--CASE WHEN B.apegl_ivc_no IS NULL THEN A.apivc_orig_amt ELSE A.apivc_orig_amt - SUM(ISNULL(B.apegl_gl_amt,0)) END
 			[intUserId]				=	@UserId,
-			[ysnPosted]				=	1
+			[ysnPosted]				=	1,
+			[ysnPaid]				=	CASE WHEN A.apivc_status_ind = ''P'' THEN 1 ELSE 0 END
 		FROM apivcmst A
 			LEFT JOIN apcbkmst B
 				ON A.apivc_cbk_no = B.apcbk_no
@@ -184,11 +187,11 @@ BEGIN
 			[intAccountId], 
 			[strDescription], 
 			[dblTotal], 
-			[ysnPaid], 
 			[dblAmountDue],
 			[intUserId],
-			[ysnPosted])
-		OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted INTO @InsertedData
+			[ysnPosted],
+			[ysnPaid])
+		OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid INTO @InsertedData
 		--Unposted
 		SELECT 
 			[strVendorId]			=	A.aptrx_vnd_no,
@@ -202,10 +205,10 @@ BEGIN
 			[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
 			[strDescription] 		=	A.aptrx_comment,
 			[dblTotal] 				=	A.aptrx_orig_amt,
-			[ysnPaid] 				=	0, --CASE WHEN SUM(ISNULL(B.apegl_gl_amt,0)) = A.aptrx_orig_amt THEN 1 ELSE 0 END,
 			[dblAmountDue]			=	A.aptrx_orig_amt,--CASE WHEN B.apegl_ivc_no IS NULL THEN A.aptrx_orig_amt ELSE A.aptrx_orig_amt - SUM(ISNULL(B.apegl_gl_amt,0)) END
 			[intUserId]				=	@UserId,
-			[ysnPosted]				=	0
+			[ysnPosted]				=	0,
+			[ysnPaid] 				=	0
 		FROM aptrxmst A
 			--LEFT JOIN apeglmst B
 			--	ON A.aptrx_ivc_no = B.apegl_ivc_no
@@ -242,10 +245,10 @@ BEGIN
 			[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
 			[strDescription] 		=	A.apivc_comment,
 			[dblTotal] 				=	A.apivc_orig_amt,
-			[ysnPaid] 				=	0, --CASE WHEN SUM(ISNULL(B.apegl_gl_amt,0)) = A.apivc_orig_amt THEN 1 ELSE 0 END,
 			[dblAmountDue]			=	A.apivc_orig_amt,--CASE WHEN B.apegl_ivc_no IS NULL THEN A.apivc_orig_amt ELSE A.apivc_orig_amt - SUM(ISNULL(B.apegl_gl_amt,0)) END
 			[intUserId]				=	@UserId,
-			[ysnPosted]				=	1
+			[ysnPosted]				=	1,
+			[ysnPaid]				=	CASE WHEN A.apivc_status_ind = ''P'' THEN 1 ELSE 0 END
 		FROM apivcmst A
 			LEFT JOIN apcbkmst B
 				ON A.apivc_cbk_no = B.apcbk_no
