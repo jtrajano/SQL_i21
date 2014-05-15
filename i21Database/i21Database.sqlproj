@@ -530,6 +530,7 @@
     <Build Include="dbo\Tables\tblRMPrintingOption.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\10_RegulatorType.sql" />
     <Build Include="dbo\Views\vyuHDCustomerContact.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPFixStartingNumbers.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
