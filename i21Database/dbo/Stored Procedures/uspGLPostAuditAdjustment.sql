@@ -668,6 +668,53 @@ ELSE
 			END
 				
 		IF @@ERROR <> 0	GOTO Post_Rollback;
+		
+		
+		IF((SELECT COUNT(*) FROM #tmpValidJournals) > 1)
+		BEGIN
+		
+			--SUMMARY GROUP
+			INSERT INTO tblGLPostRecap (
+				 [strTransactionId]
+				,[intTransactionId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[dtmDate]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[strBatchId]
+				,[strCode]
+				,[strModuleName]
+				,[strTransactionForm]
+			)
+			SELECT 
+				 [strTransactionId]
+				,[intTransactionId]		
+				,SUM([dblDebit])
+				,SUM([dblCredit])
+				,SUM([dblDebitUnit])
+				,SUM([dblCreditUnit])
+				,[dtmDate]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[ysnIsUnposted]
+				,[intUserId]	
+				,[strBatchId]	
+				,[strCode]				
+				,[strModuleName]
+				,[strTransactionForm]
+			FROM [dbo].tblGLPostRecap A
+			WHERE A.[strBatchId] = @strBatchId and A.[intUserId] = @intUserId
+			GROUP BY [strTransactionId],[intTransactionId],[dtmDate],[dblExchangeRate],[dtmDateEntered],[ysnIsUnposted],[intUserId],[strBatchId],[strCode],[strModuleName],[strTransactionForm]
+
+			IF @@ERROR <> 0	GOTO Post_Rollback;
+					
+		END
+		
 
 		GOTO Post_Commit;
 	END
