@@ -85,26 +85,31 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 --Fiscal Year
-INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber)
-	SELECT 
-		'Unable to find an open fiscal year period to match the transaction date.',
-		'Bill',
-		A.intBillId,
-		@billBatchId
-	FROM tblAPBill A 
-	WHERE  A.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
-		0 = ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0)
+IF(ISNULL(@post,0) = 1)
+BEGIN
+	INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber)
+		SELECT 
+			'Unable to find an open fiscal year period to match the transaction date.',
+			'Bill',
+			A.intBillId,
+			@billBatchId
+		FROM tblAPBill A 
+		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
+			0 = ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0)
 
-INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber)
-	SELECT 
-		'No terms has been specified.',
-		'Bill',
-		A.intBillId,
-		@billBatchId
-	FROM tblAPBill A 
-	WHERE  A.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
-		0 = A.intTermsId
+	INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber)
+		SELECT 
+			'No terms has been specified.',
+			'Bill',
+			A.intBillId,
+			@billBatchId
+		FROM tblAPBill A 
+		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
+			0 = A.intTermsId
+END 
 
+IF(ISNULL(@post,0) = 1)
+BEGIN
 --NOT BALANCE
 INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber)
 	SELECT 
@@ -115,9 +120,27 @@ INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, 
 	FROM tblAPBill A 
 	WHERE  A.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
 		A.dblTotal <> (SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = A.intBillId)
+END
+
+--ALREADY HAVE PAYMENTS
+IF(ISNULL(@post,0) = 0)
+BEGIN
+INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber)
+	SELECT
+		A.strPaymentRecordNum + ' payment was already made on this bill.',
+		'Bill',
+		C.intBillId,
+		@billBatchId
+	FROM tblAPPayment A
+		INNER JOIN tblAPPaymentDetail B 
+			ON A.intPaymentId = B.intPaymentId
+		INNER JOIN tblAPBill C
+			ON B.intBillId = C.intBillId
+	WHERE  C.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData)
+END
 
 --ALREADY POSTED
-IF(ISNULL(@post,0) = 0)
+IF(ISNULL(@post,0) = 1)
 BEGIN
 	INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber)
 		SELECT 
@@ -129,9 +152,10 @@ BEGIN
 		WHERE  A.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
 			A.ysnPosted = 1
 
-	DECLARE @totalInvalid INT = 0
-	SET @totalInvalid = (SELECT COUNT(*) #tmpInvalidBillData)
 END
+
+DECLARE @totalInvalid INT = 0
+SELECT @totalInvalid = COUNT(*) FROM #tmpInvalidBillData
 
 IF(@totalInvalid > 0)
 BEGIN
@@ -149,6 +173,10 @@ BEGIN
 END
 
 
+DECLARE @totalRecords INT
+SELECT @totalRecords = COUNT(*) FROM #tmpPostBillData
+
+
 --=====================================================================================================================================
 -- 	CHECK IF THE PROCESS IS RECAP OR NOT
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -157,7 +185,7 @@ IF ISNULL(@recap, 0) = 0
 	IF(ISNULL(@post,0) = 0)
 	BEGIN
 		
-		IF(@billBatchId IS NOT NULL)
+		IF(@billBatchId IS NOT NULL AND @totalRecords > 0)
 		BEGIN
 			UPDATE tblAPBillBatch
 				SET ysnPosted = 0
@@ -171,7 +199,6 @@ IF ISNULL(@recap, 0) = 0
 		UPDATE tblGLDetail
 			SET ysnIsUnposted = 1
 		WHERE strTransactionId IN (SELECT strBillId FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData))
-			
 
 	END
 	ELSE
@@ -357,8 +384,6 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 --=====================================================================================================================================
 -- 	RETURN TOTAL NUMBER OF VALID JOURNALS
 ---------------------------------------------------------------------------------------------------------------------------------------
-DECLARE @totalRecords INT
-SELECT @totalRecords = COUNT(*) FROM #tmpPostBillData
 SET @successfulCount = @totalRecords
 --=====================================================================================================================================
 -- 	FINALIZING STAGE
