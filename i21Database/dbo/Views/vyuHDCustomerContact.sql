@@ -10,6 +10,7 @@
 		,ec.strPhone
 		,el.strLocationName
 		,ec.strTimezone
+		,intConcurrencyId = 1
 	  from
 		tblEntityContact ec
 		inner join tblEntityToContact etc on etc.intContactId = ec.intEntityId

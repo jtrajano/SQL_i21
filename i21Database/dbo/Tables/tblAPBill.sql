@@ -46,6 +46,7 @@ SELECT intBillId FROM INSERTED ORDER BY intBillId
 WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
 BEGIN
 	
+	EXEC uspAPFixStartingNumbers 9
 	EXEC uspSMGetStartingNumber 9, @BillId OUT
 
 	SELECT TOP 1 @intBillId = intBillId FROM @inserted

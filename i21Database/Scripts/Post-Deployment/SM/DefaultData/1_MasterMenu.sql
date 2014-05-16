@@ -431,3 +431,6 @@ GO
 	SET strMenuName = 'Import Origin Users'
 	WHERE strMenuName = 'Import Legacy Users' AND strModuleName = 'System Manager' AND strType = 'Screen'
 GO
+	IF NOT EXISTS(SELECT * FROM tblSMMasterMenu WHERE strMenuName = 'Company Location' AND strType = 'Screen' AND strModuleName = 'System Manager')
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Company Location', N'System Manager', 13, N'Company Location', N'Screen', N'i21.controller.CompanyLocation', N'small-screen', 0, 0, 0, 1, NULL, 1)
+GO

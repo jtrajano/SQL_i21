@@ -28,6 +28,7 @@ SELECT intBillBatchId FROM INSERTED ORDER BY intBillBatchId
 WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
 BEGIN
 
+	EXEC uspAPFixStartingNumbers 7
 	EXEC uspSMGetStartingNumber 7, @BillBatchId OUT
 
 	SELECT TOP 1 @intBillBatchId = intBillBatchId FROM @inserted
@@ -44,3 +45,6 @@ BEGIN
 	WHERE intBillBatchId = @intBillBatchId
 
 END
+GO
+
+CREATE INDEX [IX_tblAPBillBatch_strBillBatchNumber] ON [dbo].[tblAPBillBatch] ([strBillBatchNumber])
