@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblEntityEFTInformation] (
     [intEntityEFTInfoId]       INT            IDENTITY (1, 1) NOT NULL,
     [intEntityId]              INT            NOT NULL,
-    [intBankId]                INT            NULL,
+    [intBankId]                INT            NOT NULL,
     [strBankName]              NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [strAccountNumber]         NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strAccountType]           NVARCHAR (10)  COLLATE Latin1_General_CI_AS NULL,
