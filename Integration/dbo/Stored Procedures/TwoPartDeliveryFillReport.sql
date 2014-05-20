@@ -12,18 +12,13 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE (strPrefix = 'AG' OR strPref
 BEGIN
 	EXEC('
 
+	
+
 	CREATE PROCEDURE [dbo].[TwoPartDeliveryFillReport] (@xmlParam NVARCHAR(MAX)=null)  
 	AS  
   
-		/*set @xmlparam = ''<xmlparam><filters><filter><fieldname>strLocation</fieldname><condition>Between</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>strDriverID<
-		/fieldname><condition>Equal To</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>strRouteId</fieldname><condition>Between</condition><from /><to /><join>And</joi
-		n><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>intNextDeliveryDegreeDay</fieldname><condition>Between</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datat
-		ype>Integer</datatype></filter><filter><fieldname>dtmNextDeliveryDate</fieldname><condition>Between</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>dtmRequeste
-		dDate</fieldname><condition>Between</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>DateTime</datatype></filter><filter><fieldname>strFillMethod</fieldname><condition>Equal To</condition><from /><to /><jo
-		in>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>dblQuantity</fieldname><condition>Between</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatyp
-		e>Decimal</datatype></filter><filter><fieldname>dblEstimatedPercentLeft</fieldname><condition>Less Than Or Equal</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>Decimal</datatype></filter><filter><fieldna
-		me>dtmForecastedDelivery</fieldname><condition>Between</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>DateTime</datatype></filter><filter><fieldname>strProductID</fieldname><condition>Between</condition>
-		<from>2225</from><to>2225</to><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter></filters><options /></xmlparam>''  
+		/*
+		set @xmlparam = ''<?xml version="1.0" encoding="utf-16"?><xmlparam>''''<options><option><name>List Totals Only</name><enable>False</enable></option><option><name>List Unit Price</name><enable>True</enable></option><option><name>Print Tank Info</name><enable>True</enable></option><option><name>Print Contracts</name><enable>True</enable></option><option><name>Print Regulator Info</name><enable>True</enable></option><option><name>Include Consumption Sites On Hold</name><enable>True</enable></option><option><name>Include Consumption Site in the same Fill Group</name><enable>True</enable></option></options></xmlparam>''  
 		*/  
 		 SET NOCOUNT ON  
 		 IF (ISNULL(@xmlParam,'''') = '''')  
@@ -308,7 +303,7 @@ BEGIN
 		 SELECT @RegulatorInfo = [enable] FROM @temp_designParam WHERE [name] = ''Print Regulator Info''  
    
 		 --Fill Group  
-		 SELECT @FillGroup = [enable] FROM @temp_designParam WHERE [name] = ''Include Consumption Site on the same Fill Group''  
+		 SELECT @FillGroup = [enable] FROM @temp_designParam WHERE [name] = ''Include Consumption Site in the same Fill Group''  
    
 		 --On Hold  
 		 SELECT @OnHold = [enable] FROM @temp_designParam WHERE [name] = ''Include Consumption Sites On Hold''  
@@ -1137,15 +1132,15 @@ BEGIN
 			@agcus_key   
 			,@intSiteNumber   
 			,strLine =   
-			 ''<font face="courier new" size="1">'' +   
+			 (''<font face="courier new" size="1">'' +   
 			  REPLACE(  
-				CAST( ISNULL(strFillGroupCode, '''') AS CHAR(15)) + @Gaps +  
-				CAST(ISNULL(strDescription, '''') AS CHAR(50)) + @Gaps +   
-				CAST(ISNULL(CAST(ysnActive AS VARCHAR(10)), '''') AS CHAR(6))   
+				CAST( ISNULL(strFillGroupCode, '''') AS CHAR(15)) COLLATE Latin1_General_CI_AS + @Gaps +  
+				CAST(ISNULL(strDescription, '''') AS CHAR(50)) COLLATE Latin1_General_CI_AS + @Gaps +   
+				CAST(ISNULL(CAST(ysnActive AS VARCHAR(10)), '''') AS CHAR(6)) COLLATE Latin1_General_CI_AS  
 			   , '' ''  
 			   , ''&#160;''  
 			  ) +   
-			 ''</font>''  
+			 ''</font>'') COLLATE Latin1_General_CI_AS
 		   FROM #tmpDeliveryFillGroup  
      
 		   -- Insert the detail column captions.   
@@ -1171,20 +1166,20 @@ BEGIN
 		   SELECT  @agcus_key   
 			 ,@intSiteNumber   
 			 ,strLine =   
-			  ''<font face="courier new" size="1">'' +   
+			  (''<font face="courier new" size="1">'' +   
 			   REPLACE(  
 				 @Gaps +  
-				 CAST(intLineNumber AS CHAR(3)) + @Gaps +  
-				 CAST(LTRIM(RTRIM(ISNULL(agcus_key, ''''))) AS CHAR(17)) + @Gaps +  
+				 CAST(intLineNumber AS CHAR(3)) COLLATE Latin1_General_CI_AS  + @Gaps +  
+				 CAST(LTRIM(RTRIM(ISNULL(agcus_key, ''''))) AS CHAR(17)) COLLATE Latin1_General_CI_AS + @Gaps +  
            
-				 CAST((Case When LEN(RTRIM(LTRIM(CustomerName))) > 20 THEN SUBSTRING(CustomerName,1,16) + '' ...'' ELSE ISNULL(CustomerName,'''') end)as CHAR(20)) + @Gaps +  
-				 CAST(''000''+ ISNULL(CAST(intSiteNumber AS VARCHAR(10)), '''') AS CHAR(10)) + @Gaps +  
-				 CAST(LTRIM(RTRIM(ISNULL(REPLACE(strSiteAddress,CHAR(13),''''), ''''))) AS CHAR(40)) + @Gaps +  
-				 CAST(LTRIM(RTRIM(ISNULL(strSiteDescription, ''''))) AS CHAR(40))   
+				 CAST((Case When LEN(RTRIM(LTRIM(CustomerName))) > 20 THEN SUBSTRING(CustomerName,1,16) + '' ...'' ELSE ISNULL(CustomerName,'''') end)as CHAR(20)) COLLATE Latin1_General_CI_AS + @Gaps +  
+				 CAST(''000''+ ISNULL(CAST(intSiteNumber AS VARCHAR(10)), '''') AS CHAR(10)) COLLATE Latin1_General_CI_AS + @Gaps +  
+				 CAST(LTRIM(RTRIM(ISNULL(REPLACE(strSiteAddress,CHAR(13),''''), ''''))) AS CHAR(40)) COLLATE Latin1_General_CI_AS + @Gaps +  
+				 CAST(LTRIM(RTRIM(ISNULL(strSiteDescription, ''''))) AS CHAR(40)) COLLATE Latin1_General_CI_AS  
 				, '' ''   
 				, ''&#160;''  
 			   ) +   
-			  ''</font>''  
+			  ''</font>'') COLLATE Latin1_General_CI_AS 
 		   FROM #tmpDeliveryFillGroup    
 		  END   
 		  END    
