@@ -136,6 +136,8 @@ BEGIN
 		 DECLARE @strFillGroupCode AS VARCHAR(100)   
 		 DECLARE @strHoldReason AS NVARCHAR(100)  
 		 DECLARE @strOnHold AS VARCHAR(20)    
+		 DECLARE @dtmNextDeliveryDate AS DATETIME   
+		 DECLARE @dtmRequestedDate AS DATETIME 
   
 		 DECLARE @intCounter AS INT   
 		 SET @intCounter = 0   
@@ -638,11 +640,13 @@ BEGIN
 		   ,Credits -- 35  
 		   ,strInstruction -- 36  
 		   ,strComment -- 37   
+		   ,dtmNextDeliveryDate
 		   ,idPhone = [agcus_key] + ''  '' + [agcus_phone]  
 		   ,FullName = LTRIM(RTRIM([agcus_last_name])) + '', '' + LTRIM(RTRIM([agcus_first_name]))   
 		   ,strFillGroupCode  
 		   ,strHoldReason  
 		   ,strOnHold   
+		   ,dtmRequestedDate
 		 INTO #tmpLoopQuery  
 		 FROM  @DeliveryFillTable  
      
@@ -707,7 +711,9 @@ BEGIN
 		 ALTER TABLE #tmpDetailToCut ALTER COLUMN FullName VARCHAR(500) NULL  
 		 ALTER TABLE #tmpDetailToCut ALTER COLUMN strFillGroupCode VARCHAR(100) NULL   
 		 ALTER TABLE #tmpDetailToCut ALTER COLUMN strHoldReason NVARCHAR(100) NULL   
-		 ALTER TABLE #tmpDetailToCut ALTER COLUMN strOnHold VARCHAR(20) NULL    
+		 ALTER TABLE #tmpDetailToCut ALTER COLUMN strOnHold VARCHAR(20) NULL
+		 ALTER TABLE #tmpDetailToCut ALTER COLUMN dtmNextDeliveryDate DATETIME NULL    
+		 ALTER TABLE #tmpDetailToCut ALTER COLUMN dtmRequestedDate DATETIME NULL    
 		 -- Create another temporary table where the result will be generated.   
 		 SELECT *   
 		   ,strLine = CAST(NULL AS VARCHAR(MAX))  
@@ -761,6 +767,8 @@ BEGIN
 		 ALTER TABLE #tmpResult ALTER COLUMN strFillGroupCode VARCHAR(100) NULL  
 		 ALTER TABLE #tmpResult ALTER COLUMN strHoldReason VARCHAR(100) NULL   
 		 ALTER TABLE #tmpResult ALTER COLUMN strOnHold VARCHAR(100) NULL  
+		 ALTER TABLE #tmpResult ALTER COLUMN dtmNextDeliveryDate DATETIME NULL  
+		 ALTER TABLE #tmpResult ALTER COLUMN dtmRequestedDate DATETIME NULL    
 		 -- Optimize the loop table by adding indexes  
 		 IF OBJECT_ID(''tempdb..#tmpResult'') IS NOT NULL  
 		 BEGIN  
@@ -817,7 +825,9 @@ BEGIN
 			,@FullName = FullName     
 			,@strFillGroupCode = strFillGroupCode   
 			,@strHoldReason = strHoldReason  
-			,@strOnHold = strOnHold   
+			,@strOnHold = strOnHold 
+			,@dtmNextDeliveryDate = dtmNextDeliveryDate
+			,@dtmRequestedDate = dtmRequestedDate
 		  FROM #tmpLoopQuery   
     
 		  IF @ListTotals = ''True''  
@@ -1407,7 +1417,9 @@ BEGIN
 			,FullName = @FullName  
 			,strFillGroupCode = @strFillGroupCode  
 			,strHoldReason = @strHoldReason  
-			,strOnHold = @strOnHold  
+			,strOnHold = @strOnHold
+			,dtmNextDeliveryDate = @dtmNextDeliveryDate  
+			,dtmRequestedDate =@dtmRequestedDate
     
 		  WHERE agcus_key = @agcus_key  
 			AND intSiteNumber = @intSiteNumber    
