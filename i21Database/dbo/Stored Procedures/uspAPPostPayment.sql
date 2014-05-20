@@ -296,9 +296,9 @@ IF ISNULL(@recap, 0) = 0
 
 		--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
 		UPDATE tblAPBill
-			SET tblAPBill.dblAmountDue = (C.dblAmountDue - B.dblPayment),
-				tblAPBill.ysnPaid = (CASE WHEN (C.dblAmountDue - B.dblPayment) = 0 THEN 1 ELSE 0 END),
-				tblAPBill.dtmDatePaid = (CASE WHEN (C.dblAmountDue - B.dblPayment) = 0 THEN A.dtmDatePaid ELSE NULL END)
+			SET tblAPBill.dblAmountDue = (C.dblAmountDue - (B.dblPayment + B.dblDiscount)),
+				tblAPBill.ysnPaid = (CASE WHEN (C.dblAmountDue - (B.dblPayment + B.dblDiscount)) = 0 THEN 1 ELSE 0 END),
+				tblAPBill.dtmDatePaid = (CASE WHEN (C.dblAmountDue - (B.dblPayment + B.dblDiscount)) = 0 THEN A.dtmDatePaid ELSE NULL END)
 		FROM tblAPPayment A
 					INNER JOIN tblAPPaymentDetail B 
 							ON A.intPaymentId = B.intPaymentId

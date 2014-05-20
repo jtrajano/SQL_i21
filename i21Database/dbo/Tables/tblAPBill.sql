@@ -6,7 +6,6 @@
     [intTermsId]           INT             NOT NULL,
     [intTaxCodeId]         INT             NULL,
     [dtmDate]              DATETIME        NOT NULL,
-    [dtmBillDate]          DATETIME        NOT NULL,
     [dtmDueDate]           DATETIME        NOT NULL,
     [intAccountId]         INT             NULL,
     [strDescription]       NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
@@ -19,6 +18,7 @@
     [dtmDiscountDate]      DATETIME        NULL,
     [intUserId]            INT             NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
+    [dtmBillDate] DATETIME NOT NULL, 
     CONSTRAINT [PK_dbo.tblAPBill] PRIMARY KEY CLUSTERED ([intBillId] ASC),
     CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPBillBatch_intBillBatchId] FOREIGN KEY ([intBillBatchId]) REFERENCES [dbo].[tblAPBillBatch] ([intBillBatchId]) ON DELETE CASCADE
 );
