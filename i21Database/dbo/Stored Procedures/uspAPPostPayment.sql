@@ -119,6 +119,20 @@ BEGIN
 			A.ysnPosted = 1
 END
 
+--Already cleared/reconciled
+IF(ISNULL(@post,0) = 0)
+BEGIN
+	INSERT INTO #tmpPayableInvalidData
+		SELECT 
+			'The transaction is already cleared.',
+			'Payable',
+			A.intPaymentId,
+			@batchId
+		FROM tblAPPayment A 
+			INNER JOIN tblCMBankTransaction B ON A.strPaymentRecordNum = B.strTransactionId
+		WHERE B.ysnClr = 1
+END
+
 DECLARE @totalInvalid INT
 SET @totalInvalid = (SELECT COUNT(*) #tmpPayableInvalidData)
 
@@ -188,6 +202,15 @@ IF ISNULL(@recap, 0) = 0
 			AND tblSMPaymentMethod.strPaymentMethod != 'Check'
 		)
 
+		--VOID IF CHECK PAYMENT
+		UPDATE tblCMBankTransaction
+		SET ysnCheckVoid = 1,
+			ysnPosted = 0
+		WHERE strTransactionId IN (
+			SELECT strPaymentRecordNum 
+			FROM tblAPPayment
+			 WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData) 
+		)
 
 
 	END
