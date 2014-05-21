@@ -545,5 +545,6 @@
     <None Include="Scripts\Post-Deployment\FIN\GLEntryDataFix.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\1_PreferenceCompany.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\2_EventType.sql" />
+    <None Include="i1420AG.local.publish.xml" />
   </ItemGroup>
 </Project>
