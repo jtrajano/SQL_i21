@@ -46,9 +46,11 @@ DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
 SET @recapId = '1'
 
 --SET BatchId
-IF(ISNULL(@batchId,'') = '')
+IF(@batchId IS NULL)
 BEGIN
-	EXEC uspSMGetStartingNumber 3, @batchId OUT
+	DECLARE @newBatchId NVARCHAR(50)
+	EXEC uspSMGetStartingNumber 3, @newBatchId OUT
+	SET @batchId = @newBatchId
 END
 
 --=====================================================================================================================================
@@ -134,7 +136,7 @@ BEGIN
 END
 
 DECLARE @totalInvalid INT
-SET @totalInvalid = (SELECT COUNT(*) #tmpPayableInvalidData)
+SET @totalInvalid = (SELECT COUNT(*) FROM #tmpPayableInvalidData)
 
 IF(@totalInvalid > 0)
 BEGIN
@@ -145,19 +147,30 @@ BEGIN
 	SET @invalidCount = @totalInvalid
 
 	--DELETE Invalid Transaction From temp table
-	DELETE FROM #tmpPayablePostData
-	FROM tblAPInvalidTransaction
-	WHERE #tmpPayablePostData.intPaymentId = CAST(tblAPInvalidTransaction.strTransactionId AS INT)
+	DELETE #tmpPayablePostData
+		FROM #tmpPayablePostData A
+			INNER JOIN #tmpPayableInvalidData
+				ON A.intPaymentId = CAST(#tmpPayableInvalidData.strTransactionId AS INT)
 
 END
 
 
 DECLARE @totalRecords INT
 SELECT @totalRecords = COUNT(*) FROM #tmpPayablePostData
+
+COMMIT TRANSACTION --COMMIT inserted invalid transaction
+
+IF(@totalRecords = 0)  
+BEGIN
+	SET @success = 0
+	GOTO Post_Exit
+END
+
+BEGIN TRANSACTION
 --=====================================================================================================================================
 -- 	CHECK IF THE PROCESS IS RECAP OR NOT
 ---------------------------------------------------------------------------------------------------------------------------------------
-IF ISNULL(@recap, 0) = 0
+IF (ISNULL(@recap, 0) = 0)
 
 	IF(ISNULL(@post,0) = 0)
 	BEGIN
@@ -211,6 +224,10 @@ IF ISNULL(@recap, 0) = 0
 			FROM tblAPPayment
 			 WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData) 
 		)
+
+		--removed from tblAPInvalidTransaction the successful records
+		DELETE FROM tblAPInvalidTransaction
+		WHERE CAST(strTransactionId AS NVARCHAR(50)) IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 
 	END
@@ -418,6 +435,10 @@ IF ISNULL(@recap, 0) = 0
 				INNER JOIN tblAPVendor B
 					ON A.strVendorId = B.strVendorId
 			WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+
+			--removed from tblAPInvalidTransaction the successful records
+			DELETE FROM tblAPInvalidTransaction
+			WHERE CAST(strTransactionId AS NVARCHAR(50)) IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
@@ -657,4 +678,4 @@ Post_Rollback:
 
 Post_Exit:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE ID = OBJECT_ID('tempdb..#tmpPayablePostData')) DROP TABLE #tmpPayablePostData
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE ID = OBJECT_ID('tempdb..#tmpValidData')) DROP TABLE #tmpPayableInvalidData
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE ID = OBJECT_ID('tempdb..##tmpPayableInvalidData')) DROP TABLE #tmpPayableInvalidData
