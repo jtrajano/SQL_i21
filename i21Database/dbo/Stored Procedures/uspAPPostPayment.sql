@@ -131,7 +131,7 @@ IF ISNULL(@recap, 0) = 0
 	IF(ISNULL(@post,0) = 0)
 	BEGIN
 		
-		--Unpost
+		--Unposting Process
 		UPDATE tblAPPayment
 			SET ysnPosted = 0
 		FROM tblAPPayment WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
@@ -163,7 +163,15 @@ IF ISNULL(@recap, 0) = 0
 
 		--DELETE IF NOT CHECK PAYMENT
 		DELETE FROM tblCMBankTransaction
-		WHERE strTransactionId IN (SELECT strPaymentRecordNum FROM tblAPPayment WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData) AND intPaymentMethodId != 3)
+		WHERE strTransactionId IN (
+			SELECT strPaymentRecordNum 
+			FROM tblAPPayment
+				INNER JOIN tblSMPaymentMethod ON tblAPPayment.intPaymentMethodId = tblSMPaymentMethod.intPaymentMethodID
+			 WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData) 
+			AND tblSMPaymentMethod.strPaymentMethod != 'Check'
+		)
+
+
 
 	END
 	ELSE
