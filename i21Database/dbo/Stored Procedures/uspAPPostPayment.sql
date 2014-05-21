@@ -46,9 +46,11 @@ DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
 SET @recapId = '1'
 
 --SET BatchId
-IF(ISNULL(@batchId,'') = '')
+IF(@batchId IS NULL)
 BEGIN
-	EXEC uspSMGetStartingNumber 3, @batchId OUT
+	DECLARE @newBatchId NVARCHAR(50)
+	EXEC uspSMGetStartingNumber 3, @newBatchId OUT
+	SET @batchId = @newBatchId
 END
 
 --=====================================================================================================================================
@@ -78,40 +80,63 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 --Fiscal Year
-INSERT INTO #tmpPayableInvalidData
-	SELECT 
-		'Unable to find an open fiscal year period to match the transaction date.',
-		'Payable',
-		A.intPaymentId,
-		@batchId
-	FROM tblAPPayment A 
-	WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
-		0 = ISNULL([dbo].isOpenAccountingDate(A.[dtmDatePaid]), 0)
+IF(ISNULL(@post,0) = 1)
+BEGIN
+	INSERT INTO #tmpPayableInvalidData
+		SELECT 
+			'Unable to find an open fiscal year period to match the transaction date.',
+			'Payable',
+			A.intPaymentId,
+			@batchId
+		FROM tblAPPayment A 
+		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
+			0 = ISNULL([dbo].isOpenAccountingDate(A.[dtmDatePaid]), 0)
+END
 
 --NOT BALANCE
-INSERT INTO #tmpPayableInvalidData
-	SELECT 
-		'The debit and credit amounts are not balanced.',
-		'Payable',
-		A.intPaymentId,
-		@batchId
-	FROM tblAPPayment A 
-	WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
-		A.dblAmountPaid <> (SELECT SUM(dblPayment) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)
+IF(ISNULL(@post,0) = 1)
+BEGIN
+	INSERT INTO #tmpPayableInvalidData
+		SELECT 
+			'The debit and credit amounts are not balanced.',
+			'Payable',
+			A.intPaymentId,
+			@batchId
+		FROM tblAPPayment A 
+		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
+			A.dblAmountPaid <> (SELECT SUM(dblPayment) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)
+END
 
 --ALREADY POSTED
-INSERT INTO #tmpPayableInvalidData
-	SELECT 
-		'The transaction is already posted.',
-		'Payable',
-		A.intPaymentId,
-		@batchId
-	FROM tblAPPayment A 
-	WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
-		A.ysnPosted = 1
+IF(ISNULL(@post,0) = 1)
+BEGIN
+	INSERT INTO #tmpPayableInvalidData
+		SELECT 
+			'The transaction is already posted.',
+			'Payable',
+			A.intPaymentId,
+			@batchId
+		FROM tblAPPayment A 
+		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
+			A.ysnPosted = 1
+END
+
+--Already cleared/reconciled
+IF(ISNULL(@post,0) = 0)
+BEGIN
+	INSERT INTO #tmpPayableInvalidData
+		SELECT 
+			'The transaction is already cleared.',
+			'Payable',
+			A.intPaymentId,
+			@batchId
+		FROM tblAPPayment A 
+			INNER JOIN tblCMBankTransaction B ON A.strPaymentRecordNum = B.strTransactionId
+		WHERE B.ysnClr = 1
+END
 
 DECLARE @totalInvalid INT
-SET @totalInvalid = (SELECT COUNT(*) #tmpPayableInvalidData)
+SET @totalInvalid = (SELECT COUNT(*) FROM #tmpPayableInvalidData)
 
 IF(@totalInvalid > 0)
 BEGIN
@@ -121,12 +146,31 @@ BEGIN
 
 	SET @invalidCount = @totalInvalid
 
+	--DELETE Invalid Transaction From temp table
+	DELETE #tmpPayablePostData
+		FROM #tmpPayablePostData A
+			INNER JOIN #tmpPayableInvalidData
+				ON A.intPaymentId = CAST(#tmpPayableInvalidData.strTransactionId AS INT)
+
 END
 
+
+DECLARE @totalRecords INT
+SELECT @totalRecords = COUNT(*) FROM #tmpPayablePostData
+
+COMMIT TRANSACTION --COMMIT inserted invalid transaction
+
+IF(@totalRecords = 0)  
+BEGIN
+	SET @success = 0
+	GOTO Post_Exit
+END
+
+BEGIN TRANSACTION
 --=====================================================================================================================================
 -- 	CHECK IF THE PROCESS IS RECAP OR NOT
 ---------------------------------------------------------------------------------------------------------------------------------------
-IF ISNULL(@recap, 0) = 0
+IF (ISNULL(@recap, 0) = 0)
 
 	IF(ISNULL(@post,0) = 0)
 	BEGIN
@@ -171,6 +215,19 @@ IF ISNULL(@recap, 0) = 0
 			AND tblSMPaymentMethod.strPaymentMethod != 'Check'
 		)
 
+		--VOID IF CHECK PAYMENT
+		UPDATE tblCMBankTransaction
+		SET ysnCheckVoid = 1,
+			ysnPosted = 0
+		WHERE strTransactionId IN (
+			SELECT strPaymentRecordNum 
+			FROM tblAPPayment
+			 WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData) 
+		)
+
+		--removed from tblAPInvalidTransaction the successful records
+		DELETE FROM tblAPInvalidTransaction
+		WHERE CAST(strTransactionId AS NVARCHAR(50)) IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 
 	END
@@ -378,6 +435,10 @@ IF ISNULL(@recap, 0) = 0
 				INNER JOIN tblAPVendor B
 					ON A.strVendorId = B.strVendorId
 			WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+
+			--removed from tblAPInvalidTransaction the successful records
+			DELETE FROM tblAPInvalidTransaction
+			WHERE CAST(strTransactionId AS NVARCHAR(50)) IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
@@ -599,6 +660,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 
 --IF @@ERROR <> 0	GOTO Post_Rollback;
 
+SET @successfulCount = @totalRecords
 
 --=====================================================================================================================================
 -- 	FINALIZING STAGE
@@ -616,4 +678,4 @@ Post_Rollback:
 
 Post_Exit:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE ID = OBJECT_ID('tempdb..#tmpPayablePostData')) DROP TABLE #tmpPayablePostData
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE ID = OBJECT_ID('tempdb..#tmpValidData')) DROP TABLE #tmpPayableInvalidData
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE ID = OBJECT_ID('tempdb..##tmpPayableInvalidData')) DROP TABLE #tmpPayableInvalidData
