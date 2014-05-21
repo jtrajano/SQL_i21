@@ -193,7 +193,8 @@ IF ISNULL(@recap, 0) = 0
 		END
 
 		UPDATE tblAPBill
-			SET ysnPosted = 0
+			SET ysnPosted = 0,
+				ysnPaid = 0
 		FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 
 		UPDATE tblGLDetail

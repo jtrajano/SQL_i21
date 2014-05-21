@@ -78,37 +78,46 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 --Fiscal Year
-INSERT INTO #tmpPayableInvalidData
-	SELECT 
-		'Unable to find an open fiscal year period to match the transaction date.',
-		'Payable',
-		A.intPaymentId,
-		@batchId
-	FROM tblAPPayment A 
-	WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
-		0 = ISNULL([dbo].isOpenAccountingDate(A.[dtmDatePaid]), 0)
+IF(ISNULL(@post,0) = 1)
+BEGIN
+	INSERT INTO #tmpPayableInvalidData
+		SELECT 
+			'Unable to find an open fiscal year period to match the transaction date.',
+			'Payable',
+			A.intPaymentId,
+			@batchId
+		FROM tblAPPayment A 
+		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
+			0 = ISNULL([dbo].isOpenAccountingDate(A.[dtmDatePaid]), 0)
+END
 
 --NOT BALANCE
-INSERT INTO #tmpPayableInvalidData
-	SELECT 
-		'The debit and credit amounts are not balanced.',
-		'Payable',
-		A.intPaymentId,
-		@batchId
-	FROM tblAPPayment A 
-	WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
-		A.dblAmountPaid <> (SELECT SUM(dblPayment) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)
+IF(ISNULL(@post,0) = 1)
+BEGIN
+	INSERT INTO #tmpPayableInvalidData
+		SELECT 
+			'The debit and credit amounts are not balanced.',
+			'Payable',
+			A.intPaymentId,
+			@batchId
+		FROM tblAPPayment A 
+		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
+			A.dblAmountPaid <> (SELECT SUM(dblPayment) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)
+END
 
 --ALREADY POSTED
-INSERT INTO #tmpPayableInvalidData
-	SELECT 
-		'The transaction is already posted.',
-		'Payable',
-		A.intPaymentId,
-		@batchId
-	FROM tblAPPayment A 
-	WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
-		A.ysnPosted = 1
+IF(ISNULL(@post,0) = 1)
+BEGIN
+	INSERT INTO #tmpPayableInvalidData
+		SELECT 
+			'The transaction is already posted.',
+			'Payable',
+			A.intPaymentId,
+			@batchId
+		FROM tblAPPayment A 
+		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
+			A.ysnPosted = 1
+END
 
 DECLARE @totalInvalid INT
 SET @totalInvalid = (SELECT COUNT(*) #tmpPayableInvalidData)
@@ -121,8 +130,16 @@ BEGIN
 
 	SET @invalidCount = @totalInvalid
 
+	--DELETE Invalid Transaction From temp table
+	DELETE FROM #tmpPayablePostData
+	FROM tblAPInvalidTransaction
+	WHERE #tmpPayablePostData.intPaymentId = CAST(tblAPInvalidTransaction.strTransactionId AS INT)
+
 END
 
+
+DECLARE @totalRecords INT
+SELECT @totalRecords = COUNT(*) FROM #tmpPayablePostData
 --=====================================================================================================================================
 -- 	CHECK IF THE PROCESS IS RECAP OR NOT
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -599,6 +616,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 
 --IF @@ERROR <> 0	GOTO Post_Rollback;
 
+SET @successfulCount = @totalRecords
 
 --=====================================================================================================================================
 -- 	FINALIZING STAGE
