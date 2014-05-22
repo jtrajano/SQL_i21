@@ -93,8 +93,8 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 		,vwcus_last_name =			(CASE WHEN (ptcus_co_per_ind_cp = ''P'') 
 											THEN RTRIM(CAST(ptcus_last_name AS CHAR(25))) 
 											ELSE 
-													CAST(ptcus_last_name AS CHAR(15))  
-													+ CAST(ptcus_first_name AS CHAR(12)) 
+													CAST(ptcus_last_name AS CHAR(25))  
+													+ CAST(ptcus_first_name AS CHAR(22)) 
 													+ CAST(ISNULL(ptcus_mid_init,'''') AS CHAR(1)) 
 													+ CAST(ISNULL(ptcus_name_suffx,'''') AS CHAR(2))
 											END)
