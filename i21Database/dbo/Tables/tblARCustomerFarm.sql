@@ -19,6 +19,8 @@
     [strFieldMapFileName] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [strDirections]       NVARCHAR (30)  COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]    INT            NOT NULL,
-    CONSTRAINT [PK_tblARCustomerFarm] PRIMARY KEY CLUSTERED ([intFarmFieldId] ASC)
+    CONSTRAINT [PK_tblARCustomerFarm] PRIMARY KEY CLUSTERED ([intFarmFieldId] ASC),
+	CONSTRAINT [UKstrFarmNumber] UNIQUE NONCLUSTERED ([strFarmNumber] ASC),
+	CONSTRAINT [UKstrFieldNumber] UNIQUE NONCLUSTERED ([strFieldNumber] ASC)
 );
 
