@@ -12,6 +12,7 @@
 	@successfulCount	AS INT				= 0 OUTPUT,
 	@invalidCount		AS INT				= 0 OUTPUT,
 	@success			AS BIT				= 0 OUTPUT,
+	@batchIdUsed		AS NVARCHAR(20)		= NULL OUTPUT,
 	@recapId			AS NVARCHAR(250)	= NEWID OUTPUT
 AS
 
@@ -45,16 +46,22 @@ DECLARE @BillBatchId int
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
 SET @recapId = '1'
 
+IF(@batchId IS NULL)
+	EXEC uspSMGetStartingNumber 3, @batchId OUT
 
 INSERT INTO #tmpPostBillBatchData SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@param)
 
 SELECT TOP 1 @BillBatchId = intBillBatchId FROM #tmpPostBillBatchData
 
-EXEC uspAPPostBill  @billBatchId = @BillBatchId, @post = @post, @recap = @recap, @userId = @userId, @success = @success OUTPUT, @successfulCount = @successfulCount OUTPUT
+EXEC uspAPPostBill  @batchId = @batchId, @billBatchId = @BillBatchId, @post = @post, @recap = @recap, @userId = @userId, @success = @success OUTPUT, @successfulCount = @successfulCount OUTPUT, @invalidCount = @invalidCount OUTPUT
+		
+SET @batchIdUsed = @batchId
 
 IF(@success = 1 AND @successfulCount > 0 AND @post = 1)
 BEGIN
+
 UPDATE tblAPBillBatch
 	SET ysnPosted = 1
 		WHERE intBillBatchId IN (SELECT intBillBatchId FROM #tmpPostBillBatchData)
+
 END

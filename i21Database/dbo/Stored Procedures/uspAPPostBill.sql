@@ -13,6 +13,7 @@
 	@successfulCount	AS INT				= 0 OUTPUT,
 	@invalidCount		AS INT				= 0 OUTPUT,
 	@success			AS BIT				= 0 OUTPUT,
+	@batchIdUsed		AS NVARCHAR(20)		= NULL OUTPUT,
 	@recapId			AS NVARCHAR(250)	= NEWID OUTPUT
 AS
 
@@ -45,6 +46,8 @@ CREATE TABLE #tmpInvalidBillData (
 
 IF(@batchId IS NULL)
 	EXEC uspSMGetStartingNumber 3, @batchId OUT
+
+SET @batchIdUsed = @batchId
 
 --DECLARRE VARIABLES
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
@@ -92,7 +95,7 @@ BEGIN
 			'Unable to find an open fiscal year period to match the transaction date.',
 			'Bill',
 			A.intBillId,
-			@billBatchId
+			@batchId
 		FROM tblAPBill A 
 		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
 			0 = ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0)
@@ -102,7 +105,7 @@ BEGIN
 			'No terms has been specified.',
 			'Bill',
 			A.intBillId,
-			@billBatchId
+			@batchId
 		FROM tblAPBill A 
 		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
 			0 = A.intTermsId
@@ -116,7 +119,7 @@ INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, 
 		'The debit and credit amounts are not balanced.',
 		'Bill',
 		A.intBillId,
-		@billBatchId
+		@batchId
 	FROM tblAPBill A 
 	WHERE  A.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
 		A.dblTotal <> (SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = A.intBillId)
@@ -130,7 +133,7 @@ INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, 
 		A.strPaymentRecordNum + ' payment was already made on this bill.',
 		'Bill',
 		C.intBillId,
-		@billBatchId
+		@batchId
 	FROM tblAPPayment A
 		INNER JOIN tblAPPaymentDetail B 
 			ON A.intPaymentId = B.intPaymentId
@@ -147,7 +150,7 @@ BEGIN
 			'The transaction is already posted.',
 			'Bill',
 			A.intBillId,
-			@billBatchId
+			@batchId
 		FROM tblAPBill A 
 		WHERE  A.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
 			A.ysnPosted = 1
@@ -176,6 +179,15 @@ END
 DECLARE @totalRecords INT
 SELECT @totalRecords = COUNT(*) FROM #tmpPostBillData
 
+COMMIT TRANSACTION --COMMIT inserted invalid transaction
+
+IF(@totalRecords = 0)  
+BEGIN
+	SET @success = 0
+	GOTO Post_Exit
+END
+
+BEGIN TRANSACTION
 
 --=====================================================================================================================================
 -- 	CHECK IF THE PROCESS IS RECAP OR NOT
@@ -200,6 +212,10 @@ IF ISNULL(@recap, 0) = 0
 		UPDATE tblGLDetail
 			SET ysnIsUnposted = 1
 		WHERE strTransactionId IN (SELECT strBillId FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData))
+
+		--removed from tblAPInvalidTransaction the successful records
+		DELETE FROM tblAPInvalidTransaction
+		WHERE CAST(strTransactionId AS NVARCHAR(50)) IN (SELECT intBillId FROM #tmpPostBillData)
 
 	END
 	ELSE
@@ -284,6 +300,10 @@ IF ISNULL(@recap, 0) = 0
 		UPDATE tblAPBill
 			SET ysnPosted = 1
 		WHERE tblAPBill.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+
+		--removed from tblAPInvalidTransaction the successful records
+		DELETE FROM tblAPInvalidTransaction
+		WHERE CAST(strTransactionId AS NVARCHAR(50)) IN (SELECT intBillId FROM #tmpPostBillData)
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END

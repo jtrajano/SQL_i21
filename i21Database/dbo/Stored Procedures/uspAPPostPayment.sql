@@ -12,6 +12,7 @@
 	@successfulCount	AS INT				= 0 OUTPUT,
 	@invalidCount		AS INT				= 0 OUTPUT,
 	@success			AS BIT				= 0 OUTPUT,
+	@batchIdUsed		AS NVARCHAR(20)		= NULL OUTPUT,
 	@recapId			AS NVARCHAR(250)	= NEWID OUTPUT
 	--OUTPUT Parameter for GUID
 	--Provision for Date Begin and Date End Parameter
@@ -48,10 +49,10 @@ SET @recapId = '1'
 --SET BatchId
 IF(@batchId IS NULL)
 BEGIN
-	DECLARE @newBatchId NVARCHAR(50)
-	EXEC uspSMGetStartingNumber 3, @newBatchId OUT
-	SET @batchId = @newBatchId
+	EXEC uspSMGetStartingNumber 3, @batchId OUT
 END
+
+SET @batchIdUsed = @batchId
 
 --=====================================================================================================================================
 -- 	POPULATE TRANSACTIONS TO POST TEMPORARY TABLE
