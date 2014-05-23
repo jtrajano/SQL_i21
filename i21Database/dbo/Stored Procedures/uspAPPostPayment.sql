@@ -497,7 +497,7 @@ ELSE
 			 [strPaymentRecordNum]
 			,A.intPaymentId
 			,(SELECT intAccountId FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
-			,'Posted Payable'
+			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
 			,A.[strVendorId]
 			,A.[dtmDatePaid]
 			,[dblDebit]				= 0
@@ -525,7 +525,7 @@ ELSE
 			 [strPaymentRecordNum]
 			,A.intPaymentId
 			,(SELECT intWithholdAccountId FROM tblAPPreference)
-			,'Posted Payable'
+			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = (SELECT intWithholdAccountId FROM tblAPPreference))
 			,A.[strVendorId]
 			,A.[dtmDatePaid]
 			,[dblDebit]				= 0
@@ -555,7 +555,7 @@ ELSE
 		SELECT	[strPaymentRecordNum]
 				,A.intPaymentId
 				,C.[intAccountId]
-				,'Posted Payable'
+				,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = C.[intAccountId])
 				,A.[strVendorId]
 				,A.dtmDatePaid
 				,[dblDebit]				= B.dblPayment
