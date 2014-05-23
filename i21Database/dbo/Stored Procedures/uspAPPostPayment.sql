@@ -116,7 +116,7 @@ IF(ISNULL(@post,0) = 1)
 				A.intPaymentId
 			FROM tblAPPayment A 
 			WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
-				A.dblAmountPaid <> (SELECT SUM(dblPayment) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)
+				(A.dblAmountPaid + A.dblWithheldAmount) <> (SELECT SUM(dblPayment) + SUM(dblDiscount) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)
 	END
 
 	--ALREADY POSTED
