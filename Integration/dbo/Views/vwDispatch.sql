@@ -23,6 +23,7 @@ BEGIN
 					END,
 			SiteNumber = RIGHT(CAST(''0000'' + CAST(B.intSiteNumber as varchar) as varchar), 4)+'' ''+LTRIM(B.strSiteAddress),--B.intSiteNumber,
 			SiteAddress = B.strSiteAddress,
+			CustomerID = B.intCustomerID,
 			SiteDescription = B.strDescription,
 			SiteLocation = B.strLocation,
 			SiteID = B.intSiteID,

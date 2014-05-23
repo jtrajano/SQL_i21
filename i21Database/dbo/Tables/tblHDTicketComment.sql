@@ -2,6 +2,7 @@
 (
 	[intTicketCommentId] [int] IDENTITY(1,1) NOT NULL,
 	[intTicketId] [int] NOT NULL,
+	[strTicketCommentImageId] [nvarchar](36) COLLATE Latin1_General_CI_AS NULL,
 	[strComment] [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL,

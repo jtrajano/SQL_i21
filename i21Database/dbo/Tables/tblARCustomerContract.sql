@@ -14,6 +14,7 @@
     [strPickupDelivery]   NVARCHAR (10)  COLLATE Latin1_General_CI_AS NULL,
     [strPriceLevel]       NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]    INT            NOT NULL,
-    CONSTRAINT [PK_tblARCustomerContract] PRIMARY KEY CLUSTERED ([intContractId] ASC)
+    CONSTRAINT [PK_tblARCustomerContract] PRIMARY KEY CLUSTERED ([intContractId] ASC),
+	CONSTRAINT [UKstrContractNumber] UNIQUE NONCLUSTERED ([strContractNumber] ASC)
 );
 

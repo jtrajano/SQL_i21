@@ -103,4 +103,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\2_CM\2_1410_to_1420.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\2_CM\3_1420_to_1430.sql" />
+  </ItemGroup>
 </Project>

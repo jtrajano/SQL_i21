@@ -79,6 +79,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 		,vwcus_balance = agcus_ar_future + agcus_ar_per1 + agcus_ar_per2 + agcus_ar_per3 + agcus_ar_per4 + agcus_ar_per5 - agcus_cred_reg - agcus_cred_ga  
 		,vwcus_ptd_sls = agcus_ptd_sls   
 		,vwcus_lyr_sls = agcus_lyr_sls
+		,dblFutureCurrent = ISNULL(agcus_ar_future,0.0) + ISNULL(agcus_ar_per1,0.0)
 		FROM agcusmst
 		')
 GO
@@ -92,8 +93,8 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 		,vwcus_last_name =			(CASE WHEN (ptcus_co_per_ind_cp = ''P'') 
 											THEN RTRIM(CAST(ptcus_last_name AS CHAR(25))) 
 											ELSE 
-													CAST(ptcus_last_name AS CHAR(15))  
-													+ CAST(ptcus_first_name AS CHAR(12)) 
+													CAST(ptcus_last_name AS CHAR(25))  
+													+ CAST(ptcus_first_name AS CHAR(22)) 
 													+ CAST(ISNULL(ptcus_mid_init,'''') AS CHAR(1)) 
 													+ CAST(ISNULL(ptcus_name_suffx,'''') AS CHAR(2))
 											END)
@@ -181,6 +182,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 		,vwcus_balance = ptcus_ar_curr + ptcus_ar_3160 + ptcus_ar_6190 + ptcus_ar_91120 + ptcus_ar_ov120 -ptcus_cred_reg - ptcus_cred_ppd 
 		,vwcus_ptd_sls = ptcus_ptd_sales   
 		,vwcus_lyr_sls = CAST(0 AS DECIMAL)
+		,dblFutureCurrent = ptcus_ar_curr
 		FROM ptcusmst
 		')
 GO
