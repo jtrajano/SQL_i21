@@ -5,6 +5,11 @@
     [strTransactionId]   NVARCHAR (50)  NULL,
     [strBatchNumber] NVARCHAR(50) NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
+    [intTransactionId] INT NULL, 
     PRIMARY KEY CLUSTERED ([intId] ASC)
 );
 
+
+GO
+
+CREATE INDEX [IX_tblAPInvalidTransaction_intTransactionId] ON [dbo].[tblAPInvalidTransaction] ([intTransactionId])
