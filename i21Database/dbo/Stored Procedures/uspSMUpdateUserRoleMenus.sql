@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSMUpdateUserRoleMenus]
 	@UserRoleID INT,
-	@BuildUserRole BIT = 1
+	@BuildUserRole BIT = 1,
+	@ForceVisibility BIT = 0
 AS
 
 SET QUOTED_IdENTIFIER OFF
@@ -69,7 +70,7 @@ BEGIN TRY
 		SELECT TOP 1 @UserSecurityID = intUserSecurityID FROM #tmpUserSecurities
 		print 'User ID :'
 		print @UserSecurityID
-		EXEC uspSMUpdateUserSecurityMenus @UserSecurityID
+		EXEC uspSMUpdateUserSecurityMenus @UserSecurityID, @ForceVisibility
 		
 		DELETE FROM #tmpUserSecurities WHERE intUserSecurityID = @UserSecurityID
 	END
