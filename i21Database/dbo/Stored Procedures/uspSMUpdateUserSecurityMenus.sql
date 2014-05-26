@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspSMUpdateUserSecurityMenus]
-	@UserSecurityID INT
+	@UserSecurityID INT,
+	@ForceVisibility BIT = 0
 AS
 
 SET QUOTED_IdENTIFIER OFF
@@ -18,7 +19,7 @@ BEGIN TRANSACTION
 	DECLARE @IsAdmin BIT
 	-- Get whether User Role has administrative rights
 	SELECT @IsAdmin = ysnAdmin FROM tblSMUserRole WHERE intUserRoleID = @UserRoleID
-
+	
 	-- Delete non existing User Security Menus for affected users
 	DELETE FROM tblSMUserSecurityMenu
 	WHERE intUserSecurityId = @UserSecurityID
@@ -56,6 +57,11 @@ BEGIN TRANSACTION
 		)tblPatch 
 	WHERE tblPatch.intUserSecurityMenuId = tblSMUserSecurityMenu.intUserSecurityMenuId
 	AND tblSMUserSecurityMenu.intUserSecurityId = @UserSecurityID
+	
+	IF (@ForceVisibility = 1)
+		UPDATE tblSMUserSecurityMenu
+		SET ysnVisible = 1
+		WHERE intUserSecurityId = @UserSecurityID
 	
 	-- Commit changes
 	GOTO uspSMUpdateUserSecurityMenus_Commit
