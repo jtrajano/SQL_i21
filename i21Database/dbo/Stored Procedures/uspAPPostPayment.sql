@@ -116,7 +116,7 @@ IF(ISNULL(@post,0) = 1)
 				A.intPaymentId
 			FROM tblAPPayment A 
 			WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
-				A.dblAmountPaid <> (SELECT SUM(dblPayment) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)
+				(A.dblAmountPaid + A.dblWithheldAmount) <> (SELECT SUM(dblPayment) + SUM(dblDiscount) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)
 	END
 
 	--ALREADY POSTED
@@ -281,7 +281,7 @@ IF (ISNULL(@recap, 0) = 0)
 		SELECT
 			 [strPaymentRecordNum]
 			,(SELECT intAccountId FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
-			,'Posted Payable'
+			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
 			,A.[strVendorId]
 			,A.[dtmDatePaid]
 			,[dblDebit]				= 0
@@ -308,7 +308,7 @@ IF (ISNULL(@recap, 0) = 0)
 		SELECT
 			 [strPaymentRecordNum]
 			,(SELECT intWithholdAccountId FROM tblAPPreference)
-			,'Posted Payable'
+			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = (SELECT intWithholdAccountId FROM tblAPPreference))
 			,A.[strVendorId]
 			,A.[dtmDatePaid]
 			,[dblDebit]				= 0
@@ -336,7 +336,7 @@ IF (ISNULL(@recap, 0) = 0)
 		UNION ALL 
 		SELECT	[strPaymentRecordNum]
 				,C.[intAccountId]
-				,'Posted Payable'
+				,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = C.[intAccountId])
 				,A.[strVendorId]
 				,A.dtmDatePaid
 				,[dblDebit]				= B.dblPayment
