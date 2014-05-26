@@ -7,7 +7,7 @@
     [strPriceBasis]     NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strCustomerGroup]  NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strCostToUse]      NVARCHAR(50)	COLLATE Latin1_General_CI_AS NULL,
-    [dblDeviation]      NUMERIC (18, 6) NULL,
+    [dblDeviation]      NUMERIC (18, 6) NOT NULL DEFAULT ((0)),
     [strLineNote]       NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [dtmBeginDate]      DATETIME        NOT NULL,
     [dtmEndDate]        DATETIME        NULL,
