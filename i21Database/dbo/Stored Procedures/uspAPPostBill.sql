@@ -51,6 +51,9 @@ IF(@batchId IS NULL)
 SET @batchIdUsed = @batchId
 
 --DECLARRE VARIABLES
+DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
+DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
+
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
 SET @recapId = '1'
 --=====================================================================================================================================
@@ -97,10 +100,13 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 IF (ISNULL(@recap, 0) = 0)
 BEGIN
---Fiscal Year
-IF(ISNULL(@post,0) = 1)
-BEGIN
-	INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+
+	--POSTING VALIDATIONS
+	IF(ISNULL(@post,0) = 1)
+	BEGIN
+
+		--Fiscal Year
+		INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT 
 			'Unable to find an open fiscal year period to match the transaction date.',
 			'Bill',
@@ -111,7 +117,8 @@ BEGIN
 		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
 			0 = ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0)
 
-	INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		--No Terms specified
+		INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT 
 			'No terms has been specified.',
 			'Bill',
@@ -121,27 +128,63 @@ BEGIN
 		FROM tblAPBill A 
 		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
 			0 = A.intTermsId
-END 
 
-IF(ISNULL(@post,0) = 1)
-BEGIN
---NOT BALANCE
-INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-	SELECT 
-		'The debit and credit amounts are not balanced.',
-		'Bill',
-		A.strBillId,
-		@batchId,
-		A.intBillId
-	FROM tblAPBill A 
-	WHERE  A.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
-		A.dblTotal <> (SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = A.intBillId)
-END
+		--NOT BALANCE
+		INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		SELECT 
+			'The debit and credit amounts are not balanced.',
+			'Bill',
+			A.strBillId,
+			@batchId,
+			A.intBillId
+		FROM tblAPBill A 
+		WHERE  A.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
+			A.dblTotal <> (SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = A.intBillId)
 
---ALREADY HAVE PAYMENTS
-IF(ISNULL(@post,0) = 0)
-BEGIN
-	INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		--ALREADY POSTED
+		INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		SELECT 
+			'The transaction is already posted.',
+			'Bill',
+			A.strBillId,
+			@batchId,
+			A.intBillId
+		FROM tblAPBill A 
+		WHERE  A.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
+			A.ysnPosted = 1
+
+		--Header Account ID
+		INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		SELECT
+			'The AP account is not specified.',
+			'Bill',
+			A.strBillId,
+			@batchId,
+			A.intBillId
+		FROM tblAPBill A 
+		WHERE  A.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
+			A.intAccountId IS NULL OR A.intAccountId = 0
+
+		INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		SELECT
+			'The account id on one of the details is not specified.',
+			'Bill',
+			A.strBillId,
+			@batchId,
+			A.intBillId
+		FROM tblAPBill A 
+		WHERE  A.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
+			1 = (SELECT 1 FROM tblAPBillDetail B 
+					WHERE B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
+							AND (B.intAccountId IS NULL OR B.intAccountId = 0))
+
+	END 
+
+	--UNPOSTING VALIDATIONS
+	IF(ISNULL(@post,0) = 0)
+	BEGIN
+		--ALREADY HAVE PAYMENTS
+		INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT
 			A.strPaymentRecordNum + ' payment was already made on this bill.',
 			'Bill',
@@ -156,37 +199,23 @@ BEGIN
 		WHERE  C.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData)
 	END
 
-	--ALREADY POSTED
-	IF(ISNULL(@post,0) = 1)
-	BEGIN
-		INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT 
-				'The transaction is already posted.',
-				'Bill',
-				A.strBillId,
-				@batchId,
-				A.intBillId
-			FROM tblAPBill A 
-			WHERE  A.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
-				A.ysnPosted = 1
-
-	END
-
 	DECLARE @totalInvalid INT = 0
 	SELECT @totalInvalid = COUNT(*) FROM #tmpInvalidBillData
 
 	IF(@totalInvalid > 0)
 	BEGIN
 
-		INSERT INTO tblAPInvalidTransaction(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		--Insert Invalid Post transaction result
+		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT * FROM #tmpInvalidBillData
 
 		SET @invalidCount = @totalInvalid
 
 		--DELETE Invalid Transaction From temp table
-		DELETE FROM #tmpPostBillData
-		FROM tblAPInvalidTransaction
-		WHERE #tmpPostBillData.intBillId = tblAPInvalidTransaction.intTransactionId
+		DELETE #tmpPostBillData
+			FROM #tmpPostBillData A
+				INNER JOIN #tmpInvalidBillData
+					ON A.intBillId = #tmpInvalidBillData.intTransactionId
 
 	END
 
@@ -228,6 +257,18 @@ IF ISNULL(@recap, 0) = 0
 			SET ysnIsUnposted = 1
 		WHERE strTransactionId IN (SELECT strBillId FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData))
 
+		--Insert Successfully unposted transactions.
+		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		SELECT 
+			@UnpostSuccessfulMsg,
+			'Bill',
+			A.strBillId,
+			@batchId,
+			A.intBillId
+		FROM tblAPBill A
+		WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+		
+
 	END
 	ELSE
 	BEGIN
@@ -237,7 +278,7 @@ IF ISNULL(@recap, 0) = 0
 			SELECT	A.[dblLbsPerUnit], B.[intAccountId] 
 			FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
 		)
-		INSERT INTO tblGLDetailRecap (
+		INSERT INTO tblGLDetail (
 			[strTransactionId], 
 			[intAccountId],
 			[strDescription],
@@ -312,6 +353,16 @@ IF ISNULL(@recap, 0) = 0
 			SET ysnPosted = 1
 		WHERE tblAPBill.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 
+		--Insert Successfully posted transactions.
+		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		SELECT 
+			@PostSuccessfulMsg,
+			'Bill',
+			A.strBillId,
+			@batchId,
+			A.intBillId
+		FROM tblAPBill A
+		WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
@@ -446,10 +497,10 @@ Post_Cleanup:
 			INNER JOIN #tmpPostBillData B ON A.intTransactionId = B.intBillId 
 
 		
-			--removed from tblAPInvalidTransaction the successful records
-			DELETE FROM tblAPInvalidTransaction
-			FROM tblAPInvalidTransaction A
-			INNER JOIN #tmpPostBillData B ON A.intTransactionId = B.intBillId 
+			----removed from tblAPInvalidTransaction the successful records
+			--DELETE FROM tblAPPostResult
+			--FROM tblAPPostResult A
+			--INNER JOIN #tmpPostBillData B ON A.intTransactionId = B.intBillId 
 
 		END
 

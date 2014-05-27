@@ -1,6 +1,6 @@
-﻿CREATE TABLE [dbo].[tblAPInvalidTransaction] (
+﻿CREATE TABLE [dbo].[tblAPPostResult] (
     [intId]              INT            IDENTITY (1, 1) NOT NULL,
-    [strError]           NVARCHAR (100) NULL,
+    [strMessage]           NVARCHAR (100) NULL,
     [strTransactionType] NVARCHAR (50)  NULL,
     [strTransactionId]   NVARCHAR (50)  NULL,
     [strBatchNumber] NVARCHAR(50) NULL, 
@@ -12,4 +12,4 @@
 
 GO
 
-CREATE INDEX [IX_tblAPInvalidTransaction_intTransactionId] ON [dbo].[tblAPInvalidTransaction] ([intTransactionId])
+CREATE INDEX [IX_tblAPPostResult_intTransactionId] ON [dbo].[tblAPPostResult] ([intTransactionId])
