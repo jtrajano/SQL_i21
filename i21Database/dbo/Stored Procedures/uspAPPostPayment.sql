@@ -477,7 +477,7 @@ ELSE
 		--TODO:
 		--DELETE TABLE PER Session
 		DELETE FROM tblGLDetailRecap
-			WHERE strTransactionId IN (SELECT CAST(intPaymentId AS NVARCHAR(50)) FROM #tmpPayablePostData);
+			WHERE intTransactionId IN (SELECT intPaymentId FROM #tmpPayablePostData);
 
 		--GO
 
@@ -707,21 +707,21 @@ Post_Cleanup:
 		WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 		AND dblPayment = 0
 
-		IF(@post = 1)
-		BEGIN
+		--IF(@post = 1)
+		--BEGIN
 
-			--clean gl detail recap after posting
-			DELETE FROM tblGLDetailRecap
-			FROM tblGLDetailRecap A
-			INNER JOIN #tmpPayablePostData B ON A.intTransactionId = B.intPaymentId 
+		--	----clean gl detail recap after posting
+		--	--DELETE FROM tblGLDetailRecap
+		--	--FROM tblGLDetailRecap A
+		--	--INNER JOIN #tmpPayablePostData B ON A.intTransactionId = B.intPaymentId 
 
 		
-			----removed from tblAPInvalidTransaction the successful records
-			--DELETE FROM tblAPInvalidTransaction
-			--FROM tblAPInvalidTransaction A
-			--INNER JOIN #tmpPayablePostData B ON A.intTransactionId = B.intPaymentId 
+		--	----removed from tblAPInvalidTransaction the successful records
+		--	--DELETE FROM tblAPInvalidTransaction
+		--	--FROM tblAPInvalidTransaction A
+		--	--INNER JOIN #tmpPayablePostData B ON A.intTransactionId = B.intPaymentId 
 
-		END
+		--END
 
 	END
 
