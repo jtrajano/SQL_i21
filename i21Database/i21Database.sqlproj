@@ -130,7 +130,7 @@
     <Build Include="dbo\Tables\tblAPBill.sql" />
     <Build Include="dbo\Tables\tblAPBillBatch.sql" />
     <Build Include="dbo\Tables\tblAPBillDetail.sql" />
-    <Build Include="dbo\Tables\tblAPInvalidTransaction.sql" />
+    <Build Include="dbo\Tables\tblAPPostResult.sql" />
     <Build Include="dbo\Tables\tblAPPayment.sql" />
     <Build Include="dbo\Tables\tblAPPaymentDetail.sql" />
     <Build Include="dbo\Tables\tblAPPreference.sql" />

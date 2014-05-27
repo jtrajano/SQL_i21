@@ -44,6 +44,8 @@ CREATE TABLE #tmpPayableInvalidData (
 );
 
 --DECLARRE VARIABLES
+DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
+DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
 SET @recapId = '1'
 
@@ -89,9 +91,11 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 IF (ISNULL(@recap, 0) = 0)
 BEGIN
---Fiscal Year
+
+--POST VALIDATIONS
 IF(ISNULL(@post,0) = 1)
 	BEGIN
+		--Fiscal Year
 		INSERT INTO #tmpPayableInvalidData
 			SELECT 
 				'Unable to find an open fiscal year period to match the transaction date.',
@@ -102,11 +106,8 @@ IF(ISNULL(@post,0) = 1)
 			FROM tblAPPayment A 
 			WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
 				0 = ISNULL([dbo].isOpenAccountingDate(A.[dtmDatePaid]), 0)
-	END
 
-	--NOT BALANCE
-	IF(ISNULL(@post,0) = 1)
-	BEGIN
+		--NOT BALANCE
 		INSERT INTO #tmpPayableInvalidData
 			SELECT 
 				'The debit and credit amounts are not balanced.',
@@ -117,26 +118,28 @@ IF(ISNULL(@post,0) = 1)
 			FROM tblAPPayment A 
 			WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
 				(A.dblAmountPaid + A.dblWithheldAmount) <> (SELECT SUM(dblPayment) + SUM(dblDiscount) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)
-	END
 
-	--ALREADY POSTED
-	IF(ISNULL(@post,0) = 1)
-	BEGIN
+		--ALREADY POSTED
 		INSERT INTO #tmpPayableInvalidData
-			SELECT 
-				'The transaction is already posted.',
-				'Payable',
-				A.strPaymentRecordNum,
-				@batchId,
-				A.intPaymentId
-			FROM tblAPPayment A 
-			WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
-				A.ysnPosted = 1
+		SELECT 
+			'The transaction is already posted.',
+			'Payable',
+			A.strPaymentRecordNum,
+			@batchId,
+			A.intPaymentId
+		FROM tblAPPayment A 
+		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
+			A.ysnPosted = 1
+
+		--BILL(S) ALREADY PAID IN FULL
+
 	END
 
-	--Already cleared/reconciled
+	--UNPOSTING VALIDATIONS
 	IF(ISNULL(@post,0) = 0)
 	BEGIN
+
+		--Already cleared/reconciled
 		INSERT INTO #tmpPayableInvalidData
 			SELECT 
 				'The transaction is already cleared.',
@@ -155,7 +158,7 @@ IF(ISNULL(@post,0) = 1)
 	IF(@totalInvalid > 0)
 	BEGIN
 
-		INSERT INTO tblAPInvalidTransaction(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT * FROM #tmpPayableInvalidData
 
 		SET @invalidCount = @totalInvalid
@@ -240,10 +243,16 @@ IF (ISNULL(@recap, 0) = 0)
 			 WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData) 
 		)
 
-		--removed from tblAPInvalidTransaction the successful records
-		DELETE FROM tblAPInvalidTransaction
-		WHERE CAST(strTransactionId AS NVARCHAR(50)) IN (SELECT intPaymentId FROM #tmpPayablePostData)
-
+		--Insert Successfully unposted transactions.
+		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		SELECT 
+			@UnpostSuccessfulMsg,
+			'Payable',
+			A.strPaymentRecordNum,
+			@batchId,
+			A.intPaymentId
+		FROM tblAPPayment A
+		WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 	END
 	ELSE
@@ -450,6 +459,17 @@ IF (ISNULL(@recap, 0) = 0)
 				INNER JOIN tblAPVendor B
 					ON A.strVendorId = B.strVendorId
 			WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+
+				--Insert Successfully unposted transactions.
+		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		SELECT 
+			@PostSuccessfulMsg,
+			'Payable',
+			A.strPaymentRecordNum,
+			@batchId,
+			A.intPaymentId
+		FROM tblAPPayment A
+		WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
@@ -704,10 +724,10 @@ Post_Cleanup:
 			INNER JOIN #tmpPayablePostData B ON A.intTransactionId = B.intPaymentId 
 
 		
-			--removed from tblAPInvalidTransaction the successful records
-			DELETE FROM tblAPInvalidTransaction
-			FROM tblAPInvalidTransaction A
-			INNER JOIN #tmpPayablePostData B ON A.intTransactionId = B.intPaymentId 
+			----removed from tblAPInvalidTransaction the successful records
+			--DELETE FROM tblAPInvalidTransaction
+			--FROM tblAPInvalidTransaction A
+			--INNER JOIN #tmpPayablePostData B ON A.intTransactionId = B.intPaymentId 
 
 		END
 
