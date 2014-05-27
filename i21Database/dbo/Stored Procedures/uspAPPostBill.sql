@@ -370,6 +370,8 @@ ELSE
 	BEGIN
 		--TODO:
 		--DELETE TABLE PER Session
+		DELETE FROM tblGLDetailRecap
+			WHERE intTransactionId IN (SELECT intBillId FROM #tmpPostBillData);
 
 		WITH Units 
 		AS 
