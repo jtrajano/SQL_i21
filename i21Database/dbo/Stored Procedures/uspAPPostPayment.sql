@@ -44,6 +44,7 @@ CREATE TABLE #tmpPayableInvalidData (
 );
 
 --DECLARRE VARIABLES
+DECLARE @WithholdAccount INT = (SELECT intWithholdAccountId FROM tblAPPreference)
 DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
 DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
@@ -289,8 +290,8 @@ IF (ISNULL(@recap, 0) = 0)
 		--CREDIT
 		SELECT
 			 [strPaymentRecordNum]
-			,(SELECT intAccountId FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
-			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
+			,A.intAccountId--(SELECT intAccountId FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
+			,GLAccnt.strDescription --(SELECT strDescription FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
 			,A.[strVendorId]
 			,A.[dtmDatePaid]
 			,[dblDebit]				= 0
@@ -308,22 +309,20 @@ IF (ISNULL(@recap, 0) = 0)
 			,[strModuleName]		= @MODULE_NAME
 			,A.intPaymentId
 		FROM	[dbo].tblAPPayment A INNER JOIN [dbo].tblGLAccount GLAccnt
-					ON A.intBankAccountId = GLAccnt.intAccountId
-				INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
-					ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
+					ON A.intAccountId = GLAccnt.intAccountId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 		--Withheld
 		UNION
 		SELECT
 			 [strPaymentRecordNum]
-			,(SELECT intWithholdAccountId FROM tblAPPreference)
-			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = (SELECT intWithholdAccountId FROM tblAPPreference))
+			,@WithholdAccount
+			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = @WithholdAccount)
 			,A.[strVendorId]
 			,A.[dtmDatePaid]
 			,[dblDebit]				= 0
 			,[dblCredit]			= A.dblWithheldAmount
-			,[dblDebitUnit]			= ISNULL(A.[dblAmountPaid], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
-			,[dblCreditUnit]		= ISNULL(A.[dblAmountPaid], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
+			,[dblDebitUnit]			= ISNULL(A.dblWithheldAmount, 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0)
+			,[dblCreditUnit]		= ISNULL(A.dblWithheldAmount, 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0)
 			,A.[dtmDatePaid]
 			,0
 			,1
@@ -336,8 +335,6 @@ IF (ISNULL(@recap, 0) = 0)
 			,A.intPaymentId
 		FROM	[dbo].tblAPPayment A INNER JOIN [dbo].tblGLAccount GLAccnt
 					ON A.intBankAccountId = GLAccnt.intAccountId
-				INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
-					ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
 				INNER JOIN tblAPVendor 
 					ON A.strVendorId = tblAPVendor.strVendorId AND tblAPVendor.ysnWithholding = 1
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
@@ -516,8 +513,8 @@ ELSE
 		SELECT
 			 [strPaymentRecordNum]
 			,A.intPaymentId
-			,(SELECT intAccountId FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
-			,'Posted Payable'
+			,A.intAccountId--(SELECT intAccountId FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
+			,GLAccnt.strDescription
 			,A.[strVendorId]
 			,A.[dtmDatePaid]
 			,[dblDebit]				= 0
@@ -534,24 +531,22 @@ ELSE
 			,[strCode]				= 'AP'
 			,[strModuleName]		= @MODULE_NAME
 			,A.intPaymentId
-		FROM	[dbo].tblAPPayment A 
-			LEFT JOIN tblAPPaymentDetail B 
-				ON A.intPaymentId = B.intPaymentId
+		FROM	[dbo].tblAPPayment A INNER JOIN [dbo].tblGLAccount GLAccnt
+					ON A.intAccountId = GLAccnt.intAccountId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-		AND B.dblPayment <> 0
 		--Withheld
 		UNION
 		SELECT
 			 [strPaymentRecordNum]
 			,A.intPaymentId
-			,(SELECT intWithholdAccountId FROM tblAPPreference)
-			,'Posted Payable'
+			,@WithholdAccount
+			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = @WithholdAccount)
 			,A.[strVendorId]
 			,A.[dtmDatePaid]
 			,[dblDebit]				= 0
 			,[dblCredit]			= A.dblWithheldAmount
-			,[dblDebitUnit]			= ISNULL(A.[dblAmountPaid], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
-			,[dblCreditUnit]		= ISNULL(A.[dblAmountPaid], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
+			,[dblDebitUnit]			= ISNULL(A.dblWithheldAmount, 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0)
+			,[dblCreditUnit]		= ISNULL(A.dblWithheldAmount, 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0)
 			,A.[dtmDatePaid]
 			,0
 			,1
@@ -562,10 +557,7 @@ ELSE
 			,[strCode]				= 'AP'
 			,[strModuleName]		= @MODULE_NAME
 			,A.intPaymentId
-		FROM	[dbo].tblAPPayment A INNER JOIN [dbo].tblGLAccount GLAccnt
-					ON A.intBankAccountId = GLAccnt.intAccountId
-				INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
-					ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
+		FROM	[dbo].tblAPPayment A 
 				INNER JOIN tblAPVendor 
 					ON A.strVendorId = tblAPVendor.strVendorId AND tblAPVendor.ysnWithholding = 1
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
@@ -575,7 +567,7 @@ ELSE
 		SELECT	[strPaymentRecordNum]
 				,A.intPaymentId
 				,C.[intAccountId]
-				,'Posted Payable'
+				,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = C.[intAccountId])
 				,A.[strVendorId]
 				,A.dtmDatePaid
 				,[dblDebit]				= B.dblPayment
