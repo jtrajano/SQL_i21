@@ -163,7 +163,7 @@ BEGIN
 			A.intBillId
 		FROM tblAPBill A 
 		WHERE  A.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
-			A.intAccountId IS NULL OR A.intAccountId = 0
+			A.intAccountId IS NULL AND A.intAccountId = 0
 
 		INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT
@@ -176,7 +176,7 @@ BEGIN
 		WHERE  A.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
 			1 = (SELECT 1 FROM tblAPBillDetail B 
 					WHERE B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
-							AND (B.intAccountId IS NULL OR B.intAccountId = 0))
+							AND (B.intAccountId IS NULL AND B.intAccountId = 0))
 
 	END 
 
