@@ -22,6 +22,7 @@
     [dtmCreated]                DATETIME       NULL,
     [strTaxState]               NVARCHAR (50)  NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
+    [strTaxNumber] NVARCHAR(20) NULL, 
     CONSTRAINT [PK_dbo.tblAPVendor] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
     CONSTRAINT [FK_dbo.tblAPVendor_dbo.tblEntities_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
     CONSTRAINT [APstrVendorId_Unique] UNIQUE NONCLUSTERED ([strVendorId] ASC)

@@ -23,54 +23,55 @@ IF(OBJECT_ID(''dbo.tblAPTempVendor'') IS NULL)
 IF(@Update = 1 AND @VendorId IS NOT NULL)
 BEGIN
 
-	UPDATE ssvndmst
-		SET ssvnd_co_per_ind = CASE WHEN B.intVendorType = 0 THEN ''P'' ELSE ''C'' END,
-		ssvnd_name = A.strName,
-		ssvnd_addr_1 = CASE WHEN CHARINDEX(CHAR(10), C.strAddress) > 0 THEN SUBSTRING(C.strAddress, 0, CHARINDEX(CHAR(10),C.strAddress)) ELSE C.strAddress END,
-		ssvnd_addr_2 = CASE WHEN CHARINDEX(CHAR(10), C.strAddress) > 0 THEN SUBSTRING(C.strAddress, CHARINDEX(CHAR(10),C.strAddress), LEN(C.strAddress)) ELSE NULL END,
-		ssvnd_city = C.strCity,
-		ssvnd_st = C.strState,
-		ssvnd_zip = C.strZipCode,
-		ssvnd_phone = ISNULL(D.strPhone, ''''),
-		ssvnd_phone2 = D.strPhone2,
-		ssvnd_contact = A.strName,
-		ssvnd_1099_yn = CASE WHEN A.ysnPrint1099 = 0 THEN ''N'' ELSE ''Y'' END,
-		ssvnd_wthhld_yn = CASE WHEN B.ysnWithholding = 0 THEN ''N'' ELSE ''Y'' END,
-		ssvnd_pay_ctl_ind = (CASE WHEN ysnPymtCtrlActive = 1 THEN ''A''
-			 WHEN ysnPymtCtrlAlwaysDiscount = 1 THEN ''D''
-			 WHEN ysnPymtCtrlEFTActive = 1  THEN ''E''
-			 WHEN ysnPymtCtrlHold = 1 THEN ''H'' END),
-		ssvnd_fed_tax_id = A.strFederalTaxId,
-		--ssvnd_w9_signed_rev_dt = CASE WHEN ysnW9Signed = 0 THEN ''N'' ELSE ''Y'' END,
-		ssvnd_pay_to = strVendorPayToId,
-		ssvnd_currency = E.strCurrency,
-		ssvnd_1099_name = A.str1099Name,
-		ssvnd_gl_pur = F.strExternalId
-	FROM
-		tblEntity A
-	INNER JOIN tblAPVendor B
-		ON A.intEntityId = B.intEntityId
-	INNER JOIN tblEntityLocation C
-		ON B.intDefaultLocationId = C.intEntityLocationId
-	INNER JOIN tblEntityContact D
-		ON B.intDefaultContactId = D.intEntityId
-	LEFT JOIN tblSMCurrency E
-		ON B.intCurrencyId = E.intCurrencyID
-	LEFT JOIN tblGLCOACrossReference F
-		ON B.intGLAccountExpenseId = F.inti21Id
-	WHERE ssvndmst.ssvnd_vnd_no = @VendorId
+	IF(EXISTS(SELECT 1 FROM ssvndmst WHERE ssvnd_vnd_no = @VendorId))
+	BEGIN
+		UPDATE ssvndmst
+		SET 
+		--ssvnd_vnd_no					=	CAST(B.strVendorId AS VARCHAR(10)),
+		ssvnd_co_per_ind				=	CASE WHEN B.intVendorType = 0 THEN ''C'' ELSE ''P'' END,
+		ssvnd_name						=	CAST(A.strName AS VARCHAR(50)),
+		ssvnd_addr_1					=	CAST(CASE WHEN CHARINDEX(CHAR(10), C.strAddress) > 0 
+													THEN SUBSTRING(C.strAddress, 0, CHARINDEX(CHAR(10),C.strAddress)) 
+													ELSE C.strAddress END AS VARCHAR(30)),
+		ssvnd_addr_2					=	CAST(CASE WHEN CHARINDEX(CHAR(10), C.strAddress) > 0 
+													THEN SUBSTRING(C.strAddress, CHARINDEX(CHAR(10),C.strAddress), LEN(C.strAddress)) 
+													ELSE NULL END AS VARCHAR(30)),
+		ssvnd_city						=	CAST(strCity AS VARCHAR(20)),
+		ssvnd_st						=	CAST(strState AS VARCHAR(2)),
+		ssvnd_zip						=	CAST(strZipCode AS VARCHAR(10)),
+		ssvnd_phone						=	CAST(ISNULL(D.strPhone,'''') AS VARCHAR(15)),
+		ssvnd_phone2					=	CAST(ISNULL(A.strName,'''') AS VARCHAR(15)),
+		ssvnd_contact					=	CAST(A.strName AS VARCHAR(15)),
+		ssvnd_1099_yn					=	CASE WHEN ysnPrint1099 = 0 THEN ''N'' ELSE ''Y'' END,
+		ssvnd_wthhld_yn					=	CASE WHEN ysnWithholding = 0 THEN ''N'' ELSE ''Y'' END,
+		ssvnd_pay_ctl_ind				=	CASE WHEN ysnPymtCtrlActive = 1 THEN ''A''
+												WHEN ysnPymtCtrlAlwaysDiscount = 1 THEN ''D''
+												WHEN ysnPymtCtrlEFTActive = 1  THEN ''E''
+												WHEN ysnPymtCtrlHold = 1 THEN ''H'' END,
+		ssvnd_fed_tax_id				=	CAST(strFederalTaxId AS VARCHAR(20)),
+		ssvnd_w9_signed_rev_dt			=	CONVERT(VARCHAR(8), GETDATE(), 112),
+		ssvnd_pay_to					=	CAST(strVendorPayToId AS VARCHAR(10)),
 
-RETURN;
-END
-
-IF(@Update = 0 AND @VendorId IS NOT NULL) -- INSERT per vendor id
-BEGIN
---ssvnd_addr_2, ssvnd_phone_ext, ssvnd_phone2_ext,ssvnd_gl_pur,ssvnd_pay_ctl_ind,ssvnd_prev_ctl_ind
---ssvnd_acct_stat
---ssvnd_terms_type
---ssvnd_terms_desc
---ssvnd_our_cus_no
-	INSERT INTO ssvndmst(
+		ssvnd_1099_name					=	CAST(str1099Name AS VARCHAR(50)),
+		ssvnd_gl_pur					=	CAST(F.strExternalId AS DECIMAL(16,8)),
+		ssvnd_tax_st					=	CAST(B.strTaxState AS VARCHAR(2))
+		FROM
+			tblEntity A
+		INNER JOIN tblAPVendor B
+			ON A.intEntityId = B.intEntityId
+		INNER JOIN tblEntityLocation C
+			ON B.intDefaultLocationId = C.intEntityLocationId
+		INNER JOIN tblEntityContact D
+			ON B.intDefaultContactId = D.intEntityId
+		LEFT JOIN tblSMCurrency E
+			ON B.intCurrencyId = E.intCurrencyID
+		LEFT JOIN tblGLCOACrossReference F
+			ON B.intGLAccountExpenseId = F.inti21Id
+		WHERE B.strVendorId = @VendorId
+	END
+	ELSE
+	BEGIN
+		INSERT INTO ssvndmst(
 		ssvnd_vnd_no,
 		ssvnd_co_per_ind,
 		ssvnd_name,
@@ -90,46 +91,50 @@ BEGIN
 		ssvnd_pay_to,
 		ssvnd_currency,
 		ssvnd_1099_name,
-		ssvnd_gl_pur
-	)
-	SELECT 
-		strVendorId,
-		CASE WHEN intVendorType = 0 THEN ''C'' ELSE ''P'' END,
-		A.strName,
-		CASE WHEN CHARINDEX(CHAR(10), C.strAddress) > 0 THEN SUBSTRING(C.strAddress, 0, CHARINDEX(CHAR(10),C.strAddress)) ELSE C.strAddress END,
-		CASE WHEN CHARINDEX(CHAR(10), C.strAddress) > 0 THEN SUBSTRING(C.strAddress, CHARINDEX(CHAR(10),C.strAddress), LEN(C.strAddress)) ELSE NULL END,
-		strCity,
-		strState,
-		strZipCode,
-		ISNULL(C.strPhone,''''),
-		strPhone2,
-		A.strName,
-		CASE WHEN ysnPrint1099 = 0 THEN ''N'' ELSE ''Y'' END,
-		CASE WHEN ysnWithholding = 0 THEN ''N'' ELSE ''Y'' END,
-		CASE WHEN ysnPymtCtrlActive = 1 THEN ''A''
-			 WHEN ysnPymtCtrlAlwaysDiscount = 1 THEN ''D''
-			 WHEN ysnPymtCtrlEFTActive = 1  THEN ''E''
-			 WHEN ysnPymtCtrlHold = 1 THEN ''H'' END,
-		strFederalTaxId,
-		CONVERT(VARCHAR(8), GETDATE(), 112),
-		strVendorPayToId,
-		E.strCurrency,
-		str1099Name,
-		F.strExternalId
-	FROM
-		tblEntity A
-	INNER JOIN tblAPVendor B
-		ON A.intEntityId = B.intEntityId
-	INNER JOIN tblEntityLocation C		
-		ON B.intDefaultLocationId = C.intEntityLocationId
-	INNER JOIN tblEntityContact D
-		ON B.intDefaultContactId = D.intEntityId
-	LEFT JOIN tblSMCurrency E
-		ON B.intCurrencyId = E.intCurrencyID
-	LEFT JOIN tblGLCOACrossReference F
-		ON B.intGLAccountExpenseId = F.inti21Id
-	WHERE strVendorId = @VendorId
-	RETURN;
+		ssvnd_gl_pur,
+		ssvnd_tax_st
+		)
+		SELECT 
+			ssvnd_vnd_no					=	B.strVendorId,
+			ssvnd_co_per_ind				=	CASE WHEN B.intVendorType = 0 THEN ''C'' ELSE ''P'' END,
+			ssvnd_name						=	A.strName,
+			ssvnd_addr_1					=	CASE WHEN CHARINDEX(CHAR(10), C.strAddress) > 0 THEN SUBSTRING(C.strAddress, 0, CHARINDEX(CHAR(10),C.strAddress)) ELSE C.strAddress END,
+			ssvnd_addr_2					=	CASE WHEN CHARINDEX(CHAR(10), C.strAddress) > 0 THEN SUBSTRING(C.strAddress, CHARINDEX(CHAR(10),C.strAddress), LEN(C.strAddress)) ELSE NULL END,
+			ssvnd_city						=	strCity,
+			ssvnd_st						=	strState,
+			ssvnd_zip						=	strZipCode,
+			ssvnd_phone						=	ISNULL(D.strPhone,''''),
+			ssvnd_phone2					=	D.strPhone2,
+			ssvnd_contact					=	A.strName,
+			ssvnd_1099_yn					=	CASE WHEN ysnPrint1099 = 0 THEN ''N'' ELSE ''Y'' END,
+			ssvnd_wthhld_yn					=	CASE WHEN ysnWithholding = 0 THEN ''N'' ELSE ''Y'' END,
+			ssvnd_pay_ctl_ind				=	CASE WHEN ysnPymtCtrlActive = 1 THEN ''A''
+												 WHEN ysnPymtCtrlAlwaysDiscount = 1 THEN ''D''
+												 WHEN ysnPymtCtrlEFTActive = 1  THEN ''E''
+												 WHEN ysnPymtCtrlHold = 1 THEN ''H'' END,
+			ssvnd_fed_tax_id				=	strFederalTaxId,
+			ssvnd_w9_signed_rev_dt			=	CONVERT(VARCHAR(8), GETDATE(), 112),
+			ssvnd_pay_to					=	strVendorPayToId,
+			ssvnd_currency					=	E.strCurrency,
+			ssvnd_1099_name					=	str1099Name,
+			ssvnd_gl_pur					=	F.strExternalId,
+			ssvnd_tax_st					=	B.strTaxState
+		FROM
+			tblEntity A
+		INNER JOIN tblAPVendor B
+			ON A.intEntityId = B.intEntityId
+		INNER JOIN tblEntityLocation C		
+			ON B.intDefaultLocationId = C.intEntityLocationId
+		INNER JOIN tblEntityContact D
+			ON B.intDefaultContactId = D.intEntityId
+		LEFT JOIN tblSMCurrency E
+			ON B.intCurrencyId = E.intCurrencyID
+		LEFT JOIN tblGLCOACrossReference F
+			ON B.intGLAccountExpenseId = F.inti21Id
+		WHERE strVendorId = @VendorId
+	END
+
+RETURN;
 END
 
 IF(@Update = 0 AND @VendorId IS NULL)
@@ -363,6 +368,8 @@ BEGIN
 SET @Total = @@ROWCOUNT
 
 END
+
+
 
 	')
 END
