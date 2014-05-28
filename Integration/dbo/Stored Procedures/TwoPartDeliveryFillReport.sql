@@ -8,7 +8,7 @@ GO
 
 
 
-IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE (strPrefix = 'AG' OR strPrefix = 'PT') and strDBName = db_name()) = 1
+IF  (((SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()) = 1) OR ((SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1))
 BEGIN
 	EXEC('
 
