@@ -19,7 +19,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 			,strLocationNo = agpay_ivc_loc_no
 			,strCreditInd = agpay_cred_ind
 			,strReferenceNo = agpay_ref_no
-			,dtmDate = (case len(convert(varchar, agpay_orig_rev_dt)) when 8 then convert(date, cast(convert(varchar, agpay_orig_rev_dt) AS CHAR(12)), 112) else null end)
+			,dtmDate = (case isdate(agpay_orig_rev_dt) when 1 then convert(date, cast(convert(varchar, agpay_orig_rev_dt) AS CHAR(12)), 112) else null end)
 			,strNote = agpay_note
 			,strInvoiceNo = agpay_ivc_no
 		from
@@ -34,7 +34,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 			,strLocationNo = a.agpye_ivc_loc_no
 			,strCreditInd = a.agpye_cred_ind
 			,strReferenceNo = a.agpye_ref_no
-			,dtmDate = (case len(convert(varchar, a.agpye_rev_dt)) when 8 then convert(date, cast(convert(varchar, a.agpye_rev_dt) AS CHAR(12)), 112) else null end)
+			,dtmDate = (case isdate(a.agpye_rev_dt) when 1 then convert(date, cast(convert(varchar, a.agpye_rev_dt) AS CHAR(12)), 112) else null end)
 			,strNote = a.agpye_note
 			,strInvoiceNo = b.agivc_ivc_no
 		from
@@ -55,7 +55,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 			,strLocationNo = a.agcrd_loc_no
 			,strCreditInd = a.agcrd_cred_ind
 			,strReferenceNo = a.agcrd_ref_no
-			,dtmDate = (case len(convert(varchar, a.agcrd_rev_dt)) when 8 then convert(date, cast(convert(varchar, a.agcrd_rev_dt) AS CHAR(12)), 112) else null end)
+			,dtmDate = (case isdate(a.agcrd_rev_dt) when 1 then convert(date, cast(convert(varchar, a.agcrd_rev_dt) AS CHAR(12)), 112) else null end)
 			,strNote = a.agcrd_note
 			,strInvoiceNo = null
 		FROM

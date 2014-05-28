@@ -56,7 +56,9 @@ BEGIN
 			[strVendorId]			=	A.aptrx_vnd_no,
 			[strBillId] 			=	A.aptrx_ivc_no,
 			[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
-			[intTermsId] 			=	0,
+			[intTermsId] 			=	(SELECT TOP 1 intTermsId FROM tblEntityLocation 
+												WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
+													WHERE strVendorId COLLATE Latin1_General_CI_AS = A.aptrx_vnd_no COLLATE Latin1_General_CI_AS)),
 			[intTaxCodeId] 			=	NULL,
 			[dtmDate] 				=	CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 			[dtmBillDate] 			=	CASE WHEN ISDATE(A.aptrx_sys_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
@@ -92,7 +94,9 @@ BEGIN
 			[strVendorId]			=	A.apivc_vnd_no,
 			[strBillId] 			=	A.apivc_ivc_no,
 			[strVendorOrderNumber] 	=	A.apivc_ivc_no,
-			[intTermsId] 			=	0,
+			[intTermsId] 			=	(SELECT TOP 1 intTermsId FROM tblEntityLocation 
+												WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
+													WHERE strVendorId COLLATE Latin1_General_CI_AS = A.apivc_vnd_no COLLATE Latin1_General_CI_AS)),
 			[intTaxCodeId] 			=	NULL,
 			[dtmDate] 				=	CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 			[dtmBillDate] 			=	CASE WHEN ISDATE(A.apivc_ivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_ivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
@@ -197,7 +201,9 @@ BEGIN
 			[strVendorId]			=	A.aptrx_vnd_no,
 			[strBillId] 			=	A.aptrx_ivc_no,
 			[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
-			[intTermsId] 			=	0,
+			[intTermsId] 			=	(SELECT TOP 1 intTermsId FROM tblEntityLocation 
+												WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
+													WHERE strVendorId COLLATE Latin1_General_CI_AS = A.aptrx_vnd_no COLLATE Latin1_General_CI_AS)),
 			[intTaxCodeId] 			=	NULL,
 			[dtmDate] 				=	CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 			[dtmBillDate] 			=	CASE WHEN ISDATE(A.aptrx_sys_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
@@ -216,7 +222,7 @@ BEGIN
 				ON A.aptrx_cbk_no = B.apcbk_no
 			LEFT JOIN tblAPTempBill C
 				ON A.aptrx_ivc_no = C.aptrx_ivc_no
-		
+			
 		WHERE --CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
 			 CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
 			 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
@@ -237,7 +243,9 @@ BEGIN
 			[strVendorId]			=	A.apivc_vnd_no,
 			[strBillId] 			=	A.apivc_ivc_no,
 			[strVendorOrderNumber] 	=	A.apivc_ivc_no,
-			[intTermsId] 			=	0,
+			[intTermsId] 			=	(SELECT TOP 1 intTermsId FROM tblEntityLocation 
+												WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
+													WHERE strVendorId COLLATE Latin1_General_CI_AS = A.apivc_vnd_no COLLATE Latin1_General_CI_AS)),
 			[intTaxCodeId] 			=	NULL,
 			[dtmDate] 				=	CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 			[dtmBillDate] 			=	CASE WHEN ISDATE(A.apivc_ivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_ivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,

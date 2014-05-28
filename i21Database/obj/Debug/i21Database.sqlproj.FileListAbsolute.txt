@@ -25,3 +25,12 @@ C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\obj\Debug\i21D
 C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\obj\Debug\i21Database.pdb
 C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\bin\Debug\i21Database.dll
 C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21Database\bin\Debug\i21Database.pdb
+C:\i21 Development\i21 SQL Scripts\i21Database\bin\Debug\i21Database.dacpac
+C:\i21 Development\i21 SQL Scripts\i21Database\bin\Debug\i21Database.dll
+C:\i21 Development\i21 SQL Scripts\i21Database\bin\Debug\i21Database.pdb
+C:\i21 Development\i21 SQL Scripts\i21Database\obj\Debug\Model.xml
+C:\i21 Development\i21 SQL Scripts\i21Database\obj\Debug\refactor.xml
+C:\i21 Development\i21 SQL Scripts\i21Database\obj\Debug\postdeploy.sql
+C:\i21 Development\i21 SQL Scripts\i21Database\obj\Debug\predeploy.sql
+C:\i21 Development\i21 SQL Scripts\i21Database\obj\Debug\i21Database.dll
+C:\i21 Development\i21 SQL Scripts\i21Database\obj\Debug\i21Database.pdb
