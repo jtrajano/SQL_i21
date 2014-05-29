@@ -224,14 +224,15 @@ IF (ISNULL(@recap, 0) = 0)
 			INNER JOIN tblGLDetail B
 				ON A.strPaymentRecordNum = B.strTransactionId
 
-		--DELETE IF NOT CHECK PAYMENT
+		--DELETE IF NOT CHECK PAYMENT AND DOESN'T HAVE CHECK NUMBER
 		DELETE FROM tblCMBankTransaction
 		WHERE strTransactionId IN (
 			SELECT strPaymentRecordNum 
 			FROM tblAPPayment
 				INNER JOIN tblSMPaymentMethod ON tblAPPayment.intPaymentMethodId = tblSMPaymentMethod.intPaymentMethodID
 			 WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData) 
-			AND tblSMPaymentMethod.strPaymentMethod != 'Check'
+			AND tblSMPaymentMethod.strPaymentMethod != 'Check' 
+			OR (ISNULL(tblAPPayment.strPaymentInfo,'') = '' AND tblSMPaymentMethod.strPaymentMethod = 'Check')
 		)
 
 		--VOID IF CHECK PAYMENT
