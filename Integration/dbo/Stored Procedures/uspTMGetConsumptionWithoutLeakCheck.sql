@@ -416,7 +416,9 @@ FROM
 		When ''N'' then
 			''Inactive''
 		End) as CustomerStatus
-	,(CASE WHEN (EXISTS(SELECT TOP 1 1 FROM tblTMEvent WHERE tblTMEvent.intSiteID = C.intSiteID AND tblTMEvent.intEventTypeID = (SELECT intEventTypeID FROM tblTMEventType WHERE strEventType = ''Event-004'' AND ysnDefault = 1)))
+	,(CASE WHEN (EXISTS(SELECT TOP 1 1 FROM tblTMEvent WHERE tblTMEvent.intSiteID = C.intSiteID 
+														AND intDeviceId = E.intDeviceId
+														AND tblTMEvent.intEventTypeID = (SELECT intEventTypeID FROM tblTMEventType WHERE strEventType = ''Event-004'' AND ysnDefault = 1)))
 					THEN 1 ELSE 0 END)as ysnHasLeakGasCheck
 	,(SELECT Top 1 dtmDate FROM tblTMEvent WHERE tblTMEvent.intDeviceId = D.intDeviceId AND tblTMEvent.intEventTypeID = (SELECT intEventTypeID FROM tblTMEventType WHERE strEventType = ''Event-004'' AND ysnDefault = 1) order by dtmDate Desc)as dtmDate
 	,intLocationTotalTanks = (	SELECT TOP 1 COUNT(Z.strLocation)
