@@ -345,7 +345,6 @@ IF (ISNULL(@recap, 0) = 0)
 		UNION
 		SELECT
 			 [strPaymentRecordNum]
-			,A.intPaymentId
 			,@DiscountAccount
 			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = @DiscountAccount)
 			,A.[strVendorId]
