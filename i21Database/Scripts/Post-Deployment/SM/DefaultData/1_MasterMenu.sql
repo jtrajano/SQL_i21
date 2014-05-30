@@ -434,3 +434,30 @@ GO
 	IF NOT EXISTS(SELECT * FROM tblSMMasterMenu WHERE strMenuName = 'Company Location' AND strType = 'Screen' AND strModuleName = 'System Manager')
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Company Location', N'System Manager', 13, N'Company Location', N'Screen', N'i21.controller.CompanyLocation', N'small-screen', 0, 0, 0, 1, NULL, 1)
 GO
+	UPDATE tblSMMasterMenu
+	SET strCommand = 'HelpDesk.controller.CPTickets'
+	WHERE strMenuName = 'Tickets'
+	AND strCommand = 'HelpDesk.controller.Ticket'
+	AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu
+							WHERE strMenuName = 'Help Desk'
+							AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu Main 
+													WHERE strMenuName = 'Customer Portal'))
+GO
+	UPDATE tblSMMasterMenu
+	SET strCommand = 'HelpDesk.controller.CPOpenTicket'
+	WHERE strMenuName = 'Open Tickets'
+	AND strCommand = 'HelpDesk.controller.OpenTicket'
+	AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu
+							WHERE strMenuName = 'Help Desk'
+							AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu Main 
+													WHERE strMenuName = 'Customer Portal'))
+GO
+	UPDATE tblSMMasterMenu
+	SET strCommand = 'HelpDesk.controller.CPTicketAssigned'
+	WHERE strMenuName = 'Tickets Assigned to Me'
+	AND strCommand = 'HelpDesk.controller.TicketAssigned'
+	AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu
+							WHERE strMenuName = 'Help Desk'
+							AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu Main 
+													WHERE strMenuName = 'Customer Portal'))
+GO
