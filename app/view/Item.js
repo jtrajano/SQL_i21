@@ -702,7 +702,148 @@ Ext.define('Inventory.view.Item', {
                                                 },
                                                 {
                                                     xtype: 'panel',
-                                                    title: 'Point of Sale'
+                                                    title: 'Point of Sale',
+                                                    layout: {
+                                                        type: 'hbox',
+                                                        align: 'stretch',
+                                                        padding: 5
+                                                    },
+                                                    items: [
+                                                        {
+                                                            xtype: 'container',
+                                                            flex: 1,
+                                                            layout: {
+                                                                type: 'vbox',
+                                                                align: 'stretch'
+                                                            },
+                                                            items: [
+                                                                {
+                                                                    xtype: 'textfield',
+                                                                    fieldLabel: 'Order UPC No',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'textfield',
+                                                                    fieldLabel: 'Case UOM',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'textfield',
+                                                                    fieldLabel: 'Vendor Category',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'textfield',
+                                                                    fieldLabel: 'NACS Category',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'combobox',
+                                                                    fieldLabel: 'Family',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'combobox',
+                                                                    fieldLabel: 'Class',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'combobox',
+                                                                    fieldLabel: 'Product Code',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'combobox',
+                                                                    fieldLabel: 'WIC Code',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Deposit Required',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Saleable',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Promotional Item',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'combobox',
+                                                                    fieldLabel: 'Promotion Item',
+                                                                    labelWidth: 125
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            xtype: 'container',
+                                                            flex: 1,
+                                                            margins: '0 7',
+                                                            layout: {
+                                                                type: 'vbox',
+                                                                align: 'stretch'
+                                                            },
+                                                            items: [
+                                                                {
+                                                                    xtype: 'textfield',
+                                                                    fieldLabel: 'Bottle Dep. No',
+                                                                    labelWidth: 130
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Open Price PLU',
+                                                                    labelWidth: 130
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Linked Item',
+                                                                    labelWidth: 130
+                                                                },
+                                                                {
+                                                                    xtype: 'combobox',
+                                                                    fieldLabel: 'AG Category',
+                                                                    labelWidth: 130
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Receipt Comment Req',
+                                                                    labelWidth: 130
+                                                                },
+                                                                {
+                                                                    xtype: 'textfield',
+                                                                    fieldLabel: 'Count Code',
+                                                                    labelWidth: 130
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Count by Sl. No',
+                                                                    labelWidth: 130
+                                                                },
+                                                                {
+                                                                    xtype: 'textfield',
+                                                                    fieldLabel: 'Serial Number Begin',
+                                                                    labelWidth: 130
+                                                                },
+                                                                {
+                                                                    xtype: 'textfield',
+                                                                    fieldLabel: 'Serial Number End',
+                                                                    labelWidth: 130
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            xtype: 'container',
+                                                            flex: 1,
+                                                            layout: {
+                                                                type: 'vbox',
+                                                                align: 'stretch'
+                                                            }
+                                                        }
+                                                    ]
                                                 },
                                                 {
                                                     xtype: 'panel',
