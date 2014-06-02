@@ -209,7 +209,7 @@ IF (ISNULL(@recap, 0) = 0)
 
 		--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
 		UPDATE tblAPBill
-			SET tblAPBill.dblAmountDue = (C.dblAmountDue + B.dblPayment),
+			SET tblAPBill.dblAmountDue = (C.dblAmountDue + B.dblPayment + B.dblDiscount) - B.dblInterest,
 				tblAPBill.ysnPaid = 0,
 				tblAPBill.dtmDatePaid = NULL
 		FROM tblAPPayment A
