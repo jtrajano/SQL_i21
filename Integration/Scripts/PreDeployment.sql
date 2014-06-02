@@ -12,6 +12,7 @@
 :r .\LoadModules.sql
 
 -- CASH MANAGEMENT
+:r ..\dbo\Functions\fnIsDepositEntry.sql 
 :r ..\dbo\Views\apcbkmst.sql
 :r ..\dbo\Views\apchkmst.sql
 :r ..\dbo\Views\vwapivcmst.sql

@@ -62,6 +62,7 @@
     <Folder Include="dbo\Views" />
     <Folder Include="Scripts" />
     <Folder Include="dbo\Stored Procedures" />
+    <Folder Include="dbo\Functions" />
   </ItemGroup>
   <ItemGroup>
     <None Include="dbo\Views\apchkmst.sql" />
@@ -155,5 +156,8 @@
   <ItemGroup>
     <None Include="dbo\Views\vyuCPGAContractHistory.sql" />
     <None Include="dbo\Views\vyuCPGAContractOption.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dbo\Functions\fnIsDepositEntry.sql" />
   </ItemGroup>
 </Project>

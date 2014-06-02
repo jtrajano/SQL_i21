@@ -197,7 +197,7 @@ BEGIN
 					,@BANK_TRANSFER_WD AS INT = 9
 					,@BANK_TRANSFER_DEP AS INT = 10
 					,@ORIGIN_DEPOSIT AS INT = 11		-- NEGATIVE AMOUNT, INDICATOR: O, APCHK_CHK_NO PREFIX: NONE
-					,@ORIGIN_CHECKS AS INT = 12			-- POSITIVE AMOUNT, INDICATOR: C, APCHK_CHK_NO PREFIX: N/A, IT MUST BE A VALId NUMBER
+					,@ORIGIN_CHECKS AS INT = 12			-- POSITIVE AMOUNT, INDICATOR: C, APCHK_CHK_NO PREFIX: N/A, IT MUST BE A VALID NUMBER
 					,@ORIGIN_EFT AS INT = 13			-- POSITIVE AMOUNT, INDICATOR: N/A, APCHK_CHK_NO PREFIX: ''E''		
 					,@ORIGIN_WITHDRAWAL AS INT = 14		-- POSITIVE AMOUNT, INDICATOR: N/A, APCHK_CHK_NO PREFIX: NONE
 					,@ORIGIN_WIRE AS INT = 15			-- POSITIVE AMOUNT, INDICATOR: N/A, APCHK_CHK_NO PREFIX: ''W''
@@ -241,6 +241,7 @@ BEGIN
 					,strLink
 					,ysnClr
 					,dtmDateReconciled
+					,strSourceSystem
 					,intCreatedUserId
 					,dtmCreated
 					,intLastModifiedUserId
@@ -306,6 +307,7 @@ BEGIN
 														ELSE 0
 													END
 					,dtmDateReconciled			=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_clear_rev_dt)
+					,strSourceSystem			=	i.apchk_src_sys COLLATE Latin1_General_CI_AS
 					,intCreatedUserId			=	dbo.fnConvertOriginUserIdtoi21(i.apchk_user_id)
 					,dtmCreated					=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_user_rev_dt)
 					,intLastModifiedUserId		=	dbo.fnConvertOriginUserIdtoi21(i.apchk_user_id)
@@ -316,6 +318,7 @@ BEGIN
 			WHERE	f.intBankAccountId IS NOT NULL
 					AND i.apchk_chk_amt <> 0
 					AND ISNULL(dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt), dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt)) IS NOT NULL
+					AND dbo.fnIsDepositEntry(i.apchk_cbk_no, i.apchk_chk_no, i.apchk_trx_ind, i.apchk_rev_dt, i.apchk_vnd_no) = 0
 			IF @@ERROR <> 0 GOTO EXIT_TRIGGER	 
 	
 			-- Check number audit process: 
@@ -521,6 +524,7 @@ BEGIN
 						,strLink
 						,ysnClr
 						,dtmDateReconciled
+						,strSourceSystem
 						,intCreatedUserId
 						,dtmCreated
 						,intLastModifiedUserId
@@ -586,6 +590,7 @@ BEGIN
 															ELSE 0
 														END
 						,dtmDateReconciled			=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_clear_rev_dt)
+						,strSourceSystem			=	i.apchk_src_sys COLLATE Latin1_General_CI_AS
 						,intCreatedUserId			=	dbo.fnConvertOriginUserIdtoi21(i.apchk_user_id)
 						,dtmCreated					=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_user_rev_dt)
 						,intLastModifiedUserId		=	dbo.fnConvertOriginUserIdtoi21(i.apchk_user_id)
@@ -596,6 +601,7 @@ BEGIN
 				WHERE	f.intBankAccountId IS NOT NULL
 						AND i.apchk_chk_amt <> 0
 						AND ISNULL(dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt), dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt)) IS NOT NULL				
+						AND dbo.fnIsDepositEntry(i.apchk_cbk_no, i.apchk_chk_no, i.apchk_trx_ind, i.apchk_rev_dt, i.apchk_vnd_no) = 0
 				IF @@ERROR <> 0 GOTO EXIT_TRIGGER	
 			END		
 			ELSE 
@@ -662,6 +668,7 @@ BEGIN
 															ELSE 0
 														END
 						,dtmDateReconciled			=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_clear_rev_dt)
+						,strSourceSystem			=	i.apchk_src_sys COLLATE Latin1_General_CI_AS
 						,intCreatedUserId			=	dbo.fnConvertOriginUserIdtoi21(i.apchk_user_id)
 						,dtmCreated					=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_user_rev_dt)
 						,intLastModifiedUserId		=	dbo.fnConvertOriginUserIdtoi21(i.apchk_user_id)
@@ -681,6 +688,7 @@ BEGIN
 						AND i.apchk_chk_amt <> 0
 						AND ISNULL(dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt), dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt)) IS NOT NULL
 						AND f.ysnClr = 0
+						AND dbo.fnIsDepositEntry(i.apchk_cbk_no, i.apchk_chk_no, i.apchk_trx_ind, i.apchk_rev_dt, i.apchk_vnd_no) = 0
 				IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 			END
 	

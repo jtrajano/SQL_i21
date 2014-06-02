@@ -25,6 +25,7 @@
     [ysnClr]                   BIT              DEFAULT 0 NOT NULL,
     [dtmDateReconciled]        DATETIME         NULL,
 	[intBankStatementImportId] INT              NULL,
+	[strSourceSystem]		   NVARCHAR (2)		COLLATE Latin1_General_CI_AS NULL,			
     [intCreatedUserId]         INT              NULL,
 	[intCompanyLocationId]     INT              NULL,
     [dtmCreated]               DATETIME         NULL,

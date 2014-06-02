@@ -8,6 +8,8 @@
 -- Created by: Feb Montefrio
 -- --------------------------------------------------
 
+print('/*******************  BEGIN Populate Bank Transaction Types *******************/')
+
 INSERT INTO dbo.[tblCMBankTransactionType] (
 	[intBankTransactionTypeId]
 	,[strBankTransactionTypeName]
@@ -125,3 +127,5 @@ SELECT
 	,[strBankTransactionTypeName]	= 'Bank Stmt Import'
 	,[intConcurrencyId]				= 1			
 WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 17)
+
+print('/*******************  END Populate Bank Transaction Types *******************/')
