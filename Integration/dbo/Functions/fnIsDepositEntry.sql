@@ -1,21 +1,15 @@
 ﻿-- This function will return true if the a record is a Deposit Entry transaction. 
 -- Otherwise, it will return false. 
--- 
--- Usage:
--- 1. It is used in the triggers for apchkmst. If record is a deposit entry, the record is not synchronized with Cash Management. 
-IF OBJECT_ID (N'dbo.fnIsDepositEntry', N'FN') IS NOT NULL
-    DROP FUNCTION dbo.fnIsDepositEntry;
-GO
-
 IF	(SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN
 	EXEC ('
+		IF OBJECT_ID (N''dbo.fnIsDepositEntry'', N''FN'') IS NOT NULL
+			DROP FUNCTION dbo.fnIsDepositEntry;
+	')
+
+	EXEC ('
 		CREATE FUNCTION [dbo].[fnIsDepositEntry](
-			@cbk_no AS CHAR(2)
-			,@chk_no AS CHAR(8)
-			,@trx_ind AS CHAR(1)
-			,@rev_dt AS INT
-			,@vnd_no AS CHAR(10)
+			@strLink AS NVARCHAR(50)
 		)
 			RETURNS BIT 
 		AS
@@ -31,11 +25,11 @@ BEGIN
 						AND a.apchk_trx_ind = b.aptrx_trans_type			
 						AND a.apchk_rev_dt = b.aptrx_chk_rev_dt
 						AND a.apchk_vnd_no = b.aptrx_vnd_no
-			WHERE	a.apchk_cbk_no = @cbk_no
-					AND a.apchk_chk_no = @chk_no
-					AND a.apchk_trx_ind = @trx_ind
-					AND a.apchk_rev_dt = @rev_dt
-					AND a.apchk_vnd_no = @vnd_no
+			WHERE	@strLink = ( CAST(a.apchk_cbk_no AS NVARCHAR(2)) 
+									+ CAST(a.apchk_rev_dt AS NVARCHAR(10)) 
+									+ CAST(a.apchk_trx_ind AS NVARCHAR(1)) 
+									+ CAST(a.apchk_chk_no AS NVARCHAR(8))
+						) COLLATE Latin1_General_CI_AS
 					AND b.aptrx_trans_type = ''O'' -- Other CW transactions
 
 			/* Note: 
@@ -50,7 +44,6 @@ BEGIN
 			*/
 	
 			RETURN ISNULL(@isDepositEntry, 0) 
-		END 	
-	
+		END 		
 	')
 END

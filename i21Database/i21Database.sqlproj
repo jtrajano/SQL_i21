@@ -532,6 +532,7 @@
     <None Include="Scripts\Post-Deployment\CM\DataImportStatus.sql" />
     <None Include="Scripts\Post-Deployment\VersionUpdate.sql" />
     <PostDeploy Include="Scripts\Post-Deployment\PostDeployment.sql" />
+    <Build Include="dbo\Functions\fnIsDepositEntry.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />

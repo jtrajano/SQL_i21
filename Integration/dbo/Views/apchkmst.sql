@@ -318,7 +318,6 @@ BEGIN
 			WHERE	f.intBankAccountId IS NOT NULL
 					AND i.apchk_chk_amt <> 0
 					AND ISNULL(dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt), dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt)) IS NOT NULL
-					AND dbo.fnIsDepositEntry(i.apchk_cbk_no, i.apchk_chk_no, i.apchk_trx_ind, i.apchk_rev_dt, i.apchk_vnd_no) = 0
 			IF @@ERROR <> 0 GOTO EXIT_TRIGGER	 
 	
 			-- Check number audit process: 
@@ -601,7 +600,6 @@ BEGIN
 				WHERE	f.intBankAccountId IS NOT NULL
 						AND i.apchk_chk_amt <> 0
 						AND ISNULL(dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt), dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt)) IS NOT NULL				
-						AND dbo.fnIsDepositEntry(i.apchk_cbk_no, i.apchk_chk_no, i.apchk_trx_ind, i.apchk_rev_dt, i.apchk_vnd_no) = 0
 				IF @@ERROR <> 0 GOTO EXIT_TRIGGER	
 			END		
 			ELSE 
@@ -688,7 +686,6 @@ BEGIN
 						AND i.apchk_chk_amt <> 0
 						AND ISNULL(dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt), dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt)) IS NOT NULL
 						AND f.ysnClr = 0
-						AND dbo.fnIsDepositEntry(i.apchk_cbk_no, i.apchk_chk_no, i.apchk_trx_ind, i.apchk_rev_dt, i.apchk_vnd_no) = 0
 				IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 			END
 	
