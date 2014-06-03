@@ -36,14 +36,13 @@ Ext.define('Inventory.view.Item', {
         'Ext.grid.column.CheckColumn',
         'Ext.grid.View',
         'Ext.form.field.Checkbox',
-        'Ext.form.Label',
         'Ext.selection.CheckboxModel',
         'Ext.toolbar.Paging'
     ],
 
     height: 630,
     hidden: false,
-    minHeight: 630,
+    minHeight: 635,
     minWidth: 950,
     width: 950,
     layout: 'fit',
@@ -454,7 +453,7 @@ Ext.define('Inventory.view.Item', {
                                                     layout: {
                                                         type: 'hbox',
                                                         align: 'stretch',
-                                                        padding: 5
+                                                        padding: 7
                                                     },
                                                     items: [
                                                         {
@@ -586,6 +585,7 @@ Ext.define('Inventory.view.Item', {
                                                                 },
                                                                 {
                                                                     xtype: 'panel',
+                                                                    flex: 1,
                                                                     margins: '5 0 0 0',
                                                                     bodyPadding: 5,
                                                                     title: 'Feed',
@@ -706,7 +706,7 @@ Ext.define('Inventory.view.Item', {
                                                     layout: {
                                                         type: 'hbox',
                                                         align: 'stretch',
-                                                        padding: 5
+                                                        padding: 7
                                                     },
                                                     items: [
                                                         {
@@ -849,87 +849,159 @@ Ext.define('Inventory.view.Item', {
                                                     xtype: 'panel',
                                                     title: 'Location/Store',
                                                     layout: {
-                                                        type: 'vbox',
+                                                        type: 'hbox',
                                                         align: 'stretch',
                                                         padding: 7
                                                     },
                                                     items: [
                                                         {
-                                                            xtype: 'panel',
-                                                            bodyPadding: 5,
-                                                            title: 'Dialy Menu',
-                                                            items: [
-                                                                {
-                                                                    xtype: 'textfield',
-                                                                    fieldLabel: 'Label'
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
-                                                            xtype: 'panel',
-                                                            margins: '10 0 0 0 ',
-                                                            bodyPadding: 5,
-                                                            title: 'Maintenance',
-                                                            items: [
-                                                                {
-                                                                    xtype: 'textfield',
-                                                                    fieldLabel: 'Label'
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
-                                                            xtype: 'panel',
-                                                            margins: '10 0 0 0 ',
-                                                            bodyPadding: 5,
-                                                            title: 'Financial Reports',
-                                                            items: [
-                                                                {
-                                                                    xtype: 'textfield',
-                                                                    fieldLabel: 'Label'
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
-                                                            xtype: 'panel',
-                                                            margins: '10 0 0 0 ',
-                                                            bodyPadding: 5,
-                                                            title: 'Reports',
+                                                            xtype: 'container',
+                                                            flex: 1,
                                                             layout: {
                                                                 type: 'vbox',
                                                                 align: 'stretch'
                                                             },
                                                             items: [
                                                                 {
-                                                                    xtype: 'label',
-                                                                    padding: '5 0 0 0 ',
-                                                                    text: 'My Label'
+                                                                    xtype: 'combobox',
+                                                                    fieldLabel: 'Location',
+                                                                    labelWidth: 125
                                                                 },
                                                                 {
-                                                                    xtype: 'label',
-                                                                    padding: '5 0 0 0 ',
-                                                                    text: 'My Label'
+                                                                    xtype: 'combobox',
+                                                                    fieldLabel: 'Store',
+                                                                    labelWidth: 125
                                                                 },
                                                                 {
-                                                                    xtype: 'label',
-                                                                    padding: '5 0 0 0 ',
-                                                                    text: 'My Label'
+                                                                    xtype: 'textfield',
+                                                                    fieldLabel: 'Row',
+                                                                    labelWidth: 125
                                                                 },
                                                                 {
-                                                                    xtype: 'label',
-                                                                    padding: '5 0 0 0 ',
-                                                                    text: 'My Label'
+                                                                    xtype: 'textfield',
+                                                                    fieldLabel: 'Bin',
+                                                                    labelWidth: 125
                                                                 },
                                                                 {
-                                                                    xtype: 'label',
-                                                                    padding: '5 0 0 0 ',
-                                                                    text: 'My Label'
+                                                                    xtype: 'combobox',
+                                                                    fieldLabel: 'Fuel Tank No',
+                                                                    labelWidth: 125
                                                                 },
                                                                 {
-                                                                    xtype: 'label',
-                                                                    padding: '5 0 0 0 ',
-                                                                    text: 'My Label'
+                                                                    xtype: 'textfield',
+                                                                    fieldLabel: 'Passport Fuel ID 1',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'textfield',
+                                                                    fieldLabel: 'Passport Fuel ID 2',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'textfield',
+                                                                    fieldLabel: 'Passport Fuel ID 3',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Tax Flag 1',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Tax Flag 2',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Tax Flag 3',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Tax Flag 4',
+                                                                    labelWidth: 125
                                                                 }
                                                             ]
+                                                        },
+                                                        {
+                                                            xtype: 'container',
+                                                            flex: 1,
+                                                            margins: '0 7',
+                                                            layout: {
+                                                                type: 'vbox',
+                                                                align: 'stretch'
+                                                            },
+                                                            items: [
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Quantity Required',
+                                                                    labelWidth: 140
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Scale Item',
+                                                                    labelWidth: 140
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Food Stampable',
+                                                                    labelWidth: 140
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Returnable',
+                                                                    labelWidth: 140
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Pre Priced',
+                                                                    labelWidth: 140
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'ID Required (liqour)',
+                                                                    labelWidth: 140
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'ID Required (Cigarettes)',
+                                                                    labelWidth: 140
+                                                                },
+                                                                {
+                                                                    xtype: 'textfield',
+                                                                    fieldLabel: 'Minimum Age',
+                                                                    labelWidth: 140
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Apply Blue Law 1',
+                                                                    labelWidth: 140
+                                                                },
+                                                                {
+                                                                    xtype: 'checkboxfield',
+                                                                    fieldLabel: 'Apply Blue Law 2',
+                                                                    labelWidth: 140
+                                                                },
+                                                                {
+                                                                    xtype: 'combobox',
+                                                                    fieldLabel: 'Item Type Code',
+                                                                    labelWidth: 140
+                                                                },
+                                                                {
+                                                                    xtype: 'textfield',
+                                                                    fieldLabel: 'Item Type Subcode',
+                                                                    labelWidth: 140
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            xtype: 'container',
+                                                            flex: 1,
+                                                            layout: {
+                                                                type: 'vbox',
+                                                                align: 'stretch'
+                                                            }
                                                         }
                                                     ]
                                                 },
