@@ -79,6 +79,7 @@
 
 :r "..\dbo\Stored Procedures\uspAPImportBillTransactions.sql"
 :r "..\dbo\Stored Procedures\uspAPImportVendor.sql"
+:r "..\dbo\Stored Procedures\uspAPImportTerms.sql"
 
 
 -- TAX FORMS
