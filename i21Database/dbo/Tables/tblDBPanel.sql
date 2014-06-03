@@ -10,7 +10,7 @@
     [intDefaultWidth]       SMALLINT        NULL,
     [intSourcePanelId]      INT             NOT NULL,
     [intConnectionId]       INT             NOT NULL,
-    [intDrillDownPanel]     INT             NOT NULL,
+    [intDrillDownPanel]     INT             NOT NULL DEFAULT 0,
     [strClass]              NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
     [strPanelName]          NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
     [strStyle]              NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
