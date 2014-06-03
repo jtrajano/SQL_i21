@@ -6,6 +6,8 @@
 -- Created by: Feb Montefrio
 -- --------------------------------------------------
 
+print('/*******************  BEGIN Populate Cash Management Import Status *******************/')
+
 SET IDENTITY_INSERT [dbo].[tblCMDataImportStatus] ON
 
 INSERT INTO dbo.[tblCMDataImportStatus] (
@@ -29,3 +31,4 @@ WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMDataImportStatus] WHERE [intData
 
 SET IDENTITY_INSERT [dbo].[tblCMDataImportStatus] OFF
 	
+print('/*******************  END Populate Cash Management Import Status *******************/')

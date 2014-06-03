@@ -12,6 +12,7 @@
 :r .\LoadModules.sql
 
 -- CASH MANAGEMENT
+:r ..\dbo\Functions\fnIsDepositEntry.sql 
 :r ..\dbo\Views\apcbkmst.sql
 :r ..\dbo\Views\apchkmst.sql
 :r ..\dbo\Views\vwapivcmst.sql
@@ -79,6 +80,7 @@
 
 :r "..\dbo\Stored Procedures\uspAPImportBillTransactions.sql"
 :r "..\dbo\Stored Procedures\uspAPImportVendor.sql"
+:r "..\dbo\Stored Procedures\uspAPImportTerms.sql"
 
 
 -- TAX FORMS

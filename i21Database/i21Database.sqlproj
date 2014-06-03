@@ -125,6 +125,7 @@
     <Folder Include="Scripts\Post-Deployment\Optional Run\2_Reports" />
     <Folder Include="Scripts\Post-Deployment\AR" />
     <Folder Include="Scripts\Post-Deployment\TM\DefaultData" />
+    <Folder Include="Scripts\Post-Deployment\CM" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -370,7 +371,6 @@
     <None Include="Script.PreDeployment1.sql" />
     <None Include="Script.PostDeployment1.sql" />
     <None Include="Scripts\Post-Deployment\FIN\DefaultData\AccountGroup.sql" />
-    <None Include="Scripts\Post-Deployment\FIN\DefaultData\BankTransactionTypes.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\1_SM\1_ZipCodeData.sql" />
     <None Include="Scripts\Post-Deployment\Reports\1_ReportDisableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Reports\2_ReportDeleteOldData.sql" />
@@ -382,8 +382,6 @@
     <None Include="Scripts\Post-Deployment\SM\DefaultData\5_CompanySetup.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\6_Preferences.sql" />
     <None Include="Scripts\Post-Deployment\TM\1_OriginIndexing.sql" />
-    <PostDeploy Include="Scripts\Post-Deployment\PostDeployment.sql" />
-    <None Include="Scripts\Post-Deployment\VersionUpdate.sql" />
     <None Include="Scripts\Post-Deployment\Reports\4_ReportData.sql" />
     <Build Include="dbo\Tables\tblGLPostRecap.sql" />
     <Build Include="dbo\Tables\tblGLPostResult.sql" />
@@ -418,7 +416,6 @@
     <Build Include="dbo\Stored Procedures\uspCMImportBankTransactionsFromOrigin.sql" />
     <Build Include="dbo\Stored Procedures\uspCMImportBankReconciliationFromOrigin.sql" />
     <Build Include="dbo\Tables\tblCMDataImportStatus.sql" />
-    <None Include="Scripts\Post-Deployment\FIN\DefaultData\DataImportStatus.sql" />
     <Build Include="dbo\Tables\tblSMUserSecurityFRPermission.sql" />
     <Build Include="dbo\Tables\tblSMUserSecurityReportPermission.sql" />
     <Build Include="dbo\Tables\tblSMUserSecurityScreenPermission.sql" />
@@ -531,6 +528,11 @@
     <None Include="Scripts\Post-Deployment\TM\DefaultData\10_RegulatorType.sql" />
     <Build Include="dbo\Views\vyuHDCustomerContact.sql" />
     <Build Include="dbo\Stored Procedures\uspAPFixStartingNumbers.sql" />
+    <None Include="Scripts\Post-Deployment\CM\BankTransactionTypes.sql" />
+    <None Include="Scripts\Post-Deployment\CM\DataImportStatus.sql" />
+    <None Include="Scripts\Post-Deployment\VersionUpdate.sql" />
+    <PostDeploy Include="Scripts\Post-Deployment\PostDeployment.sql" />
+    <Build Include="dbo\Functions\fnIsDepositEntry.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
@@ -546,5 +548,6 @@
     <None Include="Scripts\Post-Deployment\TM\DefaultData\1_PreferenceCompany.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\2_EventType.sql" />
     <None Include="i1420AG.local.publish.xml" />
+    <None Include="Scripts\Post-Deployment\CM\PopulateSourceSystemData.sql" />
   </ItemGroup>
 </Project>

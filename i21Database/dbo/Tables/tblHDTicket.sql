@@ -2,7 +2,7 @@
 (
 	[intTicketId] [int] IDENTITY(1,1) NOT NULL,
 	[strTicketNumber] [nvarchar](20) NOT NULL,
-	[strSubject] [nvarchar](200) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strSubject] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strCustomerNumber] [nvarchar](15) COLLATE Latin1_General_CI_AS NULL,
 	[intCustomerContactId] [int] NULL,
 	[intTicketTypeId] [int] NOT NULL,
