@@ -55,9 +55,10 @@ BEGIN
 		ssvnd_1099_name					=	CAST(str1099Name AS VARCHAR(50)),
 		ssvnd_gl_pur					=	CAST(F.strExternalId AS DECIMAL(16,8)),
 		ssvnd_tax_st					=	CAST(B.strTaxState AS VARCHAR(2))
-		FROM
-			tblEntity A
+		FROM ssvndmst 
 		INNER JOIN tblAPVendor B
+			ON ssvndmst.ssvnd_vnd_no COLLATE Latin1_General_CI_AS = B.strVendorId COLLATE Latin1_General_CI_AS
+		INNER JOIN tblEntity A
 			ON A.intEntityId = B.intEntityId
 		INNER JOIN tblEntityLocation C
 			ON B.intDefaultLocationId = C.intEntityLocationId
@@ -67,7 +68,7 @@ BEGIN
 			ON B.intCurrencyId = E.intCurrencyID
 		LEFT JOIN tblGLCOACrossReference F
 			ON B.intGLAccountExpenseId = F.inti21Id
-		WHERE B.strVendorId = @VendorId
+		WHERE ssvndmst.ssvnd_vnd_no = @VendorId
 	END
 	ELSE
 	BEGIN
@@ -119,9 +120,10 @@ BEGIN
 			ssvnd_1099_name					=	str1099Name,
 			ssvnd_gl_pur					=	F.strExternalId,
 			ssvnd_tax_st					=	B.strTaxState
-		FROM
-			tblEntity A
+		FROM ssvndmst 
 		INNER JOIN tblAPVendor B
+			ON ssvndmst.ssvnd_vnd_no COLLATE Latin1_General_CI_AS = B.strVendorId COLLATE Latin1_General_CI_AS
+		INNER JOIN tblEntity A
 			ON A.intEntityId = B.intEntityId
 		INNER JOIN tblEntityLocation C		
 			ON B.intDefaultLocationId = C.intEntityLocationId
@@ -131,7 +133,7 @@ BEGIN
 			ON B.intCurrencyId = E.intCurrencyID
 		LEFT JOIN tblGLCOACrossReference F
 			ON B.intGLAccountExpenseId = F.inti21Id
-		WHERE strVendorId = @VendorId
+		WHERE ssvndmst.ssvnd_vnd_no = @VendorId
 	END
 
 RETURN;
