@@ -1007,11 +1007,188 @@ Ext.define('Inventory.view.Item', {
                                                 },
                                                 {
                                                     xtype: 'panel',
-                                                    title: 'UPC'
+                                                    layout: 'fit',
+                                                    title: 'UPC',
+                                                    items: [
+                                                        {
+                                                            xtype: 'advancefiltergrid',
+                                                            margin: -1,
+                                                            dockedItems: [
+                                                                {
+                                                                    xtype: 'toolbar',
+                                                                    dock: 'top',
+                                                                    itemId: 'tlbGridOptions',
+                                                                    layout: {
+                                                                        type: 'hbox',
+                                                                        padding: '0 0 0 1'
+                                                                    },
+                                                                    items: [
+                                                                        {
+                                                                            xtype: 'button',
+                                                                            itemId: 'btnDelete',
+                                                                            iconCls: 'small-delete',
+                                                                            tabIndex: -1,
+                                                                            text: 'Delete'
+                                                                        },
+                                                                        {
+                                                                            xtype: 'tbseparator'
+                                                                        },
+                                                                        {
+                                                                            xtype: 'filter'
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ],
+                                                            columns: [
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    width: 215,
+                                                                    dataIndex: 'string',
+                                                                    text: 'Unit of Measure',
+                                                                    flex: 1.5
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    dataIndex: 'string',
+                                                                    text: 'Unit Qty',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    dataIndex: 'string',
+                                                                    text: 'UPC Code',
+                                                                    flex: 2
+                                                                }
+                                                            ],
+                                                            selModel: Ext.create('Ext.selection.CheckboxModel', {
+
+                                                            })
+                                                        }
+                                                    ]
                                                 },
                                                 {
                                                     xtype: 'panel',
-                                                    title: 'xRef'
+                                                    title: 'xRef',
+                                                    layout: {
+                                                        type: 'vbox',
+                                                        align: 'stretch'
+                                                    },
+                                                    items: [
+                                                        {
+                                                            xtype: 'advancefiltergrid',
+                                                            flex: 1,
+                                                            margins: '0 0 5 0',
+                                                            margin: -1,
+                                                            title: 'Customer Item Cross Reference Grid',
+                                                            dockedItems: [
+                                                                {
+                                                                    xtype: 'toolbar',
+                                                                    dock: 'top',
+                                                                    itemId: 'tlbGridOptions',
+                                                                    layout: {
+                                                                        type: 'hbox',
+                                                                        padding: '0 0 0 1'
+                                                                    },
+                                                                    items: [
+                                                                        {
+                                                                            xtype: 'button',
+                                                                            itemId: 'btnDelete',
+                                                                            iconCls: 'small-delete',
+                                                                            tabIndex: -1,
+                                                                            text: 'Delete'
+                                                                        },
+                                                                        {
+                                                                            xtype: 'tbseparator'
+                                                                        },
+                                                                        {
+                                                                            xtype: 'filter'
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ],
+                                                            columns: [
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    width: 215,
+                                                                    dataIndex: 'string',
+                                                                    text: 'Customer',
+                                                                    flex: 1.5
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    dataIndex: 'string',
+                                                                    text: 'Customer Product',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    dataIndex: 'string',
+                                                                    text: 'Product Description',
+                                                                    flex: 2
+                                                                }
+                                                            ],
+                                                            selModel: Ext.create('Ext.selection.CheckboxModel', {
+
+                                                            })
+                                                        },
+                                                        {
+                                                            xtype: 'advancefiltergrid',
+                                                            flex: 1,
+                                                            margins: '5 0 0 0',
+                                                            margin: -1,
+                                                            title: 'Vendor Item Cross Reference Grid',
+                                                            dockedItems: [
+                                                                {
+                                                                    xtype: 'toolbar',
+                                                                    dock: 'top',
+                                                                    itemId: 'tlbGridOptions',
+                                                                    layout: {
+                                                                        type: 'hbox',
+                                                                        padding: '0 0 0 1'
+                                                                    },
+                                                                    items: [
+                                                                        {
+                                                                            xtype: 'button',
+                                                                            itemId: 'btnDelete',
+                                                                            iconCls: 'small-delete',
+                                                                            tabIndex: -1,
+                                                                            text: 'Delete'
+                                                                        },
+                                                                        {
+                                                                            xtype: 'tbseparator'
+                                                                        },
+                                                                        {
+                                                                            xtype: 'filter'
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ],
+                                                            columns: [
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    width: 215,
+                                                                    dataIndex: 'string',
+                                                                    text: 'Vendor',
+                                                                    flex: 1.5
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    dataIndex: 'string',
+                                                                    text: 'Vendor Product',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    dataIndex: 'string',
+                                                                    text: 'Product Description',
+                                                                    flex: 2
+                                                                }
+                                                            ],
+                                                            selModel: Ext.create('Ext.selection.CheckboxModel', {
+
+                                                            })
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         }
