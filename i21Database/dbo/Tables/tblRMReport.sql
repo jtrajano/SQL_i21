@@ -8,6 +8,7 @@
     [ysnAllowChangeFieldname]  BIT             NOT NULL,
     [ysnAllowRemoveFieldname]  BIT             NOT NULL,
     [ysnAllowAddFieldname]     BIT             NOT NULL,
+    [ysnAllowArchive]          BIT             NOT NULL,
     [ysnUseAllAndOperator]     BIT             NOT NULL,
     [ysnShowQuery]             BIT             NOT NULL,
     [strDescription]           NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
