@@ -95,6 +95,7 @@ WHERE	intBankAccountId = @intBankAccountId
 		AND ysnClr = 1
 		AND dtmDateReconciled IS NULL 
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate, dtmDate) AS FLOAT)) AS DATETIME)
+		AND dbo.fnIsDepositEntry(strLink) = 0
 IF @@ERROR <> 0	GOTO uspCMReconcileBankRecords_Rollback
 		
 --=====================================================================================================================================

@@ -46,7 +46,7 @@ WHERE	A.ysnPosted = 1
 		AND A.intBankTransactionTypeId IN (@BANK_TRANSACTION, @BANK_WITHDRAWAL)
 HAVING	ISNULL(SUM(ISNULL(B.dblCredit, 0)), 0) - ISNULL(SUM(ISNULL(B.dblDebit, 0)), 0) <> 0
 
--- Get bank amounts for the rest of the transactions like deposits, transferd (dep), and etc.
+-- Get bank amounts for the rest of the transactions like deposits, transfer (dep), and etc.
 SELECT	@returnBalance = ISNULL(@returnBalance, 0) + ISNULL(SUM(ISNULL(dblAmount, 0)), 0)
 FROM	[dbo].[tblCMBankTransaction]
 WHERE	ysnPosted = 1

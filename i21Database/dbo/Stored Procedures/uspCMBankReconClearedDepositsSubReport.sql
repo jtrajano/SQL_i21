@@ -152,3 +152,4 @@ WHERE	BankTrans.ysnPosted = 1
 			BankTrans.intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT)
 			OR ( dblAmount > 0 AND BankTrans.intBankTransactionTypeId = @BANK_TRANSACTION )
 		)
+		AND dbo.fnIsDepositEntry(BankTrans.strLink) = 0
