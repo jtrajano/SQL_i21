@@ -283,8 +283,7 @@ BEGIN
 													AND intBalanceDue = ssvnd_terms_due_day
 													AND intDiscountDay = ssvnd_terms_disc_day) 
 									WHEN ssvnd_terms_type = ''P'' THEN (SELECT TOP 1 intTermID FROM tblSMTerm 
-													WHERE intDayofMonthDue = ssvnd_terms_disc_pct
-													AND intBalanceDue = ssvnd_terms_due_day
+													WHERE intBalanceDue = ssvnd_terms_due_day
 													AND intDiscountDay = ssvnd_terms_disc_day
 													AND intDayofMonthDue = ssvnd_terms_cutoff_day)
 									ELSE NULL END
