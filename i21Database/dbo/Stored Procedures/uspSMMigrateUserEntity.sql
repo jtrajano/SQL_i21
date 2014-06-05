@@ -10,22 +10,43 @@ SET ANSI_WARNINGS OFF
 
 BEGIN
 
-	INSERT INTO tblEntity(strName, strEmail)
-	SELECT strUserName, strEmail FROM tblSMUserSecurity
+	DECLARE @UserName NVARCHAR(100)
+	DECLARE @FullName NVARCHAR(100)
+	DECLARE @Email NVARCHAR(100)
+	DECLARE @Password NVARCHAR(100)
+	DECLARE @NewId INT
+
+	SELECT strUserName, strFullName, strEmail, strPassword
+	INTO #tmpUsers
+	FROM tblSMUserSecurity
 	WHERE ysnDisabled = 0
-	AND strUserName NOT IN (SELECT strName FROM tblEntity)
+	AND ISNULL(intEntityId, 0) <= 0
 
-	UPDATE tblSMUserSecurity
-	SET intEntityId = tblPatch.intEntityId
-	FROM (
-		SELECT Entity.intEntityId, Entity.strName
-		FROM tblEntity Entity
-		INNER JOIN tblSMUserSecurity [User] ON [User].strUserName = Entity.strName
-	) tblPatch
-	WHERE tblPatch.strName = tblSMUserSecurity.strUserName
+	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpUsers)
+	BEGIN
+		
+		SELECT TOP 1 @UserName = strUserName, 
+			@FullName = strFullName,
+			@Email = strEmail,
+			@Password = strPassword
+		FROM #tmpUsers
+		
+		INSERT INTO tblEntity(strName, strEmail)
+		VALUES (@FullName, @Email)
+		
+		SELECT @NewId = SCOPE_IDENTITY()
+		
+		UPDATE tblSMUserSecurity
+		SET intEntityId = @NewId
+		WHERE strUserName = @UserName
+		AND ISNULL(intEntityId, 0) = 0
+		
+		INSERT INTO tblEntityCredential(intEntityId, strUserName, strPassword)
+		VALUES (@NewId, @UserName, @Password)
+		
+		DELETE FROM #tmpUsers WHERE strUserName = @UserName
+	END
 
-	INSERT INTO tblEntityCredential(intEntityId, strUserName, strPassword)
-	SELECT intEntityId, strUserName, strPassword FROM tblSMUserSecurity
-	WHERE intEntityId NOT IN (SELECT intEntityId FROM tblEntityCredential)
+	DROP TABLE #tmpUsers
 
 END
