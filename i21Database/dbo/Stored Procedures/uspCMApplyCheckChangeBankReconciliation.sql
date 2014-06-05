@@ -48,7 +48,8 @@ WHERE	ysnPosted = 1
 								intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT)
 								OR ( dblAmount > 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
 							)
+							AND dbo.fnIsDepositEntry(strLink) = 0 
 					THEN 1
 					ELSE
 					0
-			END
+			END		

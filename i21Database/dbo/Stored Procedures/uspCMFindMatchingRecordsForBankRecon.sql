@@ -49,6 +49,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 -- Criteria for qualification:
 -- 1. The record is posted, not voided, and not yet cleared. 
 -- 2. The record is with +/- 19 days from the imported record date. 
+-- 3. The record is not a deposit entry transaction. 
 SELECT	A.intTransactionId
 		,A.intBankTransactionTypeId
 		,A.dtmDate
@@ -63,6 +64,7 @@ WHERE	A.dtmDateReconciled IS NULL
 		AND A.ysnClr = 0
 		AND CAST(FLOOR(CAST(A.dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(B.dtmDate AS FLOAT) + @BETWEEN_DAYS) AS DATETIME)
 		AND CAST(FLOOR(CAST(A.dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(B.dtmDate AS FLOAT) - @BETWEEN_DAYS) AS DATETIME)
+		AND dbo.fnIsDepositEntry(strLink) = 0
 IF @@ERROR <> 0	GOTO _ROLLBACK
 
 -- Temporary table of the imported records		

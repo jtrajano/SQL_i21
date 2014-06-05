@@ -65,6 +65,7 @@ WHERE	intBankAccountId = @intBankAccountId
 		AND ysnClr = 1
 		AND dtmDateReconciled IS NULL 
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate, dtmDate) AS FLOAT)) AS DATETIME)		
+		AND dbo.fnIsDepositEntry(strLink) = 0
 IF @@ERROR <> 0	GOTO uspCMReconcileBankRecords_Rollback		
 
 -- Mark all origin transactions as cleared.
@@ -78,6 +79,7 @@ FROM	dbo.tblCMBankTransaction f INNER JOIN [dbo].[apchkmst_origin] origin
 							+ CAST(origin.apchk_chk_no AS NVARCHAR(8))
 			) COLLATE Latin1_General_CI_AS 
 			AND f.intBankTransactionTypeId IN (@ORIGIN_DEPOSIT, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
+			AND dbo.fnIsDepositEntry(f.strLink) = 0
 WHERE	intBankAccountId = @intBankAccountId
 		AND ysnPosted = 1
 		AND ysnClr = 1
@@ -95,6 +97,7 @@ WHERE	intBankAccountId = @intBankAccountId
 		AND ysnClr = 1
 		AND dtmDateReconciled IS NULL 
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate, dtmDate) AS FLOAT)) AS DATETIME)
+		AND dbo.fnIsDepositEntry(strLink) = 0
 IF @@ERROR <> 0	GOTO uspCMReconcileBankRecords_Rollback
 		
 --=====================================================================================================================================

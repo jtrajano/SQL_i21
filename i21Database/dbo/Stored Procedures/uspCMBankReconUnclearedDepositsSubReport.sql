@@ -150,4 +150,5 @@ WHERE	BankTrans.ysnPosted = 1
 			-- Filter for all the bank deposits and credits:
 			BankTrans.intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT)
 			OR ( BankTrans.dblAmount > 0 AND BankTrans.intBankTransactionTypeId = @BANK_TRANSACTION )
-		)		
+		)
+		AND dbo.fnIsDepositEntry(BankTrans.strLink) = 0

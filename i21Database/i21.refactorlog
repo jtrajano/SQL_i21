@@ -1372,4 +1372,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intConcurrencyId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="957841cf-1a03-46f4-b73e-edc0b4b65291" ChangeDateTime="06/04/2014 06:43:55">
+    <Property Name="ElementName" Value="[dbo].[tblEntityCredential].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblEntityCredential]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intEntityCredentialId" />
+  </Operation>
 </Operations>
