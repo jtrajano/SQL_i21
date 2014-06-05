@@ -59,6 +59,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 --Accounts Receivable
 :r .\AR\EntityTableDataFix.sql
+:R .\AR\DefaultMenu\1_CustomerPortalMenu.sql
 
 -- Version Update
 :r .\VersionUpdate.sql
