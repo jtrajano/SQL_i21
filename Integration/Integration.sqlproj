@@ -160,4 +160,7 @@
   <ItemGroup>
     <None Include="dbo\Functions\fnIsDepositEntry.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="dbo\Views\vyuCMOriginDepositEntry.sql" />
+  </ItemGroup>
 </Project>

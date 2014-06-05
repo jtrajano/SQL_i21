@@ -538,6 +538,8 @@
     <Build Include="dbo\Tables\tblCMAptrxmstArchive.sql" />
     <Build Include="dbo\Tables\tblCMApchkmstArchive.sql" />
     <Build Include="dbo\Tables\tblCMApeglmstArchive.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMRefreshUndepositedFundsFromOrigin.sql" />
+    <Build Include="dbo\Views\vyuCMOriginDepositEntry.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
