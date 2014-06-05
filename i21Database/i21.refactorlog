@@ -1379,4 +1379,109 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intEntityCredentialId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="92b86315-7060-45a0-8f98-229e891e6bca" ChangeDateTime="06/05/2014 01:06:04">
+    <Property Name="ElementName" Value="[dbo].[tblCMAptrxmstArchive].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMAptrxmstArchive]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intArchiveId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="805b6c6c-f018-4817-ace0-d427481bd5ad" ChangeDateTime="06/05/2014 01:22:53">
+    <Property Name="ElementName" Value="[dbo].[tblCMAptrxmstArchive].[ intCreatedUserId int True ]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMAptrxmstArchive]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCreatedUserId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="df2380ad-5dbe-4c89-a137-1c901d22c0b4" ChangeDateTime="06/05/2014 01:52:43">
+    <Property Name="ElementName" Value="[dbo].[tblCMAptrxmstArchive].[intArchiveId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMAptrxmstArchive]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intAptrxmstId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="6d7592b2-d406-436e-b0f6-9c40f5da1f4f" ChangeDateTime="06/05/2014 01:58:14">
+    <Property Name="ElementName" Value="[dbo].[tblCMUndepositedFund].[intBankTransactionId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMUndepositedFund]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTransactionId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="0140b811-57e7-46ce-9d27-233783d3bb4e" ChangeDateTime="06/05/2014 01:58:35">
+    <Property Name="ElementName" Value="[dbo].[tblCMUndepositedFund].[dblDebit]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMUndepositedFund]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblDeposit" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e243eb20-0f16-4f1b-995c-7facdc4b7555" ChangeDateTime="06/05/2014 01:59:26">
+    <Property Name="ElementName" Value="[dbo].[tblCMUndepositedFund].[strBankTransactionId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMUndepositedFund]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strBankDeposit" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d72759a1-bd08-4760-809a-34d9cc346b33" ChangeDateTime="06/05/2014 01:59:52">
+    <Property Name="ElementName" Value="[dbo].[tblCMUndepositedFund].[strTransactionId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMUndepositedFund]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strSourceTransactionId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="0f7a58dc-7360-410a-b825-943da17ba439" ChangeDateTime="06/05/2014 01:59:56">
+    <Property Name="ElementName" Value="[dbo].[tblCMUndepositedFund].[intTransactionId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMUndepositedFund]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intSourceTransactionId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3c8d1c98-c6c9-42d2-b87f-5f729643c851" ChangeDateTime="06/05/2014 04:02:32">
+    <Property Name="ElementName" Value="[dbo].[tblCMApchkmstArchive].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMApchkmstArchive]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intApchkmstId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="262af005-b702-435d-9b48-5b7ce02aa8fd" ChangeDateTime="06/05/2014 04:03:33">
+    <Property Name="ElementName" Value="[dbo].[tblCMApchkmstArchive].[v]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMApchkmstArchive]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="apchk_trx_ind" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="06d696ea-af80-4ee0-89b7-277ca8f1fa53" ChangeDateTime="06/05/2014 05:14:25">
+    <Property Name="ElementName" Value="[dbo].[tblCMApeglmst].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMApeglmst]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intApeglmstId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e35d1f39-800f-454f-8915-5a73876c464f" ChangeDateTime="06/05/2014 05:34:03">
+    <Property Name="ElementName" Value="[dbo].[tblCMUndepositedFund].[intAptrxmstArchiveId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMUndepositedFund]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intAptrxmstId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c5d050e8-79d7-44e8-ac13-d1652f5561d3" ChangeDateTime="06/05/2014 05:34:08">
+    <Property Name="ElementName" Value="[dbo].[tblCMUndepositedFund].[intApchkmstArchiveId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMUndepositedFund]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intApchkmstId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9d2f1d06-cac7-4ea0-94d0-c8d129c50ecb" ChangeDateTime="06/05/2014 05:34:11">
+    <Property Name="ElementName" Value="[dbo].[tblCMUndepositedFund].[intApeglmstArchiveId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMUndepositedFund]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intApeglmstId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b18c6d7c-80e9-4c09-9eae-cea5174bd5e7" ChangeDateTime="06/05/2014 05:34:18">
+    <Property Name="ElementName" Value="[dbo].[tblCMUndepositedFund].[intBankDepositLinkId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMUndepositedFund]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intBankDepositDetailId" />
+  </Operation>
 </Operations>

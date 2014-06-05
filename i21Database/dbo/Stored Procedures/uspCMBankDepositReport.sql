@@ -108,7 +108,7 @@ SELECT  H.intBankAccountId
 		,strCheckNo = '' -- TODO: This is the check number of the check deposited by a customer. Retrieve the check number from the undeposited funds table. 
 		,strPaymentMethod = '' -- TODO: This is payment method used by the customer to pay a sales invoice. Retrieve it from the undeposited funds table. 
 		,strReceivedFrom = ISNULL(ED.strName, ISNULL(EH.strName, H.strPayee))
-		,strSourceTransactionId = ISNULL(UF.strTransactionId, H.strTransactionId)
+		,strSourceTransactionId = ISNULL(UF.strSourceTransactionId, H.strTransactionId)
 FROM	[dbo].[tblCMBankTransaction] H INNER JOIN [dbo].[tblCMBankTransactionDetail] D
 			ON H.intTransactionId = D.intTransactionId
 		INNER JOIN [dbo].[tblCMBankAccount] BA

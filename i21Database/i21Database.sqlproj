@@ -531,10 +531,13 @@
     <None Include="Scripts\Post-Deployment\CM\BankTransactionTypes.sql" />
     <None Include="Scripts\Post-Deployment\CM\DataImportStatus.sql" />
     <None Include="Scripts\Post-Deployment\VersionUpdate.sql" />
-    <PostDeploy Include="Scripts\Post-Deployment\PostDeployment.sql" />
+    <None Include="Scripts\Post-Deployment\PostDeployment.sql" />
     <Build Include="dbo\Functions\fnIsDepositEntry.sql" />
     <Build Include="dbo\Views\vyuCMBankTransaction.sql" />
     <Build Include="dbo\Tables\tblEntityCredential.sql" />
+    <Build Include="dbo\Tables\tblCMAptrxmstArchive.sql" />
+    <Build Include="dbo\Tables\tblCMApchkmstArchive.sql" />
+    <Build Include="dbo\Tables\tblCMApeglmstArchive.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
