@@ -163,4 +163,7 @@
   <ItemGroup>
     <None Include="dbo\Views\vyuCMOriginDepositEntry.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="dbo\Views\vyuCMOriginUndepositedFund.sql" />
+  </ItemGroup>
 </Project>
