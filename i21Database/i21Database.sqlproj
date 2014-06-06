@@ -558,5 +558,6 @@
     <None Include="i1420AG.local.publish.xml" />
     <None Include="Scripts\Post-Deployment\CM\PopulateSourceSystemData.sql" />
     <Build Include="dbo\Views\vyuCPContactMenu.sql" />
+    <Build Include="dbo\Views\vyuARCustomerContacts.sql" />
   </ItemGroup>
 </Project>
