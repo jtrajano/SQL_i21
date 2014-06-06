@@ -18,6 +18,7 @@
 :r ..\dbo\Functions\fnIsDepositEntry.sql 
 :r ..\dbo\Views\vyuCMBankAccount.sql
 :r ..\dbo\Views\vyuCMOriginDepositEntry.sql
+:r ..\dbo\Views\vyuCMOriginUndepositedFund.sql
 
 -- ACCOUNTS PAYABLE
 :r ..\dbo\Views\vwapivcmst.sql
