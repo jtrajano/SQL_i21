@@ -1196,106 +1196,206 @@ Ext.define('Inventory.view.Item', {
                                 },
                                 {
                                     xtype: 'panel',
-                                    layout: 'fit',
                                     title: 'Pricing',
+                                    layout: {
+                                        type: 'vbox',
+                                        align: 'stretch'
+                                    },
                                     items: [
                                         {
-                                            xtype: 'advancefiltergrid',
-                                            itemId: 'grdLocation',
-                                            margin: -1,
-                                            dockedItems: [
+                                            xtype: 'container',
+                                            flex: 1
+                                        },
+                                        {
+                                            xtype: 'tabpanel',
+                                            flex: 1,
+                                            margins: '3',
+                                            activeTab: 0,
+                                            plain: true,
+                                            items: [
                                                 {
-                                                    xtype: 'toolbar',
-                                                    dock: 'top',
-                                                    itemId: 'tlbGridOptions',
-                                                    layout: {
-                                                        type: 'hbox',
-                                                        padding: '0 0 0 1'
-                                                    },
+                                                    xtype: 'panel',
+                                                    layout: 'fit',
+                                                    title: 'Pricing Level',
                                                     items: [
                                                         {
-                                                            xtype: 'button',
-                                                            itemId: 'btnAddLoc',
-                                                            iconCls: 'small-add',
-                                                            tabIndex: -1,
-                                                            text: 'Add'
-                                                        },
+                                                            xtype: 'advancefiltergrid',
+                                                            itemId: 'grdLocation',
+                                                            margin: -1,
+                                                            dockedItems: [
+                                                                {
+                                                                    xtype: 'toolbar',
+                                                                    dock: 'top',
+                                                                    itemId: 'tlbGridOptions',
+                                                                    layout: {
+                                                                        type: 'hbox',
+                                                                        padding: '0 0 0 1'
+                                                                    },
+                                                                    items: [
+                                                                        {
+                                                                            xtype: 'button',
+                                                                            itemId: 'btnDeleteLoc',
+                                                                            iconCls: 'small-delete',
+                                                                            tabIndex: -1,
+                                                                            text: 'Delete'
+                                                                        },
+                                                                        {
+                                                                            xtype: 'tbseparator'
+                                                                        },
+                                                                        {
+                                                                            xtype: 'filter'
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ],
+                                                            columns: [
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    dataIndex: 'strLocationName',
+                                                                    text: 'Location Name',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    dataIndex: 'strAddress',
+                                                                    text: 'Address',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    dataIndex: 'strCity',
+                                                                    text: 'City',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    dataIndex: 'strState',
+                                                                    text: 'State/Province'
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    dataIndex: 'strZipCode',
+                                                                    text: 'Zip/Postal Code'
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    hidden: true,
+                                                                    dataIndex: 'strPhone',
+                                                                    text: 'Phone',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    hidden: true,
+                                                                    dataIndex: 'strFax',
+                                                                    text: 'Fax',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    dataIndex: 'strEmailLocation',
+                                                                    text: 'Email',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                                mode: 'SINGLE'
+                                                            })
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    xtype: 'panel',
+                                                    layout: 'fit',
+                                                    title: 'Rebate/Discount',
+                                                    items: [
                                                         {
-                                                            xtype: 'button',
-                                                            itemId: 'btnEditLoc',
-                                                            iconCls: 'small-edit',
-                                                            tabIndex: -1,
-                                                            text: 'Edit'
-                                                        },
-                                                        {
-                                                            xtype: 'button',
-                                                            itemId: 'btnDeleteLoc',
-                                                            iconCls: 'small-delete',
-                                                            tabIndex: -1,
-                                                            text: 'Delete'
-                                                        },
-                                                        {
-                                                            xtype: 'tbseparator'
-                                                        },
-                                                        {
-                                                            xtype: 'filter'
+                                                            xtype: 'advancefiltergrid',
+                                                            itemId: 'grdLocation1',
+                                                            margin: -1,
+                                                            dockedItems: [
+                                                                {
+                                                                    xtype: 'toolbar',
+                                                                    dock: 'top',
+                                                                    itemId: 'tlbGridOptions',
+                                                                    layout: {
+                                                                        type: 'hbox',
+                                                                        padding: '0 0 0 1'
+                                                                    },
+                                                                    items: [
+                                                                        {
+                                                                            xtype: 'button',
+                                                                            itemId: 'btnDeleteLoc',
+                                                                            iconCls: 'small-delete',
+                                                                            tabIndex: -1,
+                                                                            text: 'Delete'
+                                                                        },
+                                                                        {
+                                                                            xtype: 'tbseparator'
+                                                                        },
+                                                                        {
+                                                                            xtype: 'filter'
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ],
+                                                            columns: [
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    dataIndex: 'strLocationName',
+                                                                    text: 'Location Name',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    dataIndex: 'strAddress',
+                                                                    text: 'Address',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    dataIndex: 'strCity',
+                                                                    text: 'City',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    dataIndex: 'strState',
+                                                                    text: 'State/Province'
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    dataIndex: 'strZipCode',
+                                                                    text: 'Zip/Postal Code'
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    hidden: true,
+                                                                    dataIndex: 'strPhone',
+                                                                    text: 'Phone',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    hidden: true,
+                                                                    dataIndex: 'strFax',
+                                                                    text: 'Fax',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    dataIndex: 'strEmailLocation',
+                                                                    text: 'Email',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                                mode: 'SINGLE'
+                                                            })
                                                         }
                                                     ]
                                                 }
-                                            ],
-                                            columns: [
-                                                {
-                                                    xtype: 'gridcolumn',
-                                                    dataIndex: 'strLocationName',
-                                                    text: 'Location Name',
-                                                    flex: 1
-                                                },
-                                                {
-                                                    xtype: 'gridcolumn',
-                                                    dataIndex: 'strAddress',
-                                                    text: 'Address',
-                                                    flex: 1
-                                                },
-                                                {
-                                                    xtype: 'gridcolumn',
-                                                    dataIndex: 'strCity',
-                                                    text: 'City',
-                                                    flex: 1
-                                                },
-                                                {
-                                                    xtype: 'gridcolumn',
-                                                    dataIndex: 'strState',
-                                                    text: 'State/Province'
-                                                },
-                                                {
-                                                    xtype: 'gridcolumn',
-                                                    dataIndex: 'strZipCode',
-                                                    text: 'Zip/Postal Code'
-                                                },
-                                                {
-                                                    xtype: 'gridcolumn',
-                                                    hidden: true,
-                                                    dataIndex: 'strPhone',
-                                                    text: 'Phone',
-                                                    flex: 1
-                                                },
-                                                {
-                                                    xtype: 'gridcolumn',
-                                                    hidden: true,
-                                                    dataIndex: 'strFax',
-                                                    text: 'Fax',
-                                                    flex: 1
-                                                },
-                                                {
-                                                    xtype: 'gridcolumn',
-                                                    dataIndex: 'strEmailLocation',
-                                                    text: 'Email',
-                                                    flex: 1
-                                                }
-                                            ],
-                                            selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                mode: 'SINGLE'
-                                            })
+                                            ]
                                         }
                                     ]
                                 },
