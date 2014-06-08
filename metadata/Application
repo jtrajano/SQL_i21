@@ -8,7 +8,9 @@
     "userConfig": {
         "name": "Inventory",
         "views": [
-            "CompanyLocation"
+            "CompanyLocation",
+            "ScreenTemplate",
+            "RIN"
         ]
     },
     "designerId": "application"

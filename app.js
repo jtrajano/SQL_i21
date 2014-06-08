@@ -21,7 +21,9 @@ Ext.Loader.setConfig({
 
 Ext.application({
     views: [
-        'CompanyLocation'
+        'CompanyLocation',
+        'ScreenTemplate',
+        'RIN'
     ],
     name: 'Inventory'
 });
