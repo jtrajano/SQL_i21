@@ -1,0 +1,536 @@
+{
+    "type": "Ext.window.Window",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "collapsible": true,
+        "defaultFocus": null,
+        "designer|userAlias": "fueltype",
+        "designer|userClassName": "FuelType",
+        "height": 465,
+        "hidden": false,
+        "icon": null,
+        "iconCls": "small-icon-i21",
+        "itemId": null,
+        "layout": "fit",
+        "maxHeight": 465,
+        "maximizable": true,
+        "minHeight": null,
+        "minWidth": 455,
+        "minimizable": null,
+        "title": "Fuel Types",
+        "width": 455
+    },
+    "designerId": "db932a16-d560-435e-99db-9c598d10bbc3",
+    "cn": [
+        {
+            "type": "Ext.form.Panel",
+            "reference": {
+                "name": "items",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "autoShow": true,
+                "bodyBorder": false,
+                "bodyPadding": 10,
+                "container|align": "stretch",
+                "dock": null,
+                "frame": null,
+                "header": false,
+                "height": 350,
+                "itemId": "frmFuelType",
+                "layout": "vbox",
+                "margin": -1,
+                "title": null,
+                "trackResetOnLoad": true,
+                "url": null,
+                "width": 450
+            },
+            "designerId": "3580b407-2aef-46f1-a34b-3cbbaa7c51c1",
+            "cn": [
+                {
+                    "type": "Ext.toolbar.Toolbar",
+                    "reference": {
+                        "name": "dockedItems",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|padding": "0 0 0 1",
+                        "designer|displayName": "toolbar",
+                        "dock": "top",
+                        "width": 588
+                    },
+                    "designerId": "4c43bcfc-6c5e-414f-a925-b6afb70a8797",
+                    "cn": [
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-new",
+                                "itemId": "btnNew",
+                                "layout|flex": null,
+                                "layout|margins": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "New",
+                                "width": 45
+                            },
+                            "designerId": "a4df0e79-1d2b-418b-a439-540ece465d94"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-save",
+                                "itemId": "btnSave",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Save",
+                                "width": 45
+                            },
+                            "designerId": "5002d7b9-988e-404d-ac3e-86d83cd8e870"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-search",
+                                "itemId": "btnSearch",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Search",
+                                "width": 45
+                            },
+                            "designerId": "f8b8761d-cc5c-405c-817f-7e91413a3fb6"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-delete",
+                                "itemId": "btnDelete",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Delete",
+                                "width": 45
+                            },
+                            "designerId": "3e081feb-2ab4-48ab-8cf5-cb4fd9d555d7"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-undo",
+                                "itemId": "btnUndo",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Undo",
+                                "width": 45
+                            },
+                            "designerId": "4068f749-609c-45c5-817d-ed68ffc707e2"
+                        },
+                        {
+                            "type": "Ext.toolbar.Separator",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": "separator",
+                                "height": 30,
+                                "layout|flex": null
+                            },
+                            "designerId": "552e11f3-5e13-4430-89b9-da95949645e6"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-close",
+                                "itemId": "btnClose",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Close",
+                                "width": 45
+                            },
+                            "designerId": "658b5c25-ea39-4462-8b10-b6572e1379c6"
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.container.Container",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|align": "stretch",
+                        "designer|displayName": "container",
+                        "height": null,
+                        "layout": "vbox",
+                        "layout|flex": 1.25,
+                        "layout|margins": "0 5 0 0",
+                        "width": 1014
+                    },
+                    "designerId": "07b54fe4-15a3-4d72-a1ad-7116677b9577",
+                    "cn": [
+                        {
+                            "type": "Ext.form.field.ComboBox",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Fuel Type",
+                                "itemId": "cboFuelType",
+                                "labelPad": null,
+                                "labelSeparator": null,
+                                "labelWidth": 165,
+                                "layout|flex": null,
+                                "margin": null,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null,
+                                "width": 170
+                            },
+                            "configAlternates": {
+                                "columns": "array"
+                            },
+                            "designerId": "a5e5c5b5-8952-48dd-b15e-a4148ba0371a"
+                        },
+                        {
+                            "type": "Ext.form.field.ComboBox",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Feed Stock",
+                                "itemId": "cboFeedStock",
+                                "labelPad": null,
+                                "labelSeparator": null,
+                                "labelWidth": 165,
+                                "layout|flex": null,
+                                "margin": null,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null,
+                                "width": 170
+                            },
+                            "designerId": "158e82c0-7bdf-4061-b5e5-c9be997929e4"
+                        },
+                        {
+                            "type": "Ext.form.field.Text",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Batch No",
+                                "itemId": "txtBatchNo",
+                                "labelPad": null,
+                                "labelSeparator": null,
+                                "labelWidth": 165,
+                                "layout|flex": null,
+                                "margin": null,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null,
+                                "width": null
+                            },
+                            "designerId": "612b526d-7188-47bd-a31f-9cb9212ff0dc"
+                        },
+                        {
+                            "type": "Ext.form.field.Text",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Ending RIN Gallons for Batch",
+                                "itemId": "txtEndingRinGallonsForBatch",
+                                "labelPad": null,
+                                "labelSeparator": null,
+                                "labelWidth": 165,
+                                "layout|flex": null,
+                                "margin": null,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null,
+                                "width": null
+                            },
+                            "designerId": "1b19e950-2f0f-4e8f-93a0-d9150376cc3a"
+                        },
+                        {
+                            "type": "Ext.form.field.ComboBox",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Equivalence Value",
+                                "itemId": "cboEquivalenceValue",
+                                "labelPad": null,
+                                "labelSeparator": null,
+                                "labelWidth": 165,
+                                "layout|flex": null,
+                                "margin": null,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null,
+                                "width": 170
+                            },
+                            "designerId": "cb947ddc-b53d-408a-828e-21ff31f0b23d"
+                        },
+                        {
+                            "type": "Ext.form.field.ComboBox",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Fuel Code",
+                                "itemId": "cboFuelCode",
+                                "labelPad": null,
+                                "labelSeparator": null,
+                                "labelWidth": 165,
+                                "layout|flex": null,
+                                "margin": null,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null,
+                                "width": 170
+                            },
+                            "designerId": "74f69a76-67b8-437d-aec2-c1f740ea3eda"
+                        },
+                        {
+                            "type": "Ext.form.field.ComboBox",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Process Code",
+                                "itemId": "cboProcessCode",
+                                "labelPad": null,
+                                "labelSeparator": null,
+                                "labelWidth": 165,
+                                "layout|flex": null,
+                                "margin": null,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null,
+                                "width": 170
+                            },
+                            "designerId": "a67ee039-a375-44bc-9291-5cfcb0742753"
+                        },
+                        {
+                            "type": "Ext.form.field.ComboBox",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Feed Stock UOM",
+                                "itemId": "cboFeedStockUom",
+                                "labelPad": null,
+                                "labelSeparator": null,
+                                "labelWidth": 165,
+                                "layout|flex": null,
+                                "margin": null,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null,
+                                "width": 170
+                            },
+                            "designerId": "03dc79f4-15f4-4ce2-9001-988db48be2a6"
+                        },
+                        {
+                            "type": "Ext.form.field.Text",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Feed Stock Factor",
+                                "itemId": "txtFeedStockFactor",
+                                "labelPad": null,
+                                "labelSeparator": null,
+                                "labelWidth": 165,
+                                "layout|flex": null,
+                                "margin": null,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null,
+                                "width": null
+                            },
+                            "designerId": "6794b5f5-5d4f-40e7-8b9d-d3a86191072b"
+                        },
+                        {
+                            "type": "Ext.form.field.Checkbox",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "boxLabel": null,
+                                "fieldLabel": "Renewable Biomass",
+                                "itemId": "chkRenewableBiomass",
+                                "labelWidth": 165,
+                                "layout|flex": null
+                            },
+                            "designerId": "5519542f-ed1d-4d6d-8ba8-98517576a584"
+                        },
+                        {
+                            "type": "Ext.form.field.Text",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Percent of Denaturant",
+                                "itemId": "txtPercentOfDenaturant",
+                                "labelPad": null,
+                                "labelSeparator": null,
+                                "labelWidth": 165,
+                                "layout|flex": null,
+                                "margin": null,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null,
+                                "width": null
+                            },
+                            "designerId": "f5644e27-75c6-46b3-85bf-659a24bbcb4b"
+                        },
+                        {
+                            "type": "Ext.form.field.Checkbox",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "boxLabel": null,
+                                "fieldLabel": "Deduct Denaturant from RIN",
+                                "itemId": "chkDeductDenaturantFromRin",
+                                "labelWidth": 165,
+                                "layout|flex": null
+                            },
+                            "designerId": "70fc0d5d-47e2-4d04-aec9-c7a5648ab50c"
+                        }
+                    ]
+                },
+                {
+                    "type": "linkedinstance",
+                    "reference": {
+                        "name": "dockedItems",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "afterPageText": null,
+                        "designer|createAlias": "ipagingstatusbar",
+                        "designer|displayName": "",
+                        "dock": "bottom",
+                        "itemId": "pagingtoolbar",
+                        "layout|flex": 1,
+                        "store": null
+                    },
+                    "designerId": "ef7cd9cb-b7a1-4f5a-a180-5e26b5c5119a",
+                    "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
+                }
+            ]
+        }
+    ]
+}
