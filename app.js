@@ -33,7 +33,8 @@ Ext.application({
         'Brand',
         'FuelTank',
         'PaidOuts',
-        'SubCategory'
+        'SubCategory',
+        'OkTemplate'
     ],
     name: 'Inventory'
 });

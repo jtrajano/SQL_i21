@@ -152,6 +152,7 @@ Ext.define('Inventory.view.RIN', {
                         {
                             xtype: 'gridpanel',
                             flex: 1,
+                            itemId: 'grdFuelType',
                             title: 'Fuel Type',
                             columns: [
                                 {
@@ -172,7 +173,10 @@ Ext.define('Inventory.view.RIN', {
                                     text: 'Equivalance Value',
                                     flex: 1
                                 }
-                            ]
+                            ],
+                            viewConfig: {
+                                itemId: 'grvFuelType'
+                            }
                         },
                         {
                             xtype: 'container',
@@ -186,6 +190,7 @@ Ext.define('Inventory.view.RIN', {
                                     xtype: 'gridpanel',
                                     flex: 1,
                                     margins: '5 0 0 0 ',
+                                    itemId: 'grdFuelCode',
                                     title: 'Fuel Code',
                                     columns: [
                                         {
@@ -200,12 +205,16 @@ Ext.define('Inventory.view.RIN', {
                                             text: 'Description',
                                             flex: 2
                                         }
-                                    ]
+                                    ],
+                                    viewConfig: {
+                                        itemId: 'grvFuelCode'
+                                    }
                                 },
                                 {
                                     xtype: 'gridpanel',
                                     flex: 1,
                                     margins: '5 0 0 5',
+                                    itemId: 'grdProcessCode',
                                     title: 'Process Code',
                                     columns: [
                                         {
@@ -220,7 +229,10 @@ Ext.define('Inventory.view.RIN', {
                                             text: 'Description',
                                             flex: 2
                                         }
-                                    ]
+                                    ],
+                                    viewConfig: {
+                                        itemId: 'grvProcessCode'
+                                    }
                                 }
                             ]
                         },
@@ -236,6 +248,7 @@ Ext.define('Inventory.view.RIN', {
                                     xtype: 'gridpanel',
                                     flex: 1,
                                     margins: '5 0 0 0 ',
+                                    itemId: 'grdFeedStockCode',
                                     title: 'Feed Stock Code',
                                     columns: [
                                         {
@@ -250,12 +263,16 @@ Ext.define('Inventory.view.RIN', {
                                             text: 'Description',
                                             flex: 2
                                         }
-                                    ]
+                                    ],
+                                    viewConfig: {
+                                        itemId: 'grvFeedStockCode'
+                                    }
                                 },
                                 {
                                     xtype: 'gridpanel',
                                     flex: 1,
                                     margins: '5 0 0 5',
+                                    itemId: 'grvFeedStockUom',
                                     title: 'Feed Stock UOM',
                                     columns: [
                                         {
@@ -270,7 +287,10 @@ Ext.define('Inventory.view.RIN', {
                                             text: 'UOM Code',
                                             flex: 2
                                         }
-                                    ]
+                                    ],
+                                    viewConfig: {
+                                        itemId: 'grvFeedStockUom'
+                                    }
                                 }
                             ]
                         }

@@ -223,6 +223,7 @@
                     },
                     "codeClass": null,
                     "userConfig": {
+                        "itemId": "grdFuelType",
                         "layout|flex": 1,
                         "title": "Fuel Type"
                     },
@@ -277,6 +278,9 @@
                                 "type": "object"
                             },
                             "codeClass": null,
+                            "userConfig": {
+                                "itemId": "grvFuelType"
+                            },
                             "designerId": "37832b77-0462-43cb-a15d-2a6bfe219e0b"
                         }
                     ]
@@ -304,6 +308,7 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "itemId": "grdFuelCode",
                                 "layout|flex": 1,
                                 "layout|margins": "5 0 0 0 ",
                                 "title": "Fuel Code"
@@ -345,6 +350,9 @@
                                         "type": "object"
                                     },
                                     "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "grvFuelCode"
+                                    },
                                     "designerId": "1a5e4b76-c1c0-44b0-a1ca-45f1951042c2"
                                 }
                             ]
@@ -357,6 +365,7 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "itemId": "grdProcessCode",
                                 "layout|flex": 1,
                                 "layout|margins": "5 0 0 5",
                                 "title": "Process Code"
@@ -398,6 +407,9 @@
                                         "type": "object"
                                     },
                                     "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "grvProcessCode"
+                                    },
                                     "designerId": "8c355fb5-8920-485b-beae-d6f864906e0e"
                                 }
                             ]
@@ -427,6 +439,7 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "itemId": "grdFeedStockCode",
                                 "layout|flex": 1,
                                 "layout|margins": "5 0 0 0 ",
                                 "title": "Feed Stock Code"
@@ -468,6 +481,9 @@
                                         "type": "object"
                                     },
                                     "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "grvFeedStockCode"
+                                    },
                                     "designerId": "56f2e907-0c6f-4dee-970d-de46be9ab0fd"
                                 }
                             ]
@@ -480,6 +496,7 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "itemId": "grvFeedStockUom",
                                 "layout|flex": 1,
                                 "layout|margins": "5 0 0 5",
                                 "title": "Feed Stock UOM"
@@ -521,6 +538,9 @@
                                         "type": "object"
                                     },
                                     "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "grvFeedStockUom"
+                                    },
                                     "designerId": "50da17cc-8d5e-4d20-bc10-d1f205a54834"
                                 }
                             ]

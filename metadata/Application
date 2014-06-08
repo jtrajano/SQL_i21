@@ -20,7 +20,8 @@
             "Brand",
             "FuelTank",
             "PaidOuts",
-            "SubCategory"
+            "SubCategory",
+            "OkTemplate"
         ]
     },
     "designerId": "application"

@@ -337,7 +337,7 @@
                             "userConfig": {
                                 "itemId": "grdProductCode",
                                 "layout|flex": 1,
-                                "title": "Product Code"
+                                "title": "Product Codes"
                             },
                             "designerId": "9e263e93-09c1-4e8c-8bd0-c57c6575e575",
                             "cn": [
