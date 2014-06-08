@@ -18,6 +18,7 @@ Ext.define('Inventory.view.PatronageCategory', {
     alias: 'widget.patronagecategory',
 
     requires: [
+        'Inventory.view.Filter',
         'Inventory.view.StatusbarPaging',
         'Ext.form.Panel',
         'Ext.button.Button',
@@ -25,11 +26,14 @@ Ext.define('Inventory.view.PatronageCategory', {
         'Ext.grid.Panel',
         'Ext.grid.column.Column',
         'Ext.grid.View',
+        'Ext.selection.CheckboxModel',
         'Ext.toolbar.Paging'
     ],
 
-    height: 583,
+    height: 500,
     hidden: false,
+    minHeight: 500,
+    minWidth: 530,
     width: 530,
     layout: 'fit',
     collapsible: true,
@@ -151,6 +155,32 @@ Ext.define('Inventory.view.PatronageCategory', {
                             xtype: 'gridpanel',
                             flex: 1,
                             itemId: 'grdPatronageCategory',
+                            dockedItems: [
+                                {
+                                    xtype: 'toolbar',
+                                    dock: 'top',
+                                    itemId: 'tlbGridOptions',
+                                    layout: {
+                                        type: 'hbox',
+                                        padding: '0 0 0 1'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            itemId: 'btnDelete',
+                                            iconCls: 'small-delete',
+                                            tabIndex: -1,
+                                            text: 'Delete'
+                                        },
+                                        {
+                                            xtype: 'tbseparator'
+                                        },
+                                        {
+                                            xtype: 'filter'
+                                        }
+                                    ]
+                                }
+                            ],
                             columns: [
                                 {
                                     xtype: 'gridcolumn',
@@ -179,7 +209,10 @@ Ext.define('Inventory.view.PatronageCategory', {
                             ],
                             viewConfig: {
                                 itemId: 'grvPatronageCategory'
-                            }
+                            },
+                            selModel: Ext.create('Ext.selection.CheckboxModel', {
+
+                            })
                         }
                     ]
                 }

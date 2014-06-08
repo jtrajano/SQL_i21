@@ -10,18 +10,18 @@
         "defaultFocus": null,
         "designer|userAlias": "inventorytag",
         "designer|userClassName": "InventoryTag",
-        "height": 539,
+        "height": 525,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
         "itemId": null,
         "layout": "fit",
         "maximizable": true,
-        "minHeight": null,
-        "minWidth": null,
+        "minHeight": 525,
+        "minWidth": 600,
         "minimizable": null,
         "title": "Inventory Tag",
-        "width": 649
+        "width": 600
     },
     "designerId": "a959b411-3963-41b6-bc2a-a30a0cfd3671",
     "cn": [

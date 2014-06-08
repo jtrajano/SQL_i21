@@ -30,9 +30,11 @@ Ext.define('Inventory.view.FuelTaxClass', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 515,
+    height: 525,
     hidden: false,
-    width: 412,
+    minHeight: 525,
+    minWidth: 425,
+    width: 425,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',

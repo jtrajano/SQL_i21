@@ -27,9 +27,11 @@ Ext.define('Inventory.view.InventoryTag', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 539,
+    height: 525,
     hidden: false,
-    width: 649,
+    minHeight: 525,
+    minWidth: 600,
+    width: 600,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',

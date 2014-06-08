@@ -28,9 +28,11 @@ Ext.define('Inventory.view.RIN', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 624,
+    height: 625,
     hidden: false,
-    width: 781,
+    minHeight: 625,
+    minWidth: 775,
+    width: 775,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',

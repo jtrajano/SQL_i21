@@ -41,7 +41,7 @@ Ext.define('Inventory.view.Item', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 630,
+    height: 635,
     hidden: false,
     minHeight: 635,
     minWidth: 950,

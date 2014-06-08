@@ -15,7 +15,12 @@
             "FuelTaxClass",
             "InventoryTag",
             "PatronageCategory",
-            "Manufacturer"
+            "Manufacturer",
+            "BoardOfTrades",
+            "Brand",
+            "FuelTank",
+            "PaidOuts",
+            "SubCategory"
         ]
     },
     "designerId": "application"

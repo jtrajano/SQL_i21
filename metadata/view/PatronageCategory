@@ -10,15 +10,15 @@
         "defaultFocus": null,
         "designer|userAlias": "patronagecategory",
         "designer|userClassName": "PatronageCategory",
-        "height": 583,
+        "height": 500,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
         "itemId": null,
         "layout": "fit",
         "maximizable": true,
-        "minHeight": null,
-        "minWidth": null,
+        "minHeight": 500,
+        "minWidth": 530,
         "minimizable": null,
         "title": "Patronage Category",
         "width": 530
@@ -230,6 +230,65 @@
                     "designerId": "1d66a4d3-78a5-4661-9922-845d4cdf1173",
                     "cn": [
                         {
+                            "type": "Ext.toolbar.Toolbar",
+                            "reference": {
+                                "name": "dockedItems",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|padding": "0 0 0 1",
+                                "dock": "top",
+                                "itemId": "tlbGridOptions"
+                            },
+                            "designerId": "c693c407-ef76-41b0-a45f-5464e3172701",
+                            "cn": [
+                                {
+                                    "type": "Ext.button.Button",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "icon": null,
+                                        "iconCls": "small-delete",
+                                        "itemId": "btnDelete",
+                                        "layout|flex": null,
+                                        "tabIndex": -1,
+                                        "text": "Delete"
+                                    },
+                                    "designerId": "e9d13941-3f4d-472a-b5f8-2080c7ee887b"
+                                },
+                                {
+                                    "type": "Ext.toolbar.Separator",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "designer|displayName": "separator",
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "00d3c866-9c33-43ec-a5cf-657525366eb0"
+                                },
+                                {
+                                    "type": "linkedinstance",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "a18798ff-eca4-42bf-a94e-9881fa91b221",
+                                    "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
+                                }
+                            ]
+                        },
+                        {
                             "type": "Ext.grid.column.Column",
                             "reference": {
                                 "name": "columns",
@@ -296,6 +355,15 @@
                                 "itemId": "grvPatronageCategory"
                             },
                             "designerId": "8384b641-31fe-40b2-abae-da8ac66c14cf"
+                        },
+                        {
+                            "type": "Ext.selection.CheckboxModel",
+                            "reference": {
+                                "name": "selModel",
+                                "type": "object"
+                            },
+                            "codeClass": "Ext.selection.CheckboxModel",
+                            "designerId": "27fd4416-70c6-4030-930b-5db285dc9fe1"
                         }
                     ]
                 },

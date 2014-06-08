@@ -18,7 +18,7 @@
         "layout": "fit",
         "maxHeight": 465,
         "maximizable": true,
-        "minHeight": null,
+        "minHeight": 465,
         "minWidth": 455,
         "minimizable": null,
         "title": "Fuel Types",

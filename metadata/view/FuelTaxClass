@@ -10,18 +10,18 @@
         "defaultFocus": null,
         "designer|userAlias": "fueltaxclass",
         "designer|userClassName": "FuelTaxClass",
-        "height": 515,
+        "height": 525,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
         "itemId": null,
         "layout": "fit",
         "maximizable": true,
-        "minHeight": null,
-        "minWidth": null,
+        "minHeight": 525,
+        "minWidth": 425,
         "minimizable": null,
         "title": "Fuel Tax Class",
-        "width": 412
+        "width": 425
     },
     "designerId": "3b7bc41a-75d8-4e76-9e5c-c7a291d6e1be",
     "cn": [

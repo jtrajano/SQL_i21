@@ -30,6 +30,7 @@ Ext.define('Inventory.view.FuelType', {
     height: 465,
     hidden: false,
     maxHeight: 465,
+    minHeight: 465,
     minWidth: 455,
     width: 455,
     layout: 'fit',

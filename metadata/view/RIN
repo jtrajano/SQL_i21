@@ -10,18 +10,18 @@
         "defaultFocus": null,
         "designer|userAlias": "rin",
         "designer|userClassName": "RIN",
-        "height": 624,
+        "height": 625,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
         "itemId": null,
         "layout": "fit",
         "maximizable": true,
-        "minHeight": null,
-        "minWidth": null,
+        "minHeight": 625,
+        "minWidth": 775,
         "minimizable": null,
         "title": "RIN",
-        "width": 781
+        "width": 775
     },
     "designerId": "9d94cca6-c484-414b-9120-f2e00868c675",
     "cn": [

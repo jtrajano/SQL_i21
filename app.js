@@ -28,7 +28,12 @@ Ext.application({
         'FuelTaxClass',
         'InventoryTag',
         'PatronageCategory',
-        'Manufacturer'
+        'Manufacturer',
+        'BoardOfTrades',
+        'Brand',
+        'FuelTank',
+        'PaidOuts',
+        'SubCategory'
     ],
     name: 'Inventory'
 });
