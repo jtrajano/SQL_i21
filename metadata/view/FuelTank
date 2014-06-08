@@ -1,0 +1,381 @@
+{
+    "type": "Ext.window.Window",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "collapsible": true,
+        "defaultFocus": null,
+        "designer|userAlias": "fueltank",
+        "designer|userClassName": "FuelTank",
+        "height": 621,
+        "hidden": false,
+        "icon": null,
+        "iconCls": "small-icon-i21",
+        "itemId": null,
+        "layout": "fit",
+        "maximizable": true,
+        "minHeight": 500,
+        "minWidth": 530,
+        "minimizable": null,
+        "title": "Fuel Tank",
+        "width": 875
+    },
+    "designerId": "6285c4d9-7aed-4586-9945-1e0cfe0cd00f",
+    "cn": [
+        {
+            "type": "Ext.form.Panel",
+            "reference": {
+                "name": "items",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "autoShow": true,
+                "bodyBorder": null,
+                "bodyPadding": 5,
+                "container|align": "stretch",
+                "dock": null,
+                "frame": null,
+                "header": null,
+                "height": 350,
+                "itemId": "frmFuelTank",
+                "layout": "vbox",
+                "margin": -1,
+                "title": null,
+                "trackResetOnLoad": true,
+                "url": null,
+                "width": 450
+            },
+            "designerId": "7ac5f650-8198-4f3a-8f07-cdab29d4c0f5",
+            "cn": [
+                {
+                    "type": "Ext.toolbar.Toolbar",
+                    "reference": {
+                        "name": "dockedItems",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|padding": "0 0 0 1",
+                        "designer|displayName": "toolbar",
+                        "dock": "top",
+                        "width": 588
+                    },
+                    "designerId": "93ebf9e0-06b6-47a2-865e-0103a9903a2b",
+                    "cn": [
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-save",
+                                "itemId": "btnSave",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Save",
+                                "width": 45
+                            },
+                            "designerId": "bb226d27-8348-4b67-a0dd-8a1bef832c70"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-undo",
+                                "itemId": "btnUndo",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Undo",
+                                "width": 45
+                            },
+                            "designerId": "5fafd892-cecf-4925-a497-caccce7b5717"
+                        },
+                        {
+                            "type": "Ext.toolbar.Separator",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": "separator",
+                                "height": 30,
+                                "layout|flex": null
+                            },
+                            "designerId": "f4a1759d-7440-4313-b89d-185f8bcc7649"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-close",
+                                "itemId": "btnClose",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Close",
+                                "width": 45
+                            },
+                            "designerId": "b4fe8b90-31e3-4367-b355-35be274236d1"
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.grid.Panel",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "itemId": "grdFuelTank",
+                        "layout|flex": 1,
+                        "title": null
+                    },
+                    "designerId": "112f6a0c-7564-4945-a845-949a86809b62",
+                    "cn": [
+                        {
+                            "type": "Ext.toolbar.Toolbar",
+                            "reference": {
+                                "name": "dockedItems",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|padding": "0 0 0 1",
+                                "dock": "top",
+                                "itemId": "tlbGridOptions"
+                            },
+                            "designerId": "dcd99f50-05d1-4087-a44d-e1b29ec87d55",
+                            "cn": [
+                                {
+                                    "type": "Ext.button.Button",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "icon": null,
+                                        "iconCls": "small-delete",
+                                        "itemId": "btnDelete",
+                                        "layout|flex": null,
+                                        "tabIndex": -1,
+                                        "text": "Delete"
+                                    },
+                                    "designerId": "8f682078-fdbd-492d-bb87-756748d92ada"
+                                },
+                                {
+                                    "type": "Ext.toolbar.Separator",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "designer|displayName": "separator",
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "7e06a618-85f3-4d10-936b-2330604da60f"
+                                },
+                                {
+                                    "type": "linkedinstance",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "2fae70be-eb75-4432-8b9e-f69f8ff60559",
+                                    "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.grid.column.Column",
+                            "reference": {
+                                "name": "columns",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "dataIndex": "string",
+                                "flex": null,
+                                "text": "Store Name",
+                                "width": 82
+                            },
+                            "designerId": "6de3f7f9-185e-4db5-9c3b-53afbe310368"
+                        },
+                        {
+                            "type": "Ext.grid.column.Column",
+                            "reference": {
+                                "name": "columns",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "dataIndex": "string",
+                                "flex": null,
+                                "text": "Fuel Tank No.",
+                                "width": 81
+                            },
+                            "designerId": "77a64ef7-7ac4-4833-9267-18371f2e1a6b"
+                        },
+                        {
+                            "type": "Ext.grid.column.Column",
+                            "reference": {
+                                "name": "columns",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "dataIndex": "string",
+                                "flex": 1,
+                                "text": "Description",
+                                "width": null
+                            },
+                            "designerId": "ea107ecd-8954-46da-a254-55209a2e5e5c"
+                        },
+                        {
+                            "type": "Ext.grid.column.Number",
+                            "reference": {
+                                "name": "columns",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "text": "Tank Capacity",
+                                "width": 79
+                            },
+                            "designerId": "a9f4fbef-6ee1-4c92-8243-1b7da089805a"
+                        },
+                        {
+                            "type": "Ext.grid.column.Number",
+                            "reference": {
+                                "name": "columns",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "text": "Current Volume",
+                                "width": 86
+                            },
+                            "designerId": "72ae9ebb-2fca-44c3-89ac-c3906ffe5a07"
+                        },
+                        {
+                            "type": "Ext.grid.column.Date",
+                            "reference": {
+                                "name": "columns",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "text": "Last Update",
+                                "width": 78
+                            },
+                            "designerId": "6788e7e2-2bfa-4711-a81d-c944912d20e8"
+                        },
+                        {
+                            "type": "Ext.grid.column.Number",
+                            "reference": {
+                                "name": "columns",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "text": "Last Update Shift",
+                                "width": 96
+                            },
+                            "designerId": "e5772008-d248-45b0-bbf8-b5704ffce5a0"
+                        },
+                        {
+                            "type": "Ext.grid.column.Column",
+                            "reference": {
+                                "name": "columns",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "dataIndex": "string",
+                                "flex": null,
+                                "text": "Tax Department No.",
+                                "width": 108
+                            },
+                            "designerId": "2ca31ce0-8d7b-4956-8e68-045ae54f4629"
+                        },
+                        {
+                            "type": "Ext.grid.View",
+                            "reference": {
+                                "name": "viewConfig",
+                                "type": "object"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "itemId": "grvFuelTank"
+                            },
+                            "designerId": "656b6d89-a6a2-4826-9dfb-26a7399222d9"
+                        },
+                        {
+                            "type": "Ext.selection.CheckboxModel",
+                            "reference": {
+                                "name": "selModel",
+                                "type": "object"
+                            },
+                            "codeClass": "Ext.selection.CheckboxModel",
+                            "designerId": "7c1dedc1-0bfc-4d73-b76e-5f511b00c0df"
+                        }
+                    ]
+                },
+                {
+                    "type": "linkedinstance",
+                    "reference": {
+                        "name": "dockedItems",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "afterPageText": null,
+                        "designer|createAlias": "ipagingstatusbar",
+                        "designer|displayName": "",
+                        "dock": "bottom",
+                        "itemId": "pagingtoolbar",
+                        "layout|flex": 1,
+                        "store": null
+                    },
+                    "designerId": "2a64a436-d508-4d5b-94c9-4ac759b7808e",
+                    "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
+                }
+            ]
+        }
+    ]
+}
