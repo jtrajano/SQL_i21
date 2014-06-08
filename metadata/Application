@@ -10,7 +10,8 @@
         "views": [
             "CompanyLocation",
             "ScreenTemplate",
-            "RIN"
+            "RIN",
+            "FuelType"
         ]
     },
     "designerId": "application"

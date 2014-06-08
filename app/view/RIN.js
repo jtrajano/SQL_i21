@@ -22,12 +22,15 @@ Ext.define('Inventory.view.RIN', {
         'Ext.form.Panel',
         'Ext.button.Button',
         'Ext.toolbar.Separator',
+        'Ext.grid.Panel',
+        'Ext.grid.column.Column',
+        'Ext.grid.View',
         'Ext.toolbar.Paging'
     ],
 
-    height: 416,
+    height: 624,
     hidden: false,
-    width: 478,
+    width: 781,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
@@ -47,7 +50,7 @@ Ext.define('Inventory.view.RIN', {
                     margin: -1,
                     width: 450,
                     bodyBorder: false,
-                    bodyPadding: 10,
+                    bodyPadding: 5,
                     header: false,
                     trackResetOnLoad: true,
                     layout: {
@@ -141,6 +144,133 @@ Ext.define('Inventory.view.RIN', {
                             itemId: 'pagingtoolbar',
                             flex: 1,
                             dock: 'bottom'
+                        }
+                    ],
+                    items: [
+                        {
+                            xtype: 'gridpanel',
+                            flex: 1,
+                            title: 'Fuel Type',
+                            columns: [
+                                {
+                                    xtype: 'gridcolumn',
+                                    dataIndex: 'string',
+                                    text: 'Fuel Type Code',
+                                    flex: 1
+                                },
+                                {
+                                    xtype: 'gridcolumn',
+                                    dataIndex: 'string',
+                                    text: 'Description',
+                                    flex: 2
+                                },
+                                {
+                                    xtype: 'gridcolumn',
+                                    dataIndex: 'string',
+                                    text: 'Equivalance Value',
+                                    flex: 1
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'container',
+                            flex: 1,
+                            layout: {
+                                type: 'hbox',
+                                align: 'stretch'
+                            },
+                            items: [
+                                {
+                                    xtype: 'gridpanel',
+                                    flex: 1,
+                                    margins: '5 0 0 0 ',
+                                    title: 'Fuel Code',
+                                    columns: [
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'string',
+                                            text: 'Fuel Code',
+                                            flex: 1
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'string',
+                                            text: 'Description',
+                                            flex: 2
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'gridpanel',
+                                    flex: 1,
+                                    margins: '5 0 0 5',
+                                    title: 'Process Code',
+                                    columns: [
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'string',
+                                            text: 'Process Code',
+                                            flex: 1
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'string',
+                                            text: 'Description',
+                                            flex: 2
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'container',
+                            flex: 1,
+                            layout: {
+                                type: 'hbox',
+                                align: 'stretch'
+                            },
+                            items: [
+                                {
+                                    xtype: 'gridpanel',
+                                    flex: 1,
+                                    margins: '5 0 0 0 ',
+                                    title: 'Feed Stock Code',
+                                    columns: [
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'string',
+                                            text: 'Feed Stock Code',
+                                            flex: 1
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'string',
+                                            text: 'Description',
+                                            flex: 2
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'gridpanel',
+                                    flex: 1,
+                                    margins: '5 0 0 5',
+                                    title: 'Feed Stock UOM',
+                                    columns: [
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'string',
+                                            text: 'UOM',
+                                            flex: 1
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'string',
+                                            text: 'UOM Code',
+                                            flex: 2
+                                        }
+                                    ]
+                                }
+                            ]
                         }
                     ]
                 }

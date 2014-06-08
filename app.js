@@ -23,7 +23,8 @@ Ext.application({
     views: [
         'CompanyLocation',
         'ScreenTemplate',
-        'RIN'
+        'RIN',
+        'FuelType'
     ],
     name: 'Inventory'
 });

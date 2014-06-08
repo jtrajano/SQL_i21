@@ -10,7 +10,7 @@
         "defaultFocus": null,
         "designer|userAlias": "rin",
         "designer|userClassName": "RIN",
-        "height": 416,
+        "height": 624,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
@@ -21,7 +21,7 @@
         "minWidth": null,
         "minimizable": null,
         "title": "RIN",
-        "width": 478
+        "width": 781
     },
     "designerId": "9d94cca6-c484-414b-9120-f2e00868c675",
     "cn": [
@@ -35,7 +35,7 @@
             "userConfig": {
                 "autoShow": true,
                 "bodyBorder": false,
-                "bodyPadding": 10,
+                "bodyPadding": 5,
                 "container|align": "stretch",
                 "dock": null,
                 "frame": null,
@@ -212,6 +212,318 @@
                                 "width": 45
                             },
                             "designerId": "4086b547-5316-4f2c-92b7-638fe96a9507"
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.grid.Panel",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "layout|flex": 1,
+                        "title": "Fuel Type"
+                    },
+                    "designerId": "fd018232-244f-4a0d-a97f-90e8a79df348",
+                    "cn": [
+                        {
+                            "type": "Ext.grid.column.Column",
+                            "reference": {
+                                "name": "columns",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "dataIndex": "string",
+                                "flex": 1,
+                                "text": "Fuel Type Code"
+                            },
+                            "designerId": "80868a20-1bc5-493e-8d9c-5b0f9ab3f807"
+                        },
+                        {
+                            "type": "Ext.grid.column.Column",
+                            "reference": {
+                                "name": "columns",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "dataIndex": "string",
+                                "flex": 2,
+                                "text": "Description"
+                            },
+                            "designerId": "3bd83fc6-26a4-43ad-97a4-b1905f3cf996"
+                        },
+                        {
+                            "type": "Ext.grid.column.Column",
+                            "reference": {
+                                "name": "columns",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "dataIndex": "string",
+                                "flex": 1,
+                                "text": "Equivalance Value"
+                            },
+                            "designerId": "6101257d-978a-4a15-b80c-998bc2820a34"
+                        },
+                        {
+                            "type": "Ext.grid.View",
+                            "reference": {
+                                "name": "viewConfig",
+                                "type": "object"
+                            },
+                            "codeClass": null,
+                            "designerId": "37832b77-0462-43cb-a15d-2a6bfe219e0b"
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.container.Container",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|align": "stretch",
+                        "designer|displayName": "container",
+                        "layout": "hbox",
+                        "layout|flex": 1
+                    },
+                    "designerId": "8ae5d3c5-7b3c-47da-aea7-7c15311cb798",
+                    "cn": [
+                        {
+                            "type": "Ext.grid.Panel",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "layout|flex": 1,
+                                "layout|margins": "5 0 0 0 ",
+                                "title": "Fuel Code"
+                            },
+                            "designerId": "35cd5dc3-c021-4224-9a04-d36784a15c2b",
+                            "cn": [
+                                {
+                                    "type": "Ext.grid.column.Column",
+                                    "reference": {
+                                        "name": "columns",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "dataIndex": "string",
+                                        "flex": 1,
+                                        "text": "Fuel Code"
+                                    },
+                                    "designerId": "8a7c1734-5a3b-492c-a0fc-568b9a8e92a8"
+                                },
+                                {
+                                    "type": "Ext.grid.column.Column",
+                                    "reference": {
+                                        "name": "columns",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "dataIndex": "string",
+                                        "flex": 2,
+                                        "text": "Description"
+                                    },
+                                    "designerId": "a4da39cd-7fa1-4e1e-90af-ea406e257936"
+                                },
+                                {
+                                    "type": "Ext.grid.View",
+                                    "reference": {
+                                        "name": "viewConfig",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "designerId": "1a5e4b76-c1c0-44b0-a1ca-45f1951042c2"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.grid.Panel",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "layout|flex": 1,
+                                "layout|margins": "5 0 0 5",
+                                "title": "Process Code"
+                            },
+                            "designerId": "376b6a27-b883-43ca-b9cf-f20dde49aac8",
+                            "cn": [
+                                {
+                                    "type": "Ext.grid.column.Column",
+                                    "reference": {
+                                        "name": "columns",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "dataIndex": "string",
+                                        "flex": 1,
+                                        "text": "Process Code"
+                                    },
+                                    "designerId": "9babbea4-a9ce-4745-85ea-7e596631d2f3"
+                                },
+                                {
+                                    "type": "Ext.grid.column.Column",
+                                    "reference": {
+                                        "name": "columns",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "dataIndex": "string",
+                                        "flex": 2,
+                                        "text": "Description"
+                                    },
+                                    "designerId": "d1df97ed-bd45-495d-9d0f-ff2ea0fd5863"
+                                },
+                                {
+                                    "type": "Ext.grid.View",
+                                    "reference": {
+                                        "name": "viewConfig",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "designerId": "8c355fb5-8920-485b-beae-d6f864906e0e"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.container.Container",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|align": "stretch",
+                        "designer|displayName": "container",
+                        "layout": "hbox",
+                        "layout|flex": 1
+                    },
+                    "designerId": "89b0b59b-e7e9-4575-bf04-331253f9e923",
+                    "cn": [
+                        {
+                            "type": "Ext.grid.Panel",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "layout|flex": 1,
+                                "layout|margins": "5 0 0 0 ",
+                                "title": "Feed Stock Code"
+                            },
+                            "designerId": "3b68695b-8713-463d-8f16-aaa7fc7b8828",
+                            "cn": [
+                                {
+                                    "type": "Ext.grid.column.Column",
+                                    "reference": {
+                                        "name": "columns",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "dataIndex": "string",
+                                        "flex": 1,
+                                        "text": "Feed Stock Code"
+                                    },
+                                    "designerId": "492507f4-1fc1-4c8c-a970-4197efa017eb"
+                                },
+                                {
+                                    "type": "Ext.grid.column.Column",
+                                    "reference": {
+                                        "name": "columns",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "dataIndex": "string",
+                                        "flex": 2,
+                                        "text": "Description"
+                                    },
+                                    "designerId": "abb06b8d-0456-4830-ba29-d0faa50055fd"
+                                },
+                                {
+                                    "type": "Ext.grid.View",
+                                    "reference": {
+                                        "name": "viewConfig",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "designerId": "56f2e907-0c6f-4dee-970d-de46be9ab0fd"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.grid.Panel",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "layout|flex": 1,
+                                "layout|margins": "5 0 0 5",
+                                "title": "Feed Stock UOM"
+                            },
+                            "designerId": "850942d5-3977-4d07-86ea-8b30c54060cb",
+                            "cn": [
+                                {
+                                    "type": "Ext.grid.column.Column",
+                                    "reference": {
+                                        "name": "columns",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "dataIndex": "string",
+                                        "flex": 1,
+                                        "text": "UOM"
+                                    },
+                                    "designerId": "f8b2198e-9724-4c38-93de-e6de352f7385"
+                                },
+                                {
+                                    "type": "Ext.grid.column.Column",
+                                    "reference": {
+                                        "name": "columns",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "dataIndex": "string",
+                                        "flex": 2,
+                                        "text": "UOM Code"
+                                    },
+                                    "designerId": "cb49ecad-8118-490b-a0b5-d4d567004f8b"
+                                },
+                                {
+                                    "type": "Ext.grid.View",
+                                    "reference": {
+                                        "name": "viewConfig",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "designerId": "50da17cc-8d5e-4d20-bc10-d1f205a54834"
+                                }
+                            ]
                         }
                     ]
                 },

@@ -30,13 +30,11 @@ Ext.define('Inventory.view.ScreenTemplate', {
 
     height: 416,
     hidden: false,
-    itemId: 'Banks',
     width: 478,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
-    title: 'Banks',
-    defaultFocus: 'txtBankName',
+    title: 'Template',
     maximizable: true,
 
     initComponent: function() {
@@ -54,7 +52,6 @@ Ext.define('Inventory.view.ScreenTemplate', {
                     bodyBorder: false,
                     bodyPadding: 10,
                     header: false,
-                    title: 'My Form',
                     trackResetOnLoad: true,
                     layout: {
                         type: 'vbox',
