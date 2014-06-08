@@ -37,6 +37,7 @@ Ext.define('Inventory.view.Item', {
         'Ext.grid.View',
         'Ext.form.field.Checkbox',
         'Ext.selection.CheckboxModel',
+        'Ext.grid.column.Date',
         'Ext.toolbar.Paging'
     ],
 
@@ -444,6 +445,7 @@ Ext.define('Inventory.view.Item', {
                                         {
                                             xtype: 'tabpanel',
                                             flex: 1,
+                                            itemId: 'tabSetup',
                                             activeTab: 0,
                                             plain: true,
                                             items: [
@@ -1204,12 +1206,135 @@ Ext.define('Inventory.view.Item', {
                                     items: [
                                         {
                                             xtype: 'container',
-                                            flex: 1
+                                            layout: {
+                                                type: 'hbox',
+                                                align: 'stretch',
+                                                padding: 5
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'container',
+                                                    flex: 1,
+                                                    layout: {
+                                                        type: 'vbox',
+                                                        align: 'stretch'
+                                                    },
+                                                    items: [
+                                                        {
+                                                            xtype: 'textfield',
+                                                            fieldLabel: 'Location',
+                                                            labelWidth: 110
+                                                        },
+                                                        {
+                                                            xtype: 'textfield',
+                                                            fieldLabel: 'Store Name',
+                                                            labelWidth: 110
+                                                        },
+                                                        {
+                                                            xtype: 'textfield',
+                                                            fieldLabel: 'Retail Price',
+                                                            labelWidth: 110
+                                                        },
+                                                        {
+                                                            xtype: 'textfield',
+                                                            fieldLabel: 'Wholesale Price',
+                                                            labelWidth: 110
+                                                        },
+                                                        {
+                                                            xtype: 'textfield',
+                                                            fieldLabel: 'Large Volume Price',
+                                                            labelWidth: 110
+                                                        },
+                                                        {
+                                                            xtype: 'textfield',
+                                                            fieldLabel: 'MSRP',
+                                                            labelWidth: 110
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    xtype: 'container',
+                                                    flex: 1,
+                                                    margins: '0 0 0 5',
+                                                    layout: {
+                                                        type: 'vbox',
+                                                        align: 'stretch'
+                                                    },
+                                                    items: [
+                                                        {
+                                                            xtype: 'combobox',
+                                                            fieldLabel: 'Pricing Method',
+                                                            labelWidth: 110
+                                                        },
+                                                        {
+                                                            xtype: 'textfield',
+                                                            fieldLabel: 'Last Cost',
+                                                            labelWidth: 110
+                                                        },
+                                                        {
+                                                            xtype: 'textfield',
+                                                            fieldLabel: 'Average Cost',
+                                                            labelWidth: 110
+                                                        },
+                                                        {
+                                                            xtype: 'textfield',
+                                                            fieldLabel: 'Standard Cost',
+                                                            labelWidth: 110
+                                                        },
+                                                        {
+                                                            xtype: 'textfield',
+                                                            fieldLabel: 'End of Month Cost',
+                                                            labelWidth: 110
+                                                        },
+                                                        {
+                                                            xtype: 'textfield',
+                                                            fieldLabel: 'Default Sales Tax',
+                                                            labelWidth: 110
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    xtype: 'container',
+                                                    flex: 1,
+                                                    margins: '0 0 0 5',
+                                                    layout: {
+                                                        type: 'vbox',
+                                                        align: 'stretch'
+                                                    },
+                                                    items: [
+                                                        {
+                                                            xtype: 'textfield',
+                                                            fieldLabel: 'Commission Rate'
+                                                        },
+                                                        {
+                                                            xtype: 'textfield',
+                                                            fieldLabel: 'Commission Units'
+                                                        },
+                                                        {
+                                                            xtype: 'textfield',
+                                                            fieldLabel: 'Discount Code'
+                                                        },
+                                                        {
+                                                            xtype: 'textfield',
+                                                            fieldLabel: 'Discount Rate'
+                                                        },
+                                                        {
+                                                            xtype: 'textfield',
+                                                            fieldLabel: 'Min Override'
+                                                        },
+                                                        {
+                                                            xtype: 'textfield',
+                                                            fieldLabel: 'Max Override'
+                                                        }
+                                                    ]
+                                                }
+                                            ]
                                         },
                                         {
                                             xtype: 'tabpanel',
                                             flex: 1,
                                             margins: '3',
+                                            itemId: 'tabPricing',
                                             activeTab: 0,
                                             plain: true,
                                             items: [
@@ -1220,7 +1345,7 @@ Ext.define('Inventory.view.Item', {
                                                     items: [
                                                         {
                                                             xtype: 'advancefiltergrid',
-                                                            itemId: 'grdLocation',
+                                                            itemId: 'grdPricingLevel',
                                                             margin: -1,
                                                             dockedItems: [
                                                                 {
@@ -1234,7 +1359,7 @@ Ext.define('Inventory.view.Item', {
                                                                     items: [
                                                                         {
                                                                             xtype: 'button',
-                                                                            itemId: 'btnDeleteLoc',
+                                                                            itemId: 'btnDelete',
                                                                             iconCls: 'small-delete',
                                                                             tabIndex: -1,
                                                                             text: 'Delete'
@@ -1251,31 +1376,33 @@ Ext.define('Inventory.view.Item', {
                                                             columns: [
                                                                 {
                                                                     xtype: 'gridcolumn',
-                                                                    dataIndex: 'strLocationName',
-                                                                    text: 'Location Name',
+                                                                    dataIndex: 'strFieldName',
+                                                                    text: 'Location',
                                                                     flex: 1
                                                                 },
                                                                 {
                                                                     xtype: 'gridcolumn',
-                                                                    dataIndex: 'strAddress',
-                                                                    text: 'Address',
+                                                                    dataIndex: 'strFieldName',
+                                                                    text: 'Store Name',
                                                                     flex: 1
                                                                 },
                                                                 {
                                                                     xtype: 'gridcolumn',
-                                                                    dataIndex: 'strCity',
-                                                                    text: 'City',
+                                                                    dataIndex: 'strFieldName',
+                                                                    text: 'Price Level',
                                                                     flex: 1
                                                                 },
                                                                 {
                                                                     xtype: 'gridcolumn',
-                                                                    dataIndex: 'strState',
-                                                                    text: 'State/Province'
+                                                                    width: 50,
+                                                                    dataIndex: 'strFieldName',
+                                                                    text: 'UOM'
                                                                 },
                                                                 {
                                                                     xtype: 'gridcolumn',
-                                                                    dataIndex: 'strZipCode',
-                                                                    text: 'Zip/Postal Code'
+                                                                    width: 50,
+                                                                    dataIndex: 'strFieldName',
+                                                                    text: 'Units'
                                                                 },
                                                                 {
                                                                     xtype: 'gridcolumn',
@@ -1293,11 +1420,46 @@ Ext.define('Inventory.view.Item', {
                                                                 },
                                                                 {
                                                                     xtype: 'gridcolumn',
-                                                                    dataIndex: 'strEmailLocation',
-                                                                    text: 'Email',
+                                                                    width: 50,
+                                                                    dataIndex: 'strFieldName',
+                                                                    text: 'Min'
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    width: 50,
+                                                                    dataIndex: 'strFieldName',
+                                                                    text: 'Max'
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    width: 85,
+                                                                    dataIndex: 'strFieldName',
+                                                                    text: 'Pricing Method'
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    width: 80,
+                                                                    dataIndex: 'strFieldName',
+                                                                    text: 'Commission %'
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    align: 'right',
+                                                                    dataIndex: 'strFieldName',
+                                                                    text: 'Percent/Amount',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    align: 'right',
+                                                                    dataIndex: 'strFieldName',
+                                                                    text: 'Unit Price',
                                                                     flex: 1
                                                                 }
                                                             ],
+                                                            viewConfig: {
+                                                                itemId: 'grvPricingLevel'
+                                                            },
                                                             selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                                 mode: 'SINGLE'
                                                             })
@@ -1311,7 +1473,7 @@ Ext.define('Inventory.view.Item', {
                                                     items: [
                                                         {
                                                             xtype: 'advancefiltergrid',
-                                                            itemId: 'grdLocation1',
+                                                            itemId: 'grdRebateDiscount',
                                                             margin: -1,
                                                             dockedItems: [
                                                                 {
@@ -1325,7 +1487,7 @@ Ext.define('Inventory.view.Item', {
                                                                     items: [
                                                                         {
                                                                             xtype: 'button',
-                                                                            itemId: 'btnDeleteLoc',
+                                                                            itemId: 'btnDelete',
                                                                             iconCls: 'small-delete',
                                                                             tabIndex: -1,
                                                                             text: 'Delete'
@@ -1342,53 +1504,72 @@ Ext.define('Inventory.view.Item', {
                                                             columns: [
                                                                 {
                                                                     xtype: 'gridcolumn',
-                                                                    dataIndex: 'strLocationName',
-                                                                    text: 'Location Name',
+                                                                    dataIndex: 'strFieldName',
+                                                                    text: 'Location',
                                                                     flex: 1
                                                                 },
                                                                 {
                                                                     xtype: 'gridcolumn',
-                                                                    dataIndex: 'strAddress',
-                                                                    text: 'Address',
+                                                                    dataIndex: 'strFieldName',
+                                                                    text: 'Store Name',
                                                                     flex: 1
                                                                 },
                                                                 {
                                                                     xtype: 'gridcolumn',
-                                                                    dataIndex: 'strCity',
-                                                                    text: 'City',
-                                                                    flex: 1
+                                                                    width: 87,
+                                                                    dataIndex: 'strFieldName',
+                                                                    text: 'Rebate Name'
                                                                 },
                                                                 {
                                                                     xtype: 'gridcolumn',
-                                                                    dataIndex: 'strState',
-                                                                    text: 'State/Province'
+                                                                    width: 74,
+                                                                    dataIndex: 'strFieldName',
+                                                                    text: 'Rebate Type'
+                                                                },
+                                                                {
+                                                                    xtype: 'datecolumn',
+                                                                    width: 80,
+                                                                    text: 'Begin Date'
+                                                                },
+                                                                {
+                                                                    xtype: 'datecolumn',
+                                                                    width: 80,
+                                                                    text: 'End Date'
                                                                 },
                                                                 {
                                                                     xtype: 'gridcolumn',
-                                                                    dataIndex: 'strZipCode',
-                                                                    text: 'Zip/Postal Code'
+                                                                    width: 72,
+                                                                    dataIndex: 'strFieldName',
+                                                                    text: 'Through Qty'
                                                                 },
                                                                 {
                                                                     xtype: 'gridcolumn',
-                                                                    hidden: true,
-                                                                    dataIndex: 'strPhone',
-                                                                    text: 'Phone',
-                                                                    flex: 1
+                                                                    width: 91,
+                                                                    dataIndex: 'strFieldName',
+                                                                    text: 'Through Amount'
                                                                 },
                                                                 {
                                                                     xtype: 'gridcolumn',
-                                                                    hidden: true,
-                                                                    dataIndex: 'strFax',
-                                                                    text: 'Fax',
-                                                                    flex: 1
+                                                                    width: 72,
+                                                                    dataIndex: 'strFieldName',
+                                                                    text: 'Amount/Unit'
                                                                 },
                                                                 {
                                                                     xtype: 'gridcolumn',
-                                                                    dataIndex: 'strEmailLocation',
-                                                                    text: 'Email',
-                                                                    flex: 1
+                                                                    width: 92,
+                                                                    dataIndex: 'strFieldName',
+                                                                    text: 'Accumulated Qty'
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    width: 110,
+                                                                    dataIndex: 'strFieldName',
+                                                                    text: 'Accumulated Amount'
                                                                 }
                                                             ],
+                                                            viewConfig: {
+                                                                itemId: 'grvRebateDiscount'
+                                                            },
                                                             selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                                 mode: 'SINGLE'
                                                             })
