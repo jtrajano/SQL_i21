@@ -11,7 +11,11 @@
             "CompanyLocation",
             "ScreenTemplate",
             "RIN",
-            "FuelType"
+            "FuelType",
+            "FuelTaxClass",
+            "InventoryTag",
+            "PatronageCategory",
+            "Manufacturer"
         ]
     },
     "designerId": "application"

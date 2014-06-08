@@ -24,7 +24,11 @@ Ext.application({
         'CompanyLocation',
         'ScreenTemplate',
         'RIN',
-        'FuelType'
+        'FuelType',
+        'FuelTaxClass',
+        'InventoryTag',
+        'PatronageCategory',
+        'Manufacturer'
     ],
     name: 'Inventory'
 });
