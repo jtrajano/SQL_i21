@@ -542,6 +542,7 @@
     <Build Include="dbo\Views\vyuCMOriginDepositEntry.sql" />
     <Build Include="dbo\Views\vyuCMOriginUndepositedFund.sql" />
     <Build Include="dbo\Functions\fnGetEntityIdFromUser.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMMigrateUserEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
