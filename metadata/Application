@@ -21,7 +21,9 @@
             "FuelTank",
             "PaidOuts",
             "SubCategory",
-            "OkTemplate"
+            "OkTemplate",
+            "Commodity",
+            "Category"
         ]
     },
     "designerId": "application"

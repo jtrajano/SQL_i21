@@ -34,7 +34,9 @@ Ext.application({
         'FuelTank',
         'PaidOuts',
         'SubCategory',
-        'OkTemplate'
+        'OkTemplate',
+        'Commodity',
+        'Category'
     ],
     name: 'Inventory'
 });

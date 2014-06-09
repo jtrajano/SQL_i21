@@ -20,9 +20,7 @@
         "minHeight": 635,
         "minWidth": 950,
         "minimizable": null,
-        "mixins": [
-            "['Ext.iux.Validator']"
-        ],
+        "mixins": null,
         "title": "Item: 000000015 - Ultralow Sulfur #2 Diesel",
         "width": 950
     },

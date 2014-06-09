@@ -17,9 +17,6 @@ Ext.define('Inventory.view.Item', {
     extend: 'Ext.window.Window',
     alias: 'widget.item',
 
-    mixins: [
-        'Ext.iux.Validator'
-    ],
     requires: [
         'Inventory.view.Filter',
         'Inventory.view.StatusbarPaging',
