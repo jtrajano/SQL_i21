@@ -195,6 +195,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intConcurrencyId]	
 			,[dblExchangeRate]
 			,[intUserId]
+			,[intEntityId]
 			,[dtmDateEntered]
 			,[strBatchId]
 			,[strCode]
@@ -222,6 +223,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intConcurrencyId]		= 1
 			,[dblExchangeRate]		= 1
 			,[intUserId]			= @intUserId
+			,[intEntityId]			= @intUserId
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
 			,[strCode]				= 'AA'
@@ -262,6 +264,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[intConcurrencyId]	
 				,[dblExchangeRate]
 				,[intUserId]
+				,[intEntityId]
 				,[dtmDateEntered]
 				,[strBatchId]
 				,[strCode]
@@ -289,6 +292,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[intConcurrencyId]		= 1
 				,[dblExchangeRate]		= 1
 				,[intUserId]			= @intUserId
+				,[intEntityId]			= @intUserId
 				,[dtmDateEntered]		= GETDATE()
 				,[strBatchId]			= @strBatchId
 				,[strCode]				= 'AA'
@@ -378,6 +382,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[intConcurrencyId]	
 				,[dblExchangeRate]
 				,[intUserId]
+				,[intEntityId]
 				,[dtmDateEntered]
 				,[strBatchId]
 				,[strCode]
@@ -401,6 +406,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[intConcurrencyId]		= 1
 				,[dblExchangeRate]		= 1
 				,[intUserId]			= @intUserId
+				,[intEntityId]			= @intUserId
 				,[dtmDateEntered]		= GETDATE()
 				,[strBatchId]			= @strBatchId
 				,[strCode]				= 'AA'
@@ -420,7 +426,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 ELSE
 	BEGIN
 		-- DELETE Results 1 DAYS OLDER	
-		DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intUserId = @intUserId;
+		DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and (intUserId = @intUserId or intEntityId = @intUserId);
 		
 		
 		WITH Accounts 
@@ -448,6 +454,7 @@ ELSE
 			,[intConcurrencyId]	
 			,[dblExchangeRate]
 			,[intUserId]
+			,[intEntityId]
 			,[dtmDateEntered]
 			,[strBatchId]
 			,[strCode]
@@ -476,6 +483,7 @@ ELSE
 			,[intConcurrencyId]		= 1
 			,[dblExchangeRate]		= 1
 			,[intUserId]			= @intUserId
+			,[intEntityId]			= @intUserId
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
 			,[strCode]				= 'AA'
@@ -516,6 +524,7 @@ ELSE
 				,[intConcurrencyId]	
 				,[dblExchangeRate]
 				,[intUserId]
+				,[intEntityId]
 				,[dtmDateEntered]
 				,[strBatchId]
 				,[strCode]
@@ -544,6 +553,7 @@ ELSE
 				,[intConcurrencyId]		= 1
 				,[dblExchangeRate]		= 1
 				,[intUserId]			= @intUserId
+				,[intEntityId]			= @intUserId
 				,[dtmDateEntered]		= GETDATE()
 				,[strBatchId]			= @strBatchId
 				,[strCode]				= 'AA'
@@ -633,6 +643,7 @@ ELSE
 				,[intConcurrencyId]	
 				,[dblExchangeRate]
 				,[intUserId]
+				,[intEntityId]
 				,[dtmDateEntered]
 				,[strBatchId]
 				,[strCode]
@@ -657,6 +668,7 @@ ELSE
 				,[intConcurrencyId]		= 1
 				,[dblExchangeRate]		= 1
 				,[intUserId]			= @intUserId
+				,[intEntityId]			= @intUserId
 				,[dtmDateEntered]		= GETDATE()
 				,[strBatchId]			= @strBatchId
 				,[strCode]				= 'AA'
@@ -686,6 +698,7 @@ ELSE
 				,[dtmDateEntered]
 				,[ysnIsUnposted]
 				,[intUserId]
+				,[intEntityId]
 				,[strBatchId]
 				,[strCode]
 				,[strModuleName]
@@ -702,14 +715,15 @@ ELSE
 				,[dblExchangeRate]
 				,[dtmDateEntered]
 				,[ysnIsUnposted]
-				,[intUserId]	
+				,[intUserId]
+				,[intEntityId]	
 				,[strBatchId]	
 				,[strCode]				
 				,[strModuleName]
 				,[strTransactionForm]
 			FROM [dbo].tblGLPostRecap A
-			WHERE A.[strBatchId] = @strBatchId and A.[intUserId] = @intUserId
-			GROUP BY [strTransactionId],[intTransactionId],[dtmDate],[dblExchangeRate],[dtmDateEntered],[ysnIsUnposted],[intUserId],[strBatchId],[strCode],[strModuleName],[strTransactionForm]
+			WHERE A.[strBatchId] = @strBatchId and (A.[intUserId] = @intUserId or A.[intEntityId] = @intUserId)
+			GROUP BY [strTransactionId],[intTransactionId],[dtmDate],[dblExchangeRate],[dtmDateEntered],[ysnIsUnposted],[intUserId],[intEntityId],[strBatchId],[strCode],[strModuleName],[strTransactionForm]
 
 			IF @@ERROR <> 0	GOTO Post_Rollback;
 					

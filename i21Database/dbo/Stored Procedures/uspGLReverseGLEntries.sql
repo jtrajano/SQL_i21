@@ -65,6 +65,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[ysnIsUnposted]
 				,[intConcurrencyId]
 				,[intUserId]
+				,[intEntityId]
 				,[strTransactionForm]
 				,[strModuleName]
 				,[strUOMCode]
@@ -96,6 +97,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,ysnIsUnposted		= 1
 				,[intConcurrencyId]
 				,[intUserId]		= @intUserId
+				,[intEntityId]		= @intUserId
 				,[strTransactionForm]
 				,[strModuleName]
 				,[strUOMCode]
@@ -108,7 +110,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 ELSE
 	BEGIN
 		-- DELETE Results 1 DAYS OLDER	
-		DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intUserId = @intUserId;
+		DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and (intUserId = @intUserId or intEntityId = @intUserId);
 		
 		WITH Accounts 
 		AS 
@@ -134,6 +136,7 @@ ELSE
 			,[intConcurrencyId]	
 			,[dblExchangeRate]
 			,[intUserId]
+			,[intEntityId]
 			,[dtmDateEntered]
 			,[strBatchId]
 			,[strCode]
@@ -156,6 +159,7 @@ ELSE
 			,[intConcurrencyId]		
 			,[dblExchangeRate]		
 			,[intUserId]			= @intUserId
+			,[intEntityId]			= @intUserId
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
 			,[strCode]

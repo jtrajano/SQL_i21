@@ -66,8 +66,8 @@ IF ISNULL(@ysnPost, 0) = 0
 							,(SELECT TOP 1 strJournalId FROM tblGLJournal WHERE intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)) as strTransactionId
 							,strMessage as strDescription
 							,GETDATE() as dtmDate
-							,@intUserId,
-							@strJournalType
+							,@intUserId
+							,@strJournalType
 					FROM (
 						SELECT DISTINCT A.intJournalId,
 							'You cannot Unpost this General Journal. You must Unpost and Delete the Reversing transaction: ' + A.strJournalId + ' first!' AS strMessage
@@ -229,6 +229,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intCurrencyId]
 			,[dblExchangeRate]
 			,[intUserId]
+			,[intEntityId]			
 			,[dtmDateEntered]
 			,[strBatchId]
 			,[strCode]
@@ -257,6 +258,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intCurrencyId]		= @intCurrencyId
 			,[dblExchangeRate]		= @dblDailyRate
 			,[intUserId]			= @intUserId
+			,[intEntityId]			= @intUserId			
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
 			,[strCode]				= 'GJ'
@@ -274,7 +276,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 ELSE
 	BEGIN
 		-- DELETE Results 1 DAYS OLDER	
-		DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intUserId = @intUserId;
+		DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and (intUserId = @intUserId or intEntity = @intUserId);
 		
 		WITH Accounts 
 		AS 
@@ -301,6 +303,7 @@ ELSE
 			,[intConcurrencyId]	
 			,[dblExchangeRate]
 			,[intUserId]
+			,[intEntityId]			
 			,[dtmDateEntered]
 			,[strBatchId]
 			,[strCode]
@@ -329,6 +332,7 @@ ELSE
 			,[intConcurrencyId]		= 1
 			,[dblExchangeRate]		= 1
 			,[intUserId]			= @intUserId
+			,[intEntityId]			= @intUserId			
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
 			,[strCode]				= 'GJ'
@@ -354,6 +358,7 @@ ELSE
 				,[dtmDateEntered]
 				,[ysnIsUnposted]
 				,[intUserId]
+				,[intEntityId]				
 				,[strBatchId]
 				,[strCode]
 				,[strModuleName]
@@ -371,13 +376,14 @@ ELSE
 				,[dtmDateEntered]
 				,[ysnIsUnposted]
 				,[intUserId]	
+				,[intEntityId]					
 				,[strBatchId]	
 				,[strCode]				
 				,[strModuleName]
 				,[strTransactionForm]
 			FROM [dbo].tblGLPostRecap A
-			WHERE A.[strBatchId] = @strBatchId and A.[intUserId] = @intUserId
-			GROUP BY [strTransactionId],[intTransactionId],[dtmDate],[dblExchangeRate],[dtmDateEntered],[ysnIsUnposted],[intUserId],[strBatchId],[strCode],[strModuleName],[strTransactionForm]
+			WHERE A.[strBatchId] = @strBatchId and (A.[intUserId] = @intUserId or A.[intEntityId] = @intUserId)
+			GROUP BY [strTransactionId],[intTransactionId],[dtmDate],[dblExchangeRate],[dtmDateEntered],[ysnIsUnposted],[intUserId],[intEntityId],[strBatchId],[strCode],[strModuleName],[strTransactionForm]
 
 			IF @@ERROR <> 0	GOTO Post_Rollback;
 					
@@ -562,6 +568,7 @@ BEGIN
 				,[intConcurrencyId]
 				,[dtmJournalDate]
 				,[intUserId]
+				,[intEntityId]				
 				,[strSourceId]
 				,[strJournalType]
 				,[strRecurringStatus]
@@ -581,6 +588,7 @@ BEGIN
 				,[intConcurrencyId]
 				,[dtmJournalDate]
 				,[intUserId]
+				,[intEntityId]
 				,[strSourceId]
 				,'Reversal Journal'
 				,NULL

@@ -51,6 +51,7 @@ CREATE TABLE #ConstructGL
 	,ysnIsUnposted				BIT
 	,intConcurrencyId			INT
 	,intUserId					INT
+	,intEntityId				INT	
 	,strTransactionForm			NVARCHAR(510)
 	,strModuleName				NVARCHAR(510)
 	,strUOMCode					NVARCHAR(50)
@@ -148,6 +149,7 @@ SELECT
 		,ysnIsUnposted				= 0
 		,intConcurrencyId			= 1
 		,intUserId					= @intUserId
+		,intEntityId				= @intUserId		
 		,strTransactionForm			= 'Fiscal Year'
 		,strModuleName				= 'General Ledger'
 		,strUOMCode					= NULL		
@@ -249,6 +251,7 @@ SELECT
 		,ysnIsUnposted			= 0
 		,intConcurrencyId		= 1
 		,intUserId				= @intUserId
+		,intEntityId			= @intUserId		
 		,strTransactionForm		= 'Fiscal Year'
 		,strModuleName			= 'General Ledger'
 		,strUOMCode				= NULL		
@@ -288,6 +291,7 @@ BEGIN
 			,ysnIsUnposted
 			,intConcurrencyId
 			,intUserId
+			,intEntityId			
 			,strTransactionForm
 			,strModuleName
 			,strUOMCode
@@ -330,6 +334,7 @@ BEGIN
 			,1 as ysnIsUnposted
 			,intConcurrencyId
 			,intUserId
+			,intEntityId			
 			,strTransactionForm
 			,strModuleName
 			,strUOMCode
@@ -372,6 +377,7 @@ BEGIN
 		,[intConcurrencyId]	
 		,[dblExchangeRate]
 		,[intUserId]
+		,[intEntityId]		
 		,[dtmDateEntered]
 		,[strBatchId]
 		,[strCode]
@@ -396,6 +402,7 @@ BEGIN
 		,intConcurrencyId
 		,dblExchangeRate
 		,intUserId
+		,intEntityId		
 		,dtmDateEntered
 		,@strBatchId
 		,strCode
