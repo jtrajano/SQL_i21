@@ -19,7 +19,6 @@ FROM	tblCMUndepositedFund f
 WHERE	f.strSourceSystem = @SOURCE_SYSTEM_DEPOSIT_ENTRY
 		AND f.intBankAccountId = @intBankAccountId
 		AND f.intBankDepositId IS NULL 
-		AND f.intBankDepositDetailId IS NULL 
 		AND NOT EXISTS (
 			SELECT	TOP 1 1 
 			FROM	vyuCMOriginDepositEntry v
@@ -96,7 +95,6 @@ FROM	tblCMUndepositedFund f INNER JOIN vyuCMOriginDepositEntry v
 WHERE	f.strSourceSystem = @SOURCE_SYSTEM_DEPOSIT_ENTRY
 		AND f.intBankAccountId = @intBankAccountId
 		AND f.intBankDepositId IS NULL 
-		AND f.intBankDepositDetailId IS NULL 
 IF @@ERROR <> 0	GOTO uspCMRefreshUndepositedFundsFromOrigin_Rollback
 
 --=====================================================================================================================================

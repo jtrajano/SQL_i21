@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblCMApchkmstArchive]
 (
 	[intApchkmstId] INT NOT NULL PRIMARY KEY IDENTITY, 
+	[intUndepositedFundId] INT NOT NULL,
     [apchk_cbk_no] CHAR(2) COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL, 
     [apchk_rev_dt] INT NOT NULL, 
     [apchk_trx_ind] CHAR COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL, 

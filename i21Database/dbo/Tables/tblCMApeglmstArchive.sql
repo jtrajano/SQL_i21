@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblCMApeglmstArchive]
 (
-	[intApeglmstId] INT NOT NULL PRIMARY KEY IDENTITY, 
+	[intApeglmstId] INT NOT NULL PRIMARY KEY IDENTITY,
+	[intUndepositedFundId] INT NOT NULL,
     [apegl_cbk_no] CHAR(2) COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL, 
     [apegl_trx_ind] CHAR COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL, 
     [apegl_vnd_no] CHAR(10) COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL, 

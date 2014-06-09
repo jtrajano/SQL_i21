@@ -166,4 +166,7 @@
   <ItemGroup>
     <None Include="dbo\Views\vyuCMOriginUndepositedFund.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="dbo\Stored Procedures\uspCMProcessUndepositedFunds.sql" />
+  </ItemGroup>
 </Project>

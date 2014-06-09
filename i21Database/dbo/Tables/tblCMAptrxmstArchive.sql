@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblCMAptrxmstArchive]
 (
 	[intAptrxmstId] INT NOT NULL PRIMARY KEY IDENTITY, 
+	[intUndepositedFundId] INT NOT NULL,
     [aptrx_vnd_no] CHAR(10) COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL, 
     [aptrx_ivc_no] CHAR(18) COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL, 
     [aptrx_sys_rev_dt] INT NOT NULL, 

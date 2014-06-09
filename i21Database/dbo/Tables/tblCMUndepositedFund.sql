@@ -8,10 +8,6 @@
 	[dblAmount]					DECIMAL (18, 6) DEFAULT 0 NOT NULL,
 	[strSourceSystem]			NVARCHAR(20) NULL,
 	[intBankDepositId]			INT NULL,
-	[intBankDepositDetailId]	INT NULL,
-	[intAptrxmstId]				INT NULL,
-	[intApchkmstId]				INT NULL,
-	[intApeglmstId]				INT NULL,
     [intCreatedUserId]			INT NULL,
     [dtmCreated]				DATETIME NULL,
     [intLastModifiedUserId]		INT NULL,
@@ -31,7 +27,4 @@ CREATE NONCLUSTERED INDEX [IX_tblCMUndepositedFund_strSourceTransactionId]
 GO
 CREATE NONCLUSTERED INDEX [IX_tblCMUndepositedFund_intBankDepositId]
     ON [dbo].[tblCMUndepositedFund]([intBankDepositId] ASC);
-GO
-CREATE NONCLUSTERED INDEX [IX_tblCMUndepositedFund_intBankDepositDetailId]
-    ON [dbo].[tblCMUndepositedFund]([intBankDepositDetailId] ASC);
 GO

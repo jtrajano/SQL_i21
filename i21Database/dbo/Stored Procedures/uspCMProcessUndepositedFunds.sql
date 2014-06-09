@@ -5,7 +5,8 @@
 -- Otherwise, the stored procedure in the integration will be used. 
 
 CREATE PROCEDURE uspCMProcessUndepositedFunds
-	@intBankAccountId AS INT 
+	@ysnPost AS BIT 
+	,@intBankAccountId AS INT 
 	,@strTransactionId NVARCHAR(40) = NULL 
 	,@intUserId INT = NULL 
 	,@isSuccessful BIT = 0 OUTPUT

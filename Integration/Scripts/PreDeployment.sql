@@ -19,6 +19,7 @@
 :r ..\dbo\Views\vyuCMBankAccount.sql
 :r ..\dbo\Views\vyuCMOriginDepositEntry.sql
 :r ..\dbo\Views\vyuCMOriginUndepositedFund.sql
+:r "..\dbo\Stored Procedures\uspCMProcessUndepositedFunds.sql"
 
 -- ACCOUNTS PAYABLE
 :r ..\dbo\Views\vwapivcmst.sql
