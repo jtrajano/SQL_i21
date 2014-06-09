@@ -120,10 +120,9 @@ BEGIN
 			ssvnd_1099_name					=	str1099Name,
 			ssvnd_gl_pur					=	F.strExternalId,
 			ssvnd_tax_st					=	B.strTaxState
-		FROM ssvndmst 
+		FROM
+			tblEntity A
 		INNER JOIN tblAPVendor B
-			ON ssvndmst.ssvnd_vnd_no COLLATE Latin1_General_CI_AS = B.strVendorId COLLATE Latin1_General_CI_AS
-		INNER JOIN tblEntity A
 			ON A.intEntityId = B.intEntityId
 		INNER JOIN tblEntityLocation C		
 			ON B.intDefaultLocationId = C.intEntityLocationId
@@ -133,7 +132,7 @@ BEGIN
 			ON B.intCurrencyId = E.intCurrencyID
 		LEFT JOIN tblGLCOACrossReference F
 			ON B.intGLAccountExpenseId = F.inti21Id
-		WHERE ssvndmst.ssvnd_vnd_no = @VendorId
+		WHERE strVendorId = @VendorId
 	END
 
 RETURN;
