@@ -35,6 +35,10 @@ BEGIN
 		-- 	INITIALIZATION
 		---------------------------------------------------------------------------------------------------------------------------------------
 
+		-- Create the variables 
+		DECLARE @isValid AS BIT
+		DECLARE @strInvalidTransactionId AS NVARCHAR(40)
+
 		-- Refresh the data in the undeposited fund table. 
 		EXEC uspCMRefreshUndepositedFundsFromOrigin @intBankAccountId, @intUserId
 
@@ -42,12 +46,10 @@ BEGIN
 		-- 	VALIDATION 
 		---------------------------------------------------------------------------------------------------------------------------------------
 
-		-- Validate the records
-		-- 1. Check any of the undeposited fund is missing 
-		DECLARE @isValid AS BIT
-
 		IF @ysnPost = 1
 		BEGIN 
+
+			-- 1. Check any of the undeposited fund is missing 
 			SELECT	@isValid = 0
 			FROM	tblCMBankTransaction h INNER JOIN tblCMBankTransactionDetail d
 						ON h.intTransactionId = d.intTransactionId
@@ -91,14 +93,32 @@ BEGIN
 						ON Q1.intUndepositedFundId = Q1.intUndepositedFundId
 			WHERE	Q1.intUndepositedFundId = Q2.intUndepositedFundId
 					AND Q1.total <> Q2.total
-			
+	
 			IF @@ERROR <> 0	GOTO Exit_WithErrors		
-			
+	
 			IF (ISNULL(@isValid, 1) = 0)
 			BEGIN 
 				RAISERROR(50023,11,1)
 				IF @@ERROR <> 0	GOTO Exit_WithErrors	
 			END
+	
+			-- 3. Check if any of the undeposited fund was used. 	
+			SELECT	TOP 1 @strInvalidTransactionId = h.strTransactionId
+			FROM	tblCMBankTransaction h INNER JOIN tblCMBankTransactionDetail d
+						ON h.intTransactionId = d.intTransactionId
+					INNER JOIN tblCMUndepositedFund uf
+						ON d.intUndepositedFundId = uf.intUndepositedFundId
+			WHERE	h.strTransactionId = @strTransactionId
+					AND uf.intBankDepositId IS NOT NULL
+					AND uf.intBankDepositId <> h.intTransactionId
+			IF @@ERROR <> 0	GOTO Exit_WithErrors
+
+			IF (ISNULL(@strInvalidTransactionId, '''') <> '''')
+			BEGIN 
+				RAISERROR(50024,11,1, @strInvalidTransactionId)
+				IF @@ERROR <> 0	GOTO Exit_WithErrors	
+			END
+	
 		END 
 
 		--=====================================================================================================================================
@@ -345,10 +365,10 @@ BEGIN
 			IF @@ERROR <> 0	GOTO Exit_WithErrors
 
 			-- Update the undeposited fund linking field
-			UPDATE tblCMUndepositedFund
+			UPDATE	tblCMUndepositedFund
 			SET		intBankDepositId = h.intTransactionId
 			FROM	tblCMBankTransaction h INNER JOIN tblCMBankTransactionDetail d
-						ON h.intTransactionId = h.intTransactionId
+						ON h.intTransactionId = d.intTransactionId
 						AND d.intUndepositedFundId IS NOT NULL 
 					INNER JOIN tblCMUndepositedFund uf
 						ON uf.intUndepositedFundId = d.intUndepositedFundId
@@ -376,7 +396,7 @@ BEGIN
 						WHERE	h.strTransactionId = @strTransactionId
 					)
 			IF @@ERROR <> 0	GOTO Exit_WithErrors
-	
+
 			DELETE	apeglmst
 			FROM	apeglmst gl INNER JOIN vyuCMOriginDepositEntry v
 						ON v.aptrx_cbk_no = gl.apegl_cbk_no
@@ -397,7 +417,7 @@ BEGIN
 						WHERE	h.strTransactionId = @strTransactionId
 					)
 			IF @@ERROR <> 0	GOTO Exit_WithErrors
-	
+
 			DELETE	aptrxmst
 			FROM	tblCMUndepositedFund uf INNER JOIN aptrxmst trx
 						ON uf.strSourceTransactionId = ( 
@@ -510,7 +530,7 @@ BEGIN
 					)	Q1
 						ON a.intUndepositedFundId = Q1.intUndepositedFundId			
 			IF @@ERROR <> 0	GOTO Exit_WithErrors	
-	
+
 			-- Restore data for aptrxmst 
 			INSERT INTO aptrxmst (
 					aptrx_vnd_no
@@ -583,7 +603,7 @@ BEGIN
 				)	Q1
 					ON a.intUndepositedFundId = Q1.intUndepositedFundId
 			IF @@ERROR <> 0	GOTO Exit_WithErrors		
-			
+	
 			-- Restore data for apeglmst
 			INSERT INTO apeglmst (
 					apegl_cbk_no
@@ -614,7 +634,7 @@ BEGIN
 					)	Q1
 						ON a.intUndepositedFundId = Q1.intUndepositedFundId
 			IF @@ERROR <> 0	GOTO Exit_WithErrors
-				
+		
 			-- Delete the archive data 
 			DELETE tblCMApchkmstArchive
 			FROM	tblCMApchkmstArchive a INNER JOIN (
@@ -625,7 +645,7 @@ BEGIN
 						WHERE	h.strTransactionId = @strTransactionId
 					)	Q1
 						ON a.intUndepositedFundId = Q1.intUndepositedFundId
-	
+
 			DELETE tblCMAptrxmstArchive
 			FROM	tblCMAptrxmstArchive a INNER JOIN (
 						SELECT	DISTINCT d.intUndepositedFundId
@@ -635,7 +655,7 @@ BEGIN
 						WHERE	h.strTransactionId = @strTransactionId
 					)	Q1
 						ON a.intUndepositedFundId = Q1.intUndepositedFundId
-	
+
 			DELETE tblCMApeglmstArchive
 			FROM	tblCMApeglmstArchive a INNER JOIN (
 						SELECT	DISTINCT d.intUndepositedFundId
@@ -645,17 +665,17 @@ BEGIN
 						WHERE	h.strTransactionId = @strTransactionId
 					)	Q1
 						ON a.intUndepositedFundId = Q1.intUndepositedFundId
-				
+		
 			-- Update the Undeposite Fund table. Remove the link to the deposit transaction
 			UPDATE tblCMUndepositedFund
 			SET		intBankDepositId = NULL 
 			FROM	tblCMBankTransaction h INNER JOIN tblCMBankTransactionDetail d
-						ON h.intTransactionId = h.intTransactionId
+						ON h.intTransactionId = d.intTransactionId
 						AND d.intUndepositedFundId IS NOT NULL 
 					INNER JOIN tblCMUndepositedFund uf
 						ON uf.intUndepositedFundId = d.intUndepositedFundId
 			WHERE	h.strTransactionId = @strTransactionId
-	
+
 		END
 
 		--=====================================================================================================================================
@@ -668,8 +688,7 @@ BEGIN
 
 		Exit_WithErrors:
 			SET @isSuccessful = 0
-	
+
 		Exit_Routine:	
-	
 	')
 END 

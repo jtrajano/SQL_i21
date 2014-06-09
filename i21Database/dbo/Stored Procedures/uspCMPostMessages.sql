@@ -95,3 +95,7 @@ EXEC sp_addmessage 50022,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50023) EXEC sp_dropmessage 50023, 'us_english'	
 SET @strmessage = 'The Undeposited Fund amount was changed. It does not match the values from the origin system.'
 EXEC sp_addmessage 50023,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50024) EXEC sp_dropmessage 50024, 'us_english'	
+SET @strmessage = 'Please re-process the Undeposited Funds. It looks like one or more records of it is already posted in %s.'
+EXEC sp_addmessage 50024,11,@strmessage,'us_english','False'
