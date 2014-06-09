@@ -304,7 +304,39 @@ BEGIN
 END	
 ELSE IF @ysnPost = 0 and @ysnRecap = 0
 BEGIN
-	INSERT INTO tblGLDetail (dtmDate,strBatchId,intAccountId,strAccountGroup,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,strDescription,strCode,strTransactionId,strReference,strJobId,intCurrencyId,dblExchangeRate,dtmDateEntered,dtmTransactionDate,strProductId,strWarehouseId,strNum,strCompanyName,strBillInvoiceNumber,strJournalLineDescription,intJournalLineNo,ysnIsUnposted,intConcurrencyId,intUserId,strTransactionForm,strModuleName,strUOMCode)
+	INSERT INTO tblGLDetail (
+			dtmDate
+			,strBatchId
+			,intAccountId
+			,strAccountGroup
+			,dblDebit
+			,dblCredit
+			,dblDebitUnit
+			,dblCreditUnit
+			,strDescription
+			,strCode
+			,strTransactionId
+			,strReference
+			,strJobId
+			,intCurrencyId
+			,dblExchangeRate
+			,dtmDateEntered
+			,dtmTransactionDate
+			,strProductId
+			,strWarehouseId
+			,strNum
+			,strCompanyName
+			,strBillInvoiceNumber
+			,strJournalLineDescription
+			,intJournalLineNo
+			,ysnIsUnposted
+			,intConcurrencyId
+			,intUserId
+			,intEntityId
+			,strTransactionForm
+			,strModuleName
+			,strUOMCode
+	)
 	SELECT   dtmDate
 			,@strBatchId
 			,intAccountId
