@@ -87,3 +87,11 @@ EXEC sp_addmessage 50020,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50021) EXEC sp_dropmessage 50021, 'us_english'	
 SET @strmessage = 'The record being created already exists in origin. Remove the duplicate record from origin or do a conversion.'
 EXEC sp_addmessage 50021,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50022) EXEC sp_dropmessage 50022, 'us_english'	
+SET @strmessage = 'There is an outdated Undeposited Fund record. It may have been deposited from a different deposit transaction.'
+EXEC sp_addmessage 50022,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50023) EXEC sp_dropmessage 50023, 'us_english'	
+SET @strmessage = 'The Undeposited Fund amount was changed. It does not match the values from the origin system.'
+EXEC sp_addmessage 50023,11,@strmessage,'us_english','False'

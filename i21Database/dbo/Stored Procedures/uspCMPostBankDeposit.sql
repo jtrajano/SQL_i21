@@ -211,6 +211,15 @@ BEGIN
 	GOTO Post_Rollback
 END 
 
+--=====================================================================================================================================
+-- 	PROCESSING OF THE UNDEPOSITED FUNDS
+---------------------------------------------------------------------------------------------------------------------------------------
+
+IF (@ysnPost = 1 AND @ysnRecap = 0)
+BEGIN 
+	EXEC uspCMProcessUndepositedFunds @intBankAccountId, @strTransactionId, @intUserId, @isSuccessful OUTPUT 
+	IF @isSuccessful = 0 GOTO Post_Rollback
+END 
 
 --=====================================================================================================================================
 -- 	PROCESSING OF THE G/L ENTRIES. 
