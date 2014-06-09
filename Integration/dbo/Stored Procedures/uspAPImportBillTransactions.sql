@@ -262,6 +262,12 @@ BEGIN
 				ON A.apivc_cbk_no = B.apcbk_no
 			LEFT JOIN tblAPTempBill C
 				ON A.apivc_ivc_no = C.aptrx_ivc_no
+
+		WHERE --CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
+			 CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
+			 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
+			 AND A.apivc_trans_type IN (''I'',''C'')
+			 AND C.aptrx_ivc_no IS NULL
 		
 			SELECT @ImportedRecords = @@ROWCOUNT
 
