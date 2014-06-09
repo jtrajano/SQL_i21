@@ -13,6 +13,7 @@
     [intConcurrencyId]   INT              DEFAULT 1 NOT NULL,
     [dtmJournalDate]     DATETIME         NULL,
     [intUserId]          INT              NULL,
+    [intEntityId]        INT              NULL,
     [strSourceId]        NVARCHAR (10)    COLLATE Latin1_General_CI_AS NULL,
     [strJournalType]     NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
     [strRecurringStatus] NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
