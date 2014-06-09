@@ -110,7 +110,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 ELSE
 	BEGIN
 		-- DELETE Results 1 DAYS OLDER	
-		DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and (intUserId = @intUserId or intEntityId = @intUserId);
+		DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intEntityId = @intUserId;
 		
 		WITH Accounts 
 		AS 

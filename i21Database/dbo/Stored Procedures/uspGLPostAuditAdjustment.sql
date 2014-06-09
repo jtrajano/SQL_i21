@@ -426,7 +426,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 ELSE
 	BEGIN
 		-- DELETE Results 1 DAYS OLDER	
-		DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and (intUserId = @intUserId or intEntityId = @intUserId);
+		DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intEntityId = @intUserId;
 		
 		
 		WITH Accounts 
@@ -722,7 +722,7 @@ ELSE
 				,[strModuleName]
 				,[strTransactionForm]
 			FROM [dbo].tblGLPostRecap A
-			WHERE A.[strBatchId] = @strBatchId and (A.[intUserId] = @intUserId or A.[intEntityId] = @intUserId)
+			WHERE A.[strBatchId] = @strBatchId and A.[intEntityId] = @intUserId
 			GROUP BY [strTransactionId],[intTransactionId],[dtmDate],[dblExchangeRate],[dtmDateEntered],[ysnIsUnposted],[intUserId],[intEntityId],[strBatchId],[strCode],[strModuleName],[strTransactionForm]
 
 			IF @@ERROR <> 0	GOTO Post_Rollback;
