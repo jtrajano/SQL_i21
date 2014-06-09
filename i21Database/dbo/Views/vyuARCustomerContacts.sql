@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuARCustomerContacts]
 AS
 SELECT 
+B.intEntityId AS intCustomerEntityId,
 B2.intEntityId, 
 B2.strName, 
 B2.strEmail, 
