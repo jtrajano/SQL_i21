@@ -22,6 +22,7 @@ CREATE TABLE [dbo].[tblGLPostRecap](
 	[ysnIsUnposted] [bit] NOT NULL,
 	[intConcurrencyId] [int] NULL,
 	[intUserId] [int] NULL,
+	[intEntityId] [int] NULL,
 	[strTransactionForm] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
 	[strModuleName] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
 	[strUOMCode] [char](6) COLLATE Latin1_General_CI_AS NULL,
