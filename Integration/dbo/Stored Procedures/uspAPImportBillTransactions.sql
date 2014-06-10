@@ -253,7 +253,7 @@ BEGIN
 			[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
 			[strDescription] 		=	A.apivc_comment,
 			[dblTotal] 				=	A.apivc_orig_amt,
-			[dblAmountDue]			=	A.apivc_orig_amt,--CASE WHEN B.apegl_ivc_no IS NULL THEN A.apivc_orig_amt ELSE A.apivc_orig_amt - SUM(ISNULL(B.apegl_gl_amt,0)) END
+			[dblAmountDue]			=	CASE WHEN A.apivc_status_ind = ''P'' THEN 0 ELSE A.apivc_orig_amt END,
 			[intUserId]				=	@UserId,
 			[ysnPosted]				=	1,
 			[ysnPaid]				=	CASE WHEN A.apivc_status_ind = ''P'' THEN 1 ELSE 0 END

@@ -30,7 +30,7 @@ BEGIN
 		[intSort])
 		OUTPUT INSERTED.intTermID INTO @tblAPTempTerms
 	SELECT
-		ssvnd_terms_desc,
+		ISNULL(ssvnd_terms_desc,''''),
 		CASE WHEN ssvnd_terms_type = ''P'' THEN ''Date Driven'' ELSE ''Standard'' END,
 		ssvnd_terms_disc_pct,
 		ssvnd_terms_due_day,
