@@ -10,6 +10,8 @@
     [ysnAllowEFT]      BIT             DEFAULT ((1)) NOT NULL,
     [intDayofMonthDue] INT             NULL,
     [intDueNextMonth]  INT             NULL,
+	[dtmDiscountDate] DATETIME             NULL,
+    [dtmDueDate]	DATETIME             NULL,
     [ysnActive]        BIT             DEFAULT ((1)) NOT NULL,
     [intSort]          INT             NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT (1), 
