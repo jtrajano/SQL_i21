@@ -36,7 +36,8 @@ Ext.application({
         'SubCategory',
         'OkTemplate',
         'Commodity',
-        'Category'
+        'Category',
+        'Store'
     ],
     name: 'Inventory'
 });

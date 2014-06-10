@@ -23,7 +23,8 @@
             "SubCategory",
             "OkTemplate",
             "Commodity",
-            "Category"
+            "Category",
+            "Store"
         ]
     },
     "designerId": "application"
