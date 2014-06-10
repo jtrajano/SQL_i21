@@ -2,7 +2,7 @@
 (
 	[intEntityCredentialId] INT IDENTITY NOT NULL, 
     [intEntityId] INT NOT NULL, 
-    [strUserName] NVARCHAR(100) NOT NULL, 
+    [strUserName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strPassword] NVARCHAR(100) NOT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT (1), 
     CONSTRAINT [FK_tblEntityCredential_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId]), 
