@@ -126,6 +126,7 @@
     <Folder Include="Scripts\Post-Deployment\AR" />
     <Folder Include="Scripts\Post-Deployment\TM\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\CM" />
+    <Folder Include="Scripts\Post-Deployment\AR\DefaultData" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -541,9 +542,9 @@
     <Build Include="dbo\Stored Procedures\uspCMRefreshUndepositedFundsFromOrigin.sql" />
     <Build Include="dbo\Views\vyuCMOriginDepositEntry.sql" />
     <Build Include="dbo\Views\vyuCMOriginUndepositedFund.sql" />
-	<Build Include="dbo\Stored Procedures\uspCMProcessUndepositedFunds.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMProcessUndepositedFunds.sql" />
     <Build Include="dbo\Functions\fnGetEntityIdFromUser.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMMigrateUserEntity.sql" />	
+    <Build Include="dbo\Stored Procedures\uspSMMigrateUserEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
@@ -562,5 +563,6 @@
     <None Include="Scripts\Post-Deployment\CM\PopulateSourceSystemData.sql" />
     <Build Include="dbo\Views\vyuCPContactMenu.sql" />
     <Build Include="dbo\Views\vyuARCustomerContacts.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\1_CustomerPortalMenu.sql" />
   </ItemGroup>
 </Project>
