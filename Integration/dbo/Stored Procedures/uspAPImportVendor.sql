@@ -268,7 +268,7 @@ BEGIN
 			@strCity         = ssvnd_city,
 			@strCountry      = (SELECT TOP 1 strCountry FROM tblSMZipCode WHERE strState COLLATE Latin1_General_CI_AS = ssvnd_st COLLATE Latin1_General_CI_AS),
 			@strState        = ssvnd_st,
-			@strZipCode      = SUBSTRING(ssvnd_zip, 0, 5),
+			@strZipCode      = ssvnd_zip,
 			@strLocationEmail        = NULL,
 			@strLocationNotes        = NULL,
 			@strW9Name       = NULL,
