@@ -24,7 +24,8 @@
             "OkTemplate",
             "Commodity",
             "Category",
-            "Store"
+            "Store",
+            "StorePaymentMethod"
         ]
     },
     "designerId": "application"

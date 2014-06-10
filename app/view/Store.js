@@ -27,11 +27,11 @@ Ext.define('Inventory.view.Store', {
         'Ext.form.field.Checkbox',
         'Ext.form.field.ComboBox',
         'Ext.form.field.Number',
+        'Ext.form.field.Date',
         'Ext.grid.Panel',
         'Ext.grid.column.CheckColumn',
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
-        'Ext.form.field.Date',
         'Ext.toolbar.Paging'
     ],
 
@@ -182,80 +182,82 @@ Ext.define('Inventory.view.Store', {
                                                     },
                                                     items: [
                                                         {
-                                                            xtype: 'textfield',
-                                                            itemId: 'txtGlDivisionNumber',
-                                                            fieldLabel: 'GL Division Number',
-                                                            labelWidth: 160
-                                                        },
-                                                        {
                                                             xtype: 'checkboxfield',
-                                                            itemId: 'chkSalesAnalysisByTon',
+                                                            itemId: 'chkStoreSystemOnHostComputer',
                                                             fieldLabel: 'Store System on Host Computer',
                                                             labelWidth: 200
                                                         },
                                                         {
                                                             xtype: 'combobox',
-                                                            flex: 1,
-                                                            itemId: 'cboMaterialFee',
-                                                            fieldLabel: 'Material Fee',
-                                                            labelWidth: 160
+                                                            itemId: 'cboPriceBook',
+                                                            fieldLabel: 'Price Book',
+                                                            labelWidth: 200
                                                         },
                                                         {
                                                             xtype: 'combobox',
-                                                            flex: 1,
-                                                            itemId: 'cboMaterialItem',
-                                                            fieldLabel: 'Material Item',
-                                                            labelWidth: 160
-                                                        },
-                                                        {
-                                                            xtype: 'checkboxfield',
-                                                            itemId: 'chkAutoCalculateFreight',
-                                                            fieldLabel: 'Auto Calculate Freight',
-                                                            labelWidth: 160
+                                                            itemId: 'cboHandheldDeviceCostBasis',
+                                                            fieldLabel: 'Handheld Device Cost Basis',
+                                                            labelWidth: 200
                                                         },
                                                         {
                                                             xtype: 'combobox',
-                                                            flex: 1,
-                                                            itemId: 'cboFreightItem',
-                                                            fieldLabel: 'Freight Item',
-                                                            labelWidth: 160
-                                                        },
-                                                        {
-                                                            xtype: 'checkboxfield',
-                                                            itemId: 'chkNonRetailUseDepartment',
-                                                            fieldLabel: 'Non Retail Use Department',
-                                                            labelWidth: 160
-                                                        },
-                                                        {
-                                                            xtype: 'checkboxfield',
-                                                            itemId: 'chkReportInNetOrGross',
-                                                            fieldLabel: 'Report in Net or Gross',
-                                                            labelWidth: 160
-                                                        },
-                                                        {
-                                                            xtype: 'checkboxfield',
-                                                            itemId: 'chkDepartmentForPumps',
-                                                            fieldLabel: 'Department for Pumps',
-                                                            labelWidth: 160
+                                                            itemId: 'cboDefaultVendor',
+                                                            fieldLabel: 'Default Vendor',
+                                                            labelWidth: 200
                                                         },
                                                         {
                                                             xtype: 'combobox',
-                                                            flex: 1,
-                                                            itemId: 'cboConvertToPaidout',
-                                                            fieldLabel: 'Convert to Paidout',
-                                                            labelWidth: 160
+                                                            itemId: 'cboLocationCode',
+                                                            fieldLabel: 'Location Code',
+                                                            labelWidth: 200
+                                                        },
+                                                        {
+                                                            xtype: 'combobox',
+                                                            itemId: 'cboCompanyIdForGL',
+                                                            fieldLabel: 'Company ID for GL',
+                                                            labelWidth: 200
+                                                        },
+                                                        {
+                                                            xtype: 'combobox',
+                                                            itemId: 'cboCompanyIdForAR',
+                                                            fieldLabel: 'Company ID for AR',
+                                                            labelWidth: 200
                                                         },
                                                         {
                                                             xtype: 'checkboxfield',
-                                                            itemId: 'chkDeleteFromRegister',
-                                                            fieldLabel: 'Delete from Register',
-                                                            labelWidth: 160
+                                                            itemId: 'chkUsePriceBookAtThisStore',
+                                                            fieldLabel: 'Use Price Book at this Store',
+                                                            labelWidth: 200
+                                                        },
+                                                        {
+                                                            xtype: 'textfield',
+                                                            itemId: 'txtMaximumPluNumber',
+                                                            fieldLabel: 'Maximum PLU Number',
+                                                            labelWidth: 200
+                                                        },
+                                                        {
+                                                            xtype: 'checkboxfield',
+                                                            itemId: 'chkTreat7DigitUpcsAsPlus',
+                                                            fieldLabel: 'Treat 7 Digit UPCs as PLUs',
+                                                            labelWidth: 200
+                                                        },
+                                                        {
+                                                            xtype: 'checkboxfield',
+                                                            itemId: 'chkInterfaceProprietaryCardsToCfn',
+                                                            fieldLabel: 'Interface Proprietary Cards to CFN',
+                                                            labelWidth: 200
+                                                        },
+                                                        {
+                                                            xtype: 'textfield',
+                                                            itemId: 'txtCfnSiteId',
+                                                            fieldLabel: 'CFN Site ID',
+                                                            labelWidth: 200
                                                         }
                                                     ]
                                                 },
                                                 {
                                                     xtype: 'container',
-                                                    flex: 1,
+                                                    flex: 1.2,
                                                     margins: '0 1 0 5',
                                                     layout: {
                                                         type: 'vbox',
@@ -264,71 +266,89 @@ Ext.define('Inventory.view.Store', {
                                                     items: [
                                                         {
                                                             xtype: 'checkboxfield',
-                                                            itemId: 'chkDepartmentKeyTaxed',
-                                                            fieldLabel: 'Allow change to shift\'s physical qty received',
+                                                            itemId: 'chkInterfaceChecksToCheckbook',
+                                                            fieldLabel: 'Interface Checks to Checkbook',
                                                             labelWidth: 250
                                                         },
                                                         {
                                                             xtype: 'combobox',
-                                                            itemId: 'cboDefaultProductCode',
-                                                            fieldLabel: 'Default Product Code',
-                                                            labelWidth: 175
+                                                            itemId: 'cboCheckbook',
+                                                            fieldLabel: 'Checkbook',
+                                                            labelWidth: 250
                                                         },
                                                         {
-                                                            xtype: 'combobox',
-                                                            itemId: 'cboDefaultFamily',
-                                                            fieldLabel: 'Default Family',
-                                                            labelWidth: 175
+                                                            xtype: 'textfield',
+                                                            itemId: 'txtQuickbookInterfaceClass',
+                                                            fieldLabel: 'Quickbook Interface Class',
+                                                            labelWidth: 250
                                                         },
                                                         {
-                                                            xtype: 'combobox',
-                                                            itemId: 'cboDefaultClass',
-                                                            fieldLabel: 'Default Class',
-                                                            labelWidth: 175
-                                                        },
-                                                        {
-                                                            xtype: 'checkboxfield',
-                                                            itemId: 'chkDefaultFoodStampable',
-                                                            fieldLabel: 'Default Food Stampable',
-                                                            labelWidth: 175
-                                                        },
-                                                        {
-                                                            xtype: 'checkboxfield',
-                                                            itemId: 'chkDefaultReturnable',
-                                                            fieldLabel: 'Default Returnable',
-                                                            labelWidth: 175
-                                                        },
-                                                        {
-                                                            xtype: 'checkboxfield',
-                                                            itemId: 'chkDefaultSaleable',
-                                                            fieldLabel: 'Default Saleable',
-                                                            labelWidth: 175
-                                                        },
-                                                        {
-                                                            xtype: 'checkboxfield',
-                                                            itemId: 'chkDefaultPrepriced',
-                                                            fieldLabel: 'Default Pre-priced',
-                                                            labelWidth: 175
-                                                        },
-                                                        {
-                                                            xtype: 'checkboxfield',
-                                                            itemId: 'chkDefaultIdRequiredLiquor',
-                                                            fieldLabel: 'Default ID Required (liquor)',
-                                                            labelWidth: 175
-                                                        },
-                                                        {
-                                                            xtype: 'checkboxfield',
-                                                            itemId: 'chkDefaultIdRequiredCigarette',
-                                                            fieldLabel: 'Default ID Required (cigarette)',
-                                                            labelWidth: 175
+                                                            xtype: 'textfield',
+                                                            itemId: 'txtBarcodePrinter',
+                                                            fieldLabel: 'Barcode Printer',
+                                                            labelWidth: 250
                                                         },
                                                         {
                                                             xtype: 'numberfield',
-                                                            itemId: 'txtDefaultMinimumAge',
-                                                            maxWidth: 225,
-                                                            fieldLabel: 'Default Minimum Age',
-                                                            labelWidth: 175,
+                                                            itemId: 'txtServiceChargeRate',
+                                                            fieldLabel: 'Service Charge Rate',
+                                                            labelWidth: 250,
                                                             hideTrigger: true
+                                                        },
+                                                        {
+                                                            xtype: 'checkboxfield',
+                                                            itemId: 'chkUseArStatementForms',
+                                                            fieldLabel: 'Use AR Statement Forms',
+                                                            labelWidth: 250
+                                                        },
+                                                        {
+                                                            xtype: 'datefield',
+                                                            itemId: 'dtmLastShiftOpenDate',
+                                                            fieldLabel: 'Last Shift Open Date',
+                                                            labelWidth: 250
+                                                        },
+                                                        {
+                                                            xtype: 'numberfield',
+                                                            itemId: 'txtLastShiftNumber',
+                                                            fieldLabel: 'Last Shift Number',
+                                                            labelWidth: 250,
+                                                            hideTrigger: true
+                                                        },
+                                                        {
+                                                            xtype: 'datefield',
+                                                            itemId: 'dtmLastPhysicalImportDate',
+                                                            fieldLabel: 'Last Physical Import Date',
+                                                            labelWidth: 250
+                                                        },
+                                                        {
+                                                            xtype: 'datefield',
+                                                            itemId: 'dtmLastStatementRollDate',
+                                                            fieldLabel: 'Last Statement Roll Date',
+                                                            labelWidth: 250
+                                                        },
+                                                        {
+                                                            xtype: 'checkboxfield',
+                                                            itemId: 'chkAllowChangeToShiftsPhysicalQtyReceived',
+                                                            fieldLabel: 'Allow Change to Shifts Physical Qty Received',
+                                                            labelWidth: 250
+                                                        },
+                                                        {
+                                                            xtype: 'checkboxfield',
+                                                            itemId: 'chkAllowChangeToShiftsPhysicalQtySold',
+                                                            fieldLabel: 'Allow Change to Shifts Physical Qty Sold',
+                                                            labelWidth: 250
+                                                        },
+                                                        {
+                                                            xtype: 'textfield',
+                                                            itemId: 'txtHandheldDeviceModel',
+                                                            fieldLabel: 'Handheld Device Model',
+                                                            labelWidth: 250
+                                                        },
+                                                        {
+                                                            xtype: 'combobox',
+                                                            itemId: 'cboDepositLookupType',
+                                                            fieldLabel: 'Deposit Lookup Type',
+                                                            labelWidth: 250
                                                         }
                                                     ]
                                                 }
@@ -343,7 +363,7 @@ Ext.define('Inventory.view.Store', {
                                     items: [
                                         {
                                             xtype: 'advancefiltergrid',
-                                            itemId: 'grdVendorCategoryXref',
+                                            itemId: 'grdPaymentMethod',
                                             margin: -1,
                                             dockedItems: [
                                                 {
@@ -415,7 +435,7 @@ Ext.define('Inventory.view.Store', {
                                                 }
                                             ],
                                             viewConfig: {
-                                                itemId: 'grvVendorCategoryXref'
+                                                itemId: 'grvPaymentMethod'
                                             },
                                             selModel: Ext.create('Ext.selection.CheckboxModel', {
 
@@ -430,7 +450,7 @@ Ext.define('Inventory.view.Store', {
                                     items: [
                                         {
                                             xtype: 'advancefiltergrid',
-                                            itemId: 'grdCatalog',
+                                            itemId: 'grdPaidOuts',
                                             margin: -1,
                                             dockedItems: [
                                                 {
@@ -491,7 +511,7 @@ Ext.define('Inventory.view.Store', {
                                                 }
                                             ],
                                             viewConfig: {
-                                                itemId: 'grvCatalog'
+                                                itemId: 'grvPaidOuts'
                                             },
                                             selModel: Ext.create('Ext.selection.CheckboxModel', {
 
@@ -527,49 +547,52 @@ Ext.define('Inventory.view.Store', {
                                                     items: [
                                                         {
                                                             xtype: 'combobox',
+                                                            itemId: 'cboDefaultPaidOut',
                                                             fieldLabel: 'Default Paid Out',
                                                             labelWidth: 220
                                                         },
                                                         {
                                                             xtype: 'numberfield',
-                                                            itemId: 'txtDefaultNucleusGroupId',
+                                                            itemId: 'txtMopForCustomerCharges',
                                                             fieldLabel: 'MOP for Customer Charges',
                                                             labelWidth: 220,
                                                             hideTrigger: true
                                                         },
                                                         {
                                                             xtype: 'numberfield',
-                                                            itemId: 'txtDefaultNucleusGroupId1',
+                                                            itemId: 'txtMopForCashTransactions',
                                                             fieldLabel: 'MOP for Cash Transactions',
                                                             labelWidth: 220,
                                                             hideTrigger: true
                                                         },
                                                         {
                                                             xtype: 'checkboxfield',
-                                                            itemId: 'chkUpdatePricesOnPbImports',
+                                                            itemId: 'chkAllowMassPriceChanges',
                                                             fieldLabel: 'Allow Mass Price Changes',
                                                             labelWidth: 220
                                                         },
                                                         {
                                                             xtype: 'checkboxfield',
-                                                            itemId: 'chkDefaultUseTaxFlag1',
+                                                            itemId: 'chkUsingTankMonitors',
                                                             fieldLabel: 'Using Tank Monitors',
                                                             labelWidth: 220
                                                         },
                                                         {
                                                             xtype: 'textfield',
+                                                            itemId: 'txtPosRegisterId',
                                                             fieldLabel: 'POS Register ID',
                                                             labelWidth: 220
                                                         },
                                                         {
                                                             xtype: 'numberfield',
-                                                            itemId: 'txtDefaultNucleusGroupId2',
+                                                            itemId: 'txtMaximumRegisterPlus',
                                                             fieldLabel: 'Maximum Register PLUs',
                                                             labelWidth: 220,
                                                             hideTrigger: true
                                                         },
                                                         {
                                                             xtype: 'combobox',
+                                                            itemId: 'cboReportDepartmentsAtGrossNet',
                                                             fieldLabel: 'Report Departments at Gross/Net',
                                                             labelWidth: 220
                                                         }
@@ -586,55 +609,59 @@ Ext.define('Inventory.view.Store', {
                                                     items: [
                                                         {
                                                             xtype: 'numberfield',
-                                                            itemId: 'txtDefaultNucleusGroupId3',
+                                                            itemId: 'txtMopForLoyaltyDiscount',
                                                             fieldLabel: 'MOP for Loyalty Discount',
                                                             labelWidth: 250,
                                                             hideTrigger: true
                                                         },
                                                         {
                                                             xtype: 'numberfield',
-                                                            itemId: 'txtDefaultNucleusGroupId4',
+                                                            itemId: 'txtLoyaltyDiscountDepartment',
                                                             fieldLabel: 'Loyalty Discount Department',
                                                             labelWidth: 250,
                                                             hideTrigger: true
                                                         },
                                                         {
                                                             xtype: 'checkboxfield',
-                                                            itemId: 'chkDefaultUseTaxFlag2',
+                                                            itemId: 'chkBreakoutProprietaryCardTotals',
                                                             fieldLabel: 'Breakout Proprietary Card Totals',
                                                             labelWidth: 250
                                                         },
                                                         {
                                                             xtype: 'numberfield',
-                                                            itemId: 'txtDefaultNucleusGroupId5',
+                                                            itemId: 'txtRemoveProprietartTotalsFromExistingMop',
                                                             fieldLabel: 'Remove Proprietart Totals from Existing MOP',
                                                             labelWidth: 250,
                                                             hideTrigger: true
                                                         },
                                                         {
                                                             xtype: 'numberfield',
-                                                            itemId: 'txtDefaultNucleusGroupId6',
+                                                            itemId: 'txtAddProprietaryTotalsToNewMop',
                                                             fieldLabel: 'Add Proprietary Totals to New MOP',
                                                             labelWidth: 250,
                                                             hideTrigger: true
                                                         },
                                                         {
                                                             xtype: 'textfield',
+                                                            itemId: 'txtProprietaryTotalsNetworkCardName',
                                                             fieldLabel: 'Proprietary Totals Network Card Name',
                                                             labelWidth: 250
                                                         },
                                                         {
                                                             xtype: 'combobox',
+                                                            itemId: 'cboAllowRegisterMarkUpsDown',
                                                             fieldLabel: 'Allow Register Mark Ups/Down',
                                                             labelWidth: 250
                                                         },
                                                         {
                                                             xtype: 'combobox',
+                                                            itemId: 'cboRegisterCheckoutDataEntry',
                                                             fieldLabel: 'Register Checkout Data Entry',
                                                             labelWidth: 250
                                                         },
                                                         {
                                                             xtype: 'combobox',
+                                                            itemId: 'cboReconcileFuels',
                                                             fieldLabel: 'Reconcile Fuels',
                                                             labelWidth: 250
                                                         }
@@ -672,74 +699,77 @@ Ext.define('Inventory.view.Store', {
                                                     items: [
                                                         {
                                                             xtype: 'checkboxfield',
-                                                            itemId: 'chkUpdatePricesOnPbImports',
+                                                            itemId: 'chkReceiveProductByDepartment',
                                                             fieldLabel: 'Receive Product by Department',
                                                             labelWidth: 220
                                                         },
                                                         {
                                                             xtype: 'checkboxfield',
-                                                            itemId: 'chkDefaultUseTaxFlag1',
-                                                            fieldLabel: 'Keep A/R at Store Level',
+                                                            itemId: 'chkKeepArAtStoreLevel',
+                                                            fieldLabel: 'Keep AR at Store Level',
                                                             labelWidth: 220
                                                         },
                                                         {
                                                             xtype: 'checkboxfield',
-                                                            itemId: 'chkDefaultUseTaxFlag2',
+                                                            itemId: 'chkUsingCheckWriter',
                                                             fieldLabel: 'Using Check Writer',
                                                             labelWidth: 220
                                                         },
                                                         {
                                                             xtype: 'checkboxfield',
-                                                            itemId: 'chkDefaultUseTaxFlag3',
+                                                            itemId: 'chkLoadFuelCostOnCheckoutPosting',
                                                             fieldLabel: 'Load Fuel Cost on Checkout Posting',
                                                             labelWidth: 220
                                                         },
                                                         {
                                                             xtype: 'checkboxfield',
-                                                            itemId: 'chkDefaultUseTaxFlag4',
+                                                            itemId: 'chkUseSafeChangeFundInCheckouts',
                                                             fieldLabel: 'Use Safe Change Fund in Checkouts',
                                                             labelWidth: 220
                                                         },
                                                         {
                                                             xtype: 'checkboxfield',
-                                                            itemId: 'chkDefaultBlueLaw1',
+                                                            itemId: 'chkClearAllPricebookFieldsOnAdd',
                                                             fieldLabel: 'Clear All Pricebook Fields on Add',
                                                             labelWidth: 220
                                                         },
                                                         {
                                                             xtype: 'numberfield',
-                                                            itemId: 'txtDefaultNucleusGroupId',
+                                                            itemId: 'txtNumberOfShiftsInADay',
                                                             fieldLabel: 'Number of Shifts in a Day',
                                                             labelWidth: 220,
                                                             hideTrigger: true
                                                         },
                                                         {
                                                             xtype: 'checkboxfield',
-                                                            itemId: 'chkDefaultBlueLaw2',
+                                                            itemId: 'chkUpdatePricebookRetailsFromReceipts',
                                                             fieldLabel: 'Update Pricebook Retails from Receipts',
                                                             labelWidth: 220
                                                         },
                                                         {
                                                             xtype: 'combobox',
                                                             flex: 1,
+                                                            itemId: 'cboGlSalesIndicator',
                                                             fieldLabel: 'GL Sales Indicator',
                                                             labelWidth: 220
                                                         },
                                                         {
                                                             xtype: 'checkboxfield',
-                                                            itemId: 'chkDefaultBlueLaw3',
+                                                            itemId: 'chkUpdatePricebookCaseCostFromHost',
                                                             fieldLabel: 'Update Pricebook Case Cost from Host',
                                                             labelWidth: 220
                                                         },
                                                         {
                                                             xtype: 'datefield',
                                                             flex: 1,
+                                                            itemId: 'dtmLastInventoryCloseDate',
                                                             fieldLabel: 'Last Inventory Close Date',
                                                             labelWidth: 220
                                                         },
                                                         {
                                                             xtype: 'textfield',
                                                             flex: 1,
+                                                            itemId: 'txtTaxIdPassword',
                                                             fieldLabel: 'Tax Id Password',
                                                             labelWidth: 220
                                                         }

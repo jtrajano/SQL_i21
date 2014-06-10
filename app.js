@@ -37,7 +37,8 @@ Ext.application({
         'OkTemplate',
         'Commodity',
         'Category',
-        'Store'
+        'Store',
+        'StorePaymentMethod'
     ],
     name: 'Inventory'
 });

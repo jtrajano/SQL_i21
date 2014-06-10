@@ -1,0 +1,721 @@
+{
+    "type": "Ext.window.Window",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "collapsible": true,
+        "defaultFocus": null,
+        "designer|userAlias": "storepaymentmethod",
+        "designer|userClassName": "StorePaymentMethod",
+        "height": 570,
+        "hidden": false,
+        "icon": null,
+        "iconCls": "small-icon-i21",
+        "itemId": null,
+        "layout": "fit",
+        "maximizable": true,
+        "minHeight": 570,
+        "minWidth": 500,
+        "minimizable": null,
+        "title": "Store Payment Methods",
+        "width": 500
+    },
+    "designerId": "6e7fd661-8644-406e-95d4-bd2963c38abb",
+    "cn": [
+        {
+            "type": "Ext.form.Panel",
+            "reference": {
+                "name": "items",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "autoShow": true,
+                "bodyBorder": false,
+                "bodyPadding": 10,
+                "container|align": "stretch",
+                "dock": null,
+                "frame": null,
+                "header": false,
+                "height": 350,
+                "itemId": "frmStorePaymentMethod",
+                "layout": "vbox",
+                "margin": -1,
+                "title": null,
+                "trackResetOnLoad": true,
+                "url": null,
+                "width": 450
+            },
+            "designerId": "d2c7e94e-8b50-4a93-aafb-2a2ec700fe47",
+            "cn": [
+                {
+                    "type": "Ext.toolbar.Toolbar",
+                    "reference": {
+                        "name": "dockedItems",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|padding": "0 0 0 1",
+                        "designer|displayName": "toolbar",
+                        "dock": "top",
+                        "width": 588
+                    },
+                    "designerId": "77df73fe-7a25-425a-be91-d01f5169ea75",
+                    "cn": [
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-new",
+                                "itemId": "btnNew",
+                                "layout|flex": null,
+                                "layout|margins": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "New",
+                                "width": 45
+                            },
+                            "designerId": "6b5c054c-613a-4eb0-a859-dd426f7c49ff"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-save",
+                                "itemId": "btnSave",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Save",
+                                "width": 45
+                            },
+                            "designerId": "d030085a-dbee-4f1b-a422-b6f33036a5d5"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-search",
+                                "itemId": "btnSearch",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Search",
+                                "width": 45
+                            },
+                            "designerId": "d0309c8e-7bb1-41b1-a92a-baa46fa9e496"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-delete",
+                                "itemId": "btnDelete",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Delete",
+                                "width": 45
+                            },
+                            "designerId": "9e95920c-dffa-42ce-a5d6-e0cf1e7cde0d"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-undo",
+                                "itemId": "btnUndo",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Undo",
+                                "width": 45
+                            },
+                            "designerId": "24ad7c17-2afb-4ce3-a64c-95e4173fc567"
+                        },
+                        {
+                            "type": "Ext.toolbar.Separator",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": "separator",
+                                "height": 30,
+                                "layout|flex": null
+                            },
+                            "designerId": "aef634cc-cc15-4a1e-aa09-67213f1847ee"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-close",
+                                "itemId": "btnClose",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Close",
+                                "width": 45
+                            },
+                            "designerId": "b1fbda51-e45b-4aba-8c17-041d88ce3ea0"
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.container.Container",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|align": "stretch",
+                        "designer|displayName": "container",
+                        "height": null,
+                        "layout": "vbox",
+                        "layout|flex": 1.25,
+                        "layout|margins": "0 5 0 0",
+                        "width": 1014
+                    },
+                    "designerId": "2b4838a6-5ffe-4767-a166-0578725eecea",
+                    "cn": [
+                        {
+                            "type": "Ext.form.field.Text",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Store Name",
+                                "itemId": "txtStoreName",
+                                "labelPad": null,
+                                "labelSeparator": null,
+                                "labelWidth": 175,
+                                "layout|flex": null,
+                                "margin": null,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null,
+                                "width": null
+                            },
+                            "configAlternates": {
+                                "columns": "array"
+                            },
+                            "designerId": "ada98406-7ec8-46c9-8e25-cdbacf100a0e"
+                        },
+                        {
+                            "type": "Ext.form.field.Text",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Payment Method",
+                                "itemId": "txtPaymentMethod",
+                                "labelPad": null,
+                                "labelSeparator": null,
+                                "labelWidth": 175,
+                                "layout|flex": null,
+                                "margin": null,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null,
+                                "width": null
+                            },
+                            "designerId": "7307347d-775d-40e2-8ea3-a05c22032a86"
+                        },
+                        {
+                            "type": "Ext.form.field.Text",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Description",
+                                "itemId": "txtDescription",
+                                "labelPad": null,
+                                "labelSeparator": null,
+                                "labelWidth": 175,
+                                "layout|flex": null,
+                                "margin": null,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null,
+                                "width": null
+                            },
+                            "designerId": "ca2c6d6a-a1d9-4385-a170-a12848ce7575"
+                        },
+                        {
+                            "type": "Ext.form.field.Number",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "fieldLabel": "Minimum Sale Amount",
+                                "hideTrigger": true,
+                                "itemId": "txtMinimumSaleAmount",
+                                "labelWidth": 175,
+                                "layout|flex": null
+                            },
+                            "designerId": "a7e19547-efc2-4e03-94a8-74996c50cc56"
+                        },
+                        {
+                            "type": "Ext.form.field.Number",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "fieldLabel": "Maximum Sale Amount",
+                                "hideTrigger": true,
+                                "itemId": "txtMaximumSaleAmount",
+                                "labelWidth": 175,
+                                "layout|flex": null
+                            },
+                            "designerId": "69480da7-a13e-4ad5-bca7-3e4aa5982ed7"
+                        },
+                        {
+                            "type": "Ext.form.field.Number",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "fieldLabel": "MOP Register Code",
+                                "hideTrigger": true,
+                                "itemId": "txtMopRegisterCode",
+                                "labelWidth": 175,
+                                "layout|flex": null
+                            },
+                            "designerId": "1df1f3e9-ddd0-400d-a082-74b5e16d6ab3"
+                        },
+                        {
+                            "type": "Ext.form.field.Checkbox",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "boxLabel": null,
+                                "fieldLabel": "Force Safe Drop",
+                                "itemId": "chkForceSafeDrop",
+                                "labelWidth": 175,
+                                "layout|flex": null
+                            },
+                            "designerId": "b527fe8b-fcfd-4a34-8733-8651c736a187"
+                        },
+                        {
+                            "type": "Ext.form.field.Number",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "fieldLabel": "Dollar Amount to Require Drop",
+                                "hideTrigger": true,
+                                "itemId": "txtDollarAmountToRequireDrop",
+                                "labelWidth": 175,
+                                "layout|flex": null
+                            },
+                            "designerId": "18231e17-d7e0-40cc-880a-63f07a50158a"
+                        },
+                        {
+                            "type": "Ext.form.field.ComboBox",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "enforceMaxLength": null,
+                                "fieldLabel": "GL Ledger Account",
+                                "itemId": "cboGlLedgerAccount",
+                                "labelPad": null,
+                                "labelSeparator": null,
+                                "labelWidth": 175,
+                                "layout|flex": null,
+                                "margin": null,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null,
+                                "width": null
+                            },
+                            "designerId": "c623509c-fe4f-4874-805f-04dfc6a33620"
+                        },
+                        {
+                            "type": "Ext.form.field.Number",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "fieldLabel": "Register Extended MOP",
+                                "hideTrigger": true,
+                                "itemId": "txtRegisterExtendedMop",
+                                "labelWidth": 175,
+                                "layout|flex": null
+                            },
+                            "designerId": "0dc0e81c-3596-4018-8bd4-6a1ed1166847"
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": "container",
+                                "layout": "hbox",
+                                "layout|flex": null,
+                                "layout|margins": "0 0 5 0"
+                            },
+                            "designerId": "4d5602b7-0954-473b-987f-cff7c1cf0bba",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Open Drawer on Sale",
+                                        "itemId": "chkOpenDrawerOnSale",
+                                        "labelWidth": 175,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "888a5e0f-79b0-4768-bf40-93b157f64e18"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Tender Amount Required",
+                                        "itemId": "chkTenderAmountRequired",
+                                        "labelWidth": 175,
+                                        "layout|flex": null,
+                                        "layout|margins": "0 0 0 75"
+                                    },
+                                    "designerId": "35362c32-350a-481d-aec1-4103af5a034a"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": "container",
+                                "layout": "hbox",
+                                "layout|flex": null,
+                                "layout|margins": "0 0 5 0"
+                            },
+                            "designerId": "e618e8e0-3ea7-4f88-ae21-f4875e9be074",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Enable Report Prompt",
+                                        "itemId": "chkEnableReportPrompt",
+                                        "labelWidth": 175,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "3b8b1205-0d81-49ca-934d-06dc9f7ea3eb"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Allow Zero Actual",
+                                        "itemId": "chkAllowZeroActual",
+                                        "labelWidth": 175,
+                                        "layout|flex": null,
+                                        "layout|margins": "0 0 0 75"
+                                    },
+                                    "designerId": "84982d43-cc6f-4cb1-91b1-79965ed750c1"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": "container",
+                                "layout": "hbox",
+                                "layout|flex": null,
+                                "layout|margins": "0 0 5 0"
+                            },
+                            "designerId": "4fdb0c9f-c9ae-4973-8a4d-fc0a45901b54",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Depositable",
+                                        "itemId": "chkDepositable",
+                                        "labelWidth": 175,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "61841604-4c12-44a3-bf86-6fc85f1b2c68"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Allowed Without Sale",
+                                        "itemId": "chkAllowedWithoutSale",
+                                        "labelWidth": 175,
+                                        "layout|flex": null,
+                                        "layout|margins": "0 0 0 75"
+                                    },
+                                    "designerId": "0a1c084f-9273-4726-bb2a-62f5380da71b"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": "container",
+                                "layout": "hbox",
+                                "layout|flex": null,
+                                "layout|margins": "0 0 5 0"
+                            },
+                            "designerId": "7dc3f4bb-520c-4aab-bd04-d2a9829d87e0",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Allow Refund",
+                                        "itemId": "chkAllowRefund",
+                                        "labelWidth": 175,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "669fa0d2-0a69-41bd-9e7e-759d32eca9b2"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Allow Change",
+                                        "itemId": "chkAllowChange",
+                                        "labelWidth": 175,
+                                        "layout|flex": null,
+                                        "layout|margins": "0 0 0 75"
+                                    },
+                                    "designerId": "24d65191-ba84-48a7-be65-7913119f64bb"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": "container",
+                                "layout": "hbox",
+                                "layout|flex": null,
+                                "layout|margins": "0 0 5 0"
+                            },
+                            "designerId": "b466c6fc-7846-4a6e-8751-76743480a5f2",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Allow Safe Drop",
+                                        "itemId": "chkAllowSafeDrop",
+                                        "labelWidth": 175,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "8a5d6f30-3644-4263-86cd-11bd611cd6fc"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Allow Money Orders",
+                                        "itemId": "chkAllowMoneyOrders",
+                                        "labelWidth": 175,
+                                        "layout|flex": null,
+                                        "layout|margins": "0 0 0 75"
+                                    },
+                                    "designerId": "8f6af6d1-7f0f-4e61-8f78-47a95fdaa1e7"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.form.field.Checkbox",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "boxLabel": null,
+                                "fieldLabel": "Force Ticket Print",
+                                "itemId": "chkForceTicketPrint",
+                                "labelWidth": 175,
+                                "layout|flex": null
+                            },
+                            "designerId": "3c5254d7-b357-4106-bbb1-c5e06633d659"
+                        }
+                    ]
+                },
+                {
+                    "type": "linkedinstance",
+                    "reference": {
+                        "name": "dockedItems",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "afterPageText": null,
+                        "designer|createAlias": "ipagingstatusbar",
+                        "designer|displayName": "",
+                        "dock": "bottom",
+                        "itemId": "pagingtoolbar",
+                        "layout|flex": 1,
+                        "store": null
+                    },
+                    "designerId": "02bea3a0-93d8-4224-a4ca-bc7026df437a",
+                    "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
+                }
+            ]
+        }
+    ]
+}

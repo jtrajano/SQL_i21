@@ -285,21 +285,6 @@
                                             "designerId": "a2f9e440-a560-4dcb-9bb7-9e3986ff4e27",
                                             "cn": [
                                                 {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "GL Division Number",
-                                                        "itemId": "txtGlDivisionNumber",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": null
-                                                    },
-                                                    "designerId": "69fbd848-2282-4644-89fc-63a6178b51f2"
-                                                },
-                                                {
                                                     "type": "Ext.form.field.Checkbox",
                                                     "reference": {
                                                         "name": "items",
@@ -309,7 +294,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Store System on Host Computer",
-                                                        "itemId": "chkSalesAnalysisByTon",
+                                                        "itemId": "chkStoreSystemOnHostComputer",
                                                         "labelWidth": 200,
                                                         "layout|flex": null
                                                     },
@@ -323,10 +308,10 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "fieldLabel": "Material Fee",
-                                                        "itemId": "cboMaterialFee",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": 1,
+                                                        "fieldLabel": "Price Book",
+                                                        "itemId": "cboPriceBook",
+                                                        "labelWidth": 200,
+                                                        "layout|flex": null,
                                                         "layout|margins": null
                                                     },
                                                     "designerId": "055ccf53-9d58-40b6-8921-063d7076fff2"
@@ -339,31 +324,15 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "fieldLabel": "Material Item",
-                                                        "itemId": "cboMaterialItem",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": 1,
+                                                        "fieldLabel": "Handheld Device Cost Basis",
+                                                        "itemId": "cboHandheldDeviceCostBasis",
+                                                        "labelWidth": 200,
+                                                        "layout|flex": null,
                                                         "layout|margins": null
                                                     },
                                                     "designerId": "1370bc4e-44a4-493a-b53a-90eaab1399a9"
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.Checkbox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "boxLabel": null,
-                                                        "fieldLabel": "Auto Calculate Freight",
-                                                        "itemId": "chkAutoCalculateFreight",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": null
-                                                    },
-                                                    "designerId": "fbadff67-644d-463a-93db-1256f43d027e"
-                                                },
-                                                {
                                                     "type": "Ext.form.field.ComboBox",
                                                     "reference": {
                                                         "name": "items",
@@ -371,61 +340,29 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "fieldLabel": "Freight Item",
-                                                        "itemId": "cboFreightItem",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": 1,
+                                                        "fieldLabel": "Default Vendor",
+                                                        "itemId": "cboDefaultVendor",
+                                                        "labelWidth": 200,
+                                                        "layout|flex": null,
                                                         "layout|margins": null
                                                     },
                                                     "designerId": "e549242a-c2c7-4817-a528-9f839e7cbd6a"
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.Checkbox",
+                                                    "type": "Ext.form.field.ComboBox",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "boxLabel": null,
-                                                        "fieldLabel": "Non Retail Use Department",
-                                                        "itemId": "chkNonRetailUseDepartment",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": null
+                                                        "fieldLabel": "Location Code",
+                                                        "itemId": "cboLocationCode",
+                                                        "labelWidth": 200,
+                                                        "layout|flex": null,
+                                                        "layout|margins": null
                                                     },
-                                                    "designerId": "c7da6d1a-e7f8-46a7-8efd-4d65cc3174ed"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Checkbox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "boxLabel": null,
-                                                        "fieldLabel": "Report in Net or Gross",
-                                                        "itemId": "chkReportInNetOrGross",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": null
-                                                    },
-                                                    "designerId": "ff51d00a-3745-4e0c-b6a0-409f7ff8de20"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Checkbox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "boxLabel": null,
-                                                        "fieldLabel": "Department for Pumps",
-                                                        "itemId": "chkDepartmentForPumps",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": null
-                                                    },
-                                                    "designerId": "865506ef-94fd-4307-9e85-c7939a13a426"
+                                                    "designerId": "0eaeca44-c674-474c-bb00-1b979cdb9e5f"
                                                 },
                                                 {
                                                     "type": "Ext.form.field.ComboBox",
@@ -435,13 +372,29 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "fieldLabel": "Convert to Paidout",
-                                                        "itemId": "cboConvertToPaidout",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": 1,
+                                                        "fieldLabel": "Company ID for GL",
+                                                        "itemId": "cboCompanyIdForGL",
+                                                        "labelWidth": 200,
+                                                        "layout|flex": null,
                                                         "layout|margins": null
                                                     },
-                                                    "designerId": "742dcd50-6dd6-48a4-8ee6-3977741adab7"
+                                                    "designerId": "0ead7d51-e666-4c22-b43f-d9b20d66e2d7"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Company ID for AR",
+                                                        "itemId": "cboCompanyIdForAR",
+                                                        "labelWidth": 200,
+                                                        "layout|flex": null,
+                                                        "layout|margins": null
+                                                    },
+                                                    "designerId": "4bdff6e6-53af-411a-8bac-362eedf97ac7"
                                                 },
                                                 {
                                                     "type": "Ext.form.field.Checkbox",
@@ -452,12 +405,74 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "boxLabel": null,
-                                                        "fieldLabel": "Delete from Register",
-                                                        "itemId": "chkDeleteFromRegister",
-                                                        "labelWidth": 160,
+                                                        "fieldLabel": "Use Price Book at this Store",
+                                                        "itemId": "chkUsePriceBookAtThisStore",
+                                                        "labelWidth": 200,
                                                         "layout|flex": null
                                                     },
-                                                    "designerId": "c71625f9-a7be-4c4d-a3f0-96aae7f66489"
+                                                    "designerId": "79dfeabd-6e99-4d64-848f-9d4a67d4bd6a"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Maximum PLU Number",
+                                                        "itemId": "txtMaximumPluNumber",
+                                                        "labelWidth": 200,
+                                                        "layout|flex": null
+                                                    },
+                                                    "designerId": "69fbd848-2282-4644-89fc-63a6178b51f2"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Treat 7 Digit UPCs as PLUs",
+                                                        "itemId": "chkTreat7DigitUpcsAsPlus",
+                                                        "labelWidth": 200,
+                                                        "layout|flex": null
+                                                    },
+                                                    "designerId": "af91fc70-9afc-4181-b1ff-797b64f27e45"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Interface Proprietary Cards to CFN",
+                                                        "itemId": "chkInterfaceProprietaryCardsToCfn",
+                                                        "labelWidth": 200,
+                                                        "layout|flex": null
+                                                    },
+                                                    "designerId": "21ba84c0-98b9-491e-a306-66a5fc206e30"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "CFN Site ID",
+                                                        "itemId": "txtCfnSiteId",
+                                                        "labelWidth": 200,
+                                                        "layout|flex": null
+                                                    },
+                                                    "designerId": "21848777-5a0a-4845-bffe-4660e252b3b3"
                                                 }
                                             ]
                                         },
@@ -472,7 +487,7 @@
                                                 "container|align": "stretch",
                                                 "designer|displayName": "container",
                                                 "layout": "vbox",
-                                                "layout|flex": 1,
+                                                "layout|flex": 1.2,
                                                 "layout|margins": "0 1 0 5"
                                             },
                                             "designerId": "bccf99c2-1dcd-4aa2-9f1a-4a274a289f8e",
@@ -486,12 +501,12 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "boxLabel": null,
-                                                        "fieldLabel": "Allow change to shift's physical qty received",
-                                                        "itemId": "chkDepartmentKeyTaxed",
+                                                        "fieldLabel": "Interface Checks to Checkbook",
+                                                        "itemId": "chkInterfaceChecksToCheckbook",
                                                         "labelWidth": 250,
                                                         "layout|flex": null
                                                     },
-                                                    "designerId": "a9de426c-7323-4356-bd9c-7e4337bc5b2c"
+                                                    "designerId": "7b1965ac-fbab-4910-b2fd-c4b5e5dd8e0c"
                                                 },
                                                 {
                                                     "type": "Ext.form.field.ComboBox",
@@ -501,141 +516,43 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "fieldLabel": "Default Product Code",
-                                                        "itemId": "cboDefaultProductCode",
-                                                        "labelWidth": 175,
+                                                        "fieldLabel": "Checkbook",
+                                                        "itemId": "cboCheckbook",
+                                                        "labelWidth": 250,
                                                         "layout|flex": null,
                                                         "layout|margins": null
                                                     },
-                                                    "designerId": "54ddc9a0-15f8-4e0f-8fa2-d54e991f39fd"
+                                                    "designerId": "26f21599-c5ca-4b46-b5f3-47d8afdaa918"
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.ComboBox",
+                                                    "type": "Ext.form.field.Text",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "fieldLabel": "Default Family",
-                                                        "itemId": "cboDefaultFamily",
-                                                        "labelWidth": 175,
-                                                        "layout|flex": null,
-                                                        "layout|margins": null
-                                                    },
-                                                    "designerId": "de9078b9-2606-46f6-9c46-1ff1d090b0a1"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.ComboBox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Default Class",
-                                                        "itemId": "cboDefaultClass",
-                                                        "labelWidth": 175,
-                                                        "layout|flex": null,
-                                                        "layout|margins": null
-                                                    },
-                                                    "designerId": "5c1478a7-a7ed-4d0b-97fa-fd0704213bc9"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Checkbox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "boxLabel": null,
-                                                        "fieldLabel": "Default Food Stampable",
-                                                        "itemId": "chkDefaultFoodStampable",
-                                                        "labelWidth": 175,
+                                                        "fieldLabel": "Quickbook Interface Class",
+                                                        "itemId": "txtQuickbookInterfaceClass",
+                                                        "labelWidth": 250,
                                                         "layout|flex": null
                                                     },
-                                                    "designerId": "4162babf-e030-4ee3-975c-31b38a3314e9"
+                                                    "designerId": "0efd6212-0d0a-4ff8-9c6c-8a723b29e90b"
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.Checkbox",
+                                                    "type": "Ext.form.field.Text",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "boxLabel": null,
-                                                        "fieldLabel": "Default Returnable",
-                                                        "itemId": "chkDefaultReturnable",
-                                                        "labelWidth": 175,
+                                                        "fieldLabel": "Barcode Printer",
+                                                        "itemId": "txtBarcodePrinter",
+                                                        "labelWidth": 250,
                                                         "layout|flex": null
                                                     },
-                                                    "designerId": "591ab814-bc89-4a43-942a-95e5d73e14a0"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Checkbox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "boxLabel": null,
-                                                        "fieldLabel": "Default Saleable",
-                                                        "itemId": "chkDefaultSaleable",
-                                                        "labelWidth": 175,
-                                                        "layout|flex": null
-                                                    },
-                                                    "designerId": "1741068a-1260-499b-92c2-fdad11b4a3b4"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Checkbox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "boxLabel": null,
-                                                        "fieldLabel": "Default Pre-priced",
-                                                        "itemId": "chkDefaultPrepriced",
-                                                        "labelWidth": 175,
-                                                        "layout|flex": null
-                                                    },
-                                                    "designerId": "8f5b6869-4e55-4c66-9d0c-f2fcb8e62ab5"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Checkbox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "boxLabel": null,
-                                                        "fieldLabel": "Default ID Required (liquor)",
-                                                        "itemId": "chkDefaultIdRequiredLiquor",
-                                                        "labelWidth": 175,
-                                                        "layout|flex": null
-                                                    },
-                                                    "designerId": "1856901d-6d13-4d79-8622-b91505258baa"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Checkbox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "boxLabel": null,
-                                                        "fieldLabel": "Default ID Required (cigarette)",
-                                                        "itemId": "chkDefaultIdRequiredCigarette",
-                                                        "labelWidth": 175,
-                                                        "layout|flex": null
-                                                    },
-                                                    "designerId": "1c23b5c6-6aaa-4da3-b3d2-c700b09e733f"
+                                                    "designerId": "fddb5163-29f0-468e-b08d-f55806fa4471"
                                                 },
                                                 {
                                                     "type": "Ext.form.field.Number",
@@ -645,14 +562,155 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "fieldLabel": "Default Minimum Age",
+                                                        "fieldLabel": "Service Charge Rate",
                                                         "hideTrigger": true,
-                                                        "itemId": "txtDefaultMinimumAge",
-                                                        "labelWidth": 175,
+                                                        "itemId": "txtServiceChargeRate",
+                                                        "labelWidth": 250,
                                                         "layout|flex": null,
-                                                        "maxWidth": 225
+                                                        "maxWidth": null
+                                                    },
+                                                    "designerId": "a837907d-e203-44ee-8774-f00220987117"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Use AR Statement Forms",
+                                                        "itemId": "chkUseArStatementForms",
+                                                        "labelWidth": 250,
+                                                        "layout|flex": null
+                                                    },
+                                                    "designerId": "b967ae15-2fb0-443d-a3f0-824cd47eb500"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Date",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Last Shift Open Date",
+                                                        "itemId": "dtmLastShiftOpenDate",
+                                                        "labelWidth": 250,
+                                                        "layout|flex": null
+                                                    },
+                                                    "designerId": "4adcc360-d3aa-4c6c-8130-7377cab22922"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Last Shift Number",
+                                                        "hideTrigger": true,
+                                                        "itemId": "txtLastShiftNumber",
+                                                        "labelWidth": 250,
+                                                        "layout|flex": null,
+                                                        "maxWidth": null
                                                     },
                                                     "designerId": "2128e12e-fe2f-478b-8899-b7feb49ec192"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Date",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Last Physical Import Date",
+                                                        "itemId": "dtmLastPhysicalImportDate",
+                                                        "labelWidth": 250,
+                                                        "layout|flex": null
+                                                    },
+                                                    "designerId": "3b72819f-2950-4479-86e7-e848ea6256ae"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Date",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Last Statement Roll Date",
+                                                        "itemId": "dtmLastStatementRollDate",
+                                                        "labelWidth": 250,
+                                                        "layout|flex": null
+                                                    },
+                                                    "designerId": "4a4bbe53-be47-4ed4-b777-591088c33be4"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Allow Change to Shifts Physical Qty Received",
+                                                        "itemId": "chkAllowChangeToShiftsPhysicalQtyReceived",
+                                                        "labelWidth": 250,
+                                                        "layout|flex": null
+                                                    },
+                                                    "designerId": "a9de426c-7323-4356-bd9c-7e4337bc5b2c"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Allow Change to Shifts Physical Qty Sold",
+                                                        "itemId": "chkAllowChangeToShiftsPhysicalQtySold",
+                                                        "labelWidth": 250,
+                                                        "layout|flex": null
+                                                    },
+                                                    "designerId": "86122bce-653a-4b41-a8cd-a0ee8198f7d2"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Handheld Device Model",
+                                                        "itemId": "txtHandheldDeviceModel",
+                                                        "labelWidth": 250,
+                                                        "layout|flex": null
+                                                    },
+                                                    "designerId": "d854bd27-e65c-4c15-8be1-99d344e89730"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Deposit Lookup Type",
+                                                        "itemId": "cboDepositLookupType",
+                                                        "labelWidth": 250,
+                                                        "layout|flex": null,
+                                                        "layout|margins": null
+                                                    },
+                                                    "designerId": "a318029a-8f5b-4b66-890a-6ee33d003213"
                                                 }
                                             ]
                                         }
@@ -692,7 +750,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "designer|createAlias": "advancefiltergrid",
-                                        "itemId": "grdVendorCategoryXref",
+                                        "itemId": "grdPaymentMethod",
                                         "margin": -1,
                                         "title": null
                                     },
@@ -864,7 +922,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "itemId": "grvVendorCategoryXref"
+                                                "itemId": "grvPaymentMethod"
                                             },
                                             "designerId": "fdb1b864-96e3-4054-bc72-b66bc63013a3"
                                         },
@@ -913,7 +971,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "designer|createAlias": "advancefiltergrid",
-                                        "itemId": "grdCatalog",
+                                        "itemId": "grdPaidOuts",
                                         "margin": -1,
                                         "title": null
                                     },
@@ -1056,7 +1114,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "itemId": "grvCatalog"
+                                                "itemId": "grvPaidOuts"
                                             },
                                             "designerId": "2ec38761-f9f5-4ce1-8140-07ef205f000f"
                                         },
@@ -1138,6 +1196,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Default Paid Out",
+                                                        "itemId": "cboDefaultPaidOut",
                                                         "labelWidth": 220,
                                                         "layout|flex": null
                                                     },
@@ -1153,7 +1212,7 @@
                                                     "userConfig": {
                                                         "fieldLabel": "MOP for Customer Charges",
                                                         "hideTrigger": true,
-                                                        "itemId": "txtDefaultNucleusGroupId",
+                                                        "itemId": "txtMopForCustomerCharges",
                                                         "labelWidth": 220,
                                                         "layout|flex": null,
                                                         "maxWidth": null,
@@ -1171,7 +1230,7 @@
                                                     "userConfig": {
                                                         "fieldLabel": "MOP for Cash Transactions",
                                                         "hideTrigger": true,
-                                                        "itemId": "txtDefaultNucleusGroupId1",
+                                                        "itemId": "txtMopForCashTransactions",
                                                         "labelWidth": 220,
                                                         "layout|flex": null,
                                                         "maxWidth": null,
@@ -1189,7 +1248,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Allow Mass Price Changes",
-                                                        "itemId": "chkUpdatePricesOnPbImports",
+                                                        "itemId": "chkAllowMassPriceChanges",
                                                         "labelWidth": 220,
                                                         "layout|flex": null
                                                     },
@@ -1205,7 +1264,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Using Tank Monitors",
-                                                        "itemId": "chkDefaultUseTaxFlag1",
+                                                        "itemId": "chkUsingTankMonitors",
                                                         "labelWidth": 220,
                                                         "layout|flex": null,
                                                         "layout|margins": null
@@ -1221,6 +1280,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "POS Register ID",
+                                                        "itemId": "txtPosRegisterId",
                                                         "labelWidth": 220,
                                                         "layout|flex": null
                                                     },
@@ -1236,7 +1296,7 @@
                                                     "userConfig": {
                                                         "fieldLabel": "Maximum Register PLUs",
                                                         "hideTrigger": true,
-                                                        "itemId": "txtDefaultNucleusGroupId2",
+                                                        "itemId": "txtMaximumRegisterPlus",
                                                         "labelWidth": 220,
                                                         "layout|flex": null,
                                                         "maxWidth": null,
@@ -1253,6 +1313,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Report Departments at Gross/Net",
+                                                        "itemId": "cboReportDepartmentsAtGrossNet",
                                                         "labelWidth": 220,
                                                         "layout|flex": null
                                                     },
@@ -1286,7 +1347,7 @@
                                                     "userConfig": {
                                                         "fieldLabel": "MOP for Loyalty Discount",
                                                         "hideTrigger": true,
-                                                        "itemId": "txtDefaultNucleusGroupId3",
+                                                        "itemId": "txtMopForLoyaltyDiscount",
                                                         "labelWidth": 250,
                                                         "layout|flex": null,
                                                         "maxWidth": null,
@@ -1304,7 +1365,7 @@
                                                     "userConfig": {
                                                         "fieldLabel": "Loyalty Discount Department",
                                                         "hideTrigger": true,
-                                                        "itemId": "txtDefaultNucleusGroupId4",
+                                                        "itemId": "txtLoyaltyDiscountDepartment",
                                                         "labelWidth": 250,
                                                         "layout|flex": null,
                                                         "maxWidth": null,
@@ -1322,7 +1383,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Breakout Proprietary Card Totals",
-                                                        "itemId": "chkDefaultUseTaxFlag2",
+                                                        "itemId": "chkBreakoutProprietaryCardTotals",
                                                         "labelWidth": 250,
                                                         "layout|flex": null,
                                                         "layout|margins": null
@@ -1339,7 +1400,7 @@
                                                     "userConfig": {
                                                         "fieldLabel": "Remove Proprietart Totals from Existing MOP",
                                                         "hideTrigger": true,
-                                                        "itemId": "txtDefaultNucleusGroupId5",
+                                                        "itemId": "txtRemoveProprietartTotalsFromExistingMop",
                                                         "labelWidth": 250,
                                                         "layout|flex": null,
                                                         "maxWidth": null,
@@ -1357,7 +1418,7 @@
                                                     "userConfig": {
                                                         "fieldLabel": "Add Proprietary Totals to New MOP",
                                                         "hideTrigger": true,
-                                                        "itemId": "txtDefaultNucleusGroupId6",
+                                                        "itemId": "txtAddProprietaryTotalsToNewMop",
                                                         "labelWidth": 250,
                                                         "layout|flex": null,
                                                         "maxWidth": null,
@@ -1374,6 +1435,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Proprietary Totals Network Card Name",
+                                                        "itemId": "txtProprietaryTotalsNetworkCardName",
                                                         "labelWidth": 250,
                                                         "layout|flex": null
                                                     },
@@ -1388,6 +1450,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Allow Register Mark Ups/Down",
+                                                        "itemId": "cboAllowRegisterMarkUpsDown",
                                                         "labelWidth": 250,
                                                         "layout|flex": null
                                                     },
@@ -1402,6 +1465,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Register Checkout Data Entry",
+                                                        "itemId": "cboRegisterCheckoutDataEntry",
                                                         "labelWidth": 250,
                                                         "layout|flex": null
                                                     },
@@ -1416,6 +1480,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Reconcile Fuels",
+                                                        "itemId": "cboReconcileFuels",
                                                         "labelWidth": 250,
                                                         "layout|flex": null
                                                     },
@@ -1493,7 +1558,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Receive Product by Department",
-                                                        "itemId": "chkUpdatePricesOnPbImports",
+                                                        "itemId": "chkReceiveProductByDepartment",
                                                         "labelWidth": 220,
                                                         "layout|flex": null
                                                     },
@@ -1508,8 +1573,8 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "boxLabel": null,
-                                                        "fieldLabel": "Keep A/R at Store Level",
-                                                        "itemId": "chkDefaultUseTaxFlag1",
+                                                        "fieldLabel": "Keep AR at Store Level",
+                                                        "itemId": "chkKeepArAtStoreLevel",
                                                         "labelWidth": 220,
                                                         "layout|flex": null,
                                                         "layout|margins": null
@@ -1526,7 +1591,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Using Check Writer",
-                                                        "itemId": "chkDefaultUseTaxFlag2",
+                                                        "itemId": "chkUsingCheckWriter",
                                                         "labelWidth": 220,
                                                         "layout|flex": null,
                                                         "layout|margins": null
@@ -1543,7 +1608,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Load Fuel Cost on Checkout Posting",
-                                                        "itemId": "chkDefaultUseTaxFlag3",
+                                                        "itemId": "chkLoadFuelCostOnCheckoutPosting",
                                                         "labelWidth": 220,
                                                         "layout|flex": null,
                                                         "layout|margins": null
@@ -1560,7 +1625,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Use Safe Change Fund in Checkouts",
-                                                        "itemId": "chkDefaultUseTaxFlag4",
+                                                        "itemId": "chkUseSafeChangeFundInCheckouts",
                                                         "labelWidth": 220,
                                                         "layout|flex": null,
                                                         "layout|margins": null
@@ -1577,7 +1642,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Clear All Pricebook Fields on Add",
-                                                        "itemId": "chkDefaultBlueLaw1",
+                                                        "itemId": "chkClearAllPricebookFieldsOnAdd",
                                                         "labelWidth": 220,
                                                         "layout|flex": null,
                                                         "layout|margins": null
@@ -1594,7 +1659,7 @@
                                                     "userConfig": {
                                                         "fieldLabel": "Number of Shifts in a Day",
                                                         "hideTrigger": true,
-                                                        "itemId": "txtDefaultNucleusGroupId",
+                                                        "itemId": "txtNumberOfShiftsInADay",
                                                         "labelWidth": 220,
                                                         "layout|flex": null,
                                                         "maxWidth": null,
@@ -1612,7 +1677,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Update Pricebook Retails from Receipts",
-                                                        "itemId": "chkDefaultBlueLaw2",
+                                                        "itemId": "chkUpdatePricebookRetailsFromReceipts",
                                                         "labelWidth": 220,
                                                         "layout|flex": null,
                                                         "layout|margins": null
@@ -1628,6 +1693,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "GL Sales Indicator",
+                                                        "itemId": "cboGlSalesIndicator",
                                                         "labelWidth": 220,
                                                         "layout|flex": 1
                                                     },
@@ -1643,7 +1709,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Update Pricebook Case Cost from Host",
-                                                        "itemId": "chkDefaultBlueLaw3",
+                                                        "itemId": "chkUpdatePricebookCaseCostFromHost",
                                                         "labelWidth": 220,
                                                         "layout|flex": null,
                                                         "layout|margins": null
@@ -1659,6 +1725,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Last Inventory Close Date",
+                                                        "itemId": "dtmLastInventoryCloseDate",
                                                         "labelWidth": 220,
                                                         "layout|flex": 1
                                                     },
@@ -1673,6 +1740,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Tax Id Password",
+                                                        "itemId": "txtTaxIdPassword",
                                                         "labelWidth": 220,
                                                         "layout|flex": 1
                                                     },
