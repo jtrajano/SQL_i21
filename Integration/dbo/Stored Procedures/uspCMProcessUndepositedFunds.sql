@@ -37,6 +37,7 @@ BEGIN
 
 		-- Create the variables 
 		DECLARE @isValid AS BIT
+		DECLARE @intInvalidTransactionId AS INT
 		DECLARE @strInvalidTransactionId AS NVARCHAR(40)
 
 		-- Refresh the data in the undeposited fund table. 
@@ -93,17 +94,17 @@ BEGIN
 						ON Q1.intUndepositedFundId = Q1.intUndepositedFundId
 			WHERE	Q1.intUndepositedFundId = Q2.intUndepositedFundId
 					AND Q1.total <> Q2.total
-	
+
 			IF @@ERROR <> 0	GOTO Exit_WithErrors		
-	
+
 			IF (ISNULL(@isValid, 1) = 0)
 			BEGIN 
 				RAISERROR(50023,11,1)
 				IF @@ERROR <> 0	GOTO Exit_WithErrors	
 			END
-	
+
 			-- 3. Check if any of the undeposited fund was used. 	
-			SELECT	TOP 1 @strInvalidTransactionId = h.strTransactionId
+			SELECT	TOP 1 @intInvalidTransactionId = uf.intBankDepositId
 			FROM	tblCMBankTransaction h INNER JOIN tblCMBankTransactionDetail d
 						ON h.intTransactionId = d.intTransactionId
 					INNER JOIN tblCMUndepositedFund uf
@@ -112,13 +113,18 @@ BEGIN
 					AND uf.intBankDepositId IS NOT NULL
 					AND uf.intBankDepositId <> h.intTransactionId
 			IF @@ERROR <> 0	GOTO Exit_WithErrors
+		
+			-- Get the string id
+			SELECT	@strInvalidTransactionId = strTransactionId
+			FROM	tblCMBankTransaction
+			WHERE	intTransactionId = @intInvalidTransactionId			
 
 			IF (ISNULL(@strInvalidTransactionId, '''') <> '''')
 			BEGIN 
 				RAISERROR(50024,11,1, @strInvalidTransactionId)
 				IF @@ERROR <> 0	GOTO Exit_WithErrors	
 			END
-	
+
 		END 
 
 		--=====================================================================================================================================
@@ -603,7 +609,7 @@ BEGIN
 				)	Q1
 					ON a.intUndepositedFundId = Q1.intUndepositedFundId
 			IF @@ERROR <> 0	GOTO Exit_WithErrors		
-	
+
 			-- Restore data for apeglmst
 			INSERT INTO apeglmst (
 					apegl_cbk_no
@@ -634,7 +640,7 @@ BEGIN
 					)	Q1
 						ON a.intUndepositedFundId = Q1.intUndepositedFundId
 			IF @@ERROR <> 0	GOTO Exit_WithErrors
-		
+	
 			-- Delete the archive data 
 			DELETE tblCMApchkmstArchive
 			FROM	tblCMApchkmstArchive a INNER JOIN (
@@ -665,7 +671,7 @@ BEGIN
 						WHERE	h.strTransactionId = @strTransactionId
 					)	Q1
 						ON a.intUndepositedFundId = Q1.intUndepositedFundId
-		
+	
 			-- Update the Undeposite Fund table. Remove the link to the deposit transaction
 			UPDATE tblCMUndepositedFund
 			SET		intBankDepositId = NULL 

@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCMRefreshUndepositedFundsFromOrigin]
 	@intBankAccountId INT
-	,@intUserID INT
+	,@intUserId INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -55,9 +55,9 @@ SELECT	@intBankAccountId
 		,dblAmount = ABS(v.aptrx_net_amt)
 		,strName = v.aptrx_name COLLATE Latin1_General_CI_AS
 		,strSourceSystem = @SOURCE_SYSTEM_DEPOSIT_ENTRY
-		,intCreatedUserId = @intUserID
+		,intCreatedUserId = @intUserId
 		,dtmCreated = GETDATE()
-		,intLastModifiedUserId = @intUserID
+		,intLastModifiedUserId = @intUserId
 		,dtmLastModified = GETDATE()
 FROM	vyuCMOriginDepositEntry v INNER JOIN tblCMBankAccount b
 			ON b.strCbkNo = v.aptrx_cbk_no COLLATE Latin1_General_CI_AS 
@@ -81,7 +81,7 @@ SET		dtmDate = dbo.fnConvertOriginDateToSQLDateTime(v.aptrx_chk_rev_dt) -- Use a
 		,dblAmount = ABS(v.aptrx_net_amt)
 		,strName = v.aptrx_name COLLATE Latin1_General_CI_AS
 		,strSourceSystem = @SOURCE_SYSTEM_DEPOSIT_ENTRY
-		,intLastModifiedUserId = @intUserID
+		,intLastModifiedUserId = @intUserId
 		,dtmLastModified = GETDATE()
 FROM	tblCMUndepositedFund f INNER JOIN vyuCMOriginDepositEntry v
 			ON f.strSourceTransactionId = ( 
