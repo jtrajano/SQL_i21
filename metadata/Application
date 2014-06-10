@@ -25,7 +25,8 @@
             "Commodity",
             "Category",
             "Store",
-            "StorePaymentMethod"
+            "StorePaymentMethod",
+            "PromotionItemList"
         ]
     },
     "designerId": "application"

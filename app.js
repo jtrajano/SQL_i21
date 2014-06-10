@@ -38,7 +38,8 @@ Ext.application({
         'Commodity',
         'Category',
         'Store',
-        'StorePaymentMethod'
+        'StorePaymentMethod',
+        'PromotionItemList'
     ],
     name: 'Inventory'
 });
