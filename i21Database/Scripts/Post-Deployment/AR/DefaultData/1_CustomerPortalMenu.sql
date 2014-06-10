@@ -1,4 +1,9 @@
 ﻿GO
+	PRINT N'BEGIN TRUNCATE TABLE tblARCustomerPortalMenu'
+	TRUNCATE TABLE tblARCustomerPortalMenu
+GO
+	PRINT N'END TRUNCATE TABLE tblARCustomerPortalMenu'
+GO
 	PRINT N'BEGIN INSERT DEFAULT CUSTOMER PORTAL MENU'
 GO
 SET IDENTITY_INSERT [dbo].[tblARCustomerPortalMenu] ON
@@ -27,3 +32,7 @@ INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerP
 INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (23, N'Business Summary', 3, N'Screen', N'CustomerPortal.controller.GABusinessSummary')
 INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (24, N'Customer Contact List', 4, N'Screen', N'AccountsReceivable.controller.CustomerContactList')
 SET IDENTITY_INSERT [dbo].[tblARCustomerPortalMenu] OFF
+
+GO
+	PRINT N'END INSERT DEFAULT CUSTOMER PORTAL MENU'
+GO

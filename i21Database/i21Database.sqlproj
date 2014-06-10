@@ -563,6 +563,6 @@
     <None Include="Scripts\Post-Deployment\CM\PopulateSourceSystemData.sql" />
     <Build Include="dbo\Views\vyuCPContactMenu.sql" />
     <Build Include="dbo\Views\vyuARCustomerContacts.sql" />
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\1_CustomerPortalMenu.sql" />
+    <PostDeploy Include="Scripts\Post-Deployment\AR\DefaultData\1_CustomerPortalMenu.sql" />
   </ItemGroup>
 </Project>
