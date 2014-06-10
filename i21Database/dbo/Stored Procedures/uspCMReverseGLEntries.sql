@@ -75,16 +75,17 @@ INSERT INTO #tmpGLDetail (
 		,[strTransactionForm]
 		,[strModuleName]
 		,[strUOMCode]
+		,[intEntityId]
 )
 SELECT	[strTransactionId]
 		,dtmDate			= ISNULL(@dtmDateReverse, [dtmDate]) -- If date is provided, use date reverse as the date for unposting the transaction.
 		,[strBatchId]
 		,[intAccountId]
 		,[strAccountGroup]
-		,dblDebit			= [dblCredit]		-- (Debit -> Credit)
-		,dblCredit			= [dblDebit]		-- (Debit <- Credit)
-		,dblDebitUnit		= [dblCreditUnit]	-- (Debit Unit -> Credit Unit)
-		,dblCreditUnit		= [dblDebitUnit]	-- (Debit Unit <- Credit Unit)
+		,[dblDebit]			= [dblCredit]		-- (Debit -> Credit)
+		,[dblCredit]		= [dblDebit]		-- (Debit <- Credit)
+		,[dblDebitUnit]		= [dblCreditUnit]	-- (Debit Unit -> Credit Unit)
+		,[dblCreditUnit]	= [dblDebitUnit]	-- (Debit Unit <- Credit Unit)
 		,[strDescription]
 		,[strCode]
 		,[strReference]
@@ -105,6 +106,7 @@ SELECT	[strTransactionId]
 		,[strTransactionForm]
 		,[strModuleName]
 		,[strUOMCode]
+		,[intEntityId]
 FROM	tblGLDetail 
 WHERE	strBatchId = @strBatchId
 ORDER BY intGLDetailId

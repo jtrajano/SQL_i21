@@ -12,6 +12,7 @@
     [intGLAccountIdTo]         INT             NOT NULL,
     [strReferenceTo]           NVARCHAR (150)  COLLATE Latin1_General_CI_AS NULL,
     [ysnPosted]                BIT             DEFAULT 0 NOT NULL,
+	[intEntityId]			   INT			   NULL, 
     [intCreatedUserId]         INT             NULL,
     [dtmCreated]               DATETIME        NULL,
     [intLastModifiedUserId]    INT             NULL,

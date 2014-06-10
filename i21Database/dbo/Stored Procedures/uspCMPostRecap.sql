@@ -43,7 +43,8 @@ INSERT INTO tblGLDetailRecap (
 		,[intUserId]			
 		,[strTransactionForm]	
 		,[strModuleName]		
-		,[strUOMCode]	
+		,[strUOMCode]
+		,[intEntityId]
 )
 -- RETRIEVE THE DATA FROM THE TABLE VARIABLE. 
 SELECT	[strTransactionId]		
@@ -69,5 +70,6 @@ SELECT	[strTransactionId]
 		,[intUserId]			
 		,[strTransactionForm]	
 		,[strModuleName]		
-		,[strUOMCode]	
+		,[strUOMCode]
+		,[intEntityId]
 FROM	@RecapTable

@@ -143,7 +143,8 @@ INSERT INTO tblGLDetail (
 		,strTransactionForm
 		,strModuleName
 		,strUOMCode
-		,intConcurrencyId	
+		,intConcurrencyId
+		,intEntityId
 )
 SELECT 
 		strBatchId
@@ -174,7 +175,8 @@ SELECT
 		,strTransactionForm
 		,strModuleName
 		,strUOMCode
-		,intConcurrencyId	
+		,intConcurrencyId
+		,intEntityId
 FROM	#tmpGLDetail
 WHERE	@ysnRecap = 0
 

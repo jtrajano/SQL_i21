@@ -24,6 +24,7 @@
     [strTransactionForm] NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
     [strModuleName]      NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
     [strUOMCode]         CHAR (6)         COLLATE Latin1_General_CI_AS NULL,
+	[intEntityId]		 INT NULL
     CONSTRAINT [PK_tblGLDetailRecap] PRIMARY KEY CLUSTERED ([intGLDetailId] ASC)
 );
 

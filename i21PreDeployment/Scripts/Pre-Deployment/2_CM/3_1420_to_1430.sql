@@ -15,5 +15,36 @@ GO
 			DROP TABLE tblCMUndepositedFund
 GO
 
+-- 1 of 2: Drop old stored procedures referencing RecapTableType. 
+PRINT N'Dropping [dbo].[uspCMPostRecap]...';
+GO
+	IF EXISTS (SELECT 1 FROM sys.objects WHERE name = 'uspCMPostRecap' and type = 'P') DROP PROCEDURE [dbo].[uspCMPostRecap];
+GO
+PRINT N'Dropping [dbo].[uspCMBookGLEntries]...';
+GO
+	IF EXISTS (SELECT 1 FROM sys.objects WHERE name = 'uspCMBookGLEntries' and type = 'P') DROP PROCEDURE [dbo].[uspCMBookGLEntries];
+GO
+PRINT N'Dropping [dbo].[uspCMPostBankTransfer]...';
+GO
+	IF EXISTS (SELECT 1 FROM sys.objects WHERE name = 'uspCMPostBankTransfer' and type = 'P') DROP PROCEDURE [dbo].[uspCMPostBankTransfer];
+GO
+PRINT N'Dropping [dbo].[uspCMPostBankDeposit]...';
+GO
+	IF EXISTS (SELECT 1 FROM sys.objects WHERE name = 'uspCMPostBankDeposit' and type = 'P') DROP PROCEDURE [dbo].[uspCMPostBankDeposit];
+GO
+PRINT N'Dropping [dbo].[uspCMPostBankTransaction]...';
+GO
+	IF EXISTS (SELECT 1 FROM sys.objects WHERE name = 'uspCMPostBankTransaction' and type = 'P') DROP PROCEDURE [dbo].[uspCMPostBankTransaction];
+GO
+PRINT N'Dropping [dbo].[uspCMPostMiscChecks]...';
+GO
+	IF EXISTS (SELECT 1 FROM sys.objects WHERE name = 'uspCMPostMiscChecks' and type = 'P') DROP PROCEDURE [dbo].[uspCMPostMiscChecks];
+GO
+
+-- 2 of 2: Drop RecapTableType
+PRINT N'Dropping [dbo].[RecapTableType]...';
+GO
+	IF EXISTS (SELECT 1 FROM sys.table_types WHERE name = 'RecapTableType') DROP TYPE [dbo].[RecapTableType]
+GO
 
 PRINT N'END CASH MANAGEMENT DELETE PATH: 14.2 to 14.3'

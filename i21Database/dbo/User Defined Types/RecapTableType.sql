@@ -22,5 +22,7 @@
     [intUserId]          INT              NULL,
     [strTransactionForm] NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
     [strModuleName]      NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
-    [strUOMCode]         CHAR (6)         NULL);
+    [strUOMCode]         CHAR (6)         NULL,
+	[intEntityId]		 INT
+)
 

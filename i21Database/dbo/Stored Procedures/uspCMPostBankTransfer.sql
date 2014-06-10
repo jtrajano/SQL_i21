@@ -4,6 +4,7 @@ CREATE PROCEDURE uspCMPostBankTransfer
 	,@ysnRecap				BIT		= 0
 	,@strTransactionId		NVARCHAR(40) = NULL 
 	,@intUserId				INT		= NULL 
+	,@intEntityId			INT		= NULL
 	,@isSuccessful			BIT		= 0 OUTPUT 
 	,@message_id			INT		= 0 OUTPUT 
 AS
@@ -53,6 +54,7 @@ CREATE TABLE #tmpGLDetail (
 	,[strTransactionForm]		[nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
 	,[strModuleName]			[nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
 	,[strUOMCode]				[char](6)  COLLATE Latin1_General_CI_AS NULL
+	,[intEntityId]				[int] NULL
 )
 
 -- Declare the variables 
@@ -78,7 +80,7 @@ DECLARE
 	,@intBankAccountIdFrom AS INT
 	,@intBankAccountIdTo AS INT
 	,@ysnBankAccountIdInactive AS BIT
-	,@intCreatedUserId AS INT
+	,@intCreatedEntityId AS INT
 	,@ysnAllowUserSelfPost AS BIT = 0
 	
 	-- Table Variables
@@ -99,7 +101,7 @@ SELECT	TOP 1
 		,@ysnTransactionPostedFlag = ysnPosted
 		,@intBankAccountIdFrom = intBankAccountIdFrom
 		,@intBankAccountIdTo = intBankAccountIdTo
-		,@intCreatedUserId = intCreatedUserId
+		,@intCreatedEntityId = intEntityId
 FROM	[dbo].tblCMBankTransfer 
 WHERE	strTransactionId = @strTransactionId 
 IF @@ERROR <> 0	GOTO Post_Rollback	
@@ -181,7 +183,7 @@ BEGIN
 END 
 
 -- Check Company preference: Allow User Self Post
-IF @ysnAllowUserSelfPost = 1 AND @intUserId <> @intCreatedUserId AND @ysnRecap = 0 
+IF @ysnAllowUserSelfPost = 1 AND @intUserId <> @intCreatedEntityId AND @ysnRecap = 0 
 BEGIN 
 	-- 'You cannot %s transactions you did not create. Please contact your local administrator.'
 	IF @ysnPost = 1	
@@ -247,6 +249,7 @@ BEGIN
 			,[strTransactionForm]
 			,[strModuleName]
 			,[strUOMCode]
+			,[intEntityId]
 	)
 	SELECT	[strTransactionId]		= @strTransactionId
 			,[intTransactionId]		= NULL
@@ -277,7 +280,8 @@ BEGIN
 			,[intUserId]			= A.intLastModifiedUserId
 			,[strTransactionForm]	= @TRANSACTION_FORM
 			,[strModuleName]		= @MODULE_NAME
-			,[strUOMCode]			= NULL 
+			,[strUOMCode]			= NULL
+			,[intEntityId]			= A.intEntityId
 	FROM	[dbo].tblCMBankTransfer A INNER JOIN [dbo].tblGLAccount GLAccnt
 				ON A.intGLAccountIdFrom = GLAccnt.intAccountId
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
@@ -317,6 +321,7 @@ BEGIN
 			,[strTransactionForm]	= @TRANSACTION_FORM
 			,[strModuleName]		= @MODULE_NAME
 			,[strUOMCode]			= NULL 
+			,[intEntityId]			= A.intEntityId
 	FROM	[dbo].tblCMBankTransfer A INNER JOIN [dbo].tblGLAccount GLAccnt
 				ON A.intGLAccountIdTo = GLAccnt.intAccountId		
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
@@ -357,6 +362,7 @@ BEGIN
 		,ysnPosted
 		,strLink
 		,ysnClr
+		,intEntityId
 		,dtmDateReconciled
 		,intCreatedUserId
 		,dtmCreated
@@ -388,6 +394,7 @@ BEGIN
 			,ysnPosted					= 1
 			,strLink					= A.strTransactionId
 			,ysnClr						= 0
+			,intEntityId				= A.intEntityId
 			,dtmDateReconciled			= NULL
 			,intCreatedUserId			= A.intCreatedUserId
 			,dtmCreated					= GETDATE()
@@ -425,6 +432,7 @@ BEGIN
 			,ysnPosted					= 1
 			,strLink					= A.strTransactionId
 			,ysnClr						= 0
+			,intEntityId				= A.intEntityId
 			,dtmDateReconciled			= NULL
 			,intCreatedUserId			= A.intCreatedUserId
 			,dtmCreated					= GETDATE()
@@ -496,7 +504,8 @@ BEGIN
 			,[intUserId]			
 			,[strTransactionForm]	
 			,[strModuleName]		
-			,[strUOMCode]			
+			,[strUOMCode]
+			,[intEntityId]
 	)
 	SELECT	@strTransactionId
 			,NULL
@@ -521,7 +530,8 @@ BEGIN
 			,[intUserId]			
 			,[strTransactionForm]	
 			,[strModuleName]		
-			,[strUOMCode]	
+			,[strUOMCode]
+			,[intEntityId]
 	FROM	#tmpGLDetail
 	IF @@ERROR <> 0	GOTO Post_Rollback
 	

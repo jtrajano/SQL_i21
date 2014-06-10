@@ -4,6 +4,7 @@ CREATE PROCEDURE uspCMPostBankDeposit
 	,@ysnRecap				BIT		= 0
 	,@strTransactionId		NVARCHAR(40) = NULL 
 	,@intUserId				INT		= NULL 
+	,@intEntityId			INT		= NULL
 	,@isSuccessful			BIT		= 0 OUTPUT 
 	,@message_id			INT		= 0 OUTPUT 
 
@@ -42,7 +43,7 @@ DECLARE
 	,@ysnTransactionClearedFlag AS BIT
 	,@intBankAccountId AS INT
 	,@ysnBankAccountIdInactive AS BIT
-	,@intCreatedUserId AS INT
+	,@intCreatedEntityId AS INT
 	,@ysnAllowUserSelfPost AS BIT = 0
 	
 	-- Table Variables
@@ -80,6 +81,7 @@ DECLARE
 		,[strTransactionForm]		[nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
 		,[strModuleName]			[nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
 		,[strUOMCode]				[char](6)  COLLATE Latin1_General_CI_AS NULL
+		,[intEntityId]				[int] NULL
 	)
 	
 -- Note: 
@@ -100,7 +102,7 @@ SELECT	TOP 1
 		,@ysnTransactionPostedFlag = ysnPosted
 		,@ysnTransactionClearedFlag = ysnClr
 		,@intBankAccountId = intBankAccountId
-		,@intCreatedUserId = intCreatedUserId
+		,@intCreatedEntityId = intEntityId
 FROM	[dbo].tblCMBankTransaction 
 WHERE	strTransactionId = @strTransactionId 
 		AND intBankTransactionTypeId = @BANK_TRANSACTION_TYPE_Id
@@ -188,7 +190,7 @@ BEGIN
 END 
 
 -- Check Company preference: Allow User Self Post
-IF @ysnAllowUserSelfPost = 1 AND @intUserId <> @intCreatedUserId AND @ysnRecap = 0 
+IF @ysnAllowUserSelfPost = 1 AND @intEntityId <> @intCreatedEntityId AND @ysnRecap = 0 
 BEGIN 
 	-- 'You cannot %s transactions you did not create. Please contact your local administrator.'
 	IF @ysnPost = 1	
@@ -263,6 +265,7 @@ BEGIN
 			,[strTransactionForm]
 			,[strModuleName]
 			,[strUOMCode]
+			,[intEntityId]
 	)
 	-- 1. DEBIT SIDE
 	SELECT	[strTransactionId]		= @strTransactionId
@@ -295,6 +298,7 @@ BEGIN
 			,[strTransactionForm]	= @TRANSACTION_FORM
 			,[strModuleName]		= @MODULE_NAME
 			,[strUOMCode]			= NULL 
+			,[intEntityId]			= A.intEntityId
 	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankAccount BankAccnt
 				ON A.intBankAccountId = BankAccnt.intBankAccountId
 			INNER JOIN [dbo].tblGLAccount GLAccnt
@@ -337,6 +341,7 @@ BEGIN
 			,[strTransactionForm]	= @TRANSACTION_FORM
 			,[strModuleName]		= @MODULE_NAME
 			,[strUOMCode]			= NULL 
+			,[intEntityId]			= A.intEntityId
 	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankTransactionDetail B
 				ON A.intTransactionId = B.intTransactionId
 			INNER JOIN [dbo].tblGLAccount GLAccnt
@@ -406,7 +411,8 @@ BEGIN
 			,[intUserId]			
 			,[strTransactionForm]	
 			,[strModuleName]		
-			,[strUOMCode]			
+			,[strUOMCode]
+			,[intEntityId]
 	)	
 	SELECT	@strTransactionId
 			,NULL
@@ -431,7 +437,8 @@ BEGIN
 			,[intUserId]			
 			,[strTransactionForm]	
 			,[strModuleName]		
-			,[strUOMCode]	
+			,[strUOMCode]
+			,[intEntityId]
 	FROM	#tmpGLDetail
 	IF @@ERROR <> 0	GOTO Post_Rollback
 	
