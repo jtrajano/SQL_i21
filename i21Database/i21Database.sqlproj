@@ -532,7 +532,7 @@
     <None Include="Scripts\Post-Deployment\CM\BankTransactionTypes.sql" />
     <None Include="Scripts\Post-Deployment\CM\DataImportStatus.sql" />
     <None Include="Scripts\Post-Deployment\VersionUpdate.sql" />
-    <None Include="Scripts\Post-Deployment\PostDeployment.sql" />
+    <PostDeploy Include="Scripts\Post-Deployment\PostDeployment.sql" />
     <Build Include="dbo\Functions\fnIsDepositEntry.sql" />
     <Build Include="dbo\Views\vyuCMBankTransaction.sql" />
     <Build Include="dbo\Tables\tblEntityCredential.sql" />
@@ -565,6 +565,6 @@
     <None Include="Scripts\Post-Deployment\CM\PopulateSourceSystemData.sql" />
     <Build Include="dbo\Views\vyuCPContactMenu.sql" />
     <Build Include="dbo\Views\vyuARCustomerContacts.sql" />
-    <PostDeploy Include="Scripts\Post-Deployment\AR\DefaultData\1_CustomerPortalMenu.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\1_CustomerPortalMenu.sql" />
   </ItemGroup>
 </Project>
