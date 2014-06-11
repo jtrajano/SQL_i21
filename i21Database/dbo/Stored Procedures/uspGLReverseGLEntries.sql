@@ -8,7 +8,7 @@ CREATE PROCEDURE [dbo].[uspGLReverseGLEntries]
 	,@ysnRecap			AS BIT			= 0
 	,@strCode			NVARCHAR(10)	= NULL
 	,@dtmDateReverse	DATETIME		= NULL 
-	,@intUserId			INT				= NULL 
+	,@intEntityId		INT				= NULL 
 	,@successfulCount	AS INT			= 0 OUTPUT
 AS
 
@@ -96,8 +96,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[intJournalLineNo]
 				,ysnIsUnposted		= 1
 				,[intConcurrencyId]
-				,[intUserId]		= @intUserId
-				,[intEntityId]		= @intUserId
+				,[intUserId]		= 0
+				,[intEntityId]		= @intEntityId
 				,[strTransactionForm]
 				,[strModuleName]
 				,[strUOMCode]
@@ -110,7 +110,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 ELSE
 	BEGIN
 		-- DELETE Results 1 DAYS OLDER	
-		DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intEntityId = @intUserId;
+		DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intEntityId = @intEntityId;
 		
 		WITH Accounts 
 		AS 
@@ -158,8 +158,8 @@ ELSE
 			,[ysnIsUnposted]		
 			,[intConcurrencyId]		
 			,[dblExchangeRate]		
-			,[intUserId]			= @intUserId
-			,[intEntityId]			= @intUserId
+			,[intUserId]			= 0
+			,[intEntityId]			= @intEntityId
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
 			,[strCode]
@@ -264,7 +264,7 @@ GO
 --	,@ysnRecap					= 0
 --	,@strCode			= 'GJ'
 --	,@dtmDateReverse	= NULL 
---	,@intUserId			= 1
+--	,@intEntityId			= 1
 --	,@successfulCount	= @intCount OUTPUT			
 				
 --SELECT @intCount

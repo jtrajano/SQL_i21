@@ -7,7 +7,7 @@ CREATE PROCEDURE [dbo].[uspGLPostFiscalYear]
 	,@ysnPost			AS BIT				= 0
 	,@ysnRecap			AS BIT				= 0
 	,@strBatchId		AS NVARCHAR(100)	= ''
-	,@intUserId			AS INT				= 1
+	,@intEntityId		AS INT				= 1
 	,@successfulCount	AS INT				= 0 OUTPUT
 
 AS
@@ -148,8 +148,8 @@ SELECT
 		,intJournalLineNo			= 0
 		,ysnIsUnposted				= 0
 		,intConcurrencyId			= 1
-		,intUserId					= @intUserId
-		,intEntityId				= @intUserId		
+		,intUserId					= 0
+		,intEntityId				= @intEntityId		
 		,strTransactionForm			= 'Fiscal Year'
 		,strModuleName				= 'General Ledger'
 		,strUOMCode					= NULL		
@@ -250,8 +250,8 @@ SELECT
 		,intJournalLineNo		= 0
 		,ysnIsUnposted			= 0
 		,intConcurrencyId		= 1
-		,intUserId				= @intUserId
-		,intEntityId			= @intUserId		
+		,intUserId				= 0
+		,intEntityId			= @intEntityId		
 		,strTransactionForm		= 'Fiscal Year'
 		,strModuleName			= 'General Ledger'
 		,strUOMCode				= NULL		
@@ -382,7 +382,7 @@ END
 ELSE IF @ysnPost = 1 and @ysnRecap = 1
 BEGIN
 	-- DELETE Results 1 DAYS OLDER	
-	DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intUserId = @intUserId;
+	DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intEntityId = @intEntityId;
 	
 	WITH Accounts 
 	AS 
@@ -549,7 +549,7 @@ GO
 --			@ysnPost = 1,
 --			@ysnRecap = 1,								-- WHEN SET TO 1, THEN IT WILL POPULATE tblGLPostRecap THAT CAN BE VIEWED VIA BUFFERED STORE IN SENCHA
 --			@strBatchId = 'BATCH-2013',							-- COMMA DELIMITED JOURNAL Id TO POST 
---			@intUserId = 1,							-- USER Id THAT INITIATES POSTING
+--			@intEntityId = 1,							-- USER Id THAT INITIATES POSTING
 --			@successfulCount = @intCount OUTPUT		-- OUTPUT PARAMETER THAT RETURNS TOTAL NUMBER OF SUCCESSFUL RECORDS
 				
 --SELECT @intCount

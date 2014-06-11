@@ -6,7 +6,8 @@ CREATE TABLE [dbo].[tblGLPostResult](
 	[strDescription] [nvarchar](250) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDate] [datetime] NULL,
 	[strTransactionType] [nvarchar](40) COLLATE Latin1_General_CI_AS NULL,
-	[intUserId] [int] NOT NULL,
+	[intUserId] [int] NULL,
+	[intEntityId] [int] NULL,
  CONSTRAINT [PK_tblGLPostResult] PRIMARY KEY CLUSTERED 
 (
 	[intResult] ASC,

@@ -8,7 +8,7 @@ CREATE PROCEDURE [dbo].[uspGLPostAuditAdjustment]
 	@ysnRecap			AS BIT				= 0,
 	@strBatchId			AS NVARCHAR(100)	= '',	
 	@strJournalType		AS NVARCHAR(30)		= '',
-	@intUserId			AS INT				= 1,
+	@intEntityId		AS INT				= 1,
 	@successfulCount	AS INT				= 0 OUTPUT
 	
 AS
@@ -56,7 +56,7 @@ IF ISNULL(@ysnPost, 0) = 0
 		DECLARE @intCount AS INT
 		
 		SET @Param = (SELECT strJournalId FROM tblGLJournal WHERE intJournalId IN (SELECT intJournalId FROM #tmpPostJournals))
-		EXEC [dbo].[uspGLReverseGLEntries] @strBatchId, @Param, @ysnRecap, 'AA', NULL, @intUserId, @intCount	OUT
+		EXEC [dbo].[uspGLReverseGLEntries] @strBatchId, @Param, @ysnRecap, 'AA', NULL, @intEntityId, @intCount	OUT
 		SET @successfulCount = @intCount
 				
 		IF(@intCount > 0)
@@ -76,8 +76,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 		-- DELETE Results 2 DAYS OLDER	
 		DELETE tblGLPostResult WHERE dtmDate < DATEADD(day, -1, GETDATE())
 		
-		INSERT INTO tblGLPostResult (strBatchId,intTransactionId,strTransactionId,strDescription,dtmDate,intUserId,strTransactionType)
-			SELECT @strBatchId as strBatchId,tmpBatchResults.intJournalId as intTransactionId,tblB.strJournalId as strTransactionId, strMessage as strDescription,GETDATE() as dtmDate,@intUserId,@strJournalType
+		INSERT INTO tblGLPostResult (strBatchId,intTransactionId,strTransactionId,strDescription,dtmDate,intEntityId,strTransactionType)
+			SELECT @strBatchId as strBatchId,tmpBatchResults.intJournalId as intTransactionId,tblB.strJournalId as strTransactionId, strMessage as strDescription,GETDATE() as dtmDate,@intEntityId,@strJournalType
 			FROM (
 				--SELECT DISTINCT A.intJournalId,
 				--	'Unable to find an open fiscal year period to match the transaction date.' AS strMessage
@@ -222,8 +222,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[dblExchangeRate]		= 1
-			,[intUserId]			= @intUserId
-			,[intEntityId]			= @intUserId
+			,[intUserId]			= 0
+			,[intEntityId]			= @intEntityId
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
 			,[strCode]				= 'AA'
@@ -291,8 +291,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[ysnIsUnposted]		= 0 
 				,[intConcurrencyId]		= 1
 				,[dblExchangeRate]		= 1
-				,[intUserId]			= @intUserId
-				,[intEntityId]			= @intUserId
+				,[intUserId]			= 0
+				,[intEntityId]			= @intEntityId
 				,[dtmDateEntered]		= GETDATE()
 				,[strBatchId]			= @strBatchId
 				,[strCode]				= 'AA'
@@ -405,8 +405,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[ysnIsUnposted]		= 0 
 				,[intConcurrencyId]		= 1
 				,[dblExchangeRate]		= 1
-				,[intUserId]			= @intUserId
-				,[intEntityId]			= @intUserId
+				,[intUserId]			= 0
+				,[intEntityId]			= @intEntityId
 				,[dtmDateEntered]		= GETDATE()
 				,[strBatchId]			= @strBatchId
 				,[strCode]				= 'AA'
@@ -426,7 +426,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 ELSE
 	BEGIN
 		-- DELETE Results 1 DAYS OLDER	
-		DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intEntityId = @intUserId;
+		DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intEntityId = @intEntityId;
 		
 		
 		WITH Accounts 
@@ -482,8 +482,8 @@ ELSE
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[dblExchangeRate]		= 1
-			,[intUserId]			= @intUserId
-			,[intEntityId]			= @intUserId
+			,[intUserId]			= 0
+			,[intEntityId]			= @intEntityId
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
 			,[strCode]				= 'AA'
@@ -552,8 +552,8 @@ ELSE
 				,[ysnIsUnposted]		= 0 
 				,[intConcurrencyId]		= 1
 				,[dblExchangeRate]		= 1
-				,[intUserId]			= @intUserId
-				,[intEntityId]			= @intUserId
+				,[intUserId]			= 0
+				,[intEntityId]			= @intEntityId
 				,[dtmDateEntered]		= GETDATE()
 				,[strBatchId]			= @strBatchId
 				,[strCode]				= 'AA'
@@ -667,8 +667,8 @@ ELSE
 				,[ysnIsUnposted]		= 0 
 				,[intConcurrencyId]		= 1
 				,[dblExchangeRate]		= 1
-				,[intUserId]			= @intUserId
-				,[intEntityId]			= @intUserId
+				,[intUserId]			= 0
+				,[intEntityId]			= @intEntityId
 				,[dtmDateEntered]		= GETDATE()
 				,[strBatchId]			= @strBatchId
 				,[strCode]				= 'AA'
@@ -722,7 +722,7 @@ ELSE
 				,[strModuleName]
 				,[strTransactionForm]
 			FROM [dbo].tblGLPostRecap A
-			WHERE A.[strBatchId] = @strBatchId and A.[intEntityId] = @intUserId
+			WHERE A.[strBatchId] = @strBatchId and A.[intEntityId] = @intEntityId
 			GROUP BY [strTransactionId],[intTransactionId],[dtmDate],[dblExchangeRate],[dtmDateEntered],[ysnIsUnposted],[intUserId],[intEntityId],[strBatchId],[strCode],[strModuleName],[strTransactionForm]
 
 			IF @@ERROR <> 0	GOTO Post_Rollback;
@@ -849,8 +849,8 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 --=====================================================================================================================================
 -- 	UPDATE RESULT
 ---------------------------------------------------------------------------------------------------------------------------------------
-INSERT INTO tblGLPostResult (strBatchId,intTransactionId,strTransactionId,strDescription,dtmDate,intUserId,strTransactionType)
-	SELECT @strBatchId as strBatchId,intJournalId as intTransactionId,strJournalId as strTransactionId, strMessage as strDescription,GETDATE() as dtmDate,@intUserId,@strJournalType
+INSERT INTO tblGLPostResult (strBatchId,intTransactionId,strTransactionId,strDescription,dtmDate,intEntityId,strTransactionType)
+	SELECT @strBatchId as strBatchId,intJournalId as intTransactionId,strJournalId as strTransactionId, strMessage as strDescription,GETDATE() as dtmDate,@intEntityId,@strJournalType
 	FROM (
 		SELECT DISTINCT A.intJournalId,A.strJournalId,
 			'Transaction successfully posted.' AS strMessage
@@ -895,7 +895,7 @@ GO
 --			@ysnRecap = 1,								-- WHEN SET TO 1, THEN IT WILL POPULATE tblGLPostRecap THAT CAN BE VIEWED VIA BUFFERED STORE IN SENCHA
 --			@strBatchId = 'BATCH-AA1',							-- COMMA DELIMITED JOURNAL Id TO POST 
 --			@strJournalType = 'Audit Adjustment',
---			@intUserId = 1,							-- USER Id THAT INITIATES POSTING
+--			@intEntityId = 1,							-- USER Id THAT INITIATES POSTING
 --			@successfulCount = @intCount OUTPUT		-- OUTPUT PARAMETER THAT RETURNS TOTAL NUMBER OF SUCCESSFUL RECORDS
 				
 --SELECT @intCount
