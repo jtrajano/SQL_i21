@@ -47,7 +47,7 @@ WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
 BEGIN
 	
 	EXEC uspAPFixStartingNumbers 9
-	IF(OBJECT_ID('tempdb..#tblTempAPByPassFixStartingNumber') IS NOT NULL) RETURN;
+	--IF(OBJECT_ID('tempdb..#tblTempAPByPassFixStartingNumber') IS NOT NULL) RETURN;
 	EXEC uspSMGetStartingNumber 9, @BillId OUT
 
 	SELECT TOP 1 @intBillId = intBillId FROM @inserted

@@ -36,7 +36,7 @@ BEGIN
 	BEGIN
 		INSERT INTO [dbo].[tblAPBill] (
 			[strVendorId], 
-			[strBillId],
+			--[strBillId],
 			[strVendorOrderNumber], 
 			[intTermsId], 
 			[intTaxCodeId], 
@@ -54,7 +54,7 @@ BEGIN
 		--Unposted
 		SELECT 
 			[strVendorId]			=	A.aptrx_vnd_no,
-			[strBillId] 			=	A.aptrx_ivc_no,
+			--[strBillId] 			=	A.aptrx_ivc_no,
 			[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
 			[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation 
 												WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
@@ -92,7 +92,7 @@ BEGIN
 		UNION
 		SELECT 
 			[strVendorId]			=	A.apivc_vnd_no,
-			[strBillId] 			=	A.apivc_ivc_no,
+			--[strBillId] 			=	A.apivc_ivc_no,
 			[strVendorOrderNumber] 	=	A.apivc_ivc_no,
 			[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation 
 												WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
@@ -181,7 +181,7 @@ BEGIN
 	BEGIN
 		INSERT [dbo].[tblAPBill] (
 			[strVendorId], 
-			[strBillId],
+			--[strBillId],
 			[strVendorOrderNumber], 
 			[intTermsId], 
 			[intTaxCodeId], 
@@ -199,7 +199,7 @@ BEGIN
 		--Unposted
 		SELECT 
 			[strVendorId]			=	A.aptrx_vnd_no,
-			[strBillId] 			=	A.aptrx_ivc_no,
+			--[strBillId] 			=	A.aptrx_ivc_no,
 			[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
 			[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation 
 												WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
@@ -241,7 +241,7 @@ BEGIN
 		UNION
 		SELECT 
 			[strVendorId]			=	A.apivc_vnd_no,
-			[strBillId] 			=	A.apivc_ivc_no,
+			--[strBillId] 			=	A.apivc_ivc_no,
 			[strVendorOrderNumber] 	=	A.apivc_ivc_no,
 			[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation 
 												WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
