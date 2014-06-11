@@ -31,22 +31,35 @@ BEGIN
 			@Password = strPassword
 		FROM #tmpUsers
 		
-		INSERT INTO tblEntity(strName, strEmail)
-		VALUES (@FullName, @Email)
-		
-		SELECT @NewId = SCOPE_IDENTITY()
+		IF NOT EXISTS(SELECT * FROM tblEntity WHERE strName = @FullName AND strEmail = @Email)
+		BEGIN
+			INSERT INTO tblEntity(strName, strEmail)
+			VALUES (@FullName, @Email)
+			SELECT @NewId = SCOPE_IDENTITY()
+		END
+		ELSE
+		BEGIN
+			SELECT @NewId = intEntityId FROM tblEntity WHERE strName = @FullName AND strEmail = @Email
+		END
 		
 		UPDATE tblSMUserSecurity
 		SET intEntityId = @NewId
 		WHERE strUserName = @UserName
 		AND ISNULL(intEntityId, 0) = 0
 		
-		INSERT INTO tblEntityCredential(intEntityId, strUserName, strPassword)
-		VALUES (@NewId, @UserName, @Password)
+		IF NOT EXISTS(SELECT * FROM tblEntityCredential WHERE intEntityId = @NewId)
+		BEGIN
+			INSERT INTO tblEntityCredential(intEntityId, strUserName, strPassword)
+			VALUES (@NewId, @UserName, @Password)
+		END
 		
 		DELETE FROM #tmpUsers WHERE strUserName = @UserName
 	END
 
 	DROP TABLE #tmpUsers
+	
+	EXEC uspSMMigrateTransactionUser 'GL'
+	EXEC uspSMMigrateTransactionUser 'AP'
+	EXEC uspSMMigrateTransactionUser 'CM'
 
 END
