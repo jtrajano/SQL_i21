@@ -367,7 +367,7 @@ IF (ISNULL(@recap, 0) = 0)
 				INNER JOIN tblAPPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-		AND B.dblAmountDue = (B.dblPayment + B.dblInterest) --fully paid
+		AND B.dblAmountDue = (B.dblPayment + B.dblDiscount) --fully paid
 		AND B.dblDiscount <> 0
 		GROUP BY A.[strPaymentRecordNum],
 		A.intPaymentId,
@@ -642,7 +642,7 @@ ELSE
 				INNER JOIN tblAPPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-		AND B.dblAmountDue = (B.dblPayment + B.dblInterest) --fully paid
+		AND B.dblAmountDue = (B.dblPayment + B.dblDiscount) --fully paid
 		AND B.dblDiscount <> 0
 		GROUP BY A.[strPaymentRecordNum],
 		A.intPaymentId,
