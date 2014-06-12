@@ -7,6 +7,7 @@ SELECT
 	A.strInternalNotes,
 	B.intCurrencyId,
 	B.intGLAccountExpenseId,
+	F.strAccountId AS strExpenseAccountId,
 	B.intPaymentMethodId,
 	A.str1099Form,
 	A.str1099Name,
@@ -53,3 +54,6 @@ FROM
 		ON B.intDefaultContactId = D.intEntityId
 	LEFT JOIN tblSMCurrency E
 		ON B.intCurrencyId = E.intCurrencyID
+	LEFT JOIN tblGLAccount F 
+		ON B.intGLAccountExpenseId = F.intAccountId
+	
