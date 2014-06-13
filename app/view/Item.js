@@ -1158,7 +1158,7 @@ Ext.define('Inventory.view.Item', {
                                                 },
                                                 {
                                                     xtype: 'panel',
-                                                    title: 'xRef',
+                                                    title: 'Xref',
                                                     layout: {
                                                         type: 'vbox',
                                                         align: 'stretch'
@@ -1995,20 +1995,6 @@ Ext.define('Inventory.view.Item', {
                                                         padding: '0 0 0 1'
                                                     },
                                                     items: [
-                                                        {
-                                                            xtype: 'button',
-                                                            itemId: 'btnAdd',
-                                                            iconCls: 'small-add',
-                                                            tabIndex: -1,
-                                                            text: 'Add'
-                                                        },
-                                                        {
-                                                            xtype: 'button',
-                                                            itemId: 'btnEdit',
-                                                            iconCls: 'small-edit',
-                                                            tabIndex: -1,
-                                                            text: 'Edit'
-                                                        },
                                                         {
                                                             xtype: 'button',
                                                             itemId: 'btnDelete',

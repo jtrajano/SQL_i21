@@ -240,7 +240,7 @@
                                 "bodyPadding": 10,
                                 "container|align": "stretch",
                                 "layout": "vbox",
-                                "title": "Commodity"
+                                "title": "Details"
                             },
                             "designerId": "579347d4-1c89-465f-94fd-e0b2833383df",
                             "cn": [
@@ -1145,7 +1145,7 @@
                             "userConfig": {
                                 "bodyPadding": null,
                                 "layout": "fit",
-                                "title": "Commodity Group"
+                                "title": "Group"
                             },
                             "designerId": "b84815df-c2d5-48aa-b441-0b53b8abb3b0",
                             "cn": [

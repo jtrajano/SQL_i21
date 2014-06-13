@@ -161,7 +161,7 @@ Ext.define('Inventory.view.Commodity', {
                                 {
                                     xtype: 'panel',
                                     bodyPadding: 10,
-                                    title: 'Commodity',
+                                    title: 'Details',
                                     layout: {
                                         type: 'vbox',
                                         align: 'stretch'
@@ -585,7 +585,7 @@ Ext.define('Inventory.view.Commodity', {
                                 {
                                     xtype: 'panel',
                                     layout: 'fit',
-                                    title: 'Commodity Group',
+                                    title: 'Group',
                                     items: [
                                         {
                                             xtype: 'advancefiltergrid',

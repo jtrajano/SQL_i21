@@ -2620,7 +2620,7 @@
                                             "userConfig": {
                                                 "container|align": "stretch",
                                                 "layout": "vbox",
-                                                "title": "xRef"
+                                                "title": "Xref"
                                             },
                                             "designerId": "9ddf333f-518f-4c42-8b12-4a35117ef3e8",
                                             "cn": [
@@ -4657,41 +4657,6 @@
                                             },
                                             "designerId": "5ed9d6ae-9c8c-481f-b4cb-807e209cc75f",
                                             "cn": [
-                                                {
-                                                    "type": "Ext.button.Button",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "icon": null,
-                                                        "iconCls": "small-add",
-                                                        "itemId": "btnAdd",
-                                                        "layout|flex": null,
-                                                        "layout|margins": null,
-                                                        "tabIndex": -1,
-                                                        "text": "Add"
-                                                    },
-                                                    "designerId": "38ab3bfb-5087-4187-b8c7-c043f22edafc"
-                                                },
-                                                {
-                                                    "type": "Ext.button.Button",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "icon": null,
-                                                        "iconCls": "small-edit",
-                                                        "itemId": "btnEdit",
-                                                        "layout|flex": null,
-                                                        "tabIndex": -1,
-                                                        "text": "Edit"
-                                                    },
-                                                    "designerId": "10ccc68d-980f-4981-842a-f3b1cf417658"
-                                                },
                                                 {
                                                     "type": "Ext.button.Button",
                                                     "reference": {

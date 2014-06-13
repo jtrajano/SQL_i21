@@ -39,7 +39,7 @@ Ext.define('Inventory.view.SubCategory', {
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
-    title: 'Sub Category',
+    title: 'Subcategory',
     maximizable: true,
 
     initComponent: function() {
