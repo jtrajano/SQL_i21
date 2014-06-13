@@ -47,7 +47,7 @@ BEGIN
 			[strDescription], 
 			[dblTotal], 
 			[dblAmountDue],
-			[intUserId],
+			[intEntityId],
 			[ysnPosted],
 			[ysnPaid])
 		OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid INTO @InsertedData
@@ -67,7 +67,7 @@ BEGIN
 			[strDescription] 		=	A.aptrx_comment,
 			[dblTotal] 				=	A.aptrx_orig_amt,
 			[dblAmountDue]			=	A.aptrx_orig_amt,--CASE WHEN B.apegl_ivc_no IS NULL THEN A.aptrx_orig_amt ELSE A.aptrx_orig_amt - SUM(ISNULL(B.apegl_gl_amt,0)) END
-			[intUserId]				=	@UserId,
+			[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CI_AS = RTRIM(A.aptrx_user_id) COLLATE Latin1_General_CI_AS),@UserId),
 			[ysnPosted]				=	0,
 			[ysnPaid]				=	0
 		FROM aptrxmst A
@@ -105,7 +105,7 @@ BEGIN
 			[strDescription] 		=	A.apivc_comment,
 			[dblTotal] 				=	A.apivc_orig_amt,
 			[dblAmountDue]			=	CASE WHEN A.apivc_status_ind = ''P'' THEN 0 ELSE A.apivc_orig_amt END,
-			[intUserId]				=	@UserId,
+			[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CI_AS = RTRIM(A.apivc_user_id) COLLATE Latin1_General_CI_AS),@UserId),
 			[ysnPosted]				=	1,
 			[ysnPaid]				=	CASE WHEN A.apivc_status_ind = ''P'' THEN 1 ELSE 0 END
 		FROM apivcmst A
@@ -163,13 +163,13 @@ BEGIN
 
 			SELECT TOP 1 @BillId = intBillId, @IsPosted = ysnPosted FROM @InsertedData
 
-			INSERT INTO tblAPBillBatch(intAccountId, ysnPosted, dblTotal, intUserId)
+			INSERT INTO tblAPBillBatch(intAccountId, ysnPosted, dblTotal, intEntityId)
 			--OUTPUT inserted.intBillBatchId, @BillId INTO @insertedBillBatch
 			SELECT 
 				A.intAccountId,
 				@IsPosted,
 				A.dblTotal,
-				@UserId
+				A.intEntityId
 			FROM tblAPBill A
 			WHERE A.intBillId = @BillId
 
@@ -201,7 +201,7 @@ BEGIN
 			[strDescription], 
 			[dblTotal], 
 			[dblAmountDue],
-			[intUserId],
+			[intEntityId],
 			[ysnPosted],
 			[ysnPaid])
 		OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid INTO @InsertedData
@@ -221,7 +221,7 @@ BEGIN
 			[strDescription] 		=	A.aptrx_comment,
 			[dblTotal] 				=	A.aptrx_orig_amt,
 			[dblAmountDue]			=	A.aptrx_orig_amt,--CASE WHEN B.apegl_ivc_no IS NULL THEN A.aptrx_orig_amt ELSE A.aptrx_orig_amt - SUM(ISNULL(B.apegl_gl_amt,0)) END
-			[intUserId]				=	@UserId,
+			[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CI_AS = RTRIM(A.aptrx_user_id) COLLATE Latin1_General_CI_AS),@UserId),
 			[ysnPosted]				=	0,
 			[ysnPaid] 				=	0
 		FROM aptrxmst A
@@ -263,7 +263,7 @@ BEGIN
 			[strDescription] 		=	A.apivc_comment,
 			[dblTotal] 				=	A.apivc_orig_amt,
 			[dblAmountDue]			=	CASE WHEN A.apivc_status_ind = ''P'' THEN 0 ELSE A.apivc_orig_amt END,
-			[intUserId]				=	@UserId,
+			[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CI_AS = RTRIM(A.apivc_user_id) COLLATE Latin1_General_CI_AS),@UserId),
 			[ysnPosted]				=	1,
 			[ysnPaid]				=	CASE WHEN A.apivc_status_ind = ''P'' THEN 1 ELSE 0 END
 		FROM apivcmst A
@@ -306,7 +306,7 @@ BEGIN
 				ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = C.aphgl_ivc_no COLLATE Latin1_General_CI_AS
 				
 		----Create Bill Batch transaction
-		--INSERT INTO tblAPBillBatch(intAccountId, ysnPosted, dblTotal, intUserId)
+		--INSERT INTO tblAPBillBatch(intAccountId, ysnPosted, dblTotal, intEntityId)
 		--SELECT 
 		--	A.intAccountId,
 		--	@IsPosted,
@@ -338,12 +338,13 @@ BEGIN
 
 			SELECT TOP 1 @BillId = intBillId, @IsPosted = ysnPosted FROM @InsertedData
 
-			INSERT INTO tblAPBillBatch(intAccountId, ysnPosted, dblTotal)
+			INSERT INTO tblAPBillBatch(intAccountId, ysnPosted, dblTotal, intEntityId)
 			--OUTPUT inserted.intBillBatchId, @BillId INTO @insertedBillBatch
 			SELECT 
 				A.intAccountId,
 				@IsPosted,
-				A.dblTotal
+				A.dblTotal,
+				A.intEntityId
 			FROM tblAPBill A
 			WHERE A.intBillId = @BillId
 
