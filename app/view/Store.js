@@ -24,8 +24,10 @@ Ext.define('Inventory.view.Store', {
         'Ext.form.Panel',
         'Ext.tab.Panel',
         'Ext.tab.Tab',
-        'Ext.form.field.Checkbox',
+        'Ext.form.Label',
+        'Ext.form.field.TextArea',
         'Ext.form.field.ComboBox',
+        'Ext.form.field.Checkbox',
         'Ext.form.field.Number',
         'Ext.form.field.Date',
         'Ext.grid.Panel',
@@ -153,9 +155,332 @@ Ext.define('Inventory.view.Store', {
                             xtype: 'tabpanel',
                             flex: 1,
                             itemId: 'tabStore',
-                            activeTab: 0,
                             plain: true,
                             items: [
+                                {
+                                    xtype: 'panel',
+                                    bodyPadding: 10,
+                                    title: 'Details',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'stretch'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'container',
+                                            flex: 1.2,
+                                            margins: '0 5 0 0',
+                                            width: 1014,
+                                            layout: {
+                                                type: 'vbox',
+                                                align: 'stretch'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'textfield',
+                                                    itemId: 'txtStoreNo',
+                                                    width: 170,
+                                                    fieldLabel: 'Store No',
+                                                    labelWidth: 90
+                                                },
+                                                {
+                                                    xtype: 'textfield',
+                                                    itemId: 'txtStoreName',
+                                                    width: 170,
+                                                    fieldLabel: 'Store Name',
+                                                    labelWidth: 90
+                                                },
+                                                {
+                                                    xtype: 'textfield',
+                                                    itemId: 'txtDescription',
+                                                    width: 170,
+                                                    fieldLabel: 'Description',
+                                                    labelWidth: 90
+                                                },
+                                                {
+                                                    xtype: 'textfield',
+                                                    itemId: 'txtRegion',
+                                                    width: 170,
+                                                    fieldLabel: 'Region',
+                                                    labelWidth: 90
+                                                },
+                                                {
+                                                    xtype: 'textfield',
+                                                    itemId: 'txtDistrict',
+                                                    width: 170,
+                                                    fieldLabel: 'District',
+                                                    labelWidth: 90
+                                                },
+                                                {
+                                                    xtype: 'container',
+                                                    margins: '0 0 5 0 ',
+                                                    height: 55,
+                                                    layout: 'hbox',
+                                                    items: [
+                                                        {
+                                                            xtype: 'label',
+                                                            padding: '3 0 0 0',
+                                                            width: 73,
+                                                            text: 'Address:'
+                                                        },
+                                                        {
+                                                            xtype: 'container',
+                                                            width: 22,
+                                                            layout: 'hbox',
+                                                            items: [
+                                                                {
+                                                                    xtype: 'button',
+                                                                    itemId: 'btnAddressMap',
+                                                                    style: {
+                                                                        background: 'transparent',
+                                                                        borderColor: 'transparent'
+                                                                    },
+                                                                    iconCls: 'small-map',
+                                                                    tabIndex: -1
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            xtype: 'textareafield',
+                                                            flex: 1,
+                                                            height: 55,
+                                                            itemId: 'txtAddress',
+                                                            hideLabel: true,
+                                                            labelWidth: 0,
+                                                            name: 'strAddress',
+                                                            enforceMaxLength: true,
+                                                            maxLength: 65
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    xtype: 'container',
+                                                    margins: '0 0 5 0',
+                                                    layout: 'hbox',
+                                                    items: [
+                                                        {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intZipCodeId',
+                                                                    text: 'Zip Code Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strZipCode',
+                                                                    text: 'Zip/Postal Code',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strCity',
+                                                                    text: 'City',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strState',
+                                                                    text: 'State/Province',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strCountry',
+                                                                    text: 'Country',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            flex: 1.2,
+                                                            itemId: 'cboZipCode',
+                                                            fieldLabel: 'Zip/Postal Code',
+                                                            labelWidth: 90,
+                                                            name: 'strZipCode',
+                                                            displayField: 'strZipCode',
+                                                            valueField: 'strZipCode'
+                                                        },
+                                                        {
+                                                            xtype: 'textfield',
+                                                            flex: 1,
+                                                            margins: '0 0 0 5',
+                                                            itemId: 'txtCity',
+                                                            fieldLabel: 'City',
+                                                            labelWidth: 50,
+                                                            name: 'strCity',
+                                                            tabIndex: -1,
+                                                            enforceMaxLength: true,
+                                                            maxLength: 85
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    xtype: 'container',
+                                                    margins: '0 0 5 0',
+                                                    layout: 'hbox',
+                                                    items: [
+                                                        {
+                                                            xtype: 'textfield',
+                                                            flex: 1.2,
+                                                            itemId: 'txtState',
+                                                            fieldLabel: 'State/Province',
+                                                            labelWidth: 90,
+                                                            name: 'strState',
+                                                            tabIndex: -1,
+                                                            enforceMaxLength: true,
+                                                            maxLength: 60
+                                                        },
+                                                        {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intCountryId',
+                                                                    text: 'Country Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strCountry',
+                                                                    text: 'Country',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            flex: 1,
+                                                            margins: '0 0 0 5',
+                                                            itemId: 'cboCountry',
+                                                            fieldLabel: 'Country',
+                                                            labelWidth: 50,
+                                                            name: 'strCountry',
+                                                            tabIndex: -1,
+                                                            enforceMaxLength: true,
+                                                            maxLength: 75,
+                                                            displayField: 'strCountry',
+                                                            valueField: 'strCountry'
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    xtype: 'container',
+                                                    margins: '0 0 5 0',
+                                                    layout: 'hbox',
+                                                    items: [
+                                                        {
+                                                            xtype: 'textfield',
+                                                            flex: 1.2,
+                                                            itemId: 'txtPhone',
+                                                            fieldLabel: 'Phone',
+                                                            labelWidth: 90,
+                                                            name: 'strPhone',
+                                                            enforceMaxLength: true,
+                                                            maxLength: 30,
+                                                            vtype: 'phone'
+                                                        },
+                                                        {
+                                                            xtype: 'textfield',
+                                                            flex: 1,
+                                                            margins: '0 0 0 5',
+                                                            itemId: 'txtFax',
+                                                            fieldLabel: 'Fax',
+                                                            labelWidth: 50,
+                                                            name: 'strFax',
+                                                            enforceMaxLength: true,
+                                                            maxLength: 30,
+                                                            vtype: 'phone'
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    xtype: 'container',
+                                                    margins: '0 0 5 0 ',
+                                                    height: 22,
+                                                    layout: 'hbox',
+                                                    items: [
+                                                        {
+                                                            xtype: 'label',
+                                                            padding: '3 0 0 0',
+                                                            width: 73,
+                                                            text: 'Email:'
+                                                        },
+                                                        {
+                                                            xtype: 'container',
+                                                            width: 22,
+                                                            layout: 'hbox',
+                                                            items: [
+                                                                {
+                                                                    xtype: 'button',
+                                                                    itemId: 'btnEmail',
+                                                                    style: {
+                                                                        background: 'transparent',
+                                                                        borderColor: 'transparent'
+                                                                    },
+                                                                    iconCls: 'small-email',
+                                                                    tabIndex: -1
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            xtype: 'textfield',
+                                                            flex: 1,
+                                                            itemId: 'txtEmail',
+                                                            hideLabel: true,
+                                                            labelWidth: 0,
+                                                            name: 'strEmail',
+                                                            enforceMaxLength: true,
+                                                            maxLength: 225
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    xtype: 'container',
+                                                    margins: '0 0 5 0 ',
+                                                    height: 22,
+                                                    layout: 'hbox',
+                                                    items: [
+                                                        {
+                                                            xtype: 'label',
+                                                            padding: '3 0 0 0',
+                                                            width: 73,
+                                                            text: 'Website:'
+                                                        },
+                                                        {
+                                                            xtype: 'container',
+                                                            width: 22,
+                                                            layout: 'hbox',
+                                                            items: [
+                                                                {
+                                                                    xtype: 'button',
+                                                                    itemId: 'btnWebsite',
+                                                                    style: {
+                                                                        background: 'transparent',
+                                                                        borderColor: 'transparent'
+                                                                    },
+                                                                    iconAlign: 'right',
+                                                                    iconCls: 'small-web',
+                                                                    tabIndex: -1
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            xtype: 'textfield',
+                                                            flex: 1,
+                                                            itemId: 'txtWebsite',
+                                                            hideLabel: true,
+                                                            labelWidth: 0,
+                                                            name: 'strWebsite',
+                                                            enforceMaxLength: true,
+                                                            maxLength: 125
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    xtype: 'combobox',
+                                                    itemId: 'cboProfitCenter',
+                                                    width: 170,
+                                                    fieldLabel: 'Profit Center',
+                                                    labelWidth: 90
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            xtype: 'container',
+                                            flex: 1
+                                        }
+                                    ]
+                                },
                                 {
                                     xtype: 'panel',
                                     bodyPadding: 10,
