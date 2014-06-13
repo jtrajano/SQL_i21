@@ -26,14 +26,15 @@ FROM	apcbkmst
 WHERE	dbo.fnConvertOriginUserIdtoi21(apcbk_user_id) IS NULL
 
 -- Check for invalid GL accounts. It must be moved under the Cash Account Group before import can be done. (ERR)
-SELECT	TOP 1 
-		@Invalid_GL_Account_Id_Found = 1  
-FROM	apcbkmst o INNER JOIN tblGLAccount accnt
-			ON dbo.fnGetGLAccountIdFromOriginToi21(o.apcbk_gl_cash) = accnt.intAccountId
-		INNER JOIN tblGLAccountGroup grp
-			ON accnt.intAccountGroupId = grp.intAccountGroupId
-WHERE	grp.strAccountGroup <> @CASH_ACCOUNT
-		OR grp.strAccountType <> @ASSET
+-- Auto-fix the GL Accounts used in Origin. Move it to under the "Cash Accounts" group. (see fix in uspCMImportBankAccountsFromOrigin.sql CM-300)
+--SELECT	TOP 1 
+--		@Invalid_GL_Account_Id_Found = 1  
+--FROM	apcbkmst o INNER JOIN tblGLAccount accnt
+--			ON dbo.fnGetGLAccountIdFromOriginToi21(o.apcbk_gl_cash) = accnt.intAccountId
+--		INNER JOIN tblGLAccountGroup grp
+--			ON accnt.intAccountGroupId = grp.intAccountGroupId
+--WHERE	grp.strAccountGroup <> @CASH_ACCOUNT
+--		OR grp.strAccountType <> @ASSET
 
 -- Check for invalid currency id's. It must be defined first before import can be done (ERR). 
 SELECT	TOP 1 

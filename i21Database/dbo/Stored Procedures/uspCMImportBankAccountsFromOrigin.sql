@@ -32,6 +32,14 @@ DECLARE @CHECKNO_LEFT INT = 1
 DECLARE @CHECKNO_MIdDLE INT = 2
 DECLARE @CHECKNO_RIGHT INT = 3
 
+-- Auto-fix the GL Accounts used in Origin. Move it to under the "Cash Accounts" group. 
+UPDATE	tblGLAccount
+SET		intAccountGroupId = (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = 'Cash Accounts')
+from	tblGLAccount gl INNER JOIN (
+			SELECT DISTINCT intGLAccountId = dbo.fnGetGLAccountIdFromOriginToi21(apcbk_gl_cash) FROM apcbkmst 
+		) Q
+			ON gl.intAccountId = Q.intGLAccountId
+
 -- INSERT new records for tblCMBank
 INSERT INTO tblCMBank (
 		strBankName
