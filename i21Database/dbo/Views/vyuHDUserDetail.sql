@@ -3,6 +3,7 @@
 			strCustomer = 'i21 User'
 			,us.strFullName
 			,us.strPhone
+			,strMobile = ''
 			,strTimeZone = ''
 			,strLocation = us.strLocation
 			,strSLAPlan = ''
@@ -29,6 +30,7 @@
 			strCustomer = cus.strCustomerNumber
 			,strFullName = ec.strEmail
 			,strPhone = ec.strPhone
+			,strMobile = ec.strMobile
 			,strTimeZone = ''
 			,strLocation = el.strCity
 			,strSLAPlan = ''
