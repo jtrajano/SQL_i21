@@ -9,6 +9,7 @@ CREATE PROCEDURE uspCMCheckPrint_QueuePrintJobs
 	@intBankAccountId INT = NULL,
 	@strTransactionId NVARCHAR(40) = NULL,
 	@strBatchId NVARCHAR(20) = NULL,
+	@intTransactionType INT,
 	@intUserId	INT = NULL
 AS
 
@@ -53,6 +54,7 @@ DECLARE -- Constant variables for bank account types:
 -- Clean the parameters
 SELECT	@strTransactionId = CASE WHEN LTRIM(RTRIM(@strTransactionId)) = '' THEN NULL ELSE @strTransactionId END
 		,@strBatchId = CASE WHEN LTRIM(RTRIM(@strBatchId)) = '' THEN NULL ELSE @strBatchId END
+		,@intTransactionType = ISNULL(@intTransactionType, @MISC_CHECKS)
 
 -- Create the temporary print job table. 
 SELECT * 
@@ -99,6 +101,7 @@ WHERE	F.intBankAccountId = @intBankAccountId
 		AND F.dblAmount <> 0
 		AND F.dtmCheckPrinted IS NULL
 		AND F.ysnCheckToBePrinted = 1
+		AND F.intBankTransactionTypeId = @intTransactionType
 IF @@ERROR <> 0 GOTO _ROLLBACK		
 
 -- Check if there are transactions to queue a print job

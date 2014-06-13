@@ -36,7 +36,7 @@ BEGIN
 	BEGIN
 		INSERT INTO [dbo].[tblAPBill] (
 			[strVendorId], 
-			[strBillId],
+			--[strBillId],
 			[strVendorOrderNumber], 
 			[intTermsId], 
 			[intTaxCodeId], 
@@ -54,7 +54,7 @@ BEGIN
 		--Unposted
 		SELECT 
 			[strVendorId]			=	A.aptrx_vnd_no,
-			[strBillId] 			=	A.aptrx_ivc_no,
+			--[strBillId] 			=	A.aptrx_ivc_no,
 			[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
 			[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation 
 												WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
@@ -92,7 +92,7 @@ BEGIN
 		UNION
 		SELECT 
 			[strVendorId]			=	A.apivc_vnd_no,
-			[strBillId] 			=	A.apivc_ivc_no,
+			--[strBillId] 			=	A.apivc_ivc_no,
 			[strVendorOrderNumber] 	=	A.apivc_ivc_no,
 			[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation 
 												WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
@@ -126,24 +126,33 @@ BEGIN
 		SELECT 
 			A.intBillId,
 			A.strDescription,
-			(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.apegl_gl_acct),
+			ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.apegl_gl_acct), 0),
 			C.apegl_gl_amt
 		FROM tblAPBill A
 			INNER JOIN apeglmst C
 				ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = C.apegl_ivc_no COLLATE Latin1_General_CI_AS
+		UNION
+		SELECT 
+			A.intBillId,
+			A.strDescription,
+			ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.aphgl_gl_acct), 0),
+			C.aphgl_gl_amt
+			FROM tblAPBill A
+			INNER JOIN aphglmst C
+				ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = C.aphgl_ivc_no COLLATE Latin1_General_CI_AS
 
-			--Add already imported bill
-			SET IDENTITY_INSERT tblAPTempBill ON
-			INSERT INTO tblAPTempBill([aptrx_vnd_no], [aptrx_ivc_no], [aptrx_sys_rev_dt], [aptrx_sys_time], [aptrx_cbk_no], [aptrx_chk_no], [aptrx_trans_type], [aptrx_batch_no],
-			[aptrx_pur_ord_no], [aptrx_po_rcpt_seq], [aptrx_ivc_rev_dt], [aptrx_disc_rev_dt], [aptrx_due_rev_dt], [aptrx_chk_rev_dt], [aptrx_gl_rev_dt], [aptrx_disc_pct], [aptrx_orig_amt],
-			[aptrx_disc_amt], [aptrx_wthhld_amt], [aptrx_net_amt], [aptrx_1099_amt], [aptrx_comment], [aptrx_orig_type], [aptrx_name], [aptrx_recur_yn], [aptrx_currency], [aptrx_currency_rt],
-			[aptrx_currency_cnt], [aptrx_user_id], [aptrx_user_rev_dt], [A4GLIdentity])
-			SELECT 
-				A.* 
-			FROM aptrxmst A
-			INNER JOIN @InsertedData B
-				ON A.aptrx_ivc_no = B.strBillId
-			SET IDENTITY_INSERT tblAPTempBill OFF
+		--Add already imported bill
+		SET IDENTITY_INSERT tblAPTempBill ON
+		INSERT INTO tblAPTempBill([aptrx_vnd_no], [aptrx_ivc_no], [aptrx_sys_rev_dt], [aptrx_sys_time], [aptrx_cbk_no], [aptrx_chk_no], [aptrx_trans_type], [aptrx_batch_no],
+		[aptrx_pur_ord_no], [aptrx_po_rcpt_seq], [aptrx_ivc_rev_dt], [aptrx_disc_rev_dt], [aptrx_due_rev_dt], [aptrx_chk_rev_dt], [aptrx_gl_rev_dt], [aptrx_disc_pct], [aptrx_orig_amt],
+		[aptrx_disc_amt], [aptrx_wthhld_amt], [aptrx_net_amt], [aptrx_1099_amt], [aptrx_comment], [aptrx_orig_type], [aptrx_name], [aptrx_recur_yn], [aptrx_currency], [aptrx_currency_rt],
+		[aptrx_currency_cnt], [aptrx_user_id], [aptrx_user_rev_dt], [A4GLIdentity])
+		SELECT 
+			A.* 
+		FROM aptrxmst A
+		INNER JOIN @InsertedData B
+			ON A.aptrx_ivc_no = B.strBillId
+		SET IDENTITY_INSERT tblAPTempBill OFF
 
 			
 		--Create Bill Batch transaction
@@ -181,7 +190,7 @@ BEGIN
 	BEGIN
 		INSERT [dbo].[tblAPBill] (
 			[strVendorId], 
-			[strBillId],
+			--[strBillId],
 			[strVendorOrderNumber], 
 			[intTermsId], 
 			[intTaxCodeId], 
@@ -199,7 +208,7 @@ BEGIN
 		--Unposted
 		SELECT 
 			[strVendorId]			=	A.aptrx_vnd_no,
-			[strBillId] 			=	A.aptrx_ivc_no,
+			--[strBillId] 			=	A.aptrx_ivc_no,
 			[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
 			[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation 
 												WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
@@ -241,7 +250,7 @@ BEGIN
 		UNION
 		SELECT 
 			[strVendorId]			=	A.apivc_vnd_no,
-			[strBillId] 			=	A.apivc_ivc_no,
+			--[strBillId] 			=	A.apivc_ivc_no,
 			[strVendorOrderNumber] 	=	A.apivc_ivc_no,
 			[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation 
 												WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
@@ -281,12 +290,20 @@ BEGIN
 		SELECT 
 			A.intBillId,
 			A.strDescription,
-			(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.apegl_gl_acct),
+			ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.apegl_gl_acct), 0),
 			C.apegl_gl_amt
 			FROM tblAPBill A
 			INNER JOIN apeglmst C
 				ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = C.apegl_ivc_no COLLATE Latin1_General_CI_AS
-
+		UNION
+		SELECT 
+			A.intBillId,
+			A.strDescription,
+			ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.aphgl_gl_acct), 0),
+			C.aphgl_gl_amt
+			FROM tblAPBill A
+			INNER JOIN aphglmst C
+				ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = C.aphgl_ivc_no COLLATE Latin1_General_CI_AS
 				
 		----Create Bill Batch transaction
 		--INSERT INTO tblAPBillBatch(intAccountId, ysnPosted, dblTotal, intUserId)
