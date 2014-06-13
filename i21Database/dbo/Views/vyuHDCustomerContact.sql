@@ -8,6 +8,7 @@
 		,ec.strEmail
 		,ec.strTitle
 		,ec.strPhone
+		,ec.strMobile
 		,el.strLocationName
 		,ec.strTimezone
 		,intConcurrencyId = 1
