@@ -328,6 +328,13 @@ BEGIN
 			INSERT [dbo].[tblEntity] ([strName], [strWebsite], [strInternalNotes])
 			VALUES					 (@strContactName, @strWebsite, @strInternalNotes)
 		END
+		ELSE
+		BEGIN
+		--Use the the vendor name as contact name if no contact is provided
+			SET @strContactName = @strName
+			INSERT [dbo].[tblEntity] ([strName], [strWebsite], [strInternalNotes])
+			VALUES					 (@strContactName, @strWebsite, @strInternalNotes)
+		END
 
 		DECLARE @ContactEntityId INT
 		--Create contact record only if there is contact for vendor
