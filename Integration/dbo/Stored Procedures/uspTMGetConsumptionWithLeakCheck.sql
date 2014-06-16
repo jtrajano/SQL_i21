@@ -45,7 +45,7 @@ BEGIN
 --</parameter>
 --</filterinfo>'
 	--DECLARE @xmlParam NVARCHAR(MAX)
-	--set @xmlParam = '<?xml version="1.0" encoding="utf-16"?><xmlparam />'
+	--set @xmlParam = '<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>strLocation</fieldname><condition>Between</condition><from></from><to></to><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>dtmDate</fieldname><condition>Between</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>Date</datatype></filter><filter><fieldname>CustomerStatus</fieldname><condition>Equal To</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>SiteStatus</fieldname><condition>Equal To</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>strOwnership</fieldname><condition>Equal To</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>strTankType</fieldname><condition>Equal To</condition><from>D</from><to></to><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter></filters></xmlparam>'
 	
 	SET NOCOUNT ON;
 	IF (ISNULL(@xmlParam,'') = '')
@@ -88,6 +88,8 @@ BEGIN
 			,@ToDate nvarchar(50)
 			,@FromLocation nvarchar(50)
 			,@ToLocation nvarchar(50)
+			,@FromTankType nvarchar(50)
+			,@ToTankType nvarchar(50)
 			,@Query nvarchar(max)
 			,@WhereClause1 nvarchar(MAX) = ''
 			,@WhereClause2 nvarchar(MAX) = ''
@@ -99,6 +101,7 @@ BEGIN
 			,@DateCondition nvarchar(20)
 			,@TankOwnershipCondition nvarchar(20)
 			,@LocationCondition nvarchar(20)
+			,@TankTypeCondition nvarchar(20)
 			,@intGrandTotalTanks int
 			,@intGrandTotalWithCheck int
 			
@@ -158,6 +161,13 @@ BEGIN
 		  ,@TankOwnershipCondition = condition
 	FROM @temp_params where [fieldname] = 'strOwnership'
 	
+	
+	--Tank Type
+	SELECT @FromTankType = [from]
+		   ,@ToTankType = [to]
+		  ,@TankTypeCondition = condition
+	FROM @temp_params where [fieldname] = 'strTankType'
+
 	--*****************BEGIN For intTotalTanks subquery WHERE CLAUSE
 	---Site Status
 	IF (ISNULL(@FromSiteStatus,'') != '')
@@ -208,6 +218,19 @@ BEGIN
          IF(@LocationCondition = 'Starts With' ) BEGIN SET @WhereClause1 = @WhereClause1 + ' AND Z.strLocation LIKE ''' + @FromLocation + '%''' END
          IF(@LocationCondition = 'Ends With' ) BEGIN SET @WhereClause1 = @WhereClause1 + ' AND Z.strLocation LIKE ''%' + @FromLocation + '''' END
          IF(@LocationCondition = 'Equal To' ) BEGIN SET @WhereClause1 = @WhereClause1 + ' AND Z.strLocation = ''' + @FromLocation + '''' END
+		 
+	END
+
+	---Tank Type
+	IF (ISNULL(@FromTankType,'') != '')
+	BEGIN 
+		 
+         IF(@TankTypeCondition = 'Not Equal To') BEGIN SET @WhereClause1 = @WhereClause1 + ' AND T.strTankType <> ''' + @FromTankType + '''' END
+         IF(@TankTypeCondition = 'Like' ) BEGIN SET @WhereClause1 = @WhereClause1 + ' AND T.strTankType LIKE ''%' + @FromTankType + '%''' END
+         IF(@TankTypeCondition = 'Between' ) BEGIN SET @WhereClause1 = @WhereClause1 + ' AND (T.strTankType BETWEEN ''' + @FromTankType + ''' AND ''' +  @ToTankType + ''')'END
+         IF(@TankTypeCondition = 'Starts With' ) BEGIN SET @WhereClause1 = @WhereClause1 + ' AND T.strTankType LIKE ''' + @FromTankType + '%''' END
+         IF(@TankTypeCondition = 'Ends With' ) BEGIN SET @WhereClause1 = @WhereClause1 + ' AND T.strTankType LIKE ''%' + @FromTankType + '''' END
+         IF(@TankTypeCondition = 'Equal To' ) BEGIN SET @WhereClause1 = @WhereClause1 + ' AND T.strTankType = ''' + @FromTankType + '''' END
 		 
 	END
 	
@@ -297,6 +320,19 @@ BEGIN
          IF(@DateCondition = 'Between' ) BEGIN SET @WhereClause2 = @WhereClause2 + ' AND (dtmDate BETWEEN ''' + @FromDate + ''' AND ''' +  @ToDate + ''')'END
          IF(@DateCondition = 'Equal To' )  BEGIN SET @WhereClause2 = @WhereClause2 + ' AND dtmDate = ''' + @FromDate + '''' END
 	END
+
+	--Tank Type
+	IF (ISNULL(@FromTankType,'') != '')
+	BEGIN 
+		 
+         IF(@TankTypeCondition = 'Not Equal To') BEGIN SET @WhereClause2 = @WhereClause2 + ' AND strTankType <> ''' + @FromTankType + '''' END
+         IF(@TankTypeCondition = 'Like' ) BEGIN SET @WhereClause2 = @WhereClause2 + ' AND strTankType LIKE ''%' + @FromTankType + '%''' END
+         IF(@TankTypeCondition = 'Between' ) BEGIN SET @WhereClause2 = @WhereClause2 + ' AND (strTankType BETWEEN ''' + @FromTankType + ''' AND ''' +  @ToTankType + ''')'END
+         IF(@TankTypeCondition = 'Starts With' ) BEGIN SET @WhereClause2 = @WhereClause2 + ' AND strTankType LIKE ''' + @FromTankType + '%''' END
+         IF(@TankTypeCondition = 'Ends With' ) BEGIN SET @WhereClause2 = @WhereClause2 + ' AND strTankType LIKE ''%' + @FromTankType + '''' END
+         IF(@TankTypeCondition = 'Equal To' ) BEGIN SET @WhereClause2 = @WhereClause2 + ' AND strTankType = ''' + @FromTankType + '''' END
+		 
+	END
 	
 	--***************************************** END For Main Query WHERE CLAUSE
 
@@ -311,6 +347,7 @@ SET @GrandTotalQuery =
 			INNER JOIN tblTMSiteDevice W ON Z.intSiteID =W.intSiteID
 			INNER JOIN tblTMDevice V ON W.intDeviceId = V.intDeviceId
 			INNER JOIN tblTMDeviceType U ON ISNULL(V.intDeviceTypeId,0) = ISNULL(U.intDeviceTypeId,-1)
+			LEFT JOIN tblTMTankType T ON ISNULL(V.intTankTypeId,0) = ISNULL(T.intTankTypeId,-1)
 			WHERE
 				V.ysnAppliance = 0
 				AND V.intInventoryStatusTypeId = (SELECT TOP 1 intInventoryStatusTypeId FROM tblTMInventoryStatusType WHERE strInventoryStatusType = ''Out'' AND ysnDefault = 1) 
@@ -318,6 +355,9 @@ SET @GrandTotalQuery =
 				' + ISNULL(@WhereClause1,'') 
 
 EXEC(@GrandTotalQuery)	
+
+print 'intGrandTotalTanks' 
+print @intGrandTotalTanks
 
 SET @intGrandTotalTanks = (SELECT TOP 1 intGrandTotal FROM #tmpGrandTotal)
 
@@ -334,6 +374,7 @@ SET @GrandTotalWithCheckQuery =
 			INNER JOIN tblTMSiteDevice W ON Z.intSiteID =W.intSiteID
 			INNER JOIN tblTMDevice V ON W.intDeviceId = V.intDeviceId
 			INNER JOIN tblTMDeviceType U ON ISNULL(V.intDeviceTypeId,0) = ISNULL(U.intDeviceTypeId,-1)
+			LEFT JOIN tblTMTankType T ON ISNULL(V.intTankTypeId,0) = ISNULL(T.intTankTypeId,-1)
 			WHERE
 				V.ysnAppliance = 0
 				AND V.intInventoryStatusTypeId = (SELECT TOP 1 intInventoryStatusTypeId FROM tblTMInventoryStatusType WHERE strInventoryStatusType = ''Out'' AND ysnDefault = 1) 
@@ -429,6 +470,7 @@ FROM
 						INNER JOIN tblTMSiteDevice W ON Z.intSiteID =W.intSiteID
 						INNER JOIN tblTMDevice V ON W.intDeviceId = V.intDeviceId
 						INNER JOIN tblTMDeviceType U ON ISNULL(V.intDeviceTypeId,0) = ISNULL(U.intDeviceTypeId,-1)
+						LEFT JOIN tblTMTankType T ON ISNULL(V.intTankTypeId,0) = ISNULL(T.intTankTypeId,-1)
 						WHERE
 							V.ysnAppliance = 0
 							AND V.intInventoryStatusTypeId = (SELECT TOP 1 intInventoryStatusTypeId FROM tblTMInventoryStatusType WHERE strInventoryStatusType = ''Out'' AND ysnDefault = 1) 
@@ -443,6 +485,7 @@ FROM
 						INNER JOIN tblTMSiteDevice W ON Z.intSiteID =W.intSiteID
 						INNER JOIN tblTMDevice V ON W.intDeviceId = V.intDeviceId
 						INNER JOIN tblTMDeviceType U ON ISNULL(V.intDeviceTypeId,0) = ISNULL(U.intDeviceTypeId,-1)
+						LEFT JOIN tblTMTankType T ON ISNULL(V.intTankTypeId,0) = ISNULL(T.intTankTypeId,-1)
 						WHERE
 							V.ysnAppliance = 0
 							AND V.intInventoryStatusTypeId = (SELECT TOP 1 intInventoryStatusTypeId FROM tblTMInventoryStatusType WHERE strInventoryStatusType = ''Out'' AND ysnDefault = 1) 
