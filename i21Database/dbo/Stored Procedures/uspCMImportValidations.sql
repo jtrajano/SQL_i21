@@ -8,8 +8,6 @@
 						  corrections to avoid bad data imports. 
 
 */
-
-
 CREATE PROCEDURE [dbo].[uspCMImportValidations]
 	@Invalid_UserId_Found AS BIT OUTPUT
 	,@Invalid_GL_Account_Id_Found AS BIT OUTPUT
@@ -24,6 +22,14 @@ SELECT	TOP 1
 		@Invalid_UserId_Found = 1  
 FROM	apcbkmst 
 WHERE	dbo.fnConvertOriginUserIdtoi21(apcbk_user_id) IS NULL
+
+-- Auto-fix the GL Accounts used in Origin. Move it to under the "Cash Accounts" group. 
+UPDATE	tblGLAccount
+SET		intAccountGroupId = (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = 'Cash Accounts')
+from	tblGLAccount gl INNER JOIN (
+			SELECT DISTINCT intGLAccountId = dbo.fnGetGLAccountIdFromOriginToi21(apcbk_gl_cash) FROM apcbkmst 
+		) Q
+			ON gl.intAccountId = Q.intGLAccountId
 
 -- Check for invalid GL accounts. It must be moved under the Cash Account Group before import can be done. (ERR)
 SELECT	TOP 1 
