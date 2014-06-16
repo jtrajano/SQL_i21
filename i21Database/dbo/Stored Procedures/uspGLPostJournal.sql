@@ -195,18 +195,17 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM #tmpValidJournals)
 ---------------------------------------------------------------------------------------------------------------------------------------
 Post_Transaction:
 
+DECLARE @intCurrencyId	INT
+DECLARE @dblDailyRate	NUMERIC (18,6)
+
 IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN							
-	
-		DECLARE @intCurrencyId	INT
-		DECLARE @dblDailyRate	NUMERIC (18,6)
 		
 		SET @intCurrencyId		= (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE intCurrencyID = (CASE WHEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') > 0 
 																		THEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency')
 																		ELSE (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'USD') END))
 		SET @dblDailyRate		= (SELECT TOP 1 dblDailyRate FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId);
-
-	
+			
 		WITH Units 
 		AS 
 		(
@@ -278,6 +277,11 @@ ELSE
 		-- DELETE Results 1 DAYS OLDER	
 		DELETE tblGLPostRecap WHERE dtmDateEntered < DATEADD(day, -1, GETDATE()) and intEntityId = @intEntityId;
 		
+		SET @intCurrencyId		= (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE intCurrencyID = (CASE WHEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') > 0 
+																		THEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency')
+																		ELSE (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'USD') END))
+		SET @dblDailyRate		= (SELECT TOP 1 dblDailyRate FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId);
+		
 		WITH Accounts 
 		AS 
 		(
@@ -330,7 +334,7 @@ ELSE
 			,[dtmDate]				= ISNULL(B.[dtmDate], GETDATE())
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
-			,[dblExchangeRate]		= 1
+			,[dblExchangeRate]		= @dblDailyRate
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
