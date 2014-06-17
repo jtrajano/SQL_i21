@@ -17,7 +17,7 @@
     [intSort]           INT             NULL,
     [intConcurrencyId]  INT             DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFRHeaderDesign] PRIMARY KEY CLUSTERED ([intHeaderDetailId] ASC, [intHeaderId] ASC),
-    CONSTRAINT [FK_tblFRHeaderDesign_tblFRHeader] FOREIGN KEY ([intHeaderId]) REFERENCES [dbo].[tblFRHeader] ([intHeaderId]) ON DELETE CASCADE
+    CONSTRAINT [FK_tblFRHeaderDesign_tblFRHeader] FOREIGN KEY ([intHeaderId]) REFERENCES [dbo].[tblFRHeader] ([intHeaderId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblFRHeaderDesign_tblFRColumnDesign] FOREIGN KEY ([intColumnRefNo]) REFERENCES [dbo].[tblFRColumnDesign] ([intColumnDetailId])
 );
 
