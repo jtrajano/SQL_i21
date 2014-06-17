@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblFRHeaderDesign] (
-    [intHeaderDetailID] INT             IDENTITY (1, 1) NOT NULL,
-    [intHeaderID]       INT             NOT NULL,
+    [intHeaderDetailId] INT             IDENTITY (1, 1) NOT NULL,
+    [intHeaderId]       INT             NOT NULL,
     [intRefNo]          INT             NULL,
     [strDescription]    NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [strType]           NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
@@ -16,6 +16,8 @@
     [intColumnRefNo]    INT             NULL,
     [intSort]           INT             NULL,
     [intConcurrencyId]  INT             DEFAULT 1 NOT NULL,
-    CONSTRAINT [PK_tblFRHeaderDesign] PRIMARY KEY CLUSTERED ([intHeaderDetailID] ASC, [intHeaderID] ASC)
+    CONSTRAINT [PK_tblFRHeaderDesign] PRIMARY KEY CLUSTERED ([intHeaderDetailId] ASC, [intHeaderId] ASC),
+    CONSTRAINT [FK_tblFRHeaderDesign_tblFRHeader] FOREIGN KEY ([intHeaderId]) REFERENCES [dbo].[tblFRHeader] ([intHeaderId]) ON DELETE CASCADE
+    CONSTRAINT [FK_tblFRHeaderDesign_tblFRColumnDesign] FOREIGN KEY ([intColumnRefNo]) REFERENCES [dbo].[tblFRColumnDesign] ([intColumnDetailId])
 );
 

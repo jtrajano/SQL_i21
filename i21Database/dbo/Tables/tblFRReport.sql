@@ -1,5 +1,5 @@
 ﻿CREATE TABLE [dbo].[tblFRReport] (
-    [intReportID]               INT             IDENTITY (1, 1) NOT NULL,
+    [intReportId]               INT             IDENTITY (1, 1) NOT NULL,
     [strOtherEmails]            NVARCHAR (4000) COLLATE Latin1_General_CI_AS NULL,
     [ysnIncludeAuditAdjustment] BIT             CONSTRAINT [DF__tblFRRepo__ysnIn__0C0220C2] DEFAULT ((1)) NULL,
     [ysnShowRedLine]            BIT             NULL,
@@ -14,10 +14,10 @@
     [ysnShowReportSettings]     BIT             NULL,
     [ysnSupressZero]            BIT             NULL,
     [dtmAsOfDate]               DATETIME        NULL,
-    [intPageFooterID]           INT             NULL,
-    [intPageHeaderID]           INT             NULL,
-    [intReportFooterID]         INT             NULL,
-    [intReportHeaderID]         INT             NULL,
+    [intPageFooterId]           INT             NULL,
+    [intPageHeaderId]           INT             NULL,
+    [intReportFooterId]         INT             NULL,
+    [intReportHeaderId]         INT             NULL,
     [ysnDefaultHeader]          BIT             CONSTRAINT [DF__tblFRRepo__ysnDe__11BAFA18] DEFAULT ((1)) NULL,
     [ysnPageFooter]             BIT             NULL,
     [ysnPageHeader]             BIT             NULL,
@@ -26,13 +26,13 @@
     [strReportName]             NVARCHAR (255)  COLLATE Latin1_General_CI_AS NOT NULL,
     [strReportType]             NVARCHAR (50)   COLLATE Latin1_General_CI_AS NOT NULL,
     [strDescription]            NVARCHAR (255)  COLLATE Latin1_General_CI_AS NULL,
-    [intRowID]                  INT             NULL,
-    [intColumnID]               INT             NULL,
-    [intMapID]                  INT             NULL,
+    [intRowId]                  INT             NULL,
+    [intColumnId]               INT             NULL,
+    [intMapId]                  INT             NULL,
     [strOrientation]            NCHAR (15)      COLLATE Latin1_General_CI_AS NULL,
     [ysnLowPriority]            BIT             DEFAULT 0 NULL,
     [intSort]                   INT             DEFAULT 0 NULL,
     [intConcurrencyId]          INT             DEFAULT 1 NOT NULL,
-    CONSTRAINT [PK_tblFRReport] PRIMARY KEY CLUSTERED ([intReportID] ASC)
+    CONSTRAINT [PK_tblFRReport] PRIMARY KEY CLUSTERED ([intReportId] ASC)
 );
 
