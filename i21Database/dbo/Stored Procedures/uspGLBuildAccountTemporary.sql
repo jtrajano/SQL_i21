@@ -79,7 +79,8 @@ CREATE TABLE #Segments
 
 
 INSERT INTO #Segments
-SELECT a.strCode, a.strDescription, a.intAccountStructureId, a.intAccountSegmentId, a.intAccountSegmentId AS strAccountSegmentId
+SELECT a.strCode, [strDescription] = CASE WHEN a.[strDescription] <> '' THEN  a.[strDescription] ELSE 'REMOVE_DIVIDER' END
+	  ,a.intAccountStructureId, a.intAccountSegmentId, a.intAccountSegmentId AS strAccountSegmentId
 FROM tblGLTempAccountToBuild x
 LEFT JOIN tblGLAccountSegment a 
 ON x.intAccountSegmentId = a.intAccountSegmentId
@@ -173,7 +174,7 @@ INSERT INTO tblGLTempAccount
 SELECT strCode AS strAccountId, 
 	   strPrimary, 
 	   strSegment,
-	   strDescription,
+	   REPLACE(strDescription, @strDivider + 'REMOVE_DIVIDER',''),
 	   strAccountGroup,
 	   intAccountGroupId,
 	   strAccountSegmentId,	   
