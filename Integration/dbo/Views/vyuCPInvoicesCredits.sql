@@ -39,7 +39,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 			,agivc_net_rev_dt = (case len(convert(varchar, a.agivc_net_rev_dt)) when 8 then convert(date, cast(convert(varchar, a.agivc_net_rev_dt) AS CHAR(12)), 112) else null end)
 			,a.agivc_src_sys
 			,agivc_orig_rev_dt = (case len(convert(varchar, a.agivc_orig_rev_dt)) when 8 then convert(date, cast(convert(varchar, a.agivc_orig_rev_dt) AS CHAR(12)), 112) else null end)
-			,a.agivc_split_no
+			,agivc_split_no = case when a.agivc_split_no is NULL then '''' else a.agivc_split_no end
 			,a.agivc_pd_days_old
 			,a.agivc_eft_ivc_paid_yn
 			,a.agivc_terms_code
@@ -88,7 +88,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 			,agivc_net_rev_dt = (case len(convert(varchar, a.ptivc_last_pay_rev_dt)) when 8 then convert(date, cast(convert(varchar, a.ptivc_last_pay_rev_dt) AS CHAR(12)), 112) else null end)
 			,agivc_src_sys = a.ptivc_src_sys
 			,agivc_orig_rev_dt = (case len(convert(varchar, a.ptivc_rev_dt)) when 8 then convert(date, cast(convert(varchar, a.ptivc_rev_dt) AS CHAR(12)), 112) else null end)
-			,agivc_split_no = null --a.agivc_split_no
+			,agivc_split_no = '' --a.agivc_split_no
 			,agivc_pd_days_old = null --a.agivc_pd_days_old
 			,agivc_eft_ivc_paid_yn = a.ptivc_eft_ivc_paid_yn
 			,agivc_terms_code = a.ptivc_terms_code
