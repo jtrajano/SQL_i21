@@ -127,6 +127,7 @@
     <Folder Include="Scripts\Post-Deployment\TM\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\CM" />
     <Folder Include="Scripts\Post-Deployment\AR\DefaultData" />
+    <Folder Include="Scripts\Post-Deployment\AP" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -360,7 +361,6 @@
     <Build Include="dbo\Stored Procedures\uspGLImportOriginCOA.sql" />
     <Build Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournal.sql" />
     <Build Include="dbo\Stored Procedures\uspGLPostFiscalYear.sql" />
-    <Build Include="dbo\Stored Procedures\uspCreateBankTransactionPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBill.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBillBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspRMInsertDynamicParameterFields.sql" />
@@ -387,9 +387,9 @@
     <Build Include="dbo\Views\vyuGLAccountGroupView.sql" />
     <Build Include="dbo\Views\vyuGLFiscalYearPeriod.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAgingSummary.sql" />
-    <Build Include="dbo\Views\vyuBillBatch.sql" />
-    <Build Include="dbo\Views\vyuPayments.sql" />
-    <Build Include="dbo\Views\vyuVendorHistory.sql" />
+    <Build Include="dbo\Views\vyuAPBillBatch.sql" />
+    <Build Include="dbo\Views\vyuAPPayments.sql" />
+    <Build Include="dbo\Views\vyuAPVendorHistory.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\2_Reports\1_UpdateConnection.sql" />
     <Build Include="dbo\Stored Procedures\uspGLReverseGLEntries.sql" />
     <Build Include="dbo\Tables\tblCMBankStatementImport.sql" />
@@ -548,6 +548,7 @@
     <Build Include="dbo\Tables\tblFREmailFinancial.sql" />
     <Build Include="dbo\Tables\tblFRGroupOtherReport.sql" />
     <Build Include="dbo\Tables\tblFRMappingDetail.sql" />
+    <Build Include="dbo\Views\vyuAPBill.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
@@ -567,5 +568,6 @@
     <Build Include="dbo\Views\vyuCPContactMenu.sql" />
     <Build Include="dbo\Views\vyuARCustomerContacts.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\1_CustomerPortalMenu.sql" />
+    <None Include="Scripts\Post-Deployment\AP\RestoreVendorId.sql" />
   </ItemGroup>
 </Project>

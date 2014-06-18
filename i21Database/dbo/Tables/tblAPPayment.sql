@@ -4,7 +4,6 @@
     [intBankAccountId]    INT             NOT NULL,
     [intPaymentMethodId]    INT             NOT NULL,
     [intCurrencyId]       INT             NOT NULL,
-    [strVendorId]         NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NOT NULL,
     [strPaymentInfo]      NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strNotes]            NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [dtmDatePaid]         DATETIME        NOT NULL,
@@ -17,7 +16,9 @@
     [intUserId]           INT             NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     [intEntityId] INT NOT NULL DEFAULT 0, 
-    CONSTRAINT [PK_dbo.tblAPPayments] PRIMARY KEY CLUSTERED ([intPaymentId] ASC)
+    [intVendorId] INT NULL, 
+    CONSTRAINT [PK_dbo.tblAPPayments] PRIMARY KEY CLUSTERED ([intPaymentId] ASC), 
+    CONSTRAINT [FK_tblAPPayment_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intEntityId]) ON DELETE SET NULL
 );
 
 

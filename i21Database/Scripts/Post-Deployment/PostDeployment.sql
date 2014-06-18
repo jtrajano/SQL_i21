@@ -61,6 +61,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\EntityTableDataFix.sql
 :R .\AR\DefaultData\1_CustomerPortalMenu.sql
 
+--Accounts Payable
+:r .\AP\RestoreVendorId.sql
+
 -- Version Update
 :r .\VersionUpdate.sql
 
