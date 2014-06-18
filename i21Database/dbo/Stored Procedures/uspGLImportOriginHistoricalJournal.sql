@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE  [dbo].[uspGLImportOriginHistoricalJournal]
-@intUserId		INT,
-@result			NVARCHAR(500) = '' OUTPUT
+@intEntityId		INT,
+@result				NVARCHAR(MAX) = '' OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -49,12 +49,12 @@ BEGIN
 		CONVERT(VARCHAR(12),MAX(glhst_period)) AS dtmDate,																					-- took the max period for the unique transaction - glhst_period controls posting period.	
 		MAX(glhst_ref) AS strDescription,																									-- strDescription
 		'General Journal' AS strTransactionType,																							-- Hard coded the transaction type
-		'Adjusted Legacy Journal' AS strJournalType,																						-- Hard coded transaction type.	
+		'Origin Journal' AS strJournalType,																						-- Hard coded transaction type.	
 		glhst_src_seq AS strSourceId,
 		glhst_src_id AS strSourceType,
 		@intCurrencyId AS intCurrencyId,																									-- intCurrencyId
 		0 AS ysnPosted,																														-- ysnPosted	
-		@intUserId AS intUserId,																											-- intUserId
+		@intEntityId AS intEntityId,																											-- intEntityId
 		1 AS intConcurrencyId,																											-- intConcurrencyId
 		NULL AS strReverseLink,
 		NULL AS strRecurringStatus,
@@ -72,8 +72,8 @@ BEGIN
 	--	   INSERT IMPORT LOGS
 	--+++++++++++++++++++++++++++++++++
 	
-	INSERT INTO tblGLCOAImportLog (strEvent,strIrelySuiteVersion,intUserId,dtmDate,strMachineName,strJournalType,intConcurrencyId)
-					VALUES('Import Origin Historical Journal',(SELECT TOP 1 strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC),@intUserId,GETDATE(),'','',1)
+	INSERT INTO tblGLCOAImportLog (strEvent,strIrelySuiteVersion,intEntityId,dtmDate,strMachineName,strJournalType,intConcurrencyId)
+					VALUES('Import Origin Historical Journal',(SELECT TOP 1 strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC),@intEntityId,GETDATE(),'','',1)
 
 	DECLARE @intImportLogId INT = (SELECT intImportLogId FROM tblGLCOAImportLog WHERE strEvent = 'Import Origin Historical Journal' AND dtmDate = GETDATE())
 	
@@ -94,7 +94,7 @@ BEGIN
 	--+++++++++++++++++++++++++++++++++
 
 	INSERT tblGLJournal (dtmReverseDate,strJournalId,strTransactionType, dtmDate,strReverseLink,intCurrencyId,dblExchangeRate,dtmPosted,strDescription,
-							ysnPosted,intConcurrencyId,dtmJournalDate,intUserId,strSourceId,strJournalType,strRecurringStatus,strSourceType)
+							ysnPosted,intConcurrencyId,dtmJournalDate,intEntityId,strSourceId,strJournalType,strRecurringStatus,strSourceType)
 	SELECT  dtmReverseDate,
 			strJournalId,
 			strTransactionType, 
@@ -107,7 +107,7 @@ BEGIN
 			ysnPosted,
 			intConcurrencyId,
 			dtmJournalDate,
-			intUserId,
+			intEntityId,
 			strSourceId,
 			strJournalType,
 			strRecurringStatus,
@@ -260,8 +260,7 @@ BEGIN
                                         						
 	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT	
                                      
-
-	SET @result = 'SUCCESSFULLY IMPORTED'
+	SET @result = 'SUCCESS ' + (Select (Select CAST(intJournalId AS NVARCHAR(MAX)) + ',' From (select intJournalId from tblGLJournal A left join #iRelyImptblGLJournal B on A.strJournalId = B.strJournalId COLLATE Latin1_General_CI_AS) X FOR XML PATH('')) as intJournalId)
 						
 END
 	
