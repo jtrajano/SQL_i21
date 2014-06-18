@@ -16,8 +16,8 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 			,a.agivc_bill_to_cus
 			,a.agivc_ivc_no
 			,a.agivc_loc_no
-			,a.agivc_type
-			,a.agivc_status
+			,agivc_type = case a.agivc_type when ''I'' then ''Invoice'' when ''C'' then ''Credit Memo'' when ''D'' then ''Debit Memo'' when ''S'' then ''Cash Sale'' when ''R'' then ''Cash Refund'' else '''' end
+			,agivc_status = case a.agivc_status when ''P'' then ''Paid'' when ''O'' then ''Unpaid'' else '''' end
 			,agivc_rev_dt = (case len(convert(varchar, a.agivc_rev_dt)) when 8 then convert(date, cast(convert(varchar, a.agivc_rev_dt) AS CHAR(12)), 112) else null end)
 			,a.agivc_comment
 			,a.agivc_po_no
@@ -65,8 +65,10 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 			,agivc_bill_to_cus = a.ptivc_cus_no
 			,agivc_ivc_no = a.ptivc_invc_no
 			,agivc_loc_no = a.ptivc_loc_no
-			,agivc_type = a.ptivc_type
-			,agivc_status = a.ptivc_status
+			
+			,agivc_type = case a.ptivc_type when ''I'' then ''Invoice'' when ''C'' then ''Credit Memo'' when ''D'' then ''Debit Memo'' when ''S'' then ''Cash Sale'' when ''R'' then ''Cash Refund'' else '''' end
+			,agivc_status = case a.ptivc_status when ''P'' then ''Paid'' when ''O'' then ''Unpaid'' else '''' end
+
 			,agivc_rev_dt = (case len(convert(varchar, a.ptivc_rev_dt)) when 8 then convert(date, cast(convert(varchar, a.ptivc_rev_dt) AS CHAR(12)), 112) else null end)
 			,agivc_comment = a.ptivc_comment
 			,agivc_po_no = a.ptivc_po_no
