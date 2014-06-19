@@ -599,6 +599,7 @@ ELSE
 		INNER JOIN [dbo].tblGLAccount GLAccnt
 					ON A.intAccountId = GLAccnt.intAccountId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		AND B.dblPayment <> 0
 
 		--Withheld
 		UNION
