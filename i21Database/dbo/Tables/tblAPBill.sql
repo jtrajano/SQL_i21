@@ -23,6 +23,7 @@
     [dblWithheld] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
     [dblDiscount] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
     [intTransactionType] INT NOT NULL DEFAULT 0, 
+    [strPONumber] NVARCHAR(50) NULL, 
     CONSTRAINT [PK_dbo.tblAPBill] PRIMARY KEY CLUSTERED ([intBillId] ASC),
     CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPBillBatch_intBillBatchId] FOREIGN KEY ([intBillBatchId]) REFERENCES [dbo].[tblAPBillBatch] ([intBillBatchId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPVendor_intEntityId] FOREIGN KEY ([intVendorId]) REFERENCES [dbo].[tblAPVendor] ([intEntityId]) ON DELETE SET NULL
