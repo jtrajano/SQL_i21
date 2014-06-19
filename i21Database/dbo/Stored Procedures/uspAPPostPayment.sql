@@ -607,6 +607,7 @@ ELSE
 		INNER JOIN tblAPVendor C
 			ON A.intVendorId = C.intEntityId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		AND B.dblPayment <> 0
 
 		--Withheld
 		UNION
