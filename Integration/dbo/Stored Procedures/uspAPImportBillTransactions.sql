@@ -50,7 +50,10 @@ BEGIN
 			[dblAmountDue],
 			[intEntityId],
 			[ysnPosted],
-			[ysnPaid])
+			[ysnPaid],
+			[intTransactionType],
+			[dblDiscount],
+			[dblWithheld])
 		OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid INTO @InsertedData
 		--Unposted
 		SELECT 
@@ -67,11 +70,14 @@ BEGIN
 			[dtmDueDate] 			=	CASE WHEN ISDATE(A.aptrx_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 			[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
 			[strDescription] 		=	A.aptrx_comment,
-			[dblTotal] 				=	A.aptrx_orig_amt,
-			[dblAmountDue]			=	A.aptrx_orig_amt,--CASE WHEN B.apegl_ivc_no IS NULL THEN A.aptrx_orig_amt ELSE A.aptrx_orig_amt - SUM(ISNULL(B.apegl_gl_amt,0)) END
+			[dblTotal] 				=	(CASE WHEN A.aptrx_trans_type = ''C'' THEN (A.aptrx_orig_amt * -1) ELSE A.aptrx_orig_amt END),
+			[dblAmountDue]			=	(CASE WHEN A.aptrx_trans_type = ''C'' THEN (A.aptrx_orig_amt * -1) ELSE A.aptrx_orig_amt END),
 			[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CI_AS = RTRIM(A.aptrx_user_id) COLLATE Latin1_General_CI_AS),@UserId),
 			[ysnPosted]				=	0,
-			[ysnPaid]				=	0
+			[ysnPaid]				=	0,
+			[intTransactionType]	=	(CASE WHEN A.aptrx_trans_type = ''C'' THEN 3 ELSE 1 END),
+			[dblDiscount]			=	A.aptrx_disc_amt,
+			[dblWithheld]			=	A.aptrx_wthhld_amt
 		FROM aptrxmst A
 			--LEFT JOIN apeglmst B
 			--	ON A.aptrx_ivc_no = B.apegl_ivc_no
@@ -81,7 +87,7 @@ BEGIN
 				ON A.aptrx_ivc_no = C.aptrx_ivc_no
 			INNER JOIN tblAPVendor D
 				ON A.aptrx_vnd_no COLLATE Latin1_General_CI_AS = D.strVendorId COLLATE Latin1_General_CI_AS
-			WHERE C.aptrx_ivc_no IS NULL
+			WHERE C.aptrx_ivc_no IS NULL AND A.aptrx_trans_type IN (''I'',''C'')
 
 			--GROUP BY A.aptrx_ivc_no, 
 			--A.aptrx_vnd_no, 
@@ -107,11 +113,16 @@ BEGIN
 			[dtmDueDate] 			=	CASE WHEN ISDATE(A.apivc_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 			[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
 			[strDescription] 		=	A.apivc_comment,
-			[dblTotal] 				=	A.apivc_orig_amt,
-			[dblAmountDue]			=	CASE WHEN A.apivc_status_ind = ''P'' THEN 0 ELSE A.apivc_orig_amt END,
+			[dblTotal] 				=	(CASE WHEN A.apivc_trans_type = ''C'' THEN (A.apivc_orig_amt * -1) ELSE A.apivc_orig_amt END),
+			[dblAmountDue]			=	CASE WHEN A.apivc_status_ind = ''P'' THEN 0 ELSE 
+										(CASE WHEN A.apivc_trans_type = ''C'' THEN (A.apivc_orig_amt * -1) ELSE A.apivc_orig_amt END)
+										 END,
 			[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CI_AS = RTRIM(A.apivc_user_id) COLLATE Latin1_General_CI_AS),@UserId),
 			[ysnPosted]				=	1,
-			[ysnPaid]				=	CASE WHEN A.apivc_status_ind = ''P'' THEN 1 ELSE 0 END
+			[ysnPaid]				=	CASE WHEN A.apivc_status_ind = ''P'' THEN 1 ELSE 0 END,
+			[intTransactionType]	=	(CASE WHEN A.apivc_trans_type = ''C'' THEN 3 ELSE 1 END),
+			[dblDiscount]			=	A.apivc_disc_avail,
+			[dblWithheld]			=	A.apivc_wthhld_amt
 		FROM apivcmst A
 			LEFT JOIN apcbkmst B
 				ON A.apivc_cbk_no = B.apcbk_no
@@ -119,6 +130,8 @@ BEGIN
 				ON A.apivc_ivc_no = C.aptrx_ivc_no
 			INNER JOIN tblAPVendor D
 				ON A.apivc_vnd_no COLLATE Latin1_General_CI_AS = D.strVendorId COLLATE Latin1_General_CI_AS
+			WHERE C.aptrx_ivc_no IS NULL AND A.apivc_trans_type IN (''I'',''C'')
+				
 		SELECT @ImportedRecords = @@ROWCOUNT
 
 		--add detail
@@ -208,7 +221,10 @@ BEGIN
 			[dblAmountDue],
 			[intEntityId],
 			[ysnPosted],
-			[ysnPaid])
+			[ysnPaid],
+			[intTransactionType],
+			[dblDiscount],
+			[dblWithheld])
 		OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid INTO @InsertedData
 		--Unposted
 		SELECT
@@ -229,7 +245,10 @@ BEGIN
 			[dblAmountDue]			=	A.aptrx_orig_amt,--CASE WHEN B.apegl_ivc_no IS NULL THEN A.aptrx_orig_amt ELSE A.aptrx_orig_amt - SUM(ISNULL(B.apegl_gl_amt,0)) END
 			[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CI_AS = RTRIM(A.aptrx_user_id) COLLATE Latin1_General_CI_AS),@UserId),
 			[ysnPosted]				=	0,
-			[ysnPaid] 				=	0
+			[ysnPaid] 				=	0,
+			[intTransactionType]	=	(CASE WHEN A.aptrx_trans_type = ''C'' THEN 3 ELSE 1 END),
+			[dblDiscount]			=	A.aptrx_disc_amt,
+			[dblWithheld]			=	A.aptrx_wthhld_amt
 		FROM aptrxmst A
 			--LEFT JOIN apeglmst B
 			--	ON A.aptrx_ivc_no = B.apegl_ivc_no
@@ -269,11 +288,16 @@ BEGIN
 			[dtmDueDate] 			=	CASE WHEN ISDATE(A.apivc_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 			[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
 			[strDescription] 		=	A.apivc_comment,
-			[dblTotal] 				=	A.apivc_orig_amt,
-			[dblAmountDue]			=	CASE WHEN A.apivc_status_ind = ''P'' THEN 0 ELSE A.apivc_orig_amt END,
+			[dblTotal] 				=	(CASE WHEN A.apivc_trans_type = ''C'' THEN (A.apivc_orig_amt * -1) ELSE A.apivc_orig_amt END),
+			[dblAmountDue]			=	CASE WHEN A.apivc_status_ind = ''P'' THEN 0 ELSE 
+										(CASE WHEN A.apivc_trans_type = ''C'' THEN (A.apivc_orig_amt * -1) ELSE A.apivc_orig_amt END)
+										END,
 			[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CI_AS = RTRIM(A.apivc_user_id) COLLATE Latin1_General_CI_AS),@UserId),
 			[ysnPosted]				=	1,
-			[ysnPaid]				=	CASE WHEN A.apivc_status_ind = ''P'' THEN 1 ELSE 0 END
+			[ysnPaid]				=	CASE WHEN A.apivc_status_ind = ''P'' THEN 1 ELSE 0 END,
+			[intTransactionType]	=	(CASE WHEN A.apivc_trans_type = ''C'' THEN 3 ELSE 1 END),
+			[dblDiscount]			=	A.apivc_disc_avail,
+			[dblWithheld]			=	A.apivc_wthhld_amt
 		FROM apivcmst A
 			LEFT JOIN apcbkmst B
 				ON A.apivc_cbk_no = B.apcbk_no
@@ -373,6 +397,5 @@ BEGIN
 
 
 	END
-
 	')
 END
