@@ -552,6 +552,7 @@
     <Build Include="dbo\Stored Procedures\uspGLRecreateCOASegmentMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBankTransactionReversal.sql" />
     <Build Include="dbo\Functions\fnGetBankTransactionReversalErrors.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLFixStartingNumbers.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
