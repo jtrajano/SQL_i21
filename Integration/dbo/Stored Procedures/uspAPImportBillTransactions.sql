@@ -194,7 +194,7 @@ BEGIN
 	ELSE
 	BEGIN
 		INSERT [dbo].[tblAPBill] (
-			[strVendorId], 
+			[intVendorId], 
 			--[strBillId],
 			[strVendorOrderNumber], 
 			[intTermsId], 

@@ -115,6 +115,7 @@
     <None Include="Integration.publish.xml" />
     <None Include="dbo\Stored Procedures\uspTMGetConsumptionWithoutGasCheck.sql" />
     <None Include="dbo\Stored Procedures\uspAPImportTerms.sql" />
+    <None Include="dbo\Stored Procedures\uspAPUpdateImportedBillTransactions.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
