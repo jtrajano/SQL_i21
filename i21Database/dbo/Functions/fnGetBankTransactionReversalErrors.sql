@@ -21,28 +21,28 @@ RETURN (
 	SELECT * FROM (
 		-- Check if the transaction still exists 
 		SELECT	intBankTransactionId = @intId
-				,strText = (SELECT TOP 1 text FROM sys.messages WHERE message_id = 50004)
+				,strText = FORMATMESSAGE(50004)
 				,intErrorCode = 50004
 		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBankTransaction WHERE intTransactionId = @intId)	
 		
 		-- Check if the transaction is already cleared from the bank reconciliation 
 		UNION ALL 
 		SELECT	intBankTransactionId = @intId
-				,strText = (SELECT TOP 1 text FROM sys.messages WHERE message_id = 50009)
+				,strText = FORMATMESSAGE(50009)
 				,intErrorCode = 50009
 		WHERE	EXISTS (SELECT TOP 1 1 FROM tblCMBankTransaction WHERE intTransactionId = @intId AND ysnClr = 1)	
 		
 		-- Check if the transaction is already voided. 
 		UNION ALL 
 		SELECT	intBankTransactionId = @intId
-				,strText = (SELECT TOP 1 text FROM sys.messages WHERE message_id = 50012)
+				,strText = FORMATMESSAGE(50012)
 				,intErrorCode = 50012
 		WHERE	EXISTS (SELECT TOP 1 1 FROM tblCMBankTransaction WHERE intTransactionId = @intId AND ysnCheckVoid = 1)
 		
 		-- Check if the bank account is inactive
 		UNION ALL 
 		SELECT	intBankTransactionId = @intId
-				,strText = (SELECT TOP 1 text FROM sys.messages WHERE message_id = 50010)
+				,strText = FORMATMESSAGE(50010)
 				,intErrorCode = 50010
 		WHERE	EXISTS (
 					SELECT	TOP 1 1 
@@ -55,7 +55,7 @@ RETURN (
 		-- Check if a check transaction is currently being printed. 
 		UNION ALL 
 		SELECT	intBankTransactionId = @intId
-				,strText = (SELECT TOP 1 text FROM sys.messages WHERE message_id = 50025)
+				,strText = FORMATMESSAGE(50025)
 				,intErrorCode = 50025
 		WHERE	EXISTS (
 					SELECT	TOP 1 1 

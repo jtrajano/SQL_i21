@@ -550,6 +550,8 @@
     <Build Include="dbo\Tables\tblFRMappingDetail.sql" />
     <Build Include="dbo\Views\vyuAPBill.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRecreateCOASegmentMapping.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMBankTransactionReversal.sql" />
+    <Build Include="dbo\Functions\fnGetBankTransactionReversalErrors.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
@@ -570,5 +572,11 @@
     <Build Include="dbo\Views\vyuARCustomerContacts.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\1_CustomerPortalMenu.sql" />
     <None Include="Scripts\Post-Deployment\AP\RestoreVendorId.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <SqlCmdVariable Include="i21PreDeployment">
+      <DefaultValue>i21PreDeployment</DefaultValue>
+      <Value>$(SqlCmdVar__1)</Value>
+    </SqlCmdVariable>
   </ItemGroup>
 </Project>
