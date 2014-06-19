@@ -4,8 +4,8 @@ AS
 SELECT 
 intUserSecurityMenuId,
 intUserSecurityId,
-intMenuId,
-intParentMenuId,
+UserMenu.intMenuId,
+UserMenu.intParentMenuId,
 UserMenu.ysnVisible,
 Menu.intSort,
 strMenuName,

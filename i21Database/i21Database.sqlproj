@@ -573,10 +573,4 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\1_CustomerPortalMenu.sql" />
     <None Include="Scripts\Post-Deployment\AP\RestoreVendorId.sql" />
   </ItemGroup>
-  <ItemGroup>
-    <SqlCmdVariable Include="i21PreDeployment">
-      <DefaultValue>i21PreDeployment</DefaultValue>
-      <Value>$(SqlCmdVar__1)</Value>
-    </SqlCmdVariable>
-  </ItemGroup>
 </Project>

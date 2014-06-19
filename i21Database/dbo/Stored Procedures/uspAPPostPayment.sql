@@ -344,7 +344,7 @@ IF (ISNULL(@recap, 0) = 0)
 		FROM	[dbo].tblAPPayment A INNER JOIN [dbo].tblGLAccount GLAccnt
 					ON A.intBankAccountId = GLAccnt.intAccountId
 				INNER JOIN tblAPVendor B
-					ON A.intVendorId = tblAPVendor.intEntityId AND tblAPVendor.ysnWithholding = 1
+					ON A.intVendorId = B.intEntityId AND B.ysnWithholding = 1
 
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
