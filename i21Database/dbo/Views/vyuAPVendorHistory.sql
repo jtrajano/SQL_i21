@@ -1,8 +1,8 @@
 ﻿
-CREATE VIEW vyuVendorHistory
+CREATE VIEW vyuAPVendorHistory
 AS
 SELECT 
-	strVendorId = A.strVendorId
+	strVendorId = tblAPVendor.strVendorId
 	,A.dtmDate
 	,intTransactionId = A.intBillId 
 	,strTransactionType = 'Bill'
@@ -14,10 +14,12 @@ SELECT
 	,A.dblAmountDue
 FROM tblAPBill A
 		LEFT JOIN tblAPPaymentDetail B ON A.intBillId = B.intBillId
+		LEFT JOIN tblAPVendor
+			ON tblAPVendor.intEntityId = A.intVendorId
 GROUP BY A.intBillId,
 	A.dtmDate,
 	A.dblTotal,
-	A.strVendorId,
+	tblAPVendor.strVendorId,
     strVendorOrderNumber,
 	A.strBillId,
 	A.ysnPaid,

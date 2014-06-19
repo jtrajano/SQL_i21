@@ -10,8 +10,8 @@ SELECT tblAPBill.dtmDate AS dtmDate
 , dblAmountDue = tblAPBill.dblAmountDue 
 , dblDiscount = 0 
 , dblInterest = 0 
-, tblAPBill.strVendorId 
-, isnull(tblAPBill.strVendorId,'') + ' - ' + isnull(tblEntity.strName,'') as strVendorIdName 
+, tblAPVendor.strVendorId 
+, isnull(tblAPVendor.strVendorId,'') + ' - ' + isnull(tblEntity.strName,'') as strVendorIdName 
 , tblAPBill.dtmDueDate
 , tblAPBill.dtmDiscountDate
 , tblAPBill.ysnPosted 
@@ -20,8 +20,8 @@ SELECT tblAPBill.dtmDate AS dtmDate
 , strDescription = (Select strDescription From tblGLAccount where strAccountId = tblGLAccount.strAccountId) 
 FROM tblAPBill 
 INNER JOIN tblGLAccount ON tblAPBill.intAccountId = tblGLAccount.intAccountId
-LEFT JOIN tblAPVendor ON tblAPVendor.strVendorId = tblAPBill.strVendorId 
-INNER JOIN tblEntity ON tblAPVendor.intEntityId = tblEntity.intEntityId
+LEFT JOIN (tblAPVendor INNER JOIN tblEntity ON tblAPVendor.intEntityId = tblEntity.intEntityId)
+	ON tblAPVendor.intEntityId = tblAPBill.intVendorId 
 WHERE tblAPBill.ysnPosted = 1   
 UNION ALL   
 SELECT tblAPPayment.dtmDatePaid AS dtmDate,   
@@ -32,8 +32,8 @@ SELECT tblAPPayment.dtmDatePaid AS dtmDate,
 , dblAmountDue = 0 
 , tblAPPaymentDetail.dblDiscount 
 , tblAPPaymentDetail.dblInterest 
-, tblAPBill.strVendorId 
-, isnull(tblAPBill.strVendorId,'') + ' - ' + isnull(tblEntity.strName,'') as strVendorIdName 
+, tblAPVendor.strVendorId 
+, isnull(tblAPVendor.strVendorId,'') + ' - ' + isnull(tblEntity.strName,'') as strVendorIdName 
 , tblAPBill.dtmDueDate 
 , tblAPBill.dtmDiscountDate
 , tblAPBill.ysnPosted 
@@ -41,7 +41,7 @@ SELECT tblAPPayment.dtmDatePaid AS dtmDate,
 , tblGLAccount.strAccountId
 , strDescription = (Select strDescription From tblGLAccount where strAccountId = tblGLAccount.strAccountId)
 FROM tblAPPaymentDetail   
- LEFT JOIN (tblAPBill LEFT JOIN (tblAPVendor INNER JOIN tblEntity ON tblAPVendor.intEntityId = tblEntity.intEntityId) ON tblAPVendor.strVendorId = tblAPBill.strVendorId) 
+ LEFT JOIN (tblAPBill LEFT JOIN (tblAPVendor INNER JOIN tblEntity ON tblAPVendor.intEntityId = tblEntity.intEntityId) ON tblAPVendor.intEntityId = tblAPBill.intVendorId) 
  ON tblAPBill.intBillId = tblAPPaymentDetail.intBillId 
  INNER JOIN tblGLAccount ON tblAPBill.intAccountId = tblGLAccount.intAccountId  
  LEFT JOIN tblAPPayment   

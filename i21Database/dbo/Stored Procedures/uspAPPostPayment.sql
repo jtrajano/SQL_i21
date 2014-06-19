@@ -294,7 +294,7 @@ IF (ISNULL(@recap, 0) = 0)
 			 [strPaymentRecordNum]
 			,A.intAccountId--(SELECT intAccountId FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
 			,GLAccnt.strDescription --(SELECT strDescription FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
-			,A.[strVendorId]
+			,C.[strVendorId]
 			,A.[dtmDatePaid]
 			,[dblDebit]				= 0
 			,[dblCredit]			= B.dblPayment
@@ -314,7 +314,9 @@ IF (ISNULL(@recap, 0) = 0)
 		INNER JOIN tblAPPaymentDetail B
 			ON	A.intPaymentId = B.intPaymentId
 		INNER JOIN [dbo].tblGLAccount GLAccnt
-					ON A.intAccountId = GLAccnt.intAccountId
+			ON A.intAccountId = GLAccnt.intAccountId
+		INNER JOIN tblAPVendor C
+			ON A.intVendorId = C.intEntityId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		--Withheld
@@ -323,7 +325,7 @@ IF (ISNULL(@recap, 0) = 0)
 			 [strPaymentRecordNum]
 			,@WithholdAccount
 			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = @WithholdAccount)
-			,A.[strVendorId]
+			,B.[strVendorId]
 			,A.[dtmDatePaid]
 			,[dblDebit]				= 0
 			,[dblCredit]			= A.dblWithheldAmount
@@ -341,8 +343,9 @@ IF (ISNULL(@recap, 0) = 0)
 			,A.intPaymentId
 		FROM	[dbo].tblAPPayment A INNER JOIN [dbo].tblGLAccount GLAccnt
 					ON A.intBankAccountId = GLAccnt.intAccountId
-				INNER JOIN tblAPVendor 
-					ON A.strVendorId = tblAPVendor.strVendorId AND tblAPVendor.ysnWithholding = 1
+				INNER JOIN tblAPVendor B
+					ON A.intVendorId = tblAPVendor.intEntityId AND tblAPVendor.ysnWithholding = 1
+
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		--Discount
@@ -351,7 +354,7 @@ IF (ISNULL(@recap, 0) = 0)
 			 [strPaymentRecordNum]
 			,@DiscountAccount
 			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = @DiscountAccount)
-			,A.[strVendorId]
+			,C.[strVendorId]
 			,A.[dtmDatePaid]
 			,[dblDebit]				= 0
 			,[dblCredit]			= B.dblDiscount
@@ -370,12 +373,14 @@ IF (ISNULL(@recap, 0) = 0)
 		FROM	[dbo].tblAPPayment A 
 				INNER JOIN tblAPPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
+				INNER JOIN tblAPVendor C
+					ON A.intVendorId = C.intEntityId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 		AND B.dblAmountDue = (B.dblPayment + B.dblDiscount) --fully paid
 		AND B.dblDiscount <> 0
 		GROUP BY A.[strPaymentRecordNum],
 		A.intPaymentId,
-		A.strVendorId,
+		C.strVendorId,
 		A.dtmDatePaid,
 		A.dblWithheldAmount,
 		B.dblDiscount,
@@ -388,7 +393,7 @@ IF (ISNULL(@recap, 0) = 0)
 		SELECT	[strPaymentRecordNum]
 				,C.[intAccountId]
 				,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = C.[intAccountId])
-				,A.[strVendorId]
+				,D.[strVendorId]
 				,A.dtmDatePaid
 				,[dblDebit]				= CASE WHEN (B.dblAmountDue = (B.dblPayment + B.dblInterest)) --add discount only if fully paid
 												THEN A.dblAmountPaid + SUM(B.dblDiscount)
@@ -409,11 +414,12 @@ IF (ISNULL(@recap, 0) = 0)
 		FROM	[dbo].tblAPPayment A 
 				INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+				INNER JOIN tblAPVendor D ON A.intVendorId = D.intEntityId 
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 		AND B.dblPayment <> 0
 		GROUP BY A.[strPaymentRecordNum],
 		A.intPaymentId,
-		A.strVendorId,
+		D.strVendorId,
 		A.dtmDatePaid,
 		A.dblWithheldAmount,
 		A.intAccountId,
@@ -512,7 +518,7 @@ IF (ISNULL(@recap, 0) = 0)
 			[intConcurrencyId] = 1
 			FROM tblAPPayment A
 				INNER JOIN tblAPVendor B
-					ON A.strVendorId = B.strVendorId
+					ON A.intVendorId = B.intEntityId
 			WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 				--Insert Successfully unposted transactions.
@@ -573,7 +579,7 @@ ELSE
 			,A.intPaymentId
 			,A.intAccountId--(SELECT intAccountId FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
 			,GLAccnt.strDescription
-			,A.[strVendorId]
+			,C.[strVendorId]
 			,A.[dtmDatePaid]
 			,[dblDebit]				= CASE WHEN @post = 0 THEN 
 										B.dblPayment
@@ -597,7 +603,9 @@ ELSE
 		INNER JOIN tblAPPaymentDetail B
 			ON A.intPaymentId = B.intPaymentId
 		INNER JOIN [dbo].tblGLAccount GLAccnt
-					ON A.intAccountId = GLAccnt.intAccountId
+			ON A.intAccountId = GLAccnt.intAccountId
+		INNER JOIN tblAPVendor C
+			ON A.intVendorId = C.intEntityId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		--Withheld
@@ -607,7 +615,7 @@ ELSE
 			,A.intPaymentId
 			,@WithholdAccount
 			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = @WithholdAccount)
-			,A.[strVendorId]
+			,B.[strVendorId]
 			,A.[dtmDatePaid]
 			,[dblDebit]				= CASE WHEN @post = 0 THEN A.dblWithheldAmount ELSE 0 END
 			,[dblCredit]			= CASE WHEN @post = 0 THEN 0 ELSE A.dblWithheldAmount END
@@ -624,8 +632,8 @@ ELSE
 			,[strModuleName]		= @MODULE_NAME
 			,A.intPaymentId
 		FROM	[dbo].tblAPPayment A 
-				INNER JOIN tblAPVendor 
-					ON A.strVendorId = tblAPVendor.strVendorId AND tblAPVendor.ysnWithholding = 1
+				INNER JOIN tblAPVendor B
+					ON A.intVendorId = B.intEntityId AND B.ysnWithholding = 1
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 		--Discount
 		UNION
@@ -634,7 +642,7 @@ ELSE
 			,A.intPaymentId
 			,@DiscountAccount
 			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = @DiscountAccount)
-			,A.[strVendorId]
+			,C.[strVendorId]
 			,A.[dtmDatePaid]
 			,[dblDebit]				= CASE WHEN @post = 0 THEN B.dblDiscount ELSE 0 END
 			,[dblCredit]			= CASE WHEN @post = 0 THEN 0 ELSE B.dblDiscount END 
@@ -653,6 +661,8 @@ ELSE
 		FROM	[dbo].tblAPPayment A 
 				INNER JOIN tblAPPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
+				INNER JOIN tblAPVendor C
+					ON A.intVendorId = C.intEntityId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 		AND 1 = (CASE WHEN @post = 1 AND B.dblAmountDue = (B.dblPayment + B.dblDiscount) THEN  1--fully paid when unposted
 					  WHEN  @post = 0 AND B.dblAmountDue = 0 THEN 1 --fully paid when posted
@@ -660,7 +670,7 @@ ELSE
 		AND B.dblDiscount <> 0
 		GROUP BY A.[strPaymentRecordNum],
 		A.intPaymentId,
-		A.strVendorId,
+		C.strVendorId,
 		A.dtmDatePaid,
 		A.dblWithheldAmount,
 		B.dblDiscount,
@@ -674,7 +684,7 @@ ELSE
 				,A.intPaymentId
 				,C.[intAccountId]
 				,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = C.[intAccountId])
-				,A.[strVendorId]
+				,D.[strVendorId]
 				,A.dtmDatePaid
 				,[dblDebit]				= SUM(CASE WHEN @post = 0 THEN 0 ELSE 
 												CASE WHEN (B.dblAmountDue = (B.dblPayment + B.dblDiscount))
@@ -699,11 +709,12 @@ ELSE
 		FROM	[dbo].tblAPPayment A 
 				INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+				INNER JOIN tblAPVendor D ON A.intVendorId = D.intEntityId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 		AND B.dblPayment <> 0
 		GROUP BY A.[strPaymentRecordNum],
 		A.intPaymentId,
-		A.strVendorId,
+		D.strVendorId,
 		A.dtmDatePaid,
 		A.dblWithheldAmount,
 		A.intAccountId,

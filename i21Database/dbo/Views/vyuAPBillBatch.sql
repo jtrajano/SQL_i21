@@ -1,4 +1,4 @@
-﻿CREATE VIEW vyuBillBatch
+﻿CREATE VIEW vyuAPBillBatch
 AS
 SELECT 
 	A.*,

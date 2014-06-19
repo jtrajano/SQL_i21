@@ -35,7 +35,8 @@ BEGIN
 	IF(@DateFrom IS NULL AND @PeriodFrom IS NULL)
 	BEGIN
 		INSERT INTO [dbo].[tblAPBill] (
-			[strVendorId], 
+			[intVendorId],
+			--[strVendorId], 
 			--[strBillId],
 			[strVendorOrderNumber], 
 			[intTermsId], 
@@ -53,7 +54,8 @@ BEGIN
 		OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid INTO @InsertedData
 		--Unposted
 		SELECT 
-			[strVendorId]			=	A.aptrx_vnd_no,
+			[intVendorId]			=	D.intEntityId,
+			--[strVendorId]			=	A.aptrx_vnd_no,
 			--[strBillId] 			=	A.aptrx_ivc_no,
 			[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
 			[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation 
@@ -77,7 +79,8 @@ BEGIN
 				ON A.aptrx_cbk_no = B.apcbk_no
 			LEFT JOIN tblAPTempBill C
 				ON A.aptrx_ivc_no = C.aptrx_ivc_no
-
+			INNER JOIN tblAPVendor D
+				ON A.aptrx_vnd_no COLLATE Latin1_General_CI_AS = D.strVendorId COLLATE Latin1_General_CI_AS
 			WHERE C.aptrx_ivc_no IS NULL
 
 			--GROUP BY A.aptrx_ivc_no, 
@@ -90,8 +93,9 @@ BEGIN
 			--B.apcbk_gl_ap
 		--Posted
 		UNION
-		SELECT 
-			[strVendorId]			=	A.apivc_vnd_no,
+		SELECT
+			[intVendorId]			=	D.intEntityId, 
+			--[strVendorId]			=	A.apivc_vnd_no,
 			--[strBillId] 			=	A.apivc_ivc_no,
 			[strVendorOrderNumber] 	=	A.apivc_ivc_no,
 			[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation 
@@ -113,7 +117,8 @@ BEGIN
 				ON A.apivc_cbk_no = B.apcbk_no
 			LEFT JOIN tblAPTempBill C
 				ON A.apivc_ivc_no = C.aptrx_ivc_no
-
+			INNER JOIN tblAPVendor D
+				ON A.apivc_vnd_no COLLATE Latin1_General_CI_AS = D.strVendorId COLLATE Latin1_General_CI_AS
 		SELECT @ImportedRecords = @@ROWCOUNT
 
 		--add detail
@@ -189,7 +194,7 @@ BEGIN
 	ELSE
 	BEGIN
 		INSERT [dbo].[tblAPBill] (
-			[strVendorId], 
+			[intVendorId], 
 			--[strBillId],
 			[strVendorOrderNumber], 
 			[intTermsId], 
@@ -206,8 +211,9 @@ BEGIN
 			[ysnPaid])
 		OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid INTO @InsertedData
 		--Unposted
-		SELECT 
-			[strVendorId]			=	A.aptrx_vnd_no,
+		SELECT
+			[intVendorId]			=	D.intEntityId,  
+			--[strVendorId]			=	A.aptrx_vnd_no,
 			--[strBillId] 			=	A.aptrx_ivc_no,
 			[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
 			[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation 
@@ -231,7 +237,8 @@ BEGIN
 				ON A.aptrx_cbk_no = B.apcbk_no
 			LEFT JOIN tblAPTempBill C
 				ON A.aptrx_ivc_no = C.aptrx_ivc_no
-			
+			INNER JOIN tblAPVendor D
+				ON A.aptrx_vnd_no COLLATE Latin1_General_CI_AS = D.strVendorId COLLATE Latin1_General_CI_AS
 		WHERE --CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
 			 CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
 			 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
@@ -248,8 +255,9 @@ BEGIN
 			--B.apcbk_gl_ap
 			--Posted
 		UNION
-		SELECT 
-			[strVendorId]			=	A.apivc_vnd_no,
+		SELECT
+			[intVendorId]			=	D.intEntityId,  
+			--[strVendorId]			=	A.apivc_vnd_no,
 			--[strBillId] 			=	A.apivc_ivc_no,
 			[strVendorOrderNumber] 	=	A.apivc_ivc_no,
 			[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation 
@@ -271,7 +279,8 @@ BEGIN
 				ON A.apivc_cbk_no = B.apcbk_no
 			LEFT JOIN tblAPTempBill C
 				ON A.apivc_ivc_no = C.aptrx_ivc_no
-
+			INNER JOIN tblAPVendor D
+				ON A.apivc_vnd_no COLLATE Latin1_General_CI_AS = D.strVendorId COLLATE Latin1_General_CI_AS
 		WHERE --CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
 			 CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
 			 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo

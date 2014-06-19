@@ -304,7 +304,7 @@ IF ISNULL(@recap, 0) = 0
 			[strTransactionId] = A.strBillId, 
 			[intAccountId] = A.intAccountId,
 			[strDescription] = A.strDescription,
-			[strReference] = A.strVendorId,
+			[strReference] = C.strVendorId,
 			[dtmTransactionDate] = A.dtmDate,
 			[dblDebit] = 0,
 			[dblCredit] = A.dblTotal,
@@ -321,6 +321,8 @@ IF ISNULL(@recap, 0) = 0
 			[strModuleName]		= @MODULE_NAME,
 			[strTransactionForm] = A.intBillId
 		FROM	[dbo].tblAPBill A
+				LEFT JOIN tblAPVendor C
+					ON A.intVendorId = C.intEntityId
 		WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 	
 		--DEBIT
@@ -329,7 +331,7 @@ IF ISNULL(@recap, 0) = 0
 			[strTransactionId] = A.strBillId, 
 			[intAccountId] = B.intAccountId,
 			[strDescription] = A.strDescription,
-			[strReference] = A.strVendorId,
+			[strReference] = C.strVendorId,
 			[dtmTransactionDate] = A.dtmDate,
 			[dblDebit] = B.dblTotal, --Bill Detail
 			[dblCredit] = 0, -- Bill
@@ -345,8 +347,11 @@ IF ISNULL(@recap, 0) = 0
 			[strCode]				= 'AP',
 			[strModuleName]		= @MODULE_NAME,
 			[strTransactionForm] = A.intBillId
-		FROM	[dbo].tblAPBill A LEFT JOIN [dbo].tblAPBillDetail B
+		FROM	[dbo].tblAPBill A 
+				LEFT JOIN [dbo].tblAPBillDetail B
 					ON A.intBillId = B.intBillId
+				LEFT JOIN tblAPVendor C
+					ON A.intVendorId = C.intEntityId
 		WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 	
 		UPDATE tblAPBill
@@ -406,7 +411,7 @@ ELSE
 			[intTransactionId] = A.intBillId,
 			[intAccountId] = A.intAccountId,
 			[strDescription] = A.strDescription,
-			[strReference] = A.strVendorId,
+			[strReference] = C.strVendorId,
 			[dtmTransactionDate] = A.dtmDate,
 			[dblDebit] = 0,
 			[dblCredit] = A.dblTotal,
@@ -423,6 +428,8 @@ ELSE
 			[strModuleName]		= @MODULE_NAME,
 			[strTransactionForm] = A.intBillId
 		FROM	[dbo].tblAPBill A
+		LEFT JOIN tblAPVendor C
+					ON A.intVendorId = C.intEntityId
 		WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 	
 		--DEBIT
@@ -432,7 +439,7 @@ ELSE
 			[intTransactionId] = A.intBillId,
 			[intAccountId] = A.intAccountId,
 			[strDescription] = A.strDescription,
-			[strReference] = A.strVendorId,
+			[strReference] = C.strVendorId,
 			[dtmTransactionDate] = A.dtmDate,
 			[dblDebit] = B.dblTotal,
 			[dblCredit] = 0,
@@ -448,8 +455,11 @@ ELSE
 			[strCode]				= 'AP',
 			[strModuleName]		= @MODULE_NAME,
 			[strTransactionForm] = A.intBillId
-		FROM	[dbo].tblAPBill A LEFT JOIN [dbo].tblAPBillDetail B
+		FROM	[dbo].tblAPBill A 
+				LEFT JOIN [dbo].tblAPBillDetail B
 					ON A.intBillId = B.intBillId
+				LEFT JOIN tblAPVendor C
+					ON A.intVendorId = C.intEntityId
 		WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
