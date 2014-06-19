@@ -9,6 +9,8 @@ SELECT
 	,strBillId = A.strBillId
 	,strInvoiceNumber = strVendorOrderNumber
 	,dblTotal = ISNULL(A.dblTotal,0)
+	,dblDiscount = A.dblDiscount
+	,dblWithheld = A.dblWithheld
 	,dblAmountPaid = CASE WHEN A.ysnPaid = 1 THEN A.dblTotal ELSE ISNULL(SUM(B.dblPayment),0) END
 	,A.ysnPaid
 	,A.dblAmountDue
@@ -19,6 +21,8 @@ FROM tblAPBill A
 GROUP BY A.intBillId,
 	A.dtmDate,
 	A.dblTotal,
+	A.dblDiscount,
+	A.dblWithheld,
 	tblAPVendor.strVendorId,
     strVendorOrderNumber,
 	A.strBillId,
