@@ -134,7 +134,36 @@ IF(ISNULL(@post,0) = 1)
 			A.ysnPosted = 1
 
 		--BILL(S) ALREADY PAID IN FULL
-
+		INSERT INTO #tmpPayableInvalidData
+		SELECT 
+			C.strBillId + ' already paid in full.',
+			'Payable',
+			A.strPaymentRecordNum,
+			@batchId,
+			A.intPaymentId
+		FROM tblAPPayment A
+			INNER JOIN tblAPPaymentDetail B
+				ON A.intPaymentId = B.intPaymentId
+			INNER JOIN tblAPBill C
+				ON B.intBillId = C.intBillId
+		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData)
+			AND C.ysnPaid = 1 AND B.dblPayment <> 0
+			
+		INSERT INTO #tmpPayableInvalidData
+		SELECT 
+			'Payment on ' + C.strBillId + ' is over the transaction''s amount due',
+			'Payable',
+			A.strPaymentRecordNum,
+			@batchId,
+			A.intPaymentId
+		FROM tblAPPayment A
+			INNER JOIN tblAPPaymentDetail B
+				ON A.intPaymentId = B.intPaymentId
+			INNER JOIN tblAPBill C
+				ON B.intBillId = C.intBillId
+		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData)
+		AND B.dblPayment <> 0 AND C.ysnPaid = 0 AND C.dblAmountDue < (B.dblPayment + B.dblDiscount)
+		
 	END
 
 	--UNPOSTING VALIDATIONS
@@ -201,7 +230,7 @@ IF (ISNULL(@recap, 0) = 0)
 		FROM tblAPPayment WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		UPDATE tblAPPaymentDetail
-			SET tblAPPaymentDetail.dblAmountDue = B.dblDiscount + B.dblPayment
+			SET tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount + B.dblPayment ELSE B.dblPayment END)
 		FROM tblAPPayment A
 			LEFT JOIN tblAPPaymentDetail B
 				ON A.intPaymentId = B.intPaymentId
