@@ -470,3 +470,17 @@ BEGIN
     END
 END
 GO
+
+
+--=====================================================================================================================================
+-- 	RENAME FIELD 
+---------------------------------------------------------------------------------------------------------------------------------------
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblFRColumnDesign]') AND type in (N'U')) 
+BEGIN
+	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'strBudgetCode' AND OBJECT_ID = OBJECT_ID(N'tblFRColumnDesign')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'strColumnCode' AND OBJECT_ID = OBJECT_ID(N'tblFRColumnDesign'))
+    BEGIN
+        EXEC sp_rename 'tblFRColumnDesign.strColumnCode', 'strBudgetCode' , 'COLUMN'
+    END
+END
+GO

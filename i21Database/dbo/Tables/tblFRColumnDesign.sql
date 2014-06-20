@@ -7,7 +7,7 @@
     [strColumnHeader]          NVARCHAR (255)  COLLATE Latin1_General_CI_AS NOT NULL,
     [strColumnCaption]         NVARCHAR (255)  COLLATE Latin1_General_CI_AS NULL,
     [strColumnType]            NVARCHAR (20)   COLLATE Latin1_General_CI_AS NULL,
-    [strColumnCode]            NVARCHAR (20)   COLLATE Latin1_General_CI_AS NULL,
+    [strBudgetCode]            NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strFilterType]            NVARCHAR (500)  COLLATE Latin1_General_CI_AS NULL,
     [dtmStartDate]             DATETIME        NULL,
     [dtmEndDate]               DATETIME        NULL,
