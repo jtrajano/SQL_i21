@@ -119,7 +119,7 @@ IF(ISNULL(@post,0) = 1)
 				A.intPaymentId
 			FROM tblAPPayment A 
 			WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
-				(A.dblAmountPaid + A.dblWithheldAmount) <> (SELECT SUM(dblPayment) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)
+				(A.dblAmountPaid + A.dblWithheld) <> (SELECT SUM(dblPayment) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)
 
 		--ALREADY POSTED
 		INSERT INTO #tmpPayableInvalidData
@@ -357,9 +357,9 @@ IF (ISNULL(@recap, 0) = 0)
 			,B.[strVendorId]
 			,A.[dtmDatePaid]
 			,[dblDebit]				= 0
-			,[dblCredit]			= A.dblWithheldAmount
-			,[dblDebitUnit]			= ISNULL(A.dblWithheldAmount, 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0)
-			,[dblCreditUnit]		= ISNULL(A.dblWithheldAmount, 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0)
+			,[dblCredit]			= A.dblWithheld
+			,[dblDebitUnit]			= ISNULL(A.dblWithheld, 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0)
+			,[dblCreditUnit]		= ISNULL(A.dblWithheld, 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0)
 			,A.[dtmDatePaid]
 			,0
 			,1
@@ -387,8 +387,8 @@ IF (ISNULL(@recap, 0) = 0)
 			,A.[dtmDatePaid]
 			,[dblDebit]				= 0
 			,[dblCredit]			= B.dblDiscount
-			,[dblDebitUnit]			= ISNULL(A.dblWithheldAmount, 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @DiscountAccount), 0)
-			,[dblCreditUnit]		= ISNULL(A.dblWithheldAmount, 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @DiscountAccount), 0)
+			,[dblDebitUnit]			= ISNULL(A.dblWithheld, 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @DiscountAccount), 0)
+			,[dblCreditUnit]		= ISNULL(A.dblWithheld, 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @DiscountAccount), 0)
 			,A.[dtmDatePaid]
 			,0
 			,1
@@ -411,7 +411,7 @@ IF (ISNULL(@recap, 0) = 0)
 		A.intPaymentId,
 		C.strVendorId,
 		A.dtmDatePaid,
-		A.dblWithheldAmount,
+		A.dblWithheld,
 		B.dblDiscount,
 		B.dblPayment,
 		B.dblInterest,
@@ -450,7 +450,7 @@ IF (ISNULL(@recap, 0) = 0)
 		A.intPaymentId,
 		D.strVendorId,
 		A.dtmDatePaid,
-		A.dblWithheldAmount,
+		A.dblWithheld,
 		A.intAccountId,
 		B.dblPayment,
 		B.dblInterest,
@@ -647,10 +647,10 @@ ELSE
 			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = @WithholdAccount)
 			,B.[strVendorId]
 			,A.[dtmDatePaid]
-			,[dblDebit]				= CASE WHEN @post = 0 THEN A.dblWithheldAmount ELSE 0 END
-			,[dblCredit]			= CASE WHEN @post = 0 THEN 0 ELSE A.dblWithheldAmount END
-			,[dblDebitUnit]			= ISNULL(A.dblWithheldAmount, 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0)
-			,[dblCreditUnit]		= ISNULL(A.dblWithheldAmount, 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0)
+			,[dblDebit]				= CASE WHEN @post = 0 THEN A.dblWithheld ELSE 0 END
+			,[dblCredit]			= CASE WHEN @post = 0 THEN 0 ELSE A.dblWithheld END
+			,[dblDebitUnit]			= ISNULL(A.dblWithheld, 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0)
+			,[dblCreditUnit]		= ISNULL(A.dblWithheld, 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0)
 			,A.[dtmDatePaid]
 			,0
 			,1
@@ -676,8 +676,8 @@ ELSE
 			,A.[dtmDatePaid]
 			,[dblDebit]				= CASE WHEN @post = 0 THEN B.dblDiscount ELSE 0 END
 			,[dblCredit]			= CASE WHEN @post = 0 THEN 0 ELSE B.dblDiscount END 
-			,[dblDebitUnit]			= ISNULL(A.dblWithheldAmount, 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @DiscountAccount), 0)
-			,[dblCreditUnit]		= ISNULL(A.dblWithheldAmount, 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @DiscountAccount), 0)
+			,[dblDebitUnit]			= ISNULL(A.dblWithheld, 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @DiscountAccount), 0)
+			,[dblCreditUnit]		= ISNULL(A.dblWithheld, 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @DiscountAccount), 0)
 			,A.[dtmDatePaid]
 			,0
 			,1
@@ -702,7 +702,7 @@ ELSE
 		A.intPaymentId,
 		C.strVendorId,
 		A.dtmDatePaid,
-		A.dblWithheldAmount,
+		A.dblWithheld,
 		B.dblDiscount,
 		B.dblPayment,
 		B.dblInterest,
@@ -746,7 +746,7 @@ ELSE
 		A.intPaymentId,
 		D.strVendorId,
 		A.dtmDatePaid,
-		A.dblWithheldAmount,
+		A.dblWithheld,
 		A.intAccountId,
 		A.dblAmountPaid,
 		B.dblPayment,

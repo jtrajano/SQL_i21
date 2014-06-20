@@ -38,3 +38,10 @@ FROM
 	tblGLDetail
 WHERE ysnIsUnposted = 0	
 GROUP BY intAccountId, dtmDate, strCode
+
+--=====================================================================================================================================
+-- 	Normalize strJournalType 
+---------------------------------------------------------------------------------------------------------------------------------------
+
+UPDATE tblGLJournal SET strJournalType = 'Origin Journal' WHERE strJournalType = 'Legacy Journal'
+UPDATE tblGLJournal SET strJournalType = 'Adjusted Origin Journal' WHERE strJournalType = 'Adjusted Legacy Journal'
