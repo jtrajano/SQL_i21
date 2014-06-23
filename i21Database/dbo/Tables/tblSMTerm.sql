@@ -15,6 +15,7 @@
     [ysnActive]        BIT             DEFAULT ((1)) NOT NULL,
     [intSort]          INT             NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT (1), 
-    CONSTRAINT [PK_tblSMTerm] PRIMARY KEY CLUSTERED ([intTermID] ASC)
+    CONSTRAINT [PK_tblSMTerm] PRIMARY KEY CLUSTERED ([intTermID] ASC), 
+    CONSTRAINT [AK_tblSMTerm_strTerm] UNIQUE ([strTerm])
 );
 
