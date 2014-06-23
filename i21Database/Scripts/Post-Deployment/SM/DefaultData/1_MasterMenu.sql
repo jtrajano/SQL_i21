@@ -461,3 +461,6 @@ GO
 							AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu Main 
 													WHERE strMenuName = 'Customer Portal'))
 GO
+	IF NOT EXISTS(SELECT * FROM tblSMMasterMenu WHERE strMenuName = 'On Hold Detail' AND strType = 'Report' AND strModuleName = 'Tank Management')
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'On Hold Detail', N'Tank Management', 86, N'On Hold Detail', N'Report', N'On Hold Detail', N'small-report', 0, 0, 0, 1, NULL, 1)
+GO
