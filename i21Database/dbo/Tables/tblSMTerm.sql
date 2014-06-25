@@ -16,6 +16,7 @@
     [intSort]          INT             NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT (1), 
     CONSTRAINT [PK_tblSMTerm] PRIMARY KEY CLUSTERED ([intTermID] ASC), 
-    CONSTRAINT [AK_tblSMTerm_strTerm] UNIQUE ([strTerm])
+    CONSTRAINT [AK_tblSMTerm_strTerm] UNIQUE ([strTerm]), 
+    CONSTRAINT [AK_tblSMTerm_strTermCode] UNIQUE ([strTermCode])
 );
 
