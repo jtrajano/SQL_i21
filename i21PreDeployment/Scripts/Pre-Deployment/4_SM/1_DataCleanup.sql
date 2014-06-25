@@ -6,3 +6,11 @@ GO
 GO
 	PRINT N'END CLEAN UP PREFERENCES - update null intUserID to 0'
 GO
+	PRINT N'BEGIN Add default value for Terms Code'
+GO
+	UPDATE tblSMTerm
+	SET strTermCode = REPLACE(strTerm, ' ', '') + CAST(intTermID AS NVARCHAR)
+	WHERE ISNULL(strTermCode, '') = ''
+GO
+	PRINT N'END Add default value for Terms Code'
+GO

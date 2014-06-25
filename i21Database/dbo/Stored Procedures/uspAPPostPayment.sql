@@ -94,77 +94,77 @@ END
 IF (ISNULL(@recap, 0) = 0)
 BEGIN
 
---POST VALIDATIONS
-IF(ISNULL(@post,0) = 1)
-	BEGIN
-		--Fiscal Year
-		INSERT INTO #tmpPayableInvalidData
+	--POST VALIDATIONS
+	IF(ISNULL(@post,0) = 1)
+		BEGIN
+			--Fiscal Year
+			INSERT INTO #tmpPayableInvalidData
+				SELECT 
+					'Unable to find an open fiscal year period to match the transaction date.',
+					'Payable',
+					A.strPaymentRecordNum,
+					@batchId,
+					A.intPaymentId
+				FROM tblAPPayment A 
+				WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
+					0 = ISNULL([dbo].isOpenAccountingDate(A.[dtmDatePaid]), 0)
+
+			--NOT BALANCE
+			INSERT INTO #tmpPayableInvalidData
+				SELECT 
+					'The debit and credit amounts are not balanced.',
+					'Payable',
+					A.strPaymentRecordNum,
+					@batchId,
+					A.intPaymentId
+				FROM tblAPPayment A 
+				WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
+					(A.dblAmountPaid + A.dblWithheld) <> (SELECT SUM(dblPayment) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)
+
+			--ALREADY POSTED
+			INSERT INTO #tmpPayableInvalidData
 			SELECT 
-				'Unable to find an open fiscal year period to match the transaction date.',
+				'The transaction is already posted.',
 				'Payable',
 				A.strPaymentRecordNum,
 				@batchId,
 				A.intPaymentId
 			FROM tblAPPayment A 
 			WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
-				0 = ISNULL([dbo].isOpenAccountingDate(A.[dtmDatePaid]), 0)
+				A.ysnPosted = 1
 
-		--NOT BALANCE
-		INSERT INTO #tmpPayableInvalidData
+			--BILL(S) ALREADY PAID IN FULL
+			INSERT INTO #tmpPayableInvalidData
 			SELECT 
-				'The debit and credit amounts are not balanced.',
+				C.strBillId + ' already paid in full.',
 				'Payable',
 				A.strPaymentRecordNum,
 				@batchId,
 				A.intPaymentId
-			FROM tblAPPayment A 
-			WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
-				(A.dblAmountPaid + A.dblWithheld) <> (SELECT SUM(dblPayment) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)
-
-		--ALREADY POSTED
-		INSERT INTO #tmpPayableInvalidData
-		SELECT 
-			'The transaction is already posted.',
-			'Payable',
-			A.strPaymentRecordNum,
-			@batchId,
-			A.intPaymentId
-		FROM tblAPPayment A 
-		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
-			A.ysnPosted = 1
-
-		--BILL(S) ALREADY PAID IN FULL
-		INSERT INTO #tmpPayableInvalidData
-		SELECT 
-			C.strBillId + ' already paid in full.',
-			'Payable',
-			A.strPaymentRecordNum,
-			@batchId,
-			A.intPaymentId
-		FROM tblAPPayment A
-			INNER JOIN tblAPPaymentDetail B
-				ON A.intPaymentId = B.intPaymentId
-			INNER JOIN tblAPBill C
-				ON B.intBillId = C.intBillId
-		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData)
-			AND C.ysnPaid = 1 AND B.dblPayment <> 0
+			FROM tblAPPayment A
+				INNER JOIN tblAPPaymentDetail B
+					ON A.intPaymentId = B.intPaymentId
+				INNER JOIN tblAPBill C
+					ON B.intBillId = C.intBillId
+			WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData)
+				AND C.ysnPaid = 1 AND B.dblPayment <> 0
+				
+			INSERT INTO #tmpPayableInvalidData
+			SELECT 
+				'Payment on ' + C.strBillId + ' is over the transaction''s amount due',
+				'Payable',
+				A.strPaymentRecordNum,
+				@batchId,
+				A.intPaymentId
+			FROM tblAPPayment A
+				INNER JOIN tblAPPaymentDetail B
+					ON A.intPaymentId = B.intPaymentId
+				INNER JOIN tblAPBill C
+					ON B.intBillId = C.intBillId
+			WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData)
+			AND B.dblPayment <> 0 AND C.ysnPaid = 0 AND C.dblAmountDue < (B.dblPayment + B.dblDiscount)
 			
-		INSERT INTO #tmpPayableInvalidData
-		SELECT 
-			'Payment on ' + C.strBillId + ' is over the transaction''s amount due',
-			'Payable',
-			A.strPaymentRecordNum,
-			@batchId,
-			A.intPaymentId
-		FROM tblAPPayment A
-			INNER JOIN tblAPPaymentDetail B
-				ON A.intPaymentId = B.intPaymentId
-			INNER JOIN tblAPBill C
-				ON B.intBillId = C.intBillId
-		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData)
-		AND B.dblPayment <> 0 AND C.ysnPaid = 0 AND C.dblAmountDue < (B.dblPayment + B.dblDiscount)
-		
-	END
+		END
 
 	--UNPOSTING VALIDATIONS
 	IF(ISNULL(@post,0) = 0)
@@ -220,7 +220,181 @@ END
 -- 	CHECK IF THE PROCESS IS RECAP OR NOT
 ---------------------------------------------------------------------------------------------------------------------------------------
 IF (ISNULL(@recap, 0) = 0)
+BEGIN
+		--POSTING
+		--INSERT GL ENTRIES
+		--WHY REVERSAL IS NECESSARY??
+		WITH Units 
+		AS 
+		(
+			SELECT	A.[dblLbsPerUnit], B.[intAccountId] 
+			FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
+		)
+		INSERT INTO tblGLDetail (
+			[strTransactionId], 
+			[intAccountId],
+			[strDescription],
+			[strReference],
+			[dtmTransactionDate],
+			[dblDebit],
+			[dblCredit],
+			[dblDebitUnit],
+			[dblCreditUnit],
+			[dtmDate],
+			[ysnIsUnposted],
+			[intConcurrencyId],
+			[dblExchangeRate],
+			[intUserId],
+			[dtmDateEntered],
+			[strBatchId],
+			[strCode],
+			[strModuleName],
+			[strTransactionForm]
+		)
+		--CREDIT
+		SELECT
+			 [strPaymentRecordNum]
+			,A.intAccountId--(SELECT intAccountId FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
+			,GLAccnt.strDescription --(SELECT strDescription FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
+			,C.[strVendorId]
+			,A.[dtmDatePaid]
+			,[dblDebit]				= CASE WHEN @post = 1 THEN 0 ELSE A.dblAmountPaid END
+			,[dblCredit]			= CASE WHEN @post = 1 THEN A.dblAmountPaid ELSE 0 END
+			,[dblDebitUnit]			= ISNULL(A.[dblAmountPaid], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
+			,[dblCreditUnit]		= ISNULL(A.[dblAmountPaid], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
+			,A.[dtmDatePaid]
+			,0
+			,1
+			,[dblExchangeRate]		= 1
+			,[intUserId]			= @userId
+			,[dtmDateEntered]		= GETDATE()
+			,[strBatchId]			= @batchId
+			,[strCode]				= 'AP'
+			,[strModuleName]		= @MODULE_NAME
+			,A.intPaymentId
+		FROM	[dbo].tblAPPayment A 
+		--INNER JOIN tblAPPaymentDetail B
+		--	ON	A.intPaymentId = B.intPaymentId
+		INNER JOIN [dbo].tblGLAccount GLAccnt
+			ON A.intAccountId = GLAccnt.intAccountId
+		INNER JOIN tblAPVendor C
+			ON A.intVendorId = C.intEntityId
+		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		--GROUP BY A.[strPaymentRecordNum],
+		--A.intPaymentId,
+		--A.dtmDatePaid,
+		--A.dblWithheld,
+		--A.intAccountId,
+		--GLAccnt.strDescription,
+		--C.strVendorId
+		
+		--Withheld
+		UNION
+		SELECT
+			 [strPaymentRecordNum]
+			,@WithholdAccount
+			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = @WithholdAccount)
+			,B.[strVendorId]
+			,A.[dtmDatePaid]
+			,[dblDebit]				= CASE WHEN @post = 1 THEN 0 ELSE A.dblWithheld END
+			,[dblCredit]			= CASE WHEN @post = 1 THEN A.dblWithheld ELSE 0 END
+			,[dblDebitUnit]			= ISNULL(A.dblWithheld, 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0)
+			,[dblCreditUnit]		= ISNULL(A.dblWithheld, 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0)
+			,A.[dtmDatePaid]
+			,0
+			,1
+			,[dblExchangeRate]		= 1
+			,[intUserId]			= @userId
+			,[dtmDateEntered]		= GETDATE()
+			,[strBatchId]			= @batchId
+			,[strCode]				= 'AP'
+			,[strModuleName]		= @MODULE_NAME
+			,A.intPaymentId
+		FROM	[dbo].tblAPPayment A INNER JOIN [dbo].tblGLAccount GLAccnt
+					ON A.intBankAccountId = GLAccnt.intAccountId
+				INNER JOIN tblAPVendor B
+					ON A.intVendorId = B.intEntityId AND B.ysnWithholding = 1
+		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
+		--Discount
+		UNION
+		SELECT
+			 [strPaymentRecordNum]
+			,@DiscountAccount
+			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = @DiscountAccount)
+			,C.[strVendorId]
+			,A.[dtmDatePaid]
+			,[dblDebit]				= SUM(CASE WHEN @post = 1 THEN 0 ELSE B.dblDiscount END)
+			,[dblCredit]			= SUM(CASE WHEN @post = 1 THEN B.dblDiscount ELSE 0 END)
+			,[dblDebitUnit]			= SUM(ISNULL(B.dblDiscount, 0))  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @DiscountAccount), 0)
+			,[dblCreditUnit]		= SUM(ISNULL(B.dblDiscount, 0)) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @DiscountAccount), 0)
+			,A.[dtmDatePaid]
+			,0
+			,1
+			,[dblExchangeRate]		= 1
+			,[intUserId]			= @userId
+			,[dtmDateEntered]		= GETDATE()
+			,[strBatchId]			= @batchId
+			,[strCode]				= 'AP'
+			,[strModuleName]		= @MODULE_NAME
+			,A.intPaymentId
+		FROM	[dbo].tblAPPayment A 
+				INNER JOIN tblAPPaymentDetail B
+					ON A.intPaymentId = B.intPaymentId
+				INNER JOIN tblAPVendor C
+					ON A.intVendorId = C.intEntityId
+		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		AND B.dblAmountDue = (B.dblPayment + B.dblDiscount) --fully paid
+		AND B.dblDiscount <> 0
+		GROUP BY A.[strPaymentRecordNum],
+		A.intPaymentId,
+		C.strVendorId,
+		A.dtmDatePaid
+		
+		---- DEBIT SIDE
+		UNION ALL 
+		SELECT	[strPaymentRecordNum]
+				,B.[intAccountId]
+				,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = B.[intAccountId])
+				,D.[strVendorId]
+				,A.dtmDatePaid
+				,[dblDebit]				= CASE WHEN @post = 1 THEN SUM(CASE WHEN (B.dblAmountDue = B.dblPayment) --add discount only if fully paid
+												THEN B.dblPayment + B.dblDiscount
+												ELSE B.dblPayment END) 
+											ELSE 0 END
+				,[dblCredit]			= CASE WHEN @post = 1 THEN 0 
+											ELSE SUM(CASE WHEN (B.dblAmountDue = B.dblPayment) --add discount only if fully paid
+												THEN B.dblPayment + B.dblDiscount
+												ELSE B.dblPayment END)
+											END 
+				,[dblDebitUnit]			= SUM(CASE WHEN (B.dblAmountDue = B.dblPayment) --add discount only if fully paid
+												THEN B.dblPayment + B.dblDiscount
+												ELSE B.dblPayment END)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = B.[intAccountId]), 0)
+				,[dblCreditUnit]		= SUM(CASE WHEN (B.dblAmountDue = B.dblPayment) --add discount only if fully paid
+												THEN B.dblPayment + B.dblDiscount
+												ELSE B.dblPayment END) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = B.[intAccountId]), 0)
+				,A.[dtmDatePaid]
+				,0
+				,1
+				,[dblExchangeRate]		= 1
+				,[intUserId]			= @userId
+				,[dtmDateEntered]		= GETDATE()
+				,[strBatchId]			= @batchId
+				,[strCode]				= 'AP'
+				,[strModuleName]		= @MODULE_NAME
+				,A.intPaymentId
+		FROM	[dbo].tblAPPayment A 
+				INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+				--INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+				INNER JOIN tblAPVendor D ON A.intVendorId = D.intEntityId 
+		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		AND B.dblPayment <> 0
+		GROUP BY A.[strPaymentRecordNum],
+		A.intPaymentId,
+		D.strVendorId,
+		A.dtmDatePaid,
+		B.intAccountId
+		
 	IF(ISNULL(@post,0) = 0)
 	BEGIN
 		
@@ -289,175 +463,6 @@ IF (ISNULL(@recap, 0) = 0)
 	END
 	ELSE
 	BEGIN
-
-		--POSTING
-		WITH Units 
-		AS 
-		(
-			SELECT	A.[dblLbsPerUnit], B.[intAccountId] 
-			FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
-		)
-		INSERT INTO tblGLDetail (
-			[strTransactionId], 
-			[intAccountId],
-			[strDescription],
-			[strReference],
-			[dtmTransactionDate],
-			[dblDebit],
-			[dblCredit],
-			[dblDebitUnit],
-			[dblCreditUnit],
-			[dtmDate],
-			[ysnIsUnposted],
-			[intConcurrencyId],
-			[dblExchangeRate],
-			[intUserId],
-			[dtmDateEntered],
-			[strBatchId],
-			[strCode],
-			[strModuleName],
-			[strTransactionForm]
-		)
-		--CREDIT
-		SELECT
-			 [strPaymentRecordNum]
-			,A.intAccountId--(SELECT intAccountId FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
-			,GLAccnt.strDescription --(SELECT strDescription FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
-			,C.[strVendorId]
-			,A.[dtmDatePaid]
-			,[dblDebit]				= 0
-			,[dblCredit]			= B.dblPayment
-			,[dblDebitUnit]			= ISNULL(A.[dblAmountPaid], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
-			,[dblCreditUnit]		= ISNULL(A.[dblAmountPaid], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
-			,A.[dtmDatePaid]
-			,0
-			,1
-			,[dblExchangeRate]		= 1
-			,[intUserId]			= @userId
-			,[dtmDateEntered]		= GETDATE()
-			,[strBatchId]			= @batchId
-			,[strCode]				= 'AP'
-			,[strModuleName]		= @MODULE_NAME
-			,A.intPaymentId
-		FROM	[dbo].tblAPPayment A 
-		INNER JOIN tblAPPaymentDetail B
-			ON	A.intPaymentId = B.intPaymentId
-		INNER JOIN [dbo].tblGLAccount GLAccnt
-			ON A.intAccountId = GLAccnt.intAccountId
-		INNER JOIN tblAPVendor C
-			ON A.intVendorId = C.intEntityId
-		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-
-		--Withheld
-		UNION
-		SELECT
-			 [strPaymentRecordNum]
-			,@WithholdAccount
-			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = @WithholdAccount)
-			,B.[strVendorId]
-			,A.[dtmDatePaid]
-			,[dblDebit]				= 0
-			,[dblCredit]			= A.dblWithheld
-			,[dblDebitUnit]			= ISNULL(A.dblWithheld, 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0)
-			,[dblCreditUnit]		= ISNULL(A.dblWithheld, 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0)
-			,A.[dtmDatePaid]
-			,0
-			,1
-			,[dblExchangeRate]		= 1
-			,[intUserId]			= @userId
-			,[dtmDateEntered]		= GETDATE()
-			,[strBatchId]			= @batchId
-			,[strCode]				= 'AP'
-			,[strModuleName]		= @MODULE_NAME
-			,A.intPaymentId
-		FROM	[dbo].tblAPPayment A INNER JOIN [dbo].tblGLAccount GLAccnt
-					ON A.intBankAccountId = GLAccnt.intAccountId
-				INNER JOIN tblAPVendor B
-					ON A.intVendorId = B.intEntityId AND B.ysnWithholding = 1
-
-		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-
-		--Discount
-		UNION
-		SELECT
-			 [strPaymentRecordNum]
-			,@DiscountAccount
-			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = @DiscountAccount)
-			,C.[strVendorId]
-			,A.[dtmDatePaid]
-			,[dblDebit]				= 0
-			,[dblCredit]			= B.dblDiscount
-			,[dblDebitUnit]			= ISNULL(A.dblWithheld, 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @DiscountAccount), 0)
-			,[dblCreditUnit]		= ISNULL(A.dblWithheld, 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @DiscountAccount), 0)
-			,A.[dtmDatePaid]
-			,0
-			,1
-			,[dblExchangeRate]		= 1
-			,[intUserId]			= @userId
-			,[dtmDateEntered]		= GETDATE()
-			,[strBatchId]			= @batchId
-			,[strCode]				= 'AP'
-			,[strModuleName]		= @MODULE_NAME
-			,A.intPaymentId
-		FROM	[dbo].tblAPPayment A 
-				INNER JOIN tblAPPaymentDetail B
-					ON A.intPaymentId = B.intPaymentId
-				INNER JOIN tblAPVendor C
-					ON A.intVendorId = C.intEntityId
-		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-		AND B.dblAmountDue = (B.dblPayment + B.dblDiscount) --fully paid
-		AND B.dblDiscount <> 0
-		GROUP BY A.[strPaymentRecordNum],
-		A.intPaymentId,
-		C.strVendorId,
-		A.dtmDatePaid,
-		A.dblWithheld,
-		B.dblDiscount,
-		B.dblPayment,
-		B.dblInterest,
-		B.dblAmountDue
-		
-		---- DEBIT SIDE
-		UNION ALL 
-		SELECT	[strPaymentRecordNum]
-				,C.[intAccountId]
-				,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = C.[intAccountId])
-				,D.[strVendorId]
-				,A.dtmDatePaid
-				,[dblDebit]				= CASE WHEN (B.dblAmountDue = (B.dblPayment + B.dblInterest)) --add discount only if fully paid
-												THEN A.dblAmountPaid + SUM(B.dblDiscount)
-												ELSE A.dblAmountPaid END
-				,[dblCredit]			= 0
-				,[dblDebitUnit]			= ISNULL(B.dblPayment, 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
-				,[dblCreditUnit]		= ISNULL(B.dblPayment, 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
-				,A.[dtmDatePaid]
-				,0
-				,1
-				,[dblExchangeRate]		= 1
-				,[intUserId]			= @userId
-				,[dtmDateEntered]		= GETDATE()
-				,[strBatchId]			= @batchId
-				,[strCode]				= 'AP'
-				,[strModuleName]		= @MODULE_NAME
-				,A.intPaymentId
-		FROM	[dbo].tblAPPayment A 
-				INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
-				INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
-				INNER JOIN tblAPVendor D ON A.intVendorId = D.intEntityId 
-		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-		AND B.dblPayment <> 0
-		GROUP BY A.[strPaymentRecordNum],
-		A.intPaymentId,
-		D.strVendorId,
-		A.dtmDatePaid,
-		A.dblWithheld,
-		A.intAccountId,
-		B.dblPayment,
-		B.dblInterest,
-		B.dblAmountDue,
-		A.dblAmountPaid,
-		C.intAccountId
-		
 
 		-- Update the posted flag in the transaction table
 		UPDATE tblAPPayment
@@ -550,7 +555,7 @@ IF (ISNULL(@recap, 0) = 0)
 					ON A.intVendorId = B.intEntityId
 			WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
-				--Insert Successfully unposted transactions.
+		--Insert Successfully posted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT 
 			@PostSuccessfulMsg,
@@ -563,6 +568,7 @@ IF (ISNULL(@recap, 0) = 0)
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
+END
 ELSE
 	BEGIN
 
@@ -610,14 +616,14 @@ ELSE
 			,GLAccnt.strDescription
 			,C.[strVendorId]
 			,A.[dtmDatePaid]
-			,[dblDebit]				= CASE WHEN @post = 0 THEN 
-										B.dblPayment
-									 ELSE 0 END
-			,[dblCredit]			= CASE WHEN @post = 0 THEN 0 ELSE 
-										B.dblPayment
-										END
-			,[dblDebitUnit]			= ISNULL(A.[dblAmountPaid], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
-			,[dblCreditUnit]		= ISNULL(A.[dblAmountPaid], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
+			,[dblDebit]				= SUM(CASE WHEN @post = 0 THEN 
+										A.dblAmountPaid
+									 ELSE 0 END)
+			,[dblCredit]			= SUM(CASE WHEN @post = 0 THEN 0 ELSE 
+										A.dblAmountPaid
+										END)
+			,[dblDebitUnit]			= SUM(ISNULL(A.[dblAmountPaid], 0))  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
+			,[dblCreditUnit]		= SUM(ISNULL(A.[dblAmountPaid], 0)) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
 			,A.[dtmDatePaid]
 			,0
 			,1
@@ -629,14 +635,20 @@ ELSE
 			,[strModuleName]		= @MODULE_NAME
 			,A.intPaymentId
 		FROM	[dbo].tblAPPayment A 
-		INNER JOIN tblAPPaymentDetail B
-			ON A.intPaymentId = B.intPaymentId
+		--INNER JOIN tblAPPaymentDetail B
+		--	ON A.intPaymentId = B.intPaymentId
 		INNER JOIN [dbo].tblGLAccount GLAccnt
 			ON A.intAccountId = GLAccnt.intAccountId
 		INNER JOIN tblAPVendor C
 			ON A.intVendorId = C.intEntityId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-		AND B.dblPayment <> 0
+		GROUP BY A.[strPaymentRecordNum],
+		A.intPaymentId,
+		A.dtmDatePaid,
+		A.dblWithheld,
+		A.intAccountId,
+		GLAccnt.strDescription,
+		C.strVendorId
 
 		--Withheld
 		UNION
@@ -749,9 +761,9 @@ ELSE
 		A.dblWithheld,
 		A.intAccountId,
 		A.dblAmountPaid,
-		B.dblPayment,
-		B.dblInterest,
-		B.dblAmountDue,
+		--B.dblPayment,
+		--B.dblInterest,
+		--B.dblAmountDue,
 		C.intAccountId
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;

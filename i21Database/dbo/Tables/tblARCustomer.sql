@@ -7,12 +7,12 @@
     [dblARBalance]                    NUMERIC (18, 6) NOT NULL,
     [strAccountNumber]                NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strTaxNumber]                    NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [strCurrency]                     NVARCHAR (3)  COLLATE Latin1_General_CI_AS NULL,
+    [strCurrency]                     NVARCHAR (3)    COLLATE Latin1_General_CI_AS NULL,
     [intAccountStatusId]              INT             NULL,
     [intSalespersonId]                INT             NULL,
     [strPricing]                      NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strLevel]                        NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-	[dblPercent]					  NUMERIC (18, 6) NOT NULL DEFAULT ((0)),
+    [dblPercent]                      NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,
     [strTimeZone]                     NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [ysnActive]                       BIT             CONSTRAINT [DF_tblARCustomer_ysnActive] DEFAULT ((1)) NOT NULL,
     [intDefaultContactId]             INT             NULL,
@@ -53,7 +53,7 @@
     [ysnMarketAgreementSigned]        BIT             DEFAULT ((0)) NOT NULL,
     [intMarketZoneId]                 INT             NULL,
     [ysnHoldBatchGrainPayment]        BIT             DEFAULT ((0)) NOT NULL,
-	[ysnFederalWithholding]			  BIT             DEFAULT ((0)) NOT NULL,
+    [ysnFederalWithholding]           BIT             DEFAULT ((0)) NOT NULL,
     [strAEBNumber]                    NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strAgrimineId]                   NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strHarvestPartnerCustomerId]     NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
@@ -67,10 +67,16 @@
     [ysnSubjectToFWT]                 BIT             DEFAULT ((0)) NOT NULL,
     [intConcurrencyId]                INT             CONSTRAINT [DF_tblARCustomer_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_dbo.tblARCustomer] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
+    CONSTRAINT [FK_tblARCustomer_tblARAccountStatus] FOREIGN KEY ([intAccountStatusId]) REFERENCES [dbo].[tblARAccountStatus] ([intAccountStatusId]),
+    CONSTRAINT [FK_tblARCustomer_tblARMarketZone] FOREIGN KEY ([intMarketZoneId]) REFERENCES [dbo].[tblARMarketZone] ([intMarketZoneId]),
+    CONSTRAINT [FK_tblARCustomer_tblARSalesperson] FOREIGN KEY ([intSalespersonId]) REFERENCES [dbo].[tblARSalesperson] ([intEntityId]),
+    CONSTRAINT [FK_tblARCustomer_tblARServiceCharge] FOREIGN KEY ([intServiceChargeId]) REFERENCES [dbo].[tblARServiceCharge] ([intServiceChargeId]),
     CONSTRAINT [FK_tblARCustomer_tblEntityLocation] FOREIGN KEY ([intDefaultLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId]) ON DELETE SET DEFAULT,
     CONSTRAINT [FK_tblARCustomer_tblEntityToContact] FOREIGN KEY ([intDefaultContactId]) REFERENCES [dbo].[tblEntityToContact] ([intEntityToContactId]) ON DELETE SET DEFAULT,
     CONSTRAINT [UKstrCusomerNumber] UNIQUE NONCLUSTERED ([strCustomerNumber] ASC)
 );
+
+
 
 
 
