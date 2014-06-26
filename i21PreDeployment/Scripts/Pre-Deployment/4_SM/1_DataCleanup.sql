@@ -14,3 +14,15 @@ GO
 GO
 	PRINT N'END Add default value for Terms Code'
 GO
+	PRINT N'BEGIN Eliminate duplicate Terms Code'
+GO
+	UPDATE tblSMTerm
+	SET strTermCode = REPLACE(strTerm, ' ', '') + CAST(intTermID AS NVARCHAR)
+	WHERE strTermCode IN (
+		SELECT strTermCode FROM tblSMTerm
+		GROUP BY strTermCode
+		HAVING COUNT(*) > 1
+	)
+GO
+	PRINT N'END Eliminate duplicate Terms Code'
+GO
