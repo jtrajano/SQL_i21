@@ -97,6 +97,36 @@ BEGIN
 --POST VALIDATIONS
 IF(ISNULL(@post,0) = 1)
 	BEGIN
+
+		--Payment without payment on detail
+		INSERT INTO #tmpPayableInvalidData
+			SELECT 
+				'There was no bill to pay on this payment.',
+				'Payable',
+				A.strPaymentRecordNum,
+				@batchId,
+				A.intPaymentId
+			FROM tblAPPayment A 
+			LEFT JOIN tblAPPaymentDetail B
+				ON A.intPaymentId = B.intPaymentId
+			WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData)
+			GROUP BY A.intPaymentId, A.strPaymentRecordNum
+			HAVING SUM(B.dblPayment) = 0
+
+		--Payment without detail
+		INSERT INTO #tmpPayableInvalidData
+			SELECT 
+				'There was no bill to pay on this payment.',
+				'Payable',
+				A.strPaymentRecordNum,
+				@batchId,
+				A.intPaymentId
+			FROM tblAPPayment A 
+			LEFT JOIN tblAPPaymentDetail B
+				ON A.intPaymentId = B.intPaymentId
+			WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData)
+			AND B.intPaymentId IS NULL
+
 		--Fiscal Year
 		INSERT INTO #tmpPayableInvalidData
 			SELECT 
