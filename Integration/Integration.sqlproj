@@ -156,4 +156,7 @@
     <None Include="dbo\Views\vyuCPGAContractHistory.sql" />
     <None Include="dbo\Views\vyuCPGAContractOption.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="dbo\Views\vyuTMOriginDegreeOption.sql" />
+  </ItemGroup>
 </Project>
