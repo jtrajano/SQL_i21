@@ -13,9 +13,10 @@ BEGIN
 		intBillId INT,
 		strVendorId NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	)
-
+	EXEC('
 	INSERT INTO tblAPTempBillData
 	SELECT intBillId, strVendorId FROM tblAPBill
+	')
 	PRINT('END Backing up Vendor Bill Data')
 END
 
@@ -34,7 +35,9 @@ BEGIN
 		strVendorId NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	)
 
+	EXEC('
 	INSERT INTO tblAPTempPaymentData
 	SELECT intPaymentId, strVendorId FROM tblAPPayment
+	')
 	PRINT('End Backing up Vendor Payment Data')
 END
