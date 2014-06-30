@@ -2599,6 +2599,20 @@
                                                             "designerId": "1275cc4e-6355-4fb9-9658-2f87b2e998e6"
                                                         },
                                                         {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "string",
+                                                                "flex": 2,
+                                                                "text": "Pick Ticket Notes"
+                                                            },
+                                                            "designerId": "0f5cc5b7-f28c-40e6-a440-46c7570c18cf"
+                                                        },
+                                                        {
                                                             "type": "Ext.grid.View",
                                                             "reference": {
                                                                 "name": "viewConfig",
@@ -2739,6 +2753,34 @@
                                                                 "text": "Product Description"
                                                             },
                                                             "designerId": "7678a764-b42e-4264-9119-1e3307a608dc"
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "string",
+                                                                "flex": 1,
+                                                                "text": "Conversion Factor"
+                                                            },
+                                                            "designerId": "4d7c607c-0dc9-4354-bbea-edccdff68181"
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "string",
+                                                                "flex": 1,
+                                                                "text": "UOM"
+                                                            },
+                                                            "designerId": "3f5d4d85-ee4f-454d-9125-abc2c971efc6"
                                                         },
                                                         {
                                                             "type": "Ext.grid.View",

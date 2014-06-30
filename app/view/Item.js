@@ -1148,6 +1148,12 @@ Ext.define('Inventory.view.Item', {
                                                                     dataIndex: 'string',
                                                                     text: 'Product Description',
                                                                     flex: 2
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    dataIndex: 'string',
+                                                                    text: 'Pick Ticket Notes',
+                                                                    flex: 2
                                                                 }
                                                             ],
                                                             viewConfig: {
@@ -1209,6 +1215,18 @@ Ext.define('Inventory.view.Item', {
                                                                     dataIndex: 'string',
                                                                     text: 'Product Description',
                                                                     flex: 2
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    dataIndex: 'string',
+                                                                    text: 'Conversion Factor',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    xtype: 'gridcolumn',
+                                                                    dataIndex: 'string',
+                                                                    text: 'UOM',
+                                                                    flex: 1
                                                                 }
                                                             ],
                                                             viewConfig: {
