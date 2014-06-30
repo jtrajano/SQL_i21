@@ -1,0 +1,639 @@
+{
+    "type": "Ext.window.Window",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "collapsible": true,
+        "defaultFocus": null,
+        "designer|userAlias": "categorystore",
+        "designer|userClassName": "CategoryStore",
+        "height": 415,
+        "hidden": false,
+        "icon": null,
+        "iconCls": "small-icon-i21",
+        "itemId": null,
+        "layout": "fit",
+        "maxHeight": 415,
+        "maximizable": true,
+        "minHeight": 415,
+        "minWidth": 675,
+        "minimizable": null,
+        "title": "Category Store",
+        "width": 675
+    },
+    "designerId": "b2711fe3-32fc-4d2e-bf3e-6e6c019c1fea",
+    "cn": [
+        {
+            "type": "Ext.form.Panel",
+            "reference": {
+                "name": "items",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "autoShow": true,
+                "bodyBorder": false,
+                "bodyPadding": 10,
+                "container|align": "stretch",
+                "dock": null,
+                "frame": null,
+                "header": false,
+                "height": 350,
+                "itemId": "frmCategoryStore",
+                "layout": "vbox",
+                "margin": -1,
+                "title": null,
+                "trackResetOnLoad": true,
+                "url": null,
+                "width": 450
+            },
+            "designerId": "6de1d308-1097-4d44-a4ea-db44ff3289d0",
+            "cn": [
+                {
+                    "type": "Ext.toolbar.Toolbar",
+                    "reference": {
+                        "name": "dockedItems",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|padding": "0 0 0 1",
+                        "designer|displayName": "toolbar",
+                        "dock": "top",
+                        "width": 588
+                    },
+                    "designerId": "af814be4-b4c1-443d-bfa6-16ab32b5b4af",
+                    "cn": [
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-new",
+                                "itemId": "btnNew",
+                                "layout|flex": null,
+                                "layout|margins": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "New",
+                                "width": 45
+                            },
+                            "designerId": "ae03c8d2-cc99-44dd-827f-108aaa63004f"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-save",
+                                "itemId": "btnSave",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Save",
+                                "width": 45
+                            },
+                            "designerId": "0c490d1f-e872-48a0-a203-d9422d8b27b2"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-search",
+                                "itemId": "btnSearch",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Search",
+                                "width": 45
+                            },
+                            "designerId": "4a57e866-7950-4554-9d21-289ce4d24b38"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-delete",
+                                "itemId": "btnDelete",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Delete",
+                                "width": 45
+                            },
+                            "designerId": "c2ba8198-ac0a-4925-94ff-aeed7e1fbc34"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-undo",
+                                "itemId": "btnUndo",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Undo",
+                                "width": 45
+                            },
+                            "designerId": "759927aa-7c1c-41aa-8309-cd41fc4f72ec"
+                        },
+                        {
+                            "type": "Ext.toolbar.Separator",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": "separator",
+                                "height": 30,
+                                "layout|flex": null
+                            },
+                            "designerId": "1e9ff5a6-3b8c-4626-b8d4-50921fab22da"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-close",
+                                "itemId": "btnClose",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Close",
+                                "width": 45
+                            },
+                            "designerId": "a1c7b2f4-1922-427c-b0a7-c68d353c7e2e"
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.container.Container",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|align": "stretch",
+                        "designer|displayName": "container",
+                        "layout": "hbox",
+                        "layout|flex": null
+                    },
+                    "designerId": "3e070332-4bfe-47ff-9e81-a9dd1d4ea88b",
+                    "cn": [
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "stretch",
+                                "designer|displayName": "container",
+                                "layout": "vbox",
+                                "layout|flex": 1.1,
+                                "layout|margins": "0 5 0 0 ",
+                                "width": 346
+                            },
+                            "designerId": "019f064f-9a9a-4443-974c-b8783f9aba76",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Store",
+                                        "itemId": "txtStore",
+                                        "labelWidth": 165,
+                                        "layout|flex": null,
+                                        "maxWidth": null
+                                    },
+                                    "designerId": "12a9be54-5117-450b-8e1c-b826d6648b11"
+                                },
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Cash Register Department",
+                                        "itemId": "txtCashRegisterDepartment",
+                                        "labelWidth": 165,
+                                        "layout|flex": null,
+                                        "maxWidth": null
+                                    },
+                                    "designerId": "4842972c-e5f4-47f8-bcdb-7262c3bb0a1e"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Update Prices on PB Imports",
+                                        "itemId": "chkUpdatePricesOnPbImports",
+                                        "labelWidth": 165,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "0cc40fef-ecbf-4a6d-a267-046dd7df67c6"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Default Use Tax Flag 1",
+                                        "itemId": "chkDefaultUseTaxFlag1",
+                                        "labelWidth": 165,
+                                        "layout|flex": null,
+                                        "layout|margins": null
+                                    },
+                                    "designerId": "36263610-3ca4-411b-9d45-0cab7fb7ff02"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Default Use Tax Flag 2",
+                                        "itemId": "chkDefaultUseTaxFlag2",
+                                        "labelWidth": 165,
+                                        "layout|flex": null,
+                                        "layout|margins": null
+                                    },
+                                    "designerId": "b310aac9-8850-48d4-908b-b273403f0076"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Default Use Tax Flag 3",
+                                        "itemId": "chkDefaultUseTaxFlag3",
+                                        "labelWidth": 165,
+                                        "layout|flex": null,
+                                        "layout|margins": null
+                                    },
+                                    "designerId": "5ac4d646-2886-4c9d-9f84-58c30b975d25"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Default Use Tax Flag 4",
+                                        "itemId": "chkDefaultUseTaxFlag4",
+                                        "labelWidth": 165,
+                                        "layout|flex": null,
+                                        "layout|margins": null
+                                    },
+                                    "designerId": "bd242e7a-e597-46ef-b705-ccd9538ee6c6"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Default Blue Law 1",
+                                        "itemId": "chkDefaultBlueLaw1",
+                                        "labelWidth": 165,
+                                        "layout|flex": null,
+                                        "layout|margins": null
+                                    },
+                                    "designerId": "525fc6c5-08d0-413b-ab94-50f954bf9447"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Default Blue Law 2",
+                                        "itemId": "chkDefaultBlueLaw2",
+                                        "labelWidth": 165,
+                                        "layout|flex": null,
+                                        "layout|margins": null
+                                    },
+                                    "designerId": "feeedac1-3383-476d-8703-4099cabad1ea"
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "stretch",
+                                        "designer|displayName": "container",
+                                        "layout": "hbox",
+                                        "layout|flex": null,
+                                        "layout|margins": "0 0 5 0"
+                                    },
+                                    "designerId": "1f66da89-34d1-42a3-b28b-f39bd82feb2b"
+                                },
+                                {
+                                    "type": "Ext.form.field.Number",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Default Nucleus Group ID",
+                                        "hideTrigger": true,
+                                        "itemId": "txtDefaultNucleusGroupId",
+                                        "labelWidth": 165,
+                                        "layout|flex": null,
+                                        "maxWidth": null,
+                                        "width": null
+                                    },
+                                    "designerId": "57ecfe13-b916-441a-ac76-37c64447ac6c"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "stretch",
+                                "designer|displayName": "container",
+                                "layout": "vbox",
+                                "layout|flex": 1,
+                                "layout|margins": "0 1 0 5"
+                            },
+                            "designerId": "9d40e7fc-4854-4bb4-aa41-0e659ef6d592",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Number",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Target Gross Profit %",
+                                        "hideTrigger": true,
+                                        "itemId": "txtTargetGrossProfitPercent",
+                                        "labelWidth": 160,
+                                        "layout|flex": null,
+                                        "maxWidth": null,
+                                        "width": null
+                                    },
+                                    "designerId": "1f54a388-5478-44a6-a4ef-c937c7360120"
+                                },
+                                {
+                                    "type": "Ext.form.field.Number",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Target Inventory at Cost",
+                                        "hideTrigger": true,
+                                        "itemId": "txtTargetInventoryAtCost",
+                                        "labelWidth": 160,
+                                        "layout|flex": null,
+                                        "maxWidth": null,
+                                        "width": null
+                                    },
+                                    "designerId": "e8411058-8f8b-4fd3-b08d-8de88a01a136"
+                                },
+                                {
+                                    "type": "Ext.form.field.Number",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Cost of Inventory at BOM",
+                                        "hideTrigger": true,
+                                        "itemId": "txtCostOfInventoryAtBom",
+                                        "labelWidth": 160,
+                                        "layout|flex": null,
+                                        "maxWidth": null,
+                                        "width": null
+                                    },
+                                    "designerId": "70aba54e-55c7-483b-aa66-77ebca15e0b1"
+                                },
+                                {
+                                    "type": "Ext.form.field.Number",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Actual Gross Profit %",
+                                        "hideTrigger": true,
+                                        "itemId": "txtActualGrossProfitPercent",
+                                        "labelWidth": 160,
+                                        "layout|flex": null,
+                                        "maxWidth": null,
+                                        "width": null
+                                    },
+                                    "designerId": "4730cde2-f798-4746-870a-38fa18d1b64a"
+                                },
+                                {
+                                    "type": "Ext.form.field.Number",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Low Gross Margin % Alert",
+                                        "hideTrigger": true,
+                                        "itemId": "txtLowGrossMarginPercentAlert",
+                                        "labelWidth": 160,
+                                        "layout|flex": null,
+                                        "maxWidth": null,
+                                        "width": null
+                                    },
+                                    "designerId": "764fb4dc-e4ca-4cbf-9266-f7ee0d463147"
+                                },
+                                {
+                                    "type": "Ext.form.field.Number",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "High Gross Margin % Alert",
+                                        "hideTrigger": true,
+                                        "itemId": "txtHighGrossMarginPercentAlert",
+                                        "labelWidth": 160,
+                                        "layout|flex": null,
+                                        "maxWidth": null,
+                                        "width": null
+                                    },
+                                    "designerId": "fb624edb-0dc2-4967-9c83-05e1c5f17602"
+                                },
+                                {
+                                    "type": "Ext.form.field.Number",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Department Value at Cost",
+                                        "hideTrigger": true,
+                                        "itemId": "txtDepartmentValueAtCost",
+                                        "labelWidth": 160,
+                                        "layout|flex": null,
+                                        "maxWidth": null,
+                                        "width": null
+                                    },
+                                    "designerId": "70da4570-7ea3-4919-b19c-1c03d3040a21"
+                                },
+                                {
+                                    "type": "Ext.form.field.Number",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Department Value at Sell",
+                                        "hideTrigger": true,
+                                        "itemId": "txtDepartmentValueAtSell",
+                                        "labelWidth": 160,
+                                        "layout|flex": null,
+                                        "maxWidth": null,
+                                        "width": null
+                                    },
+                                    "designerId": "184756fd-f3b8-4a6e-ba11-7fed69dc07bc"
+                                },
+                                {
+                                    "type": "Ext.form.field.Date",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Last Inventory Level Entry",
+                                        "itemId": "dtmLastInventoryLevelEntry",
+                                        "labelWidth": 160,
+                                        "layout|flex": null,
+                                        "maxWidth": null
+                                    },
+                                    "designerId": "b3011212-985e-49d2-9a8a-82d9a26cdaec"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "linkedinstance",
+                    "reference": {
+                        "name": "dockedItems",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "afterPageText": null,
+                        "designer|createAlias": "ipagingstatusbar",
+                        "designer|displayName": "",
+                        "dock": "bottom",
+                        "itemId": "pagingtoolbar",
+                        "layout|flex": 1,
+                        "store": null
+                    },
+                    "designerId": "61a83781-4c49-4581-8dd0-248eb965f747",
+                    "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
+                }
+            ]
+        }
+    ]
+}

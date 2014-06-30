@@ -27,7 +27,6 @@ Ext.define('Inventory.view.Category', {
         'Ext.form.field.Checkbox',
         'Ext.form.field.ComboBox',
         'Ext.form.field.Number',
-        'Ext.form.field.Date',
         'Ext.grid.Panel',
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
@@ -338,187 +337,91 @@ Ext.define('Inventory.view.Category', {
                                 },
                                 {
                                     xtype: 'panel',
-                                    title: 'Setup by Store',
-                                    layout: {
-                                        type: 'vbox',
-                                        align: 'stretch',
-                                        padding: 10
-                                    },
+                                    layout: 'fit',
+                                    title: 'Stores',
                                     items: [
                                         {
-                                            xtype: 'container',
-                                            layout: {
-                                                type: 'hbox',
-                                                align: 'stretch'
-                                            },
-                                            items: [
+                                            xtype: 'advancefiltergrid',
+                                            itemId: 'grdStore',
+                                            margin: -1,
+                                            dockedItems: [
                                                 {
-                                                    xtype: 'container',
-                                                    flex: 1.1,
-                                                    margins: '0 5 0 0 ',
-                                                    width: 346,
+                                                    xtype: 'toolbar',
+                                                    dock: 'top',
+                                                    itemId: 'tlbGridOptions',
                                                     layout: {
-                                                        type: 'vbox',
-                                                        align: 'stretch'
+                                                        type: 'hbox',
+                                                        padding: '0 0 0 1'
                                                     },
                                                     items: [
                                                         {
-                                                            xtype: 'textfield',
-                                                            itemId: 'txtStore',
-                                                            maxWidth: 300,
-                                                            fieldLabel: 'Store',
-                                                            labelWidth: 165
+                                                            xtype: 'button',
+                                                            itemId: 'btnAdd',
+                                                            iconCls: 'small-add',
+                                                            tabIndex: -1,
+                                                            text: 'Add'
                                                         },
                                                         {
-                                                            xtype: 'textfield',
-                                                            itemId: 'txtCashRegisterDepartment',
-                                                            maxWidth: 300,
-                                                            fieldLabel: 'Cash Register Department',
-                                                            labelWidth: 165
+                                                            xtype: 'button',
+                                                            itemId: 'btnEdit',
+                                                            iconCls: 'small-edit',
+                                                            tabIndex: -1,
+                                                            text: 'Edit'
                                                         },
                                                         {
-                                                            xtype: 'checkboxfield',
-                                                            itemId: 'chkUpdatePricesOnPbImports',
-                                                            fieldLabel: 'Update Prices on PB Imports',
-                                                            labelWidth: 165
+                                                            xtype: 'button',
+                                                            itemId: 'btnDelete',
+                                                            iconCls: 'small-delete',
+                                                            tabIndex: -1,
+                                                            text: 'Delete'
                                                         },
                                                         {
-                                                            xtype: 'checkboxfield',
-                                                            itemId: 'chkDefaultUseTaxFlag1',
-                                                            fieldLabel: 'Default Use Tax Flag 1',
-                                                            labelWidth: 165
+                                                            xtype: 'tbseparator'
                                                         },
                                                         {
-                                                            xtype: 'checkboxfield',
-                                                            itemId: 'chkDefaultUseTaxFlag2',
-                                                            fieldLabel: 'Default Use Tax Flag 2',
-                                                            labelWidth: 165
-                                                        },
-                                                        {
-                                                            xtype: 'checkboxfield',
-                                                            itemId: 'chkDefaultUseTaxFlag3',
-                                                            fieldLabel: 'Default Use Tax Flag 3',
-                                                            labelWidth: 165
-                                                        },
-                                                        {
-                                                            xtype: 'checkboxfield',
-                                                            itemId: 'chkDefaultUseTaxFlag4',
-                                                            fieldLabel: 'Default Use Tax Flag 4',
-                                                            labelWidth: 165
-                                                        },
-                                                        {
-                                                            xtype: 'checkboxfield',
-                                                            itemId: 'chkDefaultBlueLaw1',
-                                                            fieldLabel: 'Default Blue Law 1',
-                                                            labelWidth: 165
-                                                        },
-                                                        {
-                                                            xtype: 'checkboxfield',
-                                                            itemId: 'chkDefaultBlueLaw2',
-                                                            fieldLabel: 'Default Blue Law 2',
-                                                            labelWidth: 165
-                                                        },
-                                                        {
-                                                            xtype: 'container',
-                                                            margins: '0 0 5 0',
-                                                            layout: {
-                                                                type: 'hbox',
-                                                                align: 'stretch'
-                                                            }
-                                                        },
-                                                        {
-                                                            xtype: 'numberfield',
-                                                            itemId: 'txtDefaultNucleusGroupId',
-                                                            maxWidth: 300,
-                                                            fieldLabel: 'Default Nucleus Group ID',
-                                                            labelWidth: 165,
-                                                            hideTrigger: true
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    xtype: 'container',
-                                                    flex: 2,
-                                                    margins: '0 1 0 5',
-                                                    layout: {
-                                                        type: 'vbox',
-                                                        align: 'stretch'
-                                                    },
-                                                    items: [
-                                                        {
-                                                            xtype: 'numberfield',
-                                                            itemId: 'txtTargetGrossProfitPercent',
-                                                            maxWidth: 300,
-                                                            fieldLabel: 'Target Gross Profit %',
-                                                            labelWidth: 160,
-                                                            hideTrigger: true
-                                                        },
-                                                        {
-                                                            xtype: 'numberfield',
-                                                            itemId: 'txtTargetInventoryAtCost',
-                                                            maxWidth: 300,
-                                                            fieldLabel: 'Target Inventory at Cost',
-                                                            labelWidth: 160,
-                                                            hideTrigger: true
-                                                        },
-                                                        {
-                                                            xtype: 'numberfield',
-                                                            itemId: 'txtCostOfInventoryAtBom',
-                                                            maxWidth: 300,
-                                                            fieldLabel: 'Cost of Inventory at BOM',
-                                                            labelWidth: 160,
-                                                            hideTrigger: true
-                                                        },
-                                                        {
-                                                            xtype: 'numberfield',
-                                                            itemId: 'txtActualGrossProfitPercent',
-                                                            maxWidth: 300,
-                                                            fieldLabel: 'Actual Gross Profit %',
-                                                            labelWidth: 160,
-                                                            hideTrigger: true
-                                                        },
-                                                        {
-                                                            xtype: 'numberfield',
-                                                            itemId: 'txtLowGrossMarginPercentAlert',
-                                                            maxWidth: 300,
-                                                            fieldLabel: 'Low Gross Margin % Alert',
-                                                            labelWidth: 160,
-                                                            hideTrigger: true
-                                                        },
-                                                        {
-                                                            xtype: 'numberfield',
-                                                            itemId: 'txtHighGrossMarginPercentAlert',
-                                                            maxWidth: 300,
-                                                            fieldLabel: 'High Gross Margin % Alert',
-                                                            labelWidth: 160,
-                                                            hideTrigger: true
-                                                        },
-                                                        {
-                                                            xtype: 'numberfield',
-                                                            itemId: 'txtDepartmentValueAtCost',
-                                                            maxWidth: 300,
-                                                            fieldLabel: 'Department Value at Cost',
-                                                            labelWidth: 160,
-                                                            hideTrigger: true
-                                                        },
-                                                        {
-                                                            xtype: 'numberfield',
-                                                            itemId: 'txtDepartmentValueAtSell',
-                                                            maxWidth: 300,
-                                                            fieldLabel: 'Department Value at Sell',
-                                                            labelWidth: 160,
-                                                            hideTrigger: true
-                                                        },
-                                                        {
-                                                            xtype: 'datefield',
-                                                            itemId: 'dtmLastInventoryLevelEntry',
-                                                            maxWidth: 300,
-                                                            fieldLabel: 'Last Inventory Level Entry',
-                                                            labelWidth: 160
+                                                            xtype: 'filter'
                                                         }
                                                     ]
                                                 }
-                                            ]
+                                            ],
+                                            columns: [
+                                                {
+                                                    xtype: 'gridcolumn',
+                                                    dataIndex: 'string',
+                                                    text: 'Store',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    xtype: 'gridcolumn',
+                                                    dataIndex: 'string',
+                                                    text: 'Cash Register Dept.',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    xtype: 'gridcolumn',
+                                                    dataIndex: 'string',
+                                                    text: 'Target Gross Profit %',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    xtype: 'gridcolumn',
+                                                    dataIndex: 'string',
+                                                    text: 'Target Inventory at Cost',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    xtype: 'gridcolumn',
+                                                    dataIndex: 'string',
+                                                    text: 'Cost of Inventory at BOM',
+                                                    flex: 1
+                                                }
+                                            ],
+                                            viewConfig: {
+                                                itemId: 'grvStore'
+                                            },
+                                            selModel: Ext.create('Ext.selection.CheckboxModel', {
+
+                                            })
                                         }
                                     ]
                                 },

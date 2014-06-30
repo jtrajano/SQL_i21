@@ -668,10 +668,8 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "container|align": "stretch",
-                                "container|padding": 10,
-                                "layout": "vbox",
-                                "title": "Setup by Store"
+                                "layout": "fit",
+                                "title": "Stores"
                             },
                             "designerId": "8839d0a7-4c92-4798-8fd9-d0338d9add8f",
                             "cn": [
@@ -685,400 +683,203 @@
                                     "designerId": "106abbaf-8874-4b89-b8b9-43e004ccd9d2"
                                 },
                                 {
-                                    "type": "Ext.container.Container",
+                                    "type": "Ext.grid.Panel",
                                     "reference": {
                                         "name": "items",
                                         "type": "array"
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "container|align": "stretch",
-                                        "designer|displayName": "container",
-                                        "layout": "hbox",
-                                        "layout|flex": null
+                                        "designer|createAlias": "advancefiltergrid",
+                                        "itemId": "grdStore",
+                                        "margin": -1,
+                                        "title": null
                                     },
-                                    "designerId": "81b2ec66-38e5-465a-84eb-0dc3d01f20c5",
+                                    "designerId": "1aad5a91-2681-4cf3-b4ba-9ea77090fa68",
                                     "cn": [
                                         {
-                                            "type": "Ext.container.Container",
+                                            "type": "Ext.toolbar.Toolbar",
                                             "reference": {
-                                                "name": "items",
+                                                "name": "dockedItems",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "container|align": "stretch",
-                                                "designer|displayName": "container",
-                                                "layout": "vbox",
-                                                "layout|flex": 1.1,
-                                                "layout|margins": "0 5 0 0 ",
-                                                "width": 346
+                                                "container|padding": "0 0 0 1",
+                                                "dock": "top",
+                                                "itemId": "tlbGridOptions"
                                             },
-                                            "designerId": "019f064f-9a9a-4443-974c-b8783f9aba76",
+                                            "designerId": "1fcec194-f074-4203-8c8e-01ab8a7ed3b4",
                                             "cn": [
                                                 {
-                                                    "type": "Ext.form.field.Text",
+                                                    "type": "Ext.button.Button",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "fieldLabel": "Store",
-                                                        "itemId": "txtStore",
-                                                        "labelWidth": 165,
+                                                        "icon": null,
+                                                        "iconCls": "small-add",
+                                                        "itemId": "btnAdd",
                                                         "layout|flex": null,
-                                                        "maxWidth": 300
+                                                        "tabIndex": -1,
+                                                        "text": "Add"
                                                     },
-                                                    "designerId": "12a9be54-5117-450b-8e1c-b826d6648b11"
+                                                    "designerId": "7761ce91-3d5b-49cd-80ad-d5bde859d14d"
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.Text",
+                                                    "type": "Ext.button.Button",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "fieldLabel": "Cash Register Department",
-                                                        "itemId": "txtCashRegisterDepartment",
-                                                        "labelWidth": 165,
+                                                        "icon": null,
+                                                        "iconCls": "small-edit",
+                                                        "itemId": "btnEdit",
                                                         "layout|flex": null,
-                                                        "maxWidth": 300
+                                                        "tabIndex": -1,
+                                                        "text": "Edit"
                                                     },
-                                                    "designerId": "4842972c-e5f4-47f8-bcdb-7262c3bb0a1e"
+                                                    "designerId": "d5d5f135-d357-4dd7-a67e-ea48a23e6303"
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.Checkbox",
+                                                    "type": "Ext.button.Button",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "boxLabel": null,
-                                                        "fieldLabel": "Update Prices on PB Imports",
-                                                        "itemId": "chkUpdatePricesOnPbImports",
-                                                        "labelWidth": 165,
+                                                        "icon": null,
+                                                        "iconCls": "small-delete",
+                                                        "itemId": "btnDelete",
+                                                        "layout|flex": null,
+                                                        "tabIndex": -1,
+                                                        "text": "Delete"
+                                                    },
+                                                    "designerId": "2fb32bab-2774-4e65-92a0-93319aeda168"
+                                                },
+                                                {
+                                                    "type": "Ext.toolbar.Separator",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "designer|displayName": "separator",
                                                         "layout|flex": null
                                                     },
-                                                    "designerId": "0cc40fef-ecbf-4a6d-a267-046dd7df67c6"
+                                                    "designerId": "190bdf35-00ef-4b64-b288-89e2b1daa2bd"
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.Checkbox",
+                                                    "type": "linkedinstance",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "boxLabel": null,
-                                                        "fieldLabel": "Default Use Tax Flag 1",
-                                                        "itemId": "chkDefaultUseTaxFlag1",
-                                                        "labelWidth": 165,
-                                                        "layout|flex": null,
-                                                        "layout|margins": null
+                                                        "layout|flex": null
                                                     },
-                                                    "designerId": "36263610-3ca4-411b-9d45-0cab7fb7ff02"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Checkbox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "boxLabel": null,
-                                                        "fieldLabel": "Default Use Tax Flag 2",
-                                                        "itemId": "chkDefaultUseTaxFlag2",
-                                                        "labelWidth": 165,
-                                                        "layout|flex": null,
-                                                        "layout|margins": null
-                                                    },
-                                                    "designerId": "b310aac9-8850-48d4-908b-b273403f0076"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Checkbox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "boxLabel": null,
-                                                        "fieldLabel": "Default Use Tax Flag 3",
-                                                        "itemId": "chkDefaultUseTaxFlag3",
-                                                        "labelWidth": 165,
-                                                        "layout|flex": null,
-                                                        "layout|margins": null
-                                                    },
-                                                    "designerId": "5ac4d646-2886-4c9d-9f84-58c30b975d25"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Checkbox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "boxLabel": null,
-                                                        "fieldLabel": "Default Use Tax Flag 4",
-                                                        "itemId": "chkDefaultUseTaxFlag4",
-                                                        "labelWidth": 165,
-                                                        "layout|flex": null,
-                                                        "layout|margins": null
-                                                    },
-                                                    "designerId": "bd242e7a-e597-46ef-b705-ccd9538ee6c6"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Checkbox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "boxLabel": null,
-                                                        "fieldLabel": "Default Blue Law 1",
-                                                        "itemId": "chkDefaultBlueLaw1",
-                                                        "labelWidth": 165,
-                                                        "layout|flex": null,
-                                                        "layout|margins": null
-                                                    },
-                                                    "designerId": "525fc6c5-08d0-413b-ab94-50f954bf9447"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Checkbox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "boxLabel": null,
-                                                        "fieldLabel": "Default Blue Law 2",
-                                                        "itemId": "chkDefaultBlueLaw2",
-                                                        "labelWidth": 165,
-                                                        "layout|flex": null,
-                                                        "layout|margins": null
-                                                    },
-                                                    "designerId": "feeedac1-3383-476d-8703-4099cabad1ea"
-                                                },
-                                                {
-                                                    "type": "Ext.container.Container",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "container|align": "stretch",
-                                                        "designer|displayName": "container",
-                                                        "layout": "hbox",
-                                                        "layout|flex": null,
-                                                        "layout|margins": "0 0 5 0"
-                                                    },
-                                                    "designerId": "1f66da89-34d1-42a3-b28b-f39bd82feb2b"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Default Nucleus Group ID",
-                                                        "hideTrigger": true,
-                                                        "itemId": "txtDefaultNucleusGroupId",
-                                                        "labelWidth": 165,
-                                                        "layout|flex": null,
-                                                        "maxWidth": 300,
-                                                        "width": null
-                                                    },
-                                                    "designerId": "57ecfe13-b916-441a-ac76-37c64447ac6c"
+                                                    "designerId": "9be921ca-705f-47f3-98b7-abf79fa0ae14",
+                                                    "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
                                             ]
                                         },
                                         {
-                                            "type": "Ext.container.Container",
+                                            "type": "Ext.grid.column.Column",
                                             "reference": {
-                                                "name": "items",
+                                                "name": "columns",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "container|align": "stretch",
-                                                "designer|displayName": "container",
-                                                "layout": "vbox",
-                                                "layout|flex": 2,
-                                                "layout|margins": "0 1 0 5"
+                                                "dataIndex": "string",
+                                                "flex": 1,
+                                                "text": "Store"
                                             },
-                                            "designerId": "9d40e7fc-4854-4bb4-aa41-0e659ef6d592",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Target Gross Profit %",
-                                                        "hideTrigger": true,
-                                                        "itemId": "txtTargetGrossProfitPercent",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "maxWidth": 300,
-                                                        "width": null
-                                                    },
-                                                    "designerId": "1f54a388-5478-44a6-a4ef-c937c7360120"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Target Inventory at Cost",
-                                                        "hideTrigger": true,
-                                                        "itemId": "txtTargetInventoryAtCost",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "maxWidth": 300,
-                                                        "width": null
-                                                    },
-                                                    "designerId": "e8411058-8f8b-4fd3-b08d-8de88a01a136"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Cost of Inventory at BOM",
-                                                        "hideTrigger": true,
-                                                        "itemId": "txtCostOfInventoryAtBom",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "maxWidth": 300,
-                                                        "width": null
-                                                    },
-                                                    "designerId": "70aba54e-55c7-483b-aa66-77ebca15e0b1"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Actual Gross Profit %",
-                                                        "hideTrigger": true,
-                                                        "itemId": "txtActualGrossProfitPercent",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "maxWidth": 300,
-                                                        "width": null
-                                                    },
-                                                    "designerId": "4730cde2-f798-4746-870a-38fa18d1b64a"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Low Gross Margin % Alert",
-                                                        "hideTrigger": true,
-                                                        "itemId": "txtLowGrossMarginPercentAlert",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "maxWidth": 300,
-                                                        "width": null
-                                                    },
-                                                    "designerId": "764fb4dc-e4ca-4cbf-9266-f7ee0d463147"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "High Gross Margin % Alert",
-                                                        "hideTrigger": true,
-                                                        "itemId": "txtHighGrossMarginPercentAlert",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "maxWidth": 300,
-                                                        "width": null
-                                                    },
-                                                    "designerId": "fb624edb-0dc2-4967-9c83-05e1c5f17602"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Department Value at Cost",
-                                                        "hideTrigger": true,
-                                                        "itemId": "txtDepartmentValueAtCost",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "maxWidth": 300,
-                                                        "width": null
-                                                    },
-                                                    "designerId": "70da4570-7ea3-4919-b19c-1c03d3040a21"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Department Value at Sell",
-                                                        "hideTrigger": true,
-                                                        "itemId": "txtDepartmentValueAtSell",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "maxWidth": 300,
-                                                        "width": null
-                                                    },
-                                                    "designerId": "184756fd-f3b8-4a6e-ba11-7fed69dc07bc"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Date",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Last Inventory Level Entry",
-                                                        "itemId": "dtmLastInventoryLevelEntry",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "maxWidth": 300
-                                                    },
-                                                    "designerId": "b3011212-985e-49d2-9a8a-82d9a26cdaec"
-                                                }
-                                            ]
+                                            "designerId": "406caabb-5e7c-4cc6-bd20-0a0279c5592e"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "string",
+                                                "flex": 1,
+                                                "text": "Cash Register Dept."
+                                            },
+                                            "designerId": "ea471c0d-8468-495f-a0a6-a7c078d274e1"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "string",
+                                                "flex": 1,
+                                                "text": "Target Gross Profit %"
+                                            },
+                                            "designerId": "f1683662-742a-42c4-b141-beae7d4dd855"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "string",
+                                                "flex": 1,
+                                                "text": "Target Inventory at Cost"
+                                            },
+                                            "designerId": "1b4421f6-108c-4489-8d74-7800f575491a"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "string",
+                                                "flex": 1,
+                                                "text": "Cost of Inventory at BOM"
+                                            },
+                                            "designerId": "ff8c1391-47ab-44a2-bb46-bab80a3c92c3"
+                                        },
+                                        {
+                                            "type": "Ext.grid.View",
+                                            "reference": {
+                                                "name": "viewConfig",
+                                                "type": "object"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "itemId": "grvStore"
+                                            },
+                                            "designerId": "c06fa758-6922-41cb-8f73-abad3d235286"
+                                        },
+                                        {
+                                            "type": "Ext.selection.CheckboxModel",
+                                            "reference": {
+                                                "name": "selModel",
+                                                "type": "object"
+                                            },
+                                            "codeClass": "Ext.selection.CheckboxModel",
+                                            "designerId": "14983ef9-cb71-4fcb-9ccf-58dd9b433b56"
                                         }
                                     ]
                                 }
