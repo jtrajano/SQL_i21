@@ -553,6 +553,9 @@
     <Build Include="dbo\Stored Procedures\uspCMBankTransactionReversal.sql" />
     <Build Include="dbo\Functions\fnGetBankTransactionReversalErrors.sql" />
     <Build Include="dbo\Stored Procedures\uspGLFixStartingNumbers.sql" />
+    <Build Include="dbo\Tables\tblSMSearchFilter.sql" />
+    <Build Include="dbo\Tables\tblSMSearchField.sql" />
+    <Build Include="dbo\Tables\tblSMSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
