@@ -1251,153 +1251,114 @@ Ext.define('Inventory.view.Item', {
                                     },
                                     items: [
                                         {
-                                            xtype: 'container',
-                                            layout: {
-                                                type: 'hbox',
-                                                align: 'stretch',
-                                                padding: 5
-                                            },
-                                            items: [
+                                            xtype: 'advancefiltergrid',
+                                            flex: 1,
+                                            itemId: 'grdLocationStore1',
+                                            margin: -1,
+                                            dockedItems: [
                                                 {
-                                                    xtype: 'container',
-                                                    flex: 1,
+                                                    xtype: 'toolbar',
+                                                    dock: 'top',
+                                                    itemId: 'tlbGridOptions',
                                                     layout: {
-                                                        type: 'vbox',
-                                                        align: 'stretch'
+                                                        type: 'hbox',
+                                                        padding: '0 0 0 1'
                                                     },
                                                     items: [
                                                         {
-                                                            xtype: 'textfield',
-                                                            itemId: 'txtLocation',
-                                                            fieldLabel: 'Location',
-                                                            labelWidth: 110
+                                                            xtype: 'button',
+                                                            itemId: 'btnAdd',
+                                                            iconCls: 'small-add',
+                                                            tabIndex: -1,
+                                                            text: 'Add'
                                                         },
                                                         {
-                                                            xtype: 'textfield',
-                                                            itemId: 'txtStoreName',
-                                                            fieldLabel: 'Store Name',
-                                                            labelWidth: 110
+                                                            xtype: 'button',
+                                                            itemId: 'btnEdit',
+                                                            iconCls: 'small-edit',
+                                                            tabIndex: -1,
+                                                            text: 'Edit'
                                                         },
                                                         {
-                                                            xtype: 'textfield',
-                                                            itemId: 'txtRetailPrice',
-                                                            fieldLabel: 'Retail Price',
-                                                            labelWidth: 110
+                                                            xtype: 'button',
+                                                            itemId: 'btnDelete',
+                                                            iconCls: 'small-delete',
+                                                            tabIndex: -1,
+                                                            text: 'Delete'
                                                         },
                                                         {
-                                                            xtype: 'textfield',
-                                                            itemId: 'txtWolesalePrice',
-                                                            fieldLabel: 'Wholesale Price',
-                                                            labelWidth: 110
+                                                            xtype: 'tbseparator'
                                                         },
                                                         {
-                                                            xtype: 'textfield',
-                                                            itemId: 'txtLargeVolumePrice',
-                                                            fieldLabel: 'Large Volume Price',
-                                                            labelWidth: 110
-                                                        },
-                                                        {
-                                                            xtype: 'textfield',
-                                                            itemId: 'txtMsrp',
-                                                            fieldLabel: 'MSRP',
-                                                            labelWidth: 110
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    xtype: 'container',
-                                                    flex: 1,
-                                                    margins: '0 0 0 5',
-                                                    layout: {
-                                                        type: 'vbox',
-                                                        align: 'stretch'
-                                                    },
-                                                    items: [
-                                                        {
-                                                            xtype: 'combobox',
-                                                            itemId: 'cboPricingMethod',
-                                                            fieldLabel: 'Pricing Method',
-                                                            labelWidth: 110
-                                                        },
-                                                        {
-                                                            xtype: 'textfield',
-                                                            itemId: 'txtLastCost',
-                                                            fieldLabel: 'Last Cost',
-                                                            labelWidth: 110
-                                                        },
-                                                        {
-                                                            xtype: 'textfield',
-                                                            itemId: 'txtAverageCost',
-                                                            fieldLabel: 'Average Cost',
-                                                            labelWidth: 110
-                                                        },
-                                                        {
-                                                            xtype: 'textfield',
-                                                            itemId: 'txtStandardCost',
-                                                            fieldLabel: 'Standard Cost',
-                                                            labelWidth: 110
-                                                        },
-                                                        {
-                                                            xtype: 'textfield',
-                                                            itemId: 'txtEndofMonthCost',
-                                                            fieldLabel: 'End of Month Cost',
-                                                            labelWidth: 110
-                                                        },
-                                                        {
-                                                            xtype: 'textfield',
-                                                            itemId: 'txtDefaultSalesTax',
-                                                            fieldLabel: 'Default Sales Tax',
-                                                            labelWidth: 110
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    xtype: 'container',
-                                                    flex: 1,
-                                                    margins: '0 0 0 5',
-                                                    layout: {
-                                                        type: 'vbox',
-                                                        align: 'stretch'
-                                                    },
-                                                    items: [
-                                                        {
-                                                            xtype: 'textfield',
-                                                            itemId: 'txtCommissionRate',
-                                                            fieldLabel: 'Commission Rate'
-                                                        },
-                                                        {
-                                                            xtype: 'textfield',
-                                                            itemId: 'txtCommissionUnits',
-                                                            fieldLabel: 'Commission Units'
-                                                        },
-                                                        {
-                                                            xtype: 'textfield',
-                                                            itemId: 'txtDiscountCode',
-                                                            fieldLabel: 'Discount Code'
-                                                        },
-                                                        {
-                                                            xtype: 'textfield',
-                                                            itemId: 'txtDiscountRate',
-                                                            fieldLabel: 'Discount Rate'
-                                                        },
-                                                        {
-                                                            xtype: 'textfield',
-                                                            itemId: 'txtMinOverride',
-                                                            fieldLabel: 'Min Override'
-                                                        },
-                                                        {
-                                                            xtype: 'textfield',
-                                                            itemId: 'txtMaxOverride',
-                                                            fieldLabel: 'Max Override'
+                                                            xtype: 'filter'
                                                         }
                                                     ]
                                                 }
-                                            ]
+                                            ],
+                                            columns: [
+                                                {
+                                                    xtype: 'gridcolumn',
+                                                    dataIndex: 'string',
+                                                    text: 'Location',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    xtype: 'gridcolumn',
+                                                    dataIndex: 'string',
+                                                    text: 'Store',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    xtype: 'gridcolumn',
+                                                    width: 100,
+                                                    dataIndex: 'string',
+                                                    text: 'Pricing Method'
+                                                },
+                                                {
+                                                    xtype: 'gridcolumn',
+                                                    width: 85,
+                                                    dataIndex: 'string',
+                                                    text: 'Retail Price'
+                                                },
+                                                {
+                                                    xtype: 'gridcolumn',
+                                                    width: 85,
+                                                    dataIndex: 'string',
+                                                    text: 'Wholesale Price'
+                                                },
+                                                {
+                                                    xtype: 'gridcolumn',
+                                                    width: 85,
+                                                    dataIndex: 'string',
+                                                    text: 'MSRP'
+                                                },
+                                                {
+                                                    xtype: 'gridcolumn',
+                                                    width: 85,
+                                                    dataIndex: 'string',
+                                                    text: 'Last Cost'
+                                                },
+                                                {
+                                                    xtype: 'gridcolumn',
+                                                    width: 85,
+                                                    dataIndex: 'string',
+                                                    text: 'Avarage Cost'
+                                                },
+                                                {
+                                                    xtype: 'gridcolumn',
+                                                    width: 85,
+                                                    dataIndex: 'string',
+                                                    text: 'Standard Cost'
+                                                }
+                                            ],
+                                            viewConfig: {
+                                                itemId: 'grvLocationStore'
+                                            }
                                         },
                                         {
                                             xtype: 'tabpanel',
                                             flex: 1,
-                                            margins: '3',
+                                            margins: '7 3 3 3',
                                             itemId: 'tabPricing',
                                             activeTab: 0,
                                             plain: true,

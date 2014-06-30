@@ -2835,337 +2835,258 @@
                                     "designerId": "2ed06e4b-2a4a-47dc-9cb8-0a15e963e843"
                                 },
                                 {
-                                    "type": "Ext.container.Container",
+                                    "type": "Ext.grid.Panel",
                                     "reference": {
                                         "name": "items",
                                         "type": "array"
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "container|align": "stretch",
-                                        "container|padding": 5,
-                                        "designer|displayName": "container",
-                                        "layout": "hbox",
-                                        "layout|flex": null
+                                        "designer|createAlias": "advancefiltergrid",
+                                        "itemId": "grdLocationStore1",
+                                        "layout|flex": 1,
+                                        "margin": -1,
+                                        "title": null
                                     },
-                                    "designerId": "f42d8e43-def0-43dd-b161-96a7ef0bd546",
+                                    "designerId": "fd3e4f03-0274-49e2-b616-f448f7b315d9",
                                     "cn": [
                                         {
-                                            "type": "Ext.container.Container",
+                                            "type": "Ext.toolbar.Toolbar",
                                             "reference": {
-                                                "name": "items",
+                                                "name": "dockedItems",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "container|align": "stretch",
-                                                "designer|displayName": "container",
-                                                "layout": "vbox",
-                                                "layout|flex": 1
+                                                "container|padding": "0 0 0 1",
+                                                "dock": "top",
+                                                "itemId": "tlbGridOptions"
                                             },
-                                            "designerId": "c41b3b18-fbf5-47e3-94fb-bd8fedde7559",
+                                            "designerId": "a72bdcd2-fc7a-4148-b1ae-536d9f945403",
                                             "cn": [
                                                 {
-                                                    "type": "Ext.form.field.Text",
+                                                    "type": "Ext.button.Button",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "fieldLabel": "Location",
-                                                        "itemId": "txtLocation",
-                                                        "labelWidth": 110,
-                                                        "layout|flex": null
+                                                        "icon": null,
+                                                        "iconCls": "small-add",
+                                                        "itemId": "btnAdd",
+                                                        "layout|flex": null,
+                                                        "tabIndex": -1,
+                                                        "text": "Add"
                                                     },
-                                                    "designerId": "ebe91a3b-12ae-4c5b-9400-e4c3c5093492"
+                                                    "designerId": "54c832fc-d646-4741-adaa-8f9e9eaa042e"
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.Text",
+                                                    "type": "Ext.button.Button",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "fieldLabel": "Store Name",
-                                                        "itemId": "txtStoreName",
-                                                        "labelWidth": 110,
-                                                        "layout|flex": null
+                                                        "icon": null,
+                                                        "iconCls": "small-edit",
+                                                        "itemId": "btnEdit",
+                                                        "layout|flex": null,
+                                                        "tabIndex": -1,
+                                                        "text": "Edit"
                                                     },
-                                                    "designerId": "688219b0-f594-4341-b02c-e2749adff01f"
+                                                    "designerId": "2e302b72-efc4-4ad5-a873-b3b9f34bad0b"
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.Text",
+                                                    "type": "Ext.button.Button",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "fieldLabel": "Retail Price",
-                                                        "itemId": "txtRetailPrice",
-                                                        "labelWidth": 110,
-                                                        "layout|flex": null
+                                                        "icon": null,
+                                                        "iconCls": "small-delete",
+                                                        "itemId": "btnDelete",
+                                                        "layout|flex": null,
+                                                        "tabIndex": -1,
+                                                        "text": "Delete"
                                                     },
-                                                    "designerId": "887aa2b4-9b87-46bf-9231-4f1bcfaec4ab"
+                                                    "designerId": "9448f42a-a69c-4a60-8d16-996e1269632a"
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.Text",
+                                                    "type": "Ext.toolbar.Separator",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "fieldLabel": "Wholesale Price",
-                                                        "itemId": "txtWolesalePrice",
-                                                        "labelWidth": 110,
+                                                        "designer|displayName": "separator",
                                                         "layout|flex": null
                                                     },
-                                                    "designerId": "76f0714f-fcbc-442f-a075-7cc3adb0a9ac"
+                                                    "designerId": "f4fab350-397a-4c3e-a9cb-fb70dfd6b11a"
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.Text",
+                                                    "type": "linkedinstance",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "fieldLabel": "Large Volume Price",
-                                                        "itemId": "txtLargeVolumePrice",
-                                                        "labelWidth": 110,
                                                         "layout|flex": null
                                                     },
-                                                    "designerId": "35aa5c9e-32e0-4966-993a-4ed186303e8b"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "MSRP",
-                                                        "itemId": "txtMsrp",
-                                                        "labelWidth": 110,
-                                                        "layout|flex": null
-                                                    },
-                                                    "designerId": "a662b97c-8638-443d-b1e8-3b7ffd88cf0c"
+                                                    "designerId": "efa99b46-2432-478a-97f2-c35eb7b7ed7c",
+                                                    "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
                                             ]
                                         },
                                         {
-                                            "type": "Ext.container.Container",
+                                            "type": "Ext.grid.column.Column",
                                             "reference": {
-                                                "name": "items",
+                                                "name": "columns",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "container|align": "stretch",
-                                                "designer|displayName": "container",
-                                                "layout": "vbox",
-                                                "layout|flex": 1,
-                                                "layout|margins": "0 0 0 5"
+                                                "dataIndex": "string",
+                                                "flex": 1,
+                                                "text": "Location"
                                             },
-                                            "designerId": "338e8f93-9999-4c1f-a456-10a87b6c0d15",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.ComboBox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Pricing Method",
-                                                        "itemId": "cboPricingMethod",
-                                                        "labelWidth": 110,
-                                                        "layout|flex": null
-                                                    },
-                                                    "designerId": "fa631e75-86d5-472d-93bd-ed222c9cb1fb"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Last Cost",
-                                                        "itemId": "txtLastCost",
-                                                        "labelWidth": 110,
-                                                        "layout|flex": null
-                                                    },
-                                                    "designerId": "968f3f82-abdf-4bc9-9d5b-24627a7c1c8e"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Average Cost",
-                                                        "itemId": "txtAverageCost",
-                                                        "labelWidth": 110,
-                                                        "layout|flex": null
-                                                    },
-                                                    "designerId": "9c7aa544-87b2-4f8e-950a-b9c7f291d7f5"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Standard Cost",
-                                                        "itemId": "txtStandardCost",
-                                                        "labelWidth": 110,
-                                                        "layout|flex": null
-                                                    },
-                                                    "designerId": "da85e908-4dbe-460a-9736-911b711029b3"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "End of Month Cost",
-                                                        "itemId": "txtEndofMonthCost",
-                                                        "labelWidth": 110,
-                                                        "layout|flex": null
-                                                    },
-                                                    "designerId": "65129da8-fe40-45a9-b634-58915ede5a85"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Default Sales Tax",
-                                                        "itemId": "txtDefaultSalesTax",
-                                                        "labelWidth": 110,
-                                                        "layout|flex": null
-                                                    },
-                                                    "designerId": "c05b8d56-0ef2-4775-aca0-66151c537c64"
-                                                }
-                                            ]
+                                            "designerId": "99b8c407-e755-4e9c-b3f2-7ace0b0a7f46"
                                         },
                                         {
-                                            "type": "Ext.container.Container",
+                                            "type": "Ext.grid.column.Column",
                                             "reference": {
-                                                "name": "items",
+                                                "name": "columns",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "container|align": "stretch",
-                                                "designer|displayName": "container",
-                                                "layout": "vbox",
-                                                "layout|flex": 1,
-                                                "layout|margins": "0 0 0 5"
+                                                "dataIndex": "string",
+                                                "flex": 1,
+                                                "text": "Store"
                                             },
-                                            "designerId": "c5e23907-42c9-444e-8ea9-fd6482f35dff",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Commission Rate",
-                                                        "itemId": "txtCommissionRate",
-                                                        "layout|flex": null
-                                                    },
-                                                    "designerId": "d35a2d36-bf32-4cae-b9b2-81c5a90feabf"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Commission Units",
-                                                        "itemId": "txtCommissionUnits",
-                                                        "layout|flex": null
-                                                    },
-                                                    "designerId": "74ea5405-c2ea-4645-8ad2-66db71b1675c"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Discount Code",
-                                                        "itemId": "txtDiscountCode",
-                                                        "layout|flex": null
-                                                    },
-                                                    "designerId": "e6376841-b6f6-466a-baa1-1e9a31f7e7c6"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Discount Rate",
-                                                        "itemId": "txtDiscountRate",
-                                                        "layout|flex": null
-                                                    },
-                                                    "designerId": "1523889a-708f-4fbf-ac2e-661c6a84f193"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Min Override",
-                                                        "itemId": "txtMinOverride",
-                                                        "layout|flex": null
-                                                    },
-                                                    "designerId": "27e43c2a-888b-4426-affb-8e4fa6fe7e51"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Max Override",
-                                                        "itemId": "txtMaxOverride",
-                                                        "layout|flex": null
-                                                    },
-                                                    "designerId": "a3af28dc-2218-4dc5-9237-9c3517bbadd0"
-                                                }
-                                            ]
+                                            "designerId": "e04954ee-67a7-4426-9550-d02ac191571f"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "string",
+                                                "flex": null,
+                                                "text": "Pricing Method",
+                                                "width": 100
+                                            },
+                                            "designerId": "faded271-3d4a-4a2a-8c32-b6083c9eb19d"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "string",
+                                                "flex": null,
+                                                "text": "Retail Price",
+                                                "width": 85
+                                            },
+                                            "designerId": "b6cd64ea-8606-4ed5-9754-dd37cd0bb41b"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "string",
+                                                "flex": null,
+                                                "text": "Wholesale Price",
+                                                "width": 85
+                                            },
+                                            "designerId": "c578ac2b-1167-4ccc-8d10-645416fac096"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "string",
+                                                "flex": null,
+                                                "text": "MSRP",
+                                                "width": 85
+                                            },
+                                            "designerId": "ff739ab3-f97e-4f1c-bba1-7bd6d5a79dd1"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "string",
+                                                "flex": null,
+                                                "text": "Last Cost",
+                                                "width": 85
+                                            },
+                                            "designerId": "832578c0-2da9-4d30-acb4-c5f12f799379"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "string",
+                                                "flex": null,
+                                                "text": "Avarage Cost",
+                                                "width": 85
+                                            },
+                                            "designerId": "b018e885-4484-4699-8b1e-0b2e8d3db91e"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "string",
+                                                "flex": null,
+                                                "text": "Standard Cost",
+                                                "width": 85
+                                            },
+                                            "designerId": "62726e98-d1ed-4332-9cc6-5c5426e83c0f"
+                                        },
+                                        {
+                                            "type": "Ext.grid.View",
+                                            "reference": {
+                                                "name": "viewConfig",
+                                                "type": "object"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "itemId": "grvLocationStore"
+                                            },
+                                            "designerId": "ddb7774d-2450-4845-8743-0ab7f3b3e989"
                                         }
                                     ]
                                 },
@@ -3181,7 +3102,7 @@
                                         "bodyPadding": null,
                                         "itemId": "tabPricing",
                                         "layout|flex": 1,
-                                        "layout|margins": "3",
+                                        "layout|margins": "7 3 3 3",
                                         "plain": true
                                     },
                                     "designerId": "240a0a38-ec21-4a2b-beff-060091f0938e",
