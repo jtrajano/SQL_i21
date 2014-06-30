@@ -75,6 +75,7 @@
 :r "..\dbo\Stored Procedures\uspTMGetConsumptionWithGasCheck.sql"
 :r "..\dbo\Stored Procedures\uspTMGetConsumptionWithLeakCheck.sql"
 :r "..\dbo\Stored Procedures\uspTMGetConsumptionWithoutLeakCheck.sql"
+:r ..\dbo\Views\vyuTMOriginDegreeOption.sql
 
 
 :r "..\dbo\Stored Procedures\uspAPImportBillTransactions.sql"
