@@ -909,185 +909,117 @@ Ext.define('Inventory.view.Item', {
                                                 },
                                                 {
                                                     xtype: 'panel',
+                                                    layout: 'fit',
                                                     title: 'Location/Store',
-                                                    layout: {
-                                                        type: 'hbox',
-                                                        align: 'stretch',
-                                                        padding: 7
-                                                    },
                                                     items: [
                                                         {
-                                                            xtype: 'container',
-                                                            flex: 1,
-                                                            layout: {
-                                                                type: 'vbox',
-                                                                align: 'stretch'
-                                                            },
-                                                            items: [
+                                                            xtype: 'advancefiltergrid',
+                                                            itemId: 'grdLocationStore',
+                                                            margin: -1,
+                                                            dockedItems: [
                                                                 {
-                                                                    xtype: 'combobox',
-                                                                    itemId: 'cboLocation',
-                                                                    fieldLabel: 'Location',
-                                                                    labelWidth: 125
-                                                                },
-                                                                {
-                                                                    xtype: 'combobox',
-                                                                    itemId: 'cboStore',
-                                                                    fieldLabel: 'Store',
-                                                                    labelWidth: 125
-                                                                },
-                                                                {
-                                                                    xtype: 'textfield',
-                                                                    itemId: 'txtRow',
-                                                                    fieldLabel: 'Row',
-                                                                    labelWidth: 125
-                                                                },
-                                                                {
-                                                                    xtype: 'textfield',
-                                                                    itemId: 'txtBin',
-                                                                    fieldLabel: 'Bin',
-                                                                    labelWidth: 125
-                                                                },
-                                                                {
-                                                                    xtype: 'combobox',
-                                                                    itemId: 'cboFuelTankNo',
-                                                                    fieldLabel: 'Fuel Tank No',
-                                                                    labelWidth: 125
-                                                                },
-                                                                {
-                                                                    xtype: 'textfield',
-                                                                    itemId: 'txtPassportFuelId1',
-                                                                    fieldLabel: 'Passport Fuel ID 1',
-                                                                    labelWidth: 125
-                                                                },
-                                                                {
-                                                                    xtype: 'textfield',
-                                                                    itemId: 'txtPassportFuelId2',
-                                                                    fieldLabel: 'Passport Fuel ID 2',
-                                                                    labelWidth: 125
-                                                                },
-                                                                {
-                                                                    xtype: 'textfield',
-                                                                    itemId: 'txtPassportFuelId3',
-                                                                    fieldLabel: 'Passport Fuel ID 3',
-                                                                    labelWidth: 125
-                                                                },
-                                                                {
-                                                                    xtype: 'checkboxfield',
-                                                                    itemId: 'chkTaxFlag1',
-                                                                    fieldLabel: 'Tax Flag 1',
-                                                                    labelWidth: 125
-                                                                },
-                                                                {
-                                                                    xtype: 'checkboxfield',
-                                                                    itemId: 'chkTaxFlag2',
-                                                                    fieldLabel: 'Tax Flag 2',
-                                                                    labelWidth: 125
-                                                                },
-                                                                {
-                                                                    xtype: 'checkboxfield',
-                                                                    itemId: 'chkTaxFlag3',
-                                                                    fieldLabel: 'Tax Flag 3',
-                                                                    labelWidth: 125
-                                                                },
-                                                                {
-                                                                    xtype: 'checkboxfield',
-                                                                    itemId: 'chkTaxFlag4',
-                                                                    fieldLabel: 'Tax Flag 4',
-                                                                    labelWidth: 125
+                                                                    xtype: 'toolbar',
+                                                                    dock: 'top',
+                                                                    itemId: 'tlbGridOptions',
+                                                                    layout: {
+                                                                        type: 'hbox',
+                                                                        padding: '0 0 0 1'
+                                                                    },
+                                                                    items: [
+                                                                        {
+                                                                            xtype: 'button',
+                                                                            itemId: 'btnAdd',
+                                                                            iconCls: 'small-add',
+                                                                            tabIndex: -1,
+                                                                            text: 'Add'
+                                                                        },
+                                                                        {
+                                                                            xtype: 'button',
+                                                                            itemId: 'btnEdit',
+                                                                            iconCls: 'small-edit',
+                                                                            tabIndex: -1,
+                                                                            text: 'Edit'
+                                                                        },
+                                                                        {
+                                                                            xtype: 'button',
+                                                                            itemId: 'btnDelete',
+                                                                            iconCls: 'small-delete',
+                                                                            tabIndex: -1,
+                                                                            text: 'Delete'
+                                                                        },
+                                                                        {
+                                                                            xtype: 'tbseparator'
+                                                                        },
+                                                                        {
+                                                                            xtype: 'filter'
+                                                                        }
+                                                                    ]
                                                                 }
-                                                            ]
-                                                        },
-                                                        {
-                                                            xtype: 'container',
-                                                            flex: 1,
-                                                            margins: '0 7',
-                                                            layout: {
-                                                                type: 'vbox',
-                                                                align: 'stretch'
-                                                            },
-                                                            items: [
+                                                            ],
+                                                            columns: [
                                                                 {
-                                                                    xtype: 'checkboxfield',
-                                                                    itemId: 'chkQuantityRequired',
-                                                                    fieldLabel: 'Quantity Required',
-                                                                    labelWidth: 140
+                                                                    xtype: 'gridcolumn',
+                                                                    dataIndex: 'string',
+                                                                    text: 'Location',
+                                                                    flex: 1
                                                                 },
                                                                 {
-                                                                    xtype: 'checkboxfield',
-                                                                    itemId: 'chkScaleItem',
-                                                                    fieldLabel: 'Scale Item',
-                                                                    labelWidth: 140
+                                                                    xtype: 'gridcolumn',
+                                                                    dataIndex: 'string',
+                                                                    text: 'Store',
+                                                                    flex: 1
                                                                 },
                                                                 {
-                                                                    xtype: 'checkboxfield',
-                                                                    itemId: 'chkFoodStampable',
-                                                                    fieldLabel: 'Food Stampable',
-                                                                    labelWidth: 140
+                                                                    xtype: 'gridcolumn',
+                                                                    width: 50,
+                                                                    dataIndex: 'string',
+                                                                    text: 'Row'
                                                                 },
                                                                 {
-                                                                    xtype: 'checkboxfield',
-                                                                    itemId: 'chkReturnable',
-                                                                    fieldLabel: 'Returnable',
-                                                                    labelWidth: 140
+                                                                    xtype: 'gridcolumn',
+                                                                    width: 50,
+                                                                    dataIndex: 'string',
+                                                                    text: 'Bin'
                                                                 },
                                                                 {
-                                                                    xtype: 'checkboxfield',
-                                                                    itemId: 'chkPrePriced',
-                                                                    fieldLabel: 'Pre Priced',
-                                                                    labelWidth: 140
+                                                                    xtype: 'gridcolumn',
+                                                                    width: 100,
+                                                                    dataIndex: 'string',
+                                                                    text: 'Fuel Tank No.'
                                                                 },
                                                                 {
-                                                                    xtype: 'checkboxfield',
-                                                                    itemId: 'chkIdRequiredLiqour',
-                                                                    fieldLabel: 'ID Required (liqour)',
-                                                                    labelWidth: 140
+                                                                    xtype: 'checkcolumn',
+                                                                    width: 75,
+                                                                    text: 'Qty Required'
                                                                 },
                                                                 {
-                                                                    xtype: 'checkboxfield',
-                                                                    itemId: 'chkIdRequiredCigarettes',
-                                                                    fieldLabel: 'ID Required (Cigarettes)',
-                                                                    labelWidth: 140
+                                                                    xtype: 'checkcolumn',
+                                                                    width: 75,
+                                                                    text: 'Scale Item'
                                                                 },
                                                                 {
-                                                                    xtype: 'textfield',
-                                                                    itemId: 'txtMinimumAge',
-                                                                    fieldLabel: 'Minimum Age',
-                                                                    labelWidth: 140
+                                                                    xtype: 'checkcolumn',
+                                                                    width: 75,
+                                                                    text: 'Returnable'
                                                                 },
                                                                 {
-                                                                    xtype: 'checkboxfield',
-                                                                    itemId: 'chkApplyBlueLaw1',
-                                                                    fieldLabel: 'Apply Blue Law 1',
-                                                                    labelWidth: 140
+                                                                    xtype: 'checkcolumn',
+                                                                    width: 75,
+                                                                    text: 'Pre Priced'
                                                                 },
                                                                 {
-                                                                    xtype: 'checkboxfield',
-                                                                    itemId: 'chkApplyBlueLaw2',
-                                                                    fieldLabel: 'Apply Blue Law 2',
-                                                                    labelWidth: 140
-                                                                },
-                                                                {
-                                                                    xtype: 'combobox',
-                                                                    itemId: 'cboItemTypeCode',
-                                                                    fieldLabel: 'Item Type Code',
-                                                                    labelWidth: 140
-                                                                },
-                                                                {
-                                                                    xtype: 'textfield',
-                                                                    itemId: 'txtItemTypeSubcode',
-                                                                    fieldLabel: 'Item Type Subcode',
-                                                                    labelWidth: 140
+                                                                    xtype: 'gridcolumn',
+                                                                    width: 50,
+                                                                    dataIndex: 'string',
+                                                                    text: 'Min Age'
                                                                 }
-                                                            ]
-                                                        },
-                                                        {
-                                                            xtype: 'container',
-                                                            flex: 1,
-                                                            layout: {
-                                                                type: 'vbox',
-                                                                align: 'stretch'
-                                                            }
+                                                            ],
+                                                            viewConfig: {
+                                                                itemId: 'grvLocationStore'
+                                                            },
+                                                            selModel: Ext.create('Ext.selection.CheckboxModel', {
+
+                                                            })
                                                         }
                                                     ]
                                                 },

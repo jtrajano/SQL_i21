@@ -2005,9 +2005,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "container|align": "stretch",
-                                                "container|padding": 7,
-                                                "layout": "hbox",
+                                                "layout": "fit",
                                                 "title": "Location/Store"
                                             },
                                             "designerId": "e93324b2-c1c6-410c-b4d9-e6fa900bce58",
@@ -2022,427 +2020,275 @@
                                                     "designerId": "e2233014-76cd-4dd0-94a7-9fa34da62ba3"
                                                 },
                                                 {
-                                                    "type": "Ext.container.Container",
+                                                    "type": "Ext.grid.Panel",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "container|align": "stretch",
-                                                        "designer|displayName": "container",
-                                                        "layout": "vbox",
-                                                        "layout|flex": 1
+                                                        "designer|createAlias": "advancefiltergrid",
+                                                        "itemId": "grdLocationStore",
+                                                        "margin": -1,
+                                                        "title": null
                                                     },
-                                                    "designerId": "60c9dbbd-cad7-47f0-a1ab-00ecad30e665",
+                                                    "designerId": "10c8e6a0-0373-40d2-94e1-27058a5f58b7",
                                                     "cn": [
                                                         {
-                                                            "type": "Ext.form.field.ComboBox",
+                                                            "type": "Ext.toolbar.Toolbar",
                                                             "reference": {
-                                                                "name": "items",
+                                                                "name": "dockedItems",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "fieldLabel": "Location",
-                                                                "itemId": "cboLocation",
-                                                                "labelWidth": 125,
-                                                                "layout|flex": null
+                                                                "container|padding": "0 0 0 1",
+                                                                "dock": "top",
+                                                                "itemId": "tlbGridOptions"
                                                             },
-                                                            "designerId": "01cd1254-c32e-4c52-be00-5a3d2a4642a7"
+                                                            "designerId": "5071cfe3-6946-4198-8dfe-a2bcf7619691",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.button.Button",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "icon": null,
+                                                                        "iconCls": "small-add",
+                                                                        "itemId": "btnAdd",
+                                                                        "layout|flex": null,
+                                                                        "tabIndex": -1,
+                                                                        "text": "Add"
+                                                                    },
+                                                                    "designerId": "90dc57bd-0fd0-45f5-8c99-f549d3b0a5d7"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.button.Button",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "icon": null,
+                                                                        "iconCls": "small-edit",
+                                                                        "itemId": "btnEdit",
+                                                                        "layout|flex": null,
+                                                                        "tabIndex": -1,
+                                                                        "text": "Edit"
+                                                                    },
+                                                                    "designerId": "043a564a-fb2d-4e0d-91c2-c84757d07af7"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.button.Button",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "icon": null,
+                                                                        "iconCls": "small-delete",
+                                                                        "itemId": "btnDelete",
+                                                                        "layout|flex": null,
+                                                                        "tabIndex": -1,
+                                                                        "text": "Delete"
+                                                                    },
+                                                                    "designerId": "9b44714c-ce79-461b-9414-31b77161aff4"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.toolbar.Separator",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "designer|displayName": "separator",
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "designerId": "b22917bf-17a1-47c8-b8ab-b680dd0c7702"
+                                                                },
+                                                                {
+                                                                    "type": "linkedinstance",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "designerId": "cbd9067a-ce03-4810-b0cb-7bd07d00d877",
+                                                                    "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
+                                                                }
+                                                            ]
                                                         },
                                                         {
-                                                            "type": "Ext.form.field.ComboBox",
+                                                            "type": "Ext.grid.column.Column",
                                                             "reference": {
-                                                                "name": "items",
+                                                                "name": "columns",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "fieldLabel": "Store",
-                                                                "itemId": "cboStore",
-                                                                "labelWidth": 125,
-                                                                "layout|flex": null
+                                                                "dataIndex": "string",
+                                                                "flex": 1,
+                                                                "text": "Location"
                                                             },
-                                                            "designerId": "1237ec97-9b70-4ee4-b11d-da3d4b528de0"
+                                                            "designerId": "8294a3ea-775c-4c0b-92a3-3a4e4f424a5d"
                                                         },
                                                         {
-                                                            "type": "Ext.form.field.Text",
+                                                            "type": "Ext.grid.column.Column",
                                                             "reference": {
-                                                                "name": "items",
+                                                                "name": "columns",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "fieldLabel": "Row",
-                                                                "itemId": "txtRow",
-                                                                "labelWidth": 125,
-                                                                "layout|flex": null
+                                                                "dataIndex": "string",
+                                                                "flex": 1,
+                                                                "text": "Store"
                                                             },
-                                                            "designerId": "0c45d94d-c5f5-4e10-b8ca-07b5bf30fdb7"
+                                                            "designerId": "4dc7b46d-f57f-48da-a077-df816d73a452"
                                                         },
                                                         {
-                                                            "type": "Ext.form.field.Text",
+                                                            "type": "Ext.grid.column.Column",
                                                             "reference": {
-                                                                "name": "items",
+                                                                "name": "columns",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "fieldLabel": "Bin",
-                                                                "itemId": "txtBin",
-                                                                "labelWidth": 125,
-                                                                "layout|flex": null
+                                                                "dataIndex": "string",
+                                                                "flex": null,
+                                                                "text": "Row",
+                                                                "width": 50
                                                             },
-                                                            "designerId": "a006055a-da78-4de9-9e22-a0b206626357"
+                                                            "designerId": "f393bef2-65e0-475e-b4a1-fed0508b4e3c"
                                                         },
                                                         {
-                                                            "type": "Ext.form.field.ComboBox",
+                                                            "type": "Ext.grid.column.Column",
                                                             "reference": {
-                                                                "name": "items",
+                                                                "name": "columns",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "fieldLabel": "Fuel Tank No",
-                                                                "itemId": "cboFuelTankNo",
-                                                                "labelWidth": 125,
-                                                                "layout|flex": null
+                                                                "dataIndex": "string",
+                                                                "flex": null,
+                                                                "text": "Bin",
+                                                                "width": 50
                                                             },
-                                                            "designerId": "1123fe5d-cd68-4bc9-a48b-5b7be62bf011"
+                                                            "designerId": "e806c8ce-149d-492a-b175-74f7a8118312"
                                                         },
                                                         {
-                                                            "type": "Ext.form.field.Text",
+                                                            "type": "Ext.grid.column.Column",
                                                             "reference": {
-                                                                "name": "items",
+                                                                "name": "columns",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "fieldLabel": "Passport Fuel ID 1",
-                                                                "itemId": "txtPassportFuelId1",
-                                                                "labelWidth": 125,
-                                                                "layout|flex": null
+                                                                "dataIndex": "string",
+                                                                "flex": null,
+                                                                "text": "Fuel Tank No.",
+                                                                "width": 100
                                                             },
-                                                            "designerId": "49bf6296-4c72-406c-849c-778c2eb004c7"
+                                                            "designerId": "2ed9a188-78bb-4837-819e-36b710fec6b1"
                                                         },
                                                         {
-                                                            "type": "Ext.form.field.Text",
+                                                            "type": "Ext.grid.column.CheckColumn",
                                                             "reference": {
-                                                                "name": "items",
+                                                                "name": "columns",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "fieldLabel": "Passport Fuel ID 2",
-                                                                "itemId": "txtPassportFuelId2",
-                                                                "labelWidth": 125,
-                                                                "layout|flex": null
+                                                                "text": "Qty Required",
+                                                                "width": 75
                                                             },
-                                                            "designerId": "c58a68bf-9930-4043-9f1b-1332a91c5e26"
+                                                            "designerId": "0ca5b295-806a-4027-bc0e-d5b6c067944f"
                                                         },
                                                         {
-                                                            "type": "Ext.form.field.Text",
+                                                            "type": "Ext.grid.column.CheckColumn",
                                                             "reference": {
-                                                                "name": "items",
+                                                                "name": "columns",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "fieldLabel": "Passport Fuel ID 3",
-                                                                "itemId": "txtPassportFuelId3",
-                                                                "labelWidth": 125,
-                                                                "layout|flex": null
+                                                                "text": "Scale Item",
+                                                                "width": 75
                                                             },
-                                                            "designerId": "09921185-ab25-4177-b8fb-43c078e7f99a"
+                                                            "designerId": "2635f936-0d4d-44a2-a078-97ac54c1537d"
                                                         },
                                                         {
-                                                            "type": "Ext.form.field.Checkbox",
+                                                            "type": "Ext.grid.column.CheckColumn",
                                                             "reference": {
-                                                                "name": "items",
+                                                                "name": "columns",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "boxLabel": null,
-                                                                "fieldLabel": "Tax Flag 1",
-                                                                "itemId": "chkTaxFlag1",
-                                                                "labelWidth": 125,
-                                                                "layout|flex": null
+                                                                "text": "Returnable",
+                                                                "width": 75
                                                             },
-                                                            "designerId": "f52c1470-7cec-4aae-a659-e95ec29bafa2"
+                                                            "designerId": "2b45e7ce-2b74-41f3-b55d-51f8de08ec46"
                                                         },
                                                         {
-                                                            "type": "Ext.form.field.Checkbox",
+                                                            "type": "Ext.grid.column.CheckColumn",
                                                             "reference": {
-                                                                "name": "items",
+                                                                "name": "columns",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "boxLabel": null,
-                                                                "fieldLabel": "Tax Flag 2",
-                                                                "itemId": "chkTaxFlag2",
-                                                                "labelWidth": 125,
-                                                                "layout|flex": null
+                                                                "text": "Pre Priced",
+                                                                "width": 75
                                                             },
-                                                            "designerId": "add2df77-3c1a-407d-9589-534b062fc351"
+                                                            "designerId": "3a71340f-8c9d-41b2-ac03-9fe26a352bb4"
                                                         },
                                                         {
-                                                            "type": "Ext.form.field.Checkbox",
+                                                            "type": "Ext.grid.column.Column",
                                                             "reference": {
-                                                                "name": "items",
+                                                                "name": "columns",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "boxLabel": null,
-                                                                "fieldLabel": "Tax Flag 3",
-                                                                "itemId": "chkTaxFlag3",
-                                                                "labelWidth": 125,
-                                                                "layout|flex": null
+                                                                "dataIndex": "string",
+                                                                "flex": null,
+                                                                "text": "Min Age",
+                                                                "width": 50
                                                             },
-                                                            "designerId": "c953973e-95da-446f-8eb1-0a53e744b2ee"
+                                                            "designerId": "11fa4865-21f9-47e3-8e10-1ec5b2e166a8"
                                                         },
                                                         {
-                                                            "type": "Ext.form.field.Checkbox",
+                                                            "type": "Ext.grid.View",
                                                             "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
+                                                                "name": "viewConfig",
+                                                                "type": "object"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "boxLabel": null,
-                                                                "fieldLabel": "Tax Flag 4",
-                                                                "itemId": "chkTaxFlag4",
-                                                                "labelWidth": 125,
-                                                                "layout|flex": null
+                                                                "itemId": "grvLocationStore"
                                                             },
-                                                            "designerId": "0dd568d8-b934-45a7-b7f5-3b91d85e36a6"
+                                                            "designerId": "0e23bd4d-0ecb-4a3e-93e9-5fa9c8472a62"
+                                                        },
+                                                        {
+                                                            "type": "Ext.selection.CheckboxModel",
+                                                            "reference": {
+                                                                "name": "selModel",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": "Ext.selection.CheckboxModel",
+                                                            "designerId": "017982c6-a9e7-452f-aad9-071a9ae3c69d"
                                                         }
                                                     ]
-                                                },
-                                                {
-                                                    "type": "Ext.container.Container",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "container|align": "stretch",
-                                                        "designer|displayName": "container",
-                                                        "layout": "vbox",
-                                                        "layout|flex": 1,
-                                                        "layout|margins": "0 7"
-                                                    },
-                                                    "designerId": "233f4805-c8ef-4fcd-bacf-1440e9479720",
-                                                    "cn": [
-                                                        {
-                                                            "type": "Ext.form.field.Checkbox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "boxLabel": null,
-                                                                "fieldLabel": "Quantity Required",
-                                                                "itemId": "chkQuantityRequired",
-                                                                "labelWidth": 140,
-                                                                "layout|flex": null
-                                                            },
-                                                            "designerId": "8f5a9fb0-61ad-4e06-ad1a-42203b2f0c6c"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Checkbox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "boxLabel": null,
-                                                                "fieldLabel": "Scale Item",
-                                                                "itemId": "chkScaleItem",
-                                                                "labelWidth": 140,
-                                                                "layout|flex": null
-                                                            },
-                                                            "designerId": "946dc220-52f4-476c-a508-ba2ce82c85e1"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Checkbox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "boxLabel": null,
-                                                                "fieldLabel": "Food Stampable",
-                                                                "itemId": "chkFoodStampable",
-                                                                "labelWidth": 140,
-                                                                "layout|flex": null
-                                                            },
-                                                            "designerId": "b658dda2-3b76-4816-8bea-a126c26da2cb"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Checkbox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "boxLabel": null,
-                                                                "fieldLabel": "Returnable",
-                                                                "itemId": "chkReturnable",
-                                                                "labelWidth": 140,
-                                                                "layout|flex": null
-                                                            },
-                                                            "designerId": "9be31ba1-b592-4e24-89e8-b47f923d1f72"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Checkbox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "boxLabel": null,
-                                                                "fieldLabel": "Pre Priced",
-                                                                "itemId": "chkPrePriced",
-                                                                "labelWidth": 140,
-                                                                "layout|flex": null
-                                                            },
-                                                            "designerId": "3860776d-f85a-498a-9489-5b512d7a5af2"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Checkbox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "boxLabel": null,
-                                                                "fieldLabel": "ID Required (liqour)",
-                                                                "itemId": "chkIdRequiredLiqour",
-                                                                "labelWidth": 140,
-                                                                "layout|flex": null
-                                                            },
-                                                            "designerId": "28fbea65-2c91-4202-96e8-ea42ac7c79b2"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Checkbox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "boxLabel": null,
-                                                                "fieldLabel": "ID Required (Cigarettes)",
-                                                                "itemId": "chkIdRequiredCigarettes",
-                                                                "labelWidth": 140,
-                                                                "layout|flex": null
-                                                            },
-                                                            "designerId": "9e05d9d4-c9ca-4dd6-ae31-92653014970d"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Text",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "fieldLabel": "Minimum Age",
-                                                                "itemId": "txtMinimumAge",
-                                                                "labelWidth": 140,
-                                                                "layout|flex": null
-                                                            },
-                                                            "designerId": "994125be-90c0-427a-8d9b-75443be05a7c"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Checkbox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "boxLabel": null,
-                                                                "fieldLabel": "Apply Blue Law 1",
-                                                                "itemId": "chkApplyBlueLaw1",
-                                                                "labelWidth": 140,
-                                                                "layout|flex": null
-                                                            },
-                                                            "designerId": "29cd49e1-c048-4fbc-8fd5-6042a096334e"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Checkbox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "boxLabel": null,
-                                                                "fieldLabel": "Apply Blue Law 2",
-                                                                "itemId": "chkApplyBlueLaw2",
-                                                                "labelWidth": 140,
-                                                                "layout|flex": null
-                                                            },
-                                                            "designerId": "591898f4-38c0-4662-8c7b-3317a5240044"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "fieldLabel": "Item Type Code",
-                                                                "itemId": "cboItemTypeCode",
-                                                                "labelWidth": 140,
-                                                                "layout|flex": null
-                                                            },
-                                                            "designerId": "714f3a58-b896-4767-b714-4fd98dab8b82"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Text",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "fieldLabel": "Item Type Subcode",
-                                                                "itemId": "txtItemTypeSubcode",
-                                                                "labelWidth": 140,
-                                                                "layout|flex": null
-                                                            },
-                                                            "designerId": "bd760983-d036-4495-bf49-b3a48ade377b"
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "type": "Ext.container.Container",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "container|align": "stretch",
-                                                        "designer|displayName": "container",
-                                                        "layout": "vbox",
-                                                        "layout|flex": 1
-                                                    },
-                                                    "designerId": "6a62dbd4-c348-4f36-afda-1cfe689d7221"
                                                 }
                                             ]
                                         },

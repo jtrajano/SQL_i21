@@ -1,0 +1,666 @@
+{
+    "type": "Ext.window.Window",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "collapsible": true,
+        "defaultFocus": null,
+        "designer|userAlias": "itemlocationstore",
+        "designer|userClassName": "ItemLocationStore",
+        "height": 465,
+        "hidden": false,
+        "icon": null,
+        "iconCls": "small-icon-i21",
+        "itemId": null,
+        "layout": "fit",
+        "maxHeight": 465,
+        "maximizable": true,
+        "minHeight": 415,
+        "minWidth": 775,
+        "minimizable": null,
+        "title": "Item Location/Store",
+        "width": 775
+    },
+    "designerId": "d57aaaae-c274-4b9e-b068-43fa5c868b63",
+    "cn": [
+        {
+            "type": "Ext.form.Panel",
+            "reference": {
+                "name": "items",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "autoShow": true,
+                "bodyBorder": false,
+                "bodyPadding": 10,
+                "container|align": "stretch",
+                "dock": null,
+                "frame": null,
+                "header": false,
+                "height": 350,
+                "itemId": "frmItemLocationStore",
+                "layout": "vbox",
+                "margin": -1,
+                "title": null,
+                "trackResetOnLoad": true,
+                "url": null,
+                "width": 450
+            },
+            "designerId": "32634488-77c6-4852-bfee-784a0d816b3f",
+            "cn": [
+                {
+                    "type": "Ext.toolbar.Toolbar",
+                    "reference": {
+                        "name": "dockedItems",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|padding": "0 0 0 1",
+                        "designer|displayName": "toolbar",
+                        "dock": "top",
+                        "width": 588
+                    },
+                    "designerId": "d4e54896-1998-4b69-9034-6f348b4c70a4",
+                    "cn": [
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-new",
+                                "itemId": "btnNew",
+                                "layout|flex": null,
+                                "layout|margins": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "New",
+                                "width": 45
+                            },
+                            "designerId": "d1390cc8-ce08-410e-afd2-7641921060cf"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-save",
+                                "itemId": "btnSave",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Save",
+                                "width": 45
+                            },
+                            "designerId": "797a9145-1ebb-45dc-8c8d-ca7df35dbb22"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-search",
+                                "itemId": "btnSearch",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Search",
+                                "width": 45
+                            },
+                            "designerId": "6e478980-edac-4f37-9b25-0b1a70236f3d"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-delete",
+                                "itemId": "btnDelete",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Delete",
+                                "width": 45
+                            },
+                            "designerId": "b0240afb-ef9a-4865-b0f6-e120b3e1c9ba"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-undo",
+                                "itemId": "btnUndo",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Undo",
+                                "width": 45
+                            },
+                            "designerId": "bfc582f4-0084-4526-93b1-9b75f2debb86"
+                        },
+                        {
+                            "type": "Ext.toolbar.Separator",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": "separator",
+                                "height": 30,
+                                "layout|flex": null
+                            },
+                            "designerId": "c8ea4f53-0dde-4937-9b52-d15e66025e25"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-close",
+                                "itemId": "btnClose",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Close",
+                                "width": 45
+                            },
+                            "designerId": "0c16f88c-eb73-4e89-a4a6-3338e76de6e9"
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.container.Container",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|align": "stretch",
+                        "designer|displayName": "container",
+                        "layout": "hbox",
+                        "layout|flex": 1
+                    },
+                    "designerId": "3d1f5cdb-04ed-468a-b210-956ff10f4f36",
+                    "cn": [
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "stretch",
+                                "designer|displayName": "container",
+                                "layout": "vbox",
+                                "layout|flex": 1
+                            },
+                            "designerId": "60c9dbbd-cad7-47f0-a1ab-00ecad30e665",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.ComboBox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Location",
+                                        "itemId": "cboLocation",
+                                        "labelWidth": 125,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "01cd1254-c32e-4c52-be00-5a3d2a4642a7"
+                                },
+                                {
+                                    "type": "Ext.form.field.ComboBox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Store",
+                                        "itemId": "cboStore",
+                                        "labelWidth": 125,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "1237ec97-9b70-4ee4-b11d-da3d4b528de0"
+                                },
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Row",
+                                        "itemId": "txtRow",
+                                        "labelWidth": 125,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "0c45d94d-c5f5-4e10-b8ca-07b5bf30fdb7"
+                                },
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Bin",
+                                        "itemId": "txtBin",
+                                        "labelWidth": 125,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "a006055a-da78-4de9-9e22-a0b206626357"
+                                },
+                                {
+                                    "type": "Ext.form.field.ComboBox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Fuel Tank No",
+                                        "itemId": "cboFuelTankNo",
+                                        "labelWidth": 125,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "1123fe5d-cd68-4bc9-a48b-5b7be62bf011"
+                                },
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Passport Fuel ID 1",
+                                        "itemId": "txtPassportFuelId1",
+                                        "labelWidth": 125,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "49bf6296-4c72-406c-849c-778c2eb004c7"
+                                },
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Passport Fuel ID 2",
+                                        "itemId": "txtPassportFuelId2",
+                                        "labelWidth": 125,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "c58a68bf-9930-4043-9f1b-1332a91c5e26"
+                                },
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Passport Fuel ID 3",
+                                        "itemId": "txtPassportFuelId3",
+                                        "labelWidth": 125,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "09921185-ab25-4177-b8fb-43c078e7f99a"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Tax Flag 1",
+                                        "itemId": "chkTaxFlag1",
+                                        "labelWidth": 125,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "f52c1470-7cec-4aae-a659-e95ec29bafa2"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Tax Flag 2",
+                                        "itemId": "chkTaxFlag2",
+                                        "labelWidth": 125,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "add2df77-3c1a-407d-9589-534b062fc351"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Tax Flag 3",
+                                        "itemId": "chkTaxFlag3",
+                                        "labelWidth": 125,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "c953973e-95da-446f-8eb1-0a53e744b2ee"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Tax Flag 4",
+                                        "itemId": "chkTaxFlag4",
+                                        "labelWidth": 125,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "0dd568d8-b934-45a7-b7f5-3b91d85e36a6"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "stretch",
+                                "designer|displayName": "container",
+                                "layout": "vbox",
+                                "layout|flex": 1,
+                                "layout|margins": "0 7"
+                            },
+                            "designerId": "233f4805-c8ef-4fcd-bacf-1440e9479720",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Quantity Required",
+                                        "itemId": "chkQuantityRequired",
+                                        "labelWidth": 140,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "8f5a9fb0-61ad-4e06-ad1a-42203b2f0c6c"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Scale Item",
+                                        "itemId": "chkScaleItem",
+                                        "labelWidth": 140,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "946dc220-52f4-476c-a508-ba2ce82c85e1"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Food Stampable",
+                                        "itemId": "chkFoodStampable",
+                                        "labelWidth": 140,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "b658dda2-3b76-4816-8bea-a126c26da2cb"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Returnable",
+                                        "itemId": "chkReturnable",
+                                        "labelWidth": 140,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "9be31ba1-b592-4e24-89e8-b47f923d1f72"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Pre Priced",
+                                        "itemId": "chkPrePriced",
+                                        "labelWidth": 140,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "3860776d-f85a-498a-9489-5b512d7a5af2"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "ID Required (liqour)",
+                                        "itemId": "chkIdRequiredLiqour",
+                                        "labelWidth": 140,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "28fbea65-2c91-4202-96e8-ea42ac7c79b2"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "ID Required (Cigarettes)",
+                                        "itemId": "chkIdRequiredCigarettes",
+                                        "labelWidth": 140,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "9e05d9d4-c9ca-4dd6-ae31-92653014970d"
+                                },
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Minimum Age",
+                                        "itemId": "txtMinimumAge",
+                                        "labelWidth": 140,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "994125be-90c0-427a-8d9b-75443be05a7c"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Apply Blue Law 1",
+                                        "itemId": "chkApplyBlueLaw1",
+                                        "labelWidth": 140,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "29cd49e1-c048-4fbc-8fd5-6042a096334e"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Apply Blue Law 2",
+                                        "itemId": "chkApplyBlueLaw2",
+                                        "labelWidth": 140,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "591898f4-38c0-4662-8c7b-3317a5240044"
+                                },
+                                {
+                                    "type": "Ext.form.field.ComboBox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Item Type Code",
+                                        "itemId": "cboItemTypeCode",
+                                        "labelWidth": 140,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "714f3a58-b896-4767-b714-4fd98dab8b82"
+                                },
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Item Type Subcode",
+                                        "itemId": "txtItemTypeSubcode",
+                                        "labelWidth": 140,
+                                        "layout|flex": null
+                                    },
+                                    "designerId": "bd760983-d036-4495-bf49-b3a48ade377b"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "linkedinstance",
+                    "reference": {
+                        "name": "dockedItems",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "afterPageText": null,
+                        "designer|createAlias": "ipagingstatusbar",
+                        "designer|displayName": "",
+                        "dock": "bottom",
+                        "itemId": "pagingtoolbar",
+                        "layout|flex": 1,
+                        "store": null
+                    },
+                    "designerId": "3812557b-eaf0-4f41-b444-7da5890f9c89",
+                    "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
+                }
+            ]
+        }
+    ]
+}
