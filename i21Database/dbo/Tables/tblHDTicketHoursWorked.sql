@@ -6,7 +6,7 @@
 	[intHours] [numeric](18, 6) NOT NULL,
 	[dtmDate] [datetime] NULL,
 	[dblRate] [numeric](18, 6) NOT NULL,
-	[strDescription] [nvarchar](150) COLLATE Latin1_General_CI_AS NULL,
+	[strDescription] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strJIRALink] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[ysnBillable] [bit] NOT NULL,
 	[intCreatedUserId] [int] NULL,
