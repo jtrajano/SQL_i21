@@ -556,6 +556,9 @@
     <Build Include="dbo\Tables\tblSMSearchFilter.sql" />
     <Build Include="dbo\Tables\tblSMSearchField.sql" />
     <Build Include="dbo\Tables\tblSMSearch.sql" />
+    <Build Include="dbo\Tables\tblARPaymentDetail.sql" />
+    <Build Include="dbo\Tables\tblARPayment.sql" />
+    <Build Include="dbo\Tables\tblARInvoiceDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
