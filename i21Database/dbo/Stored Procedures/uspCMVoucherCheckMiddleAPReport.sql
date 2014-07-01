@@ -141,4 +141,5 @@ FROM	dbo.tblCMBankTransaction CHK INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSP
 			AND LOCATION.intEntityId = ENTITY.intEntityId
 WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND CHK.strTransactionId = ISNULL(@strTransactionId, CHK.strTransactionId)
-		AND PRINTSPOOL.strBatchId = ISNULL(@strBatchId, PRINTSPOOL.strBatchId) 
+		AND PRINTSPOOL.strBatchId = ISNULL(@strBatchId, PRINTSPOOL.strBatchId)
+ORDER BY CHK.strReferenceNo ASC

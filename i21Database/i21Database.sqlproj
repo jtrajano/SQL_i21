@@ -125,6 +125,8 @@
     <Folder Include="Scripts\Post-Deployment\Optional Run\2_Reports" />
     <Folder Include="Scripts\Post-Deployment\AR" />
     <Folder Include="Scripts\Post-Deployment\TM\DefaultData" />
+    <Folder Include="Scripts\Post-Deployment\CM" />
+    <Folder Include="Scripts\Post-Deployment\CM\Patch" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -370,7 +372,6 @@
     <None Include="Script.PreDeployment1.sql" />
     <None Include="Script.PostDeployment1.sql" />
     <None Include="Scripts\Post-Deployment\FIN\DefaultData\AccountGroup.sql" />
-    <None Include="Scripts\Post-Deployment\FIN\DefaultData\BankTransactionTypes.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\1_SM\1_ZipCodeData.sql" />
     <None Include="Scripts\Post-Deployment\Reports\1_ReportDisableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Reports\2_ReportDeleteOldData.sql" />
@@ -418,7 +419,6 @@
     <Build Include="dbo\Stored Procedures\uspCMImportBankTransactionsFromOrigin.sql" />
     <Build Include="dbo\Stored Procedures\uspCMImportBankReconciliationFromOrigin.sql" />
     <Build Include="dbo\Tables\tblCMDataImportStatus.sql" />
-    <None Include="Scripts\Post-Deployment\FIN\DefaultData\DataImportStatus.sql" />
     <Build Include="dbo\Tables\tblSMUserSecurityFRPermission.sql" />
     <Build Include="dbo\Tables\tblSMUserSecurityReportPermission.sql" />
     <Build Include="dbo\Tables\tblSMUserSecurityScreenPermission.sql" />
@@ -535,6 +535,9 @@
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleAPSubReport.sql" />
     <Build Include="dbo\Functions\fnConvertToFullAddress.sql" />
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleAPReport.sql" />
+    <None Include="Scripts\Post-Deployment\CM\1_BankTransactionTypes.sql" />
+    <None Include="Scripts\Post-Deployment\CM\2_DataImportStatus.sql" />
+    <None Include="Scripts\Post-Deployment\CM\Patch\1_CheckVoucherMiddle.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
