@@ -170,4 +170,7 @@
   <ItemGroup>
     <None Include="dbo\Stored Procedures\uspCMProcessUndepositedFunds.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="dbo\Views\vyuTMOriginDegreeOption.sql" />
+  </ItemGroup>
 </Project>
