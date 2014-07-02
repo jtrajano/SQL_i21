@@ -128,6 +128,7 @@
     <Folder Include="Scripts\Post-Deployment\CM" />
     <Folder Include="Scripts\Post-Deployment\AR\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\AP" />
+    <Folder Include="Scripts\Post-Deployment\CM\Patch" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -559,6 +560,10 @@
     <Build Include="dbo\Tables\tblARPaymentDetail.sql" />
     <Build Include="dbo\Tables\tblARPayment.sql" />
     <Build Include="dbo\Tables\tblARInvoiceDetail.sql" />
+    <None Include="Scripts\Post-Deployment\CM\Patch\CheckVoucherMiddle.sql" />
+    <Build Include="dbo\Functions\fnConvertToFullAddress.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleAPSubReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleAPReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />

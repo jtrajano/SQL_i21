@@ -57,6 +57,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\DataImportStatus.sql
 :r .\CM\PopulateSourceSystemData.sql
 
+-- Note: remove patch (:r .\CM\Patch\CheckVoucherMiddle.sql) when CM-311 is resolved. 
+:r .\CM\Patch\CheckVoucherMiddle.sql
+
 --Accounts Receivable
 :r .\AR\EntityTableDataFix.sql
 :R .\AR\DefaultData\1_CustomerPortalMenu.sql
