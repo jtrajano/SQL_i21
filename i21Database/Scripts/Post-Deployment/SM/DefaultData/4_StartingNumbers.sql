@@ -164,6 +164,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Ticket Number')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 17
+			,[strTransactionType]	= N'Receive Payments'
+			,[strPrefix]			= N'RCV-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Accounts Receivable'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Receive Payments')
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
