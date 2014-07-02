@@ -97,7 +97,8 @@ SET @intTransactionIdFrom = CASE WHEN ISNULL(@intTransactionIdFrom, 0) = 0 THEN 
 -- Report Query:  
 SELECT TOP 10 
 		intTransactionId = F.intTransactionId
-		,strInvoice = BILL.strBillId
+		,strBillId = BILL.strBillId
+		,strInvoice = BILL.strVendorOrderNumber
 		,dtmDate = BILL.dtmBillDate
 		,dblAmount = BILL.dblTotal
 		,dblDiscount = PYMTDetail.dblDiscount
