@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblFRRowDesignFilterAccount] (
     [intRowFilterAccountId] INT            IDENTITY (1, 1) NOT NULL,
-    [intRowDetailId]        INT            NOT NULL,
+    [intRowDetailId]        INT            NULL,
     [intRowId]              INT            NOT NULL,
     [intRefNoId]            INT            NOT NULL,
     [strName]               NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
