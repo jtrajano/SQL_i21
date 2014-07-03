@@ -15,6 +15,8 @@
 	delete from tblRMOption
 	delete from tblRMFilter
 	delete from tblRMFieldSelectionFilter
+	delete from tblRMPrintingOption
+	delete from tblRMPrintingFilter
 	print('/*******************  END DELETE old records  *******************/')
 
 /*******************  END DELETE old records  *******************/
