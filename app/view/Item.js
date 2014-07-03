@@ -765,8 +765,8 @@ Ext.define('Inventory.view.Item', {
                                                                     labelWidth: 125
                                                                 },
                                                                 {
-                                                                    xtype: 'textfield',
-                                                                    itemId: 'txtCaseUom',
+                                                                    xtype: 'combobox',
+                                                                    itemId: 'cboCaseUom',
                                                                     fieldLabel: 'Case UOM',
                                                                     labelWidth: 125
                                                                 },

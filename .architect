@@ -1465,6 +1465,7 @@
         },
         "3a59fc7a-16c2-4a32-9f9e-da6a3b7a75c7": {
             "id": "3a59fc7a-16c2-4a32-9f9e-da6a3b7a75c7",
+            "expanded": false,
             "cn": [
                 {
                     "id": "8dc75c31-24ee-4631-8694-f06fa38758be",
@@ -4929,7 +4930,7 @@
         ]
     },
     "canvasState": {
-        "topInstance": "3a59fc7a-16c2-4a32-9f9e-da6a3b7a75c7"
+        "topInstance": "d7ef9c4d-9fa7-40a9-ac40-8922ff13c54c"
     },
     "inspectorState": {
         "topInstance": null,

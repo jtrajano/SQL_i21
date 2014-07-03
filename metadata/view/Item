@@ -1654,7 +1654,7 @@
                                                             "designerId": "b2cd731f-c9c2-432f-9c85-eb6def174e34"
                                                         },
                                                         {
-                                                            "type": "Ext.form.field.Text",
+                                                            "type": "Ext.form.field.ComboBox",
                                                             "reference": {
                                                                 "name": "items",
                                                                 "type": "array"
@@ -1662,7 +1662,7 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "fieldLabel": "Case UOM",
-                                                                "itemId": "txtCaseUom",
+                                                                "itemId": "cboCaseUom",
                                                                 "labelWidth": 125,
                                                                 "layout|flex": null
                                                             },
