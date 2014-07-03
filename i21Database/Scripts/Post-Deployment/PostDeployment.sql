@@ -50,9 +50,12 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- Financials
 :r .\FIN\DefaultData\AccountGroup.sql
-:r .\FIN\DefaultData\BankTransactionTypes.sql
-:r .\FIN\DefaultData\DataImportStatus.sql
 :r .\FIN\GLEntryDataFix.sql
+
+-- Cash Management
+:r .\CM\1_BankTransactionTypes.sql
+:r .\CM\2_DataImportStatus.sql
+:r .\CM\Patch\1_CheckVoucherMiddle.sql
 
 --Accounts Receivable
 :r .\AR\EntityTableDataFix.sql
