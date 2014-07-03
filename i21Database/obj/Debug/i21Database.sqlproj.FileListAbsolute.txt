@@ -34,3 +34,12 @@ C:\i21 Development\i21 SQL Scripts\i21Database\obj\Debug\postdeploy.sql
 C:\i21 Development\i21 SQL Scripts\i21Database\obj\Debug\predeploy.sql
 C:\i21 Development\i21 SQL Scripts\i21Database\obj\Debug\i21Database.dll
 C:\i21 Development\i21 SQL Scripts\i21Database\obj\Debug\i21Database.pdb
+C:\Git\i21Web_Development\i21_SQLScripts\i21Database\bin\Debug\i21Database.dacpac
+C:\Git\i21Web_Development\i21_SQLScripts\i21Database\bin\Debug\i21Database.dll
+C:\Git\i21Web_Development\i21_SQLScripts\i21Database\bin\Debug\i21Database.pdb
+C:\Git\i21Web_Development\i21_SQLScripts\i21Database\obj\Debug\Model.xml
+C:\Git\i21Web_Development\i21_SQLScripts\i21Database\obj\Debug\refactor.xml
+C:\Git\i21Web_Development\i21_SQLScripts\i21Database\obj\Debug\postdeploy.sql
+C:\Git\i21Web_Development\i21_SQLScripts\i21Database\obj\Debug\predeploy.sql
+C:\Git\i21Web_Development\i21_SQLScripts\i21Database\obj\Debug\i21Database.dll
+C:\Git\i21Web_Development\i21_SQLScripts\i21Database\obj\Debug\i21Database.pdb

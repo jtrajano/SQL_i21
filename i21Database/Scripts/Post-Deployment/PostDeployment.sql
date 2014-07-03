@@ -48,9 +48,12 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\DB\2_CannedPanels_Column.sql
 :r .\DB\3_CannedPanels_Format.sql
 
--- Financials
-:r .\FIN\DefaultData\AccountGroup.sql
-:r .\FIN\GLEntryDataFix.sql
+-- General Ledger
+:r .\GL\DefaultData\AccountGroup.sql
+:r .\GL\GLEntryDataFix.sql
+
+-- Financial Report Designer
+:r .\FRD\FRDEntryDataFix.sql
 
 -- Cash Management
 :r .\CM\BankTransactionTypes.sql

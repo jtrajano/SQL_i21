@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblFRColumnDesignSegment] (
     [intColumnSegmentId]	INT            IDENTITY (1, 1) NOT NULL,
-    [intColumnDetailId]		INT            NOT NULL,
+    [intColumnDetailId]		INT            NULL,
     [strJoin]				NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [intSegmentType]		INT            NOT NULL,
     [strSegment]			NVARCHAR (500) COLLATE Latin1_General_CI_AS NULL,

@@ -114,8 +114,8 @@
     <Folder Include="Scripts" />
     <Folder Include="Scripts\Post-Deployment" />
     <Folder Include="Scripts\Post-Deployment\DB" />
-    <Folder Include="Scripts\Post-Deployment\FIN" />
-    <Folder Include="Scripts\Post-Deployment\FIN\DefaultData" />
+    <Folder Include="Scripts\Post-Deployment\GL" />
+    <Folder Include="Scripts\Post-Deployment\GL\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\Optional Run" />
     <Folder Include="Scripts\Post-Deployment\Optional Run\1_SM" />
     <Folder Include="Scripts\Post-Deployment\Reports" />
@@ -129,6 +129,7 @@
     <Folder Include="Scripts\Post-Deployment\AR\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\AP" />
     <Folder Include="Scripts\Post-Deployment\CM\Patch" />
+    <Folder Include="Scripts\Post-Deployment\FRD" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -368,7 +369,7 @@
     <Build Include="dbo\User Defined Types\RecapTableType.sql" />
     <None Include="Script.PreDeployment1.sql" />
     <None Include="Script.PostDeployment1.sql" />
-    <None Include="Scripts\Post-Deployment\FIN\DefaultData\AccountGroup.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountGroup.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\1_SM\1_ZipCodeData.sql" />
     <None Include="Scripts\Post-Deployment\Reports\1_ReportDisableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Reports\2_ReportDeleteOldData.sql" />
@@ -575,7 +576,7 @@
     <None Include="Scripts\Post-Deployment\SM\SMDataMigrations.sql" />
     <None Include="Scripts\Post-Deployment\AR\EntityTableDataFix.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\8_Country.sql" />
-    <None Include="Scripts\Post-Deployment\FIN\GLEntryDataFix.sql" />
+    <None Include="Scripts\Post-Deployment\GL\GLEntryDataFix.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\1_PreferenceCompany.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\2_EventType.sql" />
     <None Include="i1420AG.local.publish.xml" />
@@ -584,5 +585,6 @@
     <Build Include="dbo\Views\vyuARCustomerContacts.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\1_CustomerPortalMenu.sql" />
     <None Include="Scripts\Post-Deployment\AP\RestoreVendorId.sql" />
+    <None Include="Scripts\Post-Deployment\FRD\FRDEntryDataFix.sql" />
   </ItemGroup>
 </Project>

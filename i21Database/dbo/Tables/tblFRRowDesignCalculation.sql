@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblFRRowDesignCalculation] (
     [intRowCalculationId] INT        IDENTITY (1, 1) NOT NULL,
-    [intRowDetailId]      INT        NOT NULL,
+    [intRowDetailId]      INT        NULL,
     [intRowDetailRefNo]	  INT		 NULL,
     [intRowId]            INT        NOT NULL,
     [intRefNoId]          INT        NOT NULL,
