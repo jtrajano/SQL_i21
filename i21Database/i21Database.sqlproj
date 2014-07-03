@@ -541,6 +541,7 @@
     <None Include="Scripts\Post-Deployment\CM\Patch\1_CheckVoucherMiddle.sql" />
     <Build Include="dbo\Functions\fnLastIndex.sql" />
     <Build Include="dbo\Functions\fnTrim.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleAPOverflow.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
