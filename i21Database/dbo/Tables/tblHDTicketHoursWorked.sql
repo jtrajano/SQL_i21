@@ -10,6 +10,8 @@
 	[strDescription] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strJIRALink] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[ysnBillable] [bit] NOT NULL,
+	[ysnBilled] [bit] NULL,
+	[dtmBilled] [datetime] NULL,
 	[intCreatedUserId] [int] NULL,
 	[intCreatedUserEntityId] [int] NULL,
 	[dtmCreated] [datetime] NULL,
