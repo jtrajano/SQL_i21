@@ -1180,7 +1180,7 @@ Ext.define('Inventory.view.Commodity', {
                                 },
                                 {
                                     xtype: 'panel',
-                                    title: 'BOT',
+                                    title: 'Exchange',
                                     layout: {
                                         type: 'vbox',
                                         align: 'stretch'
@@ -1189,9 +1189,9 @@ Ext.define('Inventory.view.Commodity', {
                                         {
                                             xtype: 'advancefiltergrid',
                                             flex: 1,
-                                            itemId: 'grdBoardOfTrade',
+                                            itemId: 'grdFuturesExchange',
                                             margin: -1,
-                                            title: 'Board of Trade',
+                                            title: 'Futures Exchange',
                                             dockedItems: [
                                                 {
                                                     xtype: 'toolbar',
@@ -1222,13 +1222,13 @@ Ext.define('Inventory.view.Commodity', {
                                                 {
                                                     xtype: 'gridcolumn',
                                                     dataIndex: 'string',
-                                                    text: 'Board of Trade',
+                                                    text: 'Futures Exchange',
                                                     flex: 1
                                                 },
                                                 {
                                                     xtype: 'gridcolumn',
                                                     dataIndex: 'string',
-                                                    text: 'Default BOT',
+                                                    text: 'Default',
                                                     flex: 1
                                                 },
                                                 {
@@ -1257,7 +1257,7 @@ Ext.define('Inventory.view.Commodity', {
                                                 }
                                             ],
                                             viewConfig: {
-                                                itemId: 'grvBoardOfTrade'
+                                                itemId: 'grvFuturesExchange'
                                             },
                                             selModel: Ext.create('Ext.selection.CheckboxModel', {
 
@@ -1267,9 +1267,9 @@ Ext.define('Inventory.view.Commodity', {
                                             xtype: 'advancefiltergrid',
                                             flex: 1,
                                             margins: '5 0 0 0',
-                                            itemId: 'grdBoardOfTradeOptions',
+                                            itemId: 'grdFuturesMonth',
                                             margin: -1,
-                                            title: 'Board of Trade Options',
+                                            title: 'Futures Month',
                                             dockedItems: [
                                                 {
                                                     xtype: 'toolbar',
@@ -1300,19 +1300,19 @@ Ext.define('Inventory.view.Commodity', {
                                                 {
                                                     xtype: 'gridcolumn',
                                                     dataIndex: 'string',
-                                                    text: 'Board of Trade',
+                                                    text: 'Futures Exchange',
                                                     flex: 1
                                                 },
                                                 {
                                                     xtype: 'gridcolumn',
                                                     dataIndex: 'string',
-                                                    text: 'BOT Month Code',
+                                                    text: 'Futures Month Code',
                                                     flex: 1
                                                 },
                                                 {
                                                     xtype: 'gridcolumn',
                                                     dataIndex: 'string',
-                                                    text: 'BOT Month Name',
+                                                    text: 'Futures Month Name',
                                                     flex: 1
                                                 },
                                                 {
@@ -1329,7 +1329,7 @@ Ext.define('Inventory.view.Commodity', {
                                                 }
                                             ],
                                             viewConfig: {
-                                                itemId: 'grvBoardOfTradeOptions'
+                                                itemId: 'grvFuturesMonth'
                                             },
                                             selModel: Ext.create('Ext.selection.CheckboxModel', {
 

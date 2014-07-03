@@ -909,6 +909,292 @@ Ext.define('Inventory.view.Item', {
                                                 },
                                                 {
                                                     xtype: 'panel',
+                                                    title: 'Manufacturing ',
+                                                    layout: {
+                                                        type: 'hbox',
+                                                        align: 'stretch',
+                                                        padding: 5
+                                                    },
+                                                    items: [
+                                                        {
+                                                            xtype: 'container',
+                                                            flex: 1,
+                                                            layout: {
+                                                                type: 'vbox',
+                                                                align: 'stretch'
+                                                            },
+                                                            items: [
+                                                                {
+                                                                    xtype: 'panel',
+                                                                    margins: '0 0 5 0',
+                                                                    height: 146,
+                                                                    bodyPadding: 7,
+                                                                    title: 'Material Detail',
+                                                                    layout: {
+                                                                        type: 'vbox',
+                                                                        align: 'stretch'
+                                                                    },
+                                                                    items: [
+                                                                        {
+                                                                            xtype: 'combobox',
+                                                                            itemId: 'cboFamily',
+                                                                            fieldLabel: 'Material Control',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'checkboxfield',
+                                                                            fieldLabel: 'Require Approval',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'combobox',
+                                                                            itemId: 'cboFamily1',
+                                                                            fieldLabel: 'Associated Recipe',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'checkboxfield',
+                                                                            fieldLabel: 'Sanitization Required',
+                                                                            labelWidth: 125
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    xtype: 'panel',
+                                                                    margins: '0 0 5 0',
+                                                                    height: 91,
+                                                                    bodyPadding: 7,
+                                                                    title: 'Life Time',
+                                                                    layout: {
+                                                                        type: 'vbox',
+                                                                        align: 'stretch'
+                                                                    },
+                                                                    items: [
+                                                                        {
+                                                                            xtype: 'container',
+                                                                            margins: '0 0 5 0',
+                                                                            layout: {
+                                                                                type: 'hbox',
+                                                                                align: 'stretch'
+                                                                            },
+                                                                            items: [
+                                                                                {
+                                                                                    xtype: 'textfield',
+                                                                                    flex: 2,
+                                                                                    itemId: 'txtCaseUom1',
+                                                                                    fieldLabel: 'Life Time',
+                                                                                    labelWidth: 125
+                                                                                },
+                                                                                {
+                                                                                    xtype: 'combobox',
+                                                                                    flex: 1,
+                                                                                    margins: '0 0 0 5',
+                                                                                    itemId: 'cboFamily',
+                                                                                    labelWidth: 125
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            xtype: 'textfield',
+                                                                            itemId: 'txtCaseUom',
+                                                                            fieldLabel: 'Receive Life',
+                                                                            labelWidth: 125
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    xtype: 'panel',
+                                                                    flex: 1,
+                                                                    margins: '0 0 5 0',
+                                                                    layout: 'fit',
+                                                                    title: 'BOM Dependencies',
+                                                                    items: [
+                                                                        {
+                                                                            xtype: 'advancefiltergrid',
+                                                                            itemId: 'grdBOM',
+                                                                            margin: -1,
+                                                                            hideHeaders: true,
+                                                                            dockedItems: [
+                                                                                {
+                                                                                    xtype: 'toolbar',
+                                                                                    dock: 'top',
+                                                                                    itemId: 'tlbGridOptions',
+                                                                                    layout: {
+                                                                                        type: 'hbox',
+                                                                                        padding: '0 0 0 1'
+                                                                                    },
+                                                                                    items: [
+                                                                                        {
+                                                                                            xtype: 'button',
+                                                                                            itemId: 'btnDelete',
+                                                                                            iconCls: 'small-delete',
+                                                                                            tabIndex: -1,
+                                                                                            text: 'Delete'
+                                                                                        },
+                                                                                        {
+                                                                                            xtype: 'tbseparator'
+                                                                                        },
+                                                                                        {
+                                                                                            xtype: 'filter'
+                                                                                        }
+                                                                                    ]
+                                                                                }
+                                                                            ],
+                                                                            columns: [
+                                                                                {
+                                                                                    xtype: 'gridcolumn',
+                                                                                    width: 215,
+                                                                                    dataIndex: 'string',
+                                                                                    text: 'Unit of Measure',
+                                                                                    flex: 1.5
+                                                                                }
+                                                                            ],
+                                                                            viewConfig: {
+                                                                                itemId: 'grvBOM'
+                                                                            },
+                                                                            selModel: Ext.create('Ext.selection.CheckboxModel', {
+
+                                                                            })
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            xtype: 'container',
+                                                            flex: 1,
+                                                            margins: '0 0 0 5',
+                                                            layout: {
+                                                                type: 'vbox',
+                                                                align: 'stretch'
+                                                            },
+                                                            items: [
+                                                                {
+                                                                    xtype: 'panel',
+                                                                    margins: '0 0 5 0',
+                                                                    height: 118,
+                                                                    bodyPadding: 7,
+                                                                    title: 'GROUP 1',
+                                                                    layout: {
+                                                                        type: 'vbox',
+                                                                        align: 'stretch'
+                                                                    },
+                                                                    items: [
+                                                                        {
+                                                                            xtype: 'textfield',
+                                                                            itemId: 'txtCaseUom1',
+                                                                            fieldLabel: 'GTIN',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'combobox',
+                                                                            itemId: 'cboFamily',
+                                                                            fieldLabel: 'Rotation Type',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'container',
+                                                                            layout: {
+                                                                                type: 'hbox',
+                                                                                align: 'stretch'
+                                                                            },
+                                                                            items: [
+                                                                                {
+                                                                                    xtype: 'combobox',
+                                                                                    flex: 1,
+                                                                                    itemId: 'cboFamily1',
+                                                                                    fieldLabel: 'NMFC',
+                                                                                    labelWidth: 125
+                                                                                },
+                                                                                {
+                                                                                    xtype: 'checkboxfield',
+                                                                                    margins: '0 0 0 5',
+                                                                                    fieldLabel: 'Strict FIFO',
+                                                                                    labelWidth: 63
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    xtype: 'panel',
+                                                                    flex: 1,
+                                                                    margins: '0 0 5 0',
+                                                                    bodyPadding: 7,
+                                                                    title: 'GROUP 2',
+                                                                    layout: {
+                                                                        type: 'vbox',
+                                                                        align: 'stretch'
+                                                                    },
+                                                                    items: [
+                                                                        {
+                                                                            xtype: 'combobox',
+                                                                            itemId: 'txtCaseUom6',
+                                                                            fieldLabel: 'Standard UOM',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'combobox',
+                                                                            itemId: 'txtCaseUom7',
+                                                                            fieldLabel: 'Issue UOM',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'combobox',
+                                                                            itemId: 'txtCaseUom8',
+                                                                            fieldLabel: 'Receive UOM',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'combobox',
+                                                                            itemId: 'cboFamily',
+                                                                            fieldLabel: 'Dimension UOM',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'combobox',
+                                                                            itemId: 'cboFamily1',
+                                                                            fieldLabel: 'Weight UOM',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'textfield',
+                                                                            itemId: 'txtCaseUom1',
+                                                                            fieldLabel: 'Material Size Code',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'textfield',
+                                                                            itemId: 'txtCaseUom2',
+                                                                            fieldLabel: 'No. of Inner Units',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'textfield',
+                                                                            itemId: 'txtCaseUom3',
+                                                                            fieldLabel: 'Layers per Pallet',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'textfield',
+                                                                            itemId: 'txtCaseUom4',
+                                                                            fieldLabel: 'Units per Layer',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'textfield',
+                                                                            itemId: 'txtCaseUom5',
+                                                                            fieldLabel: 'Std. Pallet Ratio (%)',
+                                                                            labelWidth: 125
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    xtype: 'panel',
                                                     layout: 'fit',
                                                     title: 'Location/Store',
                                                     items: [

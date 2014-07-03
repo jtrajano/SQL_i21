@@ -2554,7 +2554,7 @@
                                 "bodyPadding": null,
                                 "container|align": "stretch",
                                 "layout": "vbox",
-                                "title": "BOT"
+                                "title": "Exchange"
                             },
                             "designerId": "b52794e4-fb05-4770-a574-cc465c5e799b",
                             "cn": [
@@ -2576,10 +2576,10 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "designer|createAlias": "advancefiltergrid",
-                                        "itemId": "grdBoardOfTrade",
+                                        "itemId": "grdFuturesExchange",
                                         "layout|flex": 1,
                                         "margin": -1,
-                                        "title": "Board of Trade"
+                                        "title": "Futures Exchange"
                                     },
                                     "designerId": "fc2d9746-395d-4af1-a6a3-d5cd3287910f",
                                     "cn": [
@@ -2652,7 +2652,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
-                                                "text": "Board of Trade"
+                                                "text": "Futures Exchange"
                                             },
                                             "designerId": "01107e53-09cc-420e-aa53-7f60beb6262a"
                                         },
@@ -2666,7 +2666,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
-                                                "text": "Default BOT"
+                                                "text": "Default"
                                             },
                                             "designerId": "8efa429e-82c7-412f-8e95-1dcdefeef611"
                                         },
@@ -2734,7 +2734,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "itemId": "grvBoardOfTrade"
+                                                "itemId": "grvFuturesExchange"
                                             },
                                             "designerId": "d567ed09-e042-4637-8f99-8cf59d796fe0"
                                         },
@@ -2758,11 +2758,11 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "designer|createAlias": "advancefiltergrid",
-                                        "itemId": "grdBoardOfTradeOptions",
+                                        "itemId": "grdFuturesMonth",
                                         "layout|flex": 1,
                                         "layout|margins": "5 0 0 0",
                                         "margin": -1,
-                                        "title": "Board of Trade Options"
+                                        "title": "Futures Month"
                                     },
                                     "designerId": "b991f4be-ae22-4aa7-a97f-de9c9d21a328",
                                     "cn": [
@@ -2835,7 +2835,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
-                                                "text": "Board of Trade"
+                                                "text": "Futures Exchange"
                                             },
                                             "designerId": "91045493-fc70-4cef-aead-3245d5b4dd90"
                                         },
@@ -2849,7 +2849,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
-                                                "text": "BOT Month Code"
+                                                "text": "Futures Month Code"
                                             },
                                             "designerId": "90356883-27d8-4d9c-bcef-362f0f44f521"
                                         },
@@ -2863,7 +2863,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
-                                                "text": "BOT Month Name"
+                                                "text": "Futures Month Name"
                                             },
                                             "designerId": "9e06ff24-8f9b-437f-9fe1-6b50a3a7dc11"
                                         },
@@ -2911,7 +2911,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "itemId": "grvBoardOfTradeOptions"
+                                                "itemId": "grvFuturesMonth"
                                             },
                                             "designerId": "4768ccdd-e67b-4fe3-a891-ba4a1b754eeb"
                                         },

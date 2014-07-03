@@ -2005,6 +2005,630 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "container|align": "stretch",
+                                                "container|padding": 5,
+                                                "layout": "hbox",
+                                                "title": "Manufacturing "
+                                            },
+                                            "designerId": "45741058-4d42-4ff9-a0d3-42024589d7be",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.tab.Tab",
+                                                    "reference": {
+                                                        "name": "tabConfig",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "designerId": "4b8b84b9-cf55-4130-b56e-c2cc6d3023c3"
+                                                },
+                                                {
+                                                    "type": "Ext.container.Container",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "container|align": "stretch",
+                                                        "designer|displayName": "container",
+                                                        "layout": "vbox",
+                                                        "layout|flex": 1
+                                                    },
+                                                    "designerId": "2d8071a0-7960-4a88-8a91-e3a1a2ce6f44",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.panel.Panel",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "bodyPadding": 7,
+                                                                "container|align": "stretch",
+                                                                "height": 146,
+                                                                "layout": "vbox",
+                                                                "layout|flex": null,
+                                                                "layout|margins": "0 0 5 0",
+                                                                "title": "Material Detail"
+                                                            },
+                                                            "designerId": "e702e408-bbf9-4b6f-b8b0-41a0f38965fb",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Material Control",
+                                                                        "itemId": "cboFamily",
+                                                                        "labelWidth": 125,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "designerId": "d7765079-ed3e-4e6c-bafc-f6b6b0aa8154"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.Checkbox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "boxLabel": null,
+                                                                        "fieldLabel": "Require Approval",
+                                                                        "labelWidth": 125,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "designerId": "cb5c9557-fc07-49ad-983b-84859ea0cdc9"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Associated Recipe",
+                                                                        "itemId": "cboFamily1",
+                                                                        "labelWidth": 125,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "designerId": "92f805f6-3f09-478a-936d-0ea49203960b"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.Checkbox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "boxLabel": null,
+                                                                        "fieldLabel": "Sanitization Required",
+                                                                        "labelWidth": 125,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "designerId": "63209349-518c-404f-836f-5be9792f0edb"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.panel.Panel",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "bodyPadding": 7,
+                                                                "container|align": "stretch",
+                                                                "height": 91,
+                                                                "layout": "vbox",
+                                                                "layout|flex": null,
+                                                                "layout|margins": "0 0 5 0",
+                                                                "title": "Life Time"
+                                                            },
+                                                            "designerId": "e998e542-67bc-4281-aeba-56c1b807845d",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.container.Container",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "container|align": "stretch",
+                                                                        "designer|displayName": "container",
+                                                                        "layout": "hbox",
+                                                                        "layout|flex": null,
+                                                                        "layout|margins": "0 0 5 0"
+                                                                    },
+                                                                    "designerId": "79f00655-fbf6-4fdb-8473-ca3f5649adfe",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Text",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "fieldLabel": "Life Time",
+                                                                                "itemId": "txtCaseUom1",
+                                                                                "labelWidth": 125,
+                                                                                "layout|flex": 2
+                                                                            },
+                                                                            "designerId": "c0831b70-ac20-46b0-aecb-839f88168b04"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.form.field.ComboBox",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "fieldLabel": null,
+                                                                                "itemId": "cboFamily",
+                                                                                "labelWidth": 125,
+                                                                                "layout|flex": 1,
+                                                                                "layout|margins": "0 0 0 5"
+                                                                            },
+                                                                            "designerId": "f21e13d2-4a10-4eea-ac33-540e6ea1d803"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.Text",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Receive Life",
+                                                                        "itemId": "txtCaseUom",
+                                                                        "labelWidth": 125,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "designerId": "d788b1a5-9420-46f0-a492-bc52850a0b88"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.panel.Panel",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "bodyPadding": null,
+                                                                "height": null,
+                                                                "layout": "fit",
+                                                                "layout|flex": 1,
+                                                                "layout|margins": "0 0 5 0",
+                                                                "title": "BOM Dependencies"
+                                                            },
+                                                            "designerId": "bc8345f8-a98c-414c-8de3-8a74f747e833",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.grid.Panel",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "designer|createAlias": "advancefiltergrid",
+                                                                        "hideHeaders": true,
+                                                                        "itemId": "grdBOM",
+                                                                        "margin": -1,
+                                                                        "title": null
+                                                                    },
+                                                                    "designerId": "1ffbf595-7119-4922-99a9-a8984834cb08",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.toolbar.Toolbar",
+                                                                            "reference": {
+                                                                                "name": "dockedItems",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "container|padding": "0 0 0 1",
+                                                                                "dock": "top",
+                                                                                "itemId": "tlbGridOptions"
+                                                                            },
+                                                                            "designerId": "8acbe05b-b8d8-4fcd-889f-2db6ef6c9ab3",
+                                                                            "cn": [
+                                                                                {
+                                                                                    "type": "Ext.button.Button",
+                                                                                    "reference": {
+                                                                                        "name": "items",
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "codeClass": null,
+                                                                                    "userConfig": {
+                                                                                        "icon": null,
+                                                                                        "iconCls": "small-delete",
+                                                                                        "itemId": "btnDelete",
+                                                                                        "layout|flex": null,
+                                                                                        "tabIndex": -1,
+                                                                                        "text": "Delete"
+                                                                                    },
+                                                                                    "designerId": "8fbcf923-c970-444f-8d7f-8e6e35428dbf"
+                                                                                },
+                                                                                {
+                                                                                    "type": "Ext.toolbar.Separator",
+                                                                                    "reference": {
+                                                                                        "name": "items",
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "codeClass": null,
+                                                                                    "userConfig": {
+                                                                                        "designer|displayName": "separator",
+                                                                                        "layout|flex": null
+                                                                                    },
+                                                                                    "designerId": "6cdb2456-78fd-4d02-bee7-c66c7bb98947"
+                                                                                },
+                                                                                {
+                                                                                    "type": "linkedinstance",
+                                                                                    "reference": {
+                                                                                        "name": "items",
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "codeClass": null,
+                                                                                    "userConfig": {
+                                                                                        "layout|flex": null
+                                                                                    },
+                                                                                    "designerId": "3fdba5e7-278e-4e6b-ad42-9ec658e4c660",
+                                                                                    "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.grid.column.Column",
+                                                                            "reference": {
+                                                                                "name": "columns",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "dataIndex": "string",
+                                                                                "flex": 1.5,
+                                                                                "text": "Unit of Measure",
+                                                                                "width": 215
+                                                                            },
+                                                                            "designerId": "7d75f061-cbab-4fd9-81cc-e24ffe572d95"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.grid.View",
+                                                                            "reference": {
+                                                                                "name": "viewConfig",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "itemId": "grvBOM"
+                                                                            },
+                                                                            "designerId": "34f2c68c-c8e5-4f8b-b2a5-3437c35e71cf"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.selection.CheckboxModel",
+                                                                            "reference": {
+                                                                                "name": "selModel",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": "Ext.selection.CheckboxModel",
+                                                                            "designerId": "3dfcf024-35f8-413e-84d8-ccd980fc2787"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.container.Container",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "container|align": "stretch",
+                                                        "designer|displayName": "container",
+                                                        "layout": "vbox",
+                                                        "layout|flex": 1,
+                                                        "layout|margins": "0 0 0 5"
+                                                    },
+                                                    "designerId": "cd3097db-c766-408f-8c48-1d32eb214b09",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.panel.Panel",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "bodyPadding": 7,
+                                                                "container|align": "stretch",
+                                                                "height": 118,
+                                                                "layout": "vbox",
+                                                                "layout|flex": null,
+                                                                "layout|margins": "0 0 5 0",
+                                                                "title": "GROUP 1"
+                                                            },
+                                                            "designerId": "ce01ceb9-a423-433f-866c-f024eb3fb61f",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.Text",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "GTIN",
+                                                                        "itemId": "txtCaseUom1",
+                                                                        "labelWidth": 125,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "designerId": "394d6504-8a0c-492d-863f-79b78e44281e"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Rotation Type",
+                                                                        "itemId": "cboFamily",
+                                                                        "labelWidth": 125,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "designerId": "3902d355-656c-49b5-aabc-435a352e4257"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.container.Container",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "container|align": "stretch",
+                                                                        "layout": "hbox",
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "designerId": "668f4544-6ddd-466c-8390-f7ec7ecd3cab",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.ComboBox",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "fieldLabel": "NMFC",
+                                                                                "itemId": "cboFamily1",
+                                                                                "labelWidth": 125,
+                                                                                "layout|flex": 1
+                                                                            },
+                                                                            "designerId": "a9916175-f9ec-4a78-8adb-a5f3dd003d59"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.form.field.Checkbox",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "boxLabel": null,
+                                                                                "fieldLabel": "Strict FIFO",
+                                                                                "labelWidth": 63,
+                                                                                "layout|flex": null,
+                                                                                "layout|margins": "0 0 0 5"
+                                                                            },
+                                                                            "designerId": "60e0e19d-0556-4b53-a7a1-4b38046c82df"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.panel.Panel",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "bodyPadding": 7,
+                                                                "container|align": "stretch",
+                                                                "height": null,
+                                                                "layout": "vbox",
+                                                                "layout|flex": 1,
+                                                                "layout|margins": "0 0 5 0",
+                                                                "title": "GROUP 2"
+                                                            },
+                                                            "designerId": "52864734-86f4-448f-99da-a1d81bf72339",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Standard UOM",
+                                                                        "itemId": "txtCaseUom6",
+                                                                        "labelWidth": 125,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "designerId": "05302153-543a-42c4-a90c-55f0f852cf10"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Issue UOM",
+                                                                        "itemId": "txtCaseUom7",
+                                                                        "labelWidth": 125,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "designerId": "b11d11f0-d1ae-4290-9811-c83acbe48a52"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Receive UOM",
+                                                                        "itemId": "txtCaseUom8",
+                                                                        "labelWidth": 125,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "designerId": "1515c9cc-7451-4364-9006-b7a71d548db9"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Dimension UOM",
+                                                                        "itemId": "cboFamily",
+                                                                        "labelWidth": 125,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "designerId": "e22c07a0-db85-42e3-ab23-1b77244d7298"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Weight UOM",
+                                                                        "itemId": "cboFamily1",
+                                                                        "labelWidth": 125,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "designerId": "fa44ba2b-3b05-4d61-a406-dbd5f0ab26a2"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.Text",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Material Size Code",
+                                                                        "itemId": "txtCaseUom1",
+                                                                        "labelWidth": 125,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "designerId": "520e4dfc-cdec-4186-bccc-92e9bb207d54"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.Text",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "No. of Inner Units",
+                                                                        "itemId": "txtCaseUom2",
+                                                                        "labelWidth": 125,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "designerId": "b186a856-481e-4284-b242-94ef50a5d866"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.Text",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Layers per Pallet",
+                                                                        "itemId": "txtCaseUom3",
+                                                                        "labelWidth": 125,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "designerId": "f7d34ec8-ed9d-4fa2-974d-a29d2517eb5c"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.Text",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Units per Layer",
+                                                                        "itemId": "txtCaseUom4",
+                                                                        "labelWidth": 125,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "designerId": "c91c6792-6145-4ecb-8944-89559d8cb5c6"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.Text",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Std. Pallet Ratio (%)",
+                                                                        "itemId": "txtCaseUom5",
+                                                                        "labelWidth": 125,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "designerId": "cebac8a5-b9a5-489e-b6c0-0e4d349052b1"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.panel.Panel",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
                                                 "layout": "fit",
                                                 "title": "Location/Store"
                                             },
