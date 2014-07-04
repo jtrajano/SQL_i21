@@ -63,6 +63,7 @@
     <Folder Include="Scripts" />
     <Folder Include="dbo\Stored Procedures" />
     <Folder Include="dbo\Functions" />
+    <Folder Include="Scripts\AP" />
   </ItemGroup>
   <ItemGroup>
     <None Include="dbo\Views\apchkmst.sql" />
@@ -116,6 +117,7 @@
     <None Include="dbo\Stored Procedures\uspTMGetConsumptionWithoutGasCheck.sql" />
     <None Include="dbo\Stored Procedures\uspAPImportTerms.sql" />
     <None Include="dbo\Stored Procedures\uspAPUpdateImportedBillTransactions.sql" />
+    <None Include="Scripts\AP\FixVendorData.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
@@ -172,5 +174,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="dbo\Views\vyuTMOriginDegreeOption.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dbo\Functions\fnGetVendorLastName.sql" />
   </ItemGroup>
 </Project>
