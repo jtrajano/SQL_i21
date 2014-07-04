@@ -568,6 +568,7 @@
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleAPReport.sql" />
     <Build Include="dbo\Functions\fnLastIndex.sql" />
     <Build Include="dbo\Functions\fnTrim.sql" />
+    <Build Include="dbo\Views\vyuExportHoursWork.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
