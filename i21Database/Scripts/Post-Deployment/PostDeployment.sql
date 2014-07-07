@@ -49,6 +49,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\DB\3_CannedPanels_Format.sql
 
 -- General Ledger
+:r .\GL\DefaultData\AccountStructure.sql
+:r .\GL\DefaultData\AccountSegmentTemplate.sql
 :r .\GL\DefaultData\AccountGroup.sql
 :r .\GL\GLEntryDataFix.sql
 
