@@ -22,6 +22,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\6_Preferences.sql
 :r .\SM\DefaultData\7_EULA.sql
 :r .\SM\DefaultData\8_Country.sql
+:r .\SM\DefaultData\9_ZipCode.sql
 :r .\SM\SMDataMigrations.sql
 
 -- Canned Report
@@ -49,6 +50,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\DB\3_CannedPanels_Format.sql
 
 -- General Ledger
+:r .\GL\DefaultData\AccountStructure.sql
+:r .\GL\DefaultData\AccountSegmentTemplate.sql
 :r .\GL\DefaultData\AccountGroup.sql
 :r .\GL\GLEntryDataFix.sql
 
