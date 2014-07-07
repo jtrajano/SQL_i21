@@ -29,7 +29,10 @@ BEGIN
 		SET 
 		--ssvnd_vnd_no					=	CAST(B.strVendorId AS VARCHAR(10)),
 		ssvnd_co_per_ind				=	CASE WHEN B.intVendorType = 0 THEN ''C'' ELSE ''P'' END,
-		ssvnd_name						=	CAST(A.strName AS VARCHAR(50)),
+		ssvnd_name						=	CASE WHEN B.intVendorType = 0 THEN CAST(A.strName AS VARCHAR(50))
+											ELSE SUBSTRING(A.strName,0,dbo.fnLastIndex(A.strName,'' '')) + '' '' +
+												SUBSTRING(A.strName, dbo.fnLastIndex(A.strName,'' ''), DATALENGTH(A.strName))
+											END,
 		ssvnd_addr_1					=	CAST(CASE WHEN CHARINDEX(CHAR(10), C.strAddress) > 0 
 													THEN SUBSTRING(C.strAddress, 0, CHARINDEX(CHAR(10),C.strAddress)) 
 													ELSE C.strAddress END AS VARCHAR(30)),
@@ -234,7 +237,10 @@ BEGIN
 
 		SELECT TOP 1
 			--Entities
-			@strName = ssvnd_name,
+			@strName = CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name 
+						ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
+							+ '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
+						END,
 			@strWebsite = '''',
 			@strInternalNotes = '''',
 			@ysnPrint1099   = CASE WHEN ssvnd_1099_yn = ''Y'' THEN 1 ELSE 0 END,
@@ -246,7 +252,7 @@ BEGIN
 
 			--Contacts
 			@strTitle = '''',
-			@strContactName = ssvnd_contact,
+			@strContactName = dbo.fnTrim(ssvnd_contact),
 			@strDepartment = NULL,
 			@strMobile     = NULL,
 			@strPhone      = ISNULL(ssvnd_phone,'''') + '' '' + ISNULL(ssvnd_phone_ext,''''),
@@ -264,7 +270,7 @@ BEGIN
 
 			--Locations
 			@strLocationName = @strName,
-			@strAddress      = ISNULL(ssvnd_addr_1,'''') + CHAR(10) + ISNULL(ssvnd_addr_2,''''),
+			@strAddress      = dbo.fnTrim(ISNULL(ssvnd_addr_1,'''')) + CHAR(10) + dbo.fnTrim(ISNULL(ssvnd_addr_2,'''')),
 			@strCity         = ssvnd_city,
 			@strCountry      = (SELECT TOP 1 strCountry FROM tblSMZipCode WHERE strState COLLATE Latin1_General_CI_AS = ssvnd_st COLLATE Latin1_General_CI_AS),
 			@strState        = ssvnd_st,
@@ -375,8 +381,6 @@ BEGIN
 SET @Total = @@ROWCOUNT
 
 END
-
-
 
 	')
 END

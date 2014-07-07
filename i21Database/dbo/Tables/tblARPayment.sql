@@ -19,3 +19,43 @@
     CONSTRAINT [FK_tblARPayment_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId])
 );
 
+
+
+
+GO
+CREATE TRIGGER trgReceivePaymentRecordNumber
+ON tblARPayment
+AFTER INSERT
+AS
+
+DECLARE @inserted TABLE(intPaymentId INT)
+DECLARE @count INT = 0
+DECLARE @intPaymentId INT
+DECLARE @PaymentId NVARCHAR(50)
+
+INSERT INTO @inserted
+SELECT intPaymentId FROM INSERTED ORDER BY intPaymentId
+
+WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
+BEGIN
+	
+	--EXEC uspARFixStartingNumbers 17
+	--IF(OBJECT_ID('tempdb..#tblTempAPByPassFixStartingNumber') IS NOT NULL) RETURN;
+	EXEC uspSMGetStartingNumber 17, @PaymentId OUT
+
+	SELECT TOP 1 @intPaymentId = intPaymentId FROM @inserted
+	
+	IF(@PaymentId IS NOT NULL)
+	BEGIN
+		UPDATE tblARPayment
+			SET tblARPayment.strRecordNumber = @PaymentId
+		FROM tblARPayment A
+		WHERE A.intPaymentId = @intPaymentId
+		--INNER JOIN INSERTED B ON A.intBillId = B.intBillId
+		--WHERE A.strBillId IS NULL
+	END
+
+	DELETE FROM @inserted
+	WHERE intPaymentId = @intPaymentId
+
+END

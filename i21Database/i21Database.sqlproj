@@ -130,6 +130,7 @@
     <Folder Include="Scripts\Post-Deployment\AP" />
     <Folder Include="Scripts\Post-Deployment\CM\Patch" />
     <Folder Include="Scripts\Post-Deployment\FRD" />
+    <Folder Include="Scripts\Post-Deployment\AP" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -564,6 +565,9 @@
     <Build Include="dbo\Functions\fnConvertToFullAddress.sql" />
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleAPSubReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleAPReport.sql" />
+    <Build Include="dbo\Functions\fnLastIndex.sql" />
+    <Build Include="dbo\Functions\fnTrim.sql" />
+    <Build Include="dbo\Views\vyuExportHoursWork.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />

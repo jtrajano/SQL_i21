@@ -21,6 +21,8 @@
     CONSTRAINT [PK_tblCMBankTransfer] PRIMARY KEY CLUSTERED ([intTransactionId] ASC),
     CONSTRAINT [FK_tblCMBankAccounttblCMBankTransfer_From] FOREIGN KEY ([intBankAccountIdFrom]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]),
     CONSTRAINT [FK_tblCMBankAccounttblCMBankTransfer_To] FOREIGN KEY ([intBankAccountIdTo]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]),
+	CONSTRAINT [FK_tblGLAccounttblCMBankTransfer_From] FOREIGN KEY ([intGLAccountIdFrom]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblGLAccounttblCMBankTransfer_To] FOREIGN KEY ([intGLAccountIdTo]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
     UNIQUE NONCLUSTERED ([strTransactionId] ASC)
 );
 

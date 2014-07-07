@@ -82,11 +82,12 @@
 :r "..\dbo\Stored Procedures\uspTMGetConsumptionWithoutLeakCheck.sql"
 :r ..\dbo\Views\vyuTMOriginDegreeOption.sql
 
-
+:r "..\dbo\Functions\fnGetVendorLastName.sql"
 :r "..\dbo\Stored Procedures\uspAPImportBillTransactions.sql"
 :r "..\dbo\Stored Procedures\uspAPImportVendor.sql"
 :r "..\dbo\Stored Procedures\uspAPImportTerms.sql"
 :r "..\dbo\Stored Procedures\uspAPUpdateImportedBillTransactions.sql"
+:r "..\Scripts\AP\FixVendorData.sql"
 
 
 -- TAX FORMS

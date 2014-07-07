@@ -9,6 +9,8 @@
     [dblPayment]         NUMERIC (18, 6) NULL,
     [intConcurrencyId]   INT             NOT NULL,
     CONSTRAINT [PK_tblARPaymentDetail] PRIMARY KEY CLUSTERED ([intPaymentDetailId] ASC),
-    CONSTRAINT [FK_tblARPaymentDetail_tblARPayment] FOREIGN KEY ([intPaymentId]) REFERENCES [dbo].[tblARPayment] ([intPaymentId])
+    CONSTRAINT [FK_tblARPaymentDetail_tblARPayment] FOREIGN KEY ([intPaymentId]) REFERENCES [dbo].[tblARPayment] ([intPaymentId]) ON DELETE CASCADE
 );
+
+
 
