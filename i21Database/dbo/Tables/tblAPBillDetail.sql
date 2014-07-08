@@ -2,6 +2,7 @@
     [intBillDetailId] INT             IDENTITY (1, 1) NOT NULL,
     [intBillId]       INT             NOT NULL,
     [strDescription]  NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
+	[strComment] NVARCHAR(200) NULL, 
     [intAccountId]    INT             NOT NULL DEFAULT 0,
     [dblTotal]        DECIMAL (18, 6) NOT NULL DEFAULT 0,
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
@@ -9,6 +10,12 @@
     [dblQtyReceived] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
     [dblDiscount] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
     [dblCost] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
+    [dblLandedCost] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
+    [dblWeight] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
+    [dblVolume] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
+    [dtmExpectedDate] DATETIME NULL, 
+    [int1099Code] INT NULL , 
+    [int1099Category] INT NULL , 
     CONSTRAINT [PK__tblAPBil__DCE2CCF4681FF753] PRIMARY KEY CLUSTERED ([intBillDetailId] ASC) ON [PRIMARY],
     CONSTRAINT [FK_tblAPBillDetail_tblAPBill] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]) ON DELETE CASCADE
 ) ON [PRIMARY];
