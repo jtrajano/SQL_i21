@@ -178,4 +178,7 @@
   <ItemGroup>
     <None Include="dbo\Functions\fnGetVendorLastName.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\AP\UpdateBillCost.sql" />
+  </ItemGroup>
 </Project>
