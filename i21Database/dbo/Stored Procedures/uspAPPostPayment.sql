@@ -150,6 +150,7 @@ BEGIN
 				FROM tblAPPayment A 
 				WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
 					(A.dblAmountPaid + A.dblWithheld) <> (SELECT SUM(dblPayment) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)
+					--include over payment
 
 			--ALREADY POSTED
 			INSERT INTO #tmpPayableInvalidData
@@ -583,7 +584,9 @@ BEGIN
 			FROM tblAPPayment A
 				INNER JOIN tblAPVendor B
 					ON A.intVendorId = B.intEntityId
+				--LEFT JOIN tblSMPaymentMethod C ON A.intPaymentMethodId = C.intPaymentMethodID
 			WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+			--AND C.strPaymentMethod = 'Check'
 
 		--Insert Successfully posted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)

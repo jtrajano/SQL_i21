@@ -88,6 +88,7 @@
 :r "..\dbo\Stored Procedures\uspAPImportTerms.sql"
 :r "..\dbo\Stored Procedures\uspAPUpdateImportedBillTransactions.sql"
 :r "..\Scripts\AP\FixVendorData.sql"
+:r "..\Scripts\AP\ReInsertBillDetail.sql"
 :r "..\Scripts\AP\UpdateBillCost.sql"
 
 

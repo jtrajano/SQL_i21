@@ -31,8 +31,8 @@
     [intOrderById] INT NULL , 
     [intCurrencyId] INT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_dbo.tblAPBill] PRIMARY KEY CLUSTERED ([intBillId] ASC),
-    CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPBillBatch_intBillBatchId] FOREIGN KEY ([intBillBatchId]) REFERENCES [dbo].[tblAPBillBatch] ([intBillBatchId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPVendor_intEntityId] FOREIGN KEY ([intVendorId]) REFERENCES [dbo].[tblAPVendor] ([intEntityId])
+    CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPBillBatch_intBillBatchId] FOREIGN KEY ([intBillBatchId]) REFERENCES [dbo].[tblAPBillBatch] ([intBillBatchId]) ON DELETE CASCADE
+	--CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPVendor_intEntityId] FOREIGN KEY ([intVendorId]) REFERENCES [dbo].[tblAPVendor] ([intEntityId])
 );
 
 

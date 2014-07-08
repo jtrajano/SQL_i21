@@ -118,6 +118,7 @@
     <None Include="dbo\Stored Procedures\uspAPImportTerms.sql" />
     <None Include="dbo\Stored Procedures\uspAPUpdateImportedBillTransactions.sql" />
     <None Include="Scripts\AP\FixVendorData.sql" />
+    <None Include="Scripts\AP\ReInsertBillDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
