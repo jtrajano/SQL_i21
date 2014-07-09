@@ -3,7 +3,7 @@
     [strInvoiceNumber]   NVARCHAR (25)   COLLATE Latin1_General_CI_AS NOT NULL,
     [intEntityId]        INT             NOT NULL,
     [dtmDueDate]         DATETIME        NOT NULL,
-    [dtmDate]            DATETIME        NOT NULL,
+    [dtmDate]            DATETIME        NULL,
     [strTransactionType] NVARCHAR (25)   COLLATE Latin1_General_CI_AS NOT NULL,
     [intTermId]          INT             NOT NULL,
     [dblInvoiceTotal]    NUMERIC (18, 6) NULL,
@@ -20,6 +20,8 @@
     CONSTRAINT [PK_tblARInvoice] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
     CONSTRAINT [FK_tblARInvoice_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId])
 );
+
+
 
 
 
