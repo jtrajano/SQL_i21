@@ -5,7 +5,9 @@ SELECT
 	A.strBillId,
 	A.dblTotal,
 	A.ysnPosted,
+	A.ysnPaid,
 	A.strVendorOrderNumber,
+	A.intTransactionType,
 	B1.strName,
 	C.strAccountId
 FROM
