@@ -20,7 +20,7 @@ BEGIN
 	--CREATE TEMP TABLE TO BYPASS EXECUTING FIXING STARTING NUMBERS
 	SELECT @@ROWCOUNT AS TestColumn INTO #tblTempAPByPassFixStartingNumber
 
-	DECLARE @InsertedData TABLE (intBillId INT, strBillId NVARCHAR(100), ysnPosted BIT, ysnPaid BIT)
+	DECLARE @InsertedData TABLE (intBillId INT, strBillId NVARCHAR(100), ysnPosted BIT, ysnPaid BIT, strVendorOrderNumber NVARCHAR(50))
 	DECLARE @insertedBillBatch TABLE(intBillBatchId INT, intBillId INT)
 	DECLARE @totalBills INT
 	DECLARE @BillId INT
@@ -30,7 +30,24 @@ BEGIN
 
 	--Create table that holds all the imported transaction
 	IF(OBJECT_ID(''dbo.tblAPTempBill'') IS NULL)
-		SELECT * INTO tblAPTempBill FROM aptrxmst WHERE aptrxmst.aptrx_ivc_no IS NULL
+	BEGIN
+		SET IDENTITY_INSERT tblAPTempBill ON
+
+		INSERT INTO tblAPTempBill([aptrx_vnd_no], [aptrx_ivc_no])
+		SELECT 
+			[aptrx_vnd_no], [aptrx_ivc_no]
+		FROM aptrxmst A
+		INNER JOIN tblAPBill B
+			ON B.strVendorOrderNumber COLLATE Latin1_General_CI_AS = A.aptrx_ivc_no COLLATE Latin1_General_CI_AS
+		UNION
+		SELECT 
+			[apivc_vnd_no],[apivc_ivc_no] 
+		FROM apivcmst A
+		INNER JOIN tblAPBill B
+			ON B.strVendorOrderNumber COLLATE Latin1_General_CI_AS = A.apivc_ivc_no COLLATE Latin1_General_CI_AS
+
+		SET IDENTITY_INSERT tblAPTempBill OFF
+	END
 
 	IF(@DateFrom IS NULL AND @PeriodFrom IS NULL)
 	BEGIN
@@ -54,7 +71,7 @@ BEGIN
 			[intTransactionType],
 			[dblDiscount],
 			[dblWithheld])
-		OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid INTO @InsertedData
+		OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid, inserted.strVendorOrderNumber INTO @InsertedData
 		--Unposted
 		SELECT 
 			[intVendorId]			=	D.intEntityId,
@@ -159,20 +176,6 @@ BEGIN
 			INNER JOIN aphglmst C
 				ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = C.aphgl_ivc_no COLLATE Latin1_General_CI_AS
 
-		--Add already imported bill
-		SET IDENTITY_INSERT tblAPTempBill ON
-		INSERT INTO tblAPTempBill([aptrx_vnd_no], [aptrx_ivc_no], [aptrx_sys_rev_dt], [aptrx_sys_time], [aptrx_cbk_no], [aptrx_chk_no], [aptrx_trans_type], [aptrx_batch_no],
-		[aptrx_pur_ord_no], [aptrx_po_rcpt_seq], [aptrx_ivc_rev_dt], [aptrx_disc_rev_dt], [aptrx_due_rev_dt], [aptrx_chk_rev_dt], [aptrx_gl_rev_dt], [aptrx_disc_pct], [aptrx_orig_amt],
-		[aptrx_disc_amt], [aptrx_wthhld_amt], [aptrx_net_amt], [aptrx_1099_amt], [aptrx_comment], [aptrx_orig_type], [aptrx_name], [aptrx_recur_yn], [aptrx_currency], [aptrx_currency_rt],
-		[aptrx_currency_cnt], [aptrx_user_id], [aptrx_user_rev_dt], [A4GLIdentity])
-		SELECT 
-			A.* 
-		FROM aptrxmst A
-		INNER JOIN @InsertedData B
-			ON A.aptrx_ivc_no = B.strBillId
-		SET IDENTITY_INSERT tblAPTempBill OFF
-
-			
 		--Create Bill Batch transaction
 		--SELECT @totalBills = COUNT(*) FROM @InsertedData
 
@@ -225,7 +228,7 @@ BEGIN
 			[intTransactionType],
 			[dblDiscount],
 			[dblWithheld])
-		OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid INTO @InsertedData
+		OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid, inserted.strVendorOrderNumber INTO @InsertedData
 		--Unposted
 		SELECT
 			[intVendorId]			=	D.intEntityId,  
@@ -352,15 +355,19 @@ BEGIN
 		--Add already imported bill
 		SET IDENTITY_INSERT tblAPTempBill ON
 
-		INSERT INTO tblAPTempBill([aptrx_vnd_no], [aptrx_ivc_no], [aptrx_sys_rev_dt], [aptrx_sys_time], [aptrx_cbk_no], [aptrx_chk_no], [aptrx_trans_type], [aptrx_batch_no],
-		[aptrx_pur_ord_no], [aptrx_po_rcpt_seq], [aptrx_ivc_rev_dt], [aptrx_disc_rev_dt], [aptrx_due_rev_dt], [aptrx_chk_rev_dt], [aptrx_gl_rev_dt], [aptrx_disc_pct], [aptrx_orig_amt],
-		[aptrx_disc_amt], [aptrx_wthhld_amt], [aptrx_net_amt], [aptrx_1099_amt], [aptrx_comment], [aptrx_orig_type], [aptrx_name], [aptrx_recur_yn], [aptrx_currency], [aptrx_currency_rt],
-		[aptrx_currency_cnt], [aptrx_user_id], [aptrx_user_rev_dt], [A4GLIdentity])
+		INSERT INTO tblAPTempBill([aptrx_vnd_no], [aptrx_ivc_no])
 		SELECT 
-			A.* 
+			[aptrx_vnd_no],
+			[aptrx_ivc_no]
 		FROM aptrxmst A
 		INNER JOIN @InsertedData B
-			ON A.aptrx_ivc_no = B.strBillId
+			ON A.aptrx_ivc_no = B.strVendorOrderNumber
+		UNION
+		SELECT 
+			[apivc_vnd_no],[apivc_ivc_no] 
+		FROM apivcmst A
+		INNER JOIN @InsertedData B
+			ON A.apivc_ivc_no = B.strVendorOrderNumber
 		SET IDENTITY_INSERT tblAPTempBill OFF
 	
 			--Create Bill Batch transaction
