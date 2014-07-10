@@ -263,7 +263,7 @@ BEGIN
 		)
 		INSERT INTO tblGLDetail (
 			[strTransactionId],
-			[intTransactionId], 
+			--[intTransactionId], 
 			[intAccountId],
 			[strDescription],
 			[strReference],
@@ -288,7 +288,7 @@ BEGIN
 		--==================
 		SELECT
 			 [strRecordNumber]
-			,A.intPaymentId
+			--,A.intPaymentId
 			,A.intAccountId--(SELECT intAccountId FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
 			,GLAccnt.strDescription --(SELECT strDescription FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
 			,C.[strCustomerNumber]
@@ -327,7 +327,7 @@ BEGIN
 		UNION
 		SELECT
 			 [strRecordNumber]
-			,A.intPaymentId
+			--,A.intPaymentId
 			,A.intAccountId
 			,GLAccnt.strDescription
 			,C.[strCustomerNumber]
@@ -370,7 +370,7 @@ BEGIN
 		--============================
 		UNION ALL 
 		SELECT	[strRecordNumber]
-				,A.intPaymentId
+				--,A.intPaymentId
 				,B.[intAccountId]
 				,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = B.[intAccountId])
 				,D.[strCustomerNumber]
@@ -417,7 +417,7 @@ BEGIN
 		UNION
 		SELECT
 			 [strRecordNumber]
-			,A.intPaymentId
+			--,A.intPaymentId
 			,@DiscountAccount
 			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = @DiscountAccount)
 			,C.[strCustomerNumber]
