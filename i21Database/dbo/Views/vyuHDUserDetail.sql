@@ -9,6 +9,7 @@
 			,strSLAPlan = ''
 			,strReplyDue = ''
 			,intUserId = us.intUserSecurityID
+			,intEntityId = us.intEntityId
 			,ur.strName
 			,us.strUserName
 			,us.strFirstName
@@ -36,6 +37,7 @@
 			,strSLAPlan = ''
 			,strReplyDue = ''
 			,intUserId = ec.intEntityId
+			,intEntityId = ec.intEntityId
 			,strName = en.strEmail
 			,strUserName = en.strEmail
 			,strFirstName = en.strEmail
