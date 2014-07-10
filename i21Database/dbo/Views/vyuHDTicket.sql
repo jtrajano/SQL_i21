@@ -13,25 +13,16 @@
       ,strCreateBy = cre.strUserName
       ,tic.dtmCreated
       ,tic.dtmLastModified
-      ,cre.strCustomer
+      ,strCustomer = tic.strCustomerNumber
       ,strAssignedTo = assi.strUserName
       ,tic.intConcurrencyId
   from
       tblHDTicket tic
-      ,tblHDTicketType typ
-      ,tblHDTicketStatus sta
-      ,tblHDTicketPriority pri
-      ,tblHDTicketProduct pro
-      ,tblHDModule mo
-      ,tblHDVersion ver
-      ,vyuHDUserDetail cre
-      ,vyuHDUserDetail assi
-  where
-      typ.intTicketTypeId = tic.intTicketTypeId
-      and sta.intTicketStatusId = tic.intTicketStatusId
-      and pri.intTicketPriorityId = tic.intTicketPriorityId
-      and pro.intTicketProductId = tic.intTicketProductId
-      and mo.intModuleId = tic.intModuleId
-      and ver.intVersionId = tic.intVersionId
-      and cre.intUserId = tic.intCreatedUserId
-      and assi.intUserId = tic.intAssignedTo
+      left outer join tblHDTicketType typ on typ.intTicketTypeId = tic.intTicketTypeId
+      left outer join tblHDTicketStatus sta on sta.intTicketStatusId = tic.intTicketStatusId
+      left outer join tblHDTicketPriority pri on pri.intTicketPriorityId = tic.intTicketPriorityId
+      left outer join tblHDTicketProduct pro on pro.intTicketProductId = tic.intTicketProductId
+      left outer join tblHDModule mo on mo.intModuleId = tic.intModuleId
+      left outer join tblHDVersion ver on ver.intVersionId = tic.intVersionId
+      left outer join vyuHDUserDetail cre on cre.intEntityId = tic.intCreatedUserEntityId
+      left outer join vyuHDUserDetail assi on assi.intEntityId = tic.intAssignedToEntity

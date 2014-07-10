@@ -44,11 +44,11 @@ CREATE TABLE #tmpARReceivableInvalidData (
 );
 
 --DECLARRE VARIABLES
---DECLARE @WithholdAccount INT = (SELECT intWithholdAccountId FROM tblAPPreference)
 DECLARE @DiscountAccount INT = (SELECT intDiscountAccountId FROM tblAPPreference)--Check where to get discount account
 DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
 DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Receivable'
+DECLARE @TRANSACTION_FROM NVARCHAR(25) = 'Receive Payments'
 SET @recapId = '1'
 
 --SET BatchId
@@ -262,7 +262,8 @@ BEGIN
 			FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
 		)
 		INSERT INTO tblGLDetail (
-			[strTransactionId], 
+			[strTransactionId],
+			--[intTransactionId], 
 			[intAccountId],
 			[strDescription],
 			[strReference],
@@ -286,7 +287,8 @@ BEGIN
 		--CREDIT SIDE
 		--==================
 		SELECT
-			 [strRecordNumber]-- to be change by intID
+			 [strRecordNumber]
+			--,A.intPaymentId
 			,A.intAccountId--(SELECT intAccountId FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
 			,GLAccnt.strDescription --(SELECT strDescription FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
 			,C.[strCustomerNumber]
@@ -304,7 +306,7 @@ BEGIN
 			,[strBatchId]			= @batchId
 			,[strCode]				= 'AR'
 			,[strModuleName]		= @MODULE_NAME
-			,A.intPaymentId
+			,[strTransactionForm]	= @TRANSACTION_FROM
 		FROM	[dbo].tblARPayment A 
 		--INNER JOIN tblAPPaymentDetail B
 		--	ON	A.intPaymentId = B.intPaymentId
@@ -325,6 +327,7 @@ BEGIN
 		UNION
 		SELECT
 			 [strRecordNumber]
+			--,A.intPaymentId
 			,A.intAccountId
 			,GLAccnt.strDescription
 			,C.[strCustomerNumber]
@@ -342,7 +345,7 @@ BEGIN
 			,[strBatchId]			= @batchId
 			,[strCode]				= 'AR'
 			,[strModuleName]		= @MODULE_NAME
-			,A.intPaymentId
+			,[strTransactionForm]	= @TRANSACTION_FROM
 		FROM	[dbo].tblARPayment A 
 				INNER JOIN tblARPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
@@ -367,6 +370,7 @@ BEGIN
 		--============================
 		UNION ALL 
 		SELECT	[strRecordNumber]
+				--,A.intPaymentId
 				,B.[intAccountId]
 				,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = B.[intAccountId])
 				,D.[strCustomerNumber]
@@ -395,7 +399,7 @@ BEGIN
 				,[strBatchId]			= @batchId
 				,[strCode]				= 'AR'
 				,[strModuleName]		= @MODULE_NAME
-				,A.intPaymentId
+				,[strTransactionForm]	= @TRANSACTION_FROM
 		FROM	[dbo].tblARPayment A 
 				INNER JOIN tblARPaymentDetail B ON A.intPaymentId = B.intPaymentId
 				--INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
@@ -413,6 +417,7 @@ BEGIN
 		UNION
 		SELECT
 			 [strRecordNumber]
+			--,A.intPaymentId
 			,@DiscountAccount
 			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = @DiscountAccount)
 			,C.[strCustomerNumber]
@@ -430,7 +435,7 @@ BEGIN
 			,[strBatchId]			= @batchId
 			,[strCode]				= 'AR'
 			,[strModuleName]		= @MODULE_NAME
-			,A.intPaymentId
+			,[strTransactionForm]	= @TRANSACTION_FROM
 		FROM	[dbo].tblARPayment A 
 				INNER JOIN tblARPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
@@ -691,7 +696,7 @@ ELSE
 			,[strBatchId]			= @batchId
 			,[strCode]				= 'AR'
 			,[strModuleName]		= @MODULE_NAME
-			,A.intPaymentId
+			,[strTransactionForm]	= @TRANSACTION_FROM
 		FROM	[dbo].tblARPayment A 
 		--INNER JOIN tblAPPaymentDetail B
 		--	ON A.intPaymentId = B.intPaymentId
@@ -730,7 +735,7 @@ ELSE
 			,[strBatchId]			= @batchId
 			,[strCode]				= 'AR'
 			,[strModuleName]		= @MODULE_NAME
-			,A.intPaymentId
+			,[strTransactionForm]	= @TRANSACTION_FROM
 		FROM	[dbo].tblARPayment A 
 				INNER JOIN tblARPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
@@ -777,7 +782,7 @@ ELSE
 				,[strBatchId]			= @batchId
 				,[strCode]				= 'AR'
 				,[strModuleName]		= @MODULE_NAME
-				,A.intPaymentId
+				,[strTransactionForm]	= @TRANSACTION_FROM
 		FROM	[dbo].tblARPayment A 
 				INNER JOIN tblARPaymentDetail B ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblARInvoice C ON B.intInvoiceId = C.intInvoiceId
@@ -818,7 +823,7 @@ ELSE
 			,[strBatchId]			= @batchId
 			,[strCode]				= 'AR'
 			,[strModuleName]		= @MODULE_NAME
-			,A.intPaymentId
+			,[strTransactionForm]	= @TRANSACTION_FROM
 		FROM	[dbo].tblARPayment A 
 				INNER JOIN tblARPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
