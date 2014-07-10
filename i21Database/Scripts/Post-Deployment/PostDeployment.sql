@@ -23,6 +23,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\7_EULA.sql
 :r .\SM\DefaultData\8_Country.sql
 :r .\SM\DefaultData\9_ZipCode.sql
+:r .\SM\DefaultData\10_Screen.sql
 :r .\SM\SMDataMigrations.sql
 
 -- Canned Report
