@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuExportHoursWork]
+﻿CREATE VIEW [dbo].[vyuHDExportHoursWork]
 	AS
 			select
 			dtmDate = hw.dtmDate
@@ -14,6 +14,7 @@
 			,strDescription = hw.strDescription
 			,strSource = 'Help Desk'
 			,strAgent = us.strFullName
+			,strUserName = us.strUserName
 			,strTicketNumber = t.strTicketNumber
 			,intId = hw.intTicketHoursWorkedId
 		from
@@ -24,3 +25,4 @@
 			left outer join tblEntity ec on ec.intEntityId = t.intCustomerContactId
 			left outer join tblHDJobCode jc on jc.intJobCodeId = hw.intJobCodeId
 			left outer join tblSMUserSecurity us on us.intUserSecurityID = hw.intAgentId
+		where hw.ysnBilled <> 1
