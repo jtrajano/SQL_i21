@@ -371,7 +371,6 @@
     <None Include="Script.PreDeployment1.sql" />
     <None Include="Script.PostDeployment1.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountGroup.sql" />
-    <None Include="Scripts\Post-Deployment\Optional Run\1_SM\1_ZipCodeData.sql" />
     <None Include="Scripts\Post-Deployment\Reports\1_ReportDisableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Reports\2_ReportDeleteOldData.sql" />
     <None Include="Scripts\Post-Deployment\Reports\3_ReportEnableConstraints.sql" />
@@ -569,6 +568,13 @@
     <Build Include="dbo\Functions\fnLastIndex.sql" />
     <Build Include="dbo\Functions\fnTrim.sql" />
     <Build Include="dbo\Views\vyuExportHoursWork.sql" />
+    <Build Include="dbo\Tables\tblARPostResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspARFixStartingNumbers.sql" />
+    <Build Include="dbo\Tables\cstGLJournal.sql" />
+    <Build Include="dbo\Tables\cstARCustomer.sql" />
+    <Build Include="dbo\Tables\cstAPVendor.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\10_Screen.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
@@ -590,5 +596,6 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\1_CustomerPortalMenu.sql" />
     <None Include="Scripts\Post-Deployment\AP\RestoreVendorId.sql" />
     <None Include="Scripts\Post-Deployment\FRD\FRDEntryDataFix.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\9_ZipCode.sql" />
   </ItemGroup>
 </Project>

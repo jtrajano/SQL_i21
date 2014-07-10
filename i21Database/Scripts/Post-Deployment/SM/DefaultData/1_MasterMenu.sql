@@ -467,3 +467,23 @@ GO
 	IF NOT EXISTS(SELECT * FROM tblSMMasterMenu WHERE strMenuName = 'Import Origin Menus' AND strType = 'Screen' AND strModuleName = 'System Manager')
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Import Origin Menus', N'System Manager', 10, N'Import Origin Menus', N'Screen', N'i21.controller.ImportLegacyMenus', N'small-screen', 0, 0, 0, 1, NULL, 1)
 GO
+	IF NOT EXISTS(SELECT * FROM tblSMMasterMenu WHERE strMenuName = 'Bill Entry' AND strType = 'Screen' AND strModuleName = 'Accounts Payable')
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Bill Entry', N'Accounts Payable', 113, N'Bill Entry', N'Screen', N'AccountsPayable.controller.Bill', N'small-screen', 0, 0, 0, 1, NULL, 1)
+GO
+	DECLARE @intParent INT
+	SELECT @intParent = intMenuID FROM tblSMMasterMenu
+	WHERE strMenuName = 'Help Desk'
+	AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu Main 
+							WHERE strMenuName = 'Customer Portal')
+
+	IF NOT EXISTS(SELECT * FROM tblSMMasterMenu WHERE strMenuName = 'Export Hours Worked' AND strType = 'Screen' AND strModuleName = 'Help Desk' AND intParentMenuID = @intParent)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Export Hours Worked', N'Help Desk', @intParent, N'Export Hours Worked', N'Screen', N'HelpDesk.controller.ExportHoursWorked', N'small-screen', 0, 0, 0, 1, NULL, 1)
+GO
+	DECLARE @intParent INT
+	SELECT @intParent = intMenuID FROM tblSMMasterMenu
+	WHERE strMenuName = 'Activities'
+	AND strModuleName = 'Help Desk'
+
+	IF NOT EXISTS(SELECT * FROM tblSMMasterMenu WHERE strMenuName = 'Export Hours Worked' AND strType = 'Screen' AND strModuleName = 'Help Desk' AND intParentMenuID = @intParent)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Export Hours Worked', N'Help Desk', @intParent, N'Export Hours Worked', N'Screen', N'HelpDesk.controller.ExportHoursWorked', N'small-screen', 0, 0, 0, 1, NULL, 1)
+GO

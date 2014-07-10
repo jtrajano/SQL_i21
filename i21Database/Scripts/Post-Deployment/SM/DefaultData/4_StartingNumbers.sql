@@ -173,6 +173,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Receive Payments')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 18
+			,[strTransactionType]	= N'Debit Memo'
+			,[strPrefix]			= N'DB-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Purchasing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Debit Memo')
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO

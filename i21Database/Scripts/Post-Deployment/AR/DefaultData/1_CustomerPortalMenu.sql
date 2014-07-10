@@ -11,9 +11,9 @@ INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerP
 INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (2, N'Billing Account', 0, N'Folder', NULL)
 INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (3, N'Grain Account', 0, N'Folder', NULL)
 INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (4, N'Contact', 0, N'Folder', NULL)
-INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (5, N'Tickets', 1, N'Screen', N'HelpDesk.controller.Ticket')
-INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (6, N'Open Tickets', 1, N'Screen', N'HelpDesk.controller.OpenTicket')
-INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (7, N'Tickets Assigned to Me', 1, N'Screen', N'HelpDesk.controller.TicketAssigned')
+INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (5, N'Tickets', 1, N'Screen', N'HelpDesk.controller.CPTickets')
+INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (6, N'Open Tickets', 1, N'Screen', N'HelpDesk.controller.CPOpenTicket')
+INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (7, N'Tickets Assigned to Me', 1, N'Screen', N'HelpDesk.controller.CPTicketAssigned')
 INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (8, N'Create Ticket', 1, N'Screen', N'HelpDesk.controller.CreateTicket')
 INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (9, N'Billing Account', 2, N'Screen', N'CustomerPortal.controller.BillingAccount')
 INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (10, N'Invoice Credits', 2, N'Screen', N'CustomerPortal.controller.InvoicesCredits')
@@ -31,6 +31,7 @@ INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerP
 INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (22, N'Current Cash Bids', 3, N'Screen', N'CustomerPortal.controller.CurrentCashBids')
 INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (23, N'Business Summary', 3, N'Screen', N'CustomerPortal.controller.GABusinessSummary')
 INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (24, N'Customer Contact List', 4, N'Screen', N'AccountsReceivable.controller.CustomerContactList')
+INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (25, N'Export Hours Worked', 1, N'Screen', N'HelpDesk.controller.ExportHoursWorked')
 SET IDENTITY_INSERT [dbo].[tblARCustomerPortalMenu] OFF
 
 GO

@@ -601,6 +601,7 @@ BEGIN
 			WHERE A.intJournalId = @intJournalId
 			
 			DECLARE @intJournalId_NEW INT = (SELECT TOP 1 intJournalId FROM tblGLJournal WHERE strJournalId = @strJournalId)
+			DECLARE @dtmDate_NEW DATETIME = (SELECT TOP 1 dtmDate FROM tblGLJournal WHERE strJournalId = @strJournalId)
 			INSERT INTO #tmpValidJournals (intJournalId) SELECT @intJournalId_NEW
 		 
 		 INSERT INTO tblGLJournalDetail (
@@ -629,7 +630,7 @@ BEGIN
 			SELECT 
 				 [intLineNo]
 				,@intJournalId_NEW
-				,[dtmDate]
+				,@dtmDate_NEW
 				,[intAccountId]			
 				,[dblCredit]
 				,[dblCreditRate]

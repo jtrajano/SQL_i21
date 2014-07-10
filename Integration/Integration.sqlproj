@@ -118,6 +118,7 @@
     <None Include="dbo\Stored Procedures\uspAPImportTerms.sql" />
     <None Include="dbo\Stored Procedures\uspAPUpdateImportedBillTransactions.sql" />
     <None Include="Scripts\AP\FixVendorData.sql" />
+    <None Include="Scripts\AP\FixBillData.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
@@ -177,5 +178,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="dbo\Functions\fnGetVendorLastName.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="dbo\Stored Procedures\uspAPCreatePaymentFromOriginBill.sql" />
   </ItemGroup>
 </Project>
