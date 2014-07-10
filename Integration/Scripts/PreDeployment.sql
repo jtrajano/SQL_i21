@@ -82,6 +82,7 @@
 :r "..\dbo\Stored Procedures\uspAPImportVendor.sql"
 :r "..\dbo\Stored Procedures\uspAPImportTerms.sql"
 :r "..\Scripts\AP\FixVendorData.sql"
+:r "..\Scripts\AP\FixBillData.sql"
 
 
 -- TAX FORMS

@@ -117,6 +117,7 @@
     <None Include="dbo\Stored Procedures\uspTMGetConsumptionWithoutGasCheck.sql" />
     <None Include="dbo\Stored Procedures\uspAPImportTerms.sql" />
     <None Include="Scripts\AP\FixVendorData.sql" />
+    <None Include="Scripts\AP\FixBillData.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
