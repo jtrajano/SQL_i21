@@ -13,7 +13,7 @@ BEGIN
 	BEGIN
 
 	DECLARE @increment INT = 0
-	DECLARE @tblAPTempTerms TABLE  (intTermID INT)
+	DECLARE @tblAPTempTerms TABLE  (intTermID INT, strTerm NVARCHAR(100))
 
 	--Import terms specified in vendor
 	INSERT INTO tblSMTerm(
@@ -29,17 +29,17 @@ BEGIN
 		[intDueNextMonth],
 		[ysnActive],
 		[intSort])
-		OUTPUT INSERTED.intTermID INTO @tblAPTempTerms
+		OUTPUT INSERTED.intTermID, INSERTED.strTerm INTO @tblAPTempTerms
 	SELECT
-		CASE WHEN EXISTS(SELECT 1 FROM tblSMTerm WHERE strTerm = RTRIM(LTRIM(ISNULL(ssvnd_terms_desc,''''))))
-			THEN RTRIM(LTRIM(ISNULL(ssvnd_terms_desc,''''))) + ''-'' + (SELECT @increment + 1)
+		CASE WHEN EXISTS(SELECT 1 FROM tblSMTerm WHERE LOWER(strTerm) = LOWER(RTRIM(LTRIM(ISNULL(ssvnd_terms_desc,'''')))))
+			THEN RTRIM(LTRIM(ISNULL(ssvnd_terms_desc,''''))) + ''-'' + CAST((ROW_NUMBER() OVER(ORDER BY ssvnd_terms_desc)) AS NVARCHAR(10))
 			ELSE RTRIM(LTRIM(ISNULL(ssvnd_terms_desc,''''))) END,
 		CASE WHEN ssvnd_terms_type = ''P'' THEN ''Date Driven'' ELSE ''Standard'' END,
 		ssvnd_terms_disc_pct,
 		ssvnd_terms_due_day,
 		ssvnd_terms_disc_day,
 		0,
-		''None'',
+		''None-'' + CAST((ROW_NUMBER() OVER(ORDER BY ssvnd_terms_desc)) AS NVARCHAR(10)),
 		1,
 		ssvnd_terms_cutoff_day,
 		0,
@@ -48,28 +48,24 @@ BEGIN
 	FROM ssvndmst
 	--Insert vendor terms when all setup does not equal to 0
 	WHERE 1 = CASE WHEN ssvnd_terms_disc_pct = 0 
-		AND ssvnd_terms_due_day = 0
-		AND ssvnd_terms_disc_day = 0
-		AND ssvnd_terms_cutoff_day = 0 THEN 0 ELSE 1 END
+				AND ssvnd_terms_due_day = 0
+				AND ssvnd_terms_disc_day = 0
+				AND ssvnd_terms_cutoff_day = 0 THEN 0 ELSE 1 END
 	--Insert if not yet exists on tblSMTerm based on type
-		AND ((ssvnd_terms_type = ''D'' 
-			AND NOT EXISTS(SELECT 1 FROM tblSMTerm A 
-						WHERE A.dblDiscountEP = ssvnd_terms_disc_pct
-							AND A.intBalanceDue = ssvnd_terms_due_day
-							AND A.intDiscountDay = ssvnd_terms_disc_day))
-			OR ssvnd_terms_type = ''P''
-				AND NOT EXISTS(SELECT 1 FROM tblSMTerm A 
-						WHERE A.intDayofMonthDue = ssvnd_terms_disc_pct
-							AND A.intBalanceDue = ssvnd_terms_due_day
-							AND A.intDiscountDay = ssvnd_terms_disc_day
-							AND A.intDayofMonthDue = ssvnd_terms_cutoff_day))
-
-	GROUP BY ssvnd_terms_desc,
-			ssvnd_terms_type,
-			ssvnd_terms_disc_pct,
-			ssvnd_terms_due_day,
-			ssvnd_terms_disc_day,
-			ssvnd_terms_cutoff_day
+		AND 1 = (CASE WHEN (ssvnd_terms_type = ''D'' 
+							AND NOT EXISTS(SELECT 1 FROM tblSMTerm A 
+											WHERE A.dblDiscountEP = ssvnd_terms_disc_pct
+												AND A.intBalanceDue = ssvnd_terms_due_day
+												AND A.intDiscountDay = ssvnd_terms_disc_day))
+				THEN 1
+				WHEN (ssvnd_terms_type = ''P''
+						AND NOT EXISTS(SELECT 1 FROM tblSMTerm A 
+								WHERE A.intDayofMonthDue = ssvnd_terms_disc_pct
+									AND A.intBalanceDue = ssvnd_terms_due_day
+									AND A.intDiscountDay = ssvnd_terms_disc_day
+									AND A.intDayofMonthDue = ssvnd_terms_cutoff_day))
+				THEN 1
+				ELSE 0 END)
 	
 	--Insert Due on Receipt if not yet exists
 	IF NOT EXISTS(SELECT 1 FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')

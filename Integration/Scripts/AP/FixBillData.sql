@@ -71,15 +71,17 @@ BEGIN
 			ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = B.aptrx_ivc_no COLLATE Latin1_General_CI_AS
 	WHERE B.aptrx_trans_type NOT IN ('I','C')
 
-	--Update transaction type
+	--Update transaction type and withheld amount
 	UPDATE tblAPBill
 	SET intTransactionType = CASE WHEN B.aptrx_trans_type = 'I' THEN 1 ELSE 3 END
+	,dblWithheld = B.aptrx_wthhld_amt
 	FROM tblAPBill A
 		INNER JOIN aptrxmst B
 			ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = B.aptrx_ivc_no COLLATE Latin1_General_CI_AS
 
 	UPDATE tblAPBill
 	SET intTransactionType = CASE WHEN B.apivc_trans_type = 'I' THEN 1 ELSE 3 END
+	,dblWithheld = B.apivc_wthhld_amt
 	FROM tblAPBill A
 		INNER JOIN apivcmst B
 			ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = B.apivc_ivc_no COLLATE Latin1_General_CI_AS
@@ -113,7 +115,7 @@ BEGIN
 
 	END
 
-	--Update Bill Cost, Landed Cost, Quantity Order and Received
+	--Update Bill Cost, Landed Cost, Quantity Order and Received, Discount
 	UPDATE tblAPBillDetail
 	SET dblCost = A.dblTotal
 	,dblLandedCost = A.dblTotal

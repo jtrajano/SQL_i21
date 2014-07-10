@@ -179,4 +179,7 @@
   <ItemGroup>
     <None Include="dbo\Functions\fnGetVendorLastName.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <Build Include="dbo\Stored Procedures\uspAPCreatePaymentFromOriginBill.sql" />
+  </ItemGroup>
 </Project>

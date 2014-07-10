@@ -14,7 +14,6 @@
     [strBillId]            NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [dblAmountDue]         DECIMAL (18, 6) NOT NULL DEFAULT 0,
     [dtmDatePaid]          DATETIME        NULL ,
-    [dtmDiscountDate]      DATETIME        NOT NULL DEFAULT GETDATE(),
     [intUserId]            INT             NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     [dtmBillDate] DATETIME NOT NULL DEFAULT GETDATE(), 
