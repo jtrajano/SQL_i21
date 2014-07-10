@@ -28,25 +28,25 @@
 
 		select
 			strCustomer = cus.strCustomerNumber
-			,strFullName = ec.strEmail
+			,strFullName = en.strEmail
 			,strPhone = ec.strPhone
 			,strMobile = ec.strMobile
 			,strTimeZone = ''
-			,strLocation = el.strCity
+			,strLocation = el.strLocationName
 			,strSLAPlan = ''
 			,strReplyDue = ''
-			,intUserId = en.intEntityId
-			,strName = ec.strEmail
-			,strUserName = ec.strEmail
-			,strFirstName = ec.strEmail
-			,strMiddleName = ec.strEmail
-			,strLastName = ec.strEmail
-			,strEmail = ec.strEmail
+			,intUserId = ec.intEntityId
+			,strName = en.strEmail
+			,strUserName = en.strEmail
+			,strFirstName = en.strEmail
+			,strMiddleName = en.strEmail
+			,strLastName = en.strEmail
+			,strEmail = en.strEmail
 			,ysni21User = 0
 			,imgPhoto = ec.imgContactPhoto
 			,intConcurrencyId = 1
 		from
 			tblEntityContact ec
 			left outer join tblARCustomer cus on cus.intEntityId = (select top 1 et.intEntityId from tblEntityToContact et where et.intContactId = ec.intEntityId)
-			left outer join tblEntity en on en.intEntityId = (select top 1 et.intEntityId from tblEntityToContact et where et.intEntityToContactId = ec.intEntityId)
-			left outer join tblEntityLocation el on el.intEntityId = (select top 1 et.intEntityId from tblEntityToContact et where et.intEntityToContactId = ec.intEntityId)
+			left outer join tblEntity en on en.intEntityId = ec.intEntityId
+			left outer join tblEntityLocation el on el.intEntityLocationId = (select top 1 et.intLocationId from tblEntityToContact et where et.intContactId = ec.intEntityId)
