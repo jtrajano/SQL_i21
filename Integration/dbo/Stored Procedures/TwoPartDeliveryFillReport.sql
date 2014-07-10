@@ -342,7 +342,7 @@ BEGIN
    
 		 --dtmRequestedDate  
 		 IF (ISNULL(@FromRequestedDate,'''') != '''')  
-		 BEGIN SET @WhereClause = @WhereClause + '' AND dtmRequestedDate BETWEEN '''''' + @FromRequestedDate + '''''' AND '''''' + @ToRequestedDate + '''''''' END     
+		 BEGIN SET @WhereClause = @WhereClause + '' AND DATEADD(dd, DATEDIFF(dd, 0, dtmRequestedDate), 0) BETWEEN '''''' + @FromRequestedDate + '''''' AND '''''' + @ToRequestedDate + '''''''' END     
   
 		 --dblQuantity  
 		 IF (ISNULL(@FromQuantity,'''') != '''')  

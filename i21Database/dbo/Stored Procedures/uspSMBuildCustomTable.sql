@@ -16,9 +16,9 @@ SET XACT_ABORT ON
 ---------------------------------------------------------------------------------------------------------------------------------------
 CREATE TABLE #tmpCustomFieldDetail (
 	[intCustomFieldDetailId] [int] PRIMARY KEY,
-	[strFieldName] NVARCHAR(50),
-	[strFieldType] NVARCHAR(50),
-	[strFieldSize] NVARCHAR(50)
+	[strFieldName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,  
+	[strFieldType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,  
+	[strFieldSize] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL  
 );
 
 DECLARE @addColumnStatement AS NVARCHAR(MAX)
@@ -46,7 +46,7 @@ BEGIN
 
 	SELECT TOP 1 
 		@fieldName = strFieldName,
-		@fieldType = CASE WHEN strFieldType = 'TEXT'	THEN 'NVARCHAR(' + strFieldSize + ')'
+		@fieldType = CASE WHEN strFieldType = 'TEXT'	THEN 'NVARCHAR(' + strFieldSize + ') COLLATE Latin1_General_CI_AS'
 						  WHEN strFieldType = 'INTEGER' THEN 'INT'
 						  WHEN strFieldType = 'DECIMAL' THEN 'DECIMAL(18,' + strFieldSize + ')'
 						  WHEN strFieldType = 'DATE'	THEN 'DATETIME'
