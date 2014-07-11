@@ -419,6 +419,7 @@ ELSE
 			,[strCode]
 			,[strModuleName]
 			,[strTransactionForm]
+			,[strTransactionType]
 		)
 		SELECT	
 			[strTransactionId] = A.strBillId, 
@@ -440,7 +441,11 @@ ELSE
 			[strBatchID]			= @batchId,
 			[strCode]				= 'AP',
 			[strModuleName]		= @MODULE_NAME,
-			[strTransactionForm] = A.intBillId
+			[strTransactionForm] = @SCREEN_NAME,
+			[strTransactionType] = CASE WHEN intTransactionType = 1 THEN 'Bill'
+										WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
+										WHEN intTransactionType = 3 THEN 'Debit Memo'
+									ELSE 'NONE' END
 		FROM	[dbo].tblAPBill A
 		LEFT JOIN tblAPVendor C
 					ON A.intVendorId = C.intEntityId
@@ -468,7 +473,11 @@ ELSE
 			[strBatchID]			= @batchId,
 			[strCode]				= 'AP',
 			[strModuleName]		= @MODULE_NAME,
-			[strTransactionForm] = A.intBillId
+			[strTransactionForm] = @SCREEN_NAME,
+			[strTransactionType] = CASE WHEN intTransactionType = 1 THEN 'Bill'
+										WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
+										WHEN intTransactionType = 3 THEN 'Debit Memo'
+									ELSE 'NONE' END
 		FROM	[dbo].tblAPBill A 
 				LEFT JOIN [dbo].tblAPBillDetail B
 					ON A.intBillId = B.intBillId
