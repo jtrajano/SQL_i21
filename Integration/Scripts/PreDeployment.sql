@@ -89,6 +89,7 @@
 :r "..\dbo\Stored Procedures\uspAPUpdateImportedBillTransactions.sql"
 :r "..\Scripts\AP\FixVendorData.sql"
 :r "..\Scripts\AP\FixBillData.sql"
+:r "..\Scripts\AP\FixPaymentCMRecords.sql"
 
 
 -- TAX FORMS
