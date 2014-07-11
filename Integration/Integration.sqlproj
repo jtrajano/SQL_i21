@@ -119,6 +119,7 @@
     <None Include="dbo\Stored Procedures\uspAPUpdateImportedBillTransactions.sql" />
     <None Include="Scripts\AP\FixVendorData.sql" />
     <None Include="Scripts\AP\FixBillData.sql" />
+    <None Include="Scripts\AP\FixPaymentCMRecords.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />

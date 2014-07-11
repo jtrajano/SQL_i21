@@ -586,7 +586,7 @@ BEGIN
 			[dblAmount] = A.dblAmountPaid,
 			[strAmountInWords] = dbo.fnConvertNumberToWord(A.dblAmountPaid),
 			[strMemo] = '',
-			[strReferenceNo] = '',
+			[strReferenceNo] = CASE WHEN (SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId) = 'Cash' THEN 'Cash' ELSE '' END,
 			[ysnCheckToBePrinted] = 0,
 			[ysnCheckVoid] = 0,
 			[ysnPosted] = 1,
@@ -657,6 +657,7 @@ ELSE
 			,[strCode]
 			,[strModuleName]
 			,[strTransactionForm]
+			,[strTransactionType]
 		)
 		--CREDIT SIDE
 		SELECT
@@ -683,7 +684,8 @@ ELSE
 			,[strBatchId]			= @batchId
 			,[strCode]				= 'AP'
 			,[strModuleName]		= @MODULE_NAME
-			,A.intPaymentId
+			,[strTransactionForm]	= @SCREEN_NAME
+			,[strTransactionType]	= @TRAN_TYPE
 		FROM	[dbo].tblAPPayment A 
 		--INNER JOIN tblAPPaymentDetail B
 		--	ON A.intPaymentId = B.intPaymentId
@@ -722,7 +724,8 @@ ELSE
 			,[strBatchId]			= @batchId
 			,[strCode]				= 'AP'
 			,[strModuleName]		= @MODULE_NAME
-			,A.intPaymentId
+			,[strTransactionForm]	= @SCREEN_NAME
+			,[strTransactionType]	= @TRAN_TYPE
 		FROM	[dbo].tblAPPayment A 
 				INNER JOIN tblAPVendor B
 					ON A.intVendorId = B.intEntityId AND B.ysnWithholding = 1
@@ -749,7 +752,8 @@ ELSE
 			,[strBatchId]			= @batchId
 			,[strCode]				= 'AP'
 			,[strModuleName]		= @MODULE_NAME
-			,A.intPaymentId
+			,[strTransactionForm]	= @SCREEN_NAME
+			,[strTransactionType]	= @TRAN_TYPE
 		FROM	[dbo].tblAPPayment A 
 				INNER JOIN tblAPPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
@@ -797,7 +801,8 @@ ELSE
 				,[strBatchId]			= @batchId
 				,[strCode]				= 'AP'
 				,[strModuleName]		= @MODULE_NAME
-				,A.intPaymentId
+				,[strTransactionForm]	= @SCREEN_NAME
+				,[strTransactionType]	= @TRAN_TYPE
 		FROM	[dbo].tblAPPayment A 
 				INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
