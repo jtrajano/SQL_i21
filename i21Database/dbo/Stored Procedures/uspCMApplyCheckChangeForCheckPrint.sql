@@ -29,6 +29,9 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@ORIGIN_WIRE AS INT = 15
 		,@AP_PAYMENT AS INT = 16
 
+		-- Constant variables for payment methods
+		,@CASH_PAYMENT AS NVARCHAR(20) = 'Cash'
+
 -- Mass update the ysnCheckToBePrinted
 UPDATE	[dbo].[tblCMBankTransaction]
 SET		ysnCheckToBePrinted = @ysnCheckToBePrinted
@@ -40,3 +43,4 @@ WHERE	intBankAccountId = @intBankAccountId
 		AND ysnPosted = 1
 		AND ysnClr = 0
 		AND dblAmount <> 0
+		AND strReferenceNo NOT IN (@CASH_PAYMENT) -- Do not include AP Payments that is paid thru a "Cash" payment method. 
