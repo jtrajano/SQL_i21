@@ -29,7 +29,7 @@ Create TABLE #TampCannedPanelFormat
 )
 
 print('/*******************  BEGIN INSERTING canned panels on temporary panel format table  *******************/')
-INSERT INTO #TampCannedPanelFormat VALUES (4, N'gacnt_due_rev_dt', N'>', N'0', N'', -657931, N'Regular', 0, N'Cell', 129, 0, 2, N'', 0, 1, 17)
+INSERT INTO #TampCannedPanelFormat VALUES (1, N'gacnt_due_rev_dt', N'>', N'0', N'', -657931, N'Regular', 0, N'Cell', 33, 0, 2, N'', 0, 1, 17)
 print('/*******************  END INSERTING canned panels on temporary panel format table  *******************/')
 
 print('/*******************  BEGIN DELETE old panel format records  *******************/')
