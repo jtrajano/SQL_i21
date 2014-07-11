@@ -166,4 +166,7 @@
   <ItemGroup>
     <None Include="dbo\Functions\fnGetVendorLastName.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="dbo\Stored Procedures\uspSMMigrateCurrency.sql" />
+  </ItemGroup>
 </Project>
