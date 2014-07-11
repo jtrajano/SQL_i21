@@ -24,37 +24,31 @@ BEGIN TRANSACTION
 
 -- CREATE THE TEMPORARY TABLE 
 CREATE TABLE #tmpGLDetail (
-	[strTransactionId]			[nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
-	,[intTransactionId]			[int] NULL
-	,[dtmDate]					[datetime] NOT NULL
-	,[strBatchId]				[nvarchar](20)  COLLATE Latin1_General_CI_AS NULL
-	,[intAccountId]				[int] NULL
-	,[strAccountGroup]			[nvarchar](30)  COLLATE Latin1_General_CI_AS NULL
-	,[dblDebit]					[numeric](18, 6) NULL
-	,[dblCredit]				[numeric](18, 6) NULL
-	,[dblDebitUnit]				[numeric](18, 6) NULL
-	,[dblCreditUnit]			[numeric](18, 6) NULL
-	,[strDescription]			[nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
-	,[strCode]					[nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
-	,[strReference]				[nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
-	,[strJobId]					[nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
-	,[intCurrencyId]			[int] NULL
-	,[dblExchangeRate]			[numeric](38, 20) NOT NULL
-	,[dtmDateEntered]			[datetime] NOT NULL
-	,[dtmTransactionDate]		[datetime] NULL
-	,[strProductId]				[nvarchar](50)  COLLATE Latin1_General_CI_AS NULL
-	,[strWarehouseId]			[nvarchar](30)  COLLATE Latin1_General_CI_AS NULL
-	,[strNum]					[nvarchar](100)  COLLATE Latin1_General_CI_AS NULL
-	,[strCompanyName]			[nvarchar](150)  COLLATE Latin1_General_CI_AS NULL
-	,[strBillInvoiceNumber]		[nvarchar](35)  COLLATE Latin1_General_CI_AS NULL
+	[dtmDate] [datetime] NOT NULL
+	,[strBatchId] [nvarchar](20)  COLLATE Latin1_General_CI_AS NULL
+	,[intAccountId] [int] NULL
+	,[dblDebit] [numeric](18, 6) NULL
+	,[dblCredit] [numeric](18, 6) NULL
+	,[dblDebitUnit] [numeric](18, 6) NULL
+	,[dblCreditUnit] [numeric](18, 6) NULL
+	,[strDescription] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
+	,[strCode] [nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
+	,[strTransactionId] [nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
+	,[intTransactionId] [int] NULL
+	,[strReference] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
+	,[intCurrencyId] [int] NULL
+	,[dblExchangeRate] [numeric](38, 20) NOT NULL
+	,[dtmDateEntered] [datetime] NOT NULL
+	,[dtmTransactionDate] [datetime] NULL
 	,[strJournalLineDescription] [nvarchar](250)  COLLATE Latin1_General_CI_AS NULL
-	,[ysnIsUnposted]			[bit] NOT NULL
-	,[intConcurrencyId]			[int] NULL
-	,[intUserId]				[int] NULL
-	,[strTransactionForm]		[nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
-	,[strModuleName]			[nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
-	,[strUOMCode]				[char](6)  COLLATE Latin1_General_CI_AS NULL
-	,[intEntityId]				[int] NULL
+	,[intJournalLineNo] [int]
+	,[ysnIsUnposted] [bit] NOT NULL
+	,[intUserId] [int] NULL
+	,[intEntityId] [int] NULL
+	,[strTransactionType] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
+	,[strTransactionForm] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
+	,[strModuleName] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL		
+	,[intConcurrencyId] [int] NULL
 )
 
 -- Declare the variables 
@@ -78,7 +72,14 @@ DECLARE
 	,@CREDIT_CARD_RETURNS INT = 7
 	,@CREDIT_CARD_PAYMENTS INT = 8
 	,@BANK_TRANSFER_WD INT = 9
-	,@BANK_TRANSFER_DEP INT = 10	
+	,@BANK_TRANSFER_DEP INT = 10
+	,@ORIGIN_DEPOSIT AS INT = 11
+	,@ORIGIN_CHECKS AS INT = 12
+	,@ORIGIN_EFT AS INT = 13
+	,@ORIGIN_WITHDRAWAL AS INT = 14
+	,@ORIGIN_WIRE AS INT = 15
+	,@AP_PAYMENT AS INT = 16
+    ,@BANK_STMT_IMPORT AS INT = 17
 	
 	-- Local Variables
 	,@intTransactionId AS INT
@@ -395,60 +396,60 @@ IF @ysnRecap = 1
 BEGIN	
 	-- INSERT THE DATA FROM #tmpGLDetail TO @RecapTable
 	INSERT INTO @RecapTable (
-			[strTransactionId]		
-			,[intTransactionId]		
-			,[dtmDate]				
-			,[strBatchId]			
-			,[intAccountId]			
-			,[strAccountGroup]		
-			,[dblDebit]				
-			,[dblCredit]			
-			,[dblDebitUnit]			
-			,[dblCreditUnit]		
-			,[strDescription]		
-			,[strCode]				
-			,[strReference]			
-			,[strJobId]				
-			,[intCurrencyId]		
-			,[dblExchangeRate]		
-			,[dtmDateEntered]		
-			,[dtmTransactionDate]	
-			,[ysnIsUnposted]		
-			,[intConcurrencyId]		
-			,[intUserId]			
-			,[strTransactionForm]	
-			,[strModuleName]		
-			,[strUOMCode]
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
 			,[intEntityId]
-	)
-	SELECT	@strTransactionId
-			,NULL
-			,[dtmDate]				
-			,[strBatchId]			
-			,[intAccountId]			
-			,[strAccountGroup]		
-			,[dblDebit]				
-			,[dblCredit]			
-			,[dblDebitUnit]			
-			,[dblCreditUnit]		
-			,[strDescription]		
-			,[strCode]				
-			,[strReference]			
-			,[strJobId]				
-			,[intCurrencyId]		
-			,[dblExchangeRate]		
-			,[dtmDateEntered]		
-			,[dtmTransactionDate]	
-			,[ysnIsUnposted]		
-			,[intConcurrencyId]		
-			,[intUserId]			
-			,[strTransactionForm]	
-			,[strModuleName]		
-			,[strUOMCode]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+	)	
+	SELECT	[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
 			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
 	FROM	#tmpGLDetail
 	IF @@ERROR <> 0	GOTO Post_Rollback
-	
+		
 	GOTO Recap_Rollback
 END
 
