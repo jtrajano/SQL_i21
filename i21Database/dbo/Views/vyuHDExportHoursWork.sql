@@ -10,13 +10,14 @@
 			,intHoursWorked = hw.intHours
 			,dblRate = hw.dblRate
 			,dblTotalCost = hw.intHours * hw.dblRate
-			,strBillable = case hw.ysnBillable when 1 then 'Yes' else 'No' end
+			,strBillable = case hw.ysnBillable when 1 then 'Billable' else 'Non-billable' end
 			,strDescription = hw.strDescription
 			,strSource = 'Help Desk'
 			,strAgent = us.strFullName
 			,strUserName = us.strUserName
 			,strTicketNumber = t.strTicketNumber
 			,intId = hw.intTicketHoursWorkedId
+			,strSummary = t.strSubject
 		from
 			tblHDTicketHoursWorked hw
 			inner join tblHDTicket t on t.intTicketId = hw.intTicketId
