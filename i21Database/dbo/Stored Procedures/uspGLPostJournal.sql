@@ -214,6 +214,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 		)
 		INSERT INTO tblGLDetail (
 			 [strTransactionId]
+			,[intTransactionId]
 			,[intAccountId]
 			,[strDescription]
 			,[strReference]	
@@ -231,14 +232,16 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intEntityId]			
 			,[dtmDateEntered]
 			,[strBatchId]
-			,[strCode]
-			,[strModuleName]
-			,[strTransactionForm]
+			,[strCode]			
 			,[strJournalLineDescription]
 			,[intJournalLineNo]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]			
 		)
 		SELECT 
 			 [strTransactionId]		= B.[strJournalId]
+			,[intTransactionId]		= B.[intJournalId]
 			,[intAccountId]			= A.[intAccountId]
 			,[strDescription]		= A.[strDescription]
 			,[strReference]			= A.[strReference]
@@ -260,11 +263,12 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= 'GJ'
-			,[strModuleName]		= 'General Ledger'
-			,[strTransactionForm]	= B.[strTransactionType]
+			,[strCode]				= 'GJ'			
 			,[strJournalLineDescription] = A.[strDescription]
-			,[intJournalLineNo]		= A.intLineNo
+			,[intJournalLineNo]		= A.intLineNo			
+			,[strTransactionType]	= B.[strJournalType]
+			,[strTransactionForm]	= B.[strTransactionType]
+			,[strModuleName]		= 'General Ledger'
 
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B 
 			ON A.[intJournalId] = B.[intJournalId]
@@ -311,8 +315,9 @@ ELSE
 			,[dtmDateEntered]
 			,[strBatchId]
 			,[strCode]
-			,[strModuleName]
+			,[strTransactionType]
 			,[strTransactionForm]
+			,[strModuleName]			
 		)
 		SELECT 
 			 [strTransactionId]		= B.[strJournalId]
@@ -340,8 +345,9 @@ ELSE
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
 			,[strCode]				= 'GJ'
-			,[strModuleName]		= 'General Ledger'
+			,[strTransactionType]	= B.[strJournalType]
 			,[strTransactionForm]	= B.[strTransactionType]
+			,[strModuleName]		= 'General Ledger'			
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B 
 			ON A.[intJournalId] = B.[intJournalId]
 		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM #tmpValidJournals)
@@ -365,8 +371,9 @@ ELSE
 				,[intEntityId]				
 				,[strBatchId]
 				,[strCode]
-				,[strModuleName]
+				,[strTransactionType]
 				,[strTransactionForm]
+				,[strModuleName]				
 			)
 			SELECT 
 				 [strTransactionId]
@@ -382,12 +389,13 @@ ELSE
 				,[intUserId]	
 				,[intEntityId]					
 				,[strBatchId]	
-				,[strCode]				
-				,[strModuleName]
-				,[strTransactionForm]
+				,[strCode]		
+				,[strTransactionType]
+				,[strTransactionForm]		
+				,[strModuleName]				
 			FROM [dbo].tblGLPostRecap A
 			WHERE A.[strBatchId] = @strBatchId and A.[intEntityId] = @intEntityId
-			GROUP BY [strTransactionId],[intTransactionId],[dtmDate],[dblExchangeRate],[dtmDateEntered],[ysnIsUnposted],[intUserId],[intEntityId],[strBatchId],[strCode],[strModuleName],[strTransactionForm]
+			GROUP BY [strTransactionId],[intTransactionId],[dtmDate],[dblExchangeRate],[dtmDateEntered],[ysnIsUnposted],[intUserId],[intEntityId],[strBatchId],[strCode],[strTransactionForm],[strTransactionType],[strModuleName]
 
 			IF @@ERROR <> 0	GOTO Post_Rollback;
 					

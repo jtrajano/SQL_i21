@@ -191,6 +191,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 		)
 		INSERT INTO tblGLDetail (
 			 [strTransactionId]
+			,[intTransactionId]
 			,[intAccountId]
 			,[strDescription]
 			,[strReference]	
@@ -208,14 +209,16 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intEntityId]
 			,[dtmDateEntered]
 			,[strBatchId]
-			,[strCode]
-			,[strModuleName]
-			,[strTransactionForm]
+			,[strCode]			
 			,[strJournalLineDescription]
-			,[intJournalLineNo]
+			,[intJournalLineNo]			
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
 		)
 		SELECT 
 			 [strTransactionId]		= B.[strJournalId]
+			,[intTransactionId]		= B.[intJournalId]
 			,[intAccountId]			= A.[intAccountId]
 			,[strDescription]		= A.[strDescription]
 			,[strReference]			= 'AA Audit AdjustmentFY ' + CAST(YEAR(B.[dtmDate]) AS NVARCHAR(50))
@@ -237,11 +240,12 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intEntityId]			= @intEntityId
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= 'AA'
-			,[strModuleName]		= 'General Ledger'
-			,[strTransactionForm]	= B.[strTransactionType]
+			,[strCode]				= 'AA'			
 			,[strJournalLineDescription] = A.[strDescription]
-			,[intJournalLineNo]		= A.intLineNo
+			,[intJournalLineNo]		= A.intLineNo			
+			,[strTransactionType]	= B.[strJournalType]
+			,[strTransactionForm]	= B.[strTransactionType]
+			,[strModuleName]		= 'General Ledger'
 						
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B 
 			ON A.[intJournalId] = B.[intJournalId]
@@ -262,6 +266,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			)
 			INSERT INTO tblGLDetail (
 				 [strTransactionId]
+				,[intTransactionId]
 				,[intAccountId]
 				,[strDescription]
 				,[strReference]	
@@ -279,14 +284,16 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[intEntityId]
 				,[dtmDateEntered]
 				,[strBatchId]
-				,[strCode]
-				,[strModuleName]
-				,[strTransactionForm]
+				,[strCode]				
 				,[strJournalLineDescription]
 				,[intJournalLineNo]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]				
 			)
 			SELECT
 				 [strTransactionId]		= B.[strJournalId]
+				,[intTransactionId]		= B.[intJournalId]
 				,[intAccountId]			= A.[intAccountId]
 				,[strDescription]		= A.[strDescription]
 				,[strReference]			= 'AA Audit AdjustmentFY ' + CAST(YEAR(B.[dtmDate]) AS NVARCHAR(50))
@@ -308,11 +315,12 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[intEntityId]			= @intEntityId
 				,[dtmDateEntered]		= GETDATE()
 				,[strBatchId]			= @strBatchId
-				,[strCode]				= 'AA'
-				,[strModuleName]		= 'General Ledger'
-				,[strTransactionForm]	= B.[strTransactionType]
+				,[strCode]				= 'AA'				
 				,[strJournalLineDescription] = A.[strDescription]
-				,[intJournalLineNo]		= A.intLineNo
+				,[intJournalLineNo]		= A.intLineNo				
+				,[strTransactionType]	= B.[strJournalType]
+				,[strTransactionForm]	= B.[strTransactionType]
+				,[strModuleName]		= 'General Ledger'
 				
 			FROM [dbo].tblGLJournalDetail A 
 				INNER JOIN [dbo].tblGLJournal B 
@@ -382,6 +390,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			)
 			INSERT INTO tblGLDetail (
 				 [strTransactionId]
+				,[intTransactionId]
 				,[intAccountId]
 				,[strDescription]
 				,[strReference]	
@@ -399,14 +408,16 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[intEntityId]
 				,[dtmDateEntered]
 				,[strBatchId]
-				,[strCode]
-				,[strModuleName]
-				,[strTransactionForm]
+				,[strCode]				
 				,[strJournalLineDescription]
-				,[intJournalLineNo]
+				,[intJournalLineNo]				
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
 			)
 			SELECT
 				 [strTransactionId]		= (SELECT TOP 1 strJournalId FROM tblGLJournal WHERE intJournalId = (SELECT TOP 1 [intJournalId] FROM #tmpValidJournals))
+				,[intTransactionId]		= (SELECT TOP 1 intJournalId FROM tblGLJournal WHERE intJournalId = (SELECT TOP 1 [intJournalId] FROM #tmpValidJournals))
 				,[intAccountId]			= (SELECT TOP 1 [intRetainAccount] FROM tblGLFiscalYear WHERE dtmDateFrom <= @GJDates AND dtmDateTo >= @GJDates)
 				,[strDescription]		= (SELECT TOP 1 [strDescription] FROM Accounts WHERE [intAccountId] = (SELECT TOP 1 intRetainAccount FROM tblGLFiscalYear WHERE dtmDateFrom <= @GJDates AND dtmDateTo >= @GJDates))
 				,[strReference]			= 'AA Audit AdjustmentFY ' + CAST(YEAR(@GJDates) AS NVARCHAR(50))
@@ -424,11 +435,12 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[intEntityId]			= @intEntityId
 				,[dtmDateEntered]		= GETDATE()
 				,[strBatchId]			= @strBatchId
-				,[strCode]				= 'AA'
-				,[strModuleName]		= 'General Ledger'
-				,[strTransactionForm]	= A.[strTransactionType]
+				,[strCode]				= 'AA'				
 				,[strJournalLineDescription] = NULL
-				,[intJournalLineNo]		= NULL
+				,[intJournalLineNo]		= NULL				
+				,[strTransactionType]	= A.[strJournalType]
+				,[strTransactionForm]	= A.[strTransactionType]
+				,[strModuleName]		= 'General Ledger'
 				
 			FROM [dbo].tblGLJournal A 
 			WHERE A.[intJournalId] IN (SELECT TOP 1 [intJournalId] FROM #tmpValidJournals)
@@ -477,8 +489,9 @@ ELSE
 			,[dtmDateEntered]
 			,[strBatchId]
 			,[strCode]
-			,[strModuleName]
+			,[strTransactionType]
 			,[strTransactionForm]
+			,[strModuleName]
 		)
 		SELECT
 			 [strTransactionId]		= B.[strJournalId]
@@ -506,8 +519,9 @@ ELSE
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
 			,[strCode]				= 'AA'
-			,[strModuleName]		= 'General Ledger'
-			,[strTransactionForm]	= B.[strTransactionType]
+			,[strTransactionType]	= B.[strJournalType]
+			,[strTransactionForm]	= B.[strTransactionType]			
+			,[strModuleName]		= 'General Ledger'			
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B 
 			ON A.[intJournalId] = B.[intJournalId]
 		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM #tmpValidJournals);
@@ -547,8 +561,9 @@ ELSE
 				,[dtmDateEntered]
 				,[strBatchId]
 				,[strCode]
-				,[strModuleName]
+				,[strTransactionType]
 				,[strTransactionForm]
+				,[strModuleName]				
 			)
 			SELECT
 				 [strTransactionId]		= B.[strJournalId]
@@ -576,8 +591,9 @@ ELSE
 				,[dtmDateEntered]		= GETDATE()
 				,[strBatchId]			= @strBatchId
 				,[strCode]				= 'AA'
+				,[strTransactionType]	= B.[strJournalType]
+				,[strTransactionForm]	= B.[strTransactionType]	
 				,[strModuleName]		= 'General Ledger'
-				,[strTransactionForm]	= B.[strTransactionType]
 			FROM [dbo].tblGLJournalDetail A 
 				INNER JOIN [dbo].tblGLJournal B 
 					ON A.[intJournalId] = B.[intJournalId]
@@ -666,8 +682,9 @@ ELSE
 				,[dtmDateEntered]
 				,[strBatchId]
 				,[strCode]
-				,[strModuleName]
+				,[strTransactionType]
 				,[strTransactionForm]
+				,[strModuleName]				
 			)
 			SELECT
 				 [strTransactionId]		= (SELECT TOP 1 strJournalId FROM tblGLJournal WHERE intJournalId = (SELECT TOP 1 [intJournalId] FROM #tmpValidJournals))
@@ -691,8 +708,9 @@ ELSE
 				,[dtmDateEntered]		= GETDATE()
 				,[strBatchId]			= @strBatchId
 				,[strCode]				= 'AA'
-				,[strModuleName]		= 'General Ledger'
+				,[strTransactionType]	= A.[strJournalType]
 				,[strTransactionForm]	= A.[strTransactionType]
+				,[strModuleName]		= 'General Ledger'				
 			FROM [dbo].tblGLJournal A 
 			WHERE A.[intJournalId] IN (SELECT TOP 1 [intJournalId] FROM #tmpValidJournals)
 			
@@ -720,8 +738,9 @@ ELSE
 				,[intEntityId]
 				,[strBatchId]
 				,[strCode]
-				,[strModuleName]
+				,[strTransactionType]
 				,[strTransactionForm]
+				,[strModuleName]				
 			)
 			SELECT 
 				 [strTransactionId]
@@ -737,12 +756,13 @@ ELSE
 				,[intUserId]
 				,[intEntityId]	
 				,[strBatchId]	
-				,[strCode]				
-				,[strModuleName]
-				,[strTransactionForm]
+				,[strCode]		
+				,[strTransactionType]
+				,[strTransactionForm]		
+				,[strModuleName]				
 			FROM [dbo].tblGLPostRecap A
 			WHERE A.[strBatchId] = @strBatchId and A.[intEntityId] = @intEntityId
-			GROUP BY [strTransactionId],[intTransactionId],[dtmDate],[dblExchangeRate],[dtmDateEntered],[ysnIsUnposted],[intUserId],[intEntityId],[strBatchId],[strCode],[strModuleName],[strTransactionForm]
+			GROUP BY [strTransactionId],[intTransactionId],[dtmDate],[dblExchangeRate],[dtmDateEntered],[ysnIsUnposted],[intUserId],[intEntityId],[strBatchId],[strCode],[strTransactionType],[strTransactionForm],[strModuleName]
 
 			IF @@ERROR <> 0	GOTO Post_Rollback;
 					

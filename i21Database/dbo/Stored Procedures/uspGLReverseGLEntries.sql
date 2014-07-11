@@ -38,11 +38,11 @@ END
 IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN			
 		INSERT INTO tblGLDetail (
-				[strTransactionId]
+				 [strTransactionId]
+				,[intTransactionId]
 				,[dtmDate]
 				,[strBatchId]
 				,[intAccountId]
-				,[strAccountGroup]
 				,[dblDebit]
 				,[dblCredit]
 				,[dblDebitUnit]
@@ -50,31 +50,25 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[strDescription]
 				,[strCode]
 				,[strReference]
-				,[strJobId]
 				,[intCurrencyId]
 				,[dblExchangeRate]
 				,[dtmDateEntered]
 				,[dtmTransactionDate]
-				,[strProductId]
-				,[strWarehouseId]
-				,[strNum]
-				,[strCompanyName]
-				,[strBillInvoiceNumber]
 				,[strJournalLineDescription]
 				,[intJournalLineNo]
 				,[ysnIsUnposted]
 				,[intConcurrencyId]
 				,[intUserId]
 				,[intEntityId]
+				,[strTransactionType]
 				,[strTransactionForm]
 				,[strModuleName]
-				,[strUOMCode]
 		)
-		SELECT	[strTransactionId]
+		SELECT	 [strTransactionId]
+				,[intTransactionId]
 				,dtmDate			= ISNULL(@dtmDateReverse, [dtmDate]) -- If date is provided, use date reverse as the date for unposting the transaction.
 				,[strBatchId]
 				,[intAccountId]
-				,[strAccountGroup]
 				,dblDebit			= [dblCredit]		-- (Debit -> Credit)
 				,dblCredit			= [dblDebit]		-- (Debit <- Credit)
 				,dblDebitUnit		= [dblCreditUnit]	-- (Debit Unit -> Credit Unit)
@@ -82,25 +76,19 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[strDescription]
 				,[strCode]
 				,[strReference]
-				,[strJobId]
 				,[intCurrencyId]
 				,[dblExchangeRate]
 				,dtmDateEntered		= GETDATE()
 				,[dtmTransactionDate]
-				,[strProductId]
-				,[strWarehouseId]
-				,[strNum]
-				,[strCompanyName]
-				,[strBillInvoiceNumber]
 				,[strJournalLineDescription]
 				,[intJournalLineNo]
 				,ysnIsUnposted		= 1
 				,[intConcurrencyId]
 				,[intUserId]		= 0
 				,[intEntityId]		= @intEntityId
+				,[strTransactionType]
 				,[strTransactionForm]
 				,[strModuleName]
-				,[strUOMCode]
 		FROM	tblGLDetail 
 		WHERE	strBatchId = @strBatchId
 		ORDER BY intGLDetailId		
@@ -121,6 +109,7 @@ ELSE
 		)
 		INSERT INTO tblGLPostRecap (
 			 [strTransactionId]
+			,[intTransactionId]
 			,[intAccountId]
 			,[strAccountId]
 			,[strAccountGroup]
@@ -140,10 +129,13 @@ ELSE
 			,[dtmDateEntered]
 			,[strBatchId]
 			,[strCode]
+			,[strTransactionType]
+			,[strTransactionForm]
 			,[strModuleName]
 		)
 		SELECT 
 			 [strTransactionId]
+			,[intTransactionId]
 			,[intAccountId]			
 			,[strAccountId]			= (SELECT [strAccountId] FROM Accounts WHERE [intAccountId] = A.[intAccountId])
 			,[strAccountGroup]		= (SELECT [strAccountGroup] FROM Accounts WHERE [intAccountId] = A.[intAccountId])
@@ -163,6 +155,8 @@ ELSE
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
 			,[strCode]
+			,[strTransactionType]
+			,[strTransactionForm]
 			,[strModuleName]
 		FROM	tblGLDetail A
 		WHERE	strTransactionId = @strTransactionId and ysnIsUnposted = 0

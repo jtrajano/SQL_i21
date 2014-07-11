@@ -35,26 +35,21 @@ CREATE TABLE #ConstructGL
 	,strGLDescription			NVARCHAR(300)
 	,strCode					NVARCHAR(50)	COLLATE Latin1_General_CI_AS NOT NULL
 	,strTransactionId			NVARCHAR(100)
+	,intTransactionId			INT
 	,strReference				NVARCHAR(500)
-	,strJobId					NVARCHAR(100)
 	,intCurrencyId				INT
 	,dblExchangeRate			NUMERIC(18, 6)
 	,dtmDateEntered				DATETIME
 	,dtmTransactionDate			DATETIME
-	,strProductId				NVARCHAR(100)
-	,strWarehouseId				NVARCHAR(100)
-	,strNum						NVARCHAR(200)
-	,strCompanyName				NVARCHAR(300)
-	,strBillInvoiceNumber		NVARCHAR(100)
 	,strJournalLineDescription	NVARCHAR(500)
 	,intJournalLineNo			INT
 	,ysnIsUnposted				BIT
 	,intConcurrencyId			INT
 	,intUserId					INT
 	,intEntityId				INT	
+	,strTransactionType			NVARCHAR(510)
 	,strTransactionForm			NVARCHAR(510)
 	,strModuleName				NVARCHAR(510)
-	,strUOMCode					NVARCHAR(50)
 	
 	,strAccountId				NVARCHAR(100)
 	,strDescription				NVARCHAR(300)
@@ -88,6 +83,7 @@ SET @intCurrencyId		= (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE intCu
 																		ELSE (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'USD') END))
 SET @dblDailyRate		= (SELECT dblDailyRate FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId)
 
+IF @@ERROR <> 0	GOTO Post_Rollback;
 
 --=====================================================================================================================================
 -- 	COMPUTATIONS ON GL
@@ -133,26 +129,21 @@ SELECT
 		,strGLDescription			= 'Closed Fiscal Year'
 		,strCode					= 'CY'
 		,strTransactionId			= CAST(@intYear as NVARCHAR(10)) + '-' + @strRetainedAccount
+		,intTransactionId			= @intFiscalYearId
 		,strReference				= 'Fiscal Year'
-		,strJobId					= NULL
 		,intCurrencyId				= intCurrencyId
 		,dblExchangeRate			= dblExchangeRate		
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= @dtmDateTo
-		,strProductId				= NULL
-		,strWarehouseId				= NULL
-		,strNum						= NULL
-		,strCompanyName				= NULL
-		,strBillInvoiceNumber		= NULL
 		,strJournalLineDescription	= NULL
 		,intJournalLineNo			= 0
 		,ysnIsUnposted				= 0
 		,intConcurrencyId			= 1
 		,intUserId					= 0
 		,intEntityId				= @intEntityId		
+		,strTransactionType			= 'Fiscal Year'
 		,strTransactionForm			= 'Fiscal Year'
 		,strModuleName				= 'General Ledger'
-		,strUOMCode					= NULL		
 		
 		,strAccountId				=	(SELECT TOP 1 strAccountId  FROM tblGLAccount  WHERE intAccountId = tblGLDetail.intAccountId)
 		,strDescription				=	(SELECT TOP 1 strDescription  FROM tblGLAccount  WHERE intAccountId = tblGLDetail.intAccountId)			
@@ -172,6 +163,7 @@ WHERE	C.strAccountType IN ('Revenue','Sales', 'Expense','Cost of Goods Sold')
 					WHERE dblTotal = 0)
 GROUP BY tblGLDetail.intAccountId, C.strAccountType, tblGLDetail.intCurrencyId, tblGLDetail.dblExchangeRate
 
+IF @@ERROR <> 0	GOTO Post_Rollback;
 
 --=====================================================================================================================================
 -- 	RETAINED EARNINGS for new Fiscal Year
@@ -235,26 +227,21 @@ SELECT
 		,strGLDescription		= 'Retained Earnings'
 		,strCode				= 'RE'
 		,strTransactionId		= CAST(@intYear as NVARCHAR(10)) + '-' + @strRetainedAccount
+		,intTransactionId		= @intFiscalYearId
 		,strReference			= 'Fiscal Year'
-		,strJobId				= NULL
 		,intCurrencyId			= @intCurrencyId
 		,dblExchangeRate		= @dblDailyRate		
 		,dtmDateEntered			= GETDATE()
 		,dtmTransactionDate		= @dtmDateTo
-		,strProductId			= NULL
-		,strWarehouseId			= NULL
-		,strNum					= NULL
-		,strCompanyName			= NULL
-		,strBillInvoiceNumber	= NULL
 		,strJournalLineDescription	= NULL
 		,intJournalLineNo		= 0
 		,ysnIsUnposted			= 0
 		,intConcurrencyId		= 1
 		,intUserId				= 0
 		,intEntityId			= @intEntityId		
+		,strTransactionType		= 'Fiscal Year'
 		,strTransactionForm		= 'Fiscal Year'
 		,strModuleName			= 'General Ledger'
-		,strUOMCode				= NULL		
 		
 		,strAccountId			= @strRetainedAccount
 		,strDescription			= (SELECT TOP 1 strDescription FROM tblGLAccount where strAccountId = @strRetainedAccount )
@@ -263,11 +250,36 @@ SELECT
 IF @ysnPost = 1 and @ysnRecap = 0
 BEGIN
 	-- +++++ INSERT TO GL TABLE +++++ --	
-	INSERT INTO tblGLDetail
+	INSERT INTO tblGLDetail( 
+			dtmDate
+			,strBatchId
+			,intAccountId
+			,dblDebit
+			,dblCredit
+			,dblDebitUnit
+			,dblCreditUnit
+			,strDescription
+			,strCode
+			,strTransactionId
+			,intTransactionId
+			,strReference
+			,intCurrencyId
+			,dblExchangeRate
+			,dtmDateEntered
+			,dtmTransactionDate
+			,strJournalLineDescription
+			,intJournalLineNo
+			,ysnIsUnposted
+			,intConcurrencyId
+			,intUserId
+			,intEntityId
+			,strTransactionType
+			,strTransactionForm
+			,strModuleName
+	)
 	SELECT   dtmDate
 			,strBatchId
 			,intAccountId
-			,strAccountGroup
 			,dblDebit
 			,dblCredit
 			,dblDebitUnit
@@ -275,27 +287,24 @@ BEGIN
 			,strGLDescription as strDescription
 			,strCode
 			,strTransactionId
+			,intTransactionId
 			,strReference
-			,strJobId
 			,intCurrencyId
 			,dblExchangeRate
 			,dtmDateEntered
-			,dtmTransactionDate
-			,strProductId
-			,strWarehouseId
-			,strNum
-			,strCompanyName
-			,strBillInvoiceNumber
+			,dtmTransactionDate			
 			,strJournalLineDescription
 			,intJournalLineNo
 			,ysnIsUnposted
 			,intConcurrencyId
 			,intUserId
 			,intEntityId			
+			,strTransactionType
 			,strTransactionForm
 			,strModuleName
-			,strUOMCode
 	FROM #ConstructGL
+	
+	IF @@ERROR <> 0	GOTO Post_Rollback;
 	
 	UPDATE tblGLFiscalYear SET ysnStatus = 0 WHERE intFiscalYearId = @intFiscalYearId	
 	UPDATE tblGLFiscalYearPeriod SET ysnOpen = 0 where intFiscalYearId = @intFiscalYearId
@@ -304,11 +313,10 @@ BEGIN
 END	
 ELSE IF @ysnPost = 0 and @ysnRecap = 0
 BEGIN
-	INSERT INTO tblGLDetail (
+	INSERT INTO tblGLDetail ( 
 			dtmDate
 			,strBatchId
 			,intAccountId
-			,strAccountGroup
 			,dblDebit
 			,dblCredit
 			,dblDebitUnit
@@ -316,31 +324,25 @@ BEGIN
 			,strDescription
 			,strCode
 			,strTransactionId
+			,intTransactionId
 			,strReference
-			,strJobId
 			,intCurrencyId
 			,dblExchangeRate
 			,dtmDateEntered
 			,dtmTransactionDate
-			,strProductId
-			,strWarehouseId
-			,strNum
-			,strCompanyName
-			,strBillInvoiceNumber
 			,strJournalLineDescription
 			,intJournalLineNo
 			,ysnIsUnposted
 			,intConcurrencyId
 			,intUserId
 			,intEntityId
+			,strTransactionType
 			,strTransactionForm
 			,strModuleName
-			,strUOMCode
 	)
 	SELECT   dtmDate
 			,@strBatchId
 			,intAccountId
-			,strAccountGroup
 			,dblCredit
 			,dblDebit			
 			,dblCreditUnit
@@ -350,26 +352,21 @@ BEGIN
 								   END
 			,strCode
 			,strTransactionId
+			,intTransactionId
 			,strReference
-			,strJobId
 			,intCurrencyId
 			,dblExchangeRate
 			,GETDATE() as dtmDateEntered
 			,dtmTransactionDate
-			,strProductId
-			,strWarehouseId
-			,strNum
-			,strCompanyName
-			,strBillInvoiceNumber
 			,strJournalLineDescription
 			,intJournalLineNo
 			,1 as ysnIsUnposted
 			,intConcurrencyId
 			,intUserId
 			,intEntityId			
+			,strTransactionType
 			,strTransactionForm
 			,strModuleName
-			,strUOMCode
 	FROM tblGLDetail
 	WHERE strTransactionId = CAST(@intYear as NVARCHAR(10)) + '-' + @strRetainedAccount and ysnIsUnposted = 0
 	
@@ -413,8 +410,9 @@ BEGIN
 		,[dtmDateEntered]
 		,[strBatchId]
 		,[strCode]
-		,[strModuleName]
+		,[strTransactionType]
 		,[strTransactionForm]
+		,[strModuleName]
 	)
 	SELECT 
 		 @strBatchId
@@ -438,8 +436,9 @@ BEGIN
 		,dtmDateEntered
 		,@strBatchId
 		,strCode
-		,strModuleName
+		,strTransactionType
 		,strTransactionForm
+		,strModuleName		
 	FROM #ConstructGL
 
 	IF @@ERROR <> 0	GOTO Post_Rollback;
@@ -544,11 +543,11 @@ GO
 ---------------------------------------------------------------------------------------------------------------------------------------
 --DECLARE @intCount AS INT
 
---EXEC [dbo].[usp_PostFiscalYear]
---			@intFiscalYearId	 = 3,
+--EXEC [dbo].[uspGLPostFiscalYear]
+--			@intFiscalYearId	 = 10,
 --			@ysnPost = 1,
 --			@ysnRecap = 1,								-- WHEN SET TO 1, THEN IT WILL POPULATE tblGLPostRecap THAT CAN BE VIEWED VIA BUFFERED STORE IN SENCHA
---			@strBatchId = 'BATCH-2013',							-- COMMA DELIMITED JOURNAL Id TO POST 
+--			@strBatchId = 'BATCH-2011',							-- COMMA DELIMITED JOURNAL Id TO POST 
 --			@intEntityId = 1,							-- USER Id THAT INITIATES POSTING
 --			@successfulCount = @intCount OUTPUT		-- OUTPUT PARAMETER THAT RETURNS TOTAL NUMBER OF SUCCESSFUL RECORDS
 				
