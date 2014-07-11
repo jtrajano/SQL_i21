@@ -29,38 +29,77 @@ WHERE intReportId = @intReportId
 DELETE FROM tblRMSubreportSetting
 WHERE intReportId = @intReportId
 
+DECLARE @intSubreportSettingId AS INT 
+
 INSERT INTO tblRMSubreportSetting (
 	intReportId,
-	intSubreportId,
 	strControlName,
-	intType,
-	strParentField,
-	strParentDataType,
-	strChildField,
-	strChildDataType,
+	intSubreportId,
 	intConcurrencyId
 )
 SELECT 
 	intReportId = @intReportId
-	,intSubreportId = @intSubreportId
 	,strControlName = 'VoucherCheckMiddleAP1'
-	,intType = 0
-	,strParentField = 'intTransactionId'
-	,strParentDataType = 'Integer'
-	,strChildField = 'intTransactionId'
-	,strChildDataType = 'Integer'
+	,intSubreportId = @intSubreportId
 	,intConcurrencyId = 1
-UNION ALL 
+
+SELECT @intSubreportSettingId = SCOPE_IDENTITY()
+
+IF (@intSubreportSettingId IS NOT NULL) 
+BEGIN 
+	INSERT INTO tblRMSubreportFilter (
+		intSubreportSettingId
+		,intType
+		,strParentField
+		,strParentDataType
+		,strChildField
+		,strChildDataType
+		,intConcurrencyId
+	)
+	SELECT 
+		intSubreportSettingId = @intSubreportSettingId
+		,intType = 0
+		,strParentField = 'intTransactionId'
+		,strParentDataType = 'Integer'
+		,strChildField = 'intTransactionId'
+		,strChildDataType = 'Integer'
+		,intConcurrencyId = 1
+END 
+
+INSERT INTO tblRMSubreportSetting (
+	intReportId,
+	strControlName,
+	intSubreportId,
+	intConcurrencyId
+)
 SELECT 
 	intReportId = @intReportId
-	,intSubreportId = @intSubreportId
 	,strControlName = 'VoucherCheckMiddleAP2'
-	,intType = 0
-	,strParentField = 'intTransactionId'
-	,strParentDataType = 'Integer'
-	,strChildField = 'intTransactionId'
-	,strChildDataType = 'Integer'
+	,intSubreportId = @intSubreportId
 	,intConcurrencyId = 1
+
+SELECT @intSubreportSettingId = SCOPE_IDENTITY()
+
+IF (@intSubreportSettingId IS NOT NULL) 
+BEGIN 
+	INSERT INTO tblRMSubreportFilter (
+		intSubreportSettingId
+		,intType
+		,strParentField
+		,strParentDataType
+		,strChildField
+		,strChildDataType
+		,intConcurrencyId
+	)
+	SELECT 
+		intSubreportSettingId = @intSubreportSettingId
+		,intType = 0
+		,strParentField = 'intTransactionId'
+		,strParentDataType = 'Integer'
+		,strChildField = 'intTransactionId'
+		,strChildDataType = 'Integer'
+		,intConcurrencyId = 1
+END 
 	
 DELETE FROM tblRMCriteriaField
 WHERE intReportId = @intReportId
