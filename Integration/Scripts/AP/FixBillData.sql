@@ -41,7 +41,8 @@ BEGIN
 
 		UPDATE tblAPBill
 		SET strBillId = @billId,
-		dblTotal = CASE WHEN @type = 'C' THEN dblTotal * -1 ELSE dblTotal END
+		dblTotal = CASE WHEN @type = 'C' THEN dblTotal * -1 ELSE dblTotal END,
+		dblAmountDue = CASE WHEN @type = 'C' THEN dblAmountDue * -1 ELSE dblAmountDue END
 		WHERE intBillId = @id
 
 		DELETE FROM @tmpBillIds
