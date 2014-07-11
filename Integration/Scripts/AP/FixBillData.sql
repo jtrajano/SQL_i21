@@ -71,7 +71,7 @@ BEGIN
 			ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = B.aptrx_ivc_no COLLATE Latin1_General_CI_AS
 	WHERE B.aptrx_trans_type NOT IN ('I','C')
 
-	--Update transaction type and withheld amount
+	--Update transaction type and withheld amount and ysnPaid, date paid, ysnPaid, amount due
 	UPDATE tblAPBill
 	SET intTransactionType = CASE WHEN B.aptrx_trans_type = 'I' THEN 1 ELSE 3 END
 	,dblWithheld = B.aptrx_wthhld_amt
@@ -82,6 +82,9 @@ BEGIN
 	UPDATE tblAPBill
 	SET intTransactionType = CASE WHEN B.apivc_trans_type = 'I' THEN 1 ELSE 3 END
 	,dblWithheld = B.apivc_wthhld_amt
+	,ysnPaid = CASE WHEN apivc_status_ind = 'P' THEN 1 ELSE 0 END
+	,dblAmountDue = CASE WHEN apivc_status_ind = 'P' THEN 0 ELSE dblAmountDue END
+	,dtmDatePaid = CASE WHEN apivc_status_ind = 'P' THEN CONVERT(DATE, CAST(apivc_chk_rev_dt AS CHAR(12)), 112) ELSE NULL END
 	FROM tblAPBill A
 		INNER JOIN apivcmst B
 			ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = B.apivc_ivc_no COLLATE Latin1_General_CI_AS
