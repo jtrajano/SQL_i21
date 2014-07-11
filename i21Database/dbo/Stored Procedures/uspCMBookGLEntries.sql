@@ -111,72 +111,61 @@ SET	dblDebit	= CASE	WHEN dblCredit < 0 THEN ABS(dblCredit)
 --------------------------------------------------------------------------------------------------------------------------------------
 
 -- TODO: Account Allocation
--- TODO: Update the summary tables. 
 
 -- Add the G/L entries from the temporary table to the permanent table (tblGLDetail)
 INSERT INTO tblGLDetail (
-		strBatchId
-		,dtmDate	
-		,intAccountId
-		,strAccountGroup
-		,dblDebit
-		,dblCredit
-		,dblDebitUnit
-		,dblCreditUnit
-		,strDescription
-		,strCode
-		,strTransactionId
-		,strReference
-		,strJobId
-		,intCurrencyId
-		,dblExchangeRate
-		,dtmDateEntered
-		,dtmTransactionDate
-		,strProductId
-		,strWarehouseId
-		,strNum
-		,strCompanyName
-		,strBillInvoiceNumber
-		,strJournalLineDescription
-		,ysnIsUnposted
-		,intUserId
-		,strTransactionForm
-		,strModuleName
-		,strUOMCode
-		,intConcurrencyId
-		,intEntityId
+		[dtmDate]
+		,[strBatchId]
+		,[intAccountId]
+		,[dblDebit]
+		,[dblCredit]
+		,[dblDebitUnit]
+		,[dblCreditUnit]
+		,[strDescription]
+		,[strCode]
+		,[strReference]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,[dtmDateEntered]
+		,[dtmTransactionDate]
+		,[strJournalLineDescription]
+		,[intJournalLineNo]
+		,[ysnIsUnposted]
+		,[intUserId]
+		,[intEntityId]
+		,[strTransactionId]
+		,[intTransactionId]
+		,[strTransactionType]
+		,[strTransactionForm]
+		,[strModuleName]
+		,[intConcurrencyId]
 )
 SELECT 
-		strBatchId
-		,dtmDate	
-		,intAccountId
-		,strAccountGroup
-		,dblDebit
-		,dblCredit
-		,dblDebitUnit
-		,dblCreditUnit
-		,strDescription
-		,strCode
-		,strTransactionId
-		,strReference
-		,strJobId
-		,intCurrencyId
-		,dblExchangeRate
-		,dtmDateEntered
-		,dtmTransactionDate
-		,strProductId
-		,strWarehouseId
-		,strNum
-		,strCompanyName
-		,strBillInvoiceNumber
-		,strJournalLineDescription
-		,ysnIsUnposted
-		,intUserId
-		,strTransactionForm
-		,strModuleName
-		,strUOMCode
-		,intConcurrencyId
-		,intEntityId
+		[dtmDate]
+		,[strBatchId]
+		,[intAccountId]
+		,[dblDebit]
+		,[dblCredit]
+		,[dblDebitUnit]
+		,[dblCreditUnit]
+		,[strDescription]
+		,[strCode]
+		,[strReference]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,[dtmDateEntered]
+		,[dtmTransactionDate]
+		,[strJournalLineDescription]
+		,[intJournalLineNo]
+		,[ysnIsUnposted]
+		,[intUserId]
+		,[intEntityId]
+		,[strTransactionId]
+		,[intTransactionId]
+		,[strTransactionType]
+		,[strTransactionForm]
+		,[strModuleName]
+		,[intConcurrencyId]
 FROM	#tmpGLDetail
 WHERE	@ysnRecap = 0
 

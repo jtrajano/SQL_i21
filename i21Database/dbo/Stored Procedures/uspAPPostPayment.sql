@@ -49,6 +49,8 @@ DECLARE @DiscountAccount INT = (SELECT intDiscountAccountId FROM tblAPPreference
 DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
 DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
+DECLARE @SCREEN_NAME NVARCHAR(25) = 'Payable'
+DECLARE @TRAN_TYPE NVARCHAR(25) = 'Payable'
 SET @recapId = '1'
 
 --SET BatchId
@@ -262,7 +264,8 @@ BEGIN
 			FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
 		)
 		INSERT INTO tblGLDetail (
-			[strTransactionId], 
+			[intTransactionId], 
+			[strTransactionId],
 			[intAccountId],
 			[strDescription],
 			[strReference],
@@ -276,15 +279,18 @@ BEGIN
 			[intConcurrencyId],
 			[dblExchangeRate],
 			[intUserId],
+			[intEntityId],
 			[dtmDateEntered],
 			[strBatchId],
 			[strCode],
 			[strModuleName],
-			[strTransactionForm]
+			[strTransactionForm],
+			[strTransactionType]
 		)
 		--CREDIT
 		SELECT
-			 [strPaymentRecordNum]
+			 [intPaymentId]
+			,[strPaymentRecordNum]
 			,A.intAccountId--(SELECT intAccountId FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
 			,GLAccnt.strDescription --(SELECT strDescription FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
 			,C.[strVendorId]
@@ -298,11 +304,13 @@ BEGIN
 			,1
 			,[dblExchangeRate]		= 1
 			,[intUserId]			= @userId
+			,[intEntityId]			= @userId
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @batchId
 			,[strCode]				= 'AP'
 			,[strModuleName]		= @MODULE_NAME
-			,A.intPaymentId
+			,[strTransactionForm]	= @SCREEN_NAME
+			,[strTransactionType]	= @TRAN_TYPE
 		FROM	[dbo].tblAPPayment A 
 		--INNER JOIN tblAPPaymentDetail B
 		--	ON	A.intPaymentId = B.intPaymentId
@@ -322,7 +330,8 @@ BEGIN
 		--Withheld
 		UNION
 		SELECT
-			 [strPaymentRecordNum]
+			 [intPaymentId]
+			,[strPaymentRecordNum]
 			,@WithholdAccount
 			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = @WithholdAccount)
 			,B.[strVendorId]
@@ -336,11 +345,13 @@ BEGIN
 			,1
 			,[dblExchangeRate]		= 1
 			,[intUserId]			= @userId
+			,[intEntityId]			= @userId
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @batchId
 			,[strCode]				= 'AP'
 			,[strModuleName]		= @MODULE_NAME
-			,A.intPaymentId
+			,[strTransactionForm]	= @SCREEN_NAME
+			,[strTransactionType]	= @TRAN_TYPE
 		FROM	[dbo].tblAPPayment A INNER JOIN [dbo].tblGLAccount GLAccnt
 					ON A.intBankAccountId = GLAccnt.intAccountId
 				INNER JOIN tblAPVendor B
@@ -350,7 +361,8 @@ BEGIN
 		--Discount
 		UNION
 		SELECT
-			 [strPaymentRecordNum]
+			 A.[intPaymentId]
+			,[strPaymentRecordNum]
 			,@DiscountAccount
 			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = @DiscountAccount)
 			,C.[strVendorId]
@@ -364,11 +376,13 @@ BEGIN
 			,1
 			,[dblExchangeRate]		= 1
 			,[intUserId]			= @userId
+			,[intEntityId]			= @userId
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @batchId
 			,[strCode]				= 'AP'
 			,[strModuleName]		= @MODULE_NAME
-			,A.intPaymentId
+			,[strTransactionForm]	= @SCREEN_NAME
+			,[strTransactionType]	= @TRAN_TYPE
 		FROM	[dbo].tblAPPayment A 
 				INNER JOIN tblAPPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
@@ -384,7 +398,8 @@ BEGIN
 		
 		---- DEBIT SIDE
 		UNION ALL 
-		SELECT	[strPaymentRecordNum]
+		SELECT	A.[intPaymentId]
+				,[strPaymentRecordNum]
 				,B.[intAccountId]
 				,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = B.[intAccountId])
 				,D.[strVendorId]
@@ -409,11 +424,13 @@ BEGIN
 				,1
 				,[dblExchangeRate]		= 1
 				,[intUserId]			= @userId
+				,[intEntityId]			= @userId
 				,[dtmDateEntered]		= GETDATE()
 				,[strBatchId]			= @batchId
 				,[strCode]				= 'AP'
 				,[strModuleName]		= @MODULE_NAME
-				,A.intPaymentId
+				,[strTransactionForm]	= @SCREEN_NAME
+				,[strTransactionType]	= @TRAN_TYPE
 		FROM	[dbo].tblAPPayment A 
 				INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 				--INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
@@ -569,7 +586,7 @@ BEGIN
 			[dblAmount] = A.dblAmountPaid,
 			[strAmountInWords] = dbo.fnConvertNumberToWord(A.dblAmountPaid),
 			[strMemo] = '',
-			[strReferenceNo] = '',
+			[strReferenceNo] = CASE WHEN (SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId) = 'Cash' THEN 'Cash' ELSE '' END,
 			[ysnCheckToBePrinted] = 0,
 			[ysnCheckVoid] = 0,
 			[ysnPosted] = 1,
@@ -640,6 +657,7 @@ ELSE
 			,[strCode]
 			,[strModuleName]
 			,[strTransactionForm]
+			,[strTransactionType]
 		)
 		--CREDIT SIDE
 		SELECT
@@ -666,7 +684,8 @@ ELSE
 			,[strBatchId]			= @batchId
 			,[strCode]				= 'AP'
 			,[strModuleName]		= @MODULE_NAME
-			,A.intPaymentId
+			,[strTransactionForm]	= @SCREEN_NAME
+			,[strTransactionType]	= @TRAN_TYPE
 		FROM	[dbo].tblAPPayment A 
 		--INNER JOIN tblAPPaymentDetail B
 		--	ON A.intPaymentId = B.intPaymentId
@@ -705,7 +724,8 @@ ELSE
 			,[strBatchId]			= @batchId
 			,[strCode]				= 'AP'
 			,[strModuleName]		= @MODULE_NAME
-			,A.intPaymentId
+			,[strTransactionForm]	= @SCREEN_NAME
+			,[strTransactionType]	= @TRAN_TYPE
 		FROM	[dbo].tblAPPayment A 
 				INNER JOIN tblAPVendor B
 					ON A.intVendorId = B.intEntityId AND B.ysnWithholding = 1
@@ -732,7 +752,8 @@ ELSE
 			,[strBatchId]			= @batchId
 			,[strCode]				= 'AP'
 			,[strModuleName]		= @MODULE_NAME
-			,A.intPaymentId
+			,[strTransactionForm]	= @SCREEN_NAME
+			,[strTransactionType]	= @TRAN_TYPE
 		FROM	[dbo].tblAPPayment A 
 				INNER JOIN tblAPPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
@@ -780,7 +801,8 @@ ELSE
 				,[strBatchId]			= @batchId
 				,[strCode]				= 'AP'
 				,[strModuleName]		= @MODULE_NAME
-				,A.intPaymentId
+				,[strTransactionForm]	= @SCREEN_NAME
+				,[strTransactionType]	= @TRAN_TYPE
 		FROM	[dbo].tblAPPayment A 
 				INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblAPBill C ON B.intBillId = C.intBillId

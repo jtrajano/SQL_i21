@@ -50,7 +50,6 @@ INSERT INTO #tmpGLDetail (
 		,[dtmDate]
 		,[strBatchId]
 		,[intAccountId]
-		,[strAccountGroup]
 		,[dblDebit]
 		,[dblCredit]
 		,[dblDebitUnit]
@@ -58,54 +57,42 @@ INSERT INTO #tmpGLDetail (
 		,[strDescription]
 		,[strCode]
 		,[strReference]
-		,[strJobId]
 		,[intCurrencyId]
 		,[dblExchangeRate]
 		,[dtmDateEntered]
 		,[dtmTransactionDate]
-		,[strProductId]
-		,[strWarehouseId]
-		,[strNum]
-		,[strCompanyName]
-		,[strBillInvoiceNumber]
 		,[strJournalLineDescription]
 		,[ysnIsUnposted]
 		,[intConcurrencyId]
 		,[intUserId]
+		,[strTransactionType]
 		,[strTransactionForm]
 		,[strModuleName]
-		,[strUOMCode]
 		,[intEntityId]
 )
 SELECT	[strTransactionId]
-		,dtmDate			= ISNULL(@dtmDateReverse, [dtmDate]) -- If date is provided, use date reverse as the date for unposting the transaction.
+		-- If date is provided, use date reverse as the date for unposting the transaction.
+		,dtmDate = ISNULL(@dtmDateReverse, [dtmDate]) 
 		,[strBatchId]
 		,[intAccountId]
-		,[strAccountGroup]
-		,[dblDebit]			= [dblCredit]		-- (Debit -> Credit)
-		,[dblCredit]		= [dblDebit]		-- (Debit <- Credit)
-		,[dblDebitUnit]		= [dblCreditUnit]	-- (Debit Unit -> Credit Unit)
-		,[dblCreditUnit]	= [dblDebitUnit]	-- (Debit Unit <- Credit Unit)
+		,[dblDebit] = [dblCredit]		-- (Debit -> Credit)
+		,[dblCredit] = [dblDebit]		-- (Debit <- Credit)
+		,[dblDebitUnit] = [dblCreditUnit]	-- (Debit Unit -> Credit Unit)
+		,[dblCreditUnit] = [dblDebitUnit]	-- (Debit Unit <- Credit Unit)
 		,[strDescription]
 		,[strCode]
 		,[strReference]
-		,[strJobId]
 		,[intCurrencyId]
 		,[dblExchangeRate]
-		,dtmDateEntered		= GETDATE()
+		,dtmDateEntered = GETDATE()
 		,[dtmTransactionDate]
-		,[strProductId]
-		,[strWarehouseId]
-		,[strNum]
-		,[strCompanyName]
-		,[strBillInvoiceNumber]
 		,[strJournalLineDescription]
-		,ysnIsUnposted		= 1
+		,ysnIsUnposted = 1
 		,[intConcurrencyId]
-		,[intUserId]		= @intUserId
+		,intUserId = @intUserId
+		,[strTransactionType]
 		,[strTransactionForm]
 		,[strModuleName]
-		,[strUOMCode]
 		,[intEntityId]
 FROM	tblGLDetail 
 WHERE	strBatchId = @strBatchId
