@@ -253,7 +253,6 @@ BEGIN
 			,[dtmDate]
 			,[strBatchId]
 			,[intAccountId]
-			,[strAccountGroup]
 			,[dblDebit]
 			,[dblCredit]
 			,[dblDebitUnit]
@@ -261,23 +260,16 @@ BEGIN
 			,[strDescription]
 			,[strCode]
 			,[strReference]
-			,[strJobId]
 			,[intCurrencyId]
 			,[dblExchangeRate]
 			,[dtmDateEntered]
 			,[dtmTransactionDate]
-			,[strProductId]
-			,[strWarehouseId]
-			,[strNum]
-			,[strCompanyName]
-			,[strBillInvoiceNumber]
 			,[strJournalLineDescription]
 			,[ysnIsUnposted]
 			,[intConcurrencyId]
 			,[intUserId]
 			,[strTransactionForm]
 			,[strModuleName]
-			,[strUOMCode]
 			,[intEntityId]
 	)
 	SELECT	[strTransactionId]		= @strTransactionId
@@ -285,7 +277,6 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= BankAccnt.intGLAccountId
-			,[strAccountGroup]		= GLAccntGrp.strAccountGroup
 			,[dblDebit]				= @dblAmountDetailTotal
 			,[dblCredit]			= 0
 			,[dblDebitUnit]			= 0
@@ -293,23 +284,16 @@ BEGIN
 			,[strDescription]		= GLAccnt.strDescription
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= NULL
-			,[strJobId]				= NULL
 			,[intCurrencyId]		= A.intCurrencyId
 			,[dblExchangeRate]		= 1
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
-			,[strProductId]			= NULL
-			,[strWarehouseId]		= NULL
-			,[strNum]				= A.strReferenceNo
-			,[strCompanyName]		= NULL
-			,[strBillInvoiceNumber] = NULL 
 			,[strJournalLineDescription] = NULL 
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId
 			,[strTransactionForm]	= @TRANSACTION_FORM
 			,[strModuleName]		= @MODULE_NAME
-			,[strUOMCode]			= NULL
 			,[intEntityId]			= A.intEntityId
 	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankAccount BankAccnt
 				ON A.intBankAccountId = BankAccnt.intBankAccountId
@@ -326,7 +310,6 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= B.intGLAccountId
-			,[strAccountGroup]		= GLAccntGrp.strAccountGroup
 			,[dblDebit]				= B.dblDebit
 			,[dblCredit]			= B.dblCredit
 			,[dblDebitUnit]			= 0
@@ -334,23 +317,16 @@ BEGIN
 			,[strDescription]		= B.strDescription
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= NULL
-			,[strJobId]				= NULL
 			,[intCurrencyId]		= A.intCurrencyId
 			,[dblExchangeRate]		= 1
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
-			,[strProductId]			= NULL
-			,[strWarehouseId]		= NULL
-			,[strNum]				= A.strReferenceNo
-			,[strCompanyName]		= NULL
-			,[strBillInvoiceNumber] = NULL 
 			,[strJournalLineDescription] = NULL 
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId
 			,[strTransactionForm]	= @TRANSACTION_FORM
 			,[strModuleName]		= @MODULE_NAME
-			,[strUOMCode]			= NULL
 			,[intEntityId]			= A.intEntityId
 	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankTransactionDetail B
 				ON A.intTransactionId = B.intTransactionId
