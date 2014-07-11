@@ -60,12 +60,12 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\FRD\FRDEntryDataFix.sql
 
 -- Cash Management
-:r .\CM\BankTransactionTypes.sql
-:r .\CM\DataImportStatus.sql
-:r .\CM\PopulateSourceSystemData.sql
+:r .\CM\1_BankTransactionTypes.sql
+:r .\CM\2_DataImportStatus.sql
+:r .\CM\3_PopulateSourceSystemData.sql
 
 -- Note: remove patch (:r .\CM\Patch\CheckVoucherMiddle.sql) when CM-311 is resolved. 
-:r .\CM\Patch\CheckVoucherMiddle.sql
+:r .\CM\Patch\1_CheckVoucherMiddle.sql
 
 --Accounts Receivable
 :r .\AR\EntityTableDataFix.sql

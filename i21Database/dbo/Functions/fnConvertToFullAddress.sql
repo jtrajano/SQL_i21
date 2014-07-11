@@ -70,3 +70,4 @@ RETURN	ISNULL(@strFixAddress, '')
 		+ CASE WHEN ISNULL(@strZipCode, '') <> '' THEN @SPACE ELSE '' END 
 		+ ISNULL(@strZipCode, '')
 END
+

@@ -131,6 +131,8 @@
     <Folder Include="Scripts\Post-Deployment\CM\Patch" />
     <Folder Include="Scripts\Post-Deployment\FRD" />
     <Folder Include="Scripts\Post-Deployment\AP" />
+    <Folder Include="Scripts\Post-Deployment\FIN\" />
+    <Folder Include="Scripts\Post-Deployment\FIN\DefaultData\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -370,7 +372,8 @@
     <Build Include="dbo\User Defined Types\RecapTableType.sql" />
     <None Include="Script.PreDeployment1.sql" />
     <None Include="Script.PostDeployment1.sql" />
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountGroup.sql" />
+    <None Include="Scripts\Post-Deployment\FIN\DefaultData\AccountGroup.sql" />
+    <None Include="Scripts\Post-Deployment\Optional Run\1_SM\1_ZipCodeData.sql" />
     <None Include="Scripts\Post-Deployment\Reports\1_ReportDisableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Reports\2_ReportDeleteOldData.sql" />
     <None Include="Scripts\Post-Deployment\Reports\3_ReportEnableConstraints.sql" />
@@ -527,8 +530,8 @@
     <None Include="Scripts\Post-Deployment\TM\DefaultData\10_RegulatorType.sql" />
     <Build Include="dbo\Views\vyuHDCustomerContact.sql" />
     <Build Include="dbo\Stored Procedures\uspAPFixStartingNumbers.sql" />
-    <None Include="Scripts\Post-Deployment\CM\BankTransactionTypes.sql" />
-    <None Include="Scripts\Post-Deployment\CM\DataImportStatus.sql" />
+    <None Include="Scripts\Post-Deployment\CM\1_BankTransactionTypes.sql" />
+    <None Include="Scripts\Post-Deployment\CM\2_DataImportStatus.sql" />
     <None Include="Scripts\Post-Deployment\VersionUpdate.sql" />
     <PostDeploy Include="Scripts\Post-Deployment\PostDeployment.sql" />
     <Build Include="dbo\Functions\fnIsDepositEntry.sql" />
@@ -561,13 +564,13 @@
     <Build Include="dbo\Tables\tblARPaymentDetail.sql" />
     <Build Include="dbo\Tables\tblARPayment.sql" />
     <Build Include="dbo\Tables\tblARInvoiceDetail.sql" />
-    <None Include="Scripts\Post-Deployment\CM\Patch\CheckVoucherMiddle.sql" />
+    <None Include="Scripts\Post-Deployment\CM\Patch\1_CheckVoucherMiddle.sql" />
     <Build Include="dbo\Functions\fnConvertToFullAddress.sql" />
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleAPSubReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleAPReport.sql" />
     <Build Include="dbo\Functions\fnLastIndex.sql" />
     <Build Include="dbo\Functions\fnTrim.sql" />
-    <Build Include="dbo\Views\vyuExportHoursWork.sql" />
+    <Build Include="dbo\Views\vyuHDExportHoursWork.sql" />
     <Build Include="dbo\Tables\tblARPostResult.sql" />
     <Build Include="dbo\Stored Procedures\uspARPostPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspARFixStartingNumbers.sql" />
@@ -575,6 +578,7 @@
     <Build Include="dbo\Tables\cstARCustomer.sql" />
     <Build Include="dbo\Tables\cstAPVendor.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\10_Screen.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleAPOverflow.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
@@ -590,7 +594,7 @@
     <None Include="Scripts\Post-Deployment\TM\DefaultData\1_PreferenceCompany.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\2_EventType.sql" />
     <None Include="i1420AG.local.publish.xml" />
-    <None Include="Scripts\Post-Deployment\CM\PopulateSourceSystemData.sql" />
+    <None Include="Scripts\Post-Deployment\CM\3_PopulateSourceSystemData.sql" />
     <Build Include="dbo\Views\vyuCPContactMenu.sql" />
     <Build Include="dbo\Views\vyuARCustomerContacts.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\1_CustomerPortalMenu.sql" />

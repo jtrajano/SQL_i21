@@ -1,4 +1,4 @@
-﻿--Fix Bill for the issue of wrong strBillId, new fields and new features (14.2 - 14.3)
+--Fix Bill for the issue of wrong strBillId, new fields and new features (14.2 - 14.3)
 IF EXISTS(SELECT 1 FROM tblAPBill WHERE LEFT(strBillId,3) <> 'BL-')
 BEGIN
 
