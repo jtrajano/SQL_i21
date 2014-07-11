@@ -55,6 +55,8 @@ DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
 DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
+DECLARE @SCREEN_NAME NVARCHAR(25) = 'Bill'
+
 SET @recapId = '1'
 --=====================================================================================================================================
 -- 	POPULATE JOURNALS TO POST TEMPORARY TABLE
@@ -279,7 +281,7 @@ IF ISNULL(@recap, 0) = 0
 			FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
 		)
 		INSERT INTO tblGLDetail (
-			[strTransactionId], 
+			[intTransactionId], 
 			[intAccountId],
 			[strDescription],
 			[strReference],
@@ -293,15 +295,17 @@ IF ISNULL(@recap, 0) = 0
 			[intConcurrencyId],
 			[dblExchangeRate],
 			[intUserId],
+			[intEntityId],
 			[dtmDateEntered],
 			[strBatchId],
 			[strCode],
 			[strModuleName],
-			[strTransactionForm]
+			[strTransactionForm],
+			[strTransactionType]
 		)
 		--CREDIT
 		SELECT	
-			[strTransactionId] = A.strBillId, 
+			[intTransactionId] = A.intBillId, 
 			[intAccountId] = A.intAccountId,
 			[strDescription] = A.strDescription,
 			[strReference] = C.strVendorId,
@@ -314,12 +318,17 @@ IF ISNULL(@recap, 0) = 0
 			[ysnIsUnposted] = 0,
 			[intConcurrencyId] = 1,
 			[dblExchangeRate]		= 1,
-			[intUserID]			= @userId,
+			[intUserId]			= @userId,
+			[intEntityId]			= @userId,
 			[dtmDateEntered]		= GETDATE(),
 			[strBatchID]			= @batchId,
 			[strCode]				= 'AP',
 			[strModuleName]		= @MODULE_NAME,
-			[strTransactionForm] = A.intBillId
+			[strTransactionForm] = @SCREEN_NAME,
+			[strTransactionType] = CASE WHEN intTransactionType = 1 THEN 'Bill'
+										WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
+										WHEN intTransactionType = 3 THEN 'Debit Memo'
+									ELSE 'NONE' END
 		FROM	[dbo].tblAPBill A
 				LEFT JOIN tblAPVendor C
 					ON A.intVendorId = C.intEntityId
@@ -328,7 +337,7 @@ IF ISNULL(@recap, 0) = 0
 		--DEBIT
 		UNION ALL 
 		SELECT	
-			[strTransactionId] = A.strBillId, 
+			[intTransactionId] = A.intBillId, 
 			[intAccountId] = B.intAccountId,
 			[strDescription] = A.strDescription,
 			[strReference] = C.strVendorId,
@@ -341,12 +350,17 @@ IF ISNULL(@recap, 0) = 0
 			[ysnIsUnposted] = 0,
 			[intConcurrencyId] = 1,
 			[dblExchangeRate]		= 1,
-			[intUserID]			= @userId,
+			[intUserId]			= @userId,
+			[intEntityId]			= @userId,
 			[dtmDateEntered]		= GETDATE(),
 			[strBatchID]			= @batchId,
 			[strCode]				= 'AP',
 			[strModuleName]		= @MODULE_NAME,
-			[strTransactionForm] = A.intBillId
+			[strTransactionForm] = @SCREEN_NAME,
+			[strTransactionType] = CASE WHEN intTransactionType = 1 THEN 'Bill'
+										WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
+										WHEN intTransactionType = 3 THEN 'Debit Memo'
+									ELSE 'NONE' END
 		FROM	[dbo].tblAPBill A 
 				LEFT JOIN [dbo].tblAPBillDetail B
 					ON A.intBillId = B.intBillId
