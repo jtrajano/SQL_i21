@@ -570,7 +570,7 @@
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleAPReport.sql" />
     <Build Include="dbo\Functions\fnLastIndex.sql" />
     <Build Include="dbo\Functions\fnTrim.sql" />
-    <Build Include="dbo\Views\vyuExportHoursWork.sql" />
+    <Build Include="dbo\Views\vyuHDExportHoursWork.sql" />
     <Build Include="dbo\Tables\tblARPostResult.sql" />
     <Build Include="dbo\Stored Procedures\uspARPostPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspARFixStartingNumbers.sql" />
