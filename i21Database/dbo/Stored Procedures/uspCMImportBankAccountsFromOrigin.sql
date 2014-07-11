@@ -32,6 +32,15 @@ DECLARE @CHECKNO_LEFT INT = 1
 DECLARE @CHECKNO_MIdDLE INT = 2
 DECLARE @CHECKNO_RIGHT INT = 3
 
+-- DEFAULT CURRENCY
+DECLARE @intCurrencyId AS INT
+
+SELECT	TOP 1 
+		@intCurrencyId = intCurrencyID 
+FROM	tblSMCurrency INNER JOIN tblSMPreferences
+			ON tblSMCurrency.intCurrencyID = CAST(tblSMPreferences.strValue AS INT)
+WHERE	tblSMPreferences.strPreference = 'defaultCurrency'
+
 -- Auto-fix the GL Accounts used in Origin. Move it to under the "Cash Accounts" group. 
 UPDATE	tblGLAccount
 SET		intAccountGroupId = (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = 'Cash Accounts')
@@ -133,7 +142,7 @@ SELECT
 		intBankId							= (SELECT TOP 1 A.intBankId FROM tblCMBank A WHERE A.strBankName = LTRIM(RTRIM(ISNULL(i.apcbk_desc, ''))) COLLATE Latin1_General_CI_AS)   
 		,ysnActive							= CASE WHEN i.apcbk_active_yn = 'Y' THEN 1 ELSE 0 END 
 		,intGLAccountId						= dbo.fnGetGLAccountIdFromOriginToi21(i.apcbk_gl_cash) 
-		,intCurrencyId						= dbo.fnGetCurrencyIdFromOriginToi21(i.apcbk_currency)
+		,intCurrencyId						= ISNULL(dbo.fnGetCurrencyIdFromOriginToi21(i.apcbk_currency), @intCurrencyId)
 		,intBankAccountType					= @DEPOSIT_ACCOUNT
 		,strContact							= ''
 		,strBankAccountNo					= ISNULL(i.apcbk_bank_acct_no, '') COLLATE Latin1_General_CI_AS

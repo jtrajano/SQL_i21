@@ -12,6 +12,7 @@ CREATE PROCEDURE [dbo].[uspCMImportValidations]
 	@Invalid_UserId_Found AS BIT OUTPUT
 	,@Invalid_GL_Account_Id_Found AS BIT OUTPUT
 	,@Invalid_Currency_Id_Found AS BIT OUTPUT
+	,@Missing_Default_Currency AS BIT OUTPUT
 AS
 
 DECLARE @CASH_ACCOUNT AS NVARCHAR(20) = 'Cash Accounts'
@@ -41,14 +42,22 @@ FROM	apcbkmst o INNER JOIN tblGLAccount accnt
 WHERE	grp.strAccountGroup <> @CASH_ACCOUNT
 		OR grp.strAccountType <> @ASSET
 
+-- Check for missing default currency. 
+SELECT	TOP 1
+		@Missing_Default_Currency = 0
+FROM	tblSMCurrency 
+WHERE	intCurrencyID = (SELECT CAST(strValue AS INT) FROM tblSMPreferences WHERE strPreference = 'defaultCurrency')
+
 -- Check for invalid currency id's. It must be defined first before import can be done (ERR). 
 SELECT	TOP 1 
 		@Invalid_Currency_Id_Found = 1  
 FROM	apcbkmst
 WHERE	dbo.fnGetCurrencyIdFromOriginToi21(apcbk_currency) IS NULL
+		AND apcbk_currency IS NOT NULL 
 
 SELECT	@Invalid_UserId_Found = ISNULL(@Invalid_UserId_Found, 0)
 		,@Invalid_GL_Account_Id_Found = ISNULL(@Invalid_GL_Account_Id_Found, 0)
 		,@Invalid_Currency_Id_Found = ISNULL(@Invalid_Currency_Id_Found,0)
+		,@Missing_Default_Currency = ISNULL(@Missing_Default_Currency, 1)
 
 GO

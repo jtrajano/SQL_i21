@@ -52,6 +52,15 @@ DECLARE @BANK_DEPOSIT AS INT = 1
 		-- Declare the local variables. 
 		,@intBankAccountId AS INT	
 
+-- Get the default currency 
+DECLARE @intCurrencyId AS INT
+
+SELECT	TOP 1 
+		@intCurrencyId = intCurrencyID 
+FROM	tblSMCurrency INNER JOIN tblSMPreferences
+			ON tblSMCurrency.intCurrencyID = CAST(tblSMPreferences.strValue AS INT)
+WHERE	tblSMPreferences.strPreference = 'defaultCurrency'
+
 -- Insert the record from the origin system to i21. 
 INSERT INTO tblCMBankTransaction (
 		strTransactionId
@@ -101,8 +110,10 @@ SELECT
 											WHEN i.apchk_chk_amt < 0 THEN @ORIGIN_DEPOSIT
 										END
 		,intBankAccountId			=	f.intBankAccountId
-		,intCurrencyId				=	dbo.fnGetCurrencyIdFromOriginToi21(i.apchk_currency_cnt)
-		,dblExchangeRate			=	ISNULL(i.apchk_currency_rt, 1)
+		,intCurrencyId				=	ISNULL(dbo.fnGetCurrencyIdFromOriginToi21(i.apchk_currency_cnt), @intCurrencyId) 
+		,dblExchangeRate			=	CASE	WHEN i.apchk_currency_rt = 2020202.02020200 THEN 1 
+												ELSE ISNULL(i.apchk_currency_rt, 1)
+										END 
 		,dtmDate					=	ISNULL(dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt), dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt))
 		,strPayee					=	RTRIM(LTRIM(ISNULL(i.apchk_name, ''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_1))) > 0 THEN ', '  ELSE '' END +
 										RTRIM(LTRIM(ISNULL(i.apchk_payee_1, ''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_2))) > 0 THEN ', '  ELSE '' END +

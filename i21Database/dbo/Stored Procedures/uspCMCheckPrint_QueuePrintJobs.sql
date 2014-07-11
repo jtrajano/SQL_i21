@@ -47,6 +47,9 @@ DECLARE -- Constant variables for bank account types:
 		,@CHECK_NUMBER_STATUS_WASTED AS INT = 5
 		,@CHECK_NUMBER_STATUS_FOR_PRINT_VERIFICATION AS INT = 6
 
+		-- Constant variables for payment methods
+		,@CASH_PAYMENT AS NVARCHAR(20) = 'Cash'
+
 		-- Local variables
 		,@strRecordNo AS NVARCHAR(40)
 		,@strNextCheckNumber AS NVARCHAR(20)
@@ -81,6 +84,7 @@ INSERT INTO #tmpPrintJobSpoolTable(
 -- 2. Belongs to the specified transaction id
 -- 3. Belongs to the specified batch id (strLink)
 -- 4. Are posted, not cleared in the bank recon, amount is not zero, and never been printed. 
+-- 5. The bank record for AP Payment is not paid thru a "Cash" payment method. 
 SELECT	intBankAccountId	= F.intBankAccountId
 		,intTransactionId	= F.intTransactionId
 		,strTransactionId	= F.strTransactionId
@@ -102,6 +106,7 @@ WHERE	F.intBankAccountId = @intBankAccountId
 		AND F.dtmCheckPrinted IS NULL
 		AND F.ysnCheckToBePrinted = 1
 		AND F.intBankTransactionTypeId = @intTransactionType
+		AND F.strReferenceNo NOT IN (@CASH_PAYMENT) 
 IF @@ERROR <> 0 GOTO _ROLLBACK		
 
 -- Check if there are transactions to queue a print job
