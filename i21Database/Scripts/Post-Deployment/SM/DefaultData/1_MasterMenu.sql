@@ -499,3 +499,17 @@ GO
 		WHERE strMenuName = 'Receive Payments (Multi Customer)' AND strType = 'Screen' AND strModuleName = 'Accounts Receivable'
 			AND strCommand != 'AccountsReceivable.controller.ReceivePayments'
 GO
+	DECLARE @intModule INT, @intParent INT
+	SELECT @intModule = intMenuID FROM tblSMMasterMenu Main 
+							WHERE strMenuName = 'Cash Management' AND intParentMenuID = 0
+
+	IF NOT EXISTS(SELECT * FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strType = 'Folder' AND strModuleName = 'Cash Management')
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Reports', N'Cash Management', @intModule, N'Reports', N'Folder', N'', N'small-folder', 0, 0, 0, 0, 3, 1)
+	
+	SELECT @intParent = intMenuID FROM tblSMMasterMenu
+	WHERE strMenuName = 'Reports' AND strType = 'Folder' AND strModuleName = 'Cash Management'
+	AND intParentMenuID = @intModule
+	
+	IF NOT EXISTS(SELECT * FROM tblSMMasterMenu WHERE strMenuName = 'Check Register' AND strType = 'Report' AND strModuleName = 'Cash Management')
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Check Register', N'Cash Management', @intParent, N'Check Register', N'Report', N'Check Register', N'small-report', 0, 0, 0, 1, NULL, 1)
+GO
