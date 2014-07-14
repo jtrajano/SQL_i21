@@ -211,6 +211,13 @@ SELECT
 FROM	#tmpPrintJobSpoolTable
 IF @@ERROR <> 0 GOTO _ROLLBACK
 
+-- Update the check numbers in the bank transaction screen. Use the check number from the print spool table. 
+UPDATE	tblCMBankTransaction
+SET		strReferenceNo = TMP.strCheckNo
+FROM	tblCMBankTransaction f INNER JOIN #tmpPrintJobSpoolTable TMP
+			ON f.intBankAccountId = TMP.intBankAccountId
+			AND f.intTransactionId = TMP.intTransactionId
+
 -- Retrieve the highest check number entered for the print queue. 
 SET @strNextCheckNumber = NULL 
 SELECT	TOP 1 
