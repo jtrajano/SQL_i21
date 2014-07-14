@@ -91,8 +91,5 @@
 :r "..\Scripts\AP\FixBillData.sql"
 :r "..\Scripts\AP\FixPaymentCMRecords.sql"
 
--- SYSTEM MANAGER
-:r "..\dbo\Stored Procedures\uspSMMigrateCurrency.sql"
-
 -- TAX FORMS
 :r ..\dbo\Views\vyuTFTaxCycle.sql
