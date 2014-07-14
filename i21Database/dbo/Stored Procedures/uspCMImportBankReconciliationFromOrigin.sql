@@ -23,6 +23,9 @@
 					1. Import logic is changed. All reconciled records will be imported in one reconciliation history record per bank account. 
 					2. The user will be doing the reconciliation from this single record. 
 
+					Modification 07/15/2014
+					1. Use the apcbk_bal as the default value for dblStatementOpeningBalance. 
+
 	Sequence of scripts to run the import: 
 	   1. uspCMImportBankAccountsFromOrigin 
 	   2. uspCMImportBankTransactionsFromOrigin 
@@ -162,11 +165,20 @@ BEGIN
 			AND ISNULL(dblAmount, 0) <> 0
 			AND intBankTransactionTypeId IN (@ORIGIN_DEPOSIT, @ORIGIN_CHECKS,@ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
 
-	-- 2.6. Delete the bank account from the tmp table after processing it. 
+	-- 2.7. Get the apcbk_bal as default value for dblStatementOpeningBalance
+	UPDATE tblCMBankReconciliation
+	SET	dblStatementOpeningBalance = ISNULL(ORIGIN.apcbk_bal, 0)
+	FROM	tblCMBankAccount f INNER JOIN tblCMBankReconciliation RECON
+				ON f.intBankAccountId = RECON.intBankAccountId
+			INNER JOIN apcbkmst ORIGIN
+				ON f.strCbkNo = ORIGIN.apcbk_no COLLATE Latin1_General_CI_AS
+	WHERE	f.intBankAccountId = @intBankAccountId
+
+	-- 2.8. Delete the bank account from the tmp table after processing it. 
 	DELETE FROM #tmpBankAccounts
 	WHERE intBankAccountId = @intBankAccountId
 	
-	-- 2.7. Drop the temp table. 
+	-- 2.9. Drop the temp table. 
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpClearedTransactions')) DROP TABLE #tmpClearedTransactions
 END
 

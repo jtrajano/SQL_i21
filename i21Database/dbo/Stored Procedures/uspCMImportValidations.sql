@@ -13,6 +13,7 @@ CREATE PROCEDURE [dbo].[uspCMImportValidations]
 	,@Invalid_GL_Account_Id_Found AS BIT OUTPUT
 	,@Invalid_Currency_Id_Found AS BIT OUTPUT
 	,@Missing_Default_Currency AS BIT OUTPUT
+	,@Missing_Cash_Account_Group AS BIT OUTPUT
 AS
 
 DECLARE @CASH_ACCOUNT AS NVARCHAR(20) = 'Cash Accounts'
@@ -31,6 +32,10 @@ from	tblGLAccount gl INNER JOIN (
 			SELECT DISTINCT intGLAccountId = dbo.fnGetGLAccountIdFromOriginToi21(apcbk_gl_cash) FROM apcbkmst 
 		) Q
 			ON gl.intAccountId = Q.intGLAccountId
+
+-- Check for missing "Cash Account" group. (ERR)
+SELECT @Missing_Cash_Account_Group = 1
+WHERE NOT EXISTS (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = 'Cash Accounts')
 
 -- Check for invalid GL accounts. It must be moved under the Cash Account Group before import can be done. (ERR)
 SELECT	TOP 1 
@@ -59,5 +64,6 @@ SELECT	@Invalid_UserId_Found = ISNULL(@Invalid_UserId_Found, 0)
 		,@Invalid_GL_Account_Id_Found = ISNULL(@Invalid_GL_Account_Id_Found, 0)
 		,@Invalid_Currency_Id_Found = ISNULL(@Invalid_Currency_Id_Found,0)
 		,@Missing_Default_Currency = ISNULL(@Missing_Default_Currency, 1)
+		,@Missing_Cash_Account_Group = ISNULL(@Missing_Cash_Account_Group, 0)
 
 GO
