@@ -8,9 +8,12 @@
     [strRecordNo]       NVARCHAR (50)    COLLATE Latin1_General_CI_AS NOT NULL,
     [dtmDateModified]   DATETIME         NOT NULL,
     [intSize]           INT              NOT NULL,
+    [intEntityId]       INT              NULL,
     [intConcurrencyId]  INT              NOT NULL,
     CONSTRAINT [PK_dbo.tblAttachment] PRIMARY KEY CLUSTERED ([intAttachmentId] ASC)
 );
+
+
 
 
 
