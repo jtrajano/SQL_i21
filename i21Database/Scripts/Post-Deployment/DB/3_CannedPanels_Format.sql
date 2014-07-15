@@ -2,11 +2,11 @@
 /*******************  BEGIN UPDATING canned panels on table Panel Format*******************/
 print('/*******************  BEGIN UPDATING canned panels format *******************/')
 
-IF OBJECT_ID('tempdb..#TampCannedPanelFormat') IS NOT NULL
-    DROP TABLE #TampCannedPanelFormat
+IF OBJECT_ID('tempdb..#TempCannedPanelFormat') IS NOT NULL
+    DROP TABLE #TempCannedPanelFormat
 
 print('/*******************  CREATE TEMPORARY table for canned panels format *******************/')
-Create TABLE #TampCannedPanelFormat 
+Create TABLE #TempCannedPanelFormat 
 (
 
 	[intPanelFormatId]  INT            NOT NULL,
@@ -29,7 +29,7 @@ Create TABLE #TampCannedPanelFormat
 )
 
 print('/*******************  BEGIN INSERTING canned panels on temporary panel format table  *******************/')
-INSERT INTO #TampCannedPanelFormat VALUES (1, N'gacnt_due_rev_dt', N'>', N'0', N'', -657931, N'Regular', 0, N'Cell', 33, 0, 2, N'', 0, 1, 17)
+INSERT INTO #TempCannedPanelFormat VALUES (3, N'gacnt_due_rev_dt', N'>', N'0', N'', -657931, N'Regular', 0, N'Cell', 33, 0, 2, N'', 0, 1, 17)
 print('/*******************  END INSERTING canned panels on temporary panel format table  *******************/')
 
 print('/*******************  BEGIN DELETE old panel format records  *******************/')
@@ -45,7 +45,7 @@ DECLARE @intCannedPanelId int
 DECLARE @intCurrentPanelId int
 
 DECLARE db_cursor CURSOR FOR  
-SELECT intPanelFormatId, intCannedPanelId FROM #TampCannedPanelFormat
+SELECT intPanelFormatId, intCannedPanelId FROM #TempCannedPanelFormat
  
 
 OPEN db_cursor   
@@ -58,7 +58,7 @@ BEGIN
 	INSERT INTO [dbo].[tblDBPanelFormat] 
 		([strColumn], [strCondition], [strValue1], [strValue2], [intBackColor], [strFontStyle], [intFontColor], [strApplyTo], [intPanelId], [intUserId], [intSort], [strType], [ysnVisible], [intConcurrencyId], [intCannedPanelId])
 	SELECT [strColumn], [strCondition], [strValue1], [strValue2], [intBackColor], [strFontStyle], [intFontColor], [strApplyTo], @intCurrentPanelId, [intUserId], [intSort], [strType], [ysnVisible], [intConcurrencyId], [intCannedPanelId]
-	FROM #TampCannedPanelFormat 
+	FROM #TempCannedPanelFormat 
 	WHERE intPanelFormatId = @intPanelFormatId
 
 	
@@ -68,7 +68,7 @@ END
 CLOSE db_cursor   
 DEALLOCATE db_cursor
 
-DROP TABLE #TampCannedPanelFormat
+DROP TABLE #TempCannedPanelFormat
 print('/*******************  END UPDATING canned panels on table Panel Format  *******************/')
 /*******************  END UPDATING canned panels on table Panel Format*******************/
 GO
