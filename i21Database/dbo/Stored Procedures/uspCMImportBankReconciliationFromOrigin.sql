@@ -24,7 +24,8 @@
 					2. The user will be doing the reconciliation from this single record. 
 
 					Modification 07/15/2014
-					1. Use the apcbk_bal as the default value for dblStatementOpeningBalance. 
+					1. Assign a default value for dblStatementOpeningBalance. 
+					2. The formula used is: (Opening Balance) = (Origin bank balance or apcbk_bal) - (Origin Deposits - Origin Payments)
 
 	Sequence of scripts to run the import: 
 	   1. uspCMImportBankAccountsFromOrigin 
@@ -80,7 +81,7 @@ BEGIN
 	
 	-- 2.3. Gather the reconciled transactions and store it inside a temp table. 
 	-- Group it by the date reconciled. 
-	SELECT	dblClearedPaymentsOrDebits = SUM(
+	SELECT	dblPaymentsOrDebits = SUM(
 				CASE 
 					WHEN A.intBankTransactionTypeId IN (@ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE) THEN
 						ISNULL(A.dblAmount, 0)
@@ -118,6 +119,7 @@ BEGIN
 			AND A.intBankAccountId = @intBankAccountId
 			AND A.ysnClr = 1
 			AND A.ysnPosted = 1 
+			AND A.ysnCheckVoid = 0
 			AND ISNULL(A.dblAmount, 0) <> 0
 	
 	-- 2.4. Insert the bank reconciliation record. 
@@ -140,7 +142,7 @@ BEGIN
 			intBankAccountId			= @intBankAccountId
 			,dtmDateReconciled			= @dtmMostRecentReconciliation
 			,dblStatementOpeningBalance = 0
-			,dblDebitCleared			= tmp.dblClearedPaymentsOrDebits
+			,dblDebitCleared			= tmp.dblPaymentsOrDebits
 			,dblCreditCleared			= tmp.dblDepositsOrCredits
 			,dblBankAccountBalance		= tmp.dblBankAccountBalance
 			,dblStatementEndingBalance	= 0
@@ -166,8 +168,23 @@ BEGIN
 			AND intBankTransactionTypeId IN (@ORIGIN_DEPOSIT, @ORIGIN_CHECKS,@ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
 
 	-- 2.7. Get the apcbk_bal as default value for dblStatementOpeningBalance
-	UPDATE tblCMBankReconciliation
-	SET	dblStatementOpeningBalance = ISNULL(ORIGIN.apcbk_bal, 0)
+	-- Formula: (Opening Balance) = (Origin bank balance) - (Origin Deposits - Origin Payments)
+	UPDATE	tblCMBankReconciliation
+	SET		dblStatementOpeningBalance = ISNULL(ORIGIN.apcbk_bal, 0) - (
+						SELECT SUM(
+								CASE	WHEN TRANS.intBankTransactionTypeId IN (@ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE) THEN
+											ISNULL(TRANS.dblAmount, 0) * -1
+										WHEN TRANS.intBankTransactionTypeId IN (@ORIGIN_DEPOSIT) THEN
+											ISNULL(TRANS.dblAmount, 0)
+										ELSE 
+											0
+								END
+							) 
+						FROM	tblCMBankTransaction TRANS 
+						WHERE	TRANS.intBankAccountId = f.intBankAccountId
+								AND TRANS.ysnPosted = 1
+								AND TRANS.ysnCheckVoid = 0 
+					)
 	FROM	tblCMBankAccount f INNER JOIN tblCMBankReconciliation RECON
 				ON f.intBankAccountId = RECON.intBankAccountId
 			INNER JOIN apcbkmst ORIGIN
