@@ -73,7 +73,7 @@ END
 -- TODO: Check for invalid unit of measure (for unit accounting)
 
 -- Validate the date against the FY Periods
-IF EXISTS (SELECT 1 FROM #tmpGLDetail WHERE [dbo].isOpenAccountingDate(#tmpGLDetail.dtmDate) = 0)
+IF EXISTS (SELECT 1 FROM #tmpGLDetail WHERE [dbo].isOpenAccountingDate(#tmpGLDetail.dtmDate) = 0) AND @ysnRecap = 0
 BEGIN 
 	-- Unable to find an open fiscal year period to match the transaction date.
 	RAISERROR(50005, 11, 1)
