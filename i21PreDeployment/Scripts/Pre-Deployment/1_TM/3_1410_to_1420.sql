@@ -166,5 +166,16 @@ GO
 PRINT N'END Renaming of columns in tblTMRoute'
 GO
 
-
+PRINT N'BEGIN Renaming of columns in tblTMFillMethod'
+GO
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblTMFillMethod]') AND type in (N'U')) 
+BEGIN
+	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intFillMethodId' AND OBJECT_ID = OBJECT_ID(N'tblTMFillMethod')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intFillMethodID' AND OBJECT_ID = OBJECT_ID(N'tblTMFillMethod'))
+    BEGIN
+        EXEC sp_rename 'tblTMFillMethod.intFillMethodID', 'intFillMethodId' , 'COLUMN'
+    END
+END
+GO
+PRINT N'BEGIN Renaming of columns in tblTMFillMethod'
+GO
 
