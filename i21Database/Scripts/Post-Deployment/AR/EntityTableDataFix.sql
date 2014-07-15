@@ -32,7 +32,7 @@ BEGIN
 	strDepartment,
 	strMobile,
 	strPhone,
-	strEmail,
+	B.strEmail,
 	strPhone2,
 	strEmail2,
 	strFax,

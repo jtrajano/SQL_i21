@@ -25,6 +25,6 @@
     [dblCreditUnit]               NUMERIC (18, 6)  NULL,
     CONSTRAINT [PK_tblGLJournalRecurringDetail] PRIMARY KEY CLUSTERED ([intJournalRecurringDetailId] ASC),
     CONSTRAINT [FK_tblGLJournalRecurringDetail_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-    CONSTRAINT [FK_tblGLJournalRecurringDetail_tblGLJournalRecurring] FOREIGN KEY ([intJournalRecurringId]) REFERENCES [dbo].[tblGLJournalRecurring] ([intJournalRecurringId])
+    CONSTRAINT [FK_tblGLJournalRecurringDetail_tblGLJournalRecurring] FOREIGN KEY ([intJournalRecurringId]) REFERENCES [dbo].[tblGLJournalRecurring] ([intJournalRecurringId]) ON DELETE CASCADE
 );
 

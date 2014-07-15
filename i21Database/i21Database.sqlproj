@@ -70,6 +70,7 @@
     <Recovery>FULL</Recovery>
     <EnableFullTextSearch>True</EnableFullTextSearch>
     <DefaultFilegroup>PRIMARY</DefaultFilegroup>
+    <DacVersion>1.1.0.0</DacVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\Release\</OutputPath>
@@ -131,8 +132,6 @@
     <Folder Include="Scripts\Post-Deployment\CM\Patch" />
     <Folder Include="Scripts\Post-Deployment\FRD" />
     <Folder Include="Scripts\Post-Deployment\AP" />
-    <Folder Include="Scripts\Post-Deployment\FIN\" />
-    <Folder Include="Scripts\Post-Deployment\FIN\DefaultData\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -372,7 +371,6 @@
     <Build Include="dbo\User Defined Types\RecapTableType.sql" />
     <None Include="Script.PreDeployment1.sql" />
     <None Include="Script.PostDeployment1.sql" />
-    <None Include="Scripts\Post-Deployment\FIN\DefaultData\AccountGroup.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\1_SM\1_ZipCodeData.sql" />
     <None Include="Scripts\Post-Deployment\Reports\1_ReportDisableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Reports\2_ReportDeleteOldData.sql" />
@@ -581,6 +579,9 @@
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleAPOverflow.sql" />
     <Build Include="dbo\Tables\tblRMSubreportCondition.sql" />
     <Build Include="dbo\Tables\tblRMSubreportFilter.sql" />
+    <Build Include="Scripts\Post-Deployment\GL\DefaultData\AccountGroup.sql" />
+    <Build Include="Scripts\Post-Deployment\GL\DefaultData\AccountSegmentTemplate.sql" />
+    <Build Include="Scripts\Post-Deployment\GL\DefaultData\AccountStructure.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
@@ -603,5 +604,14 @@
     <None Include="Scripts\Post-Deployment\AP\RestoreVendorId.sql" />
     <None Include="Scripts\Post-Deployment\FRD\FRDEntryDataFix.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\9_ZipCode.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="C:\SharedAssemblyInfo.cs">
+      <Link>Properties\SharedAssemblyInfo.cs</Link>
+    </Compile>
   </ItemGroup>
 </Project>

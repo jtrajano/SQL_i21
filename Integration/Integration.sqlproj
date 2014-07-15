@@ -183,4 +183,13 @@
   <ItemGroup>
     <Build Include="dbo\Stored Procedures\uspAPCreatePaymentFromOriginBill.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="C:\SharedAssemblyInfo.cs">
+      <Link>Properties\SharedAssemblyInfo.cs</Link>
+    </Compile>
+  </ItemGroup>
 </Project>
