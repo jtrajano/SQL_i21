@@ -8,8 +8,8 @@
     "userConfig": {
         "collapsible": true,
         "defaultFocus": null,
-        "designer|userAlias": "boardoftrades",
-        "designer|userClassName": "BoardOfTrades",
+        "designer|userAlias": "futuresexchange",
+        "designer|userClassName": "FuturesExchange",
         "height": 385,
         "hidden": false,
         "icon": null,
@@ -21,7 +21,7 @@
         "minHeight": 385,
         "minWidth": 475,
         "minimizable": null,
-        "title": "Board of Trades",
+        "title": "Futures Exchange",
         "width": 475
     },
     "designerId": "4dff1e71-0123-4da0-bd34-25f2f80228cb",
@@ -42,7 +42,7 @@
                 "frame": null,
                 "header": false,
                 "height": 350,
-                "itemId": "frmBoardOfTrades",
+                "itemId": "frmFuturesExchange",
                 "layout": "vbox",
                 "margin": -1,
                 "title": null,
@@ -244,11 +244,11 @@
                             "userConfig": {
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
-                                "fieldLabel": "BOT Code",
-                                "itemId": "txtBotCode",
+                                "fieldLabel": "Exchange Code",
+                                "itemId": "txtExchangeCode",
                                 "labelPad": null,
                                 "labelSeparator": null,
-                                "labelWidth": 90,
+                                "labelWidth": 95,
                                 "layout|flex": null,
                                 "margin": null,
                                 "maxLength": null,
@@ -271,11 +271,11 @@
                             "userConfig": {
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
-                                "fieldLabel": "BOT Name",
-                                "itemId": "txtBotName",
+                                "fieldLabel": "Exchange Name",
+                                "itemId": "txtExchangeName",
                                 "labelPad": null,
                                 "labelSeparator": null,
-                                "labelWidth": 90,
+                                "labelWidth": 95,
                                 "layout|flex": null,
                                 "margin": null,
                                 "maxLength": null,
@@ -311,7 +311,7 @@
                                     "userConfig": {
                                         "padding": "3 0 0 0",
                                         "text": "Address:",
-                                        "width": 73
+                                        "width": 78
                                     },
                                     "designerId": "15e2be15-c1cd-41de-83e1-f73ec800061b"
                                 },
@@ -417,7 +417,7 @@
                                         "displayField": "strZipCode",
                                         "fieldLabel": "Zip/Postal Code",
                                         "itemId": "cboZipCode",
-                                        "labelWidth": 90,
+                                        "labelWidth": 95,
                                         "layout|flex": 1.2,
                                         "name": "strZipCode",
                                         "store": null,
@@ -483,7 +483,7 @@
                                         "enforceMaxLength": true,
                                         "fieldLabel": "State/Province",
                                         "itemId": "txtState",
-                                        "labelWidth": 90,
+                                        "labelWidth": 95,
                                         "layout|flex": 1.2,
                                         "maxLength": 60,
                                         "name": "strState",
@@ -559,7 +559,7 @@
                                         "enforceMaxLength": true,
                                         "fieldLabel": "Phone",
                                         "itemId": "txtPhone",
-                                        "labelWidth": 90,
+                                        "labelWidth": 95,
                                         "layout|flex": 1.2,
                                         "maxLength": 30,
                                         "name": "strPhone",
@@ -615,7 +615,7 @@
                                     "userConfig": {
                                         "padding": "3 0 0 0",
                                         "text": "Website:",
-                                        "width": 73
+                                        "width": 78
                                     },
                                     "designerId": "19009178-d94d-4420-b396-285bc3701da7"
                                 },
@@ -707,7 +707,7 @@
                                     "userConfig": {
                                         "padding": "3 0 0 0",
                                         "text": "Email:",
-                                        "width": 73
+                                        "width": 78
                                     },
                                     "designerId": "7a7896e0-8869-45e3-8a2f-c47deddb10bf"
                                 },

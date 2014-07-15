@@ -29,7 +29,7 @@ Ext.application({
         'InventoryTag',
         'PatronageCategory',
         'Manufacturer',
-        'BoardOfTrades',
+        'FuturesExchange',
         'Brand',
         'FuelTank',
         'PaidOuts',
