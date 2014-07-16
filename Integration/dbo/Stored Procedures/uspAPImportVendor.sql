@@ -272,7 +272,7 @@ BEGIN
 			@strLocationName = @strName,
 			@strAddress      = dbo.fnTrim(ISNULL(ssvnd_addr_1,'''')) + CHAR(10) + dbo.fnTrim(ISNULL(ssvnd_addr_2,'''')),
 			@strCity         = ssvnd_city,
-			@strCountry      = (SELECT TOP 1 strCountry FROM tblSMZipCode WHERE strState COLLATE Latin1_General_CI_AS = ssvnd_st COLLATE Latin1_General_CI_AS),
+			@strCountry      = ''United States''--(SELECT TOP 1 strCountry FROM tblSMZipCode WHERE strState COLLATE Latin1_General_CI_AS = ssvnd_st COLLATE Latin1_General_CI_AS),
 			@strState        = ssvnd_st,
 			@strZipCode      = ssvnd_zip,
 			@strLocationEmail        = NULL,
