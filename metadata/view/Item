@@ -1322,22 +1322,6 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "boxLabel": null,
-                                                                        "fieldLabel": "Lot Tracking",
-                                                                        "itemId": "chkLotTracking",
-                                                                        "labelWidth": 125,
-                                                                        "layout|flex": null
-                                                                    },
-                                                                    "designerId": "4ae42930-1a5d-427b-ac07-bc91ad5927c4"
-                                                                },
-                                                                {
-                                                                    "type": "Ext.form.field.Checkbox",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "boxLabel": null,
                                                                         "fieldLabel": "Load tracking",
                                                                         "itemId": "chkLoadTracking",
                                                                         "labelWidth": 125,
@@ -1594,6 +1578,21 @@
                                                                 "layout|flex": null
                                                             },
                                                             "designerId": "a089fec9-916a-4ed8-a1d3-d88bf1432e56"
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "fieldLabel": "Lot Tracking",
+                                                                "itemId": "cboLotTracking",
+                                                                "labelWidth": 125,
+                                                                "layout|flex": null
+                                                            },
+                                                            "designerId": "284e5c90-f631-4626-829c-395bacac2746"
                                                         }
                                                     ]
                                                 }

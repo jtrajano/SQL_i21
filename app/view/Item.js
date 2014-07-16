@@ -625,12 +625,6 @@ Ext.define('Inventory.view.Item', {
                                                                         },
                                                                         {
                                                                             xtype: 'checkboxfield',
-                                                                            itemId: 'chkLotTracking',
-                                                                            fieldLabel: 'Lot Tracking',
-                                                                            labelWidth: 125
-                                                                        },
-                                                                        {
-                                                                            xtype: 'checkboxfield',
                                                                             itemId: 'chkLoadTracking',
                                                                             fieldLabel: 'Load tracking',
                                                                             labelWidth: 125
@@ -735,6 +729,12 @@ Ext.define('Inventory.view.Item', {
                                                                     xtype: 'combobox',
                                                                     itemId: 'cboFreightVendor',
                                                                     fieldLabel: 'Freight Vendor',
+                                                                    labelWidth: 125
+                                                                },
+                                                                {
+                                                                    xtype: 'combobox',
+                                                                    itemId: 'cboLotTracking',
+                                                                    fieldLabel: 'Lot Tracking',
                                                                     labelWidth: 125
                                                                 }
                                                             ]
