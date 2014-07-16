@@ -927,7 +927,7 @@ Ext.define('Inventory.view.Item', {
                                                                 {
                                                                     xtype: 'panel',
                                                                     margins: '0 0 5 0',
-                                                                    height: 146,
+                                                                    height: 120,
                                                                     bodyPadding: 7,
                                                                     title: 'Material Detail',
                                                                     layout: {
@@ -935,12 +935,6 @@ Ext.define('Inventory.view.Item', {
                                                                         align: 'stretch'
                                                                     },
                                                                     items: [
-                                                                        {
-                                                                            xtype: 'combobox',
-                                                                            itemId: 'cboFamily',
-                                                                            fieldLabel: 'Material Control',
-                                                                            labelWidth: 125
-                                                                        },
                                                                         {
                                                                             xtype: 'checkboxfield',
                                                                             fieldLabel: 'Require Approval',
@@ -1025,16 +1019,6 @@ Ext.define('Inventory.view.Item', {
                                                                                     },
                                                                                     items: [
                                                                                         {
-                                                                                            xtype: 'button',
-                                                                                            itemId: 'btnDelete',
-                                                                                            iconCls: 'small-delete',
-                                                                                            tabIndex: -1,
-                                                                                            text: 'Delete'
-                                                                                        },
-                                                                                        {
-                                                                                            xtype: 'tbseparator'
-                                                                                        },
-                                                                                        {
                                                                                             xtype: 'filter'
                                                                                         }
                                                                                     ]
@@ -1051,10 +1035,7 @@ Ext.define('Inventory.view.Item', {
                                                                             ],
                                                                             viewConfig: {
                                                                                 itemId: 'grvBOM'
-                                                                            },
-                                                                            selModel: Ext.create('Ext.selection.CheckboxModel', {
-
-                                                                            })
+                                                                            }
                                                                         }
                                                                     ]
                                                                 }
@@ -1070,11 +1051,9 @@ Ext.define('Inventory.view.Item', {
                                                             },
                                                             items: [
                                                                 {
-                                                                    xtype: 'panel',
-                                                                    margins: '0 0 5 0',
-                                                                    height: 118,
-                                                                    bodyPadding: 7,
-                                                                    title: 'GROUP 1',
+                                                                    xtype: 'container',
+                                                                    flex: 1,
+                                                                    margins: '0 0 0 5',
                                                                     layout: {
                                                                         type: 'vbox',
                                                                         align: 'stretch'
@@ -1082,18 +1061,19 @@ Ext.define('Inventory.view.Item', {
                                                                     items: [
                                                                         {
                                                                             xtype: 'textfield',
-                                                                            itemId: 'txtCaseUom1',
+                                                                            itemId: 'txtCaseUom12',
                                                                             fieldLabel: 'GTIN',
                                                                             labelWidth: 125
                                                                         },
                                                                         {
                                                                             xtype: 'combobox',
-                                                                            itemId: 'cboFamily',
+                                                                            itemId: 'cboFamily2',
                                                                             fieldLabel: 'Rotation Type',
                                                                             labelWidth: 125
                                                                         },
                                                                         {
                                                                             xtype: 'container',
+                                                                            margins: '0 0 5 0',
                                                                             layout: {
                                                                                 type: 'hbox',
                                                                                 align: 'stretch'
@@ -1113,20 +1093,7 @@ Ext.define('Inventory.view.Item', {
                                                                                     labelWidth: 63
                                                                                 }
                                                                             ]
-                                                                        }
-                                                                    ]
-                                                                },
-                                                                {
-                                                                    xtype: 'panel',
-                                                                    flex: 1,
-                                                                    margins: '0 0 5 0',
-                                                                    bodyPadding: 7,
-                                                                    title: 'GROUP 2',
-                                                                    layout: {
-                                                                        type: 'vbox',
-                                                                        align: 'stretch'
-                                                                    },
-                                                                    items: [
+                                                                        },
                                                                         {
                                                                             xtype: 'combobox',
                                                                             itemId: 'txtCaseUom6',
@@ -1185,6 +1152,24 @@ Ext.define('Inventory.view.Item', {
                                                                             xtype: 'textfield',
                                                                             itemId: 'txtCaseUom5',
                                                                             fieldLabel: 'Std. Pallet Ratio (%)',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'textfield',
+                                                                            itemId: 'txtMask1',
+                                                                            fieldLabel: 'Mask 1',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'textfield',
+                                                                            itemId: 'txtMask2',
+                                                                            fieldLabel: 'Mask 2',
+                                                                            labelWidth: 125
+                                                                        },
+                                                                        {
+                                                                            xtype: 'textfield',
+                                                                            itemId: 'txtMask3',
+                                                                            fieldLabel: 'Mask 3',
                                                                             labelWidth: 125
                                                                         }
                                                                     ]

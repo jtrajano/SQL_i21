@@ -2046,7 +2046,7 @@
                                                             "userConfig": {
                                                                 "bodyPadding": 7,
                                                                 "container|align": "stretch",
-                                                                "height": 146,
+                                                                "height": 120,
                                                                 "layout": "vbox",
                                                                 "layout|flex": null,
                                                                 "layout|margins": "0 0 5 0",
@@ -2054,21 +2054,6 @@
                                                             },
                                                             "designerId": "e702e408-bbf9-4b6f-b8b0-41a0f38965fb",
                                                             "cn": [
-                                                                {
-                                                                    "type": "Ext.form.field.ComboBox",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "fieldLabel": "Material Control",
-                                                                        "itemId": "cboFamily",
-                                                                        "labelWidth": 125,
-                                                                        "layout|flex": null
-                                                                    },
-                                                                    "designerId": "d7765079-ed3e-4e6c-bafc-f6b6b0aa8154"
-                                                                },
                                                                 {
                                                                     "type": "Ext.form.field.Checkbox",
                                                                     "reference": {
@@ -2248,36 +2233,6 @@
                                                                             "designerId": "8acbe05b-b8d8-4fcd-889f-2db6ef6c9ab3",
                                                                             "cn": [
                                                                                 {
-                                                                                    "type": "Ext.button.Button",
-                                                                                    "reference": {
-                                                                                        "name": "items",
-                                                                                        "type": "array"
-                                                                                    },
-                                                                                    "codeClass": null,
-                                                                                    "userConfig": {
-                                                                                        "icon": null,
-                                                                                        "iconCls": "small-delete",
-                                                                                        "itemId": "btnDelete",
-                                                                                        "layout|flex": null,
-                                                                                        "tabIndex": -1,
-                                                                                        "text": "Delete"
-                                                                                    },
-                                                                                    "designerId": "8fbcf923-c970-444f-8d7f-8e6e35428dbf"
-                                                                                },
-                                                                                {
-                                                                                    "type": "Ext.toolbar.Separator",
-                                                                                    "reference": {
-                                                                                        "name": "items",
-                                                                                        "type": "array"
-                                                                                    },
-                                                                                    "codeClass": null,
-                                                                                    "userConfig": {
-                                                                                        "designer|displayName": "separator",
-                                                                                        "layout|flex": null
-                                                                                    },
-                                                                                    "designerId": "6cdb2456-78fd-4d02-bee7-c66c7bb98947"
-                                                                                },
-                                                                                {
                                                                                     "type": "linkedinstance",
                                                                                     "reference": {
                                                                                         "name": "items",
@@ -2318,15 +2273,6 @@
                                                                                 "itemId": "grvBOM"
                                                                             },
                                                                             "designerId": "34f2c68c-c8e5-4f8b-b2a5-3437c35e71cf"
-                                                                        },
-                                                                        {
-                                                                            "type": "Ext.selection.CheckboxModel",
-                                                                            "reference": {
-                                                                                "name": "selModel",
-                                                                                "type": "object"
-                                                                            },
-                                                                            "codeClass": "Ext.selection.CheckboxModel",
-                                                                            "designerId": "3dfcf024-35f8-413e-84d8-ccd980fc2787"
                                                                         }
                                                                     ]
                                                                 }
@@ -2351,22 +2297,21 @@
                                                     "designerId": "cd3097db-c766-408f-8c48-1d32eb214b09",
                                                     "cn": [
                                                         {
-                                                            "type": "Ext.panel.Panel",
+                                                            "type": "Ext.container.Container",
                                                             "reference": {
                                                                 "name": "items",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "bodyPadding": 7,
                                                                 "container|align": "stretch",
-                                                                "height": 118,
+                                                                "designer|displayName": "container",
+                                                                "height": null,
                                                                 "layout": "vbox",
-                                                                "layout|flex": null,
-                                                                "layout|margins": "0 0 5 0",
-                                                                "title": "GROUP 1"
+                                                                "layout|flex": 1,
+                                                                "layout|margins": "0 0 0 5"
                                                             },
-                                                            "designerId": "ce01ceb9-a423-433f-866c-f024eb3fb61f",
+                                                            "designerId": "52864734-86f4-448f-99da-a1d81bf72339",
                                                             "cn": [
                                                                 {
                                                                     "type": "Ext.form.field.Text",
@@ -2377,7 +2322,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldLabel": "GTIN",
-                                                                        "itemId": "txtCaseUom1",
+                                                                        "itemId": "txtCaseUom12",
                                                                         "labelWidth": 125,
                                                                         "layout|flex": null
                                                                     },
@@ -2392,7 +2337,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldLabel": "Rotation Type",
-                                                                        "itemId": "cboFamily",
+                                                                        "itemId": "cboFamily2",
                                                                         "labelWidth": 125,
                                                                         "layout|flex": null
                                                                     },
@@ -2407,8 +2352,10 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "container|align": "stretch",
+                                                                        "designer|displayName": "container",
                                                                         "layout": "hbox",
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "layout|margins": "0 0 5 0"
                                                                     },
                                                                     "designerId": "668f4544-6ddd-466c-8390-f7ec7ecd3cab",
                                                                     "cn": [
@@ -2444,27 +2391,7 @@
                                                                             "designerId": "60e0e19d-0556-4b53-a7a1-4b38046c82df"
                                                                         }
                                                                     ]
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
-                                                            "type": "Ext.panel.Panel",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "bodyPadding": 7,
-                                                                "container|align": "stretch",
-                                                                "height": null,
-                                                                "layout": "vbox",
-                                                                "layout|flex": 1,
-                                                                "layout|margins": "0 0 5 0",
-                                                                "title": "GROUP 2"
-                                                            },
-                                                            "designerId": "52864734-86f4-448f-99da-a1d81bf72339",
-                                                            "cn": [
+                                                                },
                                                                 {
                                                                     "type": "Ext.form.field.ComboBox",
                                                                     "reference": {
@@ -2614,6 +2541,51 @@
                                                                         "layout|flex": null
                                                                     },
                                                                     "designerId": "cebac8a5-b9a5-489e-b6c0-0e4d349052b1"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.Text",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Mask 1",
+                                                                        "itemId": "txtMask1",
+                                                                        "labelWidth": 125,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "designerId": "d83b8176-eeee-494c-98dd-8d2e04063cdc"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.Text",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Mask 2",
+                                                                        "itemId": "txtMask2",
+                                                                        "labelWidth": 125,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "designerId": "0146248e-97b8-45a7-8ac2-61ec18807624"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.Text",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Mask 3",
+                                                                        "itemId": "txtMask3",
+                                                                        "labelWidth": 125,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "designerId": "2a93544d-ddff-4081-98cc-491dc9710b73"
                                                                 }
                                                             ]
                                                         }
