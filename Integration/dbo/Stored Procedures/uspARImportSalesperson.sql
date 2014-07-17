@@ -128,8 +128,8 @@ EXEC(
 				@strSalespersonId = agsls_slsmn_id,
 				@strName = agsls_name,
 				@strType = CASE WHEN agsls_et_driver_yn = ''Y'' THEN ''Driver'' ELSE ''Sales Representative'' END,
-				@strEmail = ISNULL(agsls_email,''),
-				@strAddress = ISNULL(agsls_addr1,'') + CHAR(10) + ISNULL(agsls_addr2,''),
+				@strEmail = ISNULL(agsls_email,''''),
+				@strAddress = ISNULL(agsls_addr1,'''') + CHAR(10) + ISNULL(agsls_addr2,''''),
 				@strZipCode = agsls_zip,
 				@strCity = agsls_city,
 				@strState = agsls_state,
@@ -144,7 +144,7 @@ EXEC(
 			INSERT [dbo].[tblEntity]	
 			([strName], [strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed])
 			VALUES						
-			(@strName, @strEmail, '', '', 0, '', '', '', NULL, NULL)
+			(@strName, @strEmail, '''', '''', 0, '''', '''', '''', NULL, NULL)
 				
 			DECLARE @EntityId INT
 			SET @EntityId = SCOPE_IDENTITY()

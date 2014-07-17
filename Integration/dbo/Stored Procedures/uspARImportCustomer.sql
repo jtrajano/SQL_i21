@@ -30,8 +30,8 @@ EXEC(
 			UPDATE agcusmst
 			SET 
 			--Entity
-			agcus_last_name = ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,1,25) ELSE SUBSTRING(Ent.strName, 1, (CASE WHEN CHARINDEX( ', ', Ent.strName) != 0 THEN CHARINDEX( ', ', Ent.strName)  -1 ELSE 25 END)) END),''),
-			agcus_first_name = ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,26,50) ELSE SUBSTRING(Ent.strName,(CASE WHEN CHARINDEX( ', ', Ent.strName) != 0 THEN CHARINDEX( ', ', Ent.strName)  + 2 ELSE 50 END),50) END),''),
+			agcus_last_name = ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,1,25) ELSE SUBSTRING(Ent.strName, 1, (CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  -1 ELSE 25 END)) END),''''),
+			agcus_first_name = ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,26,50) ELSE SUBSTRING(Ent.strName,(CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  + 2 ELSE 50 END),50) END),''''),
 			agcus_comments = Ent.strInternalNotes,
 			agcus_1099_name = Ent.str1099Name,
 			--Location
@@ -132,8 +132,8 @@ EXEC(
 	
 		SELECT 
 			--Entity
-			ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,1,25) ELSE SUBSTRING(Ent.strName, 1, (CASE WHEN CHARINDEX( ', ', Ent.strName) != 0 THEN CHARINDEX( ', ', Ent.strName)  -1 ELSE 25 END)) END),'') AS strLastName,
-			ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,26,50) ELSE SUBSTRING(Ent.strName,(CASE WHEN CHARINDEX( ', ', Ent.strName) != 0 THEN CHARINDEX( ', ', Ent.strName)  + 2 ELSE 50 END),50) END),'') AS strFirsName,
+			ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,1,25) ELSE SUBSTRING(Ent.strName, 1, (CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  -1 ELSE 25 END)) END),'''') AS strLastName,
+			ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,26,50) ELSE SUBSTRING(Ent.strName,(CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  + 2 ELSE 50 END),50) END),'''') AS strFirsName,
 			Ent.strInternalNotes ,
 			Ent.str1099Name,
 			--Contact
@@ -292,18 +292,18 @@ EXEC(
 
 			SELECT TOP 1
 				--Entity
-				@strName = CASE WHEN agcus_co_per_ind_cp = ''C'' THEN agcus_last_name + agcus_first_name WHEN agcus_co_per_ind_cp = ''P'' THEN RTRIM(LTRIM(agcus_last_name)) + ', ' + RTRIM(LTRIM(agcus_first_name))END,
-				@strWebsite = '',
+				@strName = CASE WHEN agcus_co_per_ind_cp = ''C'' THEN agcus_last_name + agcus_first_name WHEN agcus_co_per_ind_cp = ''P'' THEN RTRIM(LTRIM(agcus_last_name)) + '', '' + RTRIM(LTRIM(agcus_first_name))END,
+				@strWebsite = '''',
 				@strInternalNotes = agcus_comments,
 				@ysnPrint1099   = 0,--To Map
 				@str1099Name    = agcus_1099_name,
-				@str1099Form	= '',
-				@str1099Type	= '',
+				@str1099Form	= '''',
+				@str1099Type	= '''',
 				@strFederalTaxId	= NULL, --To Map
 				@dtmW9Signed	= NULL, --To Map,
 
 				--Contacts
-				@strTitle = '',
+				@strTitle = '''',
 				@strContactName = agcus_contact,
 				@strDepartment = NULL,
 				@strMobile     = NULL,
@@ -322,7 +322,7 @@ EXEC(
 
 				--Locations
 				@strLocationName = @strName,
-				@strAddress      = ISNULL(agcus_addr,'') + CHAR(10) + ISNULL(agcus_addr2,''),
+				@strAddress      = ISNULL(agcus_addr,'''') + CHAR(10) + ISNULL(agcus_addr2,''''),
 				@strCity         = agcus_city,
 				@strCountry      = agcus_country,
 				@strState        = agcus_state,
@@ -357,7 +357,7 @@ EXEC(
 				@strBudgetBillingEndMonth	= agcus_budget_end_mm,
 				--Grain Tab
 				@strDPAContract = agcus_dpa_cnt,				
-				@dtmDPADate = (CASE WHEN agcus_dpa_rev_dt = 0 THEN NULL ELSE CONVERT(datetime,SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),0,5) + '-' + SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),5,2) + '-' + SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),7,2)) END),					
+				@dtmDPADate = (CASE WHEN agcus_dpa_rev_dt = 0 THEN NULL ELSE CONVERT(datetime,SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),0,5) + ''-'' + SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),5,2) + ''-'' + SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),7,2)) END),					
 				@strGBReceiptNumber = agcus_gb_rcpt_no,			
 				@ysnCheckoffExempt = CASE WHEN agcus_ckoff_exempt_yn = ''Y'' THEN 1 ELSE 0 END,			
 				@ysnVoluntaryCheckoff = CASE WHEN agcus_ckoff_vol_yn = ''Y'' THEN 1 ELSE 0 END ,		
@@ -372,7 +372,7 @@ EXEC(
 			
 			--INSERT Entity record for Customer
 			INSERT [dbo].[tblEntity]	([strName],[strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed])
-			VALUES						(@strName, '', @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed)
+			VALUES						(@strName, '''', @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed)
 
 			DECLARE @EntityId INT
 			SET @EntityId = SCOPE_IDENTITY()
@@ -381,7 +381,7 @@ EXEC(
 			IF(@strContactName IS NOT NULL)
 			BEGIN
 				INSERT [dbo].[tblEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes])
-				VALUES					 (@strContactName, '', @strWebsite, @strInternalNotes)
+				VALUES					 (@strContactName, '''', @strWebsite, @strInternalNotes)
 			END
 
 			DECLARE @ContactEntityId INT
