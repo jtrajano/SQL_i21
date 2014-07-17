@@ -120,6 +120,9 @@
     <None Include="Scripts\AP\FixVendorData.sql" />
     <None Include="Scripts\AP\FixBillData.sql" />
     <None Include="Scripts\AP\FixPaymentCMRecords.sql" />
+    <None Include="dbo\Stored Procedures\uspARImportAccount.sql" />
+    <None Include="dbo\Stored Procedures\uspARImportSalesperson.sql" />
+    <None Include="dbo\Stored Procedures\uspARImportCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
