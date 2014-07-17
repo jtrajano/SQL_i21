@@ -1,4 +1,5 @@
-﻿--This will fix the payment bank transaction on CM for filtering on printing checks
+﻿GO
+--This will fix the payment bank transaction on CM for filtering on printing checks
 IF EXISTS(SELECT 1 FROM tblCMBankTransaction A
 						INNER JOIN tblAPPayment B
 							ON A.strTransactionId = B.strPaymentRecordNum
@@ -17,3 +18,5 @@ FROM tblCMBankTransaction A
 	WHERE C.strPaymentMethod = 'Cash' AND A.strReferenceNo <> 'Cash'
 
 END
+
+GO

@@ -81,9 +81,6 @@
 :r "..\dbo\Stored Procedures\uspAPImportBillTransactions.sql"
 :r "..\dbo\Stored Procedures\uspAPImportVendor.sql"
 :r "..\dbo\Stored Procedures\uspAPImportTerms.sql"
-:r "..\Scripts\AP\FixVendorData.sql"
-:r "..\Scripts\AP\FixBillData.sql"
-:r "..\Scripts\AP\FixPaymentCMRecords.sql"
 
 -- SYSTEM MANAGER
 :r "..\dbo\Stored Procedures\uspSMMigrateCurrency.sql"

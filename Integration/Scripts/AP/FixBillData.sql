@@ -1,4 +1,4 @@
-﻿
+﻿GO
 
 IF EXISTS(SELECT 1 FROM tblAPBill A
 		INNER JOIN apivcmst B
@@ -51,3 +51,5 @@ BEGIN
 	END
 
 END
+
+GO
