@@ -2,27 +2,36 @@
 	@userId NVARCHAR(50),
 	@bankAccount INT,
 	@paymentMethod INT,
-	@intVendorId INT,
 	@paymentInfo NVARCHAR(10),
 	@notes NVARCHAR(500),
 	@payment DECIMAL(18, 6) = NULL,
 	@datePaid DATETIME = NULL,
 	@isPost BIT = 0,
 	@post BIT = 0,
-	@discount DECIMAL(18,6) = 0,
-	@interest DECIMAL(18,6) = 0,
-	@withHeld DECIMAL(18,6) = 0,
-	@billId int
+	@billId NVARCHAR(MAX)
 AS
 BEGIN
 
 	DECLARE @queryPayment NVARCHAR(MAX)
 	DECLARE @queryPaymentDetail NVARCHAR(MAX)
 	DECLARE @paymentId INT
+	DECLARE @vendorId INT
 
 	--Compute Discount Here
 
 	--Compute Interest Here
+
+	--TODO Validations
+
+	--TODO Allow Multi Vendor
+	SELECT [intID] INTO #tmpBillsPayment FROM [dbo].fnGetRowsFromDelimitedValues(@billId)
+
+	SELECT TOP 1 @vendorId = intEntityId 
+		FROM tblAPBill A
+		INNER JOIN  #tmpBillsPayment B
+			ON A.intBillId = B.intID
+		INNER JOIN tblAPVendor C
+			ON A.strVendorId = C.strVendorId
 
 	SET @queryPayment = '
 	INSERT INTO tblAPPayment(
@@ -46,19 +55,17 @@ BEGIN
 		[intBankAccountId]		= @bankAccount,
 		[intPaymentMethodId]	= @paymentMethod,
 		[intCurrencyId]			= ISNULL((SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = @bankAccount), (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = ''USD'')),
-		[strVendorId]			= (SELECT strVendorId FROM tblAPVendor WHERE intEntityId = @intVendorId),
+		[strVendorId]			= (SELECT strVendorId FROM tblAPVendor WHERE intEntityId = @vendorId),
 		[strPaymentInfo]		= @paymentInfo,
 		[strNotes]				= @notes,
 		[dtmDatePaid]			= ISNULL(@datePaid, GETDATE()),
 		[dblCredit]				= 0,
-		[dblAmountPaid]			= ISNULL(@payment, A.dblAmountDue),
+		[dblAmountPaid]			= @payment,
 		[dblUnappliedAmount]	= 0,
 		[ysnPosted]				= @isPost,
 		[dblWithheldAmount]		= @withHeld,
 		[intUserId]				= @userId,
 		[intConcurrencyId]		= 0
-	FROM tblAPBill A
-	WHERE A.intBillId = @billId
 	
 	SELECT @paymentId = SCOPE_IDENTITY()'
 
@@ -80,13 +87,14 @@ BEGIN
 		[intTermsId]	= A.intTermsId,
 		[intAccountId]	= A.intAccountId,
 		[dtmDueDate]	= A.dtmDueDate,
-		[dblDiscount]	=  @discount,
+		[dblDiscount]	= A.dblDiscount,
+		[dblWithheld]	= A.dblWithheld,
 		[dblAmountDue]	= A.dblAmountDue,
-		[dblPayment]	= @payment,
-		[dblInterest]	= @interest,
+		[dblPayment]	= A.dblAmountDue,
+		[dblInterest]	= 0, --TODO
 		[dblTotal]		= A.dblTotal
 	FROM tblAPBill A
-	WHERE A.intBillId = @billId
+	WHERE A.intBillId IN (SELECT [intID] FROM #tmpBillsPayment)
 	'
 
 	EXEC sp_executesql @queryPayment,
@@ -94,12 +102,11 @@ BEGIN
 	 @userId NVARCHAR(50),
 	 @bankAccount INT,
 	 @paymentMethod INT,
-	 @intVendorId INT,
+	 @vendorId INT,
 	 @paymentInfo NVARCHAR(10),
 	 @notes NVARCHAR(500),
 	 @payment DECIMAL(18, 6),
 	 @datePaid DATETIME,
-	 @withHeld DECIMAL(18,6),
 	 @isPost BIT,
 	 @paymentId INT OUTPUT',
 	 @userId = @userId,
@@ -107,24 +114,15 @@ BEGIN
 	 @bankAccount = @bankAccount,
 	 @paymentMethod = @paymentMethod,
 	 @paymentInfo = @paymentInfo,
-	 @intVendorId = @intVendorId,
+	 @vendorId = @vendorId,
 	 @notes = @notes,
 	 @payment = @payment,
-	 @withHeld = @withHeld,
 	 @datePaid = @datePaid,
 	 @isPost = @isPost,
 	 @paymentId = @paymentId OUTPUT;
 
 	EXEC sp_executesql @queryPaymentDetail, 
-	N'@billId INT,
-	 @payment DECIMAL(18, 6),
-	 @discount DECIMAL(18,6),
-	 @interest DECIMAL(18,6),
-	 @paymentId INT',
-	 @paymentId = @paymentId,
-	 @billId = @billId,
-	 @payment = @payment,
-	 @discount = @discount,
-	 @interest = @interest;
+	N'@paymentId INT',
+	 @paymentId = @paymentId;
 
 END
