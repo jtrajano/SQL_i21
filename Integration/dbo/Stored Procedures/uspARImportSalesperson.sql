@@ -1,7 +1,7 @@
 ﻿GO
 
 IF EXISTS(select top 1 1 from sys.procedures where name = 'uspARImportSalesperson')
-	DROP PROCEDURE uspARImportAccount
+	DROP PROCEDURE uspARImportSalesperson
 GO
 
 

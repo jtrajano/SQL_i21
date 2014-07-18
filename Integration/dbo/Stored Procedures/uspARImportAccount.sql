@@ -63,7 +63,7 @@ GO
 		DECLARE @strAccountStatusCode	NVARCHAR (1)
 		DECLARE	@strDescription			NVARCHAR (MAX)
 	
-		DECLARE @counter INT = 0
+		DECLARE @Counter INT = 0
 	
     
 		--Import only those are not yet imported
