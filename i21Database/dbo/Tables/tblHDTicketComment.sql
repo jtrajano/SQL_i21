@@ -11,6 +11,7 @@
 	[intLastModifiedUserEntityId] [int] NULL,
 	[dtmLastModified] [datetime] NULL,
 	[ysnSent] [bit] NOT NULL,
+	[ysnCreatedByAgent] [bit]  NULL,
 	[dtmSent] [datetime] NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicketComment] PRIMARY KEY CLUSTERED ([intTicketCommentId] ASC),
