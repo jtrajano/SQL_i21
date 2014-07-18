@@ -31,7 +31,7 @@ INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerP
 INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (22, N'Current Cash Bids', 3, N'Screen', N'CustomerPortal.controller.CurrentCashBids')
 INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (23, N'Business Summary', 3, N'Screen', N'CustomerPortal.controller.GABusinessSummary')
 INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (24, N'Customer Contact List', 4, N'Screen', N'AccountsReceivable.controller.CustomerContactList')
-INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (25, N'Export Hours Worked', 1, N'Screen', N'HelpDesk.controller.ExportHoursWorked')
+--INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (25, N'Export Hours Worked', 1, N'Screen', N'HelpDesk.controller.ExportHoursWorked')
 SET IDENTITY_INSERT [dbo].[tblARCustomerPortalMenu] OFF
 
 GO
