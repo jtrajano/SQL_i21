@@ -17,8 +17,23 @@ AS
 
 --make first a copy of ssvndmst. this will use to track all vendors already imported
 IF(OBJECT_ID(''dbo.tblAPTempVendor'') IS NULL)
-	SELECT * INTO tblAPTempVendor FROM ssvndmst
+BEGIN
+	EXEC(''
+	SELECT ssvnd_vnd_no INTO tblAPTempVendor FROM ssvndmst
 	-- WHERE ssvndmst.ssvnd_vnd_no IS NULL
+
+	INSERT INTO tblAPTempVendor
+	SELECT DISTINCT A.apchk_vnd_no
+	FROM apchkmst A
+			WHERE A.apchk_vnd_no IN (
+				SELECT
+				DISTINCT B.apivc_vnd_no
+				FROM apivcmst B
+				WHERE B.apivc_vnd_no NOT IN (SELECT ssvnd_vnd_no FROM ssvndmst)
+			)
+	'')
+
+END
 
 IF(@Update = 1 AND @VendorId IS NOT NULL)
 BEGIN
@@ -224,102 +239,187 @@ BEGIN
 
 	--Import only those are not yet imported
 	SELECT ssvnd_vnd_no INTO #tmpssvndmst 
-		FROM ssvndmst
-	LEFT JOIN tblAPVendor
-		ON ssvndmst.ssvnd_vnd_no COLLATE Latin1_General_CI_AS = tblAPVendor.strVendorId COLLATE Latin1_General_CI_AS
-	WHERE tblAPVendor.strVendorId IS NULL
-	ORDER BY ssvndmst.ssvnd_vnd_no
+		FROM tblAPTempVendor
 
 	WHILE (EXISTS(SELECT 1 FROM #tmpssvndmst))
 	BEGIN
 		
+		DECLARE @continue BIT = 0;
+
 		SELECT @originVendor = ssvnd_vnd_no FROM #tmpssvndmst
 
-		SELECT TOP 1
-			--Entities
-			@strName = CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name 
-						ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
-							+ '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
-						END,
-			@strWebsite = '''',
-			@strInternalNotes = '''',
-			@ysnPrint1099   = CASE WHEN ssvnd_1099_yn = ''Y'' THEN 1 ELSE 0 END,
-			@str1099Name    = ssvnd_1099_name,
-			@str1099Form	= '''',
-			@str1099Type	= '''',
-			@strFederalTaxId	= ssvnd_fed_tax_id,
-			@dtmW9Signed	= CASE WHEN ssvnd_w9_signed_rev_dt = 0 THEN NULL ELSE CONVERT(DATE, CAST(ssvnd_w9_signed_rev_dt AS CHAR(12)), 112) END,
+		IF(EXISTS(SELECT 1 FROM ssvndmst WHERE ssvnd_vnd_no = @originVendor))
+		BEGIN
 
-			--Contacts
-			@strTitle = '''',
-			@strContactName = dbo.fnTrim(ssvnd_contact),
-			@strDepartment = NULL,
-			@strMobile     = NULL,
-			@strPhone      = ISNULL(ssvnd_phone,'''') + '' '' + ISNULL(ssvnd_phone_ext,''''),
-			@strPhone2     = NULL,
-			@strEmail      = NULL,
-			@strEmail2     = NULL,
-			@strFax        = NULL,
-			@strNotes      = NULL,
-			@strContactMethod = NULL,
-			@strPassword = NULL,
-			@strUserType = NULL,
-			@strTimezone = NULL,
-			@ysnPortalAccess = NULL,
-			@imgContactPhoto = NULL,
+			SET @continue = 1;
 
-			--Locations
-			@strLocationName = @strName,
-			@strAddress      = dbo.fnTrim(ISNULL(ssvnd_addr_1,'''')) + CHAR(10) + dbo.fnTrim(ISNULL(ssvnd_addr_2,'''')),
-			@strCity         = ssvnd_city,
-			@strCountry      = (SELECT TOP 1 strCountry FROM tblSMZipCode WHERE strState COLLATE Latin1_General_CI_AS = ssvnd_st COLLATE Latin1_General_CI_AS),
-			@strState        = ssvnd_st,
-			@strZipCode      = ssvnd_zip,
-			@strLocationEmail        = NULL,
-			@strLocationNotes        = NULL,
-			@strW9Name       = NULL,
-			@intLocationShipViaId    = NULL,
-			@intShipViaId = NULL,
-			@intTaxCodeId    = NULL,
-			@intTermsId      = CASE WHEN ssvnd_terms_disc_pct = 0 AND ssvnd_terms_due_day = 0
-										AND ssvnd_terms_disc_day = 0 AND ssvnd_terms_cutoff_day = 0 THEN (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm= ''Due on Receipt'') 
-									WHEN ssvnd_terms_type = ''D'' THEN (SELECT TOP 1 intTermID FROM tblSMTerm
-													WHERE dblDiscountEP = ssvnd_terms_disc_pct
-													AND intBalanceDue = ssvnd_terms_due_day
-													AND intDiscountDay = ssvnd_terms_disc_day) 
-									WHEN ssvnd_terms_type = ''P'' THEN (SELECT TOP 1 intTermID FROM tblSMTerm 
-													WHERE intBalanceDue = ssvnd_terms_due_day
-													AND intDiscountDay = ssvnd_terms_disc_day
-													AND intDayofMonthDue = ssvnd_terms_cutoff_day)
-									ELSE NULL END
-										,
-			@intWarehouseId  = NULL,
-			
-			--Vendors
-			@intVendorType				= CASE WHEN ssvnd_co_per_ind = ''C'' THEN 0 ELSE 1 END,
-			@originVendor				= ssvnd_vnd_no,
-			@intCurrencyId				= (SELECT TOP 1 intConcurrencyId FROM tblSMCurrency WHERE strCurrency COLLATE Latin1_General_CI_AS = ssvnd_currency COLLATE Latin1_General_CI_AS),
-			@strVendorPayToId         	= ssvnd_pay_to,
-			@intPaymentMethodId       	= NULL,
-			@intVendorTaxCodeId     	= NULL,
-			@intGLAccountExpenseId    	= (SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CONVERT(NVARCHAR(50),ssvnd_gl_pur)),
-			@strVendorAccountNum      	= NULL,
-			@ysnPymtCtrlActive        	= CASE WHEN ssvnd_pay_ctl_ind = ''A'' THEN 1 ELSE 0 END,
-			@ysnPymtCtrlAlwaysDiscount	= CASE WHEN ssvnd_pay_ctl_ind = ''D'' THEN 1 ELSE 0 END,
-			@ysnPymtCtrlEFTActive     	= CASE WHEN ssvnd_pay_ctl_ind = ''E'' THEN 1 ELSE 0 END,
-			@ysnPymtCtrlHold          	= CASE WHEN ssvnd_pay_ctl_ind = ''H'' THEN 1 ELSE 0 END,
-			@ysnWithholding           	= CASE WHEN ssvnd_wthhld_yn = ''N'' THEN 0 ELSE 1 END,
-			@dblCreditLimit           	= ISNULL(ssvnd_future_bal,0),
-			@intCreatedUserId         	= NULL,
-			@intLastModifiedUserId    	= NULL,
-			@dtmLastModified          	= NULL,
-			@dtmCreated               	= NULL,
-			@strTaxState				= ssvnd_tax_st
-		FROM ssvndmst
-		WHERE ssvnd_vnd_no = @originVendor
-			--INNER JOIN tblSMZipCode ON #tmpssvndmst.ssvnd_st COLLATE Latin1_General_CI_AS = tblSMZipCode.strState COLLATE Latin1_General_CI_AS
-			--INNER JOIN tblSMCurrency ON #tmpssvndmst.ssvnd_currency COLLATE Latin1_General_CI_AS = tblSMCurrency.strCurrency COLLATE Latin1_General_CI_AS
-			--INNER JOIN tblGLCOACrossReference ON CONVERT(NVARCHAR(50),#tmpssvndmst.ssvnd_gl_pur) = tblGLCOACrossReference.strExternalID
+            SELECT TOP 1
+                --Entities
+                @strName = CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
+                            ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
+                                + '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
+                            END,
+                @strWebsite = '''',
+                @strInternalNotes = '''',
+                @ysnPrint1099   = CASE WHEN ssvnd_1099_yn = ''Y'' THEN 1 ELSE 0 END,
+                @str1099Name    = ssvnd_1099_name,
+                @str1099Form	= '''',
+                @str1099Type	= '''',
+                @strFederalTaxId	= ssvnd_fed_tax_id,
+                @dtmW9Signed	= CASE WHEN ssvnd_w9_signed_rev_dt = 0 THEN NULL ELSE CONVERT(DATE, CAST(ssvnd_w9_signed_rev_dt AS CHAR(12)), 112) END,
+
+                --Contacts
+                @strTitle = '''',
+                @strContactName = dbo.fnTrim(ssvnd_contact),
+                @strDepartment = NULL,
+                @strMobile     = NULL,
+                @strPhone      = ISNULL(ssvnd_phone,'''') + '' '' + ISNULL(ssvnd_phone_ext,''''),
+                @strPhone2     = NULL,
+                @strEmail      = NULL,
+                @strEmail2     = NULL,
+                @strFax        = NULL,
+                @strNotes      = NULL,
+                @strContactMethod = NULL,
+                @strPassword = NULL,
+                @strUserType = NULL,
+                @strTimezone = NULL,
+                @ysnPortalAccess = NULL,
+                @imgContactPhoto = NULL,
+
+                --Locations
+                @strLocationName = @strName,
+                @strAddress      = dbo.fnTrim(ISNULL(ssvnd_addr_1,'''')) + CHAR(10) + dbo.fnTrim(ISNULL(ssvnd_addr_2,'''')),
+                @strCity         = ssvnd_city,
+                    @strCountry      = ''United States'',--(SELECT TOP 1 strCountry FROM tblSMZipCode WHERE strState COLLATE Latin1_General_CI_AS = ssvnd_st COLLATE Latin1_General_CI_AS),
+                @strState        = ssvnd_st,
+                @strZipCode      = ssvnd_zip,
+                @strLocationEmail        = NULL,
+                @strLocationNotes        = NULL,
+                @strW9Name       = NULL,
+                @intLocationShipViaId    = NULL,
+                @intShipViaId = NULL,
+                @intTaxCodeId    = NULL,
+                @intTermsId      = CASE WHEN ssvnd_terms_disc_pct = 0 AND ssvnd_terms_due_day = 0
+                                            AND ssvnd_terms_disc_day = 0 AND ssvnd_terms_cutoff_day = 0 THEN (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm= ''Due on Receipt'')
+                                        WHEN ssvnd_terms_type = ''D'' THEN (SELECT TOP 1 intTermID FROM tblSMTerm
+                                                        WHERE dblDiscountEP = ssvnd_terms_disc_pct
+                                                        AND intBalanceDue = ssvnd_terms_due_day
+                                                        AND intDiscountDay = ssvnd_terms_disc_day)
+                                        WHEN ssvnd_terms_type = ''P'' THEN (SELECT TOP 1 intTermID FROM tblSMTerm
+                                                        WHERE intBalanceDue = ssvnd_terms_due_day
+                                                        AND intDiscountDay = ssvnd_terms_disc_day
+                                                        AND intDayofMonthDue = ssvnd_terms_cutoff_day)
+                                        ELSE NULL END
+                                            ,
+                @intWarehouseId  = NULL,
+
+                --Vendors
+                @intVendorType				= CASE WHEN ssvnd_co_per_ind = ''C'' THEN 0 ELSE 1 END,
+                @originVendor				= ssvnd_vnd_no,
+                @intCurrencyId				= (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency COLLATE Latin1_General_CI_AS = ssvnd_currency COLLATE Latin1_General_CI_AS),
+                @strVendorPayToId         	= ssvnd_pay_to,
+                @intPaymentMethodId       	= NULL,
+                @intVendorTaxCodeId     	= NULL,
+                @intGLAccountExpenseId    	= (SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CONVERT(NVARCHAR(50),ssvnd_gl_pur)),
+                @strVendorAccountNum      	= NULL,
+                @ysnPymtCtrlActive        	= CASE WHEN ssvnd_pay_ctl_ind = ''A'' THEN 1 ELSE 0 END,
+                @ysnPymtCtrlAlwaysDiscount	= CASE WHEN ssvnd_pay_ctl_ind = ''D'' THEN 1 ELSE 0 END,
+                @ysnPymtCtrlEFTActive     	= CASE WHEN ssvnd_pay_ctl_ind = ''E'' THEN 1 ELSE 0 END,
+                @ysnPymtCtrlHold          	= CASE WHEN ssvnd_pay_ctl_ind = ''H'' THEN 1 ELSE 0 END,
+                @ysnWithholding           	= CASE WHEN ssvnd_wthhld_yn = ''N'' THEN 0 ELSE 1 END,
+                @dblCreditLimit           	= ISNULL(ssvnd_future_bal,0),
+                @intCreatedUserId         	= NULL,
+                @intLastModifiedUserId    	= NULL,
+                @dtmLastModified          	= NULL,
+                @dtmCreated               	= NULL,
+                @strTaxState				= ssvnd_tax_st
+            FROM ssvndmst
+            WHERE ssvnd_vnd_no = @originVendor
+		END
+		ELSE IF(EXISTS(SELECT 1 FROM apchkmst WHERE apchk_vnd_no = @originVendor))
+		BEGIN
+
+			SET @continue = 1;
+
+			SELECT
+				TOP 1
+				--Entities
+				@strName = A.apchk_vnd_no,
+				@strWebsite = '''',
+				@strInternalNotes = '''',
+				@ysnPrint1099   = 0,
+				@str1099Name    = '''',
+				@str1099Form	= '''',
+				@str1099Type	= '''',
+				@strFederalTaxId	= NULL,
+				@dtmW9Signed	= NULL,
+
+				--Contacts
+				@strTitle = '''',
+				@strContactName = A.apchk_vnd_no,
+				@strDepartment = NULL,
+				@strMobile     = NULL,
+				@strPhone      = NULL,
+				@strPhone2     = NULL,
+				@strEmail      = NULL,
+				@strEmail2     = NULL,
+				@strFax        = NULL,
+				@strNotes      = NULL,
+				@strContactMethod = NULL,
+				@strPassword = NULL,
+				@strUserType = NULL,
+				@strTimezone = NULL,
+				@ysnPortalAccess = NULL,
+				@imgContactPhoto = NULL,
+
+				--Locations
+				@strLocationName = @strName,
+				@strAddress      = dbo.fnTrim(ISNULL(apchk_addr_1,'''')) + CHAR(10) + dbo.fnTrim(ISNULL(apchk_addr_2,'''')),
+				@strCity         = apchk_city,
+				@strCountry      = ''United States'',
+				@strState        = apchk_st,
+				@strZipCode      = apchk_zip,
+				@strLocationEmail        = NULL,
+				@strLocationNotes        = NULL,
+				@strW9Name       = NULL,
+				@intLocationShipViaId    = NULL,
+				@intShipViaId = NULL,
+				@intTaxCodeId    = NULL,
+				@intTermsId      = (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt''),
+				@intWarehouseId  = NULL,
+
+				--Vendors
+				@intVendorType				= 1,
+				@originVendor				= apchk_vnd_no,
+				@intCurrencyId				= (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = ''USD''),
+				@strVendorPayToId         	= NULL,
+				@intPaymentMethodId       	= NULL,
+				@intVendorTaxCodeId     	= NULL,
+				@intGLAccountExpenseId    	= NULL,
+				@strVendorAccountNum      	= NULL,
+				@ysnPymtCtrlActive        	= 0,
+				@ysnPymtCtrlAlwaysDiscount	= 0,
+				@ysnPymtCtrlEFTActive     	= 0,
+				@ysnPymtCtrlHold          	= 1,
+				@ysnWithholding           	= 0,
+				@dblCreditLimit           	= 0,
+				@intCreatedUserId         	= NULL,
+				@intLastModifiedUserId    	= NULL,
+				@dtmLastModified          	= NULL,
+				@dtmCreated               	= NULL,
+				@strTaxState				= NULL
+			FROM apchkmst A
+			WHERE A.apchk_vnd_no IN (
+				SELECT
+				DISTINCT B.apivc_vnd_no
+				FROM apivcmst B
+				WHERE B.apivc_vnd_no NOT IN (SELECT ssvnd_vnd_no FROM ssvndmst)
+			) AND A.apchk_vnd_no = @originVendor
+
+		END
+
+		IF(@continue = 1)
+		BEGIN
 
 		--INSERT Entity record for Vendor
 		INSERT [dbo].[tblEntity]	([strName], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed])
@@ -373,7 +473,8 @@ BEGIN
 			RETURN;
 		END
 
-		PRINT @originVendor
+		END
+
 		DELETE FROM #tmpssvndmst WHERE ssvnd_vnd_no = @originVendor
 
 	END

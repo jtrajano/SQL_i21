@@ -176,7 +176,7 @@ GO
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 18
 			,[strTransactionType]	= N'Debit Memo'
-			,[strPrefix]			= N'DB-'
+			,[strPrefix]			= N'DM-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Purchasing'
 			,[ysnEnable]			= 1

@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblAPBill] (
     [intBillId]            INT             IDENTITY (1, 1) NOT NULL,
-    [intBillBatchId]       INT             NOT NULL DEFAULT 0,
+    [intBillBatchId]       INT             NULL ,
     [strVendorOrderNumber] NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [intTermsId]           INT             NOT NULL DEFAULT 0,
     [intTaxId]         INT             NULL ,
@@ -14,6 +14,7 @@
     [strBillId]            NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [dblAmountDue]         DECIMAL (18, 6) NOT NULL DEFAULT 0,
     [dtmDatePaid]          DATETIME        NULL ,
+    [dtmDiscountDate]      DATETIME        NULL,
     [intUserId]            INT             NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     [dtmBillDate] DATETIME NOT NULL DEFAULT GETDATE(), 
@@ -46,22 +47,24 @@ ON tblAPBill
 AFTER INSERT
 AS
 
-DECLARE @inserted TABLE(intBillId INT)
+DECLARE @inserted TABLE(intBillId INT, intTransactionType INT)
 DECLARE @count INT = 0
 DECLARE @intBillId INT
+DECLARE @type INT
 DECLARE @BillId NVARCHAR(50)
 
 INSERT INTO @inserted
-SELECT intBillId FROM INSERTED ORDER BY intBillId
+SELECT intBillId, intTransactionType FROM INSERTED ORDER BY intBillId
 
 WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
 BEGIN
-	
-	EXEC uspAPFixStartingNumbers 9
-	--IF(OBJECT_ID('tempdb..#tblTempAPByPassFixStartingNumber') IS NOT NULL) RETURN;
-	EXEC uspSMGetStartingNumber 9, @BillId OUT
 
-	SELECT TOP 1 @intBillId = intBillId FROM @inserted
+	SELECT TOP 1 @intBillId = intBillId, @type = intTransactionType FROM @inserted
+
+	IF @type = 1
+		EXEC uspSMGetStartingNumber 9, @BillId OUT
+	ELSE IF @type = 3
+		EXEC uspSMGetStartingNumber 18, @BillId OUT
 	
 	IF(@BillId IS NOT NULL)
 	BEGIN

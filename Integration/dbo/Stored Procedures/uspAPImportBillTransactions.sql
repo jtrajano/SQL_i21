@@ -7,7 +7,7 @@ GO
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN
 	EXEC ('
-		CREATE PROCEDURE [dbo].[uspAPImportBillTransactions]
+	CREATE PROCEDURE [dbo].[uspAPImportBillTransactions]
 		@DateFrom	DATE = NULL,
 		@DateTo	DATE = NULL,
 		@PeriodFrom	INT = NULL,
@@ -27,26 +27,34 @@ BEGIN
 	DECLARE @BillBatchId INT
 	DECLARE @ImportedRecords INT
 	DECLARE @IsPosted BIT
+	DECLARE @IsPaid BIT
+
+	--Payment variable
+	DECLARE @bankAccount INT,
+				@paymentMethod INT,
+				@intVendorId INT,
+				@paymentInfo NVARCHAR(10),
+				@notes NVARCHAR(500),
+				@payment DECIMAL(18, 6) = NULL,
+				@datePaid DATETIME = NULL,
+				@post BIT = 0,
+				@discount DECIMAL(18,6) = 0,
+				@interest DECIMAL(18,6) = 0,
+				@withHeld DECIMAL(18,6) = 0,
+				@billIds NVARCHAR(MAX)
 
 	--Create table that holds all the imported transaction
 	IF(OBJECT_ID(''dbo.tblAPTempBill'') IS NULL)
 	BEGIN
-		SET IDENTITY_INSERT tblAPTempBill ON
+        EXEC(''
+        --SELECT aptrx_vnd_no, aptrx_ivc_no INTO tblAPTempBill FROM aptrxmst WHERE aptrx_trans_type IN (''''I'''',''''C'''')
 
-		INSERT INTO tblAPTempBill([aptrx_vnd_no], [aptrx_ivc_no])
-		SELECT 
-			[aptrx_vnd_no], [aptrx_ivc_no]
-		FROM aptrxmst A
-		INNER JOIN tblAPBill B
-			ON B.strVendorOrderNumber COLLATE Latin1_General_CI_AS = A.aptrx_ivc_no COLLATE Latin1_General_CI_AS
-		UNION
-		SELECT 
-			[apivc_vnd_no],[apivc_ivc_no] 
-		FROM apivcmst A
-		INNER JOIN tblAPBill B
-			ON B.strVendorOrderNumber COLLATE Latin1_General_CI_AS = A.apivc_ivc_no COLLATE Latin1_General_CI_AS
+		--INSERT INTO tblAPTempBill
+		--SELECT apivc_vnd_no, apivc_ivc_no FROM apivcmst WHERE apivc_trans_type IN (''''I'''',''''C'''')
+		SELECT apivc_vnd_no, apivc_ivc_no INTO tblAPTempBill FROM apivcmst WHERE apivc_trans_type IN (''''I'''',''''C'''')
+		'')
 
-		SET IDENTITY_INSERT tblAPTempBill OFF
+	END
 	END
 
 	IF(@DateFrom IS NULL AND @PeriodFrom IS NULL)
@@ -72,50 +80,43 @@ BEGIN
 			[dblDiscount],
 			[dblWithheld])
 		OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid, inserted.strVendorOrderNumber INTO @InsertedData
-		--Unposted
-		SELECT 
-			[intVendorId]			=	D.intEntityId,
-			--[strVendorId]			=	A.aptrx_vnd_no,
-			--[strBillId] 			=	A.aptrx_ivc_no,
-			[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
-			[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation 
-												WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
-													WHERE strVendorId COLLATE Latin1_General_CI_AS = A.aptrx_vnd_no COLLATE Latin1_General_CI_AS)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
-			[intTaxId] 			=	NULL,
-			[dtmDate] 				=	CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-			[dtmBillDate] 			=	CASE WHEN ISDATE(A.aptrx_sys_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-			[dtmDueDate] 			=	CASE WHEN ISDATE(A.aptrx_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-			[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
-			[strDescription] 		=	A.aptrx_comment,
-			[dblTotal] 				=	(CASE WHEN A.aptrx_trans_type = ''C'' THEN (A.aptrx_orig_amt * -1) ELSE A.aptrx_orig_amt END),
-			[dblAmountDue]			=	(CASE WHEN A.aptrx_trans_type = ''C'' THEN (A.aptrx_orig_amt * -1) ELSE A.aptrx_orig_amt END),
-			[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CI_AS = RTRIM(A.aptrx_user_id) COLLATE Latin1_General_CI_AS),@UserId),
-			[ysnPosted]				=	0,
-			[ysnPaid]				=	0,
-			[intTransactionType]	=	(CASE WHEN A.aptrx_trans_type = ''C'' THEN 3 ELSE 1 END),
-			[dblDiscount]			=	A.aptrx_disc_amt,
-			[dblWithheld]			=	A.aptrx_wthhld_amt
-		FROM aptrxmst A
-			--LEFT JOIN apeglmst B
-			--	ON A.aptrx_ivc_no = B.apegl_ivc_no
-			LEFT JOIN apcbkmst B
-				ON A.aptrx_cbk_no = B.apcbk_no
-			LEFT JOIN tblAPTempBill C
-				ON A.aptrx_ivc_no = C.aptrx_ivc_no
-			INNER JOIN tblAPVendor D
-				ON A.aptrx_vnd_no COLLATE Latin1_General_CI_AS = D.strVendorId COLLATE Latin1_General_CI_AS
-			WHERE C.aptrx_ivc_no IS NULL AND A.aptrx_trans_type IN (''I'',''C'')
+--		--Unposted
+--		SELECT
+--			[intVendorId]			=	D.intEntityId,
+--			--[strVendorId]			=	A.aptrx_vnd_no,
+--			--[strBillId] 			=	A.aptrx_ivc_no,
+--			[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
+--			[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation
+--												WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor
+--													WHERE strVendorId COLLATE Latin1_General_CI_AS = A.aptrx_vnd_no COLLATE Latin1_General_CI_AS)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
+--			[intTaxId] 			=	NULL,
+--			[dtmDate] 				=	CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
+--			[dtmBillDate] 			=	CASE WHEN ISDATE(A.aptrx_sys_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
+--			[dtmDueDate] 			=	CASE WHEN ISDATE(A.aptrx_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
+--			[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
+--			[strDescription] 		=	A.aptrx_comment,
+--			[dblTotal] 				=	(CASE WHEN A.aptrx_trans_type = ''C'' THEN (A.aptrx_orig_amt * -1) ELSE A.aptrx_orig_amt END),
+--			[dblAmountDue]			=	(CASE WHEN A.aptrx_trans_type = ''C'' THEN (A.aptrx_orig_amt * -1) ELSE A.aptrx_orig_amt END),
+--			[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CI_AS = RTRIM(A.aptrx_user_id) COLLATE Latin1_General_CI_AS),@UserId),
+--			[ysnPosted]				=	0,
+--			[ysnPaid]				=	0,
+--			[intTransactionType]	=	(CASE WHEN A.aptrx_trans_type = ''C'' THEN 3 ELSE 1 END),
+--			[dblDiscount]			=	A.aptrx_disc_amt,
+--			[dblWithheld]			=	A.aptrx_wthhld_amt
+--		FROM aptrxmst A
+--			--LEFT JOIN apeglmst B
+--			--	ON A.aptrx_ivc_no = B.apegl_ivc_no
+--			LEFT JOIN apcbkmst B
+--				ON A.aptrx_cbk_no = B.apcbk_no
+--			LEFT JOIN tblAPTempBill C
+--				ON A.aptrx_ivc_no = C.aptrx_ivc_no
+--			INNER JOIN tblAPVendor D
+--				ON A.aptrx_vnd_no COLLATE Latin1_General_CI_AS = D.strVendorId COLLATE Latin1_General_CI_AS
+--			WHERE C.aptrx_ivc_no IS NULL AND A.aptrx_trans_type IN (''I'',''C'')
 
-			--GROUP BY A.aptrx_ivc_no, 
-			--A.aptrx_vnd_no, 
-			--A.aptrx_sys_rev_dt,
-			--A.aptrx_gl_rev_dt,
-			--A.aptrx_due_rev_dt,
-			--A.aptrx_comment,
-			--A.aptrx_orig_amt,
-			--B.apcbk_gl_ap
+
 		--Posted
-		UNION
+--		UNION
 		SELECT
 			[intVendorId]			=	D.intEntityId, 
 			--[strVendorId]			=	A.apivc_vnd_no,
@@ -143,11 +144,9 @@ BEGIN
 		FROM apivcmst A
 			LEFT JOIN apcbkmst B
 				ON A.apivc_cbk_no = B.apcbk_no
-			LEFT JOIN tblAPTempBill C
-				ON A.apivc_ivc_no = C.aptrx_ivc_no
 			INNER JOIN tblAPVendor D
 				ON A.apivc_vnd_no COLLATE Latin1_General_CI_AS = D.strVendorId COLLATE Latin1_General_CI_AS
-			WHERE C.aptrx_ivc_no IS NULL AND A.apivc_trans_type IN (''I'',''C'')
+			WHERE A.apivc_trans_type IN (''I'',''C'')
 				
 		SELECT @ImportedRecords = @@ROWCOUNT
 
@@ -182,7 +181,7 @@ BEGIN
 		WHILE((SELECT TOP 1 1 FROM @InsertedData) IS NOT NULL)
 		BEGIN
 
-			SELECT TOP 1 @BillId = intBillId, @IsPosted = ysnPosted FROM @InsertedData
+			SELECT TOP 1 @BillId = intBillId, @IsPosted = ysnPosted, @IsPaid = ysnPaid FROM @InsertedData
 
 			INSERT INTO tblAPBillBatch(intAccountId, ysnPosted, dblTotal, intEntityId)
 			--OUTPUT inserted.intBillBatchId, @BillId INTO @insertedBillBatch
@@ -203,6 +202,87 @@ BEGIN
 			WHERE intBillId = @BillId
 
 			DELETE FROM @InsertedData WHERE intBillId = @BillId
+		END;
+
+		--CREATE PAYMENT
+
+		WITH CTE (apchk_cbk_no, apchk_vnd_no, apchk_chk_amt, apchk_rev_dt, apchk_chk_no, apchk_disc_amt, intBillId)
+		AS (
+			SELECT
+			A.apchk_cbk_no
+			,A.apchk_vnd_no
+			,A.apchk_chk_amt
+			,A.apchk_rev_dt
+			,A.apchk_chk_no
+			,A.apchk_disc_amt
+			,C.intBillId
+			--,B.apivc_orig_amt
+			FROM apchkmst A
+			LEFT JOIN apivcmst B
+			ON A.apchk_vnd_no = B.apivc_vnd_no
+			AND A.apchk_chk_no = B.apivc_chk_no
+			AND A.apchk_rev_dt = B.apivc_chk_rev_dt
+			AND A.apchk_cbk_no = B.apivc_cbk_no
+			INNER JOIN (tblAPBill C INNER JOIN tblAPVendor D ON C.intVendorId = D.intEntityId)
+				ON B.apivc_ivc_no COLLATE Latin1_General_CI_AS = C.strVendorOrderNumber COLLATE Latin1_General_CI_AS
+				AND B.apivc_vnd_no COLLATE Latin1_General_CI_AS = D.strVendorId COLLATE Latin1_General_CI_AS
+			--ORDER BY A.apchk_rev_dt, A.apchk_cbk_no, A.apchk_chk_no
+		)
+		SELECT
+			A.apchk_cbk_no
+			,A.apchk_vnd_no
+			,A.apchk_chk_amt
+			,A.apchk_rev_dt
+			,A.apchk_chk_no
+			,A.apchk_disc_amt
+			,STUFF((SELECT '', '' + CAST(B.intBillId AS VARCHAR(10))
+				   FROM CTE B
+				   WHERE A.apchk_vnd_no = B.apchk_vnd_no
+					AND A.apchk_chk_no = B.apchk_chk_no
+					AND A.apchk_rev_dt = B.apchk_rev_dt
+					AND A.apchk_cbk_no = B.apchk_cbk_no
+				   --ORDER BY B.apchk_rev_dt, B.apchk_cbk_no, B.apchk_chk_no
+				  FOR XML PATH('''')), 1, 2, '''') AS BillIds
+		INTO #tmpBillsPayment
+		FROM CTE A
+		GROUP BY A.apchk_cbk_no
+			,A.apchk_vnd_no
+			,A.apchk_chk_amt
+			,A.apchk_rev_dt
+			,A.apchk_chk_no
+			,A.apchk_disc_amt
+		--ORDER BY A.apchk_rev_dt, A.apchk_cbk_no, A.apchk_chk_no
+
+		WHILE EXISTS(SELECT 1 FROM #tmpBillsPayment)
+		BEGIN
+
+			SELECT TOP 1
+				@bankAccount = C.intBankAccountId,
+				@intVendorId = B.intEntityId,
+				@paymentInfo = A.apchk_chk_no,
+				@payment = A.apchk_chk_amt,
+				@datePaid = CASE WHEN ISDATE(A.apchk_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apchk_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
+				@paymentMethod = (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = ''Check''),
+				@billIds = A.BillIds
+			FROM #tmpBillsPayment A
+				INNER JOIN tblAPVendor B
+					ON A.apchk_vnd_no COLLATE Latin1_General_CI_AS = B.strVendorId COLLATE Latin1_General_CI_AS
+				INNER JOIN tblCMBankAccount C
+					ON A.apchk_cbk_no COLLATE Latin1_General_CI_AS = C.strCbkNo COLLATE Latin1_General_CI_AS
+
+			EXEC uspAPCreatePayment @userId = @UserId,
+					@bankAccount = @bankAccount,
+					@paymentMethod = @paymentMethod,
+					@paymentInfo = @paymentInfo,
+					@notes = @notes,
+					@payment = @payment,
+					@datePaid = @datePaid,
+					@isPost = 1,
+					@post = @post,
+					@billId = @billIds
+
+			DELETE TOP(1) FROM #tmpBillsPayment
+
 		END
 
 		SET @Total = @ImportedRecords;
@@ -230,53 +310,45 @@ BEGIN
 			[dblWithheld])
 		OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid, inserted.strVendorOrderNumber INTO @InsertedData
 		--Unposted
-		SELECT
-			[intVendorId]			=	D.intEntityId,  
-			--[strVendorId]			=	A.aptrx_vnd_no,
-			--[strBillId] 			=	A.aptrx_ivc_no,
-			[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
-			[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation 
-												WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
-													WHERE strVendorId COLLATE Latin1_General_CI_AS = A.aptrx_vnd_no COLLATE Latin1_General_CI_AS)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
-			[intTaxId] 			=	NULL,
-			[dtmDate] 				=	CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-			[dtmBillDate] 			=	CASE WHEN ISDATE(A.aptrx_sys_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-			[dtmDueDate] 			=	CASE WHEN ISDATE(A.aptrx_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-			[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
-			[strDescription] 		=	A.aptrx_comment,
-			[dblTotal] 				=	A.aptrx_orig_amt,
-			[dblAmountDue]			=	A.aptrx_orig_amt,--CASE WHEN B.apegl_ivc_no IS NULL THEN A.aptrx_orig_amt ELSE A.aptrx_orig_amt - SUM(ISNULL(B.apegl_gl_amt,0)) END
-			[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CI_AS = RTRIM(A.aptrx_user_id) COLLATE Latin1_General_CI_AS),@UserId),
-			[ysnPosted]				=	0,
-			[ysnPaid] 				=	0,
-			[intTransactionType]	=	(CASE WHEN A.aptrx_trans_type = ''C'' THEN 3 ELSE 1 END),
-			[dblDiscount]			=	A.aptrx_disc_amt,
-			[dblWithheld]			=	A.aptrx_wthhld_amt
-		FROM aptrxmst A
-			--LEFT JOIN apeglmst B
-			--	ON A.aptrx_ivc_no = B.apegl_ivc_no
-			LEFT JOIN apcbkmst B
-				ON A.aptrx_cbk_no = B.apcbk_no
-			LEFT JOIN tblAPTempBill C
-				ON A.aptrx_ivc_no = C.aptrx_ivc_no
-			INNER JOIN tblAPVendor D
-				ON A.aptrx_vnd_no COLLATE Latin1_General_CI_AS = D.strVendorId COLLATE Latin1_General_CI_AS
-		WHERE --CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
-			 CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
-			 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
-			 AND A.aptrx_trans_type IN (''I'',''C'')
-			 AND C.aptrx_ivc_no IS NULL
+--		SELECT
+--			[intVendorId]			=	D.intEntityId,
+--			--[strVendorId]			=	A.aptrx_vnd_no,
+--			--[strBillId] 			=	A.aptrx_ivc_no,
+--			[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
+--			[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation
+--												WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor
+--													WHERE strVendorId COLLATE Latin1_General_CI_AS = A.aptrx_vnd_no COLLATE Latin1_General_CI_AS)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
+--			[intTaxId] 			=	NULL,
+--			[dtmDate] 				=	CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
+--			[dtmBillDate] 			=	CASE WHEN ISDATE(A.aptrx_sys_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
+--			[dtmDueDate] 			=	CASE WHEN ISDATE(A.aptrx_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
+--			[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
+--			[strDescription] 		=	A.aptrx_comment,
+--			[dblTotal] 				=	A.aptrx_orig_amt,
+--			[dblAmountDue]			=	A.aptrx_orig_amt,--CASE WHEN B.apegl_ivc_no IS NULL THEN A.aptrx_orig_amt ELSE A.aptrx_orig_amt - SUM(ISNULL(B.apegl_gl_amt,0)) END
+--			[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CI_AS = RTRIM(A.aptrx_user_id) COLLATE Latin1_General_CI_AS),@UserId),
+--			[ysnPosted]				=	0,
+--			[ysnPaid] 				=	0,
+--			[intTransactionType]	=	(CASE WHEN A.aptrx_trans_type = ''C'' THEN 3 ELSE 1 END),
+--			[dblDiscount]			=	A.aptrx_disc_amt,
+--			[dblWithheld]			=	A.aptrx_wthhld_amt
+--		FROM aptrxmst A
+--			--LEFT JOIN apeglmst B
+--			--	ON A.aptrx_ivc_no = B.apegl_ivc_no
+--			LEFT JOIN apcbkmst B
+--				ON A.aptrx_cbk_no = B.apcbk_no
+--			LEFT JOIN tblAPTempBill C
+--				ON A.aptrx_ivc_no = C.aptrx_ivc_no
+--			INNER JOIN tblAPVendor D
+--				ON A.aptrx_vnd_no COLLATE Latin1_General_CI_AS = D.strVendorId COLLATE Latin1_General_CI_AS
+--		WHERE --CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
+--			 CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
+--			 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
+--			 AND A.aptrx_trans_type IN (''I'',''C'')
+--			 AND C.aptrx_ivc_no IS NULL
 
-			--GROUP BY A.aptrx_ivc_no, 
-			--A.aptrx_vnd_no, 
-			--A.aptrx_sys_rev_dt,
-			--A.aptrx_gl_rev_dt,
-			--A.aptrx_due_rev_dt,
-			--A.aptrx_comment,
-			--A.aptrx_orig_amt,
-			--B.apcbk_gl_ap
 			--Posted
-		UNION
+--		UNION
 		SELECT
 			[intVendorId]			=	D.intEntityId,  
 			--[strVendorId]			=	A.apivc_vnd_no,
@@ -304,15 +376,11 @@ BEGIN
 		FROM apivcmst A
 			LEFT JOIN apcbkmst B
 				ON A.apivc_cbk_no = B.apcbk_no
-			LEFT JOIN tblAPTempBill C
-				ON A.apivc_ivc_no = C.aptrx_ivc_no
 			INNER JOIN tblAPVendor D
 				ON A.apivc_vnd_no COLLATE Latin1_General_CI_AS = D.strVendorId COLLATE Latin1_General_CI_AS
-		WHERE --CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
-			 CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
+		WHERE CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
 			 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
 			 AND A.apivc_trans_type IN (''I'',''C'')
-			 AND C.aptrx_ivc_no IS NULL
 		
 			SELECT @ImportedRecords = @@ROWCOUNT
 
@@ -355,16 +423,17 @@ BEGIN
 		--Add already imported bill
 		SET IDENTITY_INSERT tblAPTempBill ON
 
-		INSERT INTO tblAPTempBill([aptrx_vnd_no], [aptrx_ivc_no])
+		INSERT INTO tblAPTempBill([apivc_vnd_no], [apivc_ivc_no])
+		--SELECT
+		--	A.aptrx_vnd_no
+		--	,aptrx_ivc_no
+		--FROM aptrxmst A
+		--INNER JOIN @InsertedData B
+		--	ON A.aptrx_ivc_no = B.strBillId
+		--UNION
 		SELECT 
-			[aptrx_vnd_no],
-			[aptrx_ivc_no]
-		FROM aptrxmst A
-		INNER JOIN @InsertedData B
-			ON A.aptrx_ivc_no = B.strVendorOrderNumber
-		UNION
-		SELECT 
-			[apivc_vnd_no],[apivc_ivc_no] 
+			A.apivc_vnd_no
+			,apivc_ivc_no
 		FROM apivcmst A
 		INNER JOIN @InsertedData B
 			ON A.apivc_ivc_no = B.strVendorOrderNumber
@@ -376,7 +445,7 @@ BEGIN
 		WHILE((SELECT TOP 1 1 FROM @InsertedData) IS NOT NULL)
 		BEGIN
 
-			SELECT TOP 1 @BillId = intBillId, @IsPosted = ysnPosted FROM @InsertedData
+			SELECT TOP 1 @BillId = intBillId, @IsPosted = ysnPosted, @IsPaid = ysnPaid FROM @InsertedData
 
 			INSERT INTO tblAPBillBatch(intAccountId, ysnPosted, dblTotal, intEntityId)
 			--OUTPUT inserted.intBillBatchId, @BillId INTO @insertedBillBatch
@@ -397,12 +466,10 @@ BEGIN
 			WHERE intBillId = @BillId
 
 			DELETE FROM @InsertedData WHERE intBillId = @BillId
-		END
-	
+		END;
+		
 		SET @Total = @ImportedRecords;
-	END
+	END;
 
-
-	END
 	')
 END
