@@ -398,13 +398,13 @@ BEGIN
 	--	,A.apchk_rev_dt
 	--	,A.apchk_chk_no
 	--	,A.apchk_disc_amt
-	--	,STUFF((SELECT '','' + CAST(B.intBillId AS NVARCHAR(10))
+	--	,STUFF((SELECT '', '' + CAST(B.intBillId AS VARCHAR(10))
 	--		   FROM CTE B
 	--		   WHERE A.apchk_vnd_no = B.apchk_vnd_no
 	--			AND A.apchk_chk_no = B.apchk_chk_no
 	--			AND A.apchk_rev_dt = B.apchk_rev_dt
 	--			AND A.apchk_cbk_no = B.apchk_cbk_no
-	--		   ORDER BY B.apchk_rev_dt, B.apchk_cbk_no, B.apchk_chk_no
+	--		   --ORDER BY B.apchk_rev_dt, B.apchk_cbk_no, B.apchk_chk_no
 	--		  FOR XML PATH('''')), 1, 2, '''') AS BillIds
 	--INTO #tmpBillsPayment
 	--FROM CTE A
@@ -414,7 +414,7 @@ BEGIN
 	--	,A.apchk_rev_dt
 	--	,A.apchk_chk_no
 	--	,A.apchk_disc_amt
-	--ORDER BY A.apchk_rev_dt, A.apchk_cbk_no, A.apchk_chk_no
+	----ORDER BY A.apchk_rev_dt, A.apchk_cbk_no, A.apchk_chk_no
 
 	--WHILE EXISTS(SELECT 1 FROM #tmpBillsPayment)
 	--BEGIN

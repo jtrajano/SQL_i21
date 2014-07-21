@@ -24,11 +24,11 @@ BEGIN
 	--TODO Validations
 
 	--TODO Allow Multi Vendor
-	SELECT [intID] INTO #tmpBillsPayment FROM [dbo].fnGetRowsFromDelimitedValues(@billId)
+	SELECT [intID] INTO #tmpBillsId FROM [dbo].fnGetRowsFromDelimitedValues(@billId)
 
 	SELECT TOP 1 @vendorId = intEntityId 
 		FROM tblAPBill A
-		INNER JOIN  #tmpBillsPayment B
+		INNER JOIN  #tmpBillsId B
 			ON A.intBillId = B.intID
 		INNER JOIN tblAPVendor C
 			ON A.strVendorId = C.strVendorId
@@ -63,7 +63,7 @@ BEGIN
 		[dblAmountPaid]			= @payment,
 		[dblUnappliedAmount]	= 0,
 		[ysnPosted]				= @isPost,
-		[dblWithheldAmount]		= @withHeld,
+		[dblWithheldAmount]		= 0,
 		[intUserId]				= @userId,
 		[intConcurrencyId]		= 0
 	
@@ -77,6 +77,7 @@ BEGIN
 		[intAccountId],
 		[dtmDueDate],
 		[dblDiscount],
+		[dblWithheld],
 		[dblAmountDue],
 		[dblPayment],
 		[dblInterest],
@@ -94,11 +95,11 @@ BEGIN
 		[dblInterest]	= 0, --TODO
 		[dblTotal]		= A.dblTotal
 	FROM tblAPBill A
-	WHERE A.intBillId IN (SELECT [intID] FROM #tmpBillsPayment)
+	WHERE A.intBillId IN (SELECT [intID] FROM #tmpBillsId)
 	'
 
 	EXEC sp_executesql @queryPayment,
-	 N'@billId INT,
+	 N'@billId NVARCHAR(MAX),
 	 @userId NVARCHAR(50),
 	 @bankAccount INT,
 	 @paymentMethod INT,
