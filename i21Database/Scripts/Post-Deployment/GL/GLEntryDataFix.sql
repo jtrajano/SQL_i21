@@ -76,17 +76,42 @@ UPDATE tblGLJournal SET strJournalType = 'Adjusted Origin Journal' WHERE strJour
 
 GO
 	PRINT N'END Normalize strJournalType'
-	PRINT N'BEGIN Move all Accounts Types (Sales & Cost Of Goods Sold) to Account Groups (Sales & Cost Of Goods Sold)'
+	PRINT N'BEGIN Move all Accounts Types (Sales & Cost Of Goods Sold) to Account Groups (Sales & Cost Of Goods Sold): ACCOUNT ID'
 GO
 
-UPDATE tblGLAccount SET intAccountGroupId = (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = 'Sales')
-						WHERE intAccountGroupId IN (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountType = 'Sales')
+UPDATE tblGLAccount SET intAccountGroupId = (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = 'Sales' AND intParentGroupId > 0)
+				WHERE intAccountGroupId IN (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountType = 'Sales')
 
-UPDATE tblGLAccount SET intAccountGroupId = (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = 'Cost Of Goods Sold')
-						WHERE intAccountGroupId IN (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountType = 'Cost Of Goods Sold')
-
-DELETE tblGLAccountGroup WHERE strAccountType IN ('Sales','Cost Of Goods Sold')
+UPDATE tblGLAccount SET intAccountGroupId = (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = 'Cost Of Goods Sold' AND intParentGroupId > 0)
+				WHERE intAccountGroupId IN (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountType = 'Cost Of Goods Sold')
 
 GO
-	PRINT N'END Move all Accounts Types (Sales & Cost Of Goods Sold) to Account Groups (Sales & Cost Of Goods Sold)'
+	PRINT N'END Move all Accounts Types (Sales & Cost Of Goods Sold) to Account Groups (Sales & Cost Of Goods Sold): ACCOUNT ID'
+	PRINT N'BEGIN Move all Accounts Types (Sales & Cost Of Goods Sold) to Account Groups (Sales & Cost Of Goods Sold): ACCOUNT SEGMENT'
+GO
+
+UPDATE tblGLAccountSegment SET intAccountGroupId = (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = 'Sales' AND intParentGroupId > 0)
+				WHERE intAccountGroupId IN (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountType = 'Sales')
+								
+UPDATE tblGLAccountSegment SET intAccountGroupId = (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = 'Cost Of Goods Sold' AND intParentGroupId > 0)
+				WHERE intAccountGroupId IN (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountType = 'Cost Of Goods Sold')	
+
+GO
+	PRINT N'END Move all Accounts Types (Sales & Cost Of Goods Sold) to Account Groups (Sales & Cost Of Goods Sold): ACCOUNT SEGMENT'
+	PRINT N'BEGIN Move all Accounts Types (Sales & Cost Of Goods Sold) to Account Groups (Sales & Cost Of Goods Sold): ACCOUNT GROUP'
+GO
+
+UPDATE tblGLAccountGroup SET strAccountType = 'Revenue' WHERE strAccountType = 'Sales'
+UPDATE tblGLAccountGroup SET strAccountType = 'Expense' WHERE strAccountType = 'Cost of Goods Sold'
+
+UPDATE tblGLAccountGroup SET intParentGroupId = (select intAccountGroupId from tblGLAccountGroup where strAccountGroup = 'Sales' and intParentGroupId > 0)
+				WHERE intParentGroupId = (select intAccountGroupId from tblGLAccountGroup where strAccountGroup = 'Sales' and intParentGroupId = 0)
+UPDATE tblGLAccountGroup SET intParentGroupId = (select intAccountGroupId from tblGLAccountGroup where strAccountGroup = 'Cost of Goods Sold' and intParentGroupId > 0)
+				WHERE intParentGroupId = (select intAccountGroupId from tblGLAccountGroup where strAccountGroup = 'Cost of Goods Sold' and intParentGroupId = 0)
+
+DELETE tblGLAccountGroup WHERE strAccountGroup = 'Sales' AND intParentGroupId = 0
+DELETE tblGLAccountGroup WHERE strAccountGroup = 'Cost Of Goods Sold' AND intParentGroupId = 0
+
+GO
+	PRINT N'END Move all Accounts Types (Sales & Cost Of Goods Sold) to Account Groups (Sales & Cost Of Goods Sold): ACCOUNT GROUP'
 GO

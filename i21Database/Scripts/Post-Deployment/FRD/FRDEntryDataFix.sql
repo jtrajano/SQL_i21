@@ -42,9 +42,11 @@ GO
 
 UPDATE tblFRRowDesign SET strAccountsUsed = REPLACE(strAccountsUsed,'[Type] = ''Sales''','[Group] = ''Sales''') WHERE strAccountsUsed LIKE '%Type] = ''Sales''%'
 UPDATE tblFRRowDesign SET strAccountsUsed = REPLACE(strAccountsUsed,'[Type] = ''Cost of Goods Sold''','[Group] = ''Cost of Goods Sold''') WHERE strAccountsUsed LIKE '%Type] = ''Cost of Goods Sold''%'
+UPDATE tblFRRowDesign SET strAccountsUsed = REPLACE(strAccountsUsed,'[Type] = ''Expenses''','[Type] = ''Expense''') WHERE strAccountsUsed LIKE '%Type] = ''Expenses''%'
 
 UPDATE tblFRRowDesignFilterAccount SET strName = 'Group' WHERE strName = 'Type' and strCriteria = 'Sales'
 UPDATE tblFRRowDesignFilterAccount SET strName = 'Group' WHERE strName = 'Type' and strCriteria = 'Cost of Goods Sold'
+UPDATE tblFRRowDesignFilterAccount SET strCriteria = 'Expense' WHERE strName = 'Type' and strCriteria = 'Expenses'
 
 GO
 	PRINT N'END UPDATE Account Types (Sales & COGS) to Account Groups (Sales & COGS)'
