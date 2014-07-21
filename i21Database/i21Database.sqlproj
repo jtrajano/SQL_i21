@@ -604,6 +604,7 @@
     <None Include="Scripts\Post-Deployment\AP\RestoreVendorId.sql" />
     <None Include="Scripts\Post-Deployment\FRD\FRDEntryDataFix.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\9_ZipCode.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountTemplate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

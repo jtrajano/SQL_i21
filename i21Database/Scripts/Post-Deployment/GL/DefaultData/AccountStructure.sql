@@ -1,8 +1,6 @@
 GO
 	PRINT N'BEGIN INSERT DEFAULT ACCOUNT STRUCTURE'
 GO
---	SET IDENTITY_INSERT [dbo].[tblGLAccountStructure] ON
---GO
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountStructure WHERE strType = N'Primary')
 	BEGIN
 		INSERT [dbo].[tblGLAccountStructure] ([intStructureType], [strStructureName], [strType], [intLength], [strMask], [intSort], [ysnBuild], [intConcurrencyId], [intStartingPosition], [intOriginLength], [strOtherSoftwareColumn]) VALUES (1, N'Primary Account', N'Primary', 5, N'0', 0, 1, 1, 4, NULL, NULL)
@@ -16,7 +14,5 @@ GO
 		INSERT [dbo].[tblGLAccountStructure] ([intStructureType], [strStructureName], [strType], [intLength], [strMask], [intSort], [ysnBuild], [intConcurrencyId], [intStartingPosition], [intOriginLength], [strOtherSoftwareColumn]) VALUES (3, N'Profit Center', N'Segment', 4, N'0', 2, 1, 1, 5, NULL, NULL)
 	END
 GO
---	SET IDENTITY_INSERT [dbo].[tblGLAccountStructure] OFF
---GO
 	PRINT N'END INSERT DEFAULT ACCOUNT STRUCTURE'
 GO
