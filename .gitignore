@@ -1,0 +1,10 @@
+.idea/
+.sencha/
+server/iRely.CashManagement_WebApi/iRely.CashManagement.BRL/bin/
+server/iRely.CashManagement_WebApi/iRely.CashManagement.BRL/obj/
+server/iRely.CashManagement_WebApi/iRely.CashManagement.Model/bin/
+server/iRely.CashManagement_WebApi/iRely.CashManagement.Model/obj/
+server/iRely.CashManagement_WebApi/iRely.CashManagement.WebApi/bin/
+server/iRely.CashManagement_WebApi/iRely.CashManagement.WebApi/obj/
+node_modules/
+ext
