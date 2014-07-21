@@ -5,7 +5,7 @@
 		,c.strCustomerNumber
 		,strCompanyName = e.strName
 		,strContactName = eec.strName
-		,ec.strEmail
+		,eec.strEmail
 		,ec.strTitle
 		,ec.strPhone
 		,ec.strMobile
