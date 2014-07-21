@@ -17,6 +17,10 @@ GO
 	BEGIN
 		INSERT [dbo].[tblGLAccountGroup] ([strAccountGroup], [strAccountType], [intParentGroupId], [intGroup], [intSort], [intConcurrencyId], [intAccountBegin], [intAccountEnd], [strAccountGroupNamespace]) VALUES (N'Revenue', N'Revenue', 0, 1, 40000, 1, 0, 0, N'src')
 	END
+	IF EXISTS(SELECT TOP 1 1 FROM tblGLAccountGroup WHERE strAccountGroup = N'Expenses' AND strAccountType = N'Expense')
+	BEGIN
+		UPDATE tblGLAccountGroup SET strAccountGroup = 'Expense' WHERE strAccountGroup = 'Expenses' AND intParentGroupId = 0
+	END
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountGroup WHERE strAccountGroup = N'Expense' AND strAccountType = N'Expense')
 	BEGIN
 		INSERT [dbo].[tblGLAccountGroup] ([strAccountGroup], [strAccountType], [intParentGroupId], [intGroup], [intSort], [intConcurrencyId], [intAccountBegin], [intAccountEnd], [strAccountGroupNamespace]) VALUES (N'Expense', N'Expense', 0, 1, 50000, 1, 0, 0, N'src')
