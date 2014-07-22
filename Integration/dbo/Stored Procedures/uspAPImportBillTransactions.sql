@@ -378,8 +378,8 @@ BEGIN
 			INNER JOIN tblAPVendor D
 				ON A.apivc_vnd_no COLLATE Latin1_General_CI_AS = D.strVendorId COLLATE Latin1_General_CI_AS
 			LEFT JOIN tblAPBill E
-				ON B.intEntityId COLLATE Latin1_General_CI_AS = E.intVendorId COLLATE Latin1_General_CI_AS
-				AND ON A.apivc_ivc_no COLLATE Latin1_General_CI_AS = E.strVendorOrderNumber COLLATE Latin1_General_CI_AS
+				ON D.intEntityId  = E.intVendorId 
+				AND A.apivc_ivc_no COLLATE Latin1_General_CI_AS = E.strVendorOrderNumber COLLATE Latin1_General_CI_AS
 				 
 		WHERE CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
 			 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
@@ -473,7 +473,7 @@ BEGIN
 		END;
 		
 		SET @Total = @ImportedRecords;
-	END;
-
+	END
+END
 	')
 END
