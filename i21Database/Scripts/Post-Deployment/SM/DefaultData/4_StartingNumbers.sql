@@ -182,6 +182,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Debit Memo')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 19
+			,[strTransactionType]	= N'Invoice'
+			,[strPrefix]			= N'SI-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Accounts Receivable'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Invoice')
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
