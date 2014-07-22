@@ -7,7 +7,7 @@ GO
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN
 	EXEC ('
-		CREATE PROCEDURE [dbo].[uspAPImportBillTransactions]
+	CREATE PROCEDURE [dbo].[uspAPImportBillTransactions]
 		@DateFrom	DATE = NULL,
 		@DateTo	DATE = NULL,
 		@PeriodFrom	INT = NULL,
@@ -43,19 +43,23 @@ BEGIN
 				@withHeld DECIMAL(18,6) = 0,
 				@billIds NVARCHAR(MAX)
 
-	--Create table that holds all the imported transaction
-	IF(OBJECT_ID(''dbo.tblAPTempBill'') IS NULL)
-	BEGIN
+	----Create table that holds all the imported transaction
+	--IF(OBJECT_ID(''dbo.tblAPTempBill'') IS NULL)
+	--BEGIN
 
-		EXEC(''
-		--SELECT aptrx_vnd_no, aptrx_ivc_no INTO tblAPTempBill FROM aptrxmst WHERE aptrx_trans_type IN (''''I'''',''''C'''')
+	--	EXEC(''
+	--	SELECT aptrx_vnd_no as apivc_vnd_no, aptrx_ivc_no as apivc_ivc_no INTO tblAPTempBill FROM aptrxmst WHERE aptrx_trans_type IN (''''I'''',''''C'''')
 
-		--INSERT INTO tblAPTempBill
-		--SELECT apivc_vnd_no, apivc_ivc_no FROM apivcmst WHERE apivc_trans_type IN (''''I'''',''''C'''')
-		SELECT apivc_vnd_no, apivc_ivc_no INTO tblAPTempBill FROM apivcmst WHERE apivc_trans_type IN (''''I'''',''''C'''')
-		'')
+	--	INSERT INTO tblAPTempBill
+	--	SELECT apivc_vnd_no, apivc_ivc_no FROM apivcmst WHERE apivc_trans_type IN (''''I'''',''''C'''')
+	--	--SELECT apivc_vnd_no, apivc_ivc_no INTO tblAPTempBill FROM apivcmst WHERE apivc_trans_type IN (''''I'''',''''C'''')
+	--	'')
 		
-	END
+	--	--backup data from aptrxmst on one time synchronization
+	--	SELECT * INTO tblAP_aptrxmst FROM aptrxmst
+	--	DELETE FROM aptrxmst
+		
+	--END
 	
 	IF(@DateFrom IS NULL AND @PeriodFrom IS NULL)
 	BEGIN
@@ -106,7 +110,7 @@ BEGIN
 		--	LEFT JOIN apcbkmst B
 		--		ON A.aptrx_cbk_no = B.apcbk_no
 		--WHERE A.aptrx_trans_type IN (''I'',''C'')
-		----Posted
+		--Posted
 		--UNION
 		SELECT 
 			[strVendorId]			=	A.apivc_vnd_no,
@@ -246,13 +250,13 @@ BEGIN
 		--	LEFT JOIN apcbkmst B
 		--		ON A.aptrx_cbk_no = B.apcbk_no
 		--	LEFT JOIN tblAPTempBill C
-		--		ON A.aptrx_ivc_no = C.aptrx_ivc_no
+		--		ON A.aptrx_ivc_no = C.apivc_ivc_no
 			
 		--WHERE CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
 		--	 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
 		--	 AND A.aptrx_trans_type IN (''I'',''C'')
 		--	 AND C.aptrx_ivc_no IS NULL
-		--	--Posted
+		--Posted
 		--UNION
 		SELECT 
 			[strVendorId]			=	A.apivc_vnd_no,
@@ -282,16 +286,18 @@ BEGIN
 		FROM apivcmst A
 			LEFT JOIN apcbkmst B
 				ON A.apivc_cbk_no = B.apcbk_no
-			LEFT JOIN tblAPTempBill C
+			--LEFT JOIN tblAPTempBill C
+			LEFT JOIN tblAPBill C
 				--ON A.apivc_ivc_no = C.aptrx_ivc_no
-				ON A.apivc_ivc_no = C.apivc_ivc_no
+				ON A.apivc_ivc_no COLLATE Latin1_General_CI_AS = C.strVendorOrderNumber COLLATE Latin1_General_CI_AS
 
 		WHERE CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
 			 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
 			 AND A.apivc_trans_type IN (''I'',''C'')
-			 AND C.apivc_ivc_no IS NULL
+			 --AND C.apivc_ivc_no IS NULL
+			 AND C.strVendorOrderNumber IS NULL
 		
-			SELECT @ImportedRecords = @@ROWCOUNT
+		SELECT @ImportedRecords = @@ROWCOUNT
 
 		--add detail
 		INSERT INTO tblAPBillDetail(
@@ -319,22 +325,47 @@ BEGIN
 				ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = C.aphgl_ivc_no COLLATE Latin1_General_CI_AS
 				
 		--Add already imported bill
-		SET IDENTITY_INSERT tblAPTempBill ON
-		INSERT INTO tblAPTempBill([apivc_vnd_no], [apivc_ivc_no])
+		--SET IDENTITY_INSERT tblAPTempBill ON
+		--INSERT INTO tblAPTempBill([apivc_vnd_no], [apivc_ivc_no])
+		----SELECT 
+		----	A.aptrx_vnd_no
+		----	,aptrx_ivc_no	 
+		----FROM aptrxmst A
+		----INNER JOIN @InsertedData B
+		----	ON A.aptrx_ivc_no = B.strBillId
+		----UNION
 		--SELECT 
-		--	A.aptrx_vnd_no
-		--	,aptrx_ivc_no	 
-		--FROM aptrxmst A
+		--	A.apivc_vnd_no
+		--	,apivc_ivc_no	 
+		--FROM apivcmst A
 		--INNER JOIN @InsertedData B
-		--	ON A.aptrx_ivc_no = B.strBillId
-		--UNION
-		SELECT 
-			A.apivc_vnd_no
-			,apivc_ivc_no	 
-		FROM apivcmst A
-		INNER JOIN @InsertedData B
-			ON A.apivc_ivc_no = B.strBillId
-		SET IDENTITY_INSERT tblAPTempBill OFF
+		--	ON A.apivc_ivc_no = B.strBillId
+		--SET IDENTITY_INSERT tblAPTempBill OFF
+		
+		--Create back up data of imported aptrxmst
+		--INSERT INTO aptrxmst
+		--SELECT * FROM aptrxmst A
+		--	LEFT JOIN apcbkmst B
+		--		ON A.aptrx_cbk_no = B.apcbk_no
+		--	LEFT JOIN tblAPTempBill C
+		--		ON A.aptrx_ivc_no = C.apivc_ivc_no
+			
+		--WHERE CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
+		--	 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
+		--	 AND A.aptrx_trans_type IN (''I'',''C'')
+		--	 AND C.aptrx_ivc_no IS NULL
+			 
+		--DELETE FROM aptrxmst
+		--FROM aptrxmst A
+		--	LEFT JOIN apcbkmst B
+		--		ON A.aptrx_cbk_no = B.apcbk_no
+		--	LEFT JOIN tblAPTempBill C
+		--		ON A.aptrx_ivc_no = C.apivc_ivc_no
+			
+		--WHERE CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
+		--	 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
+		--	 AND A.aptrx_trans_type IN (''I'',''C'')
+		--	 AND C.aptrx_ivc_no IS NULL
 
 		--Create Bill Batch transaction
 		SELECT @totalBills = COUNT(*) FROM @InsertedData
