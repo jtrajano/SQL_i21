@@ -238,7 +238,6 @@
     <Build Include="dbo\Tables\tblRMReport.sql" />
     <Build Include="dbo\Tables\tblRMSort.sql" />
     <Build Include="dbo\Tables\tblRMSubreportSetting.sql" />
-    <Build Include="dbo\Tables\tblRMUser.sql" />
     <Build Include="dbo\Tables\tblSMActiveScreen.sql" />
     <Build Include="dbo\Tables\tblSMBuildNumber.sql" />
     <Build Include="dbo\Tables\tblSMCompanySetup.sql" />
