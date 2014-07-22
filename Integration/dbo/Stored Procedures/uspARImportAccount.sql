@@ -32,7 +32,7 @@ GO
 				ssasc_code = Accnt.strAccountStatusCode,
 				ssasc_desc = Accnt.strDescription
 			FROM tblARAccountStatus Accnt
-				WHERE strAccountStatusCode = @AccountCode
+				WHERE strAccountStatusCode = @AccountCode AND ssasc_code = @AccountCode
 		END
 		--INSERT IF NOT EXIST IN THE ORIGIN
 		ELSE
