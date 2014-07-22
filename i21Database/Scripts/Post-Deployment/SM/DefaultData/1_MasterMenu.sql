@@ -472,15 +472,6 @@ GO
 GO
 	DECLARE @intParent INT
 	SELECT @intParent = intMenuID FROM tblSMMasterMenu
-	WHERE strMenuName = 'Help Desk'
-	AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu Main 
-							WHERE strMenuName = 'Customer Portal')
-
-	IF NOT EXISTS(SELECT * FROM tblSMMasterMenu WHERE strMenuName = 'Export Hours Worked' AND strType = 'Screen' AND strModuleName = 'Help Desk' AND intParentMenuID = @intParent)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Export Hours Worked', N'Help Desk', @intParent, N'Export Hours Worked', N'Screen', N'HelpDesk.controller.ExportHoursWorked', N'small-screen', 0, 0, 0, 1, NULL, 1)
-GO
-	DECLARE @intParent INT
-	SELECT @intParent = intMenuID FROM tblSMMasterMenu
 	WHERE strMenuName = 'Activities'
 	AND strModuleName = 'Help Desk'
 
@@ -512,4 +503,13 @@ GO
 	
 	IF NOT EXISTS(SELECT * FROM tblSMMasterMenu WHERE strMenuName = 'Check Register' AND strType = 'Report' AND strModuleName = 'Cash Management')
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Check Register', N'Cash Management', @intParent, N'Check Register', N'Report', N'Check Register', N'small-report', 0, 0, 0, 1, NULL, 1)
+GO
+	DECLARE @intParent INT
+	SELECT @intParent = intMenuID FROM tblSMMasterMenu
+	WHERE strMenuName = 'Help Desk'
+	AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu Main 
+							WHERE strMenuName = 'Customer Portal')
+							
+	IF EXISTS(SELECT * FROM tblSMMasterMenu WHERE strMenuName = 'Export Hours Worked' AND strType = 'Screen' AND strModuleName = 'Help Desk' AND intParentMenuID = @intParent)
+	DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Export Hours Worked' AND strType = 'Screen' AND strModuleName = 'Help Desk' AND intParentMenuID = @intParent
 GO
