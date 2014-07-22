@@ -30,7 +30,7 @@ GO
 			UPDATE ssascmst
 				SET 
 				ssasc_code = Accnt.strAccountStatusCode,
-				ssasc_desc = Accnt.strDescription
+				ssasc_desc = SUBSTRING(Accnt.strDescription,0,15)
 			FROM tblARAccountStatus Accnt
 				WHERE strAccountStatusCode = @AccountCode AND ssasc_code = @AccountCode
 		END
@@ -42,7 +42,7 @@ GO
 			)
 			SELECT 
 				strAccountStatusCode,
-				strDescription
+				SUBSTRING(strDescription,0,15)
 			FROM tblARAccountStatus
 			WHERE strAccountStatusCode = @AccountCode
 		
