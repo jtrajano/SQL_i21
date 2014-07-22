@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblARSalesperson] (
     [intEntityId]             INT             NOT NULL,
-    [intSalespersonId]        INT             NOT NULL,
+    [intSalespersonId]        INT             IDENTITY (1, 1) NOT NULL,
     [strSalespersonId]        NVARCHAR (3)    COLLATE Latin1_General_CI_AS NULL,
     [dtmBirthDate]            DATETIME        NULL,
     [strGender]               NVARCHAR (6)    COLLATE Latin1_General_CI_AS NULL,
@@ -34,6 +34,8 @@
     CONSTRAINT [FK_tblARSalesperson_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
     CONSTRAINT [UKstrSalespersonId] UNIQUE NONCLUSTERED ([strSalespersonId] ASC)
 );
+
+
 
 
 
