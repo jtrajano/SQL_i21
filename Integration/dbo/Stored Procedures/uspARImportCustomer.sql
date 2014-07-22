@@ -78,7 +78,7 @@ EXEC(
 			INNER JOIN tblEntityToContact EntToCon ON Cus.intDefaultContactId = EntToCon.intEntityToContactId
 			INNER JOIN tblEntityContact Con ON EntToCon.intContactId = Con.intEntityId
 			INNER JOIN tblEntityLocation Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId
-			WHERE strCustomerNumber = @CustomerId
+			WHERE strCustomerNumber = @CustomerId AND agcus_key = @CustomerId
 		END
 		--INSERT IF NOT EXIST IN THE ORIGIN	
 		ELSE
@@ -588,7 +588,7 @@ EXEC(
 			INNER JOIN tblEntityToContact EntToCon ON Cus.intDefaultContactId = EntToCon.intEntityToContactId
 			INNER JOIN tblEntityContact Con ON EntToCon.intContactId = Con.intEntityId
 			INNER JOIN tblEntityLocation Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId
-			WHERE strCustomerNumber = @CustomerId
+			WHERE strCustomerNumber = @CustomerId AND ptcus_cus_no = @CustomerId
 		END
 		--INSERT IF NOT EXIST IN THE ORIGIN	
 		ELSE
