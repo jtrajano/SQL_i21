@@ -3,7 +3,7 @@
 	[intUserSecurityScreenPermissionId] INT NOT NULL PRIMARY KEY IDENTITY, 
     [intUserSecurityId] INT NOT NULL, 
     [intScreenId] INT NOT NULL, 
-	[strPermission] NVARCHAR(20) NOT NULL, 
+	[strPermission] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT (1), 
     CONSTRAINT [FK_tblSMUserSecurityScreenPermission_tblSMUserSecurity] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intUserSecurityID]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblSMUserSecurityScreenPermission_tblSMScreen] FOREIGN KEY ([intScreenId]) REFERENCES [tblSMScreen]([intScreenId]) ON DELETE CASCADE

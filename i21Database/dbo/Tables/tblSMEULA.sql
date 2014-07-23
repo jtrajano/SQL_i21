@@ -1,8 +1,8 @@
 ﻿CREATE TABLE [dbo].[tblSMEULA]
 (
 	[intEULAId] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [strVersionNumber] NVARCHAR(50) NOT NULL, 
-    [strText] NVARCHAR(MAX) NULL, 
+    [strVersionNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strText] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT (1)
 )
 

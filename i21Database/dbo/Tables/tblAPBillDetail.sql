@@ -2,7 +2,7 @@
     [intBillDetailId] INT             IDENTITY (1, 1) NOT NULL,
     [intBillId]       INT             NOT NULL,
     [strDescription]  NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
-	[strComment] NVARCHAR(200) NULL, 
+	[strComment] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
     [intAccountId]    INT             NOT NULL DEFAULT 0,
     [dblTotal]        DECIMAL (18, 6) NOT NULL DEFAULT 0,
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
