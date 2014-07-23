@@ -4,6 +4,8 @@
     [intCustomerPortalMenuId]       INT NOT NULL,
     [intConcurrencyId]              INT CONSTRAINT [DF_tblARCustomerPortalPermission_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARCustomerPortalPermission] PRIMARY KEY CLUSTERED ([intCustomerPortalPermissionId] ASC),
-    CONSTRAINT [FK_tblARCustomerPortalPermission_tblEntityContact] FOREIGN KEY ([intContactId]) REFERENCES [dbo].[tblEntityContact] ([intEntityId])
+    CONSTRAINT [FK_tblARCustomerPortalPermission_tblEntityContact] FOREIGN KEY ([intContactId]) REFERENCES [dbo].[tblEntityContact] ([intEntityId]) ON DELETE CASCADE
 );
+
+
 
