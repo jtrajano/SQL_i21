@@ -16,9 +16,15 @@ BEGIN
 	DECLARE @Id_update INT = (SELECT TOP 1 inti21Id FROM #TempUpdateCrossReference)
 	DECLARE @ACCOUNT_update varchar(200) = (SELECT TOP 1 REPLACE(strCurrentExternalId,'-','') FROM #TempUpdateCrossReference WHERE inti21Id = @Id_update)
 	DECLARE @TYPE_update varchar(200) = (SELECT TOP 1 strAccountType FROM tblGLAccount LEFT JOIN tblGLAccountGroup ON tblGLAccount.intAccountGroupId = tblGLAccountGroup.intAccountGroupId WHERE intAccountId = @Id_update)
+	DECLARE @GROUP_update varchar(200) = (SELECT TOP 1 strAccountGroup FROM tblGLAccount LEFT JOIN tblGLAccountGroup ON tblGLAccount.intAccountGroupId = tblGLAccountGroup.intAccountGroupId WHERE intAccountId = @Id_update)
 	DECLARE @LegacyType_update varchar(200) = ''
 	DECLARE @LegacySide_update varchar(200) = ''
 	
+	IF @GROUP_update = 'Cost of Goods Sold' or @GROUP_update = 'Sales'
+		BEGIN
+			SET @TYPE_update = @GROUP_update
+		END
+			
 	IF @TYPE_update = 'Asset'
 		BEGIN
 			SET @LegacyType_update = 'A'
@@ -82,8 +88,10 @@ BEGIN
 			)
 		SELECT 
 			CONVERT(INT, SUBSTRING(@ACCOUNT_update,1,8)),
-			CONVERT(INT, SUBSTRING(@ACCOUNT_update,9,16)),
-			SUBSTRING(strDescription,0,30),
+			CONVERT(INT, SUBSTRING(@ACCOUNT_update,9,16)),						
+			(CASE WHEN (SELECT TOP 1 1 FROM tblGLAccountSegment WHERE intAccountSegmentId = (select intAccountSegmentId from tblGLAccountSegmentMapping where intAccountId = @Id_update AND intAccountSegmentId IN (select intAccountSegmentId from tblGLAccountSegment where intAccountStructureId = (select TOP 1 intAccountStructureId from tblGLAccountStructure where strType = 'Primary')))) > 0
+						THEN (SELECT TOP 1 SUBSTRING(tblGLAccountSegment.strDescription,0,30) FROM tblGLAccountSegment WHERE intAccountSegmentId = (select intAccountSegmentId from tblGLAccountSegmentMapping where intAccountId = @Id_update AND intAccountSegmentId IN (select intAccountSegmentId from tblGLAccountSegment where intAccountStructureId = (select TOP 1 intAccountStructureId from tblGLAccountStructure where strType = 'Primary'))))
+					ELSE SUBSTRING(tblGLAccount.strDescription,0,30) END) as AccountDescription, --SUBSTRING(strDescription,0,30),					
 			@LegacyType_update,
 			@LegacySide_update,
 			'',

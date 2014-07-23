@@ -82,11 +82,11 @@ BEGIN
 		WHERE glact_type = 'L'
 
 		UPDATE @tblQuery
-		SET glact_type = (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountType = 'Cost of Goods Sold' and intParentGroupId = 0)
+		SET glact_type = (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountType = 'Expense' and strAccountGroup = 'Cost of Goods Sold')
 		WHERE glact_type = 'C'
 
 		UPDATE @tblQuery
-		SET glact_type = (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountType = 'Sales' and intParentGroupId = 0)
+		SET glact_type = (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountType = 'Revenue' and strAccountGroup = 'Sales')
 		WHERE glact_type = 'I'
 
 		UPDATE @tblQuery
