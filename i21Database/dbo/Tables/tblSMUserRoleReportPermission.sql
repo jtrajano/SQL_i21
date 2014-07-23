@@ -3,7 +3,7 @@
 	[intUserRoleReportPermissionId] INT NOT NULL PRIMARY KEY IDENTITY, 
     [intUserRoleId] INT NOT NULL, 
     [intReportId] INT NOT NULL, 
-    [strPrinter] NVARCHAR(50) NULL, 
+    [strPrinter] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [ysnCollate] BIT NOT NULL DEFAULT (0), 
     [intCopies] INT NOT NULL DEFAULT (1), 
     [ysnPreview] BIT NOT NULL DEFAULT (1), 

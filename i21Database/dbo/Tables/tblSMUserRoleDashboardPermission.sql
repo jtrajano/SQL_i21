@@ -3,7 +3,7 @@
 	[intUserRoleDashboardPermissionId] INT NOT NULL PRIMARY KEY IDENTITY, 
     [intUserRoleId] INT NOT NULL, 
     [intPanelId] INT NOT NULL, 
-    [strPermission] NVARCHAR(20) NOT NULL, 
+    [strPermission] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT (1), 
     CONSTRAINT [FK_tblSMUserRoleDashboardPermission_tblSMUserRole] FOREIGN KEY ([intUserRoleId]) REFERENCES [tblSMUserRole]([intUserRoleID]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblSMUserRoleDashboardPermission_tblDBPanel] FOREIGN KEY ([intPanelId]) REFERENCES [tblDBPanel]([intPanelId]) ON DELETE CASCADE

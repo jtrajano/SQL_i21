@@ -76,7 +76,7 @@
 	[strLastTicket] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnDirectShipLocation] BIT NULL DEFAULT (1),
 	[ysnScaleInstalled] BIT NULL DEFAULT (1),
-	[strDefaultScaleId] NVARCHAR(50) NULL,
+	[strDefaultScaleId] NVARCHAR(50)  COLLATE Latin1_General_CI_AS NULL,
 	[ysnActive] BIT NULL DEFAULT (1),
 	[ysnUsingCashDrawer] BIT NULL DEFAULT (1),
 	[strCashDrawerDeviceId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 

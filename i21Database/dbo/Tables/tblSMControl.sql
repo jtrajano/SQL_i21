@@ -2,10 +2,10 @@
 (
 	[intControlId] INT NOT NULL PRIMARY KEY IDENTITY, 
     [intScreenId] INT NOT NULL, 
-    [strControlId] NVARCHAR(50) NOT NULL, 
-    [strControlName] NVARCHAR(100) NOT NULL, 
-	[strContainer] NVARCHAR(100) NOT NULL, 
-    [strControlType] NVARCHAR(10) NOT NULL, 
+    [strControlId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strControlName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, 
+	[strContainer] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strControlType] NVARCHAR(10) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT (1), 
     CONSTRAINT [FK_tblSMControl_tblSMScreen] FOREIGN KEY ([intScreenId]) REFERENCES [tblSMScreen]([intScreenId]) ON DELETE CASCADE
 )
