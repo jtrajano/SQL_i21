@@ -2,9 +2,9 @@
     "name": "Inventory",
     "settings": {
         "cmd": {
-            "license": "commercial",
-            "cmdVersion": "4.0.1.45",
-            "frameworkVersion": "4.2.1.883"
+            "license": "",
+            "cmdVersion": "",
+            "frameworkVersion": ""
         },
         "canvasControls": {
             "viewportSize": {
@@ -22,7 +22,8 @@
         "genTimestamps": false,
         "cacheBust": false,
         "buildShouldOverwriteIndex": true,
-        "generateArchitectVersion": true
+        "generateArchitectVersion": true,
+        "displayfield-ExtBox1-1274-inputEl": "Not Installed"
     },
     "xdsVersion": "3.0.4",
     "xdsBuild": 1386,
@@ -62,7 +63,6 @@
         "model": [],
         "resource": [
             "ab2f780c-31cc-4dd2-82fd-519b77b4bcef",
-            "77a49ca5-8726-4c18-a6d3-10e9fb83bad2",
             "ae13962d-c7fb-4964-a6c4-e63105d7b3bd",
             "10aea025-86cf-458b-ae8d-8fe2fa689193"
         ],

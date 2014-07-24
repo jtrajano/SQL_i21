@@ -1,9 +1,0 @@
-{
-   "name": "Inventory",
-   "requires": [],
-   "id": "f93cbb12-6df6-4eb0-8d08-b96097b77fc8",
-   "resources": [
-      "../resources/themes/blue/4.2.1/blue-all.css",
-      "../resources/images/images.css"
-   ]
-}

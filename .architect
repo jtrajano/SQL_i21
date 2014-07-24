@@ -4,9 +4,10 @@
         "model": true,
         "component": true,
         "controller": true,
-        "resource": false,
+        "resource": true,
         "d7ef9c4d-9fa7-40a9-ac40-8922ff13c54c": {
             "id": "d7ef9c4d-9fa7-40a9-ac40-8922ff13c54c",
+            "expanded": false,
             "cn": [
                 {
                     "id": "76b180be-b7ce-479d-8f48-96a2e7c4aea2",
@@ -4898,9 +4899,6 @@
         "ab2f780c-31cc-4dd2-82fd-519b77b4bcef": {
             "id": "ab2f780c-31cc-4dd2-82fd-519b77b4bcef"
         },
-        "77a49ca5-8726-4c18-a6d3-10e9fb83bad2": {
-            "id": "77a49ca5-8726-4c18-a6d3-10e9fb83bad2"
-        },
         "ae13962d-c7fb-4964-a6c4-e63105d7b3bd": {
             "id": "ae13962d-c7fb-4964-a6c4-e63105d7b3bd"
         },
@@ -4919,14 +4917,14 @@
         "topInstance": "d7ef9c4d-9fa7-40a9-ac40-8922ff13c54c"
     },
     "inspectorState": {
-        "topInstance": null,
-        "selectedInstance": null
+        "topInstance": "d7ef9c4d-9fa7-40a9-ac40-8922ff13c54c",
+        "selectedInstance": "d7ef9c4d-9fa7-40a9-ac40-8922ff13c54c"
     },
     "codeState": {
         "topInstance": null
     },
     "editMode": "design",
     "userSettings": {
-        "no-cmd": false
+        "no-cmd": true
     }
 }
