@@ -456,7 +456,7 @@ ELSE
 		SELECT	
 			[strTransactionId] = A.strBillId, 
 			[intTransactionId] = A.intBillId,
-			[intAccountId] = A.intAccountId,
+			[intAccountId] = B.intAccountId,
 			[strDescription] = A.strDescription,
 			[strReference] = C.strVendorId,
 			[dtmTransactionDate] = A.dtmDate,
