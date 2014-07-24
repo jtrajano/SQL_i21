@@ -1,14 +1,9 @@
-Database Project/obj/
-Database Project/bin/
-Integration/obj/
-Integration/bin/
-Origin/bin/
-Origin/obj/
-i21PreDeployment/bin/
-i21PreDeployment/obj/
-i21Database/bin/
-i21Database/obj/
-_UpgradeReport_Files/
-UpgradeLog.*
+#Ignore these files/folders when pushing to Bitbucket.
+.idea
+.sencha
+**/bin
+**/obj
+server/TestResults/
+node_modules/
 *publish.xml
 *.dbmdl

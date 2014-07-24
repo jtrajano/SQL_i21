@@ -1,9 +1,0 @@
-C:\Users\destrada\Documents\i21_sqlscripts\Origin\bin\Debug\Origin.dacpac
-C:\Users\destrada\Documents\i21_sqlscripts\Origin\bin\Debug\Origin.dll
-C:\Users\destrada\Documents\i21_sqlscripts\Origin\bin\Debug\Origin.pdb
-C:\Users\destrada\Documents\i21_sqlscripts\Origin\obj\Debug\Origin.dll
-C:\Users\destrada\Documents\i21_sqlscripts\Origin\obj\Debug\Origin.pdb
-C:\Users\destrada\Documents\i21_sqlscripts\Origin\obj\Debug\Model.xml
-C:\Users\destrada\Documents\i21_sqlscripts\Origin\obj\Debug\refactor.xml
-C:\Users\destrada\Documents\i21_sqlscripts\Origin\obj\Debug\postdeploy.sql
-C:\Users\destrada\Documents\i21_sqlscripts\Origin\obj\Debug\predeploy.sql
