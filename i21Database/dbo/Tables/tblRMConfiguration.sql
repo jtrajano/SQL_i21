@@ -6,8 +6,10 @@
     [ysnShowPrintDialog] BIT            NOT NULL,
     [intNumberOfCopies]  INT            NOT NULL,
     [intReportId]        INT            NOT NULL,
-    [intConcurrencyId]   INT            DEFAULT 1 NOT NULL,
+    [intConcurrencyId]   INT            DEFAULT ((1)) NOT NULL,
     CONSTRAINT [PK_dbo.Configurations] PRIMARY KEY CLUSTERED ([intConfigurationId] ASC),
-    CONSTRAINT [FK_dbo.Configurations_dbo.Reports_intReportId] FOREIGN KEY ([intReportId]) REFERENCES [dbo].[tblRMReport] ([intReportId]) ON DELETE CASCADE
+    CONSTRAINT [FK_tblRMConfiguration_tblRMReport] FOREIGN KEY ([intReportId]) REFERENCES [dbo].[tblRMReport] ([intReportId]) ON DELETE CASCADE
 );
+
+
 
