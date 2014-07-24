@@ -17,8 +17,8 @@ BEGIN
 	DECLARE @increment INT = 0
 	DECLARE @tblAPTempTerms TABLE  (
 		[intTermID]        INT             IDENTITY (1, 1) NOT NULL,
-		[strTerm]          NVARCHAR (100)  NOT NULL,
-		[strType]          NVARCHAR (100)  NOT NULL,
+		[strTerm]          NVARCHAR (100)  COLLATE Latin1_General_CI_AS NOT NULL,
+		[strType]          NVARCHAR (100)  COLLATE Latin1_General_CI_AS NOT NULL,
 		[dblDiscountEP]    NUMERIC (18, 6) NULL,
 		[intBalanceDue]    INT             NULL,
 		[intDiscountDay]   INT             NULL,
