@@ -3,6 +3,7 @@
 	[intGroupUserConfigId] [int] IDENTITY(1,1) NOT NULL,
 	[intTicketGroupId] [int] NOT NULL,
 	[intUserSecurityId] [int] NOT NULL,
+	[intUserSecurityEntityId] [int] NULL,
 	[ysnOwner] BIT NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	PRIMARY KEY CLUSTERED (	[intGroupUserConfigId] ASC),
