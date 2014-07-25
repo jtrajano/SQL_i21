@@ -15,7 +15,7 @@
 			,us.strFirstName
 			,us.strMiddleName
 			,us.strLastName
-			,us.strEmail
+			,strEmail = (select (case when strEmail IS null then us.strEmail else strEmail end) from tblEntity where intEntityId = us.intEntityId)
 			,ysni21User = 1
 			,imgPhoto = null
 			,intConcurrencyId = 1
