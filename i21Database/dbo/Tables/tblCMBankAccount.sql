@@ -26,6 +26,7 @@
     [intBackupCheckEndingNo]           INT            DEFAULT 0 NOT NULL,
     [intEFTNextNo]                     INT            DEFAULT 0 NOT NULL,
     [intEFTBankFileFormatId]           INT            NULL,
+	[intPositivePayBankFileFormatId]   INT            NULL,
 	[intBankStatementImportId]		   INT            NULL,
     [strEFTCompanyId]                  NVARCHAR (20)  COLLATE Latin1_General_CI_AS NULL,
     [strEFTBankName]                   NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,

@@ -15,6 +15,21 @@ GO
 			DROP TABLE tblCMUndepositedFund
 GO
 
+-- Drop the view (vwCMBankAccount) because of the schema change in tblCMBankAccount.
+PRINT N'Dropping View: [dbo].[vwCMBankAccount]...';
+GO
+	IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vwCMBankAccount')
+		DROP VIEW vwCMBankAccount
+GO
+
+-- Drop the view (vyuCMBankAccount) because of the schema change in tblCMBankAccount.
+PRINT N'Dropping View: [dbo].[vyuCMBankAccount]...';
+GO
+	IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCMBankAccount')
+		DROP VIEW vyuCMBankAccount
+GO
+
+
 -- 1 of 2: Drop old stored procedures referencing RecapTableType. 
 PRINT N'Dropping [dbo].[uspCMPostRecap]...';
 GO

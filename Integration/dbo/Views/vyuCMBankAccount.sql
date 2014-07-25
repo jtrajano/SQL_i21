@@ -41,6 +41,7 @@ BEGIN
 				,i21.intEFTNextNo
 				,i21.intBankStatementImportId
 				,i21.intEFTBankFileFormatId
+				,i21.intPositivePayBankFileFormatId
 				,i21.strEFTCompanyId
 				,i21.strEFTBankName
 				,i21.strMICRDescription
@@ -198,6 +199,7 @@ BEGIN
 					,intEFTNextNo
 					,intBankStatementImportId
 					,intEFTBankFileFormatId
+					,intPositivePayBankFileFormatId
 					,strEFTCompanyId
 					,strEFTBankName
 					,strMICRDescription
@@ -244,6 +246,7 @@ BEGIN
 					,intEFTNextNo						= i.intEFTNextNo
 					,intBankStatementImportId			= i.intBankStatementImportId
 					,intEFTBankFileFormatId				= i.intEFTBankFileFormatId
+					,intPositivePayBankFileFormatId		= i.intPositivePayBankFileFormatId
 					,strEFTCompanyId					= i.strEFTCompanyId
 					,strEFTBankName						= i.strEFTBankName
 					,strMICRDescription					= i.strMICRDescription
@@ -400,6 +403,7 @@ BEGIN
 					,intEFTNextNo						= i.intEFTNextNo
 					,intBankStatementImportId			= i.intBankStatementImportId
 					,intEFTBankFileFormatId				= i.intEFTBankFileFormatId
+					,intPositivePayBankFileFormatId		= i.intPositivePayBankFileFormatId
 					,strEFTCompanyId					= i.strEFTCompanyId
 					,strEFTBankName						= i.strEFTBankName
 					,strMICRDescription					= i.strMICRDescription
