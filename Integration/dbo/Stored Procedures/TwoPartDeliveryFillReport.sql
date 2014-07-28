@@ -87,6 +87,7 @@ BEGIN
 		  , '''' as strLine  
 		  , '''' as strPagePart  
 		  ,getdate() as dtmForecastedDelivery   
+		  ,'''' as SiteAddress
 		 RETURN;  
 		 END    
   
