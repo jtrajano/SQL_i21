@@ -211,15 +211,17 @@ BEGIN
 		,C.intBillId
 		--,B.apivc_orig_amt
 		FROM apchkmst A
-		LEFT JOIN apivcmst B
+		INNER JOIN apivcmst B
 		ON A.apchk_vnd_no = B.apivc_vnd_no
 		AND A.apchk_chk_no = B.apivc_chk_no
 		AND A.apchk_rev_dt = B.apivc_chk_rev_dt
 		AND A.apchk_cbk_no = B.apivc_cbk_no
+		AND A.apchk_trx_ind <> ''O''
 		INNER JOIN tblAPBill C
 			ON B.apivc_ivc_no COLLATE Latin1_General_CI_AS = C.strVendorOrderNumber COLLATE Latin1_General_CI_AS
 			AND B.apivc_vnd_no COLLATE Latin1_General_CI_AS = C.strVendorId COLLATE Latin1_General_CI_AS
 		--ORDER BY A.apchk_rev_dt, A.apchk_cbk_no, A.apchk_chk_no
+		--WHERE NOT (A.apchk_trx_ind = ''O'' AND apchk_chk_amt < 0)
 	)
 	SELECT 
 		A.apchk_cbk_no
@@ -313,6 +315,13 @@ BEGIN
 			A.[aptrx_user_rev_dt]  
 		 FROM aptrxmst A
 		DELETE FROM aptrxmst
+
+		----UPDATE strTransactionId from tblCMBankTransaction
+		--UPDATE tblCMBankTransaction
+		--SET strTransactionId = 
+		--FROM tblCMBankTransaction A
+		--INNER JOIN tblAPPayment B
+		--	ON 
 
 		SET @Total = @ImportedRecords;
 	END
