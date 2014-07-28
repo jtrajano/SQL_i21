@@ -1,0 +1,22 @@
+C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21PreDeployment\bin\Release\i21PreDeployment.dacpac
+C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21PreDeployment\bin\Release\i21PreDeployment.dll
+C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21PreDeployment\bin\Release\i21PreDeployment.pdb
+C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21PreDeployment\obj\Release\i21PreDeployment.dll
+C:\Users\Feb Montefrio\Documents\[SANDBOX]\sqlscripts\i21PreDeployment\obj\Release\i21PreDeployment.pdb
+C:\SANDBOX\sqlscripts\i21PreDeployment\bin\Release\i21PreDeployment.dacpac
+C:\SANDBOX\sqlscripts\i21PreDeployment\bin\Release\i21PreDeployment.dll
+C:\SANDBOX\sqlscripts\i21PreDeployment\bin\Release\i21PreDeployment.pdb
+C:\SANDBOX\dacpac\1420\i21PreDeployment.dacpac
+C:\SANDBOX\dacpac\1420\i21PreDeployment.dll
+C:\SANDBOX\dacpac\1420\i21PreDeployment.pdb
+C:\SANDBOX\sqlscripts\i21PreDeployment\obj\Release\i21PreDeployment.dll
+C:\SANDBOX\sqlscripts\i21PreDeployment\obj\Release\i21PreDeployment.pdb
+C:\SANDBOX\Script\i21PreDeployment\bin\Release\i21PreDeployment.dacpac
+C:\SANDBOX\Script\i21PreDeployment\bin\Release\i21PreDeployment.dll
+C:\SANDBOX\Script\i21PreDeployment\bin\Release\i21PreDeployment.pdb
+C:\SANDBOX\Script\i21PreDeployment\obj\Release\i21PreDeployment.dll
+C:\SANDBOX\Script\i21PreDeployment\obj\Release\i21PreDeployment.pdb
+C:\SANDBOX\Script\i21PreDeployment\obj\Release\Model.xml
+C:\SANDBOX\Script\i21PreDeployment\obj\Release\refactor.xml
+C:\SANDBOX\Script\i21PreDeployment\obj\Release\postdeploy.sql
+C:\SANDBOX\Script\i21PreDeployment\obj\Release\predeploy.sql

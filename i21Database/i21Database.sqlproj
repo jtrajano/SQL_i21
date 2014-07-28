@@ -545,6 +545,7 @@
     <Build Include="dbo\Functions\fnGetBankTransactionReversalErrors.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBankTransactionReversal.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreatePayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMBankTransactionReversalOrigin.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />

@@ -138,6 +138,7 @@ IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
 * Conditions:
 *	1. Void only check transactions
 *	2. Applicable only on check transactions with printed check report.
+*	3. Void process is applicable for checks issued in AP Payment, Misc Checks, and from origin. 
 */
 UPDATE	tblCMBankTransaction
 SET		ysnCheckVoid = 1
@@ -146,12 +147,19 @@ SET		ysnCheckVoid = 1
 		,intLastModifiedUserId = @intUserId
 FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
 			ON F.strTransactionId = TMP.strTransactionId
-WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT)		
+WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS)		
 		-- Condition #1:
 		AND F.strReferenceNo NOT IN (@CASH_PAYMENT) 
 		-- Condition #2:		
 		AND F.dtmCheckPrinted IS NOT NULL 
 IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
+
+/** 
+* Void "checks" from origin. 
+*/
+EXEC dbo.uspCMBankTransactionReversalOrigin @intUserId, @isSuccessful OUTPUT 
+IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
+IF @isSuccessful = 0 GOTO Exit_BankTransactionReversal_WithErrors
 
 /**
 * Delete the bank transactions
