@@ -173,6 +173,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Debit Memo')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 18
+			,[strTransactionType]	= N'Vendor Prepayment'
+			,[strPrefix]			= N'VPRE-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Accounts Payable'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Vendor Prepayment')
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO

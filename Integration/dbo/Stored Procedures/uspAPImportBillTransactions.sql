@@ -92,20 +92,21 @@ BEGIN
 			[dtmDueDate] 			=	CASE WHEN ISDATE(A.aptrx_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 			[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
 			[strDescription] 		=	A.aptrx_comment,
-			[dblTotal] 				=	CASE WHEN A.aptrx_trans_type = ''C'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
-			[dblAmountDue]			=	CASE WHEN A.aptrx_trans_type = ''C'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
+			[dblTotal] 				=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
+			[dblAmountDue]			=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
 			[dblDiscount]			=	A.aptrx_disc_amt,
 			[dblWithheld]			=	A.aptrx_wthhld_amt,
 			[intUserId]				=	@UserId,
 			[ysnPosted]				=	0,
 			[ysnPaid]				=	0,
 			[intTransactionType]	=	CASE WHEN A.aptrx_trans_type = ''I'' THEN 1 
+											WHEN A.aptrx_trans_type = ''A'' THEN 2
 											WHEN A.aptrx_trans_type = ''C'' THEN 3
 											ELSE 0 END
 		FROM aptrxmst A
 			LEFT JOIN apcbkmst B
 				ON A.aptrx_cbk_no = B.apcbk_no
-		WHERE A.aptrx_trans_type IN (''I'',''C'')
+		WHERE A.aptrx_trans_type IN (''I'',''C'',''A'')
 		--Posted
 		UNION
 		SELECT 
@@ -120,9 +121,9 @@ BEGIN
 			[dtmDueDate] 			=	CASE WHEN ISDATE(A.apivc_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 			[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
 			[strDescription] 		=	A.apivc_comment,
-			[dblTotal] 				=	CASE WHEN A.apivc_trans_type = ''C'' THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END,
+			[dblTotal] 				=	CASE WHEN A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'' THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END,
 			[dblAmountDue]			=	CASE WHEN A.apivc_status_ind = ''P'' THEN 0 ELSE 
-												CASE WHEN A.apivc_trans_type = ''C'' THEN A.apivc_orig_amt * -1 
+												CASE WHEN A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'' THEN A.apivc_orig_amt * -1 
 														ELSE A.apivc_orig_amt END 
 											END,
 			[dblDiscount]			=	A.apivc_disc_taken,
@@ -131,12 +132,13 @@ BEGIN
 			[ysnPosted]				=	1,
 			[ysnPaid]				=	CASE WHEN A.apivc_status_ind = ''P'' THEN 1 ELSE 0 END,
 			[intTransactionType]	=	CASE WHEN A.apivc_trans_type = ''I'' THEN 1 
+											WHEN A.apivc_trans_type = ''A'' THEN 2
 											WHEN A.apivc_trans_type = ''C'' THEN 3
 											ELSE 0 END
 		FROM apivcmst A
 			LEFT JOIN apcbkmst B
 				ON A.apivc_cbk_no = B.apcbk_no
-		WHERE A.apivc_trans_type IN (''I'',''C'')
+		WHERE A.apivc_trans_type IN (''I'',''C'',''A'')
 
 		SELECT @ImportedRecords = @@ROWCOUNT
 
@@ -350,14 +352,15 @@ BEGIN
 			[dtmDueDate] 			=	CASE WHEN ISDATE(A.aptrx_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 			[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
 			[strDescription] 		=	A.aptrx_comment,
-			[dblTotal] 				=	CASE WHEN A.aptrx_trans_type = ''C'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
-			[dblAmountDue]			=	CASE WHEN A.aptrx_trans_type = ''C'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
+			[dblTotal] 				=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
+			[dblAmountDue]			=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
 			[dblDiscount]			=	A.aptrx_disc_amt,
 			[dblWithheld]			=	A.aptrx_wthhld_amt,
 			[intUserId]				=	@UserId,
 			[ysnPosted]				=	0,
 			[ysnPaid] 				=	0,
 			[intTransactionType]	=	CASE WHEN A.aptrx_trans_type = ''I'' THEN 1 
+											WHEN A.aptrx_trans_type = ''A'' THEN 3
 											WHEN A.aptrx_trans_type = ''C'' THEN 3
 											ELSE NULL END
 		FROM aptrxmst A
@@ -368,7 +371,7 @@ BEGIN
 			
 		WHERE CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
 			 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
-			 AND A.aptrx_trans_type IN (''I'',''C'')
+			 AND A.aptrx_trans_type IN (''I'',''C'',''A'')
 			 AND C.aptrx_ivc_no IS NULL
 		--Posted
 		--UNION
@@ -481,7 +484,7 @@ BEGIN
 				ON A.aptrx_ivc_no = C.aptrx_ivc_no
 		WHERE CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
 			 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
-			 AND A.aptrx_trans_type IN (''I'',''C'')
+			 AND A.aptrx_trans_type IN (''I'',''C'',''A'')
 			 AND C.aptrx_ivc_no IS NULL
 		--SET IDENTITY_INSERT tblAPaptrxmst OFF
 
@@ -491,7 +494,7 @@ BEGIN
 				ON A.aptrx_cbk_no = B.apcbk_no
 		WHERE CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
 			 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
-			 AND A.aptrx_trans_type IN (''I'',''C'')
+			 AND A.aptrx_trans_type IN (''I'',''C'',''A'')
 
 		--Create Bill Batch transaction
 		SELECT @totalBills = COUNT(*) FROM @InsertedData
