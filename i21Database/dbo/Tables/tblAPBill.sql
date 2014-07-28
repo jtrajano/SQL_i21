@@ -58,6 +58,8 @@ BEGIN
 		EXEC uspSMGetStartingNumber 9, @BillId OUT
 	ELSE IF @type = 3
 		EXEC uspSMGetStartingNumber 17, @BillId OUT
+	ELSE IF @type = 2
+		EXEC uspSMGetStartingNumber 18, @BillId OUT
 	
 	IF(@BillId IS NOT NULL)
 	BEGIN
