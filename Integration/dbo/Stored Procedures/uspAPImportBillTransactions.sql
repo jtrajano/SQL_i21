@@ -43,21 +43,17 @@ BEGIN
 				@withHeld DECIMAL(18,6) = 0,
 				@billIds NVARCHAR(MAX)
 
-	----Create table that holds all the imported transaction
+	--Create table that holds all the imported transaction
 	--IF(OBJECT_ID(''dbo.tblAPTempBill'') IS NULL)
 	--BEGIN
 
 	--	EXEC(''
-	--	SELECT aptrx_vnd_no as apivc_vnd_no, aptrx_ivc_no as apivc_ivc_no INTO tblAPTempBill FROM aptrxmst WHERE aptrx_trans_type IN (''''I'''',''''C'''')
+	--	SELECT aptrx_vnd_no as apivc_vnd_no, aptrx_ivc_no as apivc_ivc_no INTO tblAPTempBill FROM aptrxmst WHERE aptrx_trans_type IN (''''I'''',''''C'''',''''A'''')
 
 	--	INSERT INTO tblAPTempBill
-	--	SELECT apivc_vnd_no, apivc_ivc_no FROM apivcmst WHERE apivc_trans_type IN (''''I'''',''''C'''')
-	--	--SELECT apivc_vnd_no, apivc_ivc_no INTO tblAPTempBill FROM apivcmst WHERE apivc_trans_type IN (''''I'''',''''C'''')
+	--	SELECT apivc_vnd_no, apivc_ivc_no FROM apivcmst WHERE apivc_trans_type IN (''''I'''',''''C'''',''''A'''')
+	--	--SELECT apivc_vnd_no, apivc_ivc_no INTO tblAPTempBill FROM apivcmst WHERE apivc_trans_type IN (''''I'''',''''C'''',''''A'''')
 	--	'')
-		
-	--	--backup data from aptrxmst on one time synchronization
-	--	SELECT * INTO tblAP_aptrxmst FROM aptrxmst
-	--	DELETE FROM aptrxmst
 		
 	--END
 	
@@ -83,35 +79,35 @@ BEGIN
 			[ysnPaid],
 			[intTransactionType])
 		OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid INTO @InsertedData
-		----Unposted
-		--SELECT 
-		--	[strVendorId]			=	A.aptrx_vnd_no,
-		--	[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
-		--	[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation 
-		--										WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
-		--											WHERE strVendorId COLLATE Latin1_General_CI_AS = A.aptrx_vnd_no COLLATE Latin1_General_CI_AS)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
-		--	[intTaxCodeId] 			=	NULL,
-		--	[dtmDate] 				=	CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-		--	[dtmBillDate] 			=	CASE WHEN ISDATE(A.aptrx_sys_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-		--	[dtmDueDate] 			=	CASE WHEN ISDATE(A.aptrx_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-		--	[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
-		--	[strDescription] 		=	A.aptrx_comment,
-		--	[dblTotal] 				=	CASE WHEN A.aptrx_trans_type = ''C'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
-		--	[dblAmountDue]			=	CASE WHEN A.aptrx_trans_type = ''C'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
-		--	[dblDiscount]			=	A.aptrx_disc_amt,
-		--	[dblWithheld]			=	A.aptrx_wthhld_amt,
-		--	[intUserId]				=	@UserId,
-		--	[ysnPosted]				=	0,
-		--	[ysnPaid]				=	0,
-		--	[intTransactionType]	=	CASE WHEN A.aptrx_trans_type = ''I'' THEN 1 
-		--									WHEN A.aptrx_trans_type = ''C'' THEN 3
-		--									ELSE 0 END
-		--FROM aptrxmst A
-		--	LEFT JOIN apcbkmst B
-		--		ON A.aptrx_cbk_no = B.apcbk_no
-		--WHERE A.aptrx_trans_type IN (''I'',''C'')
+		--Unposted
+		SELECT 
+			[strVendorId]			=	A.aptrx_vnd_no,
+			[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
+			[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation 
+												WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
+													WHERE strVendorId COLLATE Latin1_General_CI_AS = A.aptrx_vnd_no COLLATE Latin1_General_CI_AS)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
+			[intTaxCodeId] 			=	NULL,
+			[dtmDate] 				=	CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
+			[dtmBillDate] 			=	CASE WHEN ISDATE(A.aptrx_sys_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
+			[dtmDueDate] 			=	CASE WHEN ISDATE(A.aptrx_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
+			[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
+			[strDescription] 		=	A.aptrx_comment,
+			[dblTotal] 				=	CASE WHEN A.aptrx_trans_type = ''C'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
+			[dblAmountDue]			=	CASE WHEN A.aptrx_trans_type = ''C'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
+			[dblDiscount]			=	A.aptrx_disc_amt,
+			[dblWithheld]			=	A.aptrx_wthhld_amt,
+			[intUserId]				=	@UserId,
+			[ysnPosted]				=	0,
+			[ysnPaid]				=	0,
+			[intTransactionType]	=	CASE WHEN A.aptrx_trans_type = ''I'' THEN 1 
+											WHEN A.aptrx_trans_type = ''C'' THEN 3
+											ELSE 0 END
+		FROM aptrxmst A
+			LEFT JOIN apcbkmst B
+				ON A.aptrx_cbk_no = B.apcbk_no
+		WHERE A.aptrx_trans_type IN (''I'',''C'')
 		--Posted
-		--UNION
+		UNION
 		SELECT 
 			[strVendorId]			=	A.apivc_vnd_no,
 			[strVendorOrderNumber] 	=	A.apivc_ivc_no,
@@ -280,6 +276,42 @@ BEGIN
 		
 	END
 
+		--backup data from aptrxmst on one time synchronization
+		INSERT INTO tblAPaptrxmst
+		SELECT 
+			A.[aptrx_vnd_no]       ,
+			A.[aptrx_ivc_no]       ,
+			A.[aptrx_sys_rev_dt]   ,
+			A.[aptrx_sys_time]     ,
+			A.[aptrx_cbk_no]       ,
+			A.[aptrx_chk_no]       ,
+			A.[aptrx_trans_type]   ,
+			A.[aptrx_batch_no]     ,
+			A.[aptrx_pur_ord_no]   ,
+			A.[aptrx_po_rcpt_seq]  ,
+			A.[aptrx_ivc_rev_dt]   ,
+			A.[aptrx_disc_rev_dt]  ,
+			A.[aptrx_due_rev_dt]   ,
+			A.[aptrx_chk_rev_dt]   ,
+			A.[aptrx_gl_rev_dt]    ,
+			A.[aptrx_disc_pct]     ,
+			A.[aptrx_orig_amt]     ,
+			A.[aptrx_disc_amt]     ,
+			A.[aptrx_wthhld_amt]   ,
+			A.[aptrx_net_amt]      ,
+			A.[aptrx_1099_amt]     ,
+			A.[aptrx_comment]      ,
+			A.[aptrx_orig_type]    ,
+			A.[aptrx_name]         ,
+			A.[aptrx_recur_yn]     ,
+			A.[aptrx_currency]     ,
+			A.[aptrx_currency_rt]  ,
+			A.[aptrx_currency_cnt] ,
+			A.[aptrx_user_id]      ,
+			A.[aptrx_user_rev_dt]  
+		 FROM aptrxmst A
+		DELETE FROM aptrxmst
+
 		SET @Total = @ImportedRecords;
 	END
 	ELSE
@@ -305,80 +337,80 @@ BEGIN
 			[intTransactionType])
 		OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid INTO @InsertedData
 		--Unposted
-		--SELECT 
-		--	[strVendorId]			=	A.aptrx_vnd_no,
-		--	--[strBillId] 			=	A.aptrx_ivc_no,
-		--	[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
-		--	[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation 
-		--										WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
-		--											WHERE strVendorId COLLATE Latin1_General_CI_AS = A.aptrx_vnd_no COLLATE Latin1_General_CI_AS)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
-		--	[intTaxCodeId] 			=	NULL,
-		--	[dtmDate] 				=	CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-		--	[dtmBillDate] 			=	CASE WHEN ISDATE(A.aptrx_sys_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-		--	[dtmDueDate] 			=	CASE WHEN ISDATE(A.aptrx_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-		--	[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
-		--	[strDescription] 		=	A.aptrx_comment,
-		--	[dblTotal] 				=	CASE WHEN A.aptrx_trans_type = ''C'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
-		--	[dblAmountDue]			=	CASE WHEN A.aptrx_trans_type = ''C'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
-		--	[dblDiscount]			=	A.aptrx_disc_amt,
-		--	[dblWithheld]			=	A.aptrx_wthhld_amt,
-		--	[intUserId]				=	@UserId,
-		--	[ysnPosted]				=	0,
-		--	[ysnPaid] 				=	0,
-		--	[intTransactionType]	=	CASE WHEN A.aptrx_trans_type = ''I'' THEN 1 
-		--									WHEN A.aptrx_trans_type = ''C'' THEN 3
-		--									ELSE NULL END
-		--FROM aptrxmst A
-		--	LEFT JOIN apcbkmst B
-		--		ON A.aptrx_cbk_no = B.apcbk_no
-		--	LEFT JOIN tblAPTempBill C
-		--		ON A.aptrx_ivc_no = C.apivc_ivc_no
-			
-		--WHERE CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
-		--	 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
-		--	 AND A.aptrx_trans_type IN (''I'',''C'')
-		--	 AND C.aptrx_ivc_no IS NULL
-		--Posted
-		--UNION
 		SELECT 
-			[strVendorId]			=	A.apivc_vnd_no,
-			[strVendorOrderNumber] 	=	A.apivc_ivc_no,
+			[strVendorId]			=	A.aptrx_vnd_no,
+			--[strBillId] 			=	A.aptrx_ivc_no,
+			[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
 			[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation 
 												WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
-													WHERE strVendorId COLLATE Latin1_General_CI_AS = A.apivc_vnd_no COLLATE Latin1_General_CI_AS)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
+													WHERE strVendorId COLLATE Latin1_General_CI_AS = A.aptrx_vnd_no COLLATE Latin1_General_CI_AS)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
 			[intTaxCodeId] 			=	NULL,
-			[dtmDate] 				=	CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-			[dtmBillDate] 			=	CASE WHEN ISDATE(A.apivc_ivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_ivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-			[dtmDueDate] 			=	CASE WHEN ISDATE(A.apivc_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
+			[dtmDate] 				=	CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
+			[dtmBillDate] 			=	CASE WHEN ISDATE(A.aptrx_sys_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
+			[dtmDueDate] 			=	CASE WHEN ISDATE(A.aptrx_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 			[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
-			[strDescription] 		=	A.apivc_comment,
-			[dblTotal] 				=	CASE WHEN A.apivc_trans_type = ''C'' THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END,
-			[dblAmountDue]			=	CASE WHEN A.apivc_status_ind = ''P'' THEN 0 ELSE 
-												CASE WHEN A.apivc_trans_type = ''C'' THEN A.apivc_orig_amt * -1 
-														ELSE A.apivc_orig_amt END 
-											END,
-			[dblDiscount]			=	A.apivc_disc_taken,
-			[dblWithheld]			=	A.apivc_wthhld_amt,
+			[strDescription] 		=	A.aptrx_comment,
+			[dblTotal] 				=	CASE WHEN A.aptrx_trans_type = ''C'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
+			[dblAmountDue]			=	CASE WHEN A.aptrx_trans_type = ''C'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
+			[dblDiscount]			=	A.aptrx_disc_amt,
+			[dblWithheld]			=	A.aptrx_wthhld_amt,
 			[intUserId]				=	@UserId,
-			[ysnPosted]				=	1,
-			[ysnPaid]				=	CASE WHEN A.apivc_status_ind = ''P'' THEN 1 ELSE 0 END,
-			[intTransactionType]	=	CASE WHEN A.apivc_trans_type = ''I'' THEN 1 
-											WHEN A.apivc_trans_type = ''C'' THEN 3
+			[ysnPosted]				=	0,
+			[ysnPaid] 				=	0,
+			[intTransactionType]	=	CASE WHEN A.aptrx_trans_type = ''I'' THEN 1 
+											WHEN A.aptrx_trans_type = ''C'' THEN 3
 											ELSE NULL END
-		FROM apivcmst A
+		FROM aptrxmst A
 			LEFT JOIN apcbkmst B
-				ON A.apivc_cbk_no = B.apcbk_no
-			--LEFT JOIN tblAPTempBill C
-			LEFT JOIN tblAPBill C
-				--ON A.apivc_ivc_no = C.aptrx_ivc_no
-				ON A.apivc_ivc_no COLLATE Latin1_General_CI_AS = C.strVendorOrderNumber COLLATE Latin1_General_CI_AS
-				AND A.apivc_vnd_no COLLATE Latin1_General_CI_AS = C.strVendorId COLLATE Latin1_General_CI_AS
+				ON A.aptrx_cbk_no = B.apcbk_no
+			LEFT JOIN tblAPaptrxmst C
+				ON A.aptrx_ivc_no = C.aptrx_ivc_no
+			
+		WHERE CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
+			 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
+			 AND A.aptrx_trans_type IN (''I'',''C'')
+			 AND C.aptrx_ivc_no IS NULL
+		--Posted
+		--UNION
+		--SELECT 
+		--	[strVendorId]			=	A.apivc_vnd_no,
+		--	[strVendorOrderNumber] 	=	A.apivc_ivc_no,
+		--	[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation 
+		--										WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
+		--											WHERE strVendorId COLLATE Latin1_General_CI_AS = A.apivc_vnd_no COLLATE Latin1_General_CI_AS)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
+		--	[intTaxCodeId] 			=	NULL,
+		--	[dtmDate] 				=	CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
+		--	[dtmBillDate] 			=	CASE WHEN ISDATE(A.apivc_ivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_ivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
+		--	[dtmDueDate] 			=	CASE WHEN ISDATE(A.apivc_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
+		--	[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
+		--	[strDescription] 		=	A.apivc_comment,
+		--	[dblTotal] 				=	CASE WHEN A.apivc_trans_type = ''C'' THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END,
+		--	[dblAmountDue]			=	CASE WHEN A.apivc_status_ind = ''P'' THEN 0 ELSE 
+		--										CASE WHEN A.apivc_trans_type = ''C'' THEN A.apivc_orig_amt * -1 
+		--												ELSE A.apivc_orig_amt END 
+		--									END,
+		--	[dblDiscount]			=	A.apivc_disc_taken,
+		--	[dblWithheld]			=	A.apivc_wthhld_amt,
+		--	[intUserId]				=	@UserId,
+		--	[ysnPosted]				=	1,
+		--	[ysnPaid]				=	CASE WHEN A.apivc_status_ind = ''P'' THEN 1 ELSE 0 END,
+		--	[intTransactionType]	=	CASE WHEN A.apivc_trans_type = ''I'' THEN 1 
+		--									WHEN A.apivc_trans_type = ''C'' THEN 3
+		--									ELSE NULL END
+		--FROM apivcmst A
+		--	LEFT JOIN apcbkmst B
+		--		ON A.apivc_cbk_no = B.apcbk_no
+		--	--LEFT JOIN tblAPTempBill C
+		--	LEFT JOIN tblAPBill C
+		--		--ON A.apivc_ivc_no = C.aptrx_ivc_no
+		--		ON A.apivc_ivc_no COLLATE Latin1_General_CI_AS = C.strVendorOrderNumber COLLATE Latin1_General_CI_AS
+		--		AND A.apivc_vnd_no COLLATE Latin1_General_CI_AS = C.strVendorId COLLATE Latin1_General_CI_AS
 
-		WHERE CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
-			 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
-			 AND A.apivc_trans_type IN (''I'',''C'')
-			 --AND C.apivc_ivc_no IS NULL
-			 AND C.strVendorOrderNumber IS NULL
+		--WHERE CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
+		--	 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
+		--	 AND A.apivc_trans_type IN (''I'',''C'')
+		--	 --AND C.apivc_ivc_no IS NULL
+		--	 AND C.strVendorOrderNumber IS NULL
 		
 		SELECT @ImportedRecords = @@ROWCOUNT
 
@@ -406,49 +438,60 @@ BEGIN
 			FROM tblAPBill A
 			INNER JOIN aphglmst C
 				ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = C.aphgl_ivc_no COLLATE Latin1_General_CI_AS
-				
-		--Add already imported bill
-		--SET IDENTITY_INSERT tblAPTempBill ON
-		--INSERT INTO tblAPTempBill([apivc_vnd_no], [apivc_ivc_no])
-		----SELECT 
-		----	A.aptrx_vnd_no
-		----	,aptrx_ivc_no	 
-		----FROM aptrxmst A
-		----INNER JOIN @InsertedData B
-		----	ON A.aptrx_ivc_no = B.strBillId
-		----UNION
-		--SELECT 
-		--	A.apivc_vnd_no
-		--	,apivc_ivc_no	 
-		--FROM apivcmst A
-		--INNER JOIN @InsertedData B
-		--	ON A.apivc_ivc_no = B.strBillId
-		--SET IDENTITY_INSERT tblAPTempBill OFF
+		
 		
 		--Create back up data of imported aptrxmst
-		--INSERT INTO aptrxmst
-		--SELECT * FROM aptrxmst A
-		--	LEFT JOIN apcbkmst B
-		--		ON A.aptrx_cbk_no = B.apcbk_no
-		--	LEFT JOIN tblAPTempBill C
-		--		ON A.aptrx_ivc_no = C.apivc_ivc_no
-			
-		--WHERE CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
-		--	 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
-		--	 AND A.aptrx_trans_type IN (''I'',''C'')
-		--	 AND C.aptrx_ivc_no IS NULL
-			 
-		--DELETE FROM aptrxmst
-		--FROM aptrxmst A
-		--	LEFT JOIN apcbkmst B
-		--		ON A.aptrx_cbk_no = B.apcbk_no
-		--	LEFT JOIN tblAPTempBill C
-		--		ON A.aptrx_ivc_no = C.apivc_ivc_no
-			
-		--WHERE CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
-		--	 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
-		--	 AND A.aptrx_trans_type IN (''I'',''C'')
-		--	 AND C.aptrx_ivc_no IS NULL
+		--SET IDENTITY_INSERT tblAPaptrxmst ON
+		INSERT INTO tblAPaptrxmst
+		SELECT 
+			A.[aptrx_vnd_no]       ,
+			A.[aptrx_ivc_no]       ,
+			A.[aptrx_sys_rev_dt]   ,
+			A.[aptrx_sys_time]     ,
+			A.[aptrx_cbk_no]       ,
+			A.[aptrx_chk_no]       ,
+			A.[aptrx_trans_type]   ,
+			A.[aptrx_batch_no]     ,
+			A.[aptrx_pur_ord_no]   ,
+			A.[aptrx_po_rcpt_seq]  ,
+			A.[aptrx_ivc_rev_dt]   ,
+			A.[aptrx_disc_rev_dt]  ,
+			A.[aptrx_due_rev_dt]   ,
+			A.[aptrx_chk_rev_dt]   ,
+			A.[aptrx_gl_rev_dt]    ,
+			A.[aptrx_disc_pct]     ,
+			A.[aptrx_orig_amt]     ,
+			A.[aptrx_disc_amt]     ,
+			A.[aptrx_wthhld_amt]   ,
+			A.[aptrx_net_amt]      ,
+			A.[aptrx_1099_amt]     ,
+			A.[aptrx_comment]      ,
+			A.[aptrx_orig_type]    ,
+			A.[aptrx_name]         ,
+			A.[aptrx_recur_yn]     ,
+			A.[aptrx_currency]     ,
+			A.[aptrx_currency_rt]  ,
+			A.[aptrx_currency_cnt] ,
+			A.[aptrx_user_id]      ,
+			A.[aptrx_user_rev_dt]  
+		 FROM aptrxmst A
+			LEFT JOIN apcbkmst B
+				ON A.aptrx_cbk_no = B.apcbk_no
+			LEFT JOIN tblAPaptrxmst C
+				ON A.aptrx_ivc_no = C.aptrx_ivc_no
+		WHERE CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
+			 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
+			 AND A.aptrx_trans_type IN (''I'',''C'')
+			 AND C.aptrx_ivc_no IS NULL
+		--SET IDENTITY_INSERT tblAPaptrxmst OFF
+
+		DELETE FROM aptrxmst
+		FROM aptrxmst A
+			LEFT JOIN apcbkmst B
+				ON A.aptrx_cbk_no = B.apcbk_no
+		WHERE CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
+			 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
+			 AND A.aptrx_trans_type IN (''I'',''C'')
 
 		--Create Bill Batch transaction
 		SELECT @totalBills = COUNT(*) FROM @InsertedData
