@@ -1021,7 +1021,7 @@ BEGIN
 			  REPLACE(  
 				''<b>'' + ''Regulator Mfr: '' + ''</b>'' + CAST( ISNULL(E.strManufacturerID, '''') AS CHAR(25) ) +   
 				''<b>'' + @Gaps + ''Name: '' + ''</b>'' + CAST ( ISNULL(E.strManufacturerName, '''') AS CHAR(23) ) +  
-				''<b>'' + @Gaps + ''Description: '' + ''</b>'' + CAST (ISNULL(E.strDescription, '''') AS CHAR(40) ) +  
+				''<b>'' + @Gaps + ''Description: '' + ''</b>'' + CAST (ISNULL(E.strDescription, '''') AS CHAR(33) ) +  
 				''<b>'' + @Gaps + ''Date Mfd: '' + ''</b>'' + CAST( ISNULL(CONVERT(VARCHAR(50), E.dtmManufacturedDate, 101), '''') AS CHAR(12) )   
 			   , '' ''  
 			   , ''&#160;''  
