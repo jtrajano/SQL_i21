@@ -11,3 +11,67 @@
 
 );
 
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Identity field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMStartingNumber',
+    @level2type = N'COLUMN',
+    @level2name = N'intStartingNumberId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Transaction Type',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMStartingNumber',
+    @level2type = N'COLUMN',
+    @level2name = N'strTransactionType'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Prefix',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMStartingNumber',
+    @level2type = N'COLUMN',
+    @level2name = N'strPrefix'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Number',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMStartingNumber',
+    @level2type = N'COLUMN',
+    @level2name = N'intNumber'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Module Name',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMStartingNumber',
+    @level2type = N'COLUMN',
+    @level2name = N'strModule'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Starting Number is enabled',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMStartingNumber',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnEnable'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Concurrency Check',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMStartingNumber',
+    @level2type = N'COLUMN',
+    @level2name = N'intConcurrencyId'

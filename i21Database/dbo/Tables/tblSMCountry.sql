@@ -8,3 +8,58 @@
     CONSTRAINT [PK_SMCountry_CoutryID] PRIMARY KEY CLUSTERED ([intCountryID] ASC)
 );
 
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Identity field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMCountry',
+    @level2type = N'COLUMN',
+    @level2name = N'intCountryID'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Country',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMCountry',
+    @level2type = N'COLUMN',
+    @level2name = N'strCountry'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Phone Number default format',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMCountry',
+    @level2type = N'COLUMN',
+    @level2name = N'strPhoneNumber'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Country Code',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMCountry',
+    @level2type = N'COLUMN',
+    @level2name = N'strCountryCode'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Sort Field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMCountry',
+    @level2type = N'COLUMN',
+    @level2name = N'intSort'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Concurrency Check',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMCountry',
+    @level2type = N'COLUMN',
+    @level2name = N'intConcurrencyId'

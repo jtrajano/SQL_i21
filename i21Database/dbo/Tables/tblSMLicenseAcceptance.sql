@@ -11,3 +11,49 @@
 GO
 
 CREATE INDEX [IX_tblSMLicenseAcceptance_strEULAVersion] ON [dbo].[tblSMLicenseAcceptance] ([strEULAVersion])
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Identity field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMLicenseAcceptance',
+    @level2type = N'COLUMN',
+    @level2name = N'intLicenseAcceptanceId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'User Security Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMLicenseAcceptance',
+    @level2type = N'COLUMN',
+    @level2name = N'intUserSecurityId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'EULA Version',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMLicenseAcceptance',
+    @level2type = N'COLUMN',
+    @level2name = N'strEULAVersion'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Date Accepted',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMLicenseAcceptance',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmDateAccepted'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Concurrency Check',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMLicenseAcceptance',
+    @level2type = N'COLUMN',
+    @level2name = N'intConcurrencyId'
