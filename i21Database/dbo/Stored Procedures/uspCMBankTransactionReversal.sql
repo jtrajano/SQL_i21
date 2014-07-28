@@ -2,7 +2,6 @@
 /**Standard temporary table to use: 
 * 
 * 	CREATE TABLE #tmpCMBankTransaction (
-* 		[intTransactionId] INT PRIMARY KEY,
 * 		[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL,
 * 		UNIQUE (strTransactionId)
 * 	)
@@ -73,7 +72,7 @@ FROM	tblCMCheckNumberAudit AUDIT INNER JOIN tblCMBankTransaction F
 			ON AUDIT.intBankAccountId = F.intBankAccountId
 			AND AUDIT.strCheckNo = F.strReferenceNo
 		INNER JOIN #tmpCMBankTransaction TMP
-			ON F.intTransactionId = TMP.intTransactionId
+			ON F.strTransactionId = TMP.strTransactionId
 WHERE	-- Condition #1:
 		F.strReferenceNo NOT IN (@CASH_PAYMENT)	
 		-- Condition #2:
@@ -120,7 +119,7 @@ SELECT	intBankAccountId = F.intBankAccountId
 		,dtmCreated = GETDATE()
 		,dtmCheckPrinted = NULL 
 FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
-			ON F.intTransactionId = TMP.intTransactionId
+			ON F.strTransactionId = TMP.strTransactionId
 WHERE	NOT EXISTS (
 			SELECT	TOP 1 1
 			FROM	tblCMCheckNumberAudit AUDIT
@@ -146,7 +145,7 @@ SET		ysnCheckVoid = 1
 		,dtmLastModified = GETDATE()
 		,intLastModifiedUserId = @intUserId
 FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
-			ON F.intTransactionId = TMP.intTransactionId
+			ON F.strTransactionId = TMP.strTransactionId
 WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT)		
 		-- Condition #1:
 		AND F.strReferenceNo NOT IN (@CASH_PAYMENT) 
@@ -162,15 +161,17 @@ IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
 */
 DELETE tblCMBankTransaction
 FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
-			ON F.intTransactionId = TMP.intTransactionId
-WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT)
-		-- Condition #1:
-		AND F.strReferenceNo IN (@CASH_PAYMENT)
-		-- Condition #2: 
+			ON F.strTransactionId = TMP.strTransactionId
+WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT)		
 		AND (
-			F.strReferenceNo NOT IN (@CASH_PAYMENT)
-			AND F.dtmCheckPrinted IS NULL 		
-		)	
+			-- Condition #1:
+			F.strReferenceNo IN (@CASH_PAYMENT)
+			-- Condition #2: 
+			OR (
+				F.strReferenceNo NOT IN (@CASH_PAYMENT)
+				AND F.dtmCheckPrinted IS NULL 		
+			)
+		)
 IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
 
 Exit_Successfully:
