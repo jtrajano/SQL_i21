@@ -66,3 +66,5 @@ i21Database/bin/
 i21PreDeployment/bin/
 Integration/bin/
 i21PreDeployment/obj/Debug/
+**/obj
+**/bin
