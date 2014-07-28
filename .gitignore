@@ -1,6 +1,7 @@
+#Ignore these files/folders when pushing to Bitbucket.
 .idea
 .sencha
-server/**/bin
-server/**/obj
-node_modules
-ext
+**/bin
+**/obj
+server/TestResults/
+node_modules/
