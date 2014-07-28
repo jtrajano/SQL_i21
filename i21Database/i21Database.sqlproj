@@ -582,6 +582,7 @@
     <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountSegmentTemplate.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountStructure.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreatePayment.sql" />
+	<Build Include="dbo\Stored Procedures\uspCMBankTransactionReversalOrigin.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
