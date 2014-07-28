@@ -211,6 +211,18 @@ IF(ISNULL(@post,0) = 1)
 			FROM tblAPPayment A 
 				INNER JOIN tblCMBankTransaction B ON A.strPaymentRecordNum = B.strTransactionId
 			WHERE B.ysnClr = 1
+
+		--CM Voiding Validation
+		INSERT INTO #tmpPayableInvalidData
+			SELECT C.strText,
+					'Payable',
+					A.strPaymentRecordNum,
+					@batchId,
+					A.intPaymentId
+			FROM    tblAPPayment A INNER JOIN tblCMBankTransaction B 
+						ON A.strPaymentRecordNum = B.strTransactionId
+						AND intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+					CROSS APPLY dbo.fnGetBankTransactionReversalErrors(B.intTransactionId) C
 	END
 
 	DECLARE @totalInvalid INT
@@ -284,26 +296,41 @@ IF (ISNULL(@recap, 0) = 0)
 			INNER JOIN tblGLDetail B
 				ON A.strPaymentRecordNum = B.strTransactionId
 
-		--DELETE IF NOT CHECK PAYMENT AND DOESN'T HAVE CHECK NUMBER
-		DELETE FROM tblCMBankTransaction
-		WHERE strTransactionId IN (
-			SELECT strPaymentRecordNum 
-			FROM tblAPPayment
-				INNER JOIN tblSMPaymentMethod ON tblAPPayment.intPaymentMethodId = tblSMPaymentMethod.intPaymentMethodID
-			 WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData) 
-			AND tblSMPaymentMethod.strPaymentMethod != 'Check' 
-			OR (ISNULL(tblAPPayment.strPaymentInfo,'') = '' AND tblSMPaymentMethod.strPaymentMethod = 'Check')
-		)
+		----DELETE IF NOT CHECK PAYMENT AND DOESN'T HAVE CHECK NUMBER
+		--DELETE FROM tblCMBankTransaction
+		--WHERE strTransactionId IN (
+		--	SELECT strPaymentRecordNum 
+		--	FROM tblAPPayment
+		--		INNER JOIN tblSMPaymentMethod ON tblAPPayment.intPaymentMethodId = tblSMPaymentMethod.intPaymentMethodID
+		--	 WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData) 
+		--	AND tblSMPaymentMethod.strPaymentMethod != 'Check' 
+		--	OR (ISNULL(tblAPPayment.strPaymentInfo,'') = '' AND tblSMPaymentMethod.strPaymentMethod = 'Check')
+		--)
 
-		--VOID IF CHECK PAYMENT
-		UPDATE tblCMBankTransaction
-		SET ysnCheckVoid = 1,
-			ysnPosted = 0
-		WHERE strTransactionId IN (
-			SELECT strPaymentRecordNum 
-			FROM tblAPPayment
-			 WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData) 
-		)
+		----VOID IF CHECK PAYMENT
+		--UPDATE tblCMBankTransaction
+		--SET ysnCheckVoid = 1,
+		--	ysnPosted = 0
+		--WHERE strTransactionId IN (
+		--	SELECT strPaymentRecordNum 
+		--	FROM tblAPPayment
+		--	 WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData) 
+		--)
+
+		-- Creating the temp table:
+		DECLARE @isSuccessful BIT
+		CREATE TABLE #tmpCMBankTransaction (
+         --[intTransactionId] INT PRIMARY KEY,
+         [strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL,
+         UNIQUE (strTransactionId))
+
+		 INSERT INTO #tmpCMBankTransaction
+		 SELECT strPaymentRecordNum FROM tblAPPayment A
+		 INNER JOIN #tmpPayablePostData B ON A.intPaymentId = B.intPaymentId
+
+		-- Calling the stored procedure
+		EXEC dbo.uspCMBankTransactionReversal @userId, @isSuccessful OUTPUT
+		IF @isSuccessful = 0 GOTO Post_Rollback
 
 		--Insert Successfully unposted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
