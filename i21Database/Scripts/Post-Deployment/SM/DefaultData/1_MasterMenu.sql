@@ -513,3 +513,19 @@ GO
 	IF EXISTS(SELECT * FROM tblSMMasterMenu WHERE strMenuName = 'Export Hours Worked' AND strType = 'Screen' AND strModuleName = 'Help Desk' AND intParentMenuID = @intParent)
 	DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Export Hours Worked' AND strType = 'Screen' AND strModuleName = 'Help Desk' AND intParentMenuID = @intParent
 GO
+	UPDATE tblSMMasterMenu
+	SET strMenuName = 'Pay Bills Detail'
+	WHERE strModuleName = 'Accounts Payable' AND strMenuName = 'Pay Bills' AND strType = 'Screen' AND strCommand = 'AccountsPayable.controller.PayBillsDetail'
+
+	UPDATE tblSMMasterMenu
+	SET strMenuName = 'Pay Bills'
+	WHERE strModuleName = 'Accounts Payable' AND strMenuName = 'Pay Bills (Multi-Vendor)' AND strType = 'Screen' AND strCommand = 'AccountsPayable.controller.PayBill'
+
+	UPDATE tblSMMasterMenu
+	SET strMenuName = 'Receive Payment Detail'
+	WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Receive Payments' AND strType = 'Screen' AND strCommand = 'AccountsReceivable.controller.ReceivePaymentsDetail'
+
+	UPDATE tblSMMasterMenu
+	SET strMenuName = 'Receive Payments'
+	WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Receive Payments (Multi Customer)' AND strType = 'Screen' AND strCommand = 'AccountsReceivable.controller.ReceivePayments'
+GO
