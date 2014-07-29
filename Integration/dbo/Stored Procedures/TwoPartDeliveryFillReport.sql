@@ -1057,7 +1057,7 @@ BEGIN
 			  REPLACE(  
 				''<b>'' + ''Regulator Mfr: '' + ''</b>'' + CAST('''' AS CHAR(25) ) +   
 				''<b>'' + @Gaps + ''Name: '' + ''</b>'' + CAST ( '''' AS CHAR(23) ) +  
-				''<b>'' + @Gaps + ''Description: '' + ''</b>'' + CAST ('''' AS CHAR(40) ) +  
+				''<b>'' + @Gaps + ''Description: '' + ''</b>'' + CAST ('''' AS CHAR(33) ) +  
 				''<b>'' + @Gaps + ''Date Mfd: '' + ''</b>'' + CAST( '''' AS CHAR(12) )   
 			   , '' ''  
 			   , ''&#160;''  
