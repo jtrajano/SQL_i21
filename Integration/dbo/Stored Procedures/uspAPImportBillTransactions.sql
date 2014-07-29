@@ -316,12 +316,18 @@ BEGIN
 		 FROM aptrxmst A
 		DELETE FROM aptrxmst
 
-		----UPDATE strTransactionId from tblCMBankTransaction
-		--UPDATE tblCMBankTransaction
-		--SET strTransactionId = 
-		--FROM tblCMBankTransaction A
-		--INNER JOIN tblAPPayment B
-		--	ON 
+		--UPDATE strTransactionId from tblCMBankTransaction
+		UPDATE tblCMBankTransaction
+		SET strTransactionId = B.strPaymentRecordNum,
+			intPayeeId = C.intEntityId
+		FROM tblCMBankTransaction A
+		INNER JOIN tblAPPayment B
+			ON A.dblAmount = B.dblAmountPaid
+			AND A.dtmDate = B.dtmDatePaid
+			AND A.intBankAccountId = B.intBankAccountId
+			AND A.strReferenceNo = B.strPaymentInfo
+		INNER JOIN tblAPVendor C
+			ON B.strVendorId = C.strVendorId
 
 		SET @Total = @ImportedRecords;
 	END
