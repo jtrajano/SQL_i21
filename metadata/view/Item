@@ -10,14 +10,14 @@
         "defaultFocus": null,
         "designer|userAlias": "item",
         "designer|userClassName": "Item",
-        "height": 635,
+        "height": 650,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
         "itemId": null,
         "layout": "fit",
         "maximizable": true,
-        "minHeight": 635,
+        "minHeight": 650,
         "minWidth": 950,
         "minimizable": null,
         "mixins": null,
@@ -2322,8 +2322,8 @@
                                                                     "userConfig": {
                                                                         "bodyPadding": 7,
                                                                         "container|align": "stretch",
-                                                                        "height": 120,
-                                                                        "layout": "vbox",
+                                                                        "height": null,
+                                                                        "layout": "hbox",
                                                                         "layout|flex": null,
                                                                         "title": "Default UOMs"
                                                                     },
@@ -2339,8 +2339,9 @@
                                                                             "userConfig": {
                                                                                 "fieldLabel": "Standard UOM",
                                                                                 "itemId": "txtCaseUom6",
+                                                                                "labelAlign": "top",
                                                                                 "labelWidth": 125,
-                                                                                "layout|flex": null
+                                                                                "layout|flex": 1
                                                                             },
                                                                             "designerId": "05302153-543a-42c4-a90c-55f0f852cf10"
                                                                         },
@@ -2354,8 +2355,10 @@
                                                                             "userConfig": {
                                                                                 "fieldLabel": "Issue UOM",
                                                                                 "itemId": "txtCaseUom7",
+                                                                                "labelAlign": "top",
                                                                                 "labelWidth": 125,
-                                                                                "layout|flex": null
+                                                                                "layout|flex": 1,
+                                                                                "layout|margins": "0 5"
                                                                             },
                                                                             "designerId": "b11d11f0-d1ae-4290-9811-c83acbe48a52"
                                                                         },
@@ -2369,8 +2372,9 @@
                                                                             "userConfig": {
                                                                                 "fieldLabel": "Receive UOM",
                                                                                 "itemId": "txtCaseUom8",
+                                                                                "labelAlign": "top",
                                                                                 "labelWidth": 125,
-                                                                                "layout|flex": null
+                                                                                "layout|flex": 1
                                                                             },
                                                                             "designerId": "1515c9cc-7451-4364-9006-b7a71d548db9"
                                                                         }
@@ -2482,6 +2486,70 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "container|align": "stretch",
+                                                                                "layout": "hbox",
+                                                                                "layout|flex": null,
+                                                                                "layout|margins": "0 0 5 0"
+                                                                            },
+                                                                            "designerId": "40b7ce5d-a521-4280-8f83-16132a18ba91",
+                                                                            "cn": [
+                                                                                {
+                                                                                    "type": "Ext.form.field.Text",
+                                                                                    "reference": {
+                                                                                        "name": "items",
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "codeClass": null,
+                                                                                    "userConfig": {
+                                                                                        "fieldLabel": "Height",
+                                                                                        "itemId": "txtCaseUom1",
+                                                                                        "labelWidth": 125,
+                                                                                        "layout|flex": 1.9
+                                                                                    },
+                                                                                    "designerId": "3a7abdfb-ce83-4142-81c4-ab39933ee63b"
+                                                                                },
+                                                                                {
+                                                                                    "type": "Ext.form.field.Text",
+                                                                                    "reference": {
+                                                                                        "name": "items",
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "codeClass": null,
+                                                                                    "userConfig": {
+                                                                                        "fieldLabel": "Width",
+                                                                                        "itemId": "txtCaseUom2",
+                                                                                        "labelWidth": 40,
+                                                                                        "layout|flex": 1,
+                                                                                        "layout|margins": "0 5"
+                                                                                    },
+                                                                                    "designerId": "37fc84cc-6bc3-46b1-82a4-1a8749b104cc"
+                                                                                },
+                                                                                {
+                                                                                    "type": "Ext.form.field.Text",
+                                                                                    "reference": {
+                                                                                        "name": "items",
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "codeClass": null,
+                                                                                    "userConfig": {
+                                                                                        "fieldLabel": "Depth",
+                                                                                        "itemId": "txtCaseUom3",
+                                                                                        "labelWidth": 40,
+                                                                                        "layout|flex": 1,
+                                                                                        "layout|margins": null
+                                                                                    },
+                                                                                    "designerId": "3b114221-c7bc-40f5-8582-e163f41abb1d"
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.container.Container",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "container|align": "stretch",
                                                                                 "designer|displayName": "container",
                                                                                 "layout": "hbox",
                                                                                 "layout|flex": null,
@@ -2490,7 +2558,7 @@
                                                                             "designerId": "d1f08e63-2595-4265-9949-00365e335d0b",
                                                                             "cn": [
                                                                                 {
-                                                                                    "type": "Ext.form.field.Text",
+                                                                                    "type": "Ext.form.field.ComboBox",
                                                                                     "reference": {
                                                                                         "name": "items",
                                                                                         "type": "array"
@@ -2505,7 +2573,7 @@
                                                                                     "designerId": "e22c07a0-db85-42e3-ab23-1b77244d7298"
                                                                                 },
                                                                                 {
-                                                                                    "type": "Ext.form.field.Text",
+                                                                                    "type": "Ext.form.field.ComboBox",
                                                                                     "reference": {
                                                                                         "name": "items",
                                                                                         "type": "array"
@@ -2514,7 +2582,7 @@
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "Weight UOM",
                                                                                         "itemId": "cboFamily1",
-                                                                                        "labelWidth": 75,
+                                                                                        "labelWidth": 87,
                                                                                         "layout|flex": 1,
                                                                                         "layout|margins": "0 0 0 5"
                                                                                     },
@@ -2545,7 +2613,7 @@
                                                                                     },
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
-                                                                                        "fieldLabel": "Material Size Code",
+                                                                                        "fieldLabel": "Weight",
                                                                                         "itemId": "txtCaseUom1",
                                                                                         "labelWidth": 125,
                                                                                         "layout|flex": 1.4
@@ -2560,13 +2628,61 @@
                                                                                     },
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
-                                                                                        "fieldLabel": "No. of Inner Units",
+                                                                                        "fieldLabel": "Material Pack",
                                                                                         "itemId": "txtCaseUom2",
-                                                                                        "labelWidth": 105,
+                                                                                        "labelWidth": 87,
                                                                                         "layout|flex": 1,
                                                                                         "layout|margins": "0 0 0 5"
                                                                                     },
                                                                                     "designerId": "b186a856-481e-4284-b242-94ef50a5d866"
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.container.Container",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "container|align": "stretch",
+                                                                                "layout": "hbox",
+                                                                                "layout|flex": null,
+                                                                                "layout|margins": "0 0 5 0"
+                                                                            },
+                                                                            "designerId": "ea311f44-394b-4b43-a50a-dcf59dda7dbe",
+                                                                            "cn": [
+                                                                                {
+                                                                                    "type": "Ext.form.field.Text",
+                                                                                    "reference": {
+                                                                                        "name": "items",
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "codeClass": null,
+                                                                                    "userConfig": {
+                                                                                        "fieldLabel": "Material Size Code",
+                                                                                        "itemId": "txtCaseUom1",
+                                                                                        "labelWidth": 125,
+                                                                                        "layout|flex": 1.4
+                                                                                    },
+                                                                                    "designerId": "ca71cab5-b0b6-4d09-b7ce-440299008b9b"
+                                                                                },
+                                                                                {
+                                                                                    "type": "Ext.form.field.Text",
+                                                                                    "reference": {
+                                                                                        "name": "items",
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "codeClass": null,
+                                                                                    "userConfig": {
+                                                                                        "fieldLabel": "Inner Units",
+                                                                                        "itemId": "txtCaseUom2",
+                                                                                        "labelWidth": 87,
+                                                                                        "layout|flex": 1,
+                                                                                        "layout|margins": "0 0 0 5"
+                                                                                    },
+                                                                                    "designerId": "43ab8d92-09fb-4d1e-8fb3-50e922a4d415"
                                                                                 }
                                                                             ]
                                                                         },

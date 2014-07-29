@@ -38,9 +38,9 @@ Ext.define('Inventory.view.Item', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 635,
+    height: 650,
     hidden: false,
-    minHeight: 635,
+    minHeight: 650,
     minWidth: 950,
     width: 950,
     layout: 'fit',
@@ -1060,30 +1060,36 @@ Ext.define('Inventory.view.Item', {
                                                                     items: [
                                                                         {
                                                                             xtype: 'panel',
-                                                                            height: 120,
                                                                             bodyPadding: 7,
                                                                             title: 'Default UOMs',
                                                                             layout: {
-                                                                                type: 'vbox',
+                                                                                type: 'hbox',
                                                                                 align: 'stretch'
                                                                             },
                                                                             items: [
                                                                                 {
                                                                                     xtype: 'combobox',
+                                                                                    flex: 1,
                                                                                     itemId: 'txtCaseUom6',
                                                                                     fieldLabel: 'Standard UOM',
+                                                                                    labelAlign: 'top',
                                                                                     labelWidth: 125
                                                                                 },
                                                                                 {
                                                                                     xtype: 'combobox',
+                                                                                    flex: 1,
+                                                                                    margins: '0 5',
                                                                                     itemId: 'txtCaseUom7',
                                                                                     fieldLabel: 'Issue UOM',
+                                                                                    labelAlign: 'top',
                                                                                     labelWidth: 125
                                                                                 },
                                                                                 {
                                                                                     xtype: 'combobox',
+                                                                                    flex: 1,
                                                                                     itemId: 'txtCaseUom8',
                                                                                     fieldLabel: 'Receive UOM',
+                                                                                    labelAlign: 'top',
                                                                                     labelWidth: 125
                                                                                 }
                                                                             ]
@@ -1145,18 +1151,75 @@ Ext.define('Inventory.view.Item', {
                                                                                     items: [
                                                                                         {
                                                                                             xtype: 'textfield',
+                                                                                            flex: 1.9,
+                                                                                            itemId: 'txtCaseUom1',
+                                                                                            fieldLabel: 'Height',
+                                                                                            labelWidth: 125
+                                                                                        },
+                                                                                        {
+                                                                                            xtype: 'textfield',
+                                                                                            flex: 1,
+                                                                                            margins: '0 5',
+                                                                                            itemId: 'txtCaseUom2',
+                                                                                            fieldLabel: 'Width',
+                                                                                            labelWidth: 40
+                                                                                        },
+                                                                                        {
+                                                                                            xtype: 'textfield',
+                                                                                            flex: 1,
+                                                                                            itemId: 'txtCaseUom3',
+                                                                                            fieldLabel: 'Depth',
+                                                                                            labelWidth: 40
+                                                                                        }
+                                                                                    ]
+                                                                                },
+                                                                                {
+                                                                                    xtype: 'container',
+                                                                                    margins: '0 0 5 0',
+                                                                                    layout: {
+                                                                                        type: 'hbox',
+                                                                                        align: 'stretch'
+                                                                                    },
+                                                                                    items: [
+                                                                                        {
+                                                                                            xtype: 'combobox',
                                                                                             flex: 1.4,
                                                                                             itemId: 'cboFamily',
                                                                                             fieldLabel: 'Dimension UOM',
                                                                                             labelWidth: 125
                                                                                         },
                                                                                         {
-                                                                                            xtype: 'textfield',
+                                                                                            xtype: 'combobox',
                                                                                             flex: 1,
                                                                                             margins: '0 0 0 5',
                                                                                             itemId: 'cboFamily1',
                                                                                             fieldLabel: 'Weight UOM',
-                                                                                            labelWidth: 75
+                                                                                            labelWidth: 87
+                                                                                        }
+                                                                                    ]
+                                                                                },
+                                                                                {
+                                                                                    xtype: 'container',
+                                                                                    margins: '0 0 5 0',
+                                                                                    layout: {
+                                                                                        type: 'hbox',
+                                                                                        align: 'stretch'
+                                                                                    },
+                                                                                    items: [
+                                                                                        {
+                                                                                            xtype: 'textfield',
+                                                                                            flex: 1.4,
+                                                                                            itemId: 'txtCaseUom1',
+                                                                                            fieldLabel: 'Weight',
+                                                                                            labelWidth: 125
+                                                                                        },
+                                                                                        {
+                                                                                            xtype: 'textfield',
+                                                                                            flex: 1,
+                                                                                            margins: '0 0 0 5',
+                                                                                            itemId: 'txtCaseUom2',
+                                                                                            fieldLabel: 'Material Pack',
+                                                                                            labelWidth: 87
                                                                                         }
                                                                                     ]
                                                                                 },
@@ -1180,8 +1243,8 @@ Ext.define('Inventory.view.Item', {
                                                                                             flex: 1,
                                                                                             margins: '0 0 0 5',
                                                                                             itemId: 'txtCaseUom2',
-                                                                                            fieldLabel: 'No. of Inner Units',
-                                                                                            labelWidth: 105
+                                                                                            fieldLabel: 'Inner Units',
+                                                                                            labelWidth: 87
                                                                                         }
                                                                                     ]
                                                                                 },
