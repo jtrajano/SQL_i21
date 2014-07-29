@@ -16,3 +16,49 @@ CREATE INDEX [IX_tblSMUserSecurityControlPermission_intUserSecurityId] ON [dbo].
 GO
 
 CREATE INDEX [IX_tblSMUserSecurityControlPermission_intControlId] ON [dbo].[tblSMUserSecurityControlPermission] ([intControlId])
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Identity field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMUserSecurityControlPermission',
+    @level2type = N'COLUMN',
+    @level2name = N'intUserSecurityControlPermissionId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'User Security Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMUserSecurityControlPermission',
+    @level2type = N'COLUMN',
+    @level2name = N'intUserSecurityId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Control Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMUserSecurityControlPermission',
+    @level2type = N'COLUMN',
+    @level2name = N'intControlId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Permission',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMUserSecurityControlPermission',
+    @level2type = N'COLUMN',
+    @level2name = N'strPermission'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Concurrency Check',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMUserSecurityControlPermission',
+    @level2type = N'COLUMN',
+    @level2name = N'intConcurrencyId'

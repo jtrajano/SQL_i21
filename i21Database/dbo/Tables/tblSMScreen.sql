@@ -22,3 +22,67 @@ CREATE INDEX [IX_tblSMScreen_strModule] ON [dbo].[tblSMScreen] ([strModule])
 GO
 
 CREATE INDEX [IX_tblSMScreen_strScreenId] ON [dbo].[tblSMScreen] ([strScreenId])
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Identity field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMScreen',
+    @level2type = N'COLUMN',
+    @level2name = N'intScreenId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Screen Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMScreen',
+    @level2type = N'COLUMN',
+    @level2name = N'strScreenId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Screen Name',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMScreen',
+    @level2type = N'COLUMN',
+    @level2name = N'strScreenName'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Namespace of the Screen',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMScreen',
+    @level2type = N'COLUMN',
+    @level2name = N'strNamespace'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Module Name',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMScreen',
+    @level2type = N'COLUMN',
+    @level2name = N'strModule'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Table Name',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMScreen',
+    @level2type = N'COLUMN',
+    @level2name = N'strTableName'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Concurrency Check',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMScreen',
+    @level2type = N'COLUMN',
+    @level2name = N'intConcurrencyId'

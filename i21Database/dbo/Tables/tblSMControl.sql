@@ -29,3 +29,58 @@ CREATE INDEX [IX_tblSMControl_strControlType] ON [dbo].[tblSMControl] ([strContr
 GO
 
 CREATE INDEX [IX_tblSMControl_strContainer] ON [dbo].[tblSMControl] ([strContainer])
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Identity field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMControl',
+    @level2type = N'COLUMN',
+    @level2name = N'intControlId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Screen Id from Screens table',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMControl',
+    @level2type = N'COLUMN',
+    @level2name = N'intScreenId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Item Id of the Control',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMControl',
+    @level2type = N'COLUMN',
+    @level2name = N'strControlId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Name of the Control',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMControl',
+    @level2type = N'COLUMN',
+    @level2name = N'strControlName'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Container where the Control belongs',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMControl',
+    @level2type = N'COLUMN',
+    @level2name = N'strContainer'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Control Type',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMControl',
+    @level2type = N'COLUMN',
+    @level2name = N'strControlType'

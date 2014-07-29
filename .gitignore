@@ -6,4 +6,4 @@
 server/TestResults/
 node_modules/
 *publish.xml
-*.dbmdl
+**/*.dbmdl

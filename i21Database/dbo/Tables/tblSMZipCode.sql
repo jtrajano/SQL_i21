@@ -11,3 +11,85 @@
     CONSTRAINT [PK_tblSMZipCode] PRIMARY KEY CLUSTERED ([strZipCode] ASC, [strCity] ASC)
 );
 
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Identity field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMZipCode',
+    @level2type = N'COLUMN',
+    @level2name = N'intZipCodeID'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Zip/Postal Code',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMZipCode',
+    @level2type = N'COLUMN',
+    @level2name = N'strZipCode'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'State',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMZipCode',
+    @level2type = N'COLUMN',
+    @level2name = N'strState'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'City',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMZipCode',
+    @level2type = N'COLUMN',
+    @level2name = N'strCity'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Country',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMZipCode',
+    @level2type = N'COLUMN',
+    @level2name = N'strCountry'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Latitude',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMZipCode',
+    @level2type = N'COLUMN',
+    @level2name = N'dblLatitude'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Longitude',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMZipCode',
+    @level2type = N'COLUMN',
+    @level2name = N'dblLongitude'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Sort field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMZipCode',
+    @level2type = N'COLUMN',
+    @level2name = N'intSort'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Concurrency Check',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMZipCode',
+    @level2type = N'COLUMN',
+    @level2name = N'intConcurrencyId'

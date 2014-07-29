@@ -17,3 +17,49 @@ CREATE INDEX [IX_tblSMUserRoleFRPermission_intUserRoleId] ON [dbo].[tblSMUserRol
 GO
 
 CREATE INDEX [IX_tblSMUserRoleFRPermission_intReportId] ON [dbo].[tblSMUserRoleFRPermission] ([intReportId])
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Identity field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMUserRoleFRPermission',
+    @level2type = N'COLUMN',
+    @level2name = N'intUserRoleFRPermissionId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'User Role Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMUserRoleFRPermission',
+    @level2type = N'COLUMN',
+    @level2name = N'intUserRoleId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Report Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMUserRoleFRPermission',
+    @level2type = N'COLUMN',
+    @level2name = N'intReportId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Permission',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMUserRoleFRPermission',
+    @level2type = N'COLUMN',
+    @level2name = N'strPermission'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Concurrency Check',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMUserRoleFRPermission',
+    @level2type = N'COLUMN',
+    @level2name = N'intConcurrencyId'

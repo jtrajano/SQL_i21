@@ -9,3 +9,67 @@
     CONSTRAINT [PK_SMPreferences_PreferenceID] PRIMARY KEY CLUSTERED ([intUserID] ASC, [strPreference] ASC)
 );
 
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Identity field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMPreferences',
+    @level2type = N'COLUMN',
+    @level2name = N'intPreferenceID'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'User Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMPreferences',
+    @level2type = N'COLUMN',
+    @level2name = N'intUserID'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Preference Name',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMPreferences',
+    @level2type = N'COLUMN',
+    @level2name = N'strPreference'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Description',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMPreferences',
+    @level2type = N'COLUMN',
+    @level2name = N'strDescription'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Value',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMPreferences',
+    @level2type = N'COLUMN',
+    @level2name = N'strValue'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Sort field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMPreferences',
+    @level2type = N'COLUMN',
+    @level2name = N'intSort'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Concurrency Check',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMPreferences',
+    @level2type = N'COLUMN',
+    @level2name = N'intConcurrencyId'
