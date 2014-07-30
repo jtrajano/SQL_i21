@@ -1185,7 +1185,7 @@ BEGIN
            
 				 CAST((Case When LEN(RTRIM(LTRIM(CustomerName))) > 20 THEN SUBSTRING(CustomerName,1,16) + '' ...'' ELSE ISNULL(CustomerName,'''') end)as CHAR(20)) COLLATE Latin1_General_CI_AS + @Gaps +  
 				 CAST(''000''+ ISNULL(CAST(intSiteNumber AS VARCHAR(10)), '''') AS CHAR(10)) COLLATE Latin1_General_CI_AS + @Gaps +  
-				 CAST(LTRIM(RTRIM(ISNULL(REPLACE(strSiteAddress,CHAR(13),''''), ''''))) AS CHAR(40)) COLLATE Latin1_General_CI_AS + @Gaps +  
+				 CAST(LTRIM(RTRIM(ISNULL(REPLACE(REPLACE(strSiteAddress,CHAR(13),''''),CHAR(10),'' ''), ''''))) AS CHAR(40)) COLLATE Latin1_General_CI_AS + @Gaps +  
 				 CAST(LTRIM(RTRIM(ISNULL(strSiteDescription, ''''))) AS CHAR(40)) COLLATE Latin1_General_CI_AS  
 				, '' ''   
 				, ''&#160;''  
