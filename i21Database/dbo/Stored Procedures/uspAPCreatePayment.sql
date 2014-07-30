@@ -91,7 +91,7 @@ BEGIN
 		[dblDiscount]	= A.dblDiscount,
 		[dblWithheld]	= A.dblWithheld,
 		[dblAmountDue]	= A.dblAmountDue,
-		[dblPayment]	= A.dblTotal,
+		[dblPayment]	= A.dblTotal - A.dblDiscount,
 		[dblInterest]	= 0, --TODO
 		[dblTotal]		= A.dblTotal
 	FROM tblAPBill A
