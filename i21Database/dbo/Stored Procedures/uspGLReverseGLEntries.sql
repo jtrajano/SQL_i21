@@ -90,7 +90,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[strTransactionForm]
 				,[strModuleName]
 		FROM	tblGLDetail 
-		WHERE	strBatchId = @strBatchId
+		WHERE	strTransactionId = @strTransactionId and ysnIsUnposted = 0
 		ORDER BY intGLDetailId		
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;

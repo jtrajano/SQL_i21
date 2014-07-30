@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuHDUserDetail]
 	AS select
 			strCustomer = 'i21 User'
+			,strCompanyName = 'iRely'
 			,us.strFullName
 			,us.strPhone
 			,strMobile = ''
@@ -29,6 +30,7 @@
 
 		select
 			strCustomer = cus.strCustomerNumber
+			,strCompanyName = (select top 1 strName from tblEntity where intEntityId = cus.intEntityId)
 			,strFullName = en.strEmail
 			,strPhone = ec.strPhone
 			,strMobile = ec.strMobile
@@ -39,7 +41,7 @@
 			,intUserId = ec.intEntityId
 			,intEntityId = ec.intEntityId
 			,strName = en.strEmail
-			,strUserName = en.strEmail
+			,strUserName = (select top 1 strUserName from tblEntityCredential where intEntityId = ec.intEntityId)
 			,strFirstName = en.strEmail
 			,strMiddleName = en.strEmail
 			,strLastName = en.strEmail
