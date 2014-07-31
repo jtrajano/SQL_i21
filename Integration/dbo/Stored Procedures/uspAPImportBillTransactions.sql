@@ -77,7 +77,8 @@ BEGIN
 			[intUserId],
 			[ysnPosted],
 			[ysnPaid],
-			[intTransactionType])
+			[intTransactionType],
+			[ysnOrigin])
 		OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid INTO @InsertedData
 		--Unposted
 		SELECT 
@@ -102,7 +103,8 @@ BEGIN
 			[intTransactionType]	=	CASE WHEN A.aptrx_trans_type = ''I'' THEN 1 
 											WHEN A.aptrx_trans_type = ''A'' THEN 2
 											WHEN A.aptrx_trans_type = ''C'' THEN 3
-											ELSE 0 END
+											ELSE 0 END,
+			[ysnOrigin]				=	1
 		FROM aptrxmst A
 			LEFT JOIN apcbkmst B
 				ON A.aptrx_cbk_no = B.apcbk_no
@@ -134,7 +136,8 @@ BEGIN
 			[intTransactionType]	=	CASE WHEN A.apivc_trans_type = ''I'' THEN 1 
 											WHEN A.apivc_trans_type = ''A'' THEN 2
 											WHEN A.apivc_trans_type = ''C'' THEN 3
-											ELSE 0 END
+											ELSE 0 END,
+			[ysnOrigin]				=	1
 		FROM apivcmst A
 			LEFT JOIN apcbkmst B
 				ON A.apivc_cbk_no = B.apcbk_no
@@ -198,7 +201,7 @@ BEGIN
 
 		
 	--CREATE PAYMENT
-
+	
 	WITH CTE (apchk_cbk_no, apchk_vnd_no, apchk_chk_amt, apchk_rev_dt, apchk_chk_no, apchk_disc_amt, intBillId)
 	AS (
 		SELECT
@@ -248,6 +251,8 @@ BEGIN
 		,A.apchk_disc_amt
 	--ORDER BY A.apchk_rev_dt, A.apchk_cbk_no, A.apchk_chk_no
 
+	DECLARE @paymentId INT
+
 	WHILE EXISTS(SELECT 1 FROM #tmpBillsPayment)
 	BEGIN
 
@@ -275,6 +280,12 @@ BEGIN
 				@isPost = 1,
 				@post = @post,
 				@billId = @billIds
+
+		SET @paymentId = IDENT_CURRENT(''tblAPPayment'')
+			
+		UPDATE tblAPPayment
+		SET ysnOrigin = 1
+		WHERE intPaymentId = @paymentId 
 
 		DELETE TOP(1) FROM #tmpBillsPayment
 		
@@ -351,7 +362,8 @@ BEGIN
 			[intUserId],
 			[ysnPosted],
 			[ysnPaid],
-			[intTransactionType])
+			[intTransactionType],
+			[ysnOrigin])
 		OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid INTO @InsertedData
 		--Unposted
 		SELECT 
@@ -377,7 +389,8 @@ BEGIN
 			[intTransactionType]	=	CASE WHEN A.aptrx_trans_type = ''I'' THEN 1 
 											WHEN A.aptrx_trans_type = ''A'' THEN 3
 											WHEN A.aptrx_trans_type = ''C'' THEN 3
-											ELSE NULL END
+											ELSE NULL END,
+			[ysnOrigin]				=	1
 		FROM aptrxmst A
 			LEFT JOIN apcbkmst B
 				ON A.aptrx_cbk_no = B.apcbk_no

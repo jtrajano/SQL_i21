@@ -272,6 +272,16 @@ IF ISNULL(@recap, 0) = 0
 	END
 	ELSE
 	BEGIN
+
+		CREATE TABLE #tmpGLDetail(
+			[dtmDate]                   DATETIME         NOT NULL,
+			[intAccountId]              INT              NULL,
+			[dblDebit]                  NUMERIC (18, 6)  NULL,
+			[dblCredit]                 NUMERIC (18, 6)  NULL,
+			[dblDebitUnit]              NUMERIC (18, 6)  NULL,
+			[dblCreditUnit]             NUMERIC (18, 6)  NULL,
+		);
+
 		WITH Units 
 		AS 
 		(
@@ -299,6 +309,7 @@ IF ISNULL(@recap, 0) = 0
 			[strModuleName],
 			[strTransactionForm]
 		)
+		OUTPUT INSERTED.dtmDate, INSERTED.intAccountId, INSERTED.dblDebit, INSERTED.dblCredit, INSERTED.dblDebitUnit, INSERTED.dblCreditUnit  INTO #tmpGLDetail
 		--CREDIT
 		SELECT	
 			[strTransactionId] = A.strBillId, 
@@ -362,7 +373,59 @@ IF ISNULL(@recap, 0) = 0
 			@batchId,
 			A.intBillId
 		FROM tblAPBill A
-		WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+		WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData);
+
+		
+--=====================================================================================================================================
+-- 	INSERT TO GL SUMMARY RECORDS
+---------------------------------------------------------------------------------------------------------------------------------------
+		WITH Units
+		AS 
+		(
+			SELECT	A.[dblLbsPerUnit], B.[intAccountId] 
+			FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
+		),
+		BillDetail 
+		AS
+		(
+			SELECT [dtmDate]		= ISNULL(A.[dtmDate], GETDATE())
+				,[intAccountId]		= A.[intAccountId]
+				,[dblDebit]			= CASE	WHEN [dblCredit] < 0 THEN ABS([dblCredit])
+											WHEN [dblDebit] < 0 THEN 0
+											ELSE [dblDebit] END 
+				,[dblCredit]		= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
+											WHEN [dblCredit] < 0 THEN 0
+											ELSE [dblCredit] END	
+				,[dblDebitUnit]		= ISNULL(A.[dblDebitUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
+				,[dblCreditUnit]	= ISNULL(A.[dblCreditUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
+			FROM #tmpGLDetail A
+		)
+		INSERT INTO tblGLSummary (
+			 [intAccountId]
+			,[dtmDate]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[intConcurrencyId]
+		)
+		SELECT	
+			 [intAccountId]		= A.[intAccountId]
+			,[dtmDate]			= ISNULL(CONVERT(DATE, A.[dtmDate]), '')
+			,[dblDebit]			= SUM(A.[dblDebit])
+			,[dblCredit]		= SUM(A.[dblCredit])
+			,[dblDebitUnit]		= SUM(A.[dblDebitUnit])
+			,[dblCreditUnit]	= SUM(A.[dblCreditUnit])
+			,[intConcurrencyId] = 1
+		FROM BillDetail A
+		WHERE NOT EXISTS 
+				(
+					SELECT TOP 1 1
+					FROM tblGLSummary B
+					WHERE ISNULL(CONVERT(DATE, A.[dtmDate]), '') = ISNULL(CONVERT(DATE, B.[dtmDate]), '') AND 
+						  A.[intAccountId] = B.[intAccountId]
+				)
+		GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountId];
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
@@ -456,14 +519,6 @@ ELSE
 
 		GOTO Post_Commit;
 	END
-
---=====================================================================================================================================
--- 	UPDATE STARTING NUMBERS
----------------------------------------------------------------------------------------------------------------------------------------
---UPDATE tblSMStartingNumber
---SET [intNumber] = ISNULL([intNumber], 0) + 1
---WHERE [strTransactionType] = 'Batch Post';
-
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 

@@ -174,5 +174,6 @@
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPaptrxmst.sql" />
     <None Include="dbo\Stored Procedures\uspCMBankTransactionReversalOrigin.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPPostOriginPayment.sql" />
   </ItemGroup>
 </Project>
