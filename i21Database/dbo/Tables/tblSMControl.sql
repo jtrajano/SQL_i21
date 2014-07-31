@@ -84,3 +84,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSMControl',
     @level2type = N'COLUMN',
     @level2name = N'strControlType'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Concurrency Check',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMControl',
+    @level2type = N'COLUMN',
+    @level2name = N'intConcurrencyId'
