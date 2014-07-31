@@ -124,21 +124,24 @@ SELECT	CHK.dtmDate
 		,strBankAddress = ''
 		
 		-- A/P Related fields: 
-		,strVendorId = VENDOR.strVendorId
-		,strVendorName = ENTITY.strName 
-		,strVendorAccount = VENDOR.strVendorAccountNum
-		,strVendorAddress = dbo.fnConvertToFullAddress(LOCATION.strAddress, LOCATION.strCity, LOCATION.strState, LOCATION.strZipCode)
-		
+		,strVendorId = ISNULL(VENDOR.strVendorId, '--')
+		,strVendorName = ISNULL(ENTITY.strName, CHK.strPayee)
+		,strVendorAccount = ISNULL(VENDOR.strVendorAccountNum, '--')
+		,strVendorAddress = CASE	
+									WHEN ISNULL(dbo.fnConvertToFullAddress(LOCATION.strAddress, LOCATION.strCity, LOCATION.strState, LOCATION.strZipCode), '') <> ''  THEN 
+										dbo.fnConvertToFullAddress(LOCATION.strAddress, LOCATION.strCity, LOCATION.strState, LOCATION.strZipCode)
+									ELSE 
+										dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode)
+							END
 		-- Used to change the sub-report during runtime. 
-		,CHK.intBankTransactionTypeId
-		
+		,CHK.intBankTransactionTypeId		
 FROM	dbo.tblCMBankTransaction CHK INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL
 			ON CHK.strTransactionId = PRINTSPOOL.strTransactionId
 			AND CHK.intBankAccountId = PRINTSPOOL.intBankAccountId
 		LEFT JOIN tblAPPayment PYMT
 			ON CHK.strTransactionId = PYMT.strPaymentRecordNum
 		LEFT JOIN tblAPVendor VENDOR
-			ON PYMT.intVendorId = VENDOR.intEntityId
+			ON VENDOR.intEntityId = ISNULL(PYMT.intVendorId, CHK.intEntityId)
 		LEFT JOIN tblEntity ENTITY
 			ON VENDOR.intEntityId = ENTITY.intEntityId
 		LEFT JOIN tblEntityLocation LOCATION
