@@ -129,9 +129,10 @@
     <Folder Include="Scripts\Post-Deployment\CM" />
     <Folder Include="Scripts\Post-Deployment\AR\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\AP" />
-    <Folder Include="Scripts\Post-Deployment\CM\Patch" />
     <Folder Include="Scripts\Post-Deployment\FRD" />
     <Folder Include="Scripts\Post-Deployment\AP" />
+    <Folder Include="Scripts\Post-Deployment\CM\Reports" />
+    <Folder Include="Scripts\Post-Deployment\CM\Reports\SubReports" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -431,7 +432,6 @@
     <Build Include="dbo\Functions\fnGeti21PeriodFromOriginPeriod.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCheckNumberAuditReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBankDepositReport.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleSubReport.sql" />
     <Build Include="dbo\Tables\tblCMBankReconciliationAudit.sql" />
     <None Include="Scripts\Post-Deployment\DB\1_CannedPanels_Panel.sql" />
     <None Include="Scripts\Post-Deployment\DB\2_CannedPanels_Column.sql" />
@@ -561,10 +561,7 @@
     <Build Include="dbo\Tables\tblARPaymentDetail.sql" />
     <Build Include="dbo\Tables\tblARPayment.sql" />
     <Build Include="dbo\Tables\tblARInvoiceDetail.sql" />
-    <None Include="Scripts\Post-Deployment\CM\Patch\1_CheckVoucherMiddle.sql" />
     <Build Include="dbo\Functions\fnConvertToFullAddress.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleAPSubReport.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleAPReport.sql" />
     <Build Include="dbo\Functions\fnLastIndex.sql" />
     <Build Include="dbo\Functions\fnTrim.sql" />
     <Build Include="dbo\Views\vyuHDExportHoursWork.sql" />
@@ -582,7 +579,13 @@
     <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountSegmentTemplate.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountStructure.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreatePayment.sql" />
-	<Build Include="dbo\Stored Procedures\uspCMBankTransactionReversalOrigin.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMBankTransactionReversalOrigin.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleSubReportCMChecks.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleSubReportAPPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleReport.sql" />
+    <None Include="Scripts\Post-Deployment\CM\Reports\CheckVoucherMiddle.sql" />
+    <None Include="Scripts\Post-Deployment\CM\Reports\SubReports\CheckVoucherMiddleSubReportAPPayment.sql" />
+    <None Include="Scripts\Post-Deployment\CM\Reports\SubReports\CheckVoucherMiddleSubReportCMChecks.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21.refactorlog" />
