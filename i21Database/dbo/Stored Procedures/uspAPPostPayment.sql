@@ -282,6 +282,7 @@ BEGIN
 		INSERT INTO tblGLDetail (
 			[strTransactionId], 
 			[intAccountId],
+			[strAccountGroup],
 			[strDescription],
 			[strReference],
 			[dtmTransactionDate],
@@ -305,6 +306,7 @@ BEGIN
 		SELECT
 			 [strPaymentRecordNum]
 			,A.intAccountId--(SELECT intAccountId FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
+			,[strAccountGroup]		= (SELECT strAccountGroup FROM tblGLAccountGroup WHERE intAccountGroupId = GLAccnt.intAccountGroupId)
 			,GLAccnt.strDescription --(SELECT strDescription FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
 			,A.[strVendorId]
 			,A.[dtmDatePaid]
@@ -334,6 +336,7 @@ BEGIN
 		SELECT
 			 [strPaymentRecordNum]
 			,@WithholdAccount
+			,(SELECT strAccountGroup FROM tblGLAccountGroup WHERE intAccountGroupId = GLAccnt.intAccountGroupId)
 			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = @WithholdAccount)
 			,A.[strVendorId]
 			,A.[dtmDatePaid]
@@ -362,6 +365,7 @@ BEGIN
 		SELECT
 			 [strPaymentRecordNum]
 			,@DiscountAccount
+			,(SELECT strAccountGroup FROM tblGLAccountGroup WHERE intAccountGroupId = (SELECT intAccountGroupId FROM tblGLAccount WHERE intAccountId = @DiscountAccount))
 			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = @DiscountAccount)
 			,A.[strVendorId]
 			,A.[dtmDatePaid]
@@ -394,6 +398,7 @@ BEGIN
 		UNION ALL 
 		SELECT	[strPaymentRecordNum]
 				,B.[intAccountId]
+				,(SELECT strAccountGroup FROM tblGLAccountGroup WHERE intAccountGroupId = (SELECT intAccountGroupId FROM tblGLAccount WHERE intAccountId = B.[intAccountId]))
 				,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = B.[intAccountId])
 				,A.[strVendorId]
 				,A.dtmDatePaid

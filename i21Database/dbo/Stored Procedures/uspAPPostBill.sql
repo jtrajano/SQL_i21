@@ -257,6 +257,7 @@ BEGIN
 	INSERT INTO tblGLDetail (
 		[strTransactionId], 
 		[intAccountId],
+		[strAccountGroup],
 		[strDescription],
 		[strReference],
 		[dtmTransactionDate],
@@ -280,6 +281,7 @@ BEGIN
 	SELECT	
 		[strTransactionId]		= A.strBillId, 
 		[intAccountId]			= A.intAccountId,
+		[strAccountGroup]		= (SELECT strAccountGroup FROM tblGLAccountGroup WHERE intAccountGroupId = (SELECT intAccountGroupId FROM tblGLAccount WHERE intAccountId = A.intAccountId)),
 		[strDescription]		= A.strDescription,
 		[strReference]			= A.strVendorId,
 		[dtmTransactionDate]	= A.dtmDate,
@@ -305,6 +307,7 @@ BEGIN
 	SELECT	
 		[strTransactionId]		= A.strBillId, 
 		[intAccountId]			= B.intAccountId,
+		[strAccountGroup]		= (SELECT strAccountGroup FROM tblGLAccountGroup WHERE intAccountGroupId = (SELECT intAccountGroupId FROM tblGLAccount WHERE intAccountId = B.intAccountId)),
 		[strDescription]		= A.strDescription,
 		[strReference]			= A.strVendorId,
 		[dtmTransactionDate]	= A.dtmDate,

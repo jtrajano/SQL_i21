@@ -160,6 +160,7 @@ BEGIN
 		FROM tblAPBill A
 			INNER JOIN apeglmst C
 				ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = C.apegl_ivc_no COLLATE Latin1_General_CI_AS
+				AND A.strVendorId COLLATE Latin1_General_CI_AS = C.apegl_vnd_no COLLATE Latin1_General_CI_AS
 		UNION
 		SELECT 
 			A.intBillId,
@@ -169,6 +170,7 @@ BEGIN
 			FROM tblAPBill A
 			INNER JOIN aphglmst C
 				ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = C.aphgl_ivc_no COLLATE Latin1_General_CI_AS
+				AND A.strVendorId COLLATE Latin1_General_CI_AS = C.aphgl_vnd_no COLLATE Latin1_General_CI_AS
 
 		--Create Bill Batch transaction
 		--SELECT @totalBills = COUNT(*) FROM @InsertedData
@@ -460,15 +462,16 @@ BEGIN
 			FROM tblAPBill A
 			INNER JOIN apeglmst C
 				ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = C.apegl_ivc_no COLLATE Latin1_General_CI_AS
-		UNION
-		SELECT 
-			A.intBillId,
-			A.strDescription,
-			ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.aphgl_gl_acct), 0),
-			C.aphgl_gl_amt
-			FROM tblAPBill A
-			INNER JOIN aphglmst C
-				ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = C.aphgl_ivc_no COLLATE Latin1_General_CI_AS
+				AND A.strVendorId COLLATE Latin1_General_CI_AS = C.apegl_vnd_no COLLATE Latin1_General_CI_AS
+		--UNION
+		--SELECT 
+		--	A.intBillId,
+		--	A.strDescription,
+		--	ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.aphgl_gl_acct), 0),
+		--	C.aphgl_gl_amt
+		--	FROM tblAPBill A
+		--	INNER JOIN aphglmst C
+		--		ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = C.aphgl_ivc_no COLLATE Latin1_General_CI_AS
 		
 		
 		--Create back up data of imported aptrxmst
