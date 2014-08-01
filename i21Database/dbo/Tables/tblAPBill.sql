@@ -25,12 +25,12 @@
     [intTransactionType] INT NOT NULL DEFAULT 0, 
     [intPurchaseOrderId] INT NULL, 
     [intShipFromId] INT NULL , 
-    [intShipToId] INT NULL , 
+	[intShipToId] INT NULL , 
     [intStoreLocationId] INT NULL , 
     [intContactId] INT NULL , 
     [intOrderById] INT NULL , 
-    [intCurrencyId] INT NOT NULL DEFAULT 0, 
-	[ysnOrigin] BIT NOT NULL DEFAULT 0,
+    [intCurrencyId] INT NOT NULL DEFAULT 0,
+    [ysnOrigin] BIT NOT NULL DEFAULT 0,
     CONSTRAINT [PK_dbo.tblAPBill] PRIMARY KEY CLUSTERED ([intBillId] ASC),
     CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPBillBatch_intBillBatchId] FOREIGN KEY ([intBillBatchId]) REFERENCES [dbo].[tblAPBillBatch] ([intBillBatchId]) ON DELETE CASCADE
 	--CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPVendor_intEntityId] FOREIGN KEY ([intVendorId]) REFERENCES [dbo].[tblAPVendor] ([intEntityId])
@@ -57,6 +57,8 @@ DECLARE @BillId NVARCHAR(50)
 INSERT INTO @inserted
 SELECT intBillId, intTransactionType FROM INSERTED ORDER BY intBillId
 
+EXEC uspAPFixStartingNumbers
+
 WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
 BEGIN
 
@@ -65,7 +67,9 @@ BEGIN
 	IF @type = 1
 		EXEC uspSMGetStartingNumber 9, @BillId OUT
 	ELSE IF @type = 3
-		EXEC uspSMGetStartingNumber 18, @BillId OUT
+		EXEC uspSMGetStartingNumber 17, @BillId OUT
+	ELSE IF @type = 2
+		EXEC uspSMGetStartingNumber 20, @BillId OUT
 	
 	IF(@BillId IS NOT NULL)
 	BEGIN

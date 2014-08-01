@@ -57,17 +57,24 @@ SET @strState = REPLACE(@strState, @LINE_FEED, '')
 SET @strZipCode = REPLACE(@strZipCode, @LINE_FEED, '')
 
 -- Trim all the blanks 
-SET @strFixAddress = LTRIM(RTRIM(@strFixAddress))
-SET @strCity = LTRIM(RTRIM(@strCity))
-SET @strState = LTRIM(RTRIM(@strState))
-SET @strZipCode = LTRIM(RTRIM(@strZipCode))
+SET @strFixAddress = LTRIM(RTRIM(ISNULL(@strFixAddress, '')))
+SET @strCity = LTRIM(RTRIM(ISNULL(@strCity, '')))
+SET @strState = LTRIM(RTRIM(ISNULL(@strState, '')))
+SET @strZipCode = LTRIM(RTRIM(ISNULL(@strZipCode, '')))
 
-RETURN	ISNULL(@strFixAddress, '') 
-		+ @LINE_BREAK 
-		+ ISNULL(@strCity, '')
-		+ CASE WHEN ISNULL(@strState, '') <> '' THEN @COMMA ELSE '' END 
-		+ ISNULL(@strState, '')
-		+ CASE WHEN ISNULL(@strZipCode, '') <> '' THEN @SPACE ELSE '' END 
-		+ ISNULL(@strZipCode, '')
+IF (@strFixAddress + @strCity + @strState + @strZipCode) <> '' 
+BEGIN 
+	RETURN	RTRIM(LTRIM(
+				@strFixAddress
+				+ @LINE_BREAK 
+				+ @strCity
+				+ CASE WHEN @strState <> '' THEN @COMMA ELSE '' END 
+				+ @strState
+				+ CASE WHEN @strZipCode <> '' THEN @SPACE ELSE '' END 
+				+ @strZipCode
+			))
+END 
+
+RETURN NULL 
 END
 
