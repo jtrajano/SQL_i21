@@ -14,8 +14,9 @@
     [dblWithheld]   DECIMAL (18, 6) NOT NULL DEFAULT 0,
     [intUserId]           INT             NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
-    [intEntityId] INT NOT NULL DEFAULT 0, 
-    [intVendorId] INT NULL, 
+    [intEntityId] INT NOT NULL DEFAULT 0,
+    [intVendorId] INT NULL,
+    [ysnOrigin] BIT NOT NULL DEFAULT 0,
     CONSTRAINT [PK_dbo.tblAPPayments] PRIMARY KEY CLUSTERED ([intPaymentId] ASC), 
     CONSTRAINT [FK_tblAPPayment_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intEntityId]) ON DELETE SET NULL
 );
