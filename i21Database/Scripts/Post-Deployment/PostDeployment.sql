@@ -64,9 +64,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\1_BankTransactionTypes.sql
 :r .\CM\2_DataImportStatus.sql
 :r .\CM\3_PopulateSourceSystemData.sql
-
--- Note: remove patch (:r .\CM\Patch\CheckVoucherMiddle.sql) when CM-311 is resolved. 
-:r .\CM\Patch\1_CheckVoucherMiddle.sql
+:r .\CM\Reports\SubReports\CheckVoucherMiddleSubReportAPPayment.sql
+:r .\CM\Reports\SubReports\CheckVoucherMiddleSubReportCMChecks.sql
+:r .\CM\Reports\CheckVoucherMiddle.sql
 
 --Accounts Receivable
 :r .\AR\EntityTableDataFix.sql
