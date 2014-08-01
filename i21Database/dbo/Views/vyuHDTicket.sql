@@ -16,6 +16,7 @@
       ,strCustomer = tic.strCustomerNumber
       ,strAssignedTo = (select top 1 strUserName from tblEntityCredential where intEntityId = tic.intAssignedToEntity)
       ,tic.intConcurrencyId
+	  ,intAssignToEntity = tic.intAssignedToEntity
   from
       tblHDTicket tic
       left outer join tblHDTicketType typ on typ.intTicketTypeId = tic.intTicketTypeId
