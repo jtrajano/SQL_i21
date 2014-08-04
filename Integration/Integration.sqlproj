@@ -186,6 +186,7 @@
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Stored Procedures\uspAPCreatePaymentFromOriginBill.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPPostOriginPayment_1.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

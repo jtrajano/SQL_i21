@@ -647,6 +647,17 @@ BEGIN
 							ON B.intBillId = C.intBillId
 					WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
+		--Update Bill Amount Due associated on the other payment record
+		UPDATE tblAPPaymentDetail
+		SET dblAmountDue = C.dblAmountDue
+		FROM tblAPPaymentDetail A
+			INNER JOIN tblAPPayment B
+				ON A.intPaymentId = B.intPaymentId
+				AND A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+				AND B.ysnPosted = 0
+			INNER JOIN tblAPBill C
+				ON A.intBillId = C.intBillId
+
 		--Insert to bank transaction
 		INSERT INTO tblCMBankTransaction(
 			[strTransactionId],
