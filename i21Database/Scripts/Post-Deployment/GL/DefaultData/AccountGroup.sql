@@ -216,14 +216,14 @@ GO
 	IF EXISTS(SELECT TOP 1 1 FROM tblGLAccountGroup WHERE (strAccountGroup = N'Fixed Asset' OR strAccountGroup = N'Fixed Assets') AND strAccountType = N'Asset')
 	BEGIN
 		UPDATE tblGLAccountGroup SET strAccountGroup = 'Fixed Assets'
-									, intSort = 100220
+									, intSort = 100300
 									, strAccountGroupNamespace = 'System'
-									, intParentGroupId = (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Non-Current Assets' AND strAccountType = N'Asset') 
+									, intParentGroupId = (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Asset' AND strAccountType = N'Asset' AND intParentGroupId = 0) 
 									WHERE  (strAccountGroup = N'Fixed Asset' OR strAccountGroup = N'Fixed Assets') AND strAccountType = N'Asset'
 	END
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountGroup WHERE strAccountGroup = N'Fixed Assets' AND strAccountType = N'Asset')
 	BEGIN
-		INSERT [dbo].[tblGLAccountGroup] ([strAccountGroup], [strAccountType], [intParentGroupId], [intGroup], [intSort], [intConcurrencyId], [intAccountBegin], [intAccountEnd], [strAccountGroupNamespace]) VALUES (N'Fixed Assets', N'Asset', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Non-Current Assets' AND strAccountType = N'Asset') , 1, 100220, 1, NULL, NULL, N'System')
+		INSERT [dbo].[tblGLAccountGroup] ([strAccountGroup], [strAccountType], [intParentGroupId], [intGroup], [intSort], [intConcurrencyId], [intAccountBegin], [intAccountEnd], [strAccountGroupNamespace]) VALUES (N'Fixed Assets', N'Asset', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Asset' AND strAccountType = N'Asset') , 1, 100300, 1, NULL, NULL, N'System')
 	END
 GO
 	PRINT N'END INSERT DEFAULT SUB GROUPS: Fixed Asset'
@@ -516,7 +516,7 @@ GO
 		UPDATE tblGLAccountGroup SET strAccountGroup = 'Purchases'
 									, intSort = 500110
 									, strAccountGroupNamespace = 'System'
-									, intParentGroupId = (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Expense' AND strAccountType = N'Expense' AND intParentGroupId = 0) 
+									, intParentGroupId = (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Cost of Goods Sold' AND strAccountType = N'Expense') 
 									WHERE  (strAccountGroup = N'Purchase' OR strAccountGroup = N'Purchases') AND strAccountType = N'Expense'
 	END
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountGroup WHERE strAccountGroup = N'Purchases' AND strAccountType = N'Expense')
