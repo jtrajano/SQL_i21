@@ -562,15 +562,6 @@ BEGIN
 	BEGIN
 		
 		--Unposting Process
-		UPDATE tblAPPayment
-			SET ysnPosted = 0
-			,ysnVoid = CASE WHEN A.ysnPrinted = 1 AND ISNULL(A.strPaymentInfo,'') <> '' THEN 1 ELSE 0 END
-			,strPaymentInfo = CASE WHEN A.ysnPrinted = 1 AND ISNULL(A.strPaymentInfo,'') <> '' THEN B.strReferenceNo ELSE A.strPaymentInfo END
-		FROM tblAPPayment A 
-			INNER JOIN tblCMBankTransaction B
-				ON A.strPaymentRecordNum = B.strTransactionId
-		WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-
 		UPDATE tblAPPaymentDetail
 			SET tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount + B.dblPayment ELSE B.dblPayment END)
 		FROM tblAPPayment A
@@ -610,6 +601,16 @@ BEGIN
 		-- Calling the stored procedure
 		EXEC dbo.uspCMBankTransactionReversal @userId, @isSuccessful OUTPUT
 		IF @isSuccessful = 0 GOTO Post_Rollback
+
+		--update payment record
+		UPDATE tblAPPayment
+			SET ysnPosted = 0
+			,ysnVoid = CASE WHEN A.ysnPrinted = 1 AND ISNULL(A.strPaymentInfo,'') <> '' THEN 1 ELSE 0 END
+			,strPaymentInfo = CASE WHEN A.ysnPrinted = 1 AND ISNULL(A.strPaymentInfo,'') <> '' THEN B.strReferenceNo ELSE A.strPaymentInfo END
+		FROM tblAPPayment A 
+			INNER JOIN tblCMBankTransaction B
+				ON A.strPaymentRecordNum = B.strTransactionId
+		WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		--Insert Successfully unposted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
