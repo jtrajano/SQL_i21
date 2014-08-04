@@ -565,7 +565,7 @@ BEGIN
 		UPDATE tblAPPayment
 			SET ysnPosted = 0
 			,ysnVoid = CASE WHEN A.ysnPrinted = 1 AND ISNULL(A.strPaymentInfo,'') <> '' THEN 1 ELSE 0 END
-			,strPaymentRecordNum = CASE WHEN A.ysnPrinted = 1 AND ISNULL(A.strPaymentInfo,'') <> '' THEN B.strReferenceNo ELSE A.strPaymentInfo END
+			,strPaymentInfo = CASE WHEN A.ysnPrinted = 1 AND ISNULL(A.strPaymentInfo,'') <> '' THEN B.strReferenceNo ELSE A.strPaymentInfo END
 		FROM tblAPPayment A 
 			INNER JOIN tblCMBankTransaction B
 				ON A.strPaymentRecordNum = B.strTransactionId
