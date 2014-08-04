@@ -529,3 +529,32 @@ GO
 	SET strMenuName = 'Receive Payments'
 	WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Receive Payments (Multi Customer)' AND strType = 'Screen' AND strCommand = 'AccountsReceivable.controller.ReceivePayments'
 GO
+	DECLARE @intParent INT
+	SELECT @intParent = intMenuID FROM tblSMMasterMenu
+	WHERE strMenuName = 'Help Desk'
+	AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu Main 
+							WHERE strMenuName = 'Customer Portal')
+
+	UPDATE tblSMMasterMenu
+	SET strMenuName = 'Tickets Reported by Me',
+		strCommand = 'HelpDesk.controller.CPTicketsReported'
+	WHERE strMenuName = 'Tickets Assigned to Me' AND strCommand = 'HelpDesk.controller.CPTicketAssigned' AND strType = 'Screen' AND strModuleName = 'Help Desk' AND intParentMenuID = @intParent	
+GO
+	DECLARE @intParent INT
+	SELECT @intParent = intMenuID FROM tblSMMasterMenu
+	WHERE strMenuName = 'Activities'
+	AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu Main 
+							WHERE strMenuName = 'Help Desk' AND intParentMenuID = 0)
+
+	IF NOT EXISTS(SELECT * FROM tblSMMasterMenu WHERE strMenuName = 'Tickets Reported by Me' AND strCommand = 'HelpDesk.controller.TicketsReported' AND strType = 'Screen' AND strModuleName = 'Help Desk' AND intParentMenuID = @intParent)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Tickets Reported by Me', N'Help Desk', @intParent, N'Tickets Reported by Me', N'Screen', N'HelpDesk.controller.TicketsReported', N'small-screen', 0, 0, 0, 1, 4, 1)
+	
+	UPDATE tblSMMasterMenu
+		SET intSort = (CASE WHEN strMenuName = 'Tickets' THEN 1
+							WHEN strMenuName = 'Open Tickets' THEN 2
+							WHEN strMenuName = 'Tickets Assigned to Me' THEN 3
+							WHEN strMenuName = 'Tickets Reported by Me' THEN 4
+							WHEN strMenuName = 'Create Ticket' THEN 5
+							WHEN strMenuName = 'Export Hours Worked' THEN 6 END)
+	WHERE intParentMenuID = @intParent
+GO	
