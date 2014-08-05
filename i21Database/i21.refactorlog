@@ -1484,4 +1484,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intBankDepositDetailId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="3d364417-97d9-401b-83be-05053964269d" ChangeDateTime="08/05/2014 08:14:02">
+    <Property Name="ElementName" Value="[dbo].[tblHDTempEmail].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblHDTempEmail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTempEmailId" />
+  </Operation>
 </Operations>
