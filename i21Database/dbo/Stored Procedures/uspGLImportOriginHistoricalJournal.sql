@@ -42,7 +42,9 @@ BEGIN
 	--		 TEMP HEADER JOURNAL
 	--+++++++++++++++++++++++++++++++++	
 
-	DECLARE @intCurrencyId NVARCHAR(100) = (select intCurrencyID from tblSMCurrency where strCurrency = 'USD')
+	DECLARE @intCurrencyId NVARCHAR(100) = (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE intCurrencyID = (CASE WHEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') > 0 
+																		THEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency')
+																		ELSE (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'USD') END))
 
 	SELECT 
 		CONVERT(VARCHAR(3),glhst_src_id) + CONVERT(VARCHAR(5),glhst_src_seq) + CONVERT(VARCHAR(6),MAX(glhst_period)) AS strJournalId,
