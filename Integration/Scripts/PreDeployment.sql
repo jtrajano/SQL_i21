@@ -94,6 +94,6 @@
 :r ..\dbo\Views\vyuTFTaxCycle.sql
 
 --ACCOUNTS RECEIVABLE
-:r "..\dbo\Stored Procedures\uspARImportAccount.sql"
-:r "..\dbo\Stored Procedures\uspARImportCustomer.sql"
-:r "..\dbo\Stored Procedures\uspARImportSalesperson.sql"
+--:r "..\dbo\Stored Procedures\uspARImportAccount.sql"
+--:r "..\dbo\Stored Procedures\uspARImportCustomer.sql"
+--:r "..\dbo\Stored Procedures\uspARImportSalesperson.sql"

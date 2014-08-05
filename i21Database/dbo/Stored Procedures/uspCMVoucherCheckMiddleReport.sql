@@ -1,7 +1,7 @@
 ﻿/*  
  This stored procedure is used as data source in the Voucher Check Middle Report
 */  
-CREATE PROCEDURE uspCMVoucherCheckMiddleAPReport  
+CREATE PROCEDURE uspCMVoucherCheckMiddleReport
  @xmlParam NVARCHAR(MAX) = NULL  
 AS  
   
@@ -115,26 +115,34 @@ SELECT	CHK.dtmDate
 		,CHK.strTransactionId
 		,CHK.intTransactionId
 		,PRINTSPOOL.strBatchId
-		,CHK.intBankAccountId	
+		,CHK.intBankAccountId
+		
+		-- Bank and company info related fields
 		,strCompanyName = ''
 		,strCompanyAddress = ''
 		,strBank = ''
 		,strBankAddress = ''
 		
 		-- A/P Related fields: 
-		,strVendorId = VENDOR.strVendorId
-		,strVendorName = ENTITY.strName 
-		,strVendorAccount = VENDOR.strVendorAccountNum
-		,strVendorAddress = dbo.fnConvertToFullAddress(LOCATION.strAddress, LOCATION.strCity, LOCATION.strState, LOCATION.strZipCode)
-		
+		,strVendorId = ISNULL(VENDOR.strVendorId, '--')
+		,strVendorName = ISNULL(ENTITY.strName, CHK.strPayee)
+		,strVendorAccount = ISNULL(VENDOR.strVendorAccountNum, '--')
+		,strVendorAddress = CASE	
+									WHEN ISNULL(dbo.fnConvertToFullAddress(LOCATION.strAddress, LOCATION.strCity, LOCATION.strState, LOCATION.strZipCode), '') <> ''  THEN 
+										dbo.fnConvertToFullAddress(LOCATION.strAddress, LOCATION.strCity, LOCATION.strState, LOCATION.strZipCode)
+									ELSE 
+										dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode)
+							END
+		-- Used to change the sub-report during runtime. 
+		,CHK.intBankTransactionTypeId		
 FROM	dbo.tblCMBankTransaction CHK INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL
 			ON CHK.strTransactionId = PRINTSPOOL.strTransactionId
 			AND CHK.intBankAccountId = PRINTSPOOL.intBankAccountId
-		INNER JOIN tblAPPayment PYMT
+		LEFT JOIN tblAPPayment PYMT
 			ON CHK.strTransactionId = PYMT.strPaymentRecordNum
-		INNER JOIN tblAPVendor VENDOR
-			ON PYMT.intVendorId = VENDOR.intEntityId
-		INNER JOIN tblEntity ENTITY
+		LEFT JOIN tblAPVendor VENDOR
+			ON VENDOR.intEntityId = ISNULL(PYMT.intVendorId, CHK.intEntityId)
+		LEFT JOIN tblEntity ENTITY
 			ON VENDOR.intEntityId = ENTITY.intEntityId
 		LEFT JOIN tblEntityLocation LOCATION
 			ON VENDOR.intDefaultLocationId = LOCATION.intEntityLocationId

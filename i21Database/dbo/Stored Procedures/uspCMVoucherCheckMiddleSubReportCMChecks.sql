@@ -1,7 +1,7 @@
 ﻿/*
-	This stored procedure is used as data source in the Voucher Check Middle Sub Report
+	This stored procedure is used as data source for "Check Voucher Middle Sub Report CM Checks"
 */
-CREATE PROCEDURE uspCMVoucherCheckMiddleSubReport
+CREATE PROCEDURE uspCMVoucherCheckMiddleSubReportCMChecks
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
 
