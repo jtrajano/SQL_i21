@@ -8,7 +8,7 @@
     [intDeviceId]           INT            DEFAULT 0 NULL,
     [dtmLastUpdated]        DATETIME       DEFAULT 0 NULL,
     [strDeviceOwnership]    NVARCHAR (20)  COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
-    [strDeviceSerialNumber] NVARCHAR (20)  COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
+    [strDeviceSerialNumber] NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [strDeviceType]         NVARCHAR (70)  COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [strDescription]        NVARCHAR (MAX) COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [intSiteID]             INT            DEFAULT 0 NULL,
