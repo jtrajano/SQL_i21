@@ -103,3 +103,8 @@ EXEC sp_addmessage 50024,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50025) EXEC sp_dropmessage 50025, 'us_english'	
 SET @strmessage = 'Unable to void while check printing is in progress.'
 EXEC sp_addmessage 50025,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50026) EXEC sp_dropmessage 50026, 'us_english'	
+SET @strmessage = 'Unable to unpost while check printing is in progress.'
+EXEC sp_addmessage 50026,11,@strmessage,'us_english','False'
+
