@@ -10,8 +10,28 @@ SELECT	@intReportId = [intReportId]
 FROM	[dbo].[tblRMReport] 
 WHERE	[strName] = N'Check Voucher Middle Sub Report AP Payment'
 
+-- Delete the existing sub report filter 
+DELETE	[dbo].[tblRMSubreportFilter]
+FROM	[dbo].[tblRMSubreportSetting] RPT_SETTING INNER JOIN [dbo].[tblRMSubreportFilter] RPT_FILTER
+			ON RPT_SETTING.intSubreportSettingId = RPT_FILTER.intSubreportSettingId
+WHERE	RPT_SETTING.intReportId = @intReportId
+
+-- Delete the existing sub report condition
+DELETE	[dbo].[tblRMSubreportCondition]
+FROM	[dbo].[tblRMSubreportSetting] RPT_SETTING INNER JOIN [dbo].[tblRMSubreportCondition] RPT_CONDITION
+			ON RPT_SETTING.intSubreportSettingId = RPT_CONDITION.intSubreportSettingId
+WHERE	RPT_SETTING.intReportId = @intReportId
+
+-- Delete the existing sub report settings. 
+DELETE FROM [dbo].[tblRMSubreportSetting]
+WHERE [intReportId] = @intReportId
+
 -- Delete the criteria fields 
 DELETE FROM [dbo].[tblRMCriteriaField]
+WHERE [intReportId] = @intReportId
+
+-- Delete the data source
+DELETE FROM [dbo].[tblRMDatasource] 
 WHERE [intReportId] = @intReportId
 
 -- Delete the report data 
@@ -70,9 +90,6 @@ SELECT
 SELECT @intReportId = SCOPE_IDENTITY()
 
 -- Setup for the data source
-DELETE FROM [dbo].[tblRMDatasource] 
-WHERE [intReportId] = @intReportId
-
 INSERT [dbo].[tblRMDatasource] (
 	[strName], 
 	[intReportId], 
@@ -89,29 +106,7 @@ SELECT
 	[intDataSourceType] = 1, 
 	[intConcurrencyId] = 1
 	
--- Setup for the report settings
-BEGIN 
-	-- Delete the existing sub report filter 
-	DELETE	[dbo].[tblRMSubreportFilter]
-	FROM	[dbo].[tblRMSubreportSetting] RPT_SETTING INNER JOIN [dbo].[tblRMSubreportFilter] RPT_FILTER
-				ON RPT_SETTING.intSubreportSettingId = RPT_FILTER.intSubreportSettingId
-	WHERE	RPT_SETTING.intReportId = @intReportId
-
-	-- Delete the existing sub report condition
-	DELETE	[dbo].[tblRMSubreportCondition]
-	FROM	[dbo].[tblRMSubreportSetting] RPT_SETTING INNER JOIN [dbo].[tblRMSubreportCondition] RPT_CONDITION
-				ON RPT_SETTING.intSubreportSettingId = RPT_CONDITION.intSubreportSettingId
-	WHERE	RPT_SETTING.intReportId = @intReportId
-
-	-- Delete the existing sub report settings. 
-	DELETE FROM [dbo].[tblRMSubreportSetting]
-	WHERE [intReportId] = @intReportId
-END 
-
 -- Setup the report criteria fields 
-DELETE FROM [dbo].[tblRMCriteriaField]
-WHERE [intReportId] = @intReportId
-
 INSERT [dbo].[tblRMCriteriaField] ([intReportId], [intCriteriaFieldSelectionId], [strFieldName], [strDataType], [strDescription], [strConditions], [ysnIsRequired], [ysnShow], [ysnAllowSort], [ysnEditCondition], [intConcurrencyId]) VALUES (@intReportId, NULL, N'intTransactionId', N'Integer', N'Transaction Id', NULL, 0, 1, 0, 1, 1)
 INSERT [dbo].[tblRMCriteriaField] ([intReportId], [intCriteriaFieldSelectionId], [strFieldName], [strDataType], [strDescription], [strConditions], [ysnIsRequired], [ysnShow], [ysnAllowSort], [ysnEditCondition], [intConcurrencyId]) VALUES (@intReportId, NULL, N'strBillId', N'String', N'Bill Id', NULL, 0, 1, 0, 1, 1)
 INSERT [dbo].[tblRMCriteriaField] ([intReportId], [intCriteriaFieldSelectionId], [strFieldName], [strDataType], [strDescription], [strConditions], [ysnIsRequired], [ysnShow], [ysnAllowSort], [ysnEditCondition], [intConcurrencyId]) VALUES (@intReportId, NULL, N'strInvoice', N'String', N'Invoice', NULL, 0, 1, 0, 1, 1)

@@ -34,6 +34,10 @@ WHERE [intReportId] = @intReportId
 DELETE FROM [dbo].[tblRMCriteriaField]
 WHERE [intReportId] = @intReportId
 
+-- Delete the data source
+DELETE FROM [dbo].[tblRMDatasource] 
+WHERE [intReportId] = @intReportId
+
 -- Delete the report data 
 DELETE	FROM [dbo].[tblRMReport] 
 WHERE	[intReportId] = @intReportId
