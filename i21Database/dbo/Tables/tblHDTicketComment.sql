@@ -13,6 +13,7 @@
 	[ysnSent] [bit] NOT NULL,
 	[ysnCreatedByAgent] [bit]  NULL,
 	[dtmSent] [datetime] NULL,
+	[ysnEncoded] [bit]  NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicketComment] PRIMARY KEY CLUSTERED ([intTicketCommentId] ASC),
     CONSTRAINT [FK_TicketComment_Ticket] FOREIGN KEY ([intTicketId]) REFERENCES [dbo].[tblHDTicket] ([intTicketId]) on delete cascade
