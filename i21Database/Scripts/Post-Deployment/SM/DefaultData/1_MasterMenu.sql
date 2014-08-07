@@ -558,3 +558,7 @@ GO
 							WHEN strMenuName = 'Export Hours Worked' THEN 6 END)
 	WHERE intParentMenuID = @intParent
 GO	
+	IF EXISTS (SELECT * FROM tblSMMasterMenu WHERE strMenuName = 'Customer Portal User Configuration' AND strModuleName = 'Customer Portal' AND strType = 'Screen')
+	DELETE FROM tblSMMasterMenu
+	WHERE strMenuName = 'Customer Portal User Configuration' AND strModuleName = 'Customer Portal' AND strType = 'Screen'
+GO
