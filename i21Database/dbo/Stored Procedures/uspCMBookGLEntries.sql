@@ -187,8 +187,8 @@ SET		dblDebit = ISNULL(tblGLSummary.dblDebit, 0) + ISNULL(tmpGLDetailGrouped.dbl
 		,dblCredit = ISNULL(tblGLSummary.dblCredit, 0) + ISNULL(tmpGLDetailGrouped.dblCredit, 0)
 		,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 FROM	(
-			SELECT	dblDebit	= SUM(ISNULL(B.dblDebit, 0))
-					,dblCredit	= SUM(ISNULL(B.dblCredit, 0))
+			SELECT	dblDebit	= CASE WHEN @ysnPost = 1 THEN SUM(ISNULL(B.dblDebit, 0)) ELSE SUM(ISNULL(B.dblCredit, 0)) * -1 END 
+					,dblCredit	= CASE WHEN @ysnPost = 1 THEN SUM(ISNULL(B.dblCredit, 0))  ELSE SUM(ISNULL(B.dblDebit, 0)) * -1 END 
 					,A.intAccountId
 					,dtmDate	= ISNULL(CONVERT(VARCHAR(10), B.dtmDate, 112), '')
 					,B.strCode						
