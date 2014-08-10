@@ -24,6 +24,8 @@
         "width": 600
     },
     "designerId": "a959b411-3963-41b6-bc2a-a30a0cfd3671",
+    "viewControllerInstanceId": "d319ea6b-5ad2-4967-8a22-e838ee9da9e6",
+    "viewModelInstanceId": "daf06f7d-9e45-4f48-863b-cfc386debe31",
     "cn": [
         {
             "type": "Ext.form.Panel",
@@ -49,6 +51,7 @@
                 "url": null,
                 "width": 450
             },
+            "name": "MyForm9",
             "designerId": "52478b37-71fe-409c-8dab-164519d067f7",
             "cn": [
                 {
@@ -64,6 +67,7 @@
                         "dock": "top",
                         "width": 588
                     },
+                    "name": "MyToolbar38",
                     "designerId": "550c7886-6686-43ce-bf86-e7d4b95adcd6",
                     "cn": [
                         {
@@ -87,6 +91,7 @@
                                 "text": "New",
                                 "width": 45
                             },
+                            "name": "MyButton105",
                             "designerId": "02dc9114-a116-4f28-a668-1fc5908084a8"
                         },
                         {
@@ -109,6 +114,7 @@
                                 "text": "Save",
                                 "width": 45
                             },
+                            "name": "MyButton106",
                             "designerId": "0246d955-162b-4c18-bedd-b61e57b4e8c7"
                         },
                         {
@@ -131,6 +137,7 @@
                                 "text": "Search",
                                 "width": 45
                             },
+                            "name": "MyButton107",
                             "designerId": "fc94d12d-bec4-4661-ba47-89d9d3268b04"
                         },
                         {
@@ -153,6 +160,7 @@
                                 "text": "Delete",
                                 "width": 45
                             },
+                            "name": "MyButton108",
                             "designerId": "266fb9b5-f561-4398-9244-0ae9556e9642"
                         },
                         {
@@ -175,6 +183,7 @@
                                 "text": "Undo",
                                 "width": 45
                             },
+                            "name": "MyButton109",
                             "designerId": "8c075f8d-17df-4c02-bc71-dd7fd2d733bc"
                         },
                         {
@@ -189,6 +198,7 @@
                                 "height": 30,
                                 "layout|flex": null
                             },
+                            "name": "MySeparator38",
                             "designerId": "4de24794-c539-408e-939a-9ffea8040934"
                         },
                         {
@@ -211,6 +221,7 @@
                                 "text": "Close",
                                 "width": 45
                             },
+                            "name": "MyButton110",
                             "designerId": "9f004b4e-c832-441b-8db0-a8dbe3fd8dc3"
                         }
                     ]
@@ -228,9 +239,11 @@
                         "height": null,
                         "layout": "vbox",
                         "layout|flex": 1.25,
-                        "layout|margins": "0 5 0 0",
+                        "layout|margins": null,
+                        "margin": "0 5 0 0",
                         "width": 1014
                     },
+                    "name": "MyContainer58",
                     "designerId": "a40b859c-53f2-4c46-8764-028e9e6f67f8",
                     "cn": [
                         {
@@ -244,8 +257,10 @@
                                 "designer|displayName": "container",
                                 "layout": "hbox",
                                 "layout|flex": null,
-                                "layout|margins": "0 0 5 0"
+                                "layout|margins": null,
+                                "margin": "0 0 5 0"
                             },
+                            "name": "MyContainer59",
                             "designerId": "0f384b01-5cd7-4d3b-8b99-5804cc35b2a6",
                             "cn": [
                                 {
@@ -266,6 +281,7 @@
                                         "tabIndex": null,
                                         "width": 300
                                     },
+                                    "name": "MyTextField72",
                                     "designerId": "4f63de21-91a8-465b-a175-5f9ba76b63b0"
                                 },
                                 {
@@ -281,8 +297,10 @@
                                         "itemId": "chkHAZMATMessage",
                                         "labelWidth": 110,
                                         "layout|flex": null,
-                                        "layout|margins": "0 0 0 5"
+                                        "layout|margins": null,
+                                        "margin": "0 0 0 5"
                                     },
+                                    "name": "MyCheckbox65",
                                     "designerId": "f7dc0415-53da-4648-9477-23f74c754dba"
                                 }
                             ]
@@ -309,6 +327,7 @@
                                 "tabIndex": null,
                                 "width": null
                             },
+                            "name": "MyTextField73",
                             "designerId": "c4d7c067-2475-435d-8222-2b51d22783ff"
                         },
                         {
@@ -333,6 +352,7 @@
                                 "tabIndex": null,
                                 "width": null
                             },
+                            "name": "MyTextArea2",
                             "designerId": "74d3969e-852c-4da7-b025-18a9308d61f4"
                         }
                     ]
@@ -353,6 +373,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
+                    "name": "statusbarpaging9",
                     "designerId": "b97e7a1b-0110-4676-8cc0-3e0083cd8966",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

@@ -24,6 +24,8 @@
         "width": 530
     },
     "designerId": "73f3aedb-a25b-4ece-989e-4e3ef1452b36",
+    "viewControllerInstanceId": "a18d8b24-c438-4d33-9492-79f868b07dd2",
+    "viewModelInstanceId": "8de1acdb-3480-45e0-8712-ca6019d16e34",
     "cn": [
         {
             "type": "Ext.form.Panel",
@@ -49,6 +51,7 @@
                 "url": null,
                 "width": 450
             },
+            "name": "MyForm10",
             "designerId": "14bb4143-4e63-49e9-88f9-8ce7ef644e2d",
             "cn": [
                 {
@@ -64,6 +67,7 @@
                         "dock": "top",
                         "width": 588
                     },
+                    "name": "MyToolbar39",
                     "designerId": "01ce298d-e40c-43b1-b0a6-d4e78fe95929",
                     "cn": [
                         {
@@ -87,6 +91,7 @@
                                 "text": "New",
                                 "width": 45
                             },
+                            "name": "MyButton111",
                             "designerId": "a142bd9c-15f3-439d-bb0b-d15d94cbe484"
                         },
                         {
@@ -109,6 +114,7 @@
                                 "text": "Save",
                                 "width": 45
                             },
+                            "name": "MyButton112",
                             "designerId": "e321695a-e301-480f-a6df-042ef3151ee1"
                         },
                         {
@@ -131,6 +137,7 @@
                                 "text": "Search",
                                 "width": 45
                             },
+                            "name": "MyButton113",
                             "designerId": "3f61f089-32e6-41f5-8c6e-443966d6d609"
                         },
                         {
@@ -153,6 +160,7 @@
                                 "text": "Delete",
                                 "width": 45
                             },
+                            "name": "MyButton114",
                             "designerId": "c6b94f3e-04be-4357-a522-dea5e52e5a4f"
                         },
                         {
@@ -175,6 +183,7 @@
                                 "text": "Undo",
                                 "width": 45
                             },
+                            "name": "MyButton115",
                             "designerId": "0dc32e45-2722-4060-aa75-2c26f7abeb69"
                         },
                         {
@@ -189,6 +198,7 @@
                                 "height": 30,
                                 "layout|flex": null
                             },
+                            "name": "MySeparator39",
                             "designerId": "a669cfae-b230-4da4-87a7-fd45e023401e"
                         },
                         {
@@ -211,6 +221,7 @@
                                 "text": "Close",
                                 "width": 45
                             },
+                            "name": "MyButton116",
                             "designerId": "43afc046-f3f1-4b00-8708-497b199b1607"
                         }
                     ]
@@ -227,6 +238,7 @@
                         "layout|flex": 1,
                         "title": null
                     },
+                    "name": "MyGridPanel36",
                     "designerId": "1d66a4d3-78a5-4661-9922-845d4cdf1173",
                     "cn": [
                         {
@@ -241,6 +253,7 @@
                                 "dock": "top",
                                 "itemId": "tlbGridOptions"
                             },
+                            "name": "MyToolbar40",
                             "designerId": "c693c407-ef76-41b0-a45f-5464e3172701",
                             "cn": [
                                 {
@@ -258,6 +271,7 @@
                                         "tabIndex": -1,
                                         "text": "Delete"
                                     },
+                                    "name": "MyButton117",
                                     "designerId": "e9d13941-3f4d-472a-b5f8-2080c7ee887b"
                                 },
                                 {
@@ -271,6 +285,7 @@
                                         "designer|displayName": "separator",
                                         "layout|flex": null
                                     },
+                                    "name": "MySeparator40",
                                     "designerId": "00d3c866-9c33-43ec-a5cf-657525366eb0"
                                 },
                                 {
@@ -283,6 +298,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
+                                    "name": "filter25",
                                     "designerId": "a18798ff-eca4-42bf-a94e-9881fa91b221",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -300,6 +316,7 @@
                                 "flex": 1,
                                 "text": "Category Code"
                             },
+                            "name": "MyColumn127",
                             "designerId": "bdbb35bb-7f0b-4125-9dfd-57ce4e373525"
                         },
                         {
@@ -314,6 +331,7 @@
                                 "flex": 2,
                                 "text": "Description"
                             },
+                            "name": "MyColumn128",
                             "designerId": "ec532c76-f756-4467-bf53-a4cbf9eaa698"
                         },
                         {
@@ -326,8 +344,9 @@
                             "userConfig": {
                                 "dataIndex": "string",
                                 "text": "Purchase/Sale",
-                                "width": 78
+                                "width": 82
                             },
+                            "name": "MyColumn129",
                             "designerId": "dccca815-f6fc-49ee-b2b0-5e309fc2660a"
                         },
                         {
@@ -340,8 +359,9 @@
                             "userConfig": {
                                 "dataIndex": "string",
                                 "text": "Unit/Amount",
-                                "width": 71
+                                "width": 75
                             },
+                            "name": "MyColumn130",
                             "designerId": "7daa9619-9160-492a-802a-f02ff0ce35b4"
                         },
                         {
@@ -354,6 +374,7 @@
                             "userConfig": {
                                 "itemId": "grvPatronageCategory"
                             },
+                            "name": "MyGridView36",
                             "designerId": "8384b641-31fe-40b2-abae-da8ac66c14cf"
                         },
                         {
@@ -363,6 +384,7 @@
                                 "type": "object"
                             },
                             "codeClass": "Ext.selection.CheckboxModel",
+                            "name": "MyCheckboxSelectionModel26",
                             "designerId": "27fd4416-70c6-4030-930b-5db285dc9fe1"
                         }
                     ]
@@ -383,6 +405,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
+                    "name": "statusbarpaging14",
                     "designerId": "d9923d36-c9c9-4f82-aba9-fd564ebbac8d",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

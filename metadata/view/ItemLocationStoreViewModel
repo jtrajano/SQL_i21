@@ -1,0 +1,13 @@
+{
+    "type": "Ext.app.ViewModel",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "itemlocationstore",
+        "designer|userClassName": "ItemLocationStoreViewModel"
+    },
+    "designerId": "25cf1c0c-a796-4bf9-9545-85fca4dea793"
+}

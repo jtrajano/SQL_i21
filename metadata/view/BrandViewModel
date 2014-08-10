@@ -1,0 +1,13 @@
+{
+    "type": "Ext.app.ViewModel",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "brand",
+        "designer|userClassName": "BrandViewModel"
+    },
+    "designerId": "07520ee1-5506-4258-90ef-53a61a91cf8f"
+}

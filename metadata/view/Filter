@@ -12,9 +12,11 @@
         "width": 199
     },
     "designerId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4",
+    "viewControllerInstanceId": "cf83061c-88e3-47e2-95ea-40fd51bd0738",
+    "viewModelInstanceId": "b6915792-f6ed-4975-bb8d-db4c86109a8a",
     "cn": [
         {
-            "type": "Ext.form.field.Trigger",
+            "type": "Ext.form.field.Text",
             "reference": {
                 "name": "items",
                 "type": "array"
@@ -29,9 +31,9 @@
                 "onTrigger2Click": null,
                 "tabIndex": -1,
                 "trigger2Cls": null,
-                "triggerCls": "x-form-clear-trigger",
                 "width": 189
             },
+            "name": "MyTextField134",
             "configAlternates": {
                 "onTrigger2Click": "object",
                 "onTrigger1Click": "object"
@@ -53,6 +55,22 @@
                     "name": "onTrigger2Click",
                     "type": "string"
                 }
+            ],
+            "cn": [
+                {
+                    "type": "Ext.form.trigger.Trigger",
+                    "reference": {
+                        "name": "triggers",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "cls": "x-form-clear-trigger",
+                        "name": "mytrigger"
+                    },
+                    "name": "MyTrigger",
+                    "designerId": "16ab28c8-d182-40b0-965b-e666f28d1f16"
+                }
             ]
         },
         {
@@ -67,6 +85,7 @@
                 "padding": 3,
                 "text": ""
             },
+            "name": "MyLabel1",
             "designerId": "2cf331a3-e16c-4551-8f6b-308b6781aa76"
         }
     ]

@@ -1,0 +1,13 @@
+{
+    "type": "Ext.app.ViewModel",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "promotionitemlist",
+        "designer|userClassName": "PromotionItemListViewModel"
+    },
+    "designerId": "d41e62a4-2dee-457c-9986-d5912d4d436b"
+}

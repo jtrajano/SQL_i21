@@ -1,0 +1,13 @@
+{
+    "type": "Ext.app.ViewController",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "paidouts",
+        "designer|userClassName": "PaidOutsViewController"
+    },
+    "designerId": "a9e32c20-1924-40f1-9aae-8ab9397d31af"
+}

@@ -24,6 +24,8 @@
         "width": 875
     },
     "designerId": "6285c4d9-7aed-4586-9945-1e0cfe0cd00f",
+    "viewControllerInstanceId": "ccde470c-0c4b-44a6-929d-1762ef5fd35c",
+    "viewModelInstanceId": "55df8b07-ac6a-4fb7-8a78-34fe59ddeed1",
     "cn": [
         {
             "type": "Ext.form.Panel",
@@ -49,6 +51,7 @@
                 "url": null,
                 "width": 450
             },
+            "name": "MyForm16",
             "designerId": "7ac5f650-8198-4f3a-8f07-cdab29d4c0f5",
             "cn": [
                 {
@@ -64,6 +67,7 @@
                         "dock": "top",
                         "width": 588
                     },
+                    "name": "MyToolbar50",
                     "designerId": "93ebf9e0-06b6-47a2-865e-0103a9903a2b",
                     "cn": [
                         {
@@ -86,6 +90,7 @@
                                 "text": "Save",
                                 "width": 45
                             },
+                            "name": "MyButton160",
                             "designerId": "bb226d27-8348-4b67-a0dd-8a1bef832c70"
                         },
                         {
@@ -108,6 +113,7 @@
                                 "text": "Undo",
                                 "width": 45
                             },
+                            "name": "MyButton161",
                             "designerId": "5fafd892-cecf-4925-a497-caccce7b5717"
                         },
                         {
@@ -122,6 +128,7 @@
                                 "height": 30,
                                 "layout|flex": null
                             },
+                            "name": "MySeparator50",
                             "designerId": "f4a1759d-7440-4313-b89d-185f8bcc7649"
                         },
                         {
@@ -144,6 +151,7 @@
                                 "text": "Close",
                                 "width": 45
                             },
+                            "name": "MyButton162",
                             "designerId": "b4fe8b90-31e3-4367-b355-35be274236d1"
                         }
                     ]
@@ -160,6 +168,7 @@
                         "layout|flex": 1,
                         "title": null
                     },
+                    "name": "MyGridPanel41",
                     "designerId": "112f6a0c-7564-4945-a845-949a86809b62",
                     "cn": [
                         {
@@ -174,6 +183,7 @@
                                 "dock": "top",
                                 "itemId": "tlbGridOptions"
                             },
+                            "name": "MyToolbar51",
                             "designerId": "dcd99f50-05d1-4087-a44d-e1b29ec87d55",
                             "cn": [
                                 {
@@ -191,6 +201,7 @@
                                         "tabIndex": -1,
                                         "text": "Delete"
                                     },
+                                    "name": "MyButton163",
                                     "designerId": "8f682078-fdbd-492d-bb87-756748d92ada"
                                 },
                                 {
@@ -204,6 +215,7 @@
                                         "designer|displayName": "separator",
                                         "layout|flex": null
                                     },
+                                    "name": "MySeparator51",
                                     "designerId": "7e06a618-85f3-4d10-936b-2330604da60f"
                                 },
                                 {
@@ -216,6 +228,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
+                                    "name": "filter22",
                                     "designerId": "2fae70be-eb75-4432-8b9e-f69f8ff60559",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -234,6 +247,7 @@
                                 "text": "Store Name",
                                 "width": 82
                             },
+                            "name": "MyColumn148",
                             "designerId": "6de3f7f9-185e-4db5-9c3b-53afbe310368"
                         },
                         {
@@ -249,6 +263,7 @@
                                 "text": "Fuel Tank No.",
                                 "width": 81
                             },
+                            "name": "MyColumn149",
                             "designerId": "77a64ef7-7ac4-4833-9267-18371f2e1a6b"
                         },
                         {
@@ -264,6 +279,7 @@
                                 "text": "Description",
                                 "width": null
                             },
+                            "name": "MyColumn150",
                             "designerId": "ea107ecd-8954-46da-a254-55209a2e5e5c"
                         },
                         {
@@ -275,8 +291,9 @@
                             "codeClass": null,
                             "userConfig": {
                                 "text": "Tank Capacity",
-                                "width": 79
+                                "width": 85
                             },
+                            "name": "MyNumberColumn18",
                             "designerId": "a9f4fbef-6ee1-4c92-8243-1b7da089805a"
                         },
                         {
@@ -288,8 +305,9 @@
                             "codeClass": null,
                             "userConfig": {
                                 "text": "Current Volume",
-                                "width": 86
+                                "width": 92
                             },
+                            "name": "MyNumberColumn19",
                             "designerId": "72ae9ebb-2fca-44c3-89ac-c3906ffe5a07"
                         },
                         {
@@ -303,6 +321,7 @@
                                 "text": "Last Update",
                                 "width": 78
                             },
+                            "name": "MyDateColumn4",
                             "designerId": "6788e7e2-2bfa-4711-a81d-c944912d20e8"
                         },
                         {
@@ -316,6 +335,7 @@
                                 "text": "Last Update Shift",
                                 "width": 96
                             },
+                            "name": "MyNumberColumn20",
                             "designerId": "e5772008-d248-45b0-bbf8-b5704ffce5a0"
                         },
                         {
@@ -331,6 +351,7 @@
                                 "text": "Tax Department No.",
                                 "width": 108
                             },
+                            "name": "MyColumn151",
                             "designerId": "2ca31ce0-8d7b-4956-8e68-045ae54f4629"
                         },
                         {
@@ -343,6 +364,7 @@
                             "userConfig": {
                                 "itemId": "grvFuelTank"
                             },
+                            "name": "MyGridView41",
                             "designerId": "656b6d89-a6a2-4826-9dfb-26a7399222d9"
                         },
                         {
@@ -352,6 +374,7 @@
                                 "type": "object"
                             },
                             "codeClass": "Ext.selection.CheckboxModel",
+                            "name": "MyCheckboxSelectionModel31",
                             "designerId": "7c1dedc1-0bfc-4d73-b76e-5f511b00c0df"
                         }
                     ]
@@ -372,6 +395,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
+                    "name": "statusbarpaging5",
                     "designerId": "2a64a436-d508-4d5b-94c9-4ac759b7808e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

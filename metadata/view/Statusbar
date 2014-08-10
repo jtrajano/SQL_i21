@@ -7,12 +7,14 @@
     "codeClass": null,
     "userConfig": {
         "container|padding": "0 0 0 1",
-        "designer|userAlias": "istatusbar101",
+        "designer|userAlias": "statusbar",
         "designer|userClassName": "Statusbar",
         "itemId": "tlbStatusbar",
         "width": 1265
     },
     "designerId": "0afbe385-6a12-469e-9f51-96107236353a",
+    "viewControllerInstanceId": "d8838c0e-afff-4c7a-90a9-6dfc5a0b5f4b",
+    "viewModelInstanceId": "9deb4207-ea3f-4190-9004-286365ed2f9e",
     "cn": [
         {
             "type": "Ext.button.Button",
@@ -31,6 +33,7 @@
                 "text": null,
                 "tooltip": "Click to get help on this screen"
             },
+            "name": "MyButton183",
             "configAlternates": {
                 "tooltip": "string"
             },
@@ -53,6 +56,7 @@
                 "text": null,
                 "tooltip": "Click for support on this screen"
             },
+            "name": "MyButton184",
             "configAlternates": {
                 "tooltip": "string"
             },
@@ -75,6 +79,7 @@
                 "text": null,
                 "tooltip": "Click to display table/field name tooltips"
             },
+            "name": "MyButton185",
             "configAlternates": {
                 "tooltip": "string"
             },
@@ -91,6 +96,7 @@
                 "designer|displayName": "separator",
                 "layout|flex": null
             },
+            "name": "MySeparator59",
             "designerId": "4ae1b61e-4b2f-4362-962b-a7843859aac7"
         },
         {
@@ -104,9 +110,11 @@
                 "designer|displayName": null,
                 "itemId": "lblReady",
                 "layout|flex": null,
-                "layout|margins": "0 5",
+                "layout|margins": null,
+                "margin": "0 5",
                 "text": "Ready"
             },
+            "name": "MyLabel11",
             "designerId": "a693cbde-5aad-4664-a701-32c4b9463ba5"
         },
         {
@@ -120,6 +128,7 @@
                 "designer|displayName": "fill",
                 "layout|flex": null
             },
+            "name": "MyFill1",
             "designerId": "77035203-e130-420d-a120-908e9a78295d"
         }
     ]

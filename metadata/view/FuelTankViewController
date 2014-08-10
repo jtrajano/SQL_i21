@@ -1,0 +1,13 @@
+{
+    "type": "Ext.app.ViewController",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "fueltank",
+        "designer|userClassName": "FuelTankViewController"
+    },
+    "designerId": "ccde470c-0c4b-44a6-929d-1762ef5fd35c"
+}

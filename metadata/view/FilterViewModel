@@ -1,0 +1,13 @@
+{
+    "type": "Ext.app.ViewModel",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "filter",
+        "designer|userClassName": "FilterViewModel"
+    },
+    "designerId": "b6915792-f6ed-4975-bb8d-db4c86109a8a"
+}

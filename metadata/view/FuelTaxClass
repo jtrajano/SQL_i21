@@ -24,6 +24,8 @@
         "width": 425
     },
     "designerId": "3b7bc41a-75d8-4e76-9e5c-c7a291d6e1be",
+    "viewControllerInstanceId": "075e6e7b-e41c-4f51-8a5c-a2bdc1a27e0c",
+    "viewModelInstanceId": "a1a8a499-7187-4654-8d46-cd34d1b5ab3a",
     "cn": [
         {
             "type": "Ext.form.Panel",
@@ -49,6 +51,7 @@
                 "url": null,
                 "width": 450
             },
+            "name": "MyForm8",
             "designerId": "f6f5d527-c56c-466f-85aa-85e5cf9bf5a2",
             "cn": [
                 {
@@ -64,6 +67,7 @@
                         "dock": "top",
                         "width": 588
                     },
+                    "name": "MyToolbar36",
                     "designerId": "195dfd9f-fe33-48f4-b518-71c2686e84a9",
                     "cn": [
                         {
@@ -87,6 +91,7 @@
                                 "text": "New",
                                 "width": 45
                             },
+                            "name": "MyButton99",
                             "designerId": "8ed87cb9-cd75-4e70-80de-c64172431097"
                         },
                         {
@@ -109,6 +114,7 @@
                                 "text": "Save",
                                 "width": 45
                             },
+                            "name": "MyButton100",
                             "designerId": "b8516e44-da0a-4caf-8090-636e15880712"
                         },
                         {
@@ -131,6 +137,7 @@
                                 "text": "Search",
                                 "width": 45
                             },
+                            "name": "MyButton101",
                             "designerId": "ad6a736f-4e77-46dd-965d-990701a59712"
                         },
                         {
@@ -153,6 +160,7 @@
                                 "text": "Delete",
                                 "width": 45
                             },
+                            "name": "MyButton102",
                             "designerId": "42fff3b3-32e1-41ae-8a31-be7d99a4dd26"
                         },
                         {
@@ -175,6 +183,7 @@
                                 "text": "Undo",
                                 "width": 45
                             },
+                            "name": "MyButton103",
                             "designerId": "84ee2fbc-71b7-47dc-b945-12b99b87181f"
                         },
                         {
@@ -189,6 +198,7 @@
                                 "height": 30,
                                 "layout|flex": null
                             },
+                            "name": "MySeparator37",
                             "designerId": "c3408873-a5d6-4f36-90cb-52093a33675b"
                         },
                         {
@@ -211,6 +221,7 @@
                                 "text": "Close",
                                 "width": 45
                             },
+                            "name": "MyButton104",
                             "designerId": "768cd4da-596c-4300-a345-b6338a9fa71a"
                         }
                     ]
@@ -228,9 +239,11 @@
                         "height": null,
                         "layout": "vbox",
                         "layout|flex": 1.25,
-                        "layout|margins": "0 5 0 0",
+                        "layout|margins": null,
+                        "margin": "0 5 0 0",
                         "width": 1014
                     },
+                    "name": "MyContainer56",
                     "designerId": "1ce3ed03-05d1-4f9d-8f16-18b4c795bfd3",
                     "cn": [
                         {
@@ -244,8 +257,10 @@
                                 "designer|displayName": "container",
                                 "layout": "hbox",
                                 "layout|flex": null,
-                                "layout|margins": "0 0 5 0"
+                                "layout|margins": null,
+                                "margin": "0 0 5 0"
                             },
+                            "name": "MyContainer57",
                             "designerId": "767100b0-bfec-452a-ab07-7f00a2190eaa",
                             "cn": [
                                 {
@@ -264,6 +279,7 @@
                                         "layout|flex": 1,
                                         "name": null
                                     },
+                                    "name": "MyTextField69",
                                     "configAlternates": {
                                         "columns": "array"
                                     },
@@ -290,9 +306,11 @@
                                         "itemId": "txtIrsTaxCode",
                                         "labelWidth": 90,
                                         "layout|flex": 1,
-                                        "layout|margins": "0 0 0 5",
+                                        "layout|margins": null,
+                                        "margin": "0 0 0 5",
                                         "name": null
                                     },
+                                    "name": "MyTextField70",
                                     "configAlternates": {
                                         "columns": "array"
                                     },
@@ -325,6 +343,7 @@
                                 "name": null,
                                 "tabIndex": null
                             },
+                            "name": "MyTextField71",
                             "designerId": "946b0fe7-1fb0-4e39-8599-fea7402e51d9"
                         },
                         {
@@ -339,6 +358,7 @@
                                 "layout|flex": 1,
                                 "title": "Product Codes"
                             },
+                            "name": "MyGridPanel35",
                             "designerId": "9e263e93-09c1-4e8c-8bd0-c57c6575e575",
                             "cn": [
                                 {
@@ -353,6 +373,7 @@
                                         "dock": "top",
                                         "itemId": "tlbGridOptions"
                                     },
+                                    "name": "MyToolbar37",
                                     "designerId": "b01bca24-1d9c-4cd0-8623-ef6e9ea35d8d",
                                     "cn": [
                                         {
@@ -365,6 +386,7 @@
                                             "userConfig": {
                                                 "layout|flex": null
                                             },
+                                            "name": "filter23",
                                             "designerId": "a6edc1ac-3fb1-409c-8533-ee41ecdec8f5",
                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                         }
@@ -382,6 +404,7 @@
                                         "flex": 1,
                                         "text": "State"
                                     },
+                                    "name": "MyColumn125",
                                     "designerId": "b2873c72-f010-4f89-ab08-63fa1bff68d5"
                                 },
                                 {
@@ -395,6 +418,7 @@
                                         "dataIndex": "string",
                                         "text": "Product Code"
                                     },
+                                    "name": "MyColumn126",
                                     "designerId": "3e5e2f37-0f6d-47e8-9f11-0a3bcaf641bc"
                                 },
                                 {
@@ -407,6 +431,7 @@
                                     "userConfig": {
                                         "itemId": "grvProductCode"
                                     },
+                                    "name": "MyGridView35",
                                     "designerId": "19b9d11e-b6ed-47a4-93c6-712fbdabf462"
                                 }
                             ]
@@ -429,6 +454,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
+                    "name": "statusbarpaging6",
                     "designerId": "3ce78bff-7020-4a1e-8c5e-085e96515140",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

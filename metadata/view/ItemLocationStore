@@ -25,6 +25,8 @@
         "width": 775
     },
     "designerId": "d57aaaae-c274-4b9e-b068-43fa5c868b63",
+    "viewControllerInstanceId": "6b00fa5e-2b9e-47dd-87c3-f4f99a7f19e8",
+    "viewModelInstanceId": "25cf1c0c-a796-4bf9-9545-85fca4dea793",
     "cn": [
         {
             "type": "Ext.form.Panel",
@@ -50,6 +52,7 @@
                 "url": null,
                 "width": 450
             },
+            "name": "MyForm1",
             "designerId": "32634488-77c6-4852-bfee-784a0d816b3f",
             "cn": [
                 {
@@ -65,6 +68,7 @@
                         "dock": "top",
                         "width": 588
                     },
+                    "name": "MyToolbar12",
                     "designerId": "d4e54896-1998-4b69-9034-6f348b4c70a4",
                     "cn": [
                         {
@@ -88,6 +92,7 @@
                                 "text": "New",
                                 "width": 45
                             },
+                            "name": "MyButton24",
                             "designerId": "d1390cc8-ce08-410e-afd2-7641921060cf"
                         },
                         {
@@ -110,6 +115,7 @@
                                 "text": "Save",
                                 "width": 45
                             },
+                            "name": "MyButton25",
                             "designerId": "797a9145-1ebb-45dc-8c8d-ca7df35dbb22"
                         },
                         {
@@ -132,6 +138,7 @@
                                 "text": "Search",
                                 "width": 45
                             },
+                            "name": "MyButton26",
                             "designerId": "6e478980-edac-4f37-9b25-0b1a70236f3d"
                         },
                         {
@@ -154,6 +161,7 @@
                                 "text": "Delete",
                                 "width": 45
                             },
+                            "name": "MyButton27",
                             "designerId": "b0240afb-ef9a-4865-b0f6-e120b3e1c9ba"
                         },
                         {
@@ -176,6 +184,7 @@
                                 "text": "Undo",
                                 "width": 45
                             },
+                            "name": "MyButton28",
                             "designerId": "bfc582f4-0084-4526-93b1-9b75f2debb86"
                         },
                         {
@@ -190,6 +199,7 @@
                                 "height": 30,
                                 "layout|flex": null
                             },
+                            "name": "MySeparator13",
                             "designerId": "c8ea4f53-0dde-4937-9b52-d15e66025e25"
                         },
                         {
@@ -212,6 +222,7 @@
                                 "text": "Close",
                                 "width": 45
                             },
+                            "name": "MyButton29",
                             "designerId": "0c16f88c-eb73-4e89-a4a6-3338e76de6e9"
                         }
                     ]
@@ -229,6 +240,7 @@
                         "layout": "hbox",
                         "layout|flex": 1
                     },
+                    "name": "MyContainer24",
                     "designerId": "3d1f5cdb-04ed-468a-b210-956ff10f4f36",
                     "cn": [
                         {
@@ -244,6 +256,7 @@
                                 "layout": "vbox",
                                 "layout|flex": 1
                             },
+                            "name": "MyContainer25",
                             "designerId": "60c9dbbd-cad7-47f0-a1ab-00ecad30e665",
                             "cn": [
                                 {
@@ -259,6 +272,7 @@
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
+                                    "name": "MyComboBox44",
                                     "designerId": "01cd1254-c32e-4c52-be00-5a3d2a4642a7"
                                 },
                                 {
@@ -274,6 +288,7 @@
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
+                                    "name": "MyComboBox45",
                                     "designerId": "1237ec97-9b70-4ee4-b11d-da3d4b528de0"
                                 },
                                 {
@@ -289,6 +304,7 @@
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
+                                    "name": "MyTextField32",
                                     "designerId": "0c45d94d-c5f5-4e10-b8ca-07b5bf30fdb7"
                                 },
                                 {
@@ -304,6 +320,7 @@
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
+                                    "name": "MyTextField33",
                                     "designerId": "a006055a-da78-4de9-9e22-a0b206626357"
                                 },
                                 {
@@ -319,6 +336,7 @@
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
+                                    "name": "MyComboBox46",
                                     "designerId": "1123fe5d-cd68-4bc9-a48b-5b7be62bf011"
                                 },
                                 {
@@ -334,6 +352,7 @@
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
+                                    "name": "MyTextField34",
                                     "designerId": "49bf6296-4c72-406c-849c-778c2eb004c7"
                                 },
                                 {
@@ -349,6 +368,7 @@
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
+                                    "name": "MyTextField35",
                                     "designerId": "c58a68bf-9930-4043-9f1b-1332a91c5e26"
                                 },
                                 {
@@ -364,6 +384,7 @@
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
+                                    "name": "MyTextField36",
                                     "designerId": "09921185-ab25-4177-b8fb-43c078e7f99a"
                                 },
                                 {
@@ -380,6 +401,7 @@
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
+                                    "name": "MyCheckbox26",
                                     "designerId": "f52c1470-7cec-4aae-a659-e95ec29bafa2"
                                 },
                                 {
@@ -396,6 +418,7 @@
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
+                                    "name": "MyCheckbox27",
                                     "designerId": "add2df77-3c1a-407d-9589-534b062fc351"
                                 },
                                 {
@@ -412,6 +435,7 @@
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
+                                    "name": "MyCheckbox28",
                                     "designerId": "c953973e-95da-446f-8eb1-0a53e744b2ee"
                                 },
                                 {
@@ -428,6 +452,7 @@
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
+                                    "name": "MyCheckbox29",
                                     "designerId": "0dd568d8-b934-45a7-b7f5-3b91d85e36a6"
                                 }
                             ]
@@ -444,8 +469,10 @@
                                 "designer|displayName": "container",
                                 "layout": "vbox",
                                 "layout|flex": 1,
-                                "layout|margins": "0 7"
+                                "layout|margins": null,
+                                "margin": "0 7"
                             },
+                            "name": "MyContainer26",
                             "designerId": "233f4805-c8ef-4fcd-bacf-1440e9479720",
                             "cn": [
                                 {
@@ -462,6 +489,7 @@
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
+                                    "name": "MyCheckbox30",
                                     "designerId": "8f5a9fb0-61ad-4e06-ad1a-42203b2f0c6c"
                                 },
                                 {
@@ -478,6 +506,7 @@
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
+                                    "name": "MyCheckbox31",
                                     "designerId": "946dc220-52f4-476c-a508-ba2ce82c85e1"
                                 },
                                 {
@@ -494,6 +523,7 @@
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
+                                    "name": "MyCheckbox32",
                                     "designerId": "b658dda2-3b76-4816-8bea-a126c26da2cb"
                                 },
                                 {
@@ -510,6 +540,7 @@
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
+                                    "name": "MyCheckbox33",
                                     "designerId": "9be31ba1-b592-4e24-89e8-b47f923d1f72"
                                 },
                                 {
@@ -526,6 +557,7 @@
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
+                                    "name": "MyCheckbox34",
                                     "designerId": "3860776d-f85a-498a-9489-5b512d7a5af2"
                                 },
                                 {
@@ -542,6 +574,7 @@
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
+                                    "name": "MyCheckbox35",
                                     "designerId": "28fbea65-2c91-4202-96e8-ea42ac7c79b2"
                                 },
                                 {
@@ -558,6 +591,7 @@
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
+                                    "name": "MyCheckbox36",
                                     "designerId": "9e05d9d4-c9ca-4dd6-ae31-92653014970d"
                                 },
                                 {
@@ -573,6 +607,7 @@
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
+                                    "name": "MyTextField37",
                                     "designerId": "994125be-90c0-427a-8d9b-75443be05a7c"
                                 },
                                 {
@@ -589,6 +624,7 @@
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
+                                    "name": "MyCheckbox37",
                                     "designerId": "29cd49e1-c048-4fbc-8fd5-6042a096334e"
                                 },
                                 {
@@ -605,6 +641,7 @@
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
+                                    "name": "MyCheckbox38",
                                     "designerId": "591898f4-38c0-4662-8c7b-3317a5240044"
                                 },
                                 {
@@ -620,6 +657,7 @@
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
+                                    "name": "MyComboBox47",
                                     "designerId": "714f3a58-b896-4767-b714-4fd98dab8b82"
                                 },
                                 {
@@ -635,6 +673,7 @@
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
+                                    "name": "MyTextField38",
                                     "designerId": "bd760983-d036-4495-bf49-b3a48ade377b"
                                 }
                             ]
@@ -657,6 +696,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
+                    "name": "statusbarpaging10",
                     "designerId": "3812557b-eaf0-4f41-b444-7da5890f9c89",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

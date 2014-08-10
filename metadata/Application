@@ -6,31 +6,8 @@
     },
     "codeClass": null,
     "userConfig": {
-        "name": "Inventory",
-        "views": [
-            "CompanyLocation",
-            "ScreenTemplate",
-            "RIN",
-            "FuelType",
-            "FuelTaxClass",
-            "InventoryTag",
-            "PatronageCategory",
-            "Manufacturer",
-            "FuturesExchange",
-            "Brand",
-            "FuelTank",
-            "PaidOuts",
-            "SubCategory",
-            "OkTemplate",
-            "Commodity",
-            "Category",
-            "Store",
-            "StorePaymentMethod",
-            "PromotionItemList",
-            "CategoryStore",
-            "ItemLocationStore",
-            "ItemPricing"
-        ]
+        "name": "Inventory"
     },
+    "name": "Application",
     "designerId": "application"
 }

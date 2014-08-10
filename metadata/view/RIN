@@ -24,6 +24,8 @@
         "width": 775
     },
     "designerId": "9d94cca6-c484-414b-9120-f2e00868c675",
+    "viewControllerInstanceId": "6e659269-fb95-48a4-9dfc-d8b256b7ef4a",
+    "viewModelInstanceId": "a88b9012-fbbe-4391-9f49-b0a7dd8f6f8d",
     "cn": [
         {
             "type": "Ext.form.Panel",
@@ -49,6 +51,7 @@
                 "url": null,
                 "width": 450
             },
+            "name": "MyForm6",
             "designerId": "2f5cff1f-1e63-49b3-9916-91d9c06f8ae3",
             "cn": [
                 {
@@ -64,6 +67,7 @@
                         "dock": "top",
                         "width": 588
                     },
+                    "name": "MyToolbar34",
                     "designerId": "4751c712-30f3-42ab-bbf5-5db344bbd6f7",
                     "cn": [
                         {
@@ -87,6 +91,7 @@
                                 "text": "New",
                                 "width": 45
                             },
+                            "name": "MyButton87",
                             "designerId": "e926bfca-448b-4e2f-bbe9-6d14bdde7148"
                         },
                         {
@@ -109,6 +114,7 @@
                                 "text": "Save",
                                 "width": 45
                             },
+                            "name": "MyButton88",
                             "designerId": "70cccbfa-54f6-4b8e-9299-9faf62124db4"
                         },
                         {
@@ -131,6 +137,7 @@
                                 "text": "Search",
                                 "width": 45
                             },
+                            "name": "MyButton89",
                             "designerId": "6a875355-3d7b-4499-9877-7d29c27a9547"
                         },
                         {
@@ -153,6 +160,7 @@
                                 "text": "Delete",
                                 "width": 45
                             },
+                            "name": "MyButton90",
                             "designerId": "d663749f-b4c6-4134-bd4c-ae1d90af5444"
                         },
                         {
@@ -175,6 +183,7 @@
                                 "text": "Undo",
                                 "width": 45
                             },
+                            "name": "MyButton91",
                             "designerId": "4a09490a-f656-4a83-919c-a84930272608"
                         },
                         {
@@ -189,6 +198,7 @@
                                 "height": 30,
                                 "layout|flex": null
                             },
+                            "name": "MySeparator35",
                             "designerId": "31d26990-42b0-4e18-8f65-3b31d5572947"
                         },
                         {
@@ -211,6 +221,7 @@
                                 "text": "Close",
                                 "width": 45
                             },
+                            "name": "MyButton92",
                             "designerId": "4086b547-5316-4f2c-92b7-638fe96a9507"
                         }
                     ]
@@ -227,6 +238,7 @@
                         "layout|flex": 1,
                         "title": "Fuel Type"
                     },
+                    "name": "MyGridPanel30",
                     "designerId": "fd018232-244f-4a0d-a97f-90e8a79df348",
                     "cn": [
                         {
@@ -241,6 +253,7 @@
                                 "flex": 1,
                                 "text": "Fuel Type Code"
                             },
+                            "name": "MyColumn114",
                             "designerId": "80868a20-1bc5-493e-8d9c-5b0f9ab3f807"
                         },
                         {
@@ -255,6 +268,7 @@
                                 "flex": 2,
                                 "text": "Description"
                             },
+                            "name": "MyColumn115",
                             "designerId": "3bd83fc6-26a4-43ad-97a4-b1905f3cf996"
                         },
                         {
@@ -269,6 +283,7 @@
                                 "flex": 1,
                                 "text": "Equivalance Value"
                             },
+                            "name": "MyColumn116",
                             "designerId": "6101257d-978a-4a15-b80c-998bc2820a34"
                         },
                         {
@@ -281,6 +296,7 @@
                             "userConfig": {
                                 "itemId": "grvFuelType"
                             },
+                            "name": "MyGridView30",
                             "designerId": "37832b77-0462-43cb-a15d-2a6bfe219e0b"
                         }
                     ]
@@ -298,6 +314,7 @@
                         "layout": "hbox",
                         "layout|flex": 1
                     },
+                    "name": "MyContainer53",
                     "designerId": "8ae5d3c5-7b3c-47da-aea7-7c15311cb798",
                     "cn": [
                         {
@@ -310,9 +327,11 @@
                             "userConfig": {
                                 "itemId": "grdFuelCode",
                                 "layout|flex": 1,
-                                "layout|margins": "5 0 0 0 ",
+                                "layout|margins": null,
+                                "margin": "5 0 0 0 ",
                                 "title": "Fuel Code"
                             },
+                            "name": "MyGridPanel31",
                             "designerId": "35cd5dc3-c021-4224-9a04-d36784a15c2b",
                             "cn": [
                                 {
@@ -327,6 +346,7 @@
                                         "flex": 1,
                                         "text": "Fuel Code"
                                     },
+                                    "name": "MyColumn117",
                                     "designerId": "8a7c1734-5a3b-492c-a0fc-568b9a8e92a8"
                                 },
                                 {
@@ -341,6 +361,7 @@
                                         "flex": 2,
                                         "text": "Description"
                                     },
+                                    "name": "MyColumn118",
                                     "designerId": "a4da39cd-7fa1-4e1e-90af-ea406e257936"
                                 },
                                 {
@@ -353,6 +374,7 @@
                                     "userConfig": {
                                         "itemId": "grvFuelCode"
                                     },
+                                    "name": "MyGridView31",
                                     "designerId": "1a5e4b76-c1c0-44b0-a1ca-45f1951042c2"
                                 }
                             ]
@@ -367,9 +389,11 @@
                             "userConfig": {
                                 "itemId": "grdProcessCode",
                                 "layout|flex": 1,
-                                "layout|margins": "5 0 0 5",
+                                "layout|margins": null,
+                                "margin": "5 0 0 5",
                                 "title": "Process Code"
                             },
+                            "name": "MyGridPanel32",
                             "designerId": "376b6a27-b883-43ca-b9cf-f20dde49aac8",
                             "cn": [
                                 {
@@ -384,6 +408,7 @@
                                         "flex": 1,
                                         "text": "Process Code"
                                     },
+                                    "name": "MyColumn119",
                                     "designerId": "9babbea4-a9ce-4745-85ea-7e596631d2f3"
                                 },
                                 {
@@ -398,6 +423,7 @@
                                         "flex": 2,
                                         "text": "Description"
                                     },
+                                    "name": "MyColumn120",
                                     "designerId": "d1df97ed-bd45-495d-9d0f-ff2ea0fd5863"
                                 },
                                 {
@@ -410,6 +436,7 @@
                                     "userConfig": {
                                         "itemId": "grvProcessCode"
                                     },
+                                    "name": "MyGridView32",
                                     "designerId": "8c355fb5-8920-485b-beae-d6f864906e0e"
                                 }
                             ]
@@ -429,6 +456,7 @@
                         "layout": "hbox",
                         "layout|flex": 1
                     },
+                    "name": "MyContainer54",
                     "designerId": "89b0b59b-e7e9-4575-bf04-331253f9e923",
                     "cn": [
                         {
@@ -441,9 +469,11 @@
                             "userConfig": {
                                 "itemId": "grdFeedStockCode",
                                 "layout|flex": 1,
-                                "layout|margins": "5 0 0 0 ",
+                                "layout|margins": null,
+                                "margin": "5 0 0 0 ",
                                 "title": "Feed Stock Code"
                             },
+                            "name": "MyGridPanel33",
                             "designerId": "3b68695b-8713-463d-8f16-aaa7fc7b8828",
                             "cn": [
                                 {
@@ -458,6 +488,7 @@
                                         "flex": 1,
                                         "text": "Feed Stock Code"
                                     },
+                                    "name": "MyColumn121",
                                     "designerId": "492507f4-1fc1-4c8c-a970-4197efa017eb"
                                 },
                                 {
@@ -472,6 +503,7 @@
                                         "flex": 2,
                                         "text": "Description"
                                     },
+                                    "name": "MyColumn122",
                                     "designerId": "abb06b8d-0456-4830-ba29-d0faa50055fd"
                                 },
                                 {
@@ -484,6 +516,7 @@
                                     "userConfig": {
                                         "itemId": "grvFeedStockCode"
                                     },
+                                    "name": "MyGridView33",
                                     "designerId": "56f2e907-0c6f-4dee-970d-de46be9ab0fd"
                                 }
                             ]
@@ -498,9 +531,11 @@
                             "userConfig": {
                                 "itemId": "grvFeedStockUom",
                                 "layout|flex": 1,
-                                "layout|margins": "5 0 0 5",
+                                "layout|margins": null,
+                                "margin": "5 0 0 5",
                                 "title": "Feed Stock UOM"
                             },
+                            "name": "MyGridPanel34",
                             "designerId": "850942d5-3977-4d07-86ea-8b30c54060cb",
                             "cn": [
                                 {
@@ -515,6 +550,7 @@
                                         "flex": 1,
                                         "text": "UOM"
                                     },
+                                    "name": "MyColumn123",
                                     "designerId": "f8b2198e-9724-4c38-93de-e6de352f7385"
                                 },
                                 {
@@ -529,6 +565,7 @@
                                         "flex": 2,
                                         "text": "UOM Code"
                                     },
+                                    "name": "MyColumn124",
                                     "designerId": "cb49ecad-8118-490b-a0b5-d4d567004f8b"
                                 },
                                 {
@@ -541,6 +578,7 @@
                                     "userConfig": {
                                         "itemId": "grvFeedStockUom"
                                     },
+                                    "name": "MyGridView34",
                                     "designerId": "50da17cc-8d5e-4d20-bc10-d1f205a54834"
                                 }
                             ]
@@ -563,6 +601,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
+                    "name": "statusbarpaging16",
                     "designerId": "34adbb44-2c90-4aa8-a5a9-2b5a6f92c50f",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

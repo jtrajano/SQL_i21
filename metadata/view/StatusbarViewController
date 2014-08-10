@@ -1,0 +1,13 @@
+{
+    "type": "Ext.app.ViewController",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "statusbar",
+        "designer|userClassName": "StatusbarViewController"
+    },
+    "designerId": "d8838c0e-afff-4c7a-90a9-6dfc5a0b5f4b"
+}

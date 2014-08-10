@@ -24,6 +24,8 @@
         "width": 530
     },
     "designerId": "db40133a-e20f-404b-8124-bf913e175224",
+    "viewControllerInstanceId": "19ba5dae-c2c2-4bc8-8212-25adbb8676dd",
+    "viewModelInstanceId": "07520ee1-5506-4258-90ef-53a61a91cf8f",
     "cn": [
         {
             "type": "Ext.form.Panel",
@@ -49,6 +51,7 @@
                 "url": null,
                 "width": 450
             },
+            "name": "MyForm15",
             "designerId": "da24974d-c856-4bf6-ab9d-ae572917947c",
             "cn": [
                 {
@@ -64,6 +67,7 @@
                         "dock": "top",
                         "width": 588
                     },
+                    "name": "MyToolbar48",
                     "designerId": "fd216dac-7c9c-49b0-a3c9-16f3fa82ba1c",
                     "cn": [
                         {
@@ -86,6 +90,7 @@
                                 "text": "Save",
                                 "width": 45
                             },
+                            "name": "MyButton156",
                             "designerId": "e68256c8-2cc7-4dec-afcc-8335ba291bc7"
                         },
                         {
@@ -108,6 +113,7 @@
                                 "text": "Undo",
                                 "width": 45
                             },
+                            "name": "MyButton157",
                             "designerId": "943881f0-249b-4b0e-b25f-b36aecc7d238"
                         },
                         {
@@ -122,6 +128,7 @@
                                 "height": 30,
                                 "layout|flex": null
                             },
+                            "name": "MySeparator48",
                             "designerId": "a4f8d0d9-35c8-4c1d-9d2a-11bf91ba2ee1"
                         },
                         {
@@ -144,6 +151,7 @@
                                 "text": "Close",
                                 "width": 45
                             },
+                            "name": "MyButton158",
                             "designerId": "0a60b491-5832-4015-84a8-6f2c2a4d16ac"
                         }
                     ]
@@ -160,6 +168,7 @@
                         "layout|flex": 1,
                         "title": null
                     },
+                    "name": "MyGridPanel40",
                     "designerId": "62bb8bae-3abe-4406-a256-0176d4744c85",
                     "cn": [
                         {
@@ -174,6 +183,7 @@
                                 "dock": "top",
                                 "itemId": "tlbGridOptions"
                             },
+                            "name": "MyToolbar49",
                             "designerId": "2a24edeb-4779-4adb-8c23-4582c0c2afc8",
                             "cn": [
                                 {
@@ -191,6 +201,7 @@
                                         "tabIndex": -1,
                                         "text": "Delete"
                                     },
+                                    "name": "MyButton159",
                                     "designerId": "c7e6268d-622e-4e19-b596-990687905d08"
                                 },
                                 {
@@ -204,6 +215,7 @@
                                         "designer|displayName": "separator",
                                         "layout|flex": null
                                     },
+                                    "name": "MySeparator49",
                                     "designerId": "f3caaade-263b-4620-8d2f-5bd4169644ae"
                                 },
                                 {
@@ -216,6 +228,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
+                                    "name": "filter11",
                                     "designerId": "1c51bbf4-69ba-4770-a731-1f09cb4d80e1",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -233,6 +246,7 @@
                                 "flex": 1,
                                 "text": "Brand Code"
                             },
+                            "name": "MyColumn145",
                             "designerId": "13e22819-5112-40a7-b4be-f3af0869edf7"
                         },
                         {
@@ -247,6 +261,7 @@
                                 "flex": 1,
                                 "text": "Brand Name"
                             },
+                            "name": "MyColumn146",
                             "designerId": "38b83aca-6af7-459b-8328-eac7c8e04b27"
                         },
                         {
@@ -262,6 +277,7 @@
                                 "text": "Manufacturer",
                                 "width": null
                             },
+                            "name": "MyColumn147",
                             "designerId": "c377fb54-8e73-4085-a2e5-dc691fab8769"
                         },
                         {
@@ -274,6 +290,7 @@
                             "userConfig": {
                                 "itemId": "grvBrand"
                             },
+                            "name": "MyGridView40",
                             "designerId": "acc2ebaa-3dc1-4338-9732-8437432ac741"
                         },
                         {
@@ -283,6 +300,7 @@
                                 "type": "object"
                             },
                             "codeClass": "Ext.selection.CheckboxModel",
+                            "name": "MyCheckboxSelectionModel30",
                             "designerId": "c3645c6b-c07a-44c3-9230-1a87bd081364"
                         }
                     ]
@@ -303,6 +321,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
+                    "name": "statusbarpaging1",
                     "designerId": "9b0a6e72-56bd-4c64-bfca-064da234da01",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
