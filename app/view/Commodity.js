@@ -266,8 +266,8 @@ Ext.define('Inventory.view.Commodity', {
                                                                 },
                                                                 items: [
                                                                     {
-                                                                        xtype: 'combobox',
-                                                                        itemId: 'cboCheckoffTaxDesc',
+                                                                        xtype: 'textfield',
+                                                                        itemId: 'txtCheckoffTaxDesc',
                                                                         width: 280,
                                                                         fieldLabel: 'Checkoff Tax Desc',
                                                                         labelWidth: 140
@@ -291,8 +291,8 @@ Ext.define('Inventory.view.Commodity', {
                                                                 },
                                                                 items: [
                                                                     {
-                                                                        xtype: 'combobox',
-                                                                        itemId: 'cboInsuranceTaxDesc',
+                                                                        xtype: 'textfield',
+                                                                        itemId: 'txtInsuranceTaxDesc',
                                                                         width: 280,
                                                                         fieldLabel: 'Insurance Tax Desc',
                                                                         labelWidth: 140

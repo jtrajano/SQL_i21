@@ -645,6 +645,192 @@ Ext.define('Inventory.view.Category', {
                                                 })
                                             }
                                         ]
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        bodyPadding: 10,
+                                        title: 'Manufacturing',
+                                        layout: {
+                                            type: 'vbox',
+                                            align: 'stretch'
+                                        },
+                                        items: [
+                                            {
+                                                xtype: 'container',
+                                                layout: {
+                                                    type: 'hbox',
+                                                    align: 'stretch'
+                                                },
+                                                items: [
+                                                    {
+                                                        xtype: 'container',
+                                                        flex: 1.1,
+                                                        margin: '0 5 0 0 ',
+                                                        layout: {
+                                                            type: 'vbox',
+                                                            align: 'stretch'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'numberfield',
+                                                                flex: 1,
+                                                                fieldLabel: 'Standard Qty',
+                                                                labelWidth: 160,
+                                                                hideTrigger: true
+                                                            },
+                                                            {
+                                                                xtype: 'combobox',
+                                                                flex: 1,
+                                                                fieldLabel: 'Standard UOM',
+                                                                labelWidth: 160,
+                                                                hideTrigger: true
+                                                            },
+                                                            {
+                                                                xtype: 'textfield',
+                                                                itemId: 'txtGlDivisionNumber',
+                                                                fieldLabel: 'ERP Item Class',
+                                                                labelWidth: 160
+                                                            },
+                                                            {
+                                                                xtype: 'numberfield',
+                                                                flex: 1,
+                                                                fieldLabel: 'Life Time (mins)',
+                                                                labelWidth: 160,
+                                                                hideTrigger: true
+                                                            },
+                                                            {
+                                                                xtype: 'numberfield',
+                                                                flex: 1,
+                                                                fieldLabel: 'BOM Item Shrinkage',
+                                                                labelWidth: 160,
+                                                                hideTrigger: true
+                                                            },
+                                                            {
+                                                                xtype: 'numberfield',
+                                                                flex: 1,
+                                                                fieldLabel: 'BOM Item Upper Tolerance',
+                                                                labelWidth: 160,
+                                                                hideTrigger: true
+                                                            },
+                                                            {
+                                                                xtype: 'numberfield',
+                                                                flex: 1,
+                                                                fieldLabel: 'BOM Item Lower Tolerance',
+                                                                labelWidth: 160,
+                                                                hideTrigger: true
+                                                            },
+                                                            {
+                                                                xtype: 'checkboxfield',
+                                                                itemId: 'chkSalesAnalysisByTon',
+                                                                fieldLabel: 'Scaled',
+                                                                labelWidth: 160
+                                                            },
+                                                            {
+                                                                xtype: 'checkboxfield',
+                                                                itemId: 'chkSalesAnalysisByTon1',
+                                                                fieldLabel: 'Output Item Mandatory',
+                                                                labelWidth: 160
+                                                            },
+                                                            {
+                                                                xtype: 'textfield',
+                                                                itemId: 'txtGlDivisionNumber1',
+                                                                fieldLabel: 'Consumption Method',
+                                                                labelWidth: 160
+                                                            },
+                                                            {
+                                                                xtype: 'textfield',
+                                                                itemId: 'txtGlDivisionNumber2',
+                                                                fieldLabel: 'BOM Item Type',
+                                                                labelWidth: 160
+                                                            },
+                                                            {
+                                                                xtype: 'textfield',
+                                                                itemId: 'txtGlDivisionNumber3',
+                                                                fieldLabel: 'Short Name',
+                                                                labelWidth: 160
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        xtype: 'container',
+                                                        flex: 1,
+                                                        margin: '0 1 0 5',
+                                                        layout: {
+                                                            type: 'vbox',
+                                                            align: 'stretch'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'textfield',
+                                                                itemId: 'txtGlDivisionNumber4',
+                                                                fieldLabel: 'Receipt Image',
+                                                                labelWidth: 160
+                                                            },
+                                                            {
+                                                                xtype: 'textfield',
+                                                                itemId: 'txtGlDivisionNumber5',
+                                                                fieldLabel: 'WIP Image',
+                                                                labelWidth: 160
+                                                            },
+                                                            {
+                                                                xtype: 'textfield',
+                                                                itemId: 'txtGlDivisionNumber6',
+                                                                fieldLabel: 'FG Image',
+                                                                labelWidth: 160
+                                                            },
+                                                            {
+                                                                xtype: 'textfield',
+                                                                itemId: 'txtGlDivisionNumber7',
+                                                                fieldLabel: 'Ship Image',
+                                                                labelWidth: 160
+                                                            },
+                                                            {
+                                                                xtype: 'numberfield',
+                                                                itemId: 'txtDefaultMinimumAge',
+                                                                maxWidth: 275,
+                                                                fieldLabel: 'Labor Cost',
+                                                                labelWidth: 160,
+                                                                hideTrigger: true
+                                                            },
+                                                            {
+                                                                xtype: 'numberfield',
+                                                                itemId: 'txtDefaultMinimumAge1',
+                                                                maxWidth: 275,
+                                                                fieldLabel: 'Over Head',
+                                                                labelWidth: 160,
+                                                                hideTrigger: true
+                                                            },
+                                                            {
+                                                                xtype: 'numberfield',
+                                                                itemId: 'txtDefaultMinimumAge2',
+                                                                maxWidth: 275,
+                                                                fieldLabel: 'Percentage',
+                                                                labelWidth: 160,
+                                                                hideTrigger: true
+                                                            },
+                                                            {
+                                                                xtype: 'textfield',
+                                                                itemId: 'txtGlDivisionNumber8',
+                                                                fieldLabel: 'Cost Distribution Method',
+                                                                labelWidth: 160
+                                                            },
+                                                            {
+                                                                xtype: 'checkboxfield',
+                                                                itemId: 'chkSalesAnalysisByTon2',
+                                                                fieldLabel: 'Sellable',
+                                                                labelWidth: 160
+                                                            },
+                                                            {
+                                                                xtype: 'checkboxfield',
+                                                                itemId: 'chkSalesAnalysisByTon3',
+                                                                fieldLabel: 'Yield Adjustment',
+                                                                labelWidth: 160
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        ]
                                     }
                                 ]
                             }
