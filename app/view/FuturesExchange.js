@@ -32,9 +32,9 @@ Ext.define('Inventory.view.FuturesExchange', {
     viewModel: {
         type: 'futuresexchange'
     },
-    height: 385,
+    height: 390,
     hidden: false,
-    maxHeight: 385,
+    maxHeight: 390,
     minHeight: 385,
     minWidth: 475,
     width: 475,
@@ -176,7 +176,7 @@ Ext.define('Inventory.view.FuturesExchange', {
                         },
                         {
                             xtype: 'container',
-                            height: 55,
+                            height: 58,
                             margin: '0 0 5 0 ',
                             layout: 'hbox',
                             items: [
@@ -206,7 +206,7 @@ Ext.define('Inventory.view.FuturesExchange', {
                                 {
                                     xtype: 'textareafield',
                                     flex: 1,
-                                    height: 55,
+                                    height: 58,
                                     itemId: 'txtAddress',
                                     hideLabel: true,
                                     labelWidth: 0,

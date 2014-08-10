@@ -32,9 +32,9 @@ Ext.define('Inventory.view.Manufacturer', {
     viewModel: {
         type: 'manufacturer'
     },
-    height: 450,
+    height: 455,
     hidden: false,
-    minHeight: 450,
+    minHeight: 455,
     minWidth: 500,
     width: 500,
     layout: 'fit',
@@ -175,7 +175,7 @@ Ext.define('Inventory.view.Manufacturer', {
                         },
                         {
                             xtype: 'container',
-                            height: 55,
+                            height: 59,
                             margin: '0 0 5 0 ',
                             layout: 'hbox',
                             items: [
@@ -205,13 +205,10 @@ Ext.define('Inventory.view.Manufacturer', {
                                 {
                                     xtype: 'textareafield',
                                     flex: 1,
-                                    height: 55,
+                                    height: 58,
                                     itemId: 'txtAddress',
                                     hideLabel: true,
-                                    labelWidth: 0,
-                                    name: 'strAddress',
-                                    enforceMaxLength: true,
-                                    maxLength: 65
+                                    labelWidth: 0
                                 }
                             ]
                         },

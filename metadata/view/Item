@@ -393,6 +393,7 @@
                                                     "userConfig": {
                                                         "container|align": "stretch",
                                                         "designer|displayName": "container",
+                                                        "height": 22,
                                                         "layout": "hbox",
                                                         "layout|flex": null,
                                                         "layout|margins": null,
@@ -458,10 +459,10 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Description",
-                                                        "height": null,
+                                                        "height": 62,
                                                         "itemId": "txtDescription",
                                                         "labelWidth": 95,
-                                                        "layout|flex": 1,
+                                                        "layout|flex": null,
                                                         "layout|margins": null,
                                                         "padding": null
                                                     },
@@ -477,9 +478,10 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "POS Description",
+                                                        "height": 62,
                                                         "itemId": "txtPosDescription",
                                                         "labelWidth": 95,
-                                                        "layout|flex": 1,
+                                                        "layout|flex": null,
                                                         "layout|margins": null,
                                                         "padding": null
                                                     },

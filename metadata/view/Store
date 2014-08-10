@@ -424,7 +424,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "designer|displayName": "container",
-                                                "height": 55,
+                                                "height": 58,
                                                 "layout": "hbox",
                                                 "layout|flex": null,
                                                 "layout|margins": null,
@@ -503,7 +503,7 @@
                                                     "userConfig": {
                                                         "enforceMaxLength": true,
                                                         "fieldLabel": null,
-                                                        "height": 55,
+                                                        "height": 58,
                                                         "hideLabel": true,
                                                         "itemId": "txtAddress",
                                                         "labelWidth": 0,
@@ -973,7 +973,9 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "container|align": "stretch",
                                         "designer|displayName": "container",
+                                        "layout": "vbox",
                                         "layout|flex": 1
                                     },
                                     "name": "MyContainer90",

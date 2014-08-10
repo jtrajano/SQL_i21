@@ -217,7 +217,7 @@ Ext.define('Inventory.view.Store', {
                                                     },
                                                     {
                                                         xtype: 'container',
-                                                        height: 55,
+                                                        height: 58,
                                                         margin: '0 0 5 0 ',
                                                         layout: 'hbox',
                                                         items: [
@@ -247,7 +247,7 @@ Ext.define('Inventory.view.Store', {
                                                             {
                                                                 xtype: 'textareafield',
                                                                 flex: 1,
-                                                                height: 55,
+                                                                height: 58,
                                                                 itemId: 'txtAddress',
                                                                 hideLabel: true,
                                                                 labelWidth: 0,
@@ -481,7 +481,11 @@ Ext.define('Inventory.view.Store', {
                                             },
                                             {
                                                 xtype: 'container',
-                                                flex: 1
+                                                flex: 1,
+                                                layout: {
+                                                    type: 'vbox',
+                                                    align: 'stretch'
+                                                }
                                             }
                                         ]
                                     },
