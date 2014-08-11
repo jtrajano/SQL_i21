@@ -562,3 +562,12 @@ GO
 	DELETE FROM tblSMMasterMenu
 	WHERE strMenuName = 'Customer Portal User Configuration' AND strModuleName = 'Customer Portal' AND strType = 'Screen'
 GO
+	DECLARE @intParent INT
+	SELECT @intParent = intMenuID FROM tblSMMasterMenu
+	WHERE strMenuName = 'Reports'
+	AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu Main 
+							WHERE strMenuName = 'Tank Management' AND intParentMenuID = 0)
+							
+	IF NOT EXISTS(SELECT * FROM tblSMMasterMenu WHERE strMenuName = 'Device Lease Detail' AND strCommand = 'Device Lease Detail' AND strType = 'Report' AND strModuleName = 'Tank Management' AND intParentMenuID = @intParent)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Device Lease Detail', N'Tank Management', @intParent, N'Device Lease Detail', N'Report', N'Device Lease Detail', N'small-report', 0, 0, 0, 1, 0, 1)
+GO
