@@ -141,8 +141,8 @@ BEGIN
 			CASE WHEN (glhst_dr_cr_ind='C' OR glhst_dr_cr_ind IS NULL) THEN glhst_amt ELSE 0 END
 		END AS Credit,		
 		0 AS CreditRate,																					-- credit rate
-		CASE WHEN glhst_units>0 THEN glhst_units ELSE 0 END AS DebitUnits,
-		CASE WHEN glhst_units<0 THEN glhst_units*-1 ELSE 0 END AS CreditUnits,
+		CASE WHEN glhst_units < 0 THEN (glhst_units * -1) ELSE 0 END AS DebitUnits,
+		CASE WHEN glhst_units > 0 THEN glhst_units ELSE 0 END AS CreditUnits,		
 		glhst_ref AS strDescription,
 		NULL AS intCurrencyId,
 		0 AS dblUnitsInlbs,
