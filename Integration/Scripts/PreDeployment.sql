@@ -61,6 +61,7 @@
 :r ..\dbo\Views\vyuCPAgcrdMst.sql
 :r ..\dbo\Views\vyuCPGAContractHistory.sql
 :r ..\dbo\Views\vyuCPGAContractOption.sql
+:r ..\dbo\Views\vyuECCFCardTransaction.sql
 
 -- TANK MANAGEMENT
 :r ..\dbo\Views\vyuTMOriginOption.sql
