@@ -4,7 +4,7 @@
     [ysnDefault]       BIT           NULL,
     [intConcurrencyId] INT           DEFAULT ((1)) NOT NULL,
     CONSTRAINT [PK_tblTMWorkStatus] PRIMARY KEY CLUSTERED ([intWorkStatusID] ASC),
-    CONSTRAINT [IX_tblTMWorkStatusType] UNIQUE NONCLUSTERED ([strWorkStatus] ASC)
+    CONSTRAINT [UQ_tblTMWorkStatusType_strWorkStatus] UNIQUE NONCLUSTERED ([strWorkStatus] ASC)
 );
 
 
