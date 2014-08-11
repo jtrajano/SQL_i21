@@ -125,12 +125,22 @@ BEGIN
 		CONVERT(int,1) AS intJournalId,
 		glhst_trans_dt,
 		tblGLAccount.intAccountId,
-		CASE WHEN glhst_dr_cr_ind='D' THEN glhst_amt ELSE 0 END AS Debit,									-- use debit indicator to show debit column.
-		0 AS DebitRate,																						-- debit rate
-		CASE WHEN (glhst_dr_cr_ind='C' OR glhst_dr_cr_ind IS NULL) THEN glhst_amt ELSE 0 END AS Credit,
+		CASE WHEN glhst_correcting = 'Y' THEN
+			CASE WHEN glhst_amt >= 0 THEN CASE WHEN glhst_dr_cr_ind = 'D' THEN glhst_amt ELSE 0 END
+			ELSE CASE WHEN (glhst_dr_cr_ind='C' OR glhst_dr_cr_ind IS NULL) THEN (glhst_amt * -1) ELSE 0 END END
+		ELSE
+			CASE WHEN glhst_dr_cr_ind = 'D' THEN glhst_amt ELSE 0 END
+		END AS Debit,
+		0 AS DebitRate,																						-- debit rate		
+		CASE WHEN glhst_correcting = 'Y' THEN
+			CASE WHEN glhst_amt >= 0 THEN CASE WHEN (glhst_dr_cr_ind='C' OR glhst_dr_cr_ind IS NULL) THEN glhst_amt ELSE 0 END
+			ELSE CASE WHEN glhst_dr_cr_ind = 'D' THEN (glhst_amt * -1) ELSE 0 END END
+		ELSE
+			CASE WHEN (glhst_dr_cr_ind='C' OR glhst_dr_cr_ind IS NULL) THEN glhst_amt ELSE 0 END
+		END AS Credit,		
 		0 AS CreditRate,																					-- credit rate
-		CASE WHEN glhst_units>0 THEN glhst_units ELSE 0 END AS DebitUnits,
-		CASE WHEN glhst_units<0 THEN glhst_units*-1 ELSE 0 END AS CreditUnits,
+		CASE WHEN glhst_units < 0 THEN (glhst_units * -1) ELSE 0 END AS DebitUnits,
+		CASE WHEN glhst_units > 0 THEN glhst_units ELSE 0 END AS CreditUnits,
 		glhst_ref AS strDescription,
 		NULL AS intCurrencyId,
 		0 AS dblUnitsInlbs,
