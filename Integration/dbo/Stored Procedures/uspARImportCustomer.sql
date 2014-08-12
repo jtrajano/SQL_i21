@@ -535,7 +535,7 @@ END
 IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1
 BEGIN
 EXEC(
-	'CREATE PROCEDURE uspARImportCustomer
+		'CREATE PROCEDURE uspARImportCustomer
 	@CustomerId NVARCHAR(50) = NULL,
 	@Update BIT = 0,
 	@Total INT = 0 OUTPUT
@@ -614,7 +614,6 @@ EXEC(
 			ptcus_last_name,
 			ptcus_first_name,
 			ptcus_comment,
-			--agcus_1099_name,
 			--Contact,
 			ptcus_contact,
 			ptcus_phone,
@@ -631,9 +630,7 @@ EXEC(
 			ptcus_co_per_ind_cp,
 			ptcus_credit_limit,
 			ptcus_sales_tax_id,
-			--ptcus_dflt_currency,
 			ptcus_active_yn,
-			--ptcus_req_po_yn,
 			ptcus_prt_stmnt_dtl_yn,
 			ptcus_stmt_fmt,
 			ptcus_crd_stop_days,
@@ -644,7 +641,7 @@ EXEC(
 			ptcus_budget_amt,
 			ptcus_budget_beg_mm,
 			ptcus_budget_end_mm
-			--agcus_dpa_cnt,
+			--agcus_dpa_cnt
 			--agcus_dpa_rev_dt,
 			--agcus_gb_rcpt_no,
 			--agcus_ckoff_exempt_yn,
@@ -662,7 +659,7 @@ EXEC(
 			ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,1,25) ELSE SUBSTRING(Ent.strName, 1, (CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  -1 ELSE 25 END)) END),'''') AS strLastName,
 			ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,26,50) ELSE SUBSTRING(Ent.strName,(CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  + 2 ELSE 50 END),50) END),'''') AS strFirsName,
 			Ent.strInternalNotes ,
-			Ent.str1099Name,
+			--Ent.str1099Name,
 			--Contact
 			(SELECT strName FROM tblEntity WHERE intEntityId = Con.intEntityId) AS strContactName,
 			Con.strPhone,
@@ -679,9 +676,7 @@ EXEC(
 			(CASE WHEN Cus.strType = ''Company'' THEN ''C'' ELSE ''P'' END) AS strType,
 			Cus.dblCreditLimit,
 			Cus.strTaxNumber,
-			Cus.strCurrency,
 			(CASE WHEN Cus.ysnActive = 1 THEN ''Y'' ELSE ''N'' END) AS ysnActive,
-			(CASE WHEN Cus.ysnPORequired = 1 THEN ''Y'' ELSE ''N'' END) AS ysnPORequired,
 			(CASE WHEN Cus.ysnStatementDetail = 1 THEN ''Y'' ELSE ''N'' END) AS ysnStatementDetail,
 			Cus.strStatementFormat,
 			Cus.intCreditStopDays,
@@ -691,17 +686,17 @@ EXEC(
 			(CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN ''Y'' ELSE ''N'' END) AS ysnApplyPrepaidTax,
 			Cus.dblBudgetAmountForBudgetBilling,
 			Cus.strBudgetBillingBeginMonth,
-			Cus.strBudgetBillingEndMonth,
-			Cus.strDPAContract,				
-			CONVERT(int,''20'' + CONVERT(nvarchar,Cus.dtmDPADate,12)),					
-			Cus.strGBReceiptNumber,			
-			(CASE WHEN Cus.ysnCheckoffExempt = 1 THEN ''Y'' ELSE ''N'' END) as ysnCheckoffExempt,			
-			(CASE WHEN Cus.ysnVoluntaryCheckoff = 1 THEN ''Y'' ELSE ''N'' END) as ysnVoluntaryCheckoff,		
-			Cus.strCheckoffState,			
-			(CASE WHEN Cus.ysnMarketAgreementSigned = 1 THEN ''Y'' ELSE ''N'' END) as ysnMarketAgreementSigned,	
-			Cus.intMarketZoneId,			
-			(CASE WHEN Cus.ysnHoldBatchGrainPayment = 1 THEN ''Y'' ELSE ''N'' END) as ysnHoldBatchGrainPayment,	
-			(CASE WHEN Cus.ysnFederalWithholding = 1 THEN ''Y'' ELSE ''N'' END) as ysnFederalWithholding
+			Cus.strBudgetBillingEndMonth
+			--Cus.strDPAContract,				
+			--CONVERT(int,''20'' + CONVERT(nvarchar,Cus.dtmDPADate,12)),					
+			--Cus.strGBReceiptNumber,			
+			--(CASE WHEN Cus.ysnCheckoffExempt = 1 THEN ''Y'' ELSE ''N'' END) as ysnCheckoffExempt,			
+			--(CASE WHEN Cus.ysnVoluntaryCheckoff = 1 THEN ''Y'' ELSE ''N'' END) as ysnVoluntaryCheckoff,		
+			--Cus.strCheckoffState,			
+			--(CASE WHEN Cus.ysnMarketAgreementSigned = 1 THEN ''Y'' ELSE ''N'' END) as ysnMarketAgreementSigned,	
+			--Cus.intMarketZoneId,			
+			--(CASE WHEN Cus.ysnHoldBatchGrainPayment = 1 THEN ''Y'' ELSE ''N'' END) as ysnHoldBatchGrainPayment,	
+			--(CASE WHEN Cus.ysnFederalWithholding = 1 THEN ''Y'' ELSE ''N'' END) as ysnFederalWithholding
 			FROM tblEntity Ent
 			INNER JOIN tblARCustomer Cus ON Ent.intEntityId = Cus.intEntityId
 			INNER JOIN tblARCustomerToContact CustToCon ON Cus.intDefaultContactId = CustToCon.intARCustomerToContactId
@@ -1057,5 +1052,6 @@ EXEC(
 	BEGIN
 		SELECT @Total = COUNT(ptcus_cus_no) from tblARTempCustomer
 	END'
+
 )
 END
