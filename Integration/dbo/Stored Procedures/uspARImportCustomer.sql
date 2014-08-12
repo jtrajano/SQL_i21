@@ -75,8 +75,8 @@ EXEC(
 			agcus_ga_wthhld_yn = CASE WHEN Cus.ysnFederalWithholding = 1 THEN ''Y'' ELSE ''N'' END	
 		FROM tblEntity Ent
 			INNER JOIN tblARCustomer Cus ON Ent.intEntityId = Cus.intEntityId
-			INNER JOIN tblEntityToContact EntToCon ON Cus.intDefaultContactId = EntToCon.intEntityToContactId
-			INNER JOIN tblEntityContact Con ON EntToCon.intContactId = Con.intEntityId
+			INNER JOIN tblARCustomerToContact CustToCon ON Cus.intDefaultContactId = CustToCon.intARCustomerToContactId
+			INNER JOIN tblEntityContact Con ON CustToCon.intContactId = Con.intContactId
 			INNER JOIN tblEntityLocation Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId
 			WHERE strCustomerNumber = @CustomerId AND agcus_key = @CustomerId
 		END
@@ -177,8 +177,8 @@ EXEC(
 			(CASE WHEN Cus.ysnFederalWithholding = 1 THEN ''Y'' ELSE ''N'' END) as ysnFederalWithholding
 			FROM tblEntity Ent
 			INNER JOIN tblARCustomer Cus ON Ent.intEntityId = Cus.intEntityId
-			INNER JOIN tblEntityToContact EntToCon ON Cus.intDefaultContactId = EntToCon.intEntityToContactId
-			INNER JOIN tblEntityContact Con ON EntToCon.intContactId = Con.intEntityId
+			INNER JOIN tblARCustomerToContact CusToCon ON Cus.intDefaultContactId = CusToCon.intARCustomerToContactId
+			INNER JOIN tblEntityContact Con ON CusToCon.intContactId = Con.intContactId
 			INNER JOIN tblEntityLocation Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId
 			WHERE strCustomerNumber = @CustomerId
 		
@@ -187,7 +187,7 @@ EXEC(
 	END
 
 	--================================================
-	--     ONE TIME ACCOUNT SYNCHRONIZATION	
+	--     ONE TIME CUSTOMER SYNCHRONIZATION	
 	--================================================
 	IF(@Update = 0 AND @CustomerId IS NULL) 
 	BEGIN
@@ -199,33 +199,37 @@ EXEC(
 
 		--Entity
 		DECLARE @strName			NVARCHAR (MAX)
+		DECLARE	@strEmail           NVARCHAR (MAX) 
 		DECLARE	@strWebsite			NVARCHAR (MAX)
 		DECLARE	@strInternalNotes	NVARCHAR (MAX)
 		DECLARE @str1099Name        NVARCHAR (100) 
 		DECLARE @ysnPrint1099       BIT     
-		DECLARE @str1099Type       NVARCHAR (100) 
+		DECLARE @str1099Type		NVARCHAR (100) 
 		DECLARE @dtmW9Signed		DATETIME
 		DECLARE	@str1099Form        NVARCHAR (MAX) 
 		DECLARE @strFederalTaxId    NVARCHAR (MAX) 
+		DECLARE @imgPhoto			varbinary(MAX)
+
 
 		--Contacts
+		DECLARE @intContactId		INT
 		DECLARE	@strTitle           NVARCHAR (MAX) 
 		DECLARE	@strContactName     NVARCHAR (MAX) 
 		DECLARE	@strDepartment      NVARCHAR (MAX) 
 		DECLARE	@strMobile          NVARCHAR (MAX) 
 		DECLARE	@strPhone           NVARCHAR (MAX) 
 		DECLARE	@strPhone2          NVARCHAR (MAX) 
-		DECLARE	@strEmail           NVARCHAR (MAX) 
 		DECLARE	@strEmail2          NVARCHAR (MAX) 
 		DECLARE	@strFax             NVARCHAR (MAX) 
 		DECLARE	@strNotes           NVARCHAR (MAX) 
-		DECLARE	@strContactMethod   NVARCHAR (MAX) 
-		DECLARE	@strPassword        NVARCHAR (MAX) 
-		DECLARE	@strUserType        NVARCHAR (MAX) 
+		DECLARE	@strContactMethod   NVARCHAR (MAX)
 		DECLARE	@strTimezone        NVARCHAR (MAX) 
+		
+		
+		--Customer To Contact
+		DECLARE	@strUserType        NVARCHAR (MAX) 
 		DECLARE @ysnPortalAccess	BIT
-		DECLARE @imgContactPhoto	varbinary(MAX)
-
+		
 		--Locations
 		DECLARE	@strLocationName     NVARCHAR (50) 
 		DECLARE	@strLocationContactName      NVARCHAR (MAX)
@@ -241,7 +245,8 @@ EXEC(
 		DECLARE	@intWarehouseId      INT          
 	
 		--Customer
-		DECLARE @intEntityId				INT            
+		DECLARE @intEntityId				INT
+		DECLARE @intCustomerId				INT
 		DECLARE @strCustomerNumber			NVARCHAR(15)    
 		DECLARE @strType					NVARCHAR(MAX)
 		DECLARE @dblCreditLimit				NUMERIC(18,6)
@@ -263,6 +268,7 @@ EXEC(
 		DECLARE @dblBudgetAmountForBudgetBilling NUMERIC(18,6)
 		DECLARE @strBudgetBillingBeginMonth	NVARCHAR(50)
 		DECLARE @strBudgetBillingEndMonth	NVARCHAR(50)
+		
 		--Grain Tab
 		DECLARE @strDPAContract				NVARCHAR(50)
 		DECLARE @dtmDPADate					DATETIME
@@ -293,6 +299,7 @@ EXEC(
 			SELECT TOP 1
 				--Entity
 				@strName = CASE WHEN agcus_co_per_ind_cp = ''C'' THEN agcus_last_name + agcus_first_name WHEN agcus_co_per_ind_cp = ''P'' THEN RTRIM(LTRIM(agcus_last_name)) + '', '' + RTRIM(LTRIM(agcus_first_name))END,
+				@strEmail   = '''',
 				@strWebsite = '''',
 				@strInternalNotes = agcus_comments,
 				@ysnPrint1099   = 0,--To Map
@@ -301,6 +308,7 @@ EXEC(
 				@str1099Type	= '''',
 				@strFederalTaxId	= NULL, --To Map
 				@dtmW9Signed	= NULL, --To Map,
+				@imgPhoto = NULL,
 
 				--Contacts
 				@strTitle = '''',
@@ -309,16 +317,15 @@ EXEC(
 				@strMobile     = NULL,
 				@strPhone      = agcus_phone,
 				@strPhone2     = agcus_phone2,
-				@strEmail      = NULL,
 				@strEmail2     = NULL,
 				@strFax        = NULL,
 				@strNotes      = NULL,
 				@strContactMethod = NULL,
-				@strPassword = NULL,
-				@strUserType = NULL,
 				@strTimezone = NULL,
+				
+				@strUserType = NULL,
 				@ysnPortalAccess = NULL,
-				@imgContactPhoto = NULL,
+				
 
 				--Locations
 				@strLocationName = @strName,
@@ -371,44 +378,12 @@ EXEC(
 			WHERE agcus_key = @originCustomer
 			
 			--INSERT Entity record for Customer
-			INSERT [dbo].[tblEntity]	([strName],[strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed])
-			VALUES						(@strName, '''', @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed)
+			INSERT [dbo].[tblEntity]	([strName],[strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed],[imgPhoto])
+			VALUES						(@strName, @strEmail, @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed, @imgPhoto)
 
 			DECLARE @EntityId INT
 			SET @EntityId = SCOPE_IDENTITY()
-
-			--INSERT ENTITY record for Contact
-			IF(@strContactName IS NOT NULL)
-			BEGIN
-				INSERT [dbo].[tblEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes])
-				VALUES					 (@strContactName, '''', @strWebsite, @strInternalNotes)
-			END
-
-			DECLARE @ContactEntityId INT
-			--Create contact record only if there is contact for customer
-			IF(@strContactName IS NOT NULL)
-			BEGIN
-				SET @ContactEntityId = SCOPE_IDENTITY()
-		
-				INSERT [dbo].[tblEntityContact] ([intEntityId], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail], [strEmail2], [strFax], [strNotes])
-				VALUES							 (@ContactEntityId, @strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail, @strEmail2, @strFax, @strNotes)
-			END
-		
-			--INSERT into Location
-			INSERT [dbo].[tblEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTaxCodeId], [intTermsId], [intWarehouseId])
-			VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intShipViaId, @intTaxCodeId, @intTermsId, @intWarehouseId)
-
-			DECLARE @EntityLocationId INT
-			SET @EntityLocationId = SCOPE_IDENTITY()
-		
-			 
-			 --INSERT into tblEntityToContact
-			INSERT [dbo].[tblEntityToContact] ([intEntityId],[intContactId],[intLocationId])
-			VALUES							  (@EntityId, @ContactEntityId, @EntityLocationId)
-		
-			DECLARE @EntityToContactId INT
-			SET @EntityToContactId = SCOPE_IDENTITY()
-		
+			
 			--INSERT into Customer
 			INSERT [dbo].[tblARCustomer](
 			[intEntityId], 
@@ -449,8 +424,8 @@ EXEC(
 			[ysnFederalWithholding])
 			VALUES						
 			(@EntityId,
-			 @EntityLocationId, 
-			 @EntityToContactId, 
+			 NULL, 
+			 NULL, 
 			 @strCustomerNumber,		
 			 @strType,			
 			 @dblCreditLimit,
@@ -483,9 +458,51 @@ EXEC(
 			 @intMarketZoneId,			
 			 @ysnHoldBatchGrainPayment,	
 			 @ysnFederalWithholding)
+			 
+			 --Get intCustomerId
+			 SELECT @intCustomerId = intCustomerId FROM tblARCustomer WHERE intEntityId = @EntityId
 	
-		
 
+			--INSERT ENTITY record for Contact
+			IF(@strContactName IS NOT NULL)
+			BEGIN
+				INSERT [dbo].[tblEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes])
+				VALUES					 (@strContactName, @strEmail, @strWebsite, @strInternalNotes)
+			END
+
+			DECLARE @ContactEntityId INT
+			--Create contact record only if there is contact for customer
+			IF(@strContactName IS NOT NULL)
+			BEGIN
+				SET @ContactEntityId = SCOPE_IDENTITY()
+		
+				INSERT [dbo].[tblEntityContact] ([intEntityId], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
+				VALUES							 (@ContactEntityId, @strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
+				
+				--Get intContactId
+				SELECT @intContactId = intContactId FROM tblEntityContact WHERE intEntityId = @ContactEntityId
+			END
+		
+			--INSERT into Location
+			INSERT [dbo].[tblEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTaxCodeId], [intTermsId], [intWarehouseId])
+			VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intShipViaId, @intTaxCodeId, @intTermsId, @intWarehouseId)
+
+			DECLARE @EntityLocationId INT
+			SET @EntityLocationId = SCOPE_IDENTITY()
+		
+			 
+			 --INSERT into tblARCustomerToContact
+			INSERT [dbo].[tblARCustomerToContact] ([intCustomerId],[intContactId],[intEntityLocationId])
+			VALUES							  (@intCustomerId, @intContactId, @EntityLocationId)
+		
+			DECLARE @CustomerToContactId INT
+			SET @CustomerToContactId = SCOPE_IDENTITY()
+			
+			UPDATE tblARCustomer 
+			SET intDefaultContactId = @CustomerToContactId, 
+				intDefaultLocationId = @EntityLocationId
+			WHERE intEntityId = @EntityId 
+		
 			IF(@@ERROR <> 0) 
 			BEGIN
 				PRINT @@ERROR;
@@ -585,8 +602,8 @@ EXEC(
 			--agcus_ga_wthhld_yn = CASE WHEN Cus.ysnFederalWithholding = 1 THEN ''Y'' ELSE ''N'' END	
 		FROM tblEntity Ent
 			INNER JOIN tblARCustomer Cus ON Ent.intEntityId = Cus.intEntityId
-			INNER JOIN tblEntityToContact EntToCon ON Cus.intDefaultContactId = EntToCon.intEntityToContactId
-			INNER JOIN tblEntityContact Con ON EntToCon.intContactId = Con.intEntityId
+			INNER JOIN tblARCustomerToContact CustToCon ON Cus.intDefaultContactId = CustToCon.intARCustomerToContactId
+			INNER JOIN tblEntityContact Con ON CustToCon.intContactId = Con.intContactId
 			INNER JOIN tblEntityLocation Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId
 			WHERE strCustomerNumber = @CustomerId AND ptcus_cus_no = @CustomerId
 		END
@@ -687,8 +704,8 @@ EXEC(
 			(CASE WHEN Cus.ysnFederalWithholding = 1 THEN ''Y'' ELSE ''N'' END) as ysnFederalWithholding
 			FROM tblEntity Ent
 			INNER JOIN tblARCustomer Cus ON Ent.intEntityId = Cus.intEntityId
-			INNER JOIN tblEntityToContact EntToCon ON Cus.intDefaultContactId = EntToCon.intEntityToContactId
-			INNER JOIN tblEntityContact Con ON EntToCon.intContactId = Con.intEntityId
+			INNER JOIN tblARCustomerToContact CustToCon ON Cus.intDefaultContactId = CustToCon.intARCustomerToContactId
+			INNER JOIN tblEntityContact Con ON CustToCon.intContactId = Con.intContactId
 			INNER JOIN tblEntityLocation Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId
 			WHERE strCustomerNumber = @CustomerId
 		
@@ -697,7 +714,7 @@ EXEC(
 	END
 
 	--================================================
-	--     ONE TIME ACCOUNT SYNCHRONIZATION	
+	--     ONE TIME CUSTOMER SYNCHRONIZATION	
 	--================================================
 	IF(@Update = 0 AND @CustomerId IS NULL) 
 	BEGIN
@@ -709,32 +726,35 @@ EXEC(
 
 		--Entity
 		DECLARE @strName			NVARCHAR (MAX)
+		DECLARE	@strEmail           NVARCHAR (MAX) 
 		DECLARE	@strWebsite			NVARCHAR (MAX)
 		DECLARE	@strInternalNotes	NVARCHAR (MAX)
 		DECLARE @str1099Name        NVARCHAR (100) 
 		DECLARE @ysnPrint1099       BIT     
-		DECLARE @str1099Type       NVARCHAR (100) 
+		DECLARE @str1099Type		NVARCHAR (100) 
 		DECLARE @dtmW9Signed		DATETIME
 		DECLARE	@str1099Form        NVARCHAR (MAX) 
-		DECLARE @strFederalTaxId    NVARCHAR (MAX) 
+		DECLARE @strFederalTaxId    NVARCHAR (MAX)
+		DECLARE @imgPhoto			varbinary(MAX) 
 
 		--Contacts
+		DECLARE @intContactId		INT
 		DECLARE	@strTitle           NVARCHAR (MAX) 
 		DECLARE	@strContactName     NVARCHAR (MAX) 
 		DECLARE	@strDepartment      NVARCHAR (MAX) 
 		DECLARE	@strMobile          NVARCHAR (MAX) 
 		DECLARE	@strPhone           NVARCHAR (MAX) 
-		DECLARE	@strPhone2          NVARCHAR (MAX) 
-		DECLARE	@strEmail           NVARCHAR (MAX) 
+		DECLARE	@strPhone2          NVARCHAR (MAX)
 		DECLARE	@strEmail2          NVARCHAR (MAX) 
 		DECLARE	@strFax             NVARCHAR (MAX) 
 		DECLARE	@strNotes           NVARCHAR (MAX) 
 		DECLARE	@strContactMethod   NVARCHAR (MAX) 
-		DECLARE	@strPassword        NVARCHAR (MAX) 
-		DECLARE	@strUserType        NVARCHAR (MAX) 
-		DECLARE	@strTimezone        NVARCHAR (MAX) 
+		DECLARE	@strTimezone        NVARCHAR (MAX)
+		
+		--Customer To Contact
+		DECLARE	@strUserType        NVARCHAR (MAX)  
 		DECLARE @ysnPortalAccess	BIT
-		DECLARE @imgContactPhoto	varbinary(MAX)
+		
 
 		--Locations
 		DECLARE	@strLocationName     NVARCHAR (50) 
@@ -751,7 +771,8 @@ EXEC(
 		DECLARE	@intWarehouseId      INT          
 	
 		--Customer
-		DECLARE @intEntityId				INT            
+		DECLARE @intEntityId				INT
+		DECLARE @intCustomerId				INT            
 		DECLARE @strCustomerNumber			NVARCHAR(15)    
 		DECLARE @strType					NVARCHAR(MAX)
 		DECLARE @dblCreditLimit				NUMERIC(18,6)
@@ -811,6 +832,7 @@ EXEC(
 				@str1099Type	= '''',
 				@strFederalTaxId	= NULL, --To Map
 				@dtmW9Signed	= NULL, --To Map,
+				@imgPhoto = NULL,
 
 				--Contacts
 				@strTitle = '''',
@@ -824,11 +846,10 @@ EXEC(
 				@strFax        = NULL,
 				@strNotes      = NULL,
 				@strContactMethod = NULL,
-				@strPassword = NULL,
-				@strUserType = NULL,
 				@strTimezone = NULL,
+				
+				@strUserType = NULL,
 				@ysnPortalAccess = NULL,
-				@imgContactPhoto = NULL,
 
 				--Locations
 				@strLocationName = @strName,
@@ -881,44 +902,12 @@ EXEC(
 			WHERE ptcus_cus_no = @originCustomer
 			
 			--INSERT Entity record for Customer
-			INSERT [dbo].[tblEntity]	([strName],[strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed])
-			VALUES						(@strName, '''', @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed)
+			INSERT [dbo].[tblEntity]	([strName],[strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed],[imgPhoto])
+			VALUES						(@strName, @strEmail, @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed, @imgPhoto)
 
 			DECLARE @EntityId INT
 			SET @EntityId = SCOPE_IDENTITY()
-
-			--INSERT ENTITY record for Contact
-			IF(@strContactName IS NOT NULL)
-			BEGIN
-				INSERT [dbo].[tblEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes])
-				VALUES					 (@strContactName, '''', @strWebsite, @strInternalNotes)
-			END
-
-			DECLARE @ContactEntityId INT
-			--Create contact record only if there is contact for customer
-			IF(@strContactName IS NOT NULL)
-			BEGIN
-				SET @ContactEntityId = SCOPE_IDENTITY()
-		
-				INSERT [dbo].[tblEntityContact] ([intEntityId], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail], [strEmail2], [strFax], [strNotes])
-				VALUES							 (@ContactEntityId, @strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail, @strEmail2, @strFax, @strNotes)
-			END
-		
-			--INSERT into Location
-			INSERT [dbo].[tblEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTaxCodeId], [intTermsId], [intWarehouseId])
-			VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intShipViaId, @intTaxCodeId, @intTermsId, @intWarehouseId)
-
-			DECLARE @EntityLocationId INT
-			SET @EntityLocationId = SCOPE_IDENTITY()
-		
-			 
-			 --INSERT into tblEntityToContact
-			INSERT [dbo].[tblEntityToContact] ([intEntityId],[intContactId],[intLocationId])
-			VALUES							  (@EntityId, @ContactEntityId, @EntityLocationId)
-		
-			DECLARE @EntityToContactId INT
-			SET @EntityToContactId = SCOPE_IDENTITY()
-		
+			
 			--INSERT into Customer
 			INSERT [dbo].[tblARCustomer](
 			[intEntityId], 
@@ -960,8 +949,8 @@ EXEC(
 			)
 			VALUES						
 			(@EntityId,
-			 @EntityLocationId, 
-			 @EntityToContactId, 
+			 NULL, 
+			 NULL, 
 			 @strCustomerNumber,		
 			 @strType,			
 			 @dblCreditLimit,
@@ -995,6 +984,50 @@ EXEC(
 			 --@ysnHoldBatchGrainPayment,	
 			 --@ysnFederalWithholding
 			 )
+			 
+			 --Get intCustomerId
+			 SELECT @intCustomerId = intCustomerId FROM tblARCustomer WHERE intEntityId = @EntityId
+	
+
+			--INSERT ENTITY record for Contact
+			IF(@strContactName IS NOT NULL)
+			BEGIN
+				INSERT [dbo].[tblEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes])
+				VALUES					 (@strContactName, @strEmail, @strWebsite, @strInternalNotes)
+			END
+
+			DECLARE @ContactEntityId INT
+			--Create contact record only if there is contact for customer
+			IF(@strContactName IS NOT NULL)
+			BEGIN
+				SET @ContactEntityId = SCOPE_IDENTITY()
+		
+				INSERT [dbo].[tblEntityContact] ([intEntityId], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
+				VALUES							 (@ContactEntityId, @strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
+				
+				--Get intContactId
+				SELECT @intContactId = intContactId FROM tblEntityContact WHERE intEntityId = @ContactEntityId
+			END
+		
+			--INSERT into Location
+			INSERT [dbo].[tblEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTaxCodeId], [intTermsId], [intWarehouseId])
+			VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intShipViaId, @intTaxCodeId, @intTermsId, @intWarehouseId)
+
+			DECLARE @EntityLocationId INT
+			SET @EntityLocationId = SCOPE_IDENTITY()
+		
+			 
+			 --INSERT into tblARCustomerToContact
+			INSERT [dbo].[tblARCustomerToContact] ([intCustomerId],[intContactId],[intEntityLocationId])
+			VALUES							  (@intCustomerId, @intContactId, @EntityLocationId)
+		
+			DECLARE @CustomerToContactId INT
+			SET @CustomerToContactId = SCOPE_IDENTITY()
+			
+			UPDATE tblARCustomer 
+			SET intDefaultContactId = @CustomerToContactId, 
+				intDefaultLocationId = @EntityLocationId
+			WHERE intEntityId = @EntityId 
 	
 		
 
