@@ -205,13 +205,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 																		THEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency')
 																		ELSE (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'USD') END))
 		SET @dblDailyRate		= (SELECT TOP 1 dblDailyRate FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId);
-			
-		WITH Units 
-		AS 
-		(
-			SELECT	A.[dblLbsPerUnit], B.[intAccountId] 
-			FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
-		)
+				
 		INSERT INTO tblGLDetail (
 			 [strTransactionId]
 			,[intAccountId]
@@ -248,8 +242,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[dblCredit]			= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
 											WHEN [dblCredit] < 0 THEN 0
 											ELSE [dblCredit] END	
-			,[dblDebitUnit]			= ISNULL(A.[dblDebitUnit], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
-			,[dblCreditUnit]		= ISNULL(A.[dblCreditUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
+			,[dblDebitUnit]			= ISNULL(A.[dblDebitUnit], 0)
+			,[dblCreditUnit]		= ISNULL(A.[dblCreditUnit], 0)
 			,[dtmDate]				= ISNULL(B.[dtmDate], GETDATE())
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
@@ -283,9 +277,8 @@ ELSE
 		WITH Accounts 
 		AS 
 		(
-			SELECT A.[strAccountId], A.[intAccountId], A.[intAccountGroupId], B.[strAccountGroup], C.[dblLbsPerUnit]
+			SELECT A.[strAccountId], A.[intAccountId], A.[intAccountGroupId], B.[strAccountGroup]
 			FROM tblGLAccount A LEFT JOIN tblGLAccountGroup B on A.intAccountGroupId = B.intAccountGroupId
-								LEFT JOIN tblGLAccountUnit  C on C.intAccountUnitId  = A.intAccountUnitId
 		)
 		INSERT INTO tblGLPostRecap (
 			 [strTransactionId]
@@ -326,8 +319,8 @@ ELSE
 			,[dblCredit]			= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
 											WHEN [dblCredit] < 0 THEN 0
 											ELSE [dblCredit] END	
-			,[dblDebitUnit]			= ISNULL(A.[dblDebitUnit], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Accounts WHERE [intAccountId] = A.[intAccountId]), 0)
-			,[dblCreditUnit]		= ISNULL(A.[dblCreditUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Accounts WHERE [intAccountId] = A.[intAccountId]), 0)
+			,[dblDebitUnit]			= ISNULL(A.[dblDebitUnit], 0)
+			,[dblCreditUnit]		= ISNULL(A.[dblCreditUnit], 0)
 			,[dtmDate]				= ISNULL(B.[dtmDate], GETDATE())
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
@@ -398,13 +391,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 --=====================================================================================================================================
 -- 	UPDATE GL SUMMARY RECORDS
 ---------------------------------------------------------------------------------------------------------------------------------------
-WITH Units
-AS 
-(
-	SELECT	A.[dblLbsPerUnit], B.[intAccountId] 
-	FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
-),
-JournalDetail
+WITH JournalDetail
 AS
 (
 	SELECT   [dtmDate]			= ISNULL(B.[dtmDate], GETDATE())
@@ -415,8 +402,8 @@ AS
 			,[dblCredit]		= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
 										WHEN [dblCredit] < 0 THEN 0
 										ELSE [dblCredit] END	
-			,[dblDebitUnit]		= ISNULL([dblDebitUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
-			,[dblCreditUnit]	= ISNULL([dblCreditUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
+			,[dblDebitUnit]		= ISNULL([dblDebitUnit], 0)
+			,[dblCreditUnit]	= ISNULL([dblCreditUnit], 0)
 	FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B ON A.[intJournalId] = B.[intJournalId]
 	WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM #tmpValidJournals)
 )
@@ -447,13 +434,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 --=====================================================================================================================================
 -- 	INSERT TO GL SUMMARY RECORDS
 ---------------------------------------------------------------------------------------------------------------------------------------
-WITH Units
-AS 
-(
-	SELECT	A.[dblLbsPerUnit], B.[intAccountId] 
-	FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
-),
-JournalDetail 
+WITH JournalDetail 
 AS
 (
 	SELECT [dtmDate]		= ISNULL(B.[dtmDate], GETDATE())
@@ -464,8 +445,8 @@ AS
 		,[dblCredit]		= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
 									WHEN [dblCredit] < 0 THEN 0
 									ELSE [dblCredit] END	
-		,[dblDebitUnit]		= ISNULL(A.[dblDebitUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
-		,[dblCreditUnit]	= ISNULL(A.[dblCreditUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
+		,[dblDebitUnit]		= ISNULL(A.[dblDebitUnit], 0)
+		,[dblCreditUnit]	= ISNULL(A.[dblCreditUnit], 0)
 	FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B ON A.[intJournalId] = B.[intJournalId]
 	WHERE B.intJournalId IN (SELECT [intJournalId] FROM #tmpValidJournals)
 )

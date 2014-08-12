@@ -350,9 +350,8 @@ BEGIN
 	WITH Accounts 
 	AS 
 	(
-		SELECT A.[strAccountId], A.[intAccountId], A.[intAccountGroupId], B.[strAccountGroup], C.[dblLbsPerUnit]
+		SELECT A.[strAccountId], A.[intAccountId], A.[intAccountGroupId], B.[strAccountGroup]
 		FROM tblGLAccount A LEFT JOIN tblGLAccountGroup B on A.intAccountGroupId = B.intAccountGroupId
-							LEFT JOIN tblGLAccountUnit  C on C.intAccountUnitId  = A.intAccountUnitId
 	)
 	INSERT INTO tblGLPostRecap (
 		 [strTransactionId]
@@ -442,12 +441,6 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 --=====================================================================================================================================
 -- 	INSERT TO GL SUMMARY RECORDS
 ---------------------------------------------------------------------------------------------------------------------------------------
-WITH Units
-AS 
-(
-	SELECT	A.[dblLbsPerUnit], B.[intAccountId] 
-	FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
-)
 INSERT INTO tblGLSummary (
 	 [intAccountId]
 	,[dtmDate]

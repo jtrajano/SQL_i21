@@ -113,9 +113,8 @@ ELSE
 		WITH Accounts 
 		AS 
 		(
-			SELECT A.[strAccountId], A.[intAccountId], A.[intAccountGroupId], B.[strAccountGroup], C.[dblLbsPerUnit]
+			SELECT A.[strAccountId], A.[intAccountId], A.[intAccountGroupId], B.[strAccountGroup]
 			FROM tblGLAccount A LEFT JOIN tblGLAccountGroup B on A.intAccountGroupId = B.intAccountGroupId
-								LEFT JOIN tblGLAccountUnit  C on C.intAccountUnitId  = A.intAccountUnitId
 		)
 		INSERT INTO tblGLPostRecap (
 			 [strTransactionId]
@@ -149,8 +148,8 @@ ELSE
 			,[dtmTransactionDate]	
 			,[dblDebit]				= [dblCredit]
 			,[dblCredit]			= [dblDebit]	
-			,[dblDebitUnit]			= [dblDebitUnit]
-			,[dblCreditUnit]		= [dblCreditUnit]
+			,[dblDebitUnit]			= [dblCreditUnit]
+			,[dblCreditUnit]		= [dblDebitUnit]
 			,[dtmDate]				
 			,[ysnIsUnposted]		
 			,[intConcurrencyId]		
