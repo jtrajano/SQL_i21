@@ -2,12 +2,14 @@
 AS  
 SELECT  
 intUserSecurityMenuId = Permission.intCustomerPortalPermissionId,  
-intUserSecurityId = Permission.intContactId,  
+intUserSecurityId = Contact.intEntityId,  
 intMenuId = Menu.intCustomerPortalMenuId,  
 intParentMenuId = (CASE WHEN Menu.intCustomerPortalParentMenuId = 0 THEN 0 ELSE (
 					SELECT intCustomerPortalPermissionId
 					FROM tblARCustomerPortalPermission
-					WHERE tblARCustomerPortalPermission.intContactId = Permission.intContactId
+					LEFT JOIN tblARCustomerToContact  ON tblARCustomerPortalPermission.intARCustomerToContactId = tblARCustomerToContact.intARCustomerToContactId
+					LEFT JOIN tblEntityContact  ON tblARCustomerToContact.intContactId = tblEntityContact.intContactId
+					WHERE tblEntityContact.intContactId = Contact.intContactId
 					
 					AND	tblARCustomerPortalPermission.intCustomerPortalMenuId = Menu.intCustomerPortalParentMenuId
 					) END),
@@ -26,3 +28,5 @@ ysnIsLegacy = CAST(0 AS BIT),
 intSort = Menu.intCustomerPortalMenuId  
 FROM tblARCustomerPortalMenu Menu  
 LEFT JOIN tblARCustomerPortalPermission Permission ON Menu.intCustomerPortalMenuId = Permission.intCustomerPortalMenuId
+LEFT JOIN tblARCustomerToContact CustomerToContact ON Permission.intARCustomerToContactId = CustomerToContact.intARCustomerToContactId
+LEFT JOIN tblEntityContact Contact ON CustomerToContact.intContactId = Contact.intContactId

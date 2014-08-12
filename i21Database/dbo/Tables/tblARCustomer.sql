@@ -66,16 +66,19 @@
     [dtmDeceasedDate]                 DATETIME        NULL,
     [ysnSubjectToFWT]                 BIT             DEFAULT ((0)) NOT NULL,
     [intConcurrencyId]                INT             CONSTRAINT [DF_tblARCustomer_intConcurrencyId] DEFAULT ((0)) NOT NULL,
-    CONSTRAINT [PK_dbo.tblARCustomer] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
+    CONSTRAINT [PK_tblARCustomer] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
     CONSTRAINT [FK_tblARCustomer_tblARAccountStatus] FOREIGN KEY ([intAccountStatusId]) REFERENCES [dbo].[tblARAccountStatus] ([intAccountStatusId]),
+    --CONSTRAINT [FK_tblARCustomer_tblARCustomerToContact] FOREIGN KEY ([intDefaultContactId]) REFERENCES [dbo].[tblARCustomerToContact] ([intARCustomerToContactId]) ON DELETE SET NULL,
     CONSTRAINT [FK_tblARCustomer_tblARMarketZone] FOREIGN KEY ([intMarketZoneId]) REFERENCES [dbo].[tblARMarketZone] ([intMarketZoneId]),
     CONSTRAINT [FK_tblARCustomer_tblARSalesperson] FOREIGN KEY ([intSalespersonId]) REFERENCES [dbo].[tblARSalesperson] ([intEntityId]),
     CONSTRAINT [FK_tblARCustomer_tblARServiceCharge] FOREIGN KEY ([intServiceChargeId]) REFERENCES [dbo].[tblARServiceCharge] ([intServiceChargeId]),
     CONSTRAINT [FK_tblARCustomer_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
     CONSTRAINT [FK_tblARCustomer_tblEntityLocation] FOREIGN KEY ([intDefaultLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId]),
-    CONSTRAINT [FK_tblARCustomer_tblEntityToContact] FOREIGN KEY ([intDefaultContactId]) REFERENCES [dbo].[tblEntityToContact] ([intEntityToContactId]),
+    CONSTRAINT [UK_intCustomerId] UNIQUE NONCLUSTERED ([intCustomerId] ASC),
     CONSTRAINT [UKstrCusomerNumber] UNIQUE NONCLUSTERED ([strCustomerNumber] ASC)
 );
+
+
 
 
 
@@ -90,6 +93,5 @@ CREATE UNIQUE NONCLUSTERED INDEX [IX_tblARCustomer]
 
 
 GO
-CREATE NONCLUSTERED INDEX [IX_intEntityId]
-    ON [dbo].[tblARCustomer]([intEntityId] ASC);
+
 

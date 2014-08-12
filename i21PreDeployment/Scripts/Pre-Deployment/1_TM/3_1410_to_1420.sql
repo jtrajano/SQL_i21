@@ -32,20 +32,26 @@ BEGIN
 	/*update null data*/
 	IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'ysnPrintARBalance' AND OBJECT_ID = OBJECT_ID(N'tblTMSite')) 
     BEGIN
-        UPDATE tblTMSite SET ysnPrintARBalance = 0 
-		WHERE ysnPrintARBalance IS NULL
+		EXEC('
+			UPDATE tblTMSite SET ysnPrintARBalance = 0 
+			WHERE ysnPrintARBalance IS NULL
+		')
     END
 
 	IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'ysnPrintDeliveryTicket' AND OBJECT_ID = OBJECT_ID(N'tblTMSite')) 
     BEGIN
-        UPDATE tblTMSite SET ysnPrintDeliveryTicket = 0 
-		WHERE ysnPrintDeliveryTicket IS NULL
+		EXEC('
+			UPDATE tblTMSite SET ysnPrintDeliveryTicket = 0 
+			WHERE ysnPrintDeliveryTicket IS NULL
+			')
     END
 
 	IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'ysnDeliveryTicketPrinted' AND OBJECT_ID = OBJECT_ID(N'tblTMSite')) 
     BEGIN
-        UPDATE tblTMSite SET ysnDeliveryTicketPrinted = 0 
-		WHERE ysnDeliveryTicketPrinted IS NULL
+		EXEC('
+			UPDATE tblTMSite SET ysnDeliveryTicketPrinted = 0 
+			WHERE ysnDeliveryTicketPrinted IS NULL
+			')
     END
 
 END
