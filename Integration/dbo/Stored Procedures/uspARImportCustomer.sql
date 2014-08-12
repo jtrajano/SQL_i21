@@ -492,8 +492,8 @@ EXEC(
 		
 			 
 			 --INSERT into tblARCustomerToContact
-			INSERT [dbo].[tblARCustomerToContact] ([intCustomerId],[intContactId],[intEntityLocationId])
-			VALUES							  (@intCustomerId, @intContactId, @EntityLocationId)
+			INSERT [dbo].[tblARCustomerToContact] ([intCustomerId],[intContactId],[intEntityLocationId],[strUserType],[ysnPortalAccess])
+			VALUES							  (@intCustomerId, @intContactId, @EntityLocationId, ''User'', 0)
 		
 			DECLARE @CustomerToContactId INT
 			SET @CustomerToContactId = SCOPE_IDENTITY()
@@ -1018,8 +1018,8 @@ EXEC(
 		
 			 
 			 --INSERT into tblARCustomerToContact
-			INSERT [dbo].[tblARCustomerToContact] ([intCustomerId],[intContactId],[intEntityLocationId])
-			VALUES							  (@intCustomerId, @intContactId, @EntityLocationId)
+			INSERT [dbo].[tblARCustomerToContact] ([intCustomerId],[intContactId],[intEntityLocationId],[strUserType],[ysnPortalAccess])
+			VALUES							  (@intCustomerId, @intContactId, @EntityLocationId, ''User'', 0)
 		
 			DECLARE @CustomerToContactId INT
 			SET @CustomerToContactId = SCOPE_IDENTITY()
