@@ -212,6 +212,19 @@ BEGIN
 	GOTO Post_Rollback
 END 
 
+-- Check if transaction is under check printing. 
+IF EXISTS (
+		SELECT	TOP 1 1 
+		FROM	tblCMBankTransaction a INNER JOIN tblCMCheckPrintJobSpool b
+					ON a.intBankAccountId = b.intBankAccountId
+					AND a.intTransactionId = b.intTransactionId
+		WHERE	a.intTransactionId = @intTransactionId 
+	)
+BEGIN
+	-- Unable to unpost while check printing is in progress.
+	RAISERROR(50026, 11, 1)
+	GOTO Post_Rollback
+END 
 
 --=====================================================================================================================================
 -- 	PROCESSING OF THE G/L ENTRIES. 

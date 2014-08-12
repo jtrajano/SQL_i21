@@ -5,7 +5,7 @@ GO
 	DECLARE @GL_intAccountStructureId_Primary AS INT
 	SET @GL_intAccountStructureId_Primary = (SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = N'Primary')
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Accounts Payable' AND strType = N'Primary')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Accounts Payable' AND strType = N'Primary') AND NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccount)
 	BEGIN
 		INSERT [dbo].[tblGLCOATemplate] ([strAccountTemplateName], [strType], [intConcurrencyId]) VALUES (N'Accounts Payable', N'Primary', 1)
 		
@@ -33,7 +33,7 @@ GO
 	DECLARE @GL_intAccountStructureId_Primary AS INT
 	SET @GL_intAccountStructureId_Primary = (SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = N'Primary')
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'AG Accounting' AND strType = N'Primary')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'AG Accounting' AND strType = N'Primary') AND NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccount)
 	BEGIN
 		INSERT [dbo].[tblGLCOATemplate] ([strAccountTemplateName], [strType], [intConcurrencyId]) VALUES (N'AG Accounting', N'Primary', 1)
 		
@@ -80,7 +80,7 @@ GO
 	DECLARE @GL_intAccountStructureId_Primary AS INT
 	SET @GL_intAccountStructureId_Primary = (SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = N'Primary')
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'C-Store' AND strType = N'Primary')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'C-Store' AND strType = N'Primary') AND NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccount)
 	BEGIN
 		INSERT [dbo].[tblGLCOATemplate] ([strAccountTemplateName], [strType], [intConcurrencyId]) VALUES (N'C-Store', N'Primary', 1)
 		
@@ -111,7 +111,7 @@ GO
 	DECLARE @GL_intAccountStructureId_Primary AS INT
 	SET @GL_intAccountStructureId_Primary = (SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = N'Primary')
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Fixed Asset' AND strType = N'Primary')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Fixed Asset' AND strType = N'Primary') AND NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccount)
 	BEGIN
 		INSERT [dbo].[tblGLCOATemplate] ([strAccountTemplateName], [strType], [intConcurrencyId]) VALUES (N'Fixed Asset', N'Primary', 1)
 		
@@ -139,7 +139,7 @@ GO
 	DECLARE @GL_intAccountStructureId_Primary AS INT
 	SET @GL_intAccountStructureId_Primary = (SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = N'Primary')
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Grain' AND strType = N'Primary')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Grain' AND strType = N'Primary') AND NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccount)
 	BEGIN
 		INSERT [dbo].[tblGLCOATemplate] ([strAccountTemplateName], [strType], [intConcurrencyId]) VALUES (N'Grain', N'Primary', 1)
 		
@@ -201,7 +201,7 @@ GO
 	DECLARE @GL_intAccountStructureId_Primary AS INT
 	SET @GL_intAccountStructureId_Primary = (SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = N'Primary')
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Payroll' AND strType = N'Primary')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Payroll' AND strType = N'Primary') AND NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccount)
 	BEGIN
 		INSERT [dbo].[tblGLCOATemplate] ([strAccountTemplateName], [strType], [intConcurrencyId]) VALUES (N'Payroll', N'Primary', 1)
 		
@@ -232,7 +232,7 @@ GO
 	DECLARE @GL_intAccountStructureId_Primary AS INT
 	SET @GL_intAccountStructureId_Primary = (SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = N'Primary')
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Petrolac' AND strType = N'Primary')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Petrolac' AND strType = N'Primary') AND NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccount)
 	BEGIN
 		INSERT [dbo].[tblGLCOATemplate] ([strAccountTemplateName], [strType], [intConcurrencyId]) VALUES (N'Petrolac', N'Primary', 1)
 		

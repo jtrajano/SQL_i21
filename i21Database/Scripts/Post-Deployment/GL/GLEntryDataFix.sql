@@ -38,32 +38,32 @@ UPDATE tblGLAccount SET ysnSystem = 0 WHERE ysnSystem is NULL
 
 GO
 	PRINT N'END Normalize ysnSystem'
-	PRINT N'BEGIN Repopulate GL Summary'
+	--PRINT N'BEGIN Repopulate GL Summary'
 GO
 
-DELETE [dbo].[tblGLSummary]
+--DELETE [dbo].[tblGLSummary]
 
-INSERT INTO tblGLSummary
-SELECT
-	 intAccountId
-	,dtmDate
-	,SUM(ISNULL(dblDebit,0)) as dblDebit
-	,SUM(ISNULL(dblCredit,0)) as dblCredit
-	,SUM(ISNULL(dblDebitUnit,0)) as dblDebitUnit
-	,SUM(ISNULL(dblCreditUnit,0)) as dblCreditUnit
-	,strCode
-	,0 as intConcurrencyId
-FROM
-	tblGLDetail
-WHERE ysnIsUnposted = 0	
-GROUP BY intAccountId, dtmDate, strCode
+--INSERT INTO tblGLSummary
+--SELECT
+--	 intAccountId
+--	,dtmDate
+--	,SUM(ISNULL(dblDebit,0)) as dblDebit
+--	,SUM(ISNULL(dblCredit,0)) as dblCredit
+--	,SUM(ISNULL(dblDebitUnit,0)) as dblDebitUnit
+--	,SUM(ISNULL(dblCreditUnit,0)) as dblCreditUnit
+--	,strCode
+--	,0 as intConcurrencyId
+--FROM
+--	tblGLDetail
+--WHERE ysnIsUnposted = 0	
+--GROUP BY intAccountId, dtmDate, strCode
 
 --=====================================================================================================================================
 -- 	Normalize strJournalType 
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 GO
-	PRINT N'END Repopulate GL Summary'
+	--PRINT N'END Repopulate GL Summary'
 	PRINT N'BEGIN Normalize strJournalType'
 GO
 
