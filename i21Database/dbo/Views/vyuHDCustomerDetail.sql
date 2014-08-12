@@ -1,6 +1,23 @@
 ﻿CREATE VIEW [dbo].[vyuHDCustomerDetail]
 	AS 
-	SELECT 1 as a
+	select
+			strCustomer = ''
+			,strFullName = ''
+			,strPhone = ''
+			,strTimeZone = ''
+			,strLocation = ''
+			,strSLAPlan = ''
+			,strReplyDue = ''
+			,intUserId = 0
+			,strName = ''
+			,strUserName = ''
+			,strFirstName = ''
+			,strMiddleName = ''
+			,strLastName = ''
+			,strEmail = ''
+			,ysni21User = 0
+			,imgPhoto = null
+			,intConcurrencyId = 1
 		--select
 		--	strCustomer = cus.strCustomerNumber
 		--	,strFullName = ec.strEmail
