@@ -195,7 +195,7 @@ SET @dblRetained =
 			WHERE	C.strAccountType IN ('Expense','Cost of Goods Sold')
 					AND FLOOR(CAST(CAST(dtmDate AS DATETIME) AS NUMERIC(18,6))) BETWEEN  FLOOR(CAST(@dtmDateFrom AS NUMERIC(18,6))) AND FLOOR(CAST(@dtmDateTo AS NUMERIC(18,6)))
 					AND ysnIsUnposted = 0
-		), 0)  
+		), 0)
 )
 
 SET @dblRetainedDebit = (SELECT SUM(dblDebit) as dblDebit FROM #ConstructGL)
@@ -384,9 +384,8 @@ BEGIN
 	WITH Accounts 
 	AS 
 	(
-		SELECT A.[strAccountId], A.[intAccountId], A.[intAccountGroupId], B.[strAccountGroup], C.[dblLbsPerUnit]
+		SELECT A.[strAccountId], A.[intAccountId], A.[intAccountGroupId], B.[strAccountGroup]
 		FROM tblGLAccount A LEFT JOIN tblGLAccountGroup B on A.intAccountGroupId = B.intAccountGroupId
-							LEFT JOIN tblGLAccountUnit  C on C.intAccountUnitId  = A.intAccountUnitId
 	)
 	INSERT INTO tblGLPostRecap (
 		 [strTransactionId]
@@ -480,12 +479,6 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 --=====================================================================================================================================
 -- 	INSERT TO GL SUMMARY RECORDS
 ---------------------------------------------------------------------------------------------------------------------------------------
-WITH Units
-AS 
-(
-	SELECT	A.[dblLbsPerUnit], B.[intAccountId] 
-	FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
-)
 INSERT INTO tblGLSummary (
 	 [intAccountId]
 	,[dtmDate]
