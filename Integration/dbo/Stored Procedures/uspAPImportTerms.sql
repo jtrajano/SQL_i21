@@ -176,7 +176,8 @@ BEGIN
 			0	
 	END
 	
-	SELECT * INTO tblAPTempTerms FROM tblSMTerm WHERE intTermID in (SELECT intTermID FROM @tblAPTempTerms)
+	INSERT INTO tblAPTermsImported 
+	SELECT intTermID FROM @tblAPTempTerms
 
 	--SELECT * FROM tblSMTerm
 	--ROLLBACK TRANSACTION 

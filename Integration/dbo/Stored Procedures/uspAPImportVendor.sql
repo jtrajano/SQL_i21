@@ -19,10 +19,11 @@ AS
 IF(OBJECT_ID(''dbo.tblAPTempVendor'') IS NULL)
 BEGIN
 	EXEC(''
-	SELECT ssvnd_vnd_no INTO tblAPTempVendor FROM ssvndmst
+	INSERT INTO tblAPImportedVendors
+	SELECT ssvnd_vnd_no FROM ssvndmst
 	-- WHERE ssvndmst.ssvnd_vnd_no IS NULL
 
-	INSERT INTO tblAPTempVendor
+	INSERT INTO tblAPImportedVendors
 	SELECT DISTINCT A.apchk_vnd_no
 	FROM apchkmst A
 			WHERE A.apchk_vnd_no IN (

@@ -1,5 +1,7 @@
 ﻿GO
---THIS SCRIPT WILL REMOVE EXTRA SPACES ON EXISTING DATA OF VENDOR, THOSE WHO ALREADY DONE IMPORTING
+--This script will do the following.
+--1. Updating strName so that it will become Last Name first.
+--2. Removed extra spaces.
 
 --Make sure this will only run once.
 --dbo.fnTrim only exists after this script executed.

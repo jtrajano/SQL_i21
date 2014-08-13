@@ -124,6 +124,8 @@
     <None Include="dbo\Stored Procedures\uspARImportAccount.sql" />
     <None Include="dbo\Stored Procedures\uspARImportSalesperson.sql" />
     <None Include="dbo\Stored Procedures\uspARImportCustomer.sql" />
+    <None Include="Scripts\AP\TransferImportedTermsData.sql" />
+    <None Include="Scripts\AP\TransferImportedVendorData.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
@@ -188,6 +190,8 @@
     <Build Include="dbo\Stored Procedures\uspAPCreatePaymentFromOriginBill.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostOriginPayment_1.sql" />
     <None Include="dbo\Views\vyuECCFCardTransaction.sql" />
+    <Build Include="dbo\Tables\tblAPTermsImported.sql" />
+    <Build Include="dbo\Tables\tblAPImportedVendors.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -201,5 +205,8 @@
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPaptrxmst.sql" />
     <None Include="dbo\Stored Procedures\uspCMBankTransactionReversalOrigin.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="Integration.refactorlog" />
   </ItemGroup>
 </Project>
