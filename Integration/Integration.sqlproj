@@ -117,7 +117,6 @@
     <None Include="Integration.publish.xml" />
     <None Include="dbo\Stored Procedures\uspTMGetConsumptionWithoutGasCheck.sql" />
     <None Include="dbo\Stored Procedures\uspAPImportTerms.sql" />
-    <None Include="dbo\Stored Procedures\uspAPUpdateImportedBillTransactions.sql" />
     <None Include="Scripts\AP\FixVendorData.sql" />
     <None Include="Scripts\AP\FixBillData.sql" />
     <None Include="Scripts\AP\FixPaymentCMRecords.sql" />
@@ -188,7 +187,7 @@
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Stored Procedures\uspAPCreatePaymentFromOriginBill.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPPostOriginPayment_1.sql" />
+    <None Include="dbo\Stored Procedures\uspAPPostOriginPayment.sql" />
     <None Include="dbo\Views\vyuECCFCardTransaction.sql" />
     <Build Include="dbo\Tables\tblAPTermsImported.sql" />
     <Build Include="dbo\Tables\tblAPImportedVendors.sql" />

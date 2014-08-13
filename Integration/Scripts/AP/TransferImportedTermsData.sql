@@ -7,10 +7,12 @@ IF EXISTS (SELECT 1
                  WHERE TABLE_SCHEMA = 'dbo' 
                  AND TABLE_NAME = 'tblAPTempTerms')
 BEGIN
-
+	
+	EXEC('
 	INSERT INTO tblAPTermsImported
 	SELECT intTermID FROM tblAPTempTerms
 
 	DROP TABLE tblAPTempTerms
+	')
 
 END

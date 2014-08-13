@@ -8,9 +8,12 @@ IF EXISTS (SELECT 1
                  AND TABLE_NAME = 'tblAPTempVendor')
 BEGIN
 
+	EXEC('
 	INSERT INTO tblAPImportedVendors
 	SELECT * FROM tblAPTempVendor
 
 	DROP TABLE tblAPTempVendor
+	DROP TABLE tblAPInvalidTransaction
+	')
 
 END
