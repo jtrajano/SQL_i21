@@ -514,7 +514,7 @@ GO
 	DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Export Hours Worked' AND strType = 'Screen' AND strModuleName = 'Help Desk' AND intParentMenuID = @intParent
 GO
 	UPDATE tblSMMasterMenu
-	SET strMenuName = 'Pay Bills Detail'
+	SET strMenuName = 'Pay Bill Detail'
 	WHERE strModuleName = 'Accounts Payable' AND strMenuName = 'Pay Bills' AND strType = 'Screen' AND strCommand = 'AccountsPayable.controller.PayBillsDetail'
 
 	UPDATE tblSMMasterMenu
