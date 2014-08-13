@@ -571,3 +571,12 @@ GO
 	IF NOT EXISTS(SELECT * FROM tblSMMasterMenu WHERE strMenuName = 'Device Lease Detail' AND strCommand = 'Device Lease Detail' AND strType = 'Report' AND strModuleName = 'Tank Management' AND intParentMenuID = @intParent)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Device Lease Detail', N'Tank Management', @intParent, N'Device Lease Detail', N'Report', N'Device Lease Detail', N'small-report', 0, 0, 0, 1, 0, 1)
 GO
+	DECLARE @intParent INT
+	SELECT @intParent = intMenuID FROM tblSMMasterMenu
+	WHERE strMenuName = 'Activities'
+	AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu Main 
+							WHERE strMenuName = 'Accounts Receivable' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 0)
+							
+	DELETE FROM tblSMMasterMenu WHERE intParentMenuID = @intParent
+	DELETE FROM tblSMMasterMenu WHERE intMenuID = @intParent
+GO
