@@ -25,9 +25,9 @@ Ext.define('Inventory.view.Category', {
         'Ext.form.Panel',
         'Ext.tab.Panel',
         'Ext.tab.Tab',
-        'Ext.form.field.Checkbox',
         'Ext.form.field.ComboBox',
         'Ext.form.field.Number',
+        'Ext.form.field.Checkbox',
         'Ext.grid.Panel',
         'Ext.grid.column.Column',
         'Ext.grid.View',
@@ -159,6 +159,96 @@ Ext.define('Inventory.view.Category', {
                                 activeTab: 0,
                                 plain: true,
                                 items: [
+                                    {
+                                        xtype: 'panel',
+                                        bodyPadding: 10,
+                                        title: 'Detail',
+                                        layout: {
+                                            type: 'vbox',
+                                            align: 'stretch'
+                                        },
+                                        items: [
+                                            {
+                                                xtype: 'container',
+                                                layout: {
+                                                    type: 'hbox',
+                                                    align: 'stretch'
+                                                },
+                                                items: [
+                                                    {
+                                                        xtype: 'container',
+                                                        flex: 1.1,
+                                                        margin: '0 5 0 0 ',
+                                                        layout: {
+                                                            type: 'vbox',
+                                                            align: 'stretch'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'textfield',
+                                                                itemId: 'txtCategoryCode',
+                                                                fieldLabel: 'Category Code',
+                                                                labelWidth: 110
+                                                            },
+                                                            {
+                                                                xtype: 'textfield',
+                                                                itemId: 'txtDescription',
+                                                                fieldLabel: 'Description',
+                                                                labelWidth: 110
+                                                            },
+                                                            {
+                                                                xtype: 'combobox',
+                                                                itemId: 'cboLineOfBusiness',
+                                                                fieldLabel: 'Line of Business',
+                                                                labelWidth: 110
+                                                            },
+                                                            {
+                                                                xtype: 'combobox',
+                                                                itemId: 'cboCatalogGroup',
+                                                                fieldLabel: 'Catalog Group',
+                                                                labelWidth: 110
+                                                            },
+                                                            {
+                                                                xtype: 'combobox',
+                                                                itemId: 'cboCostingMethod',
+                                                                fieldLabel: 'Costing Method',
+                                                                labelWidth: 110
+                                                            },
+                                                            {
+                                                                xtype: 'combobox',
+                                                                itemId: 'cboInventoryTracking',
+                                                                fieldLabel: 'Inventory Tracking',
+                                                                labelWidth: 110
+                                                            },
+                                                            {
+                                                                xtype: 'numberfield',
+                                                                itemId: 'txtStandardQty',
+                                                                maxWidth: 225,
+                                                                fieldLabel: 'Standard Qty',
+                                                                labelWidth: 110,
+                                                                hideTrigger: true
+                                                            },
+                                                            {
+                                                                xtype: 'combobox',
+                                                                itemId: 'cboStandardUom',
+                                                                fieldLabel: 'Standard UOM',
+                                                                labelWidth: 110
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        xtype: 'container',
+                                                        flex: 1,
+                                                        margin: '0 1 0 5',
+                                                        layout: {
+                                                            type: 'vbox',
+                                                            align: 'stretch'
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
                                     {
                                         xtype: 'panel',
                                         bodyPadding: 10,
@@ -672,28 +762,15 @@ Ext.define('Inventory.view.Category', {
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'numberfield',
-                                                                flex: 1,
-                                                                fieldLabel: 'Standard Qty',
-                                                                labelWidth: 160,
-                                                                hideTrigger: true
-                                                            },
-                                                            {
-                                                                xtype: 'combobox',
-                                                                flex: 1,
-                                                                fieldLabel: 'Standard UOM',
-                                                                labelWidth: 160,
-                                                                hideTrigger: true
-                                                            },
-                                                            {
                                                                 xtype: 'textfield',
-                                                                itemId: 'txtGlDivisionNumber',
+                                                                itemId: 'txtERPItemClass',
                                                                 fieldLabel: 'ERP Item Class',
                                                                 labelWidth: 160
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
                                                                 flex: 1,
+                                                                itemId: 'txtLifeTime',
                                                                 fieldLabel: 'Life Time (mins)',
                                                                 labelWidth: 160,
                                                                 hideTrigger: true
@@ -701,6 +778,7 @@ Ext.define('Inventory.view.Category', {
                                                             {
                                                                 xtype: 'numberfield',
                                                                 flex: 1,
+                                                                itemId: 'txtBOMItemShrinkage',
                                                                 fieldLabel: 'BOM Item Shrinkage',
                                                                 labelWidth: 160,
                                                                 hideTrigger: true
@@ -708,6 +786,7 @@ Ext.define('Inventory.view.Category', {
                                                             {
                                                                 xtype: 'numberfield',
                                                                 flex: 1,
+                                                                itemId: 'txtBOMItemUpperTolerance',
                                                                 fieldLabel: 'BOM Item Upper Tolerance',
                                                                 labelWidth: 160,
                                                                 hideTrigger: true
@@ -715,37 +794,38 @@ Ext.define('Inventory.view.Category', {
                                                             {
                                                                 xtype: 'numberfield',
                                                                 flex: 1,
+                                                                itemId: 'txtBOMItemLowerTolerance',
                                                                 fieldLabel: 'BOM Item Lower Tolerance',
                                                                 labelWidth: 160,
                                                                 hideTrigger: true
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
-                                                                itemId: 'chkSalesAnalysisByTon',
+                                                                itemId: 'chkScaled',
                                                                 fieldLabel: 'Scaled',
                                                                 labelWidth: 160
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
-                                                                itemId: 'chkSalesAnalysisByTon1',
+                                                                itemId: 'chkOutputItemMandatory',
                                                                 fieldLabel: 'Output Item Mandatory',
                                                                 labelWidth: 160
                                                             },
                                                             {
                                                                 xtype: 'textfield',
-                                                                itemId: 'txtGlDivisionNumber1',
+                                                                itemId: 'txtConsumptionMethod',
                                                                 fieldLabel: 'Consumption Method',
                                                                 labelWidth: 160
                                                             },
                                                             {
                                                                 xtype: 'textfield',
-                                                                itemId: 'txtGlDivisionNumber2',
+                                                                itemId: 'txtBOMItemType',
                                                                 fieldLabel: 'BOM Item Type',
                                                                 labelWidth: 160
                                                             },
                                                             {
                                                                 xtype: 'textfield',
-                                                                itemId: 'txtGlDivisionNumber3',
+                                                                itemId: 'txtShortName',
                                                                 fieldLabel: 'Short Name',
                                                                 labelWidth: 160
                                                             }
@@ -762,31 +842,31 @@ Ext.define('Inventory.view.Category', {
                                                         items: [
                                                             {
                                                                 xtype: 'textfield',
-                                                                itemId: 'txtGlDivisionNumber4',
+                                                                itemId: 'txtReceiptImage',
                                                                 fieldLabel: 'Receipt Image',
                                                                 labelWidth: 160
                                                             },
                                                             {
                                                                 xtype: 'textfield',
-                                                                itemId: 'txtGlDivisionNumber5',
+                                                                itemId: 'txtWIPImage',
                                                                 fieldLabel: 'WIP Image',
                                                                 labelWidth: 160
                                                             },
                                                             {
                                                                 xtype: 'textfield',
-                                                                itemId: 'txtGlDivisionNumber6',
+                                                                itemId: 'txtFGImage',
                                                                 fieldLabel: 'FG Image',
                                                                 labelWidth: 160
                                                             },
                                                             {
                                                                 xtype: 'textfield',
-                                                                itemId: 'txtGlDivisionNumber7',
+                                                                itemId: 'txtShipImage',
                                                                 fieldLabel: 'Ship Image',
                                                                 labelWidth: 160
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
-                                                                itemId: 'txtDefaultMinimumAge',
+                                                                itemId: 'txtLaborCost',
                                                                 maxWidth: 275,
                                                                 fieldLabel: 'Labor Cost',
                                                                 labelWidth: 160,
@@ -794,7 +874,7 @@ Ext.define('Inventory.view.Category', {
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
-                                                                itemId: 'txtDefaultMinimumAge1',
+                                                                itemId: 'txtOverHead',
                                                                 maxWidth: 275,
                                                                 fieldLabel: 'Over Head',
                                                                 labelWidth: 160,
@@ -802,7 +882,7 @@ Ext.define('Inventory.view.Category', {
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
-                                                                itemId: 'txtDefaultMinimumAge2',
+                                                                itemId: 'txtPercentage',
                                                                 maxWidth: 275,
                                                                 fieldLabel: 'Percentage',
                                                                 labelWidth: 160,
@@ -810,19 +890,19 @@ Ext.define('Inventory.view.Category', {
                                                             },
                                                             {
                                                                 xtype: 'textfield',
-                                                                itemId: 'txtGlDivisionNumber8',
+                                                                itemId: 'txtCostDistributionMethod',
                                                                 fieldLabel: 'Cost Distribution Method',
                                                                 labelWidth: 160
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
-                                                                itemId: 'chkSalesAnalysisByTon2',
+                                                                itemId: 'chkSellable',
                                                                 fieldLabel: 'Sellable',
                                                                 labelWidth: 160
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
-                                                                itemId: 'chkSalesAnalysisByTon3',
+                                                                itemId: 'chkYieldAdjustment',
                                                                 fieldLabel: 'Yield Adjustment',
                                                                 labelWidth: 160
                                                             }

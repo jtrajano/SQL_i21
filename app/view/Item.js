@@ -32,8 +32,8 @@ Ext.define('Inventory.view.Item', {
         'Ext.grid.Panel',
         'Ext.grid.column.Number',
         'Ext.grid.View',
-        'Ext.form.field.Checkbox',
         'Ext.selection.CheckboxModel',
+        'Ext.form.field.Checkbox',
         'Ext.grid.column.Date',
         'Ext.toolbar.Paging'
     ],
@@ -434,9 +434,105 @@ Ext.define('Inventory.view.Item', {
                                                 xtype: 'tabpanel',
                                                 flex: 1,
                                                 itemId: 'tabSetup',
-                                                activeTab: 0,
+                                                activeTab: 1,
                                                 plain: true,
                                                 items: [
+                                                    {
+                                                        xtype: 'panel',
+                                                        layout: 'fit',
+                                                        title: 'Location/Store',
+                                                        items: [
+                                                            {
+                                                                xtype: 'advancefiltergrid',
+                                                                itemId: 'grdLocationStore',
+                                                                margin: -1,
+                                                                dockedItems: [
+                                                                    {
+                                                                        xtype: 'toolbar',
+                                                                        dock: 'top',
+                                                                        itemId: 'tlbGridOptions',
+                                                                        layout: {
+                                                                            type: 'hbox',
+                                                                            padding: '0 0 0 1'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnAdd',
+                                                                                iconCls: 'small-add',
+                                                                                text: 'Add'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnEdit',
+                                                                                iconCls: 'small-edit',
+                                                                                text: 'Edit'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnDelete',
+                                                                                iconCls: 'small-delete',
+                                                                                text: 'Delete'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'tbseparator'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'filter'
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ],
+                                                                columns: [
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        dataIndex: 'string',
+                                                                        text: 'Location',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        dataIndex: 'string',
+                                                                        text: 'Store',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        width: 50,
+                                                                        dataIndex: 'string',
+                                                                        text: 'Row'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        width: 50,
+                                                                        dataIndex: 'string',
+                                                                        text: 'Bin'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        width: 100,
+                                                                        dataIndex: 'string',
+                                                                        text: 'Fuel Tank No.'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        width: 50,
+                                                                        dataIndex: 'string',
+                                                                        text: 'Min Age'
+                                                                    }
+                                                                ],
+                                                                viewConfig: {
+                                                                    itemId: 'grvLocationStore'
+                                                                },
+                                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                                    selType: 'checkboxmodel'
+                                                                })
+                                                            }
+                                                        ]
+                                                    },
                                                     {
                                                         xtype: 'panel',
                                                         title: 'Sales',
@@ -1287,102 +1383,6 @@ Ext.define('Inventory.view.Item', {
                                                                         ]
                                                                     }
                                                                 ]
-                                                            }
-                                                        ]
-                                                    },
-                                                    {
-                                                        xtype: 'panel',
-                                                        layout: 'fit',
-                                                        title: 'Location/Store',
-                                                        items: [
-                                                            {
-                                                                xtype: 'advancefiltergrid',
-                                                                itemId: 'grdLocationStore',
-                                                                margin: -1,
-                                                                dockedItems: [
-                                                                    {
-                                                                        xtype: 'toolbar',
-                                                                        dock: 'top',
-                                                                        itemId: 'tlbGridOptions',
-                                                                        layout: {
-                                                                            type: 'hbox',
-                                                                            padding: '0 0 0 1'
-                                                                        },
-                                                                        items: [
-                                                                            {
-                                                                                xtype: 'button',
-                                                                                tabIndex: -1,
-                                                                                itemId: 'btnAdd',
-                                                                                iconCls: 'small-add',
-                                                                                text: 'Add'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'button',
-                                                                                tabIndex: -1,
-                                                                                itemId: 'btnEdit',
-                                                                                iconCls: 'small-edit',
-                                                                                text: 'Edit'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'button',
-                                                                                tabIndex: -1,
-                                                                                itemId: 'btnDelete',
-                                                                                iconCls: 'small-delete',
-                                                                                text: 'Delete'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'tbseparator'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'filter'
-                                                                            }
-                                                                        ]
-                                                                    }
-                                                                ],
-                                                                columns: [
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        dataIndex: 'string',
-                                                                        text: 'Location',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        dataIndex: 'string',
-                                                                        text: 'Store',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        width: 50,
-                                                                        dataIndex: 'string',
-                                                                        text: 'Row'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        width: 50,
-                                                                        dataIndex: 'string',
-                                                                        text: 'Bin'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        width: 100,
-                                                                        dataIndex: 'string',
-                                                                        text: 'Fuel Tank No.'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        width: 50,
-                                                                        dataIndex: 'string',
-                                                                        text: 'Min Age'
-                                                                    }
-                                                                ],
-                                                                viewConfig: {
-                                                                    itemId: 'grvLocationStore'
-                                                                },
-                                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                                    selType: 'checkboxmodel'
-                                                                })
                                                             }
                                                         ]
                                                     },
