@@ -35,7 +35,7 @@
 			,strFullName = en.strEmail
 			,strPhone = ec.strPhone
 			,strMobile = ec.strMobile
-			,strTimeZone = ''
+			,strTimeZone = ec.strTimezone
 			,strLocation = el.strLocationName
 			,strSLAPlan = ''
 			,strReplyDue = ''
