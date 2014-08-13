@@ -26,7 +26,8 @@
     CONSTRAINT [PK_User] PRIMARY KEY CLUSTERED ([intUserSecurityID] ASC),
     CONSTRAINT [FK_UserSecurity_UserRole] FOREIGN KEY ([intUserRoleID]) REFERENCES [dbo].[tblSMUserRole] ([intUserRoleID]),
 	CONSTRAINT [FK_UserSecurity_Entity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
-	CONSTRAINT [FK_UserSecurity_CompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId])
+	CONSTRAINT [FK_UserSecurity_CompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]), 
+    CONSTRAINT [AK_tblSMUserSecurity_strUserName] UNIQUE ([strUserName])
 );
 
 
