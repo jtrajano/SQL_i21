@@ -600,16 +600,20 @@ BEGIN
 
 		-- Calling the stored procedure
 		EXEC dbo.uspCMBankTransactionReversal @userId, @isSuccessful OUTPUT
-		IF @isSuccessful = 0 GOTO Post_Rollback
 
-		--update payment record
+		--update payment record based on record from tblCMBankTransaction
 		UPDATE tblAPPayment
-			SET ysnPosted = 0
-			,ysnVoid = CASE WHEN A.ysnPrinted = 1 AND ISNULL(A.strPaymentInfo,'') <> '' THEN 1 ELSE 0 END
+			SET ysnVoid = CASE WHEN A.ysnPrinted = 1 AND ISNULL(A.strPaymentInfo,'') <> '' THEN 1 ELSE 0 END
 			,strPaymentInfo = CASE WHEN A.ysnPrinted = 1 AND ISNULL(A.strPaymentInfo,'') <> '' THEN B.strReferenceNo ELSE A.strPaymentInfo END
 		FROM tblAPPayment A 
 			INNER JOIN tblCMBankTransaction B
 				ON A.strPaymentRecordNum = B.strTransactionId
+		WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+
+		--update payment record
+		UPDATE tblAPPayment
+			SET ysnPosted= 0
+		FROM tblAPPayment A 
 		WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		--Insert Successfully unposted transactions.
@@ -622,6 +626,8 @@ BEGIN
 			A.intPaymentId
 		FROM tblAPPayment A
 		WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+
+		IF @@ERROR <> 0 OR @isSuccessful = 0 GOTO Post_Rollback;
 
 	END
 	ELSE
@@ -645,7 +651,8 @@ BEGIN
 		UPDATE tblAPBill
 			SET tblAPBill.dblAmountDue = B.dblAmountDue,
 				tblAPBill.ysnPaid = (CASE WHEN (B.dblAmountDue) = 0 THEN 1 ELSE 0 END),
-				tblAPBill.dtmDatePaid = (CASE WHEN (B.dblAmountDue) = 0 THEN A.dtmDatePaid ELSE NULL END)
+				tblAPBill.dtmDatePaid = (CASE WHEN (B.dblAmountDue) = 0 THEN A.dtmDatePaid ELSE NULL END),
+				tblAPBill.dblWithheld = B.dblWithheld
 		FROM tblAPPayment A
 					INNER JOIN tblAPPaymentDetail B 
 							ON A.intPaymentId = B.intPaymentId

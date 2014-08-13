@@ -61,6 +61,7 @@
 :r ..\dbo\Views\vyuCPAgcrdMst.sql
 :r ..\dbo\Views\vyuCPGAContractHistory.sql
 :r ..\dbo\Views\vyuCPGAContractOption.sql
+:r ..\dbo\Views\vyuECCFCardTransaction.sql
 
 -- TANK MANAGEMENT
 :r ..\dbo\Views\vyuTMOriginOption.sql
@@ -85,7 +86,7 @@
 
 :r "..\dbo\Functions\fnGetVendorLastName.sql"
 :r "..\dbo\Stored Procedures\uspAPImportBillTransactions.sql"
-:r "..\dbo\Stored Procedures\uspAPImportVendor.sql"
+--:r "..\dbo\Stored Procedures\uspAPImportVendor.sql"
 :r "..\dbo\Stored Procedures\uspAPImportTerms.sql"
 :r "..\dbo\Stored Procedures\uspAPUpdateImportedBillTransactions.sql"
 :r "..\Scripts\AP\FixPaymentCMRecords.sql"
@@ -95,5 +96,5 @@
 
 --ACCOUNTS RECEIVABLE
 --:r "..\dbo\Stored Procedures\uspARImportAccount.sql"
---:r "..\dbo\Stored Procedures\uspARImportCustomer.sql"
+:r "..\dbo\Stored Procedures\uspARImportCustomer.sql"
 --:r "..\dbo\Stored Procedures\uspARImportSalesperson.sql"

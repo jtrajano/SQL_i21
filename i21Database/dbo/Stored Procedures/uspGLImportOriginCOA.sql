@@ -35,6 +35,8 @@ BEGIN
 		SET @PrimaryLength = (SELECT MAX(LEN(glact_acct1_8)) glact_acct1_8 FROM glactmst)
 		SET @SegmentLength = (SELECT MAX(LEN(glact_acct9_16)) glact_acct9_16 FROM glactmst)	
 		
+		DELETE tblGLCOATemplateDetail
+		DELETE tblGLCOATemplate
 		DELETE tblGLAccountSegment
 		DELETE tblGLAccountStructure
 		
