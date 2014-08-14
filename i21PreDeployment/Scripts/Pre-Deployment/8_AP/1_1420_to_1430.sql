@@ -1,5 +1,7 @@
 ﻿--CHANGING strVendorId to intVendorId
 --BACK UP Bill Data
+GO
+
 IF COL_LENGTH('tblAPBill','strVendorId') IS NOT NULL
 BEGIN
 	PRINT('Backing up Vendor Bill Data')
@@ -19,6 +21,8 @@ BEGIN
 	')
 	PRINT('END Backing up Vendor Bill Data')
 END
+
+GO
 
 --BACK UP Payment Data
 IF COL_LENGTH('tblAPPayment','strVendorId') IS NOT NULL
@@ -42,61 +46,63 @@ BEGIN
 	PRINT('End Backing up Vendor Payment Data')
 END
 
+GO
+
 --Fix Terms Data Imported From FortBooks DB, strTerm should be unique
-IF EXISTS(SELECT 1 FROM tblSMTerm GROUP BY LOWER(strTerm) HAVING COUNT(*) > 1)
-BEGIN
+--IF EXISTS(SELECT 1 FROM tblSMTerm GROUP BY LOWER(strTerm) HAVING COUNT(*) > 1)
+--BEGIN
 
-	PRINT 'BEGIN UPDATE tblSMTerm FROM AP Module'
-	DECLARE @intTermsId INT,
-	@term NVARCHAR(200),
-	@hasDuplicate BIT
+--	PRINT 'BEGIN UPDATE tblSMTerm FROM AP Module'
+--	DECLARE @intTermsId INT,
+--	@term NVARCHAR(200),
+--	@hasDuplicate BIT
 	
-	SELECT * INTO #tmpTermsData FROM tblSMTerm
-	WHILE EXISTS(SELECT 1 FROM #tmpTermsData)
-	BEGIN
+--	SELECT * INTO #tmpTermsData FROM tblSMTerm
+--	WHILE EXISTS(SELECT 1 FROM #tmpTermsData)
+--	BEGIN
 
-		SELECT @intTermsId = intTermID, @term = strTerm FROM #tmpTermsData
+--		SELECT @intTermsId = intTermID, @term = strTerm FROM #tmpTermsData
 
-		--Check if the current term has duplicate
-		IF EXISTS(SELECT 1 FROM (SELECT LOWER(strTerm) Duplicate FROM tblSMTerm GROUP BY LOWER(strTerm) HAVING COUNT(*) > 1) DuplicateTerms WHERE Duplicate = LOWER(@term))
-		BEGIN
+--		--Check if the current term has duplicate
+--		IF EXISTS(SELECT 1 FROM (SELECT LOWER(strTerm) Duplicate FROM tblSMTerm GROUP BY LOWER(strTerm) HAVING COUNT(*) > 1) DuplicateTerms WHERE Duplicate = LOWER(@term))
+--		BEGIN
 
-			IF NOT EXISTS(SELECT 1 FROM tblSMTerm WHERE LOWER(strTerm) = @term AND intTermID IN (SELECT intTermsId FROM tblAPBill UNION SELECT intTermsId FROM tblEntityLocation))
-			BEGIN
-				--DELETE TOP 1 ONLY IF ANY OF THE DUPLICATE TERMS IS NOT BEING USED
-				DELETE TOP (1) FROM tblSMTerm
-				FROM tblSMTerm A
-				WHERE LOWER(A.strTerm) = @term
+--			IF NOT EXISTS(SELECT 1 FROM tblSMTerm WHERE LOWER(strTerm) = @term AND intTermID IN (SELECT intTermsId FROM tblAPBill UNION SELECT intTermsId FROM tblEntityLocation))
+--			BEGIN
+--				--DELETE TOP 1 ONLY IF ANY OF THE DUPLICATE TERMS IS NOT BEING USED
+--				DELETE TOP (1) FROM tblSMTerm
+--				FROM tblSMTerm A
+--				WHERE LOWER(A.strTerm) = @term
 
-			END
-			ELSE
-			BEGIN
+--			END
+--			ELSE
+--			BEGIN
 
-				--DELETE Duplicate Terms that is not using in Bill or Vendor
-				DELETE FROM tblSMTerm
-				FROM tblSMTerm A
-				WHERE LOWER(A.strTerm) = @term
-				AND intTermID NOT IN (
-					SELECT intTermsId FROM tblAPBill
-					UNION
-					SELECT intTermsId FROM tblEntityLocation
-				)
-			END
+--				--DELETE Duplicate Terms that is not using in Bill or Vendor
+--				DELETE FROM tblSMTerm
+--				FROM tblSMTerm A
+--				WHERE LOWER(A.strTerm) = @term
+--				AND intTermID NOT IN (
+--					SELECT intTermsId FROM tblAPBill
+--					UNION
+--					SELECT intTermsId FROM tblEntityLocation
+--				)
+--			END
 
-		END
+--		END
 
-		DELETE FROM #tmpTermsData WHERE intTermID = @intTermsId
+--		DELETE FROM #tmpTermsData WHERE intTermID = @intTermsId
 
-	END
+--	END
 
-	--Update the name of strTerm to be unique
-	UPDATE tblSMTerm
-	SET strTerm = dbo.fnTrim(A.strTerm) + ' - ' + CAST(A.intTermID AS NVARCHAR(20))
-	FROM tblSMTerm A
-	WHERE LOWER(A.strTerm) IN (
-		SELECT LOWER(strTerm) FROM tblSMTerm GROUP BY LOWER(strTerm) HAVING COUNT(*) > 1
-	)
+--	--Update the name of strTerm to be unique
+--	UPDATE tblSMTerm
+--	SET strTerm = dbo.fnTrim(A.strTerm) + ' - ' + CAST(A.intTermID AS NVARCHAR(20))
+--	FROM tblSMTerm A
+--	WHERE LOWER(A.strTerm) IN (
+--		SELECT LOWER(strTerm) FROM tblSMTerm GROUP BY LOWER(strTerm) HAVING COUNT(*) > 1
+--	)
 
-	PRINT 'END UPDATE tblSMTerm FROM AP Module'
+--	PRINT 'END UPDATE tblSMTerm FROM AP Module'
 
-END
+--END
