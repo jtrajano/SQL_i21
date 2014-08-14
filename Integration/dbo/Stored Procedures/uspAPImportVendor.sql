@@ -15,27 +15,6 @@ CREATE PROCEDURE [dbo].[uspAPImportVendor]
 
 AS
 
---make first a copy of ssvndmst. this will use to track all vendors already imported
-IF(OBJECT_ID(''dbo.tblAPTempVendor'') IS NULL)
-BEGIN
-	EXEC(''
-	INSERT INTO tblAPImportedVendors
-	SELECT ssvnd_vnd_no FROM ssvndmst
-	-- WHERE ssvndmst.ssvnd_vnd_no IS NULL
-
-	INSERT INTO tblAPImportedVendors
-	SELECT DISTINCT A.apchk_vnd_no
-	FROM apchkmst A
-			WHERE A.apchk_vnd_no IN (
-				SELECT
-				DISTINCT B.apivc_vnd_no
-				FROM apivcmst B
-				WHERE B.apivc_vnd_no NOT IN (SELECT ssvnd_vnd_no FROM ssvndmst)
-			)
-	'')
-
-END
-
 IF(@Update = 1 AND @VendorId IS NOT NULL)
 BEGIN
 
@@ -154,6 +133,9 @@ BEGIN
 		WHERE strVendorId = @VendorId
 	END
 
+	INSERT INTO tblAPImportedVendors
+	SELECT @VendorId
+
 RETURN;
 END
 
@@ -162,6 +144,27 @@ BEGIN
 	
 	--1 Time synchronization here
 	PRINT ''1 Time Vendor Synchronization''
+
+	--Make a copy of all imported vendor
+	
+	EXEC(''
+	INSERT INTO tblAPImportedVendors
+	SELECT ssvnd_vnd_no FROM ssvndmst A
+	LEFT JOIN tblAPImportedVendors B
+	ON A.ssvnd_vnd_no COLLATE Latin1_General_CI_AS = B.strVendorId COLLATE Latin1_General_CI_AS AND B.strVendorId IS NULL
+
+	INSERT INTO tblAPImportedVendors
+	SELECT DISTINCT A.apchk_vnd_no
+	FROM apchkmst A
+	LEFT JOIN tblAPImportedVendors B
+	ON A.apchk_vnd_no COLLATE Latin1_General_CI_AS = B.strVendorId COLLATE Latin1_General_CI_AS AND B.strVendorId IS NULL
+		WHERE A.apchk_vnd_no IN (
+		SELECT
+		DISTINCT B.apivc_vnd_no
+		FROM apivcmst B
+		WHERE B.apivc_vnd_no NOT IN (SELECT ssvnd_vnd_no FROM ssvndmst)
+	)
+	'')
 
 	DECLARE @originVendor NVARCHAR(50)
 
@@ -240,7 +243,10 @@ BEGIN
 
 	--Import only those are not yet imported
 	SELECT ssvnd_vnd_no INTO #tmpssvndmst 
-		FROM tblAPTempVendor
+	FROM ssvndmst A
+	LEFT JOIN tblAPImportedVendors B
+	ON A.ssvnd_vnd_no COLLATE Latin1_General_CI_AS = B.strVendorId COLLATE Latin1_General_CI_AS AND B.strVendorId IS NULL
+		
 
 	WHILE (EXISTS(SELECT 1 FROM #tmpssvndmst))
 	BEGIN
@@ -423,8 +429,8 @@ BEGIN
 		BEGIN
 
 		--INSERT Entity record for Vendor
-		INSERT [dbo].[tblEntity]	([strName], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed])
-		VALUES						(@strName, @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed)
+		INSERT [dbo].[tblEntity]	([strName], [strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed])
+		VALUES						(@strName, @strEmail, @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed)
 
 		DECLARE @EntityId INT
 		SET @EntityId = SCOPE_IDENTITY()
@@ -449,8 +455,8 @@ BEGIN
 		BEGIN
 			SET @ContactEntityId = SCOPE_IDENTITY()
 		
-			INSERT [dbo].[tblEntityContact] ([intEntityId], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail], [strEmail2], [strFax], [strNotes])
-			VALUES							 (@ContactEntityId, @strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail, @strEmail2, @strFax, @strNotes)
+			INSERT [dbo].[tblEntityContact] ([intEntityId], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
+			VALUES							 (@ContactEntityId, @strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
 		END
 		--DECLARE @EntityContactId INT
 		--SET @EntityContactId = SCOPE_IDENTITY()

@@ -87,7 +87,7 @@
 :r "..\dbo\Functions\fnGetVendorLastName.sql"
 :r "..\dbo\Stored Procedures\uspAPImportBillTransactions.sql"
 :r "..\dbo\Stored Procedures\uspAPImportTerms.sql"
---:r "..\dbo\Stored Procedures\uspAPImportVendor.sql"
+:r "..\dbo\Stored Procedures\uspAPImportVendor.sql"
 :r "..\dbo\Stored Procedures\uspAPPostOriginPayment.sql"
 :r "..\Scripts\AP\FixPaymentCMRecords.sql"
 :r "..\Scripts\AP\FixBillData.sql"
