@@ -205,7 +205,4 @@
     <Build Include="dbo\Tables\tblAPaptrxmst.sql" />
     <None Include="dbo\Stored Procedures\uspCMBankTransactionReversalOrigin.sql" />
   </ItemGroup>
-  <ItemGroup>
-    <RefactorLog Include="Integration.refactorlog" />
-  </ItemGroup>
 </Project>
