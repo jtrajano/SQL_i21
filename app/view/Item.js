@@ -2234,6 +2234,11 @@ Ext.define('Inventory.view.Item', {
                                                         xtype: 'combobox',
                                                         itemId: 'cboProductLine',
                                                         fieldLabel: 'Product Line'
+                                                    },
+                                                    {
+                                                        xtype: 'combobox',
+                                                        itemId: 'cboMarketValuation',
+                                                        fieldLabel: 'Market Valuation'
                                                     }
                                                 ]
                                             },

@@ -5472,6 +5472,21 @@
                                             },
                                             "name": "MyComboBox43",
                                             "designerId": "5d1f49b1-a905-4d49-91a0-63241fa6d161"
+                                        },
+                                        {
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "fieldLabel": "Market Valuation",
+                                                "itemId": "cboMarketValuation",
+                                                "layout|flex": null
+                                            },
+                                            "name": "MyComboBox44",
+                                            "designerId": "73a5c479-e095-4ef9-9e19-efcc7e932399"
                                         }
                                     ]
                                 },
