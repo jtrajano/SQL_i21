@@ -308,7 +308,7 @@ BEGIN
 														WHERE intBalanceDue = ssvnd_terms_due_day
 														AND intDiscountDay = ssvnd_terms_disc_day
 														AND intDayofMonthDue = ssvnd_terms_cutoff_day)
-										ELSE NULL END
+										ELSE (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm= ''Due on Receipt'') END
 											,
 				@intWarehouseId  = NULL,
 			
