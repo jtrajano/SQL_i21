@@ -228,7 +228,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter22",
+                                    "name": "filter11",
                                     "designerId": "2fae70be-eb75-4432-8b9e-f69f8ff60559",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -395,7 +395,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging5",
+                    "name": "statusbarpaging4",
                     "designerId": "2a64a436-d508-4d5b-94c9-4ac759b7808e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
