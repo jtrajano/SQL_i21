@@ -17,3 +17,6 @@ GO
 
 -- Add the SQL Server custom messages
 EXEC dbo.uspCMPostMessages
+
+:r "..\Scripts\AP\TransferImportedTermsData.sql"
+:r "..\Scripts\AP\TransferImportedVendorData.sql"

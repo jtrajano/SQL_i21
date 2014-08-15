@@ -3,6 +3,10 @@
 -- 	UPDATE FIELD CASING (ID to Id)
 ---------------------------------------------------------------------------------------------------------------------------------------
 
+GO
+	PRINT 'BEGIN FRD UPDATE FIELD CASING (ID to Id)'
+GO
+
 IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblFRCalculation]') AND type in (N'U')) 
 BEGIN
 	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intCalculationId' AND OBJECT_ID = OBJECT_ID(N'tblFRCalculation')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intCalculationID' AND OBJECT_ID = OBJECT_ID(N'tblFRCalculation'))
@@ -79,7 +83,8 @@ IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[
 BEGIN
 	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intColumnId' AND OBJECT_ID = OBJECT_ID(N'tblFRColumnDesign')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intColumnID' AND OBJECT_ID = OBJECT_ID(N'tblFRColumnDesign'))
     BEGIN
-        EXEC sp_rename 'tblFRColumnDesign.intColumnID', 'intColumnId' , 'COLUMN'
+        EXEC sp_rename 'tblFRColumnDesign.intColumnID', 'intColumnId' , 'COLUMN'		
+		EXEC ('DELETE tblFRColumnDesign WHERE intColumnId NOT IN (SELECT intColumnId FROM tblFRColumn)')
     END
 END
 GO
@@ -88,7 +93,7 @@ IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[
 BEGIN
 	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intColumnCalculationId' AND OBJECT_ID = OBJECT_ID(N'tblFRColumnDesignCalculation')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intColumnCalculationID' AND OBJECT_ID = OBJECT_ID(N'tblFRColumnDesignCalculation'))
     BEGIN
-        EXEC sp_rename 'tblFRColumnDesignCalculation.intColumnCalculationID', 'intColumnCalculationId' , 'COLUMN'
+        EXEC sp_rename 'tblFRColumnDesignCalculation.intColumnCalculationID', 'intColumnCalculationId' , 'COLUMN'		
     END
 END
 GO
@@ -98,6 +103,7 @@ BEGIN
 	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intColumnId' AND OBJECT_ID = OBJECT_ID(N'tblFRColumnDesignCalculation')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intColumnID' AND OBJECT_ID = OBJECT_ID(N'tblFRColumnDesignCalculation'))
     BEGIN
         EXEC sp_rename 'tblFRColumnDesignCalculation.intColumnID', 'intColumnId' , 'COLUMN'
+		EXEC ('DELETE tblFRColumnDesignCalculation WHERE intColumnId NOT IN (SELECT intColumnId FROM tblFRColumn)')
     END
 END
 GO
@@ -115,7 +121,7 @@ IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[
 BEGIN
 	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intColumnSegmentId' AND OBJECT_ID = OBJECT_ID(N'tblFRColumnDesignSegment')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intColumnSegmentID' AND OBJECT_ID = OBJECT_ID(N'tblFRColumnDesignSegment'))
     BEGIN
-        EXEC sp_rename 'tblFRColumnDesignSegment.intColumnSegmentID', 'intColumnSegmentId' , 'COLUMN'
+        EXEC sp_rename 'tblFRColumnDesignSegment.intColumnSegmentID', 'intColumnSegmentId' , 'COLUMN'		
     END
 END
 GO
@@ -125,6 +131,7 @@ BEGIN
 	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intColumnId' AND OBJECT_ID = OBJECT_ID(N'tblFRColumnDesignSegment')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intColumnID' AND OBJECT_ID = OBJECT_ID(N'tblFRColumnDesignSegment'))
     BEGIN
         EXEC sp_rename 'tblFRColumnDesignSegment.intColumnID', 'intColumnId' , 'COLUMN'
+		EXEC ('DELETE tblFRColumnDesignSegment WHERE intColumnId NOT IN (SELECT intColumnId FROM tblFRColumn)')
     END
 END
 GO
@@ -215,6 +222,7 @@ BEGIN
 	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intHeaderId' AND OBJECT_ID = OBJECT_ID(N'tblFRHeaderDesign')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intHeaderID' AND OBJECT_ID = OBJECT_ID(N'tblFRHeaderDesign'))
     BEGIN
         EXEC sp_rename 'tblFRHeaderDesign.intHeaderID', 'intHeaderId' , 'COLUMN'
+		EXEC ('DELETE tblFRHeaderDesign WHERE intHeaderId NOT IN (SELECT intHeaderId FROM tblFRHeader)')
     END
 END
 GO
@@ -341,6 +349,7 @@ BEGIN
 	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intRowId' AND OBJECT_ID = OBJECT_ID(N'tblFRRowDesign')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intRowID' AND OBJECT_ID = OBJECT_ID(N'tblFRRowDesign'))
     BEGIN
         EXEC sp_rename 'tblFRRowDesign.intRowID', 'intRowId' , 'COLUMN'
+		EXEC ('DELETE tblFRRowDesign WHERE intRowId NOT IN (SELECT intRowId FROM tblFRRow)')
     END
 END
 GO
@@ -359,6 +368,7 @@ BEGIN
 	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intRowId' AND OBJECT_ID = OBJECT_ID(N'tblFRRowDesignCalculation')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intRowID' AND OBJECT_ID = OBJECT_ID(N'tblFRRowDesignCalculation'))
     BEGIN
         EXEC sp_rename 'tblFRRowDesignCalculation.intRowID', 'intRowId' , 'COLUMN'
+		EXEC ('DELETE tblFRRowDesignCalculation WHERE intRowId NOT IN (SELECT intRowId FROM tblFRRow)')
     END
 END
 GO
@@ -386,6 +396,7 @@ BEGIN
 	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intRowId' AND OBJECT_ID = OBJECT_ID(N'tblFRRowDesignFilterAccount')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intRowID' AND OBJECT_ID = OBJECT_ID(N'tblFRRowDesignFilterAccount'))
     BEGIN
         EXEC sp_rename 'tblFRRowDesignFilterAccount.intRowID', 'intRowId' , 'COLUMN'
+		EXEC ('DELETE tblFRRowDesignFilterAccount WHERE intRowId NOT IN (SELECT intRowId FROM tblFRRow)')
     END
 END
 GO
@@ -469,4 +480,8 @@ BEGIN
         EXEC sp_rename 'tblFRGroupOtherReport.intGroupOtherReportID', 'intGroupOtherReportId' , 'COLUMN'
     END
 END
+GO
+
+GO
+	PRINT 'END FRD UPDATE FIELD CASING (ID to Id)'
 GO

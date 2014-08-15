@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblEntity] (
     [intEntityId]      INT             IDENTITY (1, 1) NOT NULL,
     [strName]          NVARCHAR (100)  COLLATE Latin1_General_CI_AS NOT NULL,
-    [strEmail]         NVARCHAR (75)   COLLATE Latin1_General_CI_AS CONSTRAINT [DF__tmp_ms_xx__strEm__503E4C21] DEFAULT ('') NOT NULL,
+    [strEmail]         NVARCHAR (75)   COLLATE Latin1_General_CI_AS  NULL,
     [strWebsite]       NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [strInternalNotes] NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [ysnPrint1099]     BIT             NULL,

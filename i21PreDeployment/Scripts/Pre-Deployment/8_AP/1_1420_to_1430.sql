@@ -1,5 +1,7 @@
 ﻿--CHANGING strVendorId to intVendorId
 --BACK UP Bill Data
+GO
+
 IF COL_LENGTH('tblAPBill','strVendorId') IS NOT NULL
 BEGIN
 	PRINT('Backing up Vendor Bill Data')
@@ -19,6 +21,8 @@ BEGIN
 	')
 	PRINT('END Backing up Vendor Bill Data')
 END
+
+GO
 
 --BACK UP Payment Data
 IF COL_LENGTH('tblAPPayment','strVendorId') IS NOT NULL
@@ -41,3 +45,5 @@ BEGIN
 	')
 	PRINT('End Backing up Vendor Payment Data')
 END
+
+GO

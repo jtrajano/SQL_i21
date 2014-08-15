@@ -176,12 +176,14 @@ BEGIN
 			0	
 	END
 	
-	SELECT * INTO tblAPTempTerms FROM tblSMTerm WHERE intTermID in (SELECT intTermID FROM @tblAPTempTerms)
+	INSERT INTO tblAPTermsImported 
+	SELECT intTermID FROM tblSMTerm A
+	LEFT JOIN tblAPTermsImported B ON A.intTermID = B.Id AND B.Id IS NULL
 
 	--SELECT * FROM tblSMTerm
 	--ROLLBACK TRANSACTION 
 	
-	SET @Total = (SELECT COUNT(*) FROM tblAPTempTerms)
+	SET @Total = (SELECT COUNT(*) FROM @tblAPTempTerms)
 			
 	END
 	')

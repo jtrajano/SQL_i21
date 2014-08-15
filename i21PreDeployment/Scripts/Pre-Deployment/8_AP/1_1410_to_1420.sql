@@ -1,4 +1,6 @@
-﻿IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblAPVendor]') AND type in (N'U')) 
+﻿GO
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblAPVendor]') AND type in (N'U')) 
 BEGIN
 	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intDefaultLocationId' AND OBJECT_ID = OBJECT_ID(N'tblAPVendor')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intEntityLocationId' AND OBJECT_ID = OBJECT_ID(N'tblAPVendor'))
     BEGIN
@@ -10,3 +12,5 @@ BEGIN
         EXEC sp_rename 'tblAPVendor.intEntityContactId', 'intDefaultContactId' , 'COLUMN'
     END
 END
+
+GO
