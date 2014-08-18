@@ -623,4 +623,7 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="dbo\Views\vyuARCustomer.sql" />
+  </ItemGroup>
 </Project>
