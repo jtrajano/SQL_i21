@@ -624,6 +624,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="dbo\Views\vyuARCustomer.sql" />
+    <Build Include="dbo\Views\vyuARCustomer.sql" />
   </ItemGroup>
 </Project>
