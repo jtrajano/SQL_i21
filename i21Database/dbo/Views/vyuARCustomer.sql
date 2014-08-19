@@ -12,5 +12,5 @@ SELECT
 FROM tblEntity as Entity
 INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.intEntityId
 INNER JOIN tblARCustomerToContact as CusToCon ON Cus.intDefaultContactId = CusToCon.intARCustomerToContactId
-INNER JOIN tblEntityContact as Con ON CusToCon.intContactId = Con.intContactId
-INNER JOIN tblEntityLocation as Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId
+LEFT JOIN tblEntityContact as Con ON CusToCon.intContactId = Con.intContactId
+LEFT JOIN tblEntityLocation as Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId
