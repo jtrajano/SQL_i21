@@ -492,12 +492,21 @@ EXEC(
 		
 			 
 			 --INSERT into tblARCustomerToContact
-			INSERT [dbo].[tblARCustomerToContact] ([intCustomerId],[intContactId],[intEntityLocationId],[strUserType],[ysnPortalAccess])
-			VALUES							  (@intCustomerId, @intContactId, @EntityLocationId, ''User'', 0)
-		
 			DECLARE @CustomerToContactId INT
-			SET @CustomerToContactId = SCOPE_IDENTITY()
+			IF(@strContactName IS NOT NULL)
+			BEGIN
+				INSERT [dbo].[tblARCustomerToContact] ([intCustomerId],[intContactId],[intEntityLocationId],[strUserType],[ysnPortalAccess])
+				VALUES							  (@intCustomerId, @intContactId, @EntityLocationId, ''User'', 0)
 			
+				
+				
+			END
+			ELSE
+				INSERT [dbo].[tblARCustomerToContact] ([intCustomerId],[intContactId],[intEntityLocationId],[strUserType],[ysnPortalAccess])
+				VALUES							  (@intCustomerId, NULL, @EntityLocationId, ''User'', 0)
+			
+			SET @CustomerToContactId = SCOPE_IDENTITY()
+				
 			UPDATE tblARCustomer 
 			SET intDefaultContactId = @CustomerToContactId, 
 				intDefaultLocationId = @EntityLocationId
@@ -1012,11 +1021,20 @@ EXEC(
 			SET @EntityLocationId = SCOPE_IDENTITY()
 		
 			 
-			 --INSERT into tblARCustomerToContact
-			INSERT [dbo].[tblARCustomerToContact] ([intCustomerId],[intContactId],[intEntityLocationId],[strUserType],[ysnPortalAccess])
-			VALUES							  (@intCustomerId, @intContactId, @EntityLocationId, ''User'', 0)
-		
+			--INSERT into tblARCustomerToContact
 			DECLARE @CustomerToContactId INT
+			IF(@strContactName IS NOT NULL)
+			BEGIN
+				INSERT [dbo].[tblARCustomerToContact] ([intCustomerId],[intContactId],[intEntityLocationId],[strUserType],[ysnPortalAccess])
+				VALUES							  (@intCustomerId, @intContactId, @EntityLocationId, ''User'', 0)
+			
+				
+				
+			END
+			ELSE
+				INSERT [dbo].[tblARCustomerToContact] ([intCustomerId],[intContactId],[intEntityLocationId],[strUserType],[ysnPortalAccess])
+				VALUES							  (@intCustomerId, NULL, @EntityLocationId, ''User'', 0)
+			
 			SET @CustomerToContactId = SCOPE_IDENTITY()
 			
 			UPDATE tblARCustomer 
