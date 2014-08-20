@@ -43,7 +43,7 @@ BEGIN
 --</parameter>
 --</filterinfo>'
 	--DECLARE @xmlParam NVARCHAR(MAX)
-	--set @xmlParam = '<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>strLocation</fieldname><condition>Between</condition><from></from><to></to><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>dtmDate</fieldname><condition>Between</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>Date</datatype></filter><filter><fieldname>CustomerStatus</fieldname><condition>Equal To</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>SiteStatus</fieldname><condition>Equal To</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>strOwnership</fieldname><condition>Equal To</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>strTankType</fieldname><condition>Equal To</condition><from>D</from><to></to><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter></filters></xmlparam>'
+	--set @xmlParam = '<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>strLocation</fieldname><condition>Between</condition><from></from><to></to><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>dtmDate</fieldname><condition>Between</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>Date</datatype></filter><filter><fieldname>strCustomerStatus</fieldname><condition>Equal To</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>SiteStatus</fieldname><condition>Equal To</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>strOwnership</fieldname><condition>Equal To</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>strTankType</fieldname><condition>Equal To</condition><from>D</from><to></to><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter></filters></xmlparam>'
 	
 	
 	SET NOCOUNT ON;
@@ -145,14 +145,14 @@ BEGIN
 		  ,@CustomerActive = (CASE [from] WHEN 'Active' THEN 'Y'
 				WHEN 'Inactive' THEN  'N' END) 
 		  ,@CustomerStatusCondition = condition
-	FROM @temp_params where [fieldname] = 'CustomerStatus'
+	FROM @temp_params where [fieldname] = 'strCustomerStatus'
 	
 	--Site Status
 	SELECT @FromSiteStatus = [from]
 		  ,@SiteActive = (CASE [from] WHEN 'Active' THEN 1
 				WHEN 'Inactive' THEN  0 END) 
 		  ,@SiteStatusCondition = condition
-	FROM @temp_params where [fieldname] = 'SiteStatus'
+	FROM @temp_params where [fieldname] = 'strSiteStatus'
 	
 	--Tank Ownership
 	SELECT @FromTankOwnership = [from]
@@ -176,7 +176,7 @@ BEGIN
 		END
 		ELSE
 		BEGIN
-			SET @WhereClause1 = ' AND Z.SiteStatus = ' + CAST(@SiteActive AS NVARCHAR(1))
+			SET @WhereClause1 = ' AND Z.ysnActive = ' + CAST(@SiteActive AS NVARCHAR(1))
 		END
 	END
 	
@@ -262,11 +262,11 @@ BEGIN
 	BEGIN 
 		IF (@SiteStatusCondition = 'Not Equal To')
 		BEGIN
-			SET @WhereClause2 = ' AND SiteStatus <> ''' + @FromSiteStatus + '''' 
+			SET @WhereClause2 = ' AND strSiteStatus <> ''' + @FromSiteStatus + '''' 
 		END
 		ELSE
 		BEGIN
-			SET @WhereClause2 = ' AND SiteStatus = ''' + @FromSiteStatus + '''' 
+			SET @WhereClause2 = ' AND strSiteStatus = ''' + @FromSiteStatus + '''' 
 		END
 	END
 	
@@ -275,11 +275,11 @@ BEGIN
 	BEGIN
 		IF (@CustomerStatusCondition = 'Not Equal To')
 		BEGIN
-			SET @WhereClause2 = @WhereClause2 + ' AND CustomerStatus <> ''' + @FromCustomerStat + '''' 
+			SET @WhereClause2 = @WhereClause2 + ' AND strCustomerStatus <> ''' + @FromCustomerStat + '''' 
 		END
 		ELSE
 		BEGIN
-			SET @WhereClause2 = @WhereClause2 + ' AND CustomerStatus = ''' + @FromCustomerStat + '''' 
+			SET @WhereClause2 = @WhereClause2 + ' AND strCustomerStatus = ''' + @FromCustomerStat + '''' 
 		END
 	END
 	
@@ -496,13 +496,13 @@ FROM
 			''Active''
 		When 0 then
 			''Inactive''
-		End) as SiteStatus
+		End) as strSiteStatus
 	, (Case B.vwcus_active_yn
 		When ''Y'' then
 			''Active''
 		When ''N'' then
 			''Inactive''
-		End) as CustomerStatus
+		End) as strCustomerStatus
 	,(CASE WHEN(I.intSiteID IS NOT NULL)THEN 1 ELSE 0 END)as ysnHasLeakGasCheck
 	, I.dtmDate as dtmDate
 	,intLocationTotalTanks = ISNULL(JJ.LocationCount,0)
