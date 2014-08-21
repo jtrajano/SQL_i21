@@ -61,7 +61,7 @@ BEGIN
 		INNER JOIN tblEntityLocation C
 			ON B.intDefaultLocationId = C.intEntityLocationId
 		INNER JOIN tblEntityContact D
-			ON B.intDefaultContactId = D.intEntityId
+			ON B.intDefaultContactId = D.intContactId
 		LEFT JOIN tblSMCurrency E
 			ON B.intCurrencyId = E.intCurrencyID
 		LEFT JOIN tblGLCOACrossReference F
@@ -125,16 +125,17 @@ BEGIN
 		INNER JOIN tblEntityLocation C		
 			ON B.intDefaultLocationId = C.intEntityLocationId
 		INNER JOIN tblEntityContact D
-			ON B.intDefaultContactId = D.intEntityId
+			ON B.intDefaultContactId = D.intContactId
 		LEFT JOIN tblSMCurrency E
 			ON B.intCurrencyId = E.intCurrencyID
 		LEFT JOIN tblGLCOACrossReference F
 			ON B.intGLAccountExpenseId = F.inti21Id
 		WHERE strVendorId = @VendorId
-	END
 
-	INSERT INTO tblAPImportedVendors
-	SELECT @VendorId
+		--Insert new record to tblAPImportedVendors
+		INSERT INTO tblAPImportedVendors
+		SELECT @VendorId
+	END
 
 RETURN;
 END
@@ -316,7 +317,7 @@ BEGIN
                                                         WHERE intBalanceDue = ssvnd_terms_due_day
                                                         AND intDiscountDay = ssvnd_terms_disc_day
                                                         AND intDayofMonthDue = ssvnd_terms_cutoff_day)
-                                        ELSE NULL END
+                                        ELSE (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm= ''Due on Receipt'') END
                                             ,
                 @intWarehouseId  = NULL,
 

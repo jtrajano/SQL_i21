@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblAPVendor] (
     [intEntityId]               INT            NOT NULL,
+	[intVendorId]				INT				IDENTITY (1, 1) NOT NULL, 
     [intDefaultLocationId]       INT            NULL,
     [intDefaultContactId]        INT            NULL,
     [intCurrencyId]             INT            NULL,
@@ -27,15 +28,25 @@
     [intShipFromId] INT NULL, 
     CONSTRAINT [PK_dbo.tblAPVendor] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
     CONSTRAINT [FK_dbo.tblAPVendor_dbo.tblEntities_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
-    CONSTRAINT [APstrVendorId_Unique] UNIQUE NONCLUSTERED ([strVendorId] ASC)
+    CONSTRAINT [UK_strVendorId] UNIQUE NONCLUSTERED ([strVendorId] ASC),
+	CONSTRAINT [UK_intVendorId] UNIQUE NONCLUSTERED ([intVendorId] ASC)
 );
 
 
 GO
-ALTER TABLE [dbo].[tblAPVendor] NOCHECK CONSTRAINT [FK_dbo.tblAPVendor_dbo.tblEntities_intEntityId];
+ALTER TABLE [dbo].[tblAPVendor] CHECK CONSTRAINT [FK_dbo.tblAPVendor_dbo.tblEntities_intEntityId];
 
 
 GO
-CREATE NONCLUSTERED INDEX [IX_intEntityId]
-    ON [dbo].[tblAPVendor]([intEntityId] ASC);
+CREATE NONCLUSTERED INDEX [IX_intVendorId]
+    ON [dbo].[tblAPVendor]([intVendorId] ASC);
 
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+			@value = N'Information about the Vendor',
+			@level0type = N'SCHEMA',
+			@level0name = N'dbo',
+			@level1type = N'TABLE',
+			@level1name = N'tblAPVendor',
+			@level2type = NULL,
+			@level2name = NULL
