@@ -57,6 +57,19 @@ BEGIN TRANSACTION
 		)tblPatch 
 	WHERE tblPatch.intUserSecurityMenuId = tblSMUserSecurityMenu.intUserSecurityMenuId
 	AND tblSMUserSecurityMenu.intUserSecurityId = @UserSecurityID
+
+	UPDATE tblSMUserSecurityMenu
+	SET ysnVisible = tblPatch.ysnVisible
+	FROM (
+		SELECT 
+			UserMenu.intUserSecurityMenuId,
+			ysnVisible = (CASE WHEN EXISTS((SELECT TOP 1 1 FROM tblSMUserSecurityMenu tmpA WHERE tmpA.intParentMenuId = UserMenu.intUserSecurityMenuId AND tmpA.intUserSecurityId = @UserSecurityID AND ysnVisible = 1)) THEN 1 ELSE 0 END)
+		FROM tblSMUserSecurityMenu UserMenu
+		LEFT JOIN tblSMMasterMenu Menu ON Menu.intMenuID = UserMenu.intMenuId
+		WHERE UserMenu.intUserSecurityId = @UserSecurityID
+		)tblPatch 
+	WHERE tblPatch.intUserSecurityMenuId = tblSMUserSecurityMenu.intUserSecurityMenuId
+	AND tblSMUserSecurityMenu.intUserSecurityId = @UserSecurityID
 	
 	IF (@ForceVisibility = 1)
 		UPDATE tblSMUserSecurityMenu
