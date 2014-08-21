@@ -10,7 +10,7 @@ BEGIN
 
 	EXEC('
 	INSERT INTO tblAPImportedVendors
-	SELECT * FROM tblAPTempVendor
+	SELECT ssvnd_vnd_no FROM tblAPTempVendor
 
 	DROP TABLE tblAPTempVendor
 	DROP TABLE tblAPInvalidTransaction

@@ -29,6 +29,22 @@ BEGIN
 	DECLARE @IsPosted BIT
 	DECLARE @IsPaid BIT
 
+	--Validation
+	--Check if there is a payment method with a type of ''Check''
+	IF NOT EXISTS(SELECT 1 FROM tblSMPaymentMethod WHERE strPaymentMethod = ''Check'')
+	BEGIN
+		RAISERROR(''Please create Check payment method before importing bills.'', 10, 1);
+	END
+
+	--Check if there is check book that was not exists on tblCMBankAccount
+	IF EXISTS(SELECT 1 FROM apchkmst A 
+				LEFT JOIN tblCMBankAccount B
+					ON A.apchk_cbk_no COLLATE Latin1_General_CI_AS = B.strCbkNo COLLATE Latin1_General_CI_AS
+				WHERE B.strCbkNo IS NULL)
+	BEGIN
+		RAISERROR(''There is a check book number that was not imported.'', 10, 1);
+	END
+
 	--Payment variable
 	DECLARE @bankAccount INT,
 				@paymentMethod INT,
