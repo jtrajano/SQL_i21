@@ -74,6 +74,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 --Accounts Payable
 :r .\AP\RestoreVendorId.sql
+:r .\AP\FixEntitiesData.sql
 
 -- Version Update
 :r .\VersionUpdate.sql

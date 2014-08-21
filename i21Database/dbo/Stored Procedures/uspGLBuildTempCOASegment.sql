@@ -42,11 +42,12 @@ BEGIN
 		EXEC ('CREATE VIEW [dbo].[vyuGLDetailView]
 		AS
 		SELECT		A.intGLDetailId, A.dtmDate, A.strBatchId, A.dblDebit, A.dblCredit, A.dblDebitUnit, A.dblCreditUnit, A.strDescription AS GLDescription, A.strCode, 
-					A.strTransactionId, A.strReference, A.ysnIsUnposted, A.intUserId, A.intEntityId, A.strTransactionForm, C.strAccountGroup, C.strAccountType, D.*            
+					A.strTransactionId, A.strReference, A.ysnIsUnposted, A.intUserId, A.intEntityId, A.strTransactionForm, C.strAccountGroup, C.strAccountType, D.*, E.strUOMCode, E.dblLbsPerUnit            
 		FROM         dbo.tblGLDetail AS A 
 						INNER JOIN dbo.tblGLAccount AS B ON B.intAccountId = A.intAccountId 
 						INNER JOIN dbo.tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId
-						LEFT JOIN dbo.tblGLTempCOASegment AS D ON D.intAccountId = B.intAccountId')
+						LEFT JOIN dbo.tblGLTempCOASegment AS D ON D.intAccountId = B.intAccountId
+						LEFT JOIN dbo.tblGLAccountUnit AS E ON E.intAccountUnitId = B.intAccountUnitId')
 	END
 
 	

@@ -590,9 +590,9 @@
     <Build Include="dbo\Views\vyuAPPaymentDetail.sql" />
     <Build Include="dbo\Functions\fnHDDecodeComment.sql" />
     <Build Include="dbo\Tables\tblARCustomerToContact.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <RefactorLog Include="i21.refactorlog" />
+    <Build Include="dbo\Tables\tblAPVendorToContact.sql" />
+    <Build Include="dbo\Tables\tblICItem.sql" />	
+	<Build Include="dbo\Tables\tblCMBankFileAudit.sql" />	
   </ItemGroup>
   <ItemGroup>
     <None Include="i21Database.publish.xml" />
@@ -613,6 +613,7 @@
     <None Include="Scripts\Post-Deployment\FRD\FRDEntryDataFix.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\9_ZipCode.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountTemplate.sql" />
+    <None Include="Scripts\Post-Deployment\AP\FixEntitiesData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -622,5 +623,8 @@
     <Compile Include="C:\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="dbo\Views\vyuARCustomer.sql" />
   </ItemGroup>
 </Project>

@@ -20,9 +20,12 @@
     [ysnVoid] BIT NOT NULL DEFAULT 0, 
     [ysnPrinted] BIT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_dbo.tblAPPayments] PRIMARY KEY CLUSTERED ([intPaymentId] ASC), 
-    CONSTRAINT [FK_tblAPPayment_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intEntityId]) ON DELETE SET NULL
+    CONSTRAINT [FK_tblAPPayment_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intVendorId])
 );
+GO
 
+ALTER TABLE dbo.tblAPPayment
+NOCHECK CONSTRAINT[FK_tblAPPayment_tblAPVendor];
 
 GO
 CREATE TRIGGER trgPaymentRecordNumber

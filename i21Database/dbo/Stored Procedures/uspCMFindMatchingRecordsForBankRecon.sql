@@ -50,6 +50,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 -- 1. The record is posted, not voided, and not yet cleared. 
 -- 2. The record is with +/- 19 days from the imported record date. 
 -- 3. The record is not a deposit entry transaction. 
+-- 4. The check transaction is printed. Non-printed check transactions are not included. 
 SELECT	A.intTransactionId
 		,A.intBankTransactionTypeId
 		,A.dtmDate
@@ -65,6 +66,13 @@ WHERE	A.dtmDateReconciled IS NULL
 		AND CAST(FLOOR(CAST(A.dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(B.dtmDate AS FLOAT) + @BETWEEN_DAYS) AS DATETIME)
 		AND CAST(FLOOR(CAST(A.dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(B.dtmDate AS FLOAT) - @BETWEEN_DAYS) AS DATETIME)
 		AND dbo.fnIsDepositEntry(strLink) = 0
+		AND 1 = (
+					-- If check transaction is not yet printed, do not include record in the update.
+			CASE	WHEN intBankTransactionTypeId IN (@MISC_CHECKS, @ORIGIN_CHECKS, @AP_PAYMENT) AND dtmCheckPrinted IS NULL THEN 0
+					-- If record is a non-check, no need to check the date check printed. 
+					ELSE 1
+			END 		
+		)
 IF @@ERROR <> 0	GOTO _ROLLBACK
 
 -- Temporary table of the imported records		

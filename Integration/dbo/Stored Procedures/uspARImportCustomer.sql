@@ -469,19 +469,22 @@ EXEC(
 				INSERT [dbo].[tblEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes])
 				VALUES					 (@strContactName, @strEmail, @strWebsite, @strInternalNotes)
 			END
+			ELSE
+				INSERT [dbo].[tblEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes])
+				VALUES					 (@strName, @strEmail, @strWebsite, @strInternalNotes)
+			
+				
 
 			DECLARE @ContactEntityId INT
-			--Create contact record only if there is contact for customer
-			IF(@strContactName IS NOT NULL)
-			BEGIN
-				SET @ContactEntityId = SCOPE_IDENTITY()
 		
-				INSERT [dbo].[tblEntityContact] ([intEntityId], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
-				VALUES							 (@ContactEntityId, @strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
-				
-				--Get intContactId
-				SELECT @intContactId = intContactId FROM tblEntityContact WHERE intEntityId = @ContactEntityId
-			END
+			SET @ContactEntityId = SCOPE_IDENTITY()
+	
+			INSERT [dbo].[tblEntityContact] ([intEntityId], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
+			VALUES							 (@ContactEntityId, @strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
+			
+			--Get intContactId
+			SELECT @intContactId = intContactId FROM tblEntityContact WHERE intEntityId = @ContactEntityId
+		
 		
 			--INSERT into Location
 			INSERT [dbo].[tblEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTaxCodeId], [intTermsId], [intWarehouseId])
@@ -492,12 +495,13 @@ EXEC(
 		
 			 
 			 --INSERT into tblARCustomerToContact
+			DECLARE @CustomerToContactId INT
+			
 			INSERT [dbo].[tblARCustomerToContact] ([intCustomerId],[intContactId],[intEntityLocationId],[strUserType],[ysnPortalAccess])
 			VALUES							  (@intCustomerId, @intContactId, @EntityLocationId, ''User'', 0)
 		
-			DECLARE @CustomerToContactId INT
 			SET @CustomerToContactId = SCOPE_IDENTITY()
-			
+				
 			UPDATE tblARCustomer 
 			SET intDefaultContactId = @CustomerToContactId, 
 				intDefaultLocationId = @EntityLocationId
@@ -990,19 +994,20 @@ EXEC(
 				INSERT [dbo].[tblEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes])
 				VALUES					 (@strContactName, @strEmail, @strWebsite, @strInternalNotes)
 			END
+			ELSE
+				INSERT [dbo].[tblEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes])
+				VALUES					 (@strName, @strEmail, @strWebsite, @strInternalNotes)
 
 			DECLARE @ContactEntityId INT
-			--Create contact record only if there is contact for customer
-			IF(@strContactName IS NOT NULL)
-			BEGIN
-				SET @ContactEntityId = SCOPE_IDENTITY()
+			
+			SET @ContactEntityId = SCOPE_IDENTITY()
 		
-				INSERT [dbo].[tblEntityContact] ([intEntityId], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
-				VALUES							 (@ContactEntityId, @strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
+			INSERT [dbo].[tblEntityContact] ([intEntityId], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
+			VALUES							 (@ContactEntityId, @strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
 				
-				--Get intContactId
-				SELECT @intContactId = intContactId FROM tblEntityContact WHERE intEntityId = @ContactEntityId
-			END
+			--Get intContactId
+			SELECT @intContactId = intContactId FROM tblEntityContact WHERE intEntityId = @ContactEntityId
+			
 		
 			--INSERT into Location
 			INSERT [dbo].[tblEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTaxCodeId], [intTermsId], [intWarehouseId])
@@ -1012,11 +1017,12 @@ EXEC(
 			SET @EntityLocationId = SCOPE_IDENTITY()
 		
 			 
-			 --INSERT into tblARCustomerToContact
+			--INSERT into tblARCustomerToContact
+			DECLARE @CustomerToContactId INT
+			
 			INSERT [dbo].[tblARCustomerToContact] ([intCustomerId],[intContactId],[intEntityLocationId],[strUserType],[ysnPortalAccess])
 			VALUES							  (@intCustomerId, @intContactId, @EntityLocationId, ''User'', 0)
-		
-			DECLARE @CustomerToContactId INT
+			
 			SET @CustomerToContactId = SCOPE_IDENTITY()
 			
 			UPDATE tblARCustomer 
