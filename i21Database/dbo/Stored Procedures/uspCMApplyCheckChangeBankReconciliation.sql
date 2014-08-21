@@ -52,4 +52,11 @@ WHERE	ysnPosted = 1
 					THEN 1
 					ELSE
 					0
-			END		
+			END
+		AND 1 = (
+					-- If check transaction is not yet printed, do not include record in the update.
+			CASE	WHEN intBankTransactionTypeId IN (@MISC_CHECKS, @ORIGIN_CHECKS, @AP_PAYMENT) AND dtmCheckPrinted IS NULL THEN 0
+					-- If record is a non-check, no need to check the date printed. 
+					ELSE 1
+			END 		
+		)

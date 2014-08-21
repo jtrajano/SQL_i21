@@ -43,7 +43,7 @@ BEGIN
 --</parameter>
 --</filterinfo>'
 	--DECLARE @xmlParam NVARCHAR(MAX)
-	--set @xmlParam = '<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>strLocation</fieldname><condition>Between</condition><from></from><to></to><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>dtmDate</fieldname><condition>Between</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>Date</datatype></filter><filter><fieldname>CustomerStatus</fieldname><condition>Equal To</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>SiteStatus</fieldname><condition>Equal To</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>strOwnership</fieldname><condition>Equal To</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>strTankType</fieldname><condition>Equal To</condition><from>D</from><to></to><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter></filters></xmlparam>'
+	--set @xmlParam = '<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>strLocation</fieldname><condition>Between</condition><from></from><to></to><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>dtmDate</fieldname><condition>Between</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>Date</datatype></filter><filter><fieldname>strCustomerStatus</fieldname><condition>Equal To</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>SiteStatus</fieldname><condition>Equal To</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>strOwnership</fieldname><condition>Equal To</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>strTankType</fieldname><condition>Equal To</condition><from>D</from><to></to><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter></filters></xmlparam>'
 	
 	
 	SET NOCOUNT ON;
@@ -145,14 +145,14 @@ BEGIN
 		  ,@CustomerActive = (CASE [from] WHEN 'Active' THEN 'Y'
 				WHEN 'Inactive' THEN  'N' END) 
 		  ,@CustomerStatusCondition = condition
-	FROM @temp_params where [fieldname] = 'CustomerStatus'
+	FROM @temp_params where [fieldname] = 'strCustomerStatus'
 	
 	--Site Status
 	SELECT @FromSiteStatus = [from]
 		  ,@SiteActive = (CASE [from] WHEN 'Active' THEN 1
 				WHEN 'Inactive' THEN  0 END) 
 		  ,@SiteStatusCondition = condition
-	FROM @temp_params where [fieldname] = 'SiteStatus'
+	FROM @temp_params where [fieldname] = 'strSiteStatus'
 	
 	--Tank Ownership
 	SELECT @FromTankOwnership = [from]
@@ -176,7 +176,7 @@ BEGIN
 		END
 		ELSE
 		BEGIN
-			SET @WhereClause1 = ' AND Z.SiteStatus = ' + CAST(@SiteActive AS NVARCHAR(1))
+			SET @WhereClause1 = ' AND Z.ysnActive = ' + CAST(@SiteActive AS NVARCHAR(1))
 		END
 	END
 	
@@ -262,11 +262,11 @@ BEGIN
 	BEGIN 
 		IF (@SiteStatusCondition = 'Not Equal To')
 		BEGIN
-			SET @WhereClause2 = ' AND SiteStatus <> ''' + @FromSiteStatus + '''' 
+			SET @WhereClause2 = ' AND strSiteStatus <> ''' + @FromSiteStatus + '''' 
 		END
 		ELSE
 		BEGIN
-			SET @WhereClause2 = ' AND SiteStatus = ''' + @FromSiteStatus + '''' 
+			SET @WhereClause2 = ' AND strSiteStatus = ''' + @FromSiteStatus + '''' 
 		END
 	END
 	
@@ -275,11 +275,11 @@ BEGIN
 	BEGIN
 		IF (@CustomerStatusCondition = 'Not Equal To')
 		BEGIN
-			SET @WhereClause2 = @WhereClause2 + ' AND CustomerStatus <> ''' + @FromCustomerStat + '''' 
+			SET @WhereClause2 = @WhereClause2 + ' AND strCustomerStatus <> ''' + @FromCustomerStat + '''' 
 		END
 		ELSE
 		BEGIN
-			SET @WhereClause2 = @WhereClause2 + ' AND CustomerStatus = ''' + @FromCustomerStat + '''' 
+			SET @WhereClause2 = @WhereClause2 + ' AND strCustomerStatus = ''' + @FromCustomerStat + '''' 
 		END
 	END
 	
@@ -376,7 +376,7 @@ SET @GrandTotalWithCheckQuery =
 				V.ysnAppliance = 0
 				AND V.intInventoryStatusTypeId = (SELECT TOP 1 intInventoryStatusTypeId FROM tblTMInventoryStatusType WHERE strInventoryStatusType = ''Out'' AND ysnDefault = 1) 
 				AND U.strDeviceType = ''Tank''
-				AND (EXISTS(SELECT TOP 1 1 FROM tblTMEvent WHERE tblTMEvent.intDeviceId = V.intDeviceId AND tblTMEvent.intEventTypeID = (SELECT intEventTypeID FROM tblTMEventType WHERE strEventType = ''Event-003'' AND ysnDefault = 1)))  
+				AND (EXISTS(SELECT TOP 1 1 FROM tblTMEvent WHERE ISNULL(tblTMEvent.intSiteID,-1) = Z.intSiteID AND tblTMEvent.intEventTypeID = (SELECT intEventTypeID FROM tblTMEventType WHERE strEventType = ''Event-003'' AND ysnDefault = 1)))  
 				' + ISNULL(@WhereClause1,'') 
 
 EXEC(@GrandTotalWithCheckQuery)	
@@ -418,14 +418,61 @@ RETURN;
 END
 		
 Set @Query = '
+SELECT * 
+INTO #tmpEventGasCheck
+FROM
+(
+	SELECT DISTINCT 
+			intSiteID
+			,dtmDate
+			,row = ROW_NUMBER() OVER(PARTITION BY intSiteID ORDER BY dtmDate DESC)  
+	FROM tblTMEvent
+	WHERE intEventTypeID = (SELECT intEventTypeID FROM tblTMEventType WHERE strEventType = ''Event-003'' AND ysnDefault = 1)
+	GROUP BY intSiteID,dtmDate
+) KK
+WHERE row = 1
+
+SELECT DISTINCT Z.strLocation, LocationCount = COUNT(Z.strLocation)
+INTO #tmpLocationCount
+FROM tblTMSite Z
+INNER JOIN tblTMCustomer Y ON Z.intCustomerID = Y.intCustomerID
+INNER JOIN vwcusmst X on Y.intCustomerNumber = X.A4GLIdentity
+INNER JOIN tblTMSiteDevice W ON Z.intSiteID =W.intSiteID
+INNER JOIN tblTMDevice V ON W.intDeviceId = V.intDeviceId
+INNER JOIN tblTMDeviceType U ON ISNULL(V.intDeviceTypeId,0) = ISNULL(U.intDeviceTypeId,-1)
+LEFT JOIN tblTMTankType T ON ISNULL(V.intTankTypeId,0) = ISNULL(T.intTankTypeId,-1)
+WHERE
+	V.ysnAppliance = 0
+	AND V.intInventoryStatusTypeId = (SELECT TOP 1 intInventoryStatusTypeId FROM tblTMInventoryStatusType WHERE strInventoryStatusType = ''Out'' AND ysnDefault = 1) 
+	AND U.strDeviceType = ''Tank'' 
+	' + ISNULL(@WhereClause1,'') + '
+GROUP BY Z.strLocation	
+
+SELECT DISTINCT Z.strLocation, TotalCountWithCheck = COUNT(Z.strLocation)
+INTO #tmpLocationCountWithCheck
+FROM tblTMSite Z
+INNER JOIN tblTMCustomer Y ON Z.intCustomerID = Y.intCustomerID
+INNER JOIN vwcusmst X on Y.intCustomerNumber = X.A4GLIdentity
+INNER JOIN tblTMSiteDevice W ON Z.intSiteID =W.intSiteID
+INNER JOIN tblTMDevice V ON W.intDeviceId = V.intDeviceId
+INNER JOIN tblTMDeviceType U ON ISNULL(V.intDeviceTypeId,0) = ISNULL(U.intDeviceTypeId,-1)
+LEFT JOIN tblTMTankType T ON ISNULL(V.intTankTypeId,0) = ISNULL(T.intTankTypeId,-1)
+INNER JOIN #tmpEventGasCheck FF ON Z.intSiteID = FF.intSiteID
+WHERE
+	V.ysnAppliance = 0
+	AND V.intInventoryStatusTypeId = (SELECT TOP 1 intInventoryStatusTypeId FROM tblTMInventoryStatusType WHERE strInventoryStatusType = ''Out'' AND ysnDefault = 1) 
+	AND U.strDeviceType = ''Tank'' 
+	' + ISNULL(@WhereClause1,'') + '
+GROUP BY Z.strLocation
+
 SELECT 
  *
  ,intGrandTotalTanks = ' + CAST(@intGrandTotalTanks AS NVARCHAR(20)) + '
  ,intGrandTotalWithCheck = ' + CAST(@intGrandTotalWithCheck AS NVARCHAR(20)) + '
- ,dblGrandPercentWithCheck = ' + CAST((CAST(@intGrandTotalWithCheck AS NUMERIC(5,2)) / CAST(@intGrandTotalTanks AS NUMERIC(5,2))) AS NVARCHAR(20))  + '
- ,dblGrandPercentWithOutCheck = ' + CAST(1 - (CAST(@intGrandTotalWithCheck AS NUMERIC(5,2)) / CAST(@intGrandTotalTanks AS NUMERIC(5,2))) AS NVARCHAR(20))  + '
- ,dblLocationPercentWithCheck = CAST(intLocationTotalWithCheck AS NUMERIC(5,2)) / CAST(intLocationTotalTanks AS NUMERIC(5,2))
- ,dblLocationPercentWithOutCheck = 1 - (CAST(intLocationTotalWithCheck AS NUMERIC(5,2)) / CAST(intLocationTotalTanks AS NUMERIC(5,2)))
+ ,dblGrandPercentWithCheck = ' + CAST((CAST((CAST(@intGrandTotalWithCheck AS NUMERIC(18,6)) / CAST(@intGrandTotalTanks AS NUMERIC(18,6))) AS NUMERIC(18,6))) AS NVARCHAR(20)) + '  
+ ,dblGrandPercentWithOutCheck = ' + CAST((CAST(1 - (CAST(@intGrandTotalWithCheck AS NUMERIC(18,6)) / CAST(@intGrandTotalTanks AS NUMERIC(18,6))) AS NUMERIC(18,6))) AS NVARCHAR(20)) + '  
+ ,dblLocationPercentWithCheck = CAST((CAST(intLocationTotalWithCheck AS NUMERIC(18,6)) / CAST(intLocationTotalTanks AS NUMERIC(18,6))) AS NUMERIC(18,6))  
+ ,dblLocationPercentWithOutCheck = CAST((1 - (CAST(intLocationTotalWithCheck AS NUMERIC(18,6)) / CAST(intLocationTotalTanks AS NUMERIC(18,6)))) AS NUMERIC(18,6))  
 FROM
 (
 	SELECT 
@@ -443,61 +490,33 @@ FROM
 	, E.strSerialNumber
 	, E.dblTankSize
 	, E.strOwnership
-	,(Select Top 1 tt.strTankType From tblTMTankType tt Where tt.intTankTypeId = E.intTankTypeId) AS [strTankType]
+	, H.strTankType AS [strTankType]
 	, (Case C.ysnActive
 		When 1 then
 			''Active''
 		When 0 then
 			''Inactive''
-		End) as SiteStatus
+		End) as strSiteStatus
 	, (Case B.vwcus_active_yn
 		When ''Y'' then
 			''Active''
 		When ''N'' then
 			''Inactive''
-		End) as CustomerStatus
-	,(CASE WHEN (EXISTS(SELECT TOP 1 1 FROM tblTMEvent WHERE tblTMEvent.intSiteID = C.intSiteID 
-															AND intDeviceId = E.intDeviceId
-															AND tblTMEvent.intEventTypeID = (SELECT intEventTypeID FROM tblTMEventType WHERE strEventType = ''Event-003'' AND ysnDefault = 1)))
-					THEN 1 ELSE 0 END)as ysnHasLeakGasCheck
-	,(SELECT Top 1 dtmDate FROM tblTMEvent WHERE tblTMEvent.intDeviceId = D.intDeviceId AND tblTMEvent.intEventTypeID = (SELECT intEventTypeID FROM tblTMEventType WHERE strEventType = ''Event-003'' AND ysnDefault = 1) order by dtmDate Desc)as dtmDate
-	,intLocationTotalTanks = (	SELECT TOP 1 COUNT(Z.strLocation)
-						FROM tblTMSite Z
-						INNER JOIN tblTMCustomer Y ON Z.intCustomerID = Y.intCustomerID
-						INNER JOIN vwcusmst X on Y.intCustomerNumber = X.A4GLIdentity
-						INNER JOIN tblTMSiteDevice W ON Z.intSiteID =W.intSiteID
-						INNER JOIN tblTMDevice V ON W.intDeviceId = V.intDeviceId
-						INNER JOIN tblTMDeviceType U ON ISNULL(V.intDeviceTypeId,0) = ISNULL(U.intDeviceTypeId,-1)
-						LEFT JOIN tblTMTankType T ON ISNULL(V.intTankTypeId,0) = ISNULL(T.intTankTypeId,-1)
-						WHERE
-							V.ysnAppliance = 0
-							AND V.intInventoryStatusTypeId = (SELECT TOP 1 intInventoryStatusTypeId FROM tblTMInventoryStatusType WHERE strInventoryStatusType = ''Out'' AND ysnDefault = 1) 
-							AND U.strDeviceType = ''Tank'' 
-							AND Z.strLocation = C.strLocation 
-							' + ISNULL(@WhereClause1,'') + '
-					 )
-	,intLocationTotalWithCheck = (	SELECT TOP 1 COUNT(Z.strLocation)
-						FROM tblTMSite Z
-						INNER JOIN tblTMCustomer Y ON Z.intCustomerID = Y.intCustomerID
-						INNER JOIN vwcusmst X on Y.intCustomerNumber = X.A4GLIdentity
-						INNER JOIN tblTMSiteDevice W ON Z.intSiteID =W.intSiteID
-						INNER JOIN tblTMDevice V ON W.intDeviceId = V.intDeviceId
-						INNER JOIN tblTMDeviceType U ON ISNULL(V.intDeviceTypeId,0) = ISNULL(U.intDeviceTypeId,-1)
-						LEFT JOIN tblTMTankType T ON ISNULL(V.intTankTypeId,0) = ISNULL(T.intTankTypeId,-1)
-						WHERE
-							V.ysnAppliance = 0
-							AND V.intInventoryStatusTypeId = (SELECT TOP 1 intInventoryStatusTypeId FROM tblTMInventoryStatusType WHERE strInventoryStatusType = ''Out'' AND ysnDefault = 1) 
-							AND U.strDeviceType = ''Tank'' 
-							AND Z.strLocation = C.strLocation 
-							AND (EXISTS(SELECT TOP 1 1 FROM tblTMEvent WHERE tblTMEvent.intDeviceId = V.intDeviceId AND tblTMEvent.intEventTypeID = (SELECT intEventTypeID FROM tblTMEventType WHERE strEventType = ''Event-003'' AND ysnDefault = 1)))
-							' + ISNULL(@WhereClause1,'') + '
-					 )
+		End) as strCustomerStatus
+	,(CASE WHEN(I.intSiteID IS NOT NULL)THEN 1 ELSE 0 END)as ysnHasLeakGasCheck
+	, I.dtmDate as dtmDate
+	,intLocationTotalTanks = ISNULL(JJ.LocationCount,0)
+	,intLocationTotalWithCheck = ISNULL(LL.TotalCountWithCheck,0)
 	FROM tblTMSite C
 	INNER JOIN tblTMCustomer A ON C.intCustomerID = A.intCustomerID
 	INNER JOIN vwcusmst B on A.intCustomerNumber = B.A4GLIdentity
 	INNER JOIN tblTMSiteDevice D ON C.intSiteID =D.intSiteID
 	INNER JOIN tblTMDevice E ON D.intDeviceId = E.intDeviceId 
 	INNER JOIN tblTMDeviceType G ON ISNULL(E.intDeviceTypeId,0) = ISNULL(G.intDeviceTypeId,-1) 
+	LEFT JOIN tblTMTankType H ON E.intTankTypeId = H.intTankTypeId
+	LEFT JOIN #tmpEventGasCheck I ON C.intSiteID = I.intSiteID
+	LEFT JOIN #tmpLocationCount JJ ON C.strLocation = JJ.strLocation
+	LEFT JOIN #tmpLocationCountWithCheck LL ON C.strLocation = LL.strLocation
 	WHERE
 	E.ysnAppliance = 0
 	and E.intInventoryStatusTypeId = (SELECT TOP 1 intInventoryStatusTypeId FROM tblTMInventoryStatusType WHERE strInventoryStatusType = ''Out'' AND ysnDefault = 1) 
