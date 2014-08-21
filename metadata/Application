@@ -6,7 +6,12 @@
     },
     "codeClass": null,
     "userConfig": {
-        "name": "Inventory"
+        "name": "Inventory",
+        "views": [
+            "Filter1",
+            "Statusbar1",
+            "StatusbarPaging1"
+        ]
     },
     "name": "Application",
     "designerId": "application"

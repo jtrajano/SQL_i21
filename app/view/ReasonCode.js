@@ -19,22 +19,29 @@ Ext.define('Inventory.view.ReasonCode', {
 
     requires: [
         'Inventory.view.ReasonCodeViewModel',
+        'Inventory.view.Filter',
         'Inventory.view.StatusbarPaging',
         'Ext.form.Panel',
-        'Ext.button.Button',
         'Ext.toolbar.Separator',
+        'Ext.tab.Panel',
+        'Ext.tab.Tab',
         'Ext.form.field.ComboBox',
         'Ext.form.field.Checkbox',
+        'Ext.grid.Panel',
+        'Ext.grid.column.Column',
+        'Ext.grid.View',
+        'Ext.selection.CheckboxModel',
         'Ext.toolbar.Paging'
     ],
 
     viewModel: {
         type: 'reasoncode'
     },
-    height: 312,
+    height: 335,
     hidden: false,
-    minWidth: 500,
-    width: 500,
+    minHeight: 335,
+    minWidth: 520,
+    width: 520,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
@@ -50,7 +57,7 @@ Ext.define('Inventory.view.ReasonCode', {
             margin: -1,
             width: 450,
             bodyBorder: false,
-            bodyPadding: 10,
+            bodyPadding: 5,
             header: false,
             trackResetOnLoad: true,
             layout: {
@@ -148,66 +155,148 @@ Ext.define('Inventory.view.ReasonCode', {
             ],
             items: [
                 {
-                    xtype: 'container',
-                    flex: 1.25,
-                    margin: '0 5 0 0',
-                    width: 1014,
-                    layout: {
-                        type: 'vbox',
-                        align: 'stretch'
-                    },
+                    xtype: 'tabpanel',
+                    flex: 1,
+                    itemId: 'tabReasonCode',
+                    activeTab: 0,
+                    plain: true,
                     items: [
                         {
-                            xtype: 'container',
-                            margin: '0 0 5 0',
-                            layout: 'hbox',
+                            xtype: 'panel',
+                            title: 'Details',
+                            layout: {
+                                type: 'vbox',
+                                align: 'stretch',
+                                padding: 7
+                            },
                             items: [
                                 {
-                                    xtype: 'textfield',
-                                    flex: 1,
-                                    itemId: 'txtReasonCode',
-                                    fieldLabel: 'Reason Code',
-                                    labelWidth: 130
-                                },
-                                {
-                                    xtype: 'combobox',
-                                    itemId: 'cboType',
-                                    margin: '0 0 0 5',
-                                    width: 175,
-                                    fieldLabel: 'Type',
-                                    labelWidth: 40
+                                    xtype: 'container',
+                                    flex: 1.25,
+                                    margin: '0 5 0 0',
+                                    width: 1014,
+                                    layout: {
+                                        type: 'vbox',
+                                        align: 'stretch'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'container',
+                                            margin: '0 0 5 0',
+                                            layout: 'hbox',
+                                            items: [
+                                                {
+                                                    xtype: 'textfield',
+                                                    flex: 1,
+                                                    itemId: 'txtReasonCode',
+                                                    fieldLabel: 'Reason Code',
+                                                    labelWidth: 130
+                                                },
+                                                {
+                                                    xtype: 'combobox',
+                                                    itemId: 'cboType',
+                                                    margin: '0 0 0 5',
+                                                    width: 175,
+                                                    fieldLabel: 'Type',
+                                                    labelWidth: 40
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            xtype: 'textfield',
+                                            itemId: 'txtDescription',
+                                            fieldLabel: 'Description',
+                                            labelWidth: 130
+                                        },
+                                        {
+                                            xtype: 'combobox',
+                                            itemId: 'cboLotTransactionType',
+                                            fieldLabel: 'Lot Transaction Type',
+                                            labelWidth: 130
+                                        },
+                                        {
+                                            xtype: 'checkboxfield',
+                                            itemId: 'chkDefault',
+                                            fieldLabel: 'Default',
+                                            labelWidth: 130
+                                        },
+                                        {
+                                            xtype: 'checkboxfield',
+                                            itemId: 'chkReduceAvailableTime',
+                                            fieldLabel: 'Reduce Available Time',
+                                            labelWidth: 130
+                                        },
+                                        {
+                                            xtype: 'checkboxfield',
+                                            itemId: 'chkExplanationRequired',
+                                            fieldLabel: 'Explanation Required',
+                                            labelWidth: 130
+                                        }
+                                    ]
                                 }
                             ]
                         },
                         {
-                            xtype: 'textfield',
-                            itemId: 'txtDescription',
-                            fieldLabel: 'Description',
-                            labelWidth: 130
-                        },
-                        {
-                            xtype: 'combobox',
-                            itemId: 'cboLotTransactionType',
-                            fieldLabel: 'Lot Transaction Type',
-                            labelWidth: 130
-                        },
-                        {
-                            xtype: 'checkboxfield',
-                            itemId: 'chkDefault',
-                            fieldLabel: 'Default',
-                            labelWidth: 130
-                        },
-                        {
-                            xtype: 'checkboxfield',
-                            itemId: 'chkReduceAvailableTime',
-                            fieldLabel: 'Reduce Available Time',
-                            labelWidth: 130
-                        },
-                        {
-                            xtype: 'checkboxfield',
-                            itemId: 'chkExplanationRequired',
-                            fieldLabel: 'Explanation Required',
-                            labelWidth: 130
+                            xtype: 'panel',
+                            title: 'Work Center Mapping',
+                            layout: {
+                                type: 'vbox',
+                                align: 'stretch'
+                            },
+                            items: [
+                                {
+                                    xtype: 'gridpanel',
+                                    flex: 1,
+                                    itemId: 'grdWorkcenter',
+                                    margin: -1,
+                                    dockedItems: [
+                                        {
+                                            xtype: 'toolbar',
+                                            dock: 'top',
+                                            itemId: 'tlbGridOptions1',
+                                            layout: {
+                                                type: 'hbox',
+                                                padding: '0 0 0 1'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'button',
+                                                    tabIndex: -1,
+                                                    itemId: 'btnDelete',
+                                                    iconCls: 'small-edit',
+                                                    text: 'Edit'
+                                                },
+                                                {
+                                                    xtype: 'tbseparator'
+                                                },
+                                                {
+                                                    xtype: 'filter'
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    columns: [
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'string',
+                                            text: 'Reason Code',
+                                            flex: 1
+                                        },
+                                        {
+                                            xtype: 'gridcolumn',
+                                            dataIndex: 'string',
+                                            text: 'Workcenter',
+                                            flex: 1
+                                        }
+                                    ],
+                                    viewConfig: {
+                                        itemId: 'grvWorkcenter'
+                                    },
+                                    selModel: {
+                                        selType: 'checkboxmodel'
+                                    }
+                                }
+                            ]
                         }
                     ]
                 }
