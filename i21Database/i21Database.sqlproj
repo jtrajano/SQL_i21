@@ -592,7 +592,9 @@
     <Build Include="dbo\Tables\tblARCustomerToContact.sql" />
     <Build Include="dbo\Tables\tblAPVendorToContact.sql" />
     <Build Include="dbo\Tables\tblICItem.sql" />	
-	<Build Include="dbo\Tables\tblCMBankFileAudit.sql" />	
+  	<Build Include="dbo\Tables\tblCMBankFileAudit.sql" />	
+    <Build Include="dbo\Views\vyuFRMColumnDescription.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRMColumnDescription.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="i21Database.publish.xml" />
@@ -626,5 +628,12 @@
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Views\vyuARCustomer.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
   </ItemGroup>
 </Project>
