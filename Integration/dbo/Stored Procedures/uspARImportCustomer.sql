@@ -40,7 +40,7 @@ EXEC(
 			agcus_city = Loc.strCity,
 			agcus_state = Loc.strState,
 			agcus_zip = Loc.strZipCode,
-			agcus_country = (CASE WHEN LEN(Loc.strCountry) = 3 THEN Loc.strCountry ELSE '''' END)as strCountry,
+			agcus_country = (CASE WHEN LEN(Loc.strCountry) = 3 THEN Loc.strCountry ELSE '''' END),
 			--Contact
 			agcus_contact = (SELECT strName FROM tblEntity WHERE intEntityId = Con.intEntityId),
 			agcus_phone = Con.strPhone,
@@ -571,7 +571,7 @@ EXEC(
 			ptcus_city = Loc.strCity,
 			ptcus_state = Loc.strState,
 			ptcus_zip = Loc.strZipCode,
-			ptcus_country = (CASE WHEN LEN(Loc.strCountry) = 10 THEN Loc.strCountry ELSE '''' END)as strCountry,
+			ptcus_country = (CASE WHEN LEN(Loc.strCountry) = 10 THEN Loc.strCountry ELSE '''' END),
 			--Contact
 			ptcus_contact = (SELECT strName FROM tblEntity WHERE intEntityId = Con.intEntityId),
 			ptcus_phone = Con.strPhone,
