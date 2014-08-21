@@ -40,7 +40,7 @@ EXEC(
 			agcus_city = Loc.strCity,
 			agcus_state = Loc.strState,
 			agcus_zip = Loc.strZipCode,
-			agcus_country = Loc.strCountry,
+			agcus_country = (CASE WHEN LEN(Loc.strCountry) = 3 THEN Loc.strCountry ELSE '''' END)as strCountry,
 			--Contact
 			agcus_contact = (SELECT strName FROM tblEntity WHERE intEntityId = Con.intEntityId),
 			agcus_phone = Con.strPhone,
@@ -146,7 +146,7 @@ EXEC(
 			Loc.strCity,
 			Loc.strState,
 			Loc.strZipCode,
-			Loc.strCountry,
+			(CASE WHEN LEN(Loc.strCountry) = 3 THEN Loc.strCountry ELSE '''' END)as strCountry,
 			--Customer
 			Cus.strCustomerNumber,
 			(CASE WHEN Cus.strType = ''Company'' THEN ''C'' ELSE ''P'' END) AS strType,
@@ -571,7 +571,7 @@ EXEC(
 			ptcus_city = Loc.strCity,
 			ptcus_state = Loc.strState,
 			ptcus_zip = Loc.strZipCode,
-			ptcus_country = Loc.strCountry,
+			ptcus_country = (CASE WHEN LEN(Loc.strCountry) = 10 THEN Loc.strCountry ELSE '''' END)as strCountry,
 			--Contact
 			ptcus_contact = (SELECT strName FROM tblEntity WHERE intEntityId = Con.intEntityId),
 			ptcus_phone = Con.strPhone,
@@ -674,7 +674,7 @@ EXEC(
 			Loc.strCity,
 			Loc.strState,
 			Loc.strZipCode,
-			Loc.strCountry,
+			(CASE WHEN LEN(Loc.strCountry) = 10 THEN Loc.strCountry ELSE '''' END)as strCountry,
 			--Customer
 			Cus.strCustomerNumber,
 			(CASE WHEN Cus.strType = ''Company'' THEN ''C'' ELSE ''P'' END) AS strType,
