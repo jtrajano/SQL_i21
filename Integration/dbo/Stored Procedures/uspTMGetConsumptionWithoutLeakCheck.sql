@@ -46,7 +46,7 @@ BEGIN
 	--DECLARE @xmlParam NVARCHAR(MAX)
 	--set @xmlParam = '<?xml version="1.0" encoding="utf-16"?><xmlparam />'
 	--set @xmlParam = '<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>strLocation</fieldname><condition>Between</condition><from></from><to></to><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>dtmDate</fieldname><condition>Between</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>Date</datatype></filter><filter><fieldname>strCustomerStatus</fieldname><condition>Equal To</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>strSiteStatus</fieldname><condition>Equal To</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>strOwnership</fieldname><condition>Equal To</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>strTankType</fieldname><condition>Equal To</condition><from>D</from><to></to><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter></filters></xmlparam>'
-	
+	 
 	SET NOCOUNT ON;
 	IF (ISNULL(@xmlParam,'') = '')
 	BEGIN 
