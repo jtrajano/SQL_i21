@@ -504,7 +504,9 @@ EXEC(
 				
 			UPDATE tblARCustomer 
 			SET intDefaultContactId = @CustomerToContactId, 
-				intDefaultLocationId = @EntityLocationId
+				intDefaultLocationId = @EntityLocationId,
+				intBillToId = @EntityLocationId,
+				intShipToId = @EntityLocationId,
 			WHERE intEntityId = @EntityId 
 		
 			IF(@@ERROR <> 0) 
@@ -1027,7 +1029,9 @@ EXEC(
 			
 			UPDATE tblARCustomer 
 			SET intDefaultContactId = @CustomerToContactId, 
-				intDefaultLocationId = @EntityLocationId
+				intDefaultLocationId = @EntityLocationId,
+				intBillToId = @EntityLocationId,
+				intShipToId = @EntityLocationId,
 			WHERE intEntityId = @EntityId 
 	
 		
