@@ -49,7 +49,6 @@
     [intFreightVendorId] INT NULL, 
     CONSTRAINT [PK_tblICItem] PRIMARY KEY CLUSTERED ([intItemId] ASC),
 	UNIQUE NONCLUSTERED ([strItemNo] ASC)
-
 )
 
 GO
