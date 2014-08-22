@@ -34,6 +34,8 @@ Ext.define('Inventory.view.Item', {
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
         'Ext.form.field.Checkbox',
+        'Ext.form.field.Number',
+        'Ext.form.field.Date',
         'Ext.grid.column.Date',
         'Ext.toolbar.Paging'
     ],
@@ -806,76 +808,88 @@ Ext.define('Inventory.view.Item', {
                                                                 },
                                                                 items: [
                                                                     {
-                                                                        xtype: 'textfield',
-                                                                        itemId: 'txtOrderUpcNo',
-                                                                        fieldLabel: 'Order UPC No',
-                                                                        labelWidth: 125
+                                                                        xtype: 'panel',
+                                                                        height: 254,
+                                                                        bodyPadding: 5,
+                                                                        title: 'General',
+                                                                        layout: {
+                                                                            type: 'vbox',
+                                                                            align: 'stretch'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'textfield',
+                                                                                itemId: 'txtOrderUpcNo',
+                                                                                fieldLabel: 'Order UPC No',
+                                                                                labelWidth: 130
+                                                                            },
+                                                                            {
+                                                                                xtype: 'combobox',
+                                                                                itemId: 'cboCaseUom',
+                                                                                fieldLabel: 'Case UOM',
+                                                                                labelWidth: 130
+                                                                            },
+                                                                            {
+                                                                                xtype: 'textfield',
+                                                                                itemId: 'txtNacsCategory',
+                                                                                fieldLabel: 'NACS Category',
+                                                                                labelWidth: 130
+                                                                            },
+                                                                            {
+                                                                                xtype: 'combobox',
+                                                                                itemId: 'cboProductCode',
+                                                                                fieldLabel: 'Product Code',
+                                                                                labelWidth: 130
+                                                                            },
+                                                                            {
+                                                                                xtype: 'combobox',
+                                                                                itemId: 'cboWicCode',
+                                                                                fieldLabel: 'WIC Code',
+                                                                                labelWidth: 130
+                                                                            },
+                                                                            {
+                                                                                xtype: 'combobox',
+                                                                                itemId: 'cboAgCategory',
+                                                                                fieldLabel: 'AG Category',
+                                                                                labelWidth: 130
+                                                                            },
+                                                                            {
+                                                                                xtype: 'checkboxfield',
+                                                                                itemId: 'chkReceiptCommentReq',
+                                                                                fieldLabel: 'Receipt Comment Req',
+                                                                                labelWidth: 130
+                                                                            },
+                                                                            {
+                                                                                xtype: 'combobox',
+                                                                                itemId: 'txtCountCode',
+                                                                                fieldLabel: 'Count Code',
+                                                                                labelWidth: 130
+                                                                            }
+                                                                        ]
                                                                     },
                                                                     {
-                                                                        xtype: 'combobox',
-                                                                        itemId: 'cboCaseUom',
-                                                                        fieldLabel: 'Case UOM',
-                                                                        labelWidth: 125
-                                                                    },
-                                                                    {
-                                                                        xtype: 'textfield',
-                                                                        itemId: 'txtVendorCategory',
-                                                                        fieldLabel: 'Vendor Category',
-                                                                        labelWidth: 125
-                                                                    },
-                                                                    {
-                                                                        xtype: 'textfield',
-                                                                        itemId: 'txtNacsCategory',
-                                                                        fieldLabel: 'NACS Category',
-                                                                        labelWidth: 125
-                                                                    },
-                                                                    {
-                                                                        xtype: 'combobox',
-                                                                        itemId: 'cboFamily',
-                                                                        fieldLabel: 'Family',
-                                                                        labelWidth: 125
-                                                                    },
-                                                                    {
-                                                                        xtype: 'combobox',
-                                                                        itemId: 'cboClass',
-                                                                        fieldLabel: 'Class',
-                                                                        labelWidth: 125
-                                                                    },
-                                                                    {
-                                                                        xtype: 'combobox',
-                                                                        itemId: 'cboProductCode',
-                                                                        fieldLabel: 'Product Code',
-                                                                        labelWidth: 125
-                                                                    },
-                                                                    {
-                                                                        xtype: 'combobox',
-                                                                        itemId: 'cboWicCode',
-                                                                        fieldLabel: 'WIC Code',
-                                                                        labelWidth: 125
-                                                                    },
-                                                                    {
-                                                                        xtype: 'checkboxfield',
-                                                                        itemId: 'chkDepositRequired',
-                                                                        fieldLabel: 'Deposit Required',
-                                                                        labelWidth: 125
-                                                                    },
-                                                                    {
-                                                                        xtype: 'checkboxfield',
-                                                                        itemId: 'chkScalable',
-                                                                        fieldLabel: 'Saleable',
-                                                                        labelWidth: 125
-                                                                    },
-                                                                    {
-                                                                        xtype: 'checkboxfield',
-                                                                        itemId: 'chkPromotionalItem',
-                                                                        fieldLabel: 'Promotional Item',
-                                                                        labelWidth: 125
-                                                                    },
-                                                                    {
-                                                                        xtype: 'combobox',
-                                                                        itemId: 'cboPromotionalItem',
-                                                                        fieldLabel: 'Promotion Item',
-                                                                        labelWidth: 125
+                                                                        xtype: 'panel',
+                                                                        flex: 1,
+                                                                        margin: '5 0 0 0 ',
+                                                                        bodyPadding: 5,
+                                                                        title: 'Commision Detail',
+                                                                        layout: {
+                                                                            type: 'vbox',
+                                                                            align: 'stretch'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'checkboxfield',
+                                                                                itemId: 'chkReceiptCommentReq4',
+                                                                                fieldLabel: 'Commisionable',
+                                                                                labelWidth: 130
+                                                                            },
+                                                                            {
+                                                                                xtype: 'combobox',
+                                                                                fieldLabel: 'Special Commission',
+                                                                                labelWidth: 130
+                                                                            }
+                                                                        ]
                                                                     }
                                                                 ]
                                                             },
@@ -889,58 +903,63 @@ Ext.define('Inventory.view.Item', {
                                                                 },
                                                                 items: [
                                                                     {
-                                                                        xtype: 'textfield',
-                                                                        itemId: 'txtBottleDepositNo',
-                                                                        fieldLabel: 'Bottle Deposit No',
-                                                                        labelWidth: 130
-                                                                    },
-                                                                    {
-                                                                        xtype: 'checkboxfield',
-                                                                        itemId: 'chkOpenPricePlu',
-                                                                        fieldLabel: 'Open Price PLU',
-                                                                        labelWidth: 130
-                                                                    },
-                                                                    {
-                                                                        xtype: 'checkboxfield',
-                                                                        itemId: 'chkLinkedItem',
-                                                                        fieldLabel: 'Linked Item',
-                                                                        labelWidth: 130
-                                                                    },
-                                                                    {
-                                                                        xtype: 'combobox',
-                                                                        itemId: 'cboAgCategory',
-                                                                        fieldLabel: 'AG Category',
-                                                                        labelWidth: 130
-                                                                    },
-                                                                    {
-                                                                        xtype: 'checkboxfield',
-                                                                        itemId: 'chkReceiptCommentReq',
-                                                                        fieldLabel: 'Receipt Comment Req',
-                                                                        labelWidth: 130
-                                                                    },
-                                                                    {
-                                                                        xtype: 'textfield',
-                                                                        itemId: 'txtCountCode',
-                                                                        fieldLabel: 'Count Code',
-                                                                        labelWidth: 130
-                                                                    },
-                                                                    {
-                                                                        xtype: 'checkboxfield',
-                                                                        itemId: 'chkCountBySlNo',
-                                                                        fieldLabel: 'Count by Sl. No',
-                                                                        labelWidth: 130
-                                                                    },
-                                                                    {
-                                                                        xtype: 'textfield',
-                                                                        itemId: 'txtSerialNumberBegin',
-                                                                        fieldLabel: 'Serial Number Begin',
-                                                                        labelWidth: 130
-                                                                    },
-                                                                    {
-                                                                        xtype: 'textfield',
-                                                                        itemId: 'txtSerialNumberEnd',
-                                                                        fieldLabel: 'Serial Number End',
-                                                                        labelWidth: 130
+                                                                        xtype: 'panel',
+                                                                        flex: 1,
+                                                                        bodyPadding: 5,
+                                                                        title: 'Inventory Setup Group',
+                                                                        layout: {
+                                                                            type: 'vbox',
+                                                                            align: 'stretch'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'checkboxfield',
+                                                                                itemId: 'chkReceiptCommentReq1',
+                                                                                fieldLabel: 'Landed Cost',
+                                                                                labelWidth: 130
+                                                                            },
+                                                                            {
+                                                                                xtype: 'textfield',
+                                                                                itemId: 'txtCountCode1',
+                                                                                fieldLabel: 'Lead Time',
+                                                                                labelWidth: 130
+                                                                            },
+                                                                            {
+                                                                                xtype: 'checkboxfield',
+                                                                                itemId: 'chkReceiptCommentReq2',
+                                                                                fieldLabel: 'Taxable',
+                                                                                labelWidth: 130
+                                                                            },
+                                                                            {
+                                                                                xtype: 'textfield',
+                                                                                itemId: 'txtCountCode2',
+                                                                                fieldLabel: 'Keywords',
+                                                                                labelWidth: 130
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numberfield',
+                                                                                fieldLabel: 'Case Qty',
+                                                                                labelWidth: 130,
+                                                                                hideTrigger: true
+                                                                            },
+                                                                            {
+                                                                                xtype: 'datefield',
+                                                                                fieldLabel: 'Date Ship',
+                                                                                labelWidth: 130
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numberfield',
+                                                                                fieldLabel: 'Tax Exempt',
+                                                                                labelWidth: 130,
+                                                                                hideTrigger: true
+                                                                            },
+                                                                            {
+                                                                                xtype: 'checkboxfield',
+                                                                                itemId: 'chkReceiptCommentReq3',
+                                                                                fieldLabel: 'Drop Ship',
+                                                                                labelWidth: 130
+                                                                            }
+                                                                        ]
                                                                     }
                                                                 ]
                                                             },

@@ -1843,199 +1843,205 @@
                                                     "designerId": "0dfb4ea8-2850-49db-a347-c43fa14fd2e1",
                                                     "cn": [
                                                         {
-                                                            "type": "Ext.form.field.Text",
+                                                            "type": "Ext.panel.Panel",
                                                             "reference": {
                                                                 "name": "items",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "fieldLabel": "Order UPC No",
-                                                                "itemId": "txtOrderUpcNo",
-                                                                "labelWidth": 125,
-                                                                "layout|flex": null
+                                                                "bodyPadding": 5,
+                                                                "container|align": "stretch",
+                                                                "height": 254,
+                                                                "layout": "vbox",
+                                                                "layout|flex": null,
+                                                                "title": "General"
                                                             },
-                                                            "name": "MyTextField8",
-                                                            "designerId": "b2cd731f-c9c2-432f-9c85-eb6def174e34"
+                                                            "name": "MyPanel28",
+                                                            "designerId": "5e1623d9-186b-47b5-b389-428b388621fb",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.Text",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Order UPC No",
+                                                                        "itemId": "txtOrderUpcNo",
+                                                                        "labelWidth": 130,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "name": "MyTextField8",
+                                                                    "designerId": "b2cd731f-c9c2-432f-9c85-eb6def174e34"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Case UOM",
+                                                                        "itemId": "cboCaseUom",
+                                                                        "labelWidth": 130,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "name": "MyComboBox21",
+                                                                    "designerId": "74408f32-bff1-4f1d-91fc-e8013ff9aadb"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.Text",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "NACS Category",
+                                                                        "itemId": "txtNacsCategory",
+                                                                        "labelWidth": 130,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "name": "MyTextField10",
+                                                                    "designerId": "c7516f3f-c657-4737-81ff-ff508caed194"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Product Code",
+                                                                        "itemId": "cboProductCode",
+                                                                        "labelWidth": 130,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "name": "MyComboBox24",
+                                                                    "designerId": "567ecaa3-77d0-4409-97d5-f25289641d79"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "WIC Code",
+                                                                        "itemId": "cboWicCode",
+                                                                        "labelWidth": 130,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "name": "MyComboBox25",
+                                                                    "designerId": "efccb1bf-f068-42c5-a713-08f896d73eea"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "AG Category",
+                                                                        "itemId": "cboAgCategory",
+                                                                        "labelWidth": 130,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "name": "MyComboBox27",
+                                                                    "designerId": "00dcda8f-94e4-4c14-86b5-03e2411f4835"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.Checkbox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "boxLabel": null,
+                                                                        "fieldLabel": "Receipt Comment Req",
+                                                                        "itemId": "chkReceiptCommentReq",
+                                                                        "labelWidth": 130,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "name": "MyCheckbox21",
+                                                                    "designerId": "4fe496f7-7117-4962-90fa-c21de9a576ab"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Count Code",
+                                                                        "itemId": "txtCountCode",
+                                                                        "labelWidth": 130,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "name": "MyComboBox19",
+                                                                    "designerId": "02c4f961-3c5e-494a-b987-38998d0859f8"
+                                                                }
+                                                            ]
                                                         },
                                                         {
-                                                            "type": "Ext.form.field.ComboBox",
+                                                            "type": "Ext.panel.Panel",
                                                             "reference": {
                                                                 "name": "items",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "fieldLabel": "Case UOM",
-                                                                "itemId": "cboCaseUom",
-                                                                "labelWidth": 125,
-                                                                "layout|flex": null
+                                                                "bodyPadding": 5,
+                                                                "container|align": "stretch",
+                                                                "layout": "vbox",
+                                                                "layout|flex": 1,
+                                                                "margin": "5 0 0 0 ",
+                                                                "title": "Commision Detail"
                                                             },
-                                                            "name": "MyComboBox21",
-                                                            "designerId": "74408f32-bff1-4f1d-91fc-e8013ff9aadb"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Text",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "fieldLabel": "Vendor Category",
-                                                                "itemId": "txtVendorCategory",
-                                                                "labelWidth": 125,
-                                                                "layout|flex": null
-                                                            },
-                                                            "name": "MyTextField9",
-                                                            "designerId": "8fd1938c-9163-480b-a7b7-3f8579b57225"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Text",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "fieldLabel": "NACS Category",
-                                                                "itemId": "txtNacsCategory",
-                                                                "labelWidth": 125,
-                                                                "layout|flex": null
-                                                            },
-                                                            "name": "MyTextField10",
-                                                            "designerId": "c7516f3f-c657-4737-81ff-ff508caed194"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "fieldLabel": "Family",
-                                                                "itemId": "cboFamily",
-                                                                "labelWidth": 125,
-                                                                "layout|flex": null
-                                                            },
-                                                            "name": "MyComboBox22",
-                                                            "designerId": "0b32fb81-ac79-45bc-a5da-4d0ff9b940bc"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "fieldLabel": "Class",
-                                                                "itemId": "cboClass",
-                                                                "labelWidth": 125,
-                                                                "layout|flex": null
-                                                            },
-                                                            "name": "MyComboBox23",
-                                                            "designerId": "cb9c3382-aec1-41dc-b51a-fc1593c98f60"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "fieldLabel": "Product Code",
-                                                                "itemId": "cboProductCode",
-                                                                "labelWidth": 125,
-                                                                "layout|flex": null
-                                                            },
-                                                            "name": "MyComboBox24",
-                                                            "designerId": "567ecaa3-77d0-4409-97d5-f25289641d79"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "fieldLabel": "WIC Code",
-                                                                "itemId": "cboWicCode",
-                                                                "labelWidth": 125,
-                                                                "layout|flex": null
-                                                            },
-                                                            "name": "MyComboBox25",
-                                                            "designerId": "efccb1bf-f068-42c5-a713-08f896d73eea"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Checkbox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "boxLabel": null,
-                                                                "fieldLabel": "Deposit Required",
-                                                                "itemId": "chkDepositRequired",
-                                                                "labelWidth": 125,
-                                                                "layout|flex": null
-                                                            },
-                                                            "name": "MyCheckbox16",
-                                                            "designerId": "9332ccb3-0ac0-4082-b5fa-3e1ede440527"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Checkbox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "boxLabel": null,
-                                                                "fieldLabel": "Saleable",
-                                                                "itemId": "chkScalable",
-                                                                "labelWidth": 125,
-                                                                "layout|flex": null
-                                                            },
-                                                            "name": "MyCheckbox17",
-                                                            "designerId": "84848238-f7f3-49e7-bf7e-def1e398d778"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Checkbox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "boxLabel": null,
-                                                                "fieldLabel": "Promotional Item",
-                                                                "itemId": "chkPromotionalItem",
-                                                                "labelWidth": 125,
-                                                                "layout|flex": null
-                                                            },
-                                                            "name": "MyCheckbox18",
-                                                            "designerId": "34782615-f990-4b6f-88f1-8a99f34a1ba3"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "fieldLabel": "Promotion Item",
-                                                                "itemId": "cboPromotionalItem",
-                                                                "labelWidth": 125,
-                                                                "layout|flex": null
-                                                            },
-                                                            "name": "MyComboBox26",
-                                                            "designerId": "b95ab177-335c-4f97-a31d-5778d0467f92"
+                                                            "name": "MyPanel27",
+                                                            "designerId": "5ccc47f1-4dd7-45cc-abf7-ba97af597c93",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.Checkbox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "boxLabel": null,
+                                                                        "fieldLabel": "Commisionable",
+                                                                        "itemId": "chkReceiptCommentReq4",
+                                                                        "labelWidth": 130,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "name": "MyCheckbox18",
+                                                                    "designerId": "05d7aaf7-b099-466c-bf9f-5d2ffdf86cb7"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Special Commission",
+                                                                        "labelWidth": 130,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "name": "MyComboBox18",
+                                                                    "designerId": "03909eba-b782-4808-a975-09b5c59ef6a9"
+                                                                }
+                                                            ]
                                                         }
                                                     ]
                                                 },
@@ -2058,152 +2064,154 @@
                                                     "designerId": "8d302e90-0dba-47ac-b42b-2b5b84776b3a",
                                                     "cn": [
                                                         {
-                                                            "type": "Ext.form.field.Text",
+                                                            "type": "Ext.panel.Panel",
                                                             "reference": {
                                                                 "name": "items",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "fieldLabel": "Bottle Deposit No",
-                                                                "itemId": "txtBottleDepositNo",
-                                                                "labelWidth": 130,
-                                                                "layout|flex": null
+                                                                "bodyPadding": 5,
+                                                                "container|align": "stretch",
+                                                                "layout": "vbox",
+                                                                "layout|flex": 1,
+                                                                "title": "Inventory Setup Group"
                                                             },
-                                                            "name": "MyTextField11",
-                                                            "designerId": "668642c1-3d5a-4d7b-8779-db24e7ca8052"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Checkbox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "boxLabel": null,
-                                                                "fieldLabel": "Open Price PLU",
-                                                                "itemId": "chkOpenPricePlu",
-                                                                "labelWidth": 130,
-                                                                "layout|flex": null
-                                                            },
-                                                            "name": "MyCheckbox19",
-                                                            "designerId": "f9214f7f-af97-4b37-b226-45a344499b31"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Checkbox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "boxLabel": null,
-                                                                "fieldLabel": "Linked Item",
-                                                                "itemId": "chkLinkedItem",
-                                                                "labelWidth": 130,
-                                                                "layout|flex": null
-                                                            },
-                                                            "name": "MyCheckbox20",
-                                                            "designerId": "46646bed-0327-4183-a9f0-98bcf5eb270c"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "fieldLabel": "AG Category",
-                                                                "itemId": "cboAgCategory",
-                                                                "labelWidth": 130,
-                                                                "layout|flex": null
-                                                            },
-                                                            "name": "MyComboBox27",
-                                                            "designerId": "00dcda8f-94e4-4c14-86b5-03e2411f4835"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Checkbox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "boxLabel": null,
-                                                                "fieldLabel": "Receipt Comment Req",
-                                                                "itemId": "chkReceiptCommentReq",
-                                                                "labelWidth": 130,
-                                                                "layout|flex": null
-                                                            },
-                                                            "name": "MyCheckbox21",
-                                                            "designerId": "4fe496f7-7117-4962-90fa-c21de9a576ab"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Text",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "fieldLabel": "Count Code",
-                                                                "itemId": "txtCountCode",
-                                                                "labelWidth": 130,
-                                                                "layout|flex": null
-                                                            },
-                                                            "name": "MyTextField12",
-                                                            "designerId": "02c4f961-3c5e-494a-b987-38998d0859f8"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Checkbox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "boxLabel": null,
-                                                                "fieldLabel": "Count by Sl. No",
-                                                                "itemId": "chkCountBySlNo",
-                                                                "labelWidth": 130,
-                                                                "layout|flex": null
-                                                            },
-                                                            "name": "MyCheckbox22",
-                                                            "designerId": "905baa3c-0582-4099-82ad-a370714d6d54"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Text",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "fieldLabel": "Serial Number Begin",
-                                                                "itemId": "txtSerialNumberBegin",
-                                                                "labelWidth": 130,
-                                                                "layout|flex": null
-                                                            },
-                                                            "name": "MyTextField13",
-                                                            "designerId": "d27eff89-e5dd-4fbe-b938-36668378dfc7"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Text",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "fieldLabel": "Serial Number End",
-                                                                "itemId": "txtSerialNumberEnd",
-                                                                "labelWidth": 130,
-                                                                "layout|flex": null
-                                                            },
-                                                            "name": "MyTextField14",
-                                                            "designerId": "347f9022-d494-45c6-9488-963b51bd4bce"
+                                                            "name": "MyPanel11",
+                                                            "designerId": "20c17664-35fb-419a-8a03-62a32d486036",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.Checkbox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "boxLabel": null,
+                                                                        "fieldLabel": "Landed Cost",
+                                                                        "itemId": "chkReceiptCommentReq1",
+                                                                        "labelWidth": 130,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "name": "MyCheckbox15",
+                                                                    "designerId": "8984b96a-d4e0-4223-a758-8fd4fd4ebbf6"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.Text",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Lead Time",
+                                                                        "itemId": "txtCountCode1",
+                                                                        "labelWidth": 130,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "name": "MyTextField9",
+                                                                    "designerId": "3d350dbe-3489-43a0-9632-205a4232b43a"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.Checkbox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "boxLabel": null,
+                                                                        "fieldLabel": "Taxable",
+                                                                        "itemId": "chkReceiptCommentReq2",
+                                                                        "labelWidth": 130,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "name": "MyCheckbox16",
+                                                                    "designerId": "f04ab63a-f500-412d-afb6-95c148328417"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.Text",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Keywords",
+                                                                        "itemId": "txtCountCode2",
+                                                                        "labelWidth": 130,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "name": "MyTextField11",
+                                                                    "designerId": "84887daf-ade1-4981-b96c-030f72bd9f9b"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.Number",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Case Qty",
+                                                                        "hideTrigger": true,
+                                                                        "labelWidth": 130,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "name": "MyNumberField",
+                                                                    "designerId": "0a8375ba-c05f-417c-adaf-f0774a3b7052"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.Date",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Date Ship",
+                                                                        "labelWidth": 130,
+                                                                        "layout|flex": null,
+                                                                        "width": null
+                                                                    },
+                                                                    "name": "MyDateField",
+                                                                    "designerId": "d2f233f3-164f-49a8-bea4-604b444af725"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.Number",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Tax Exempt",
+                                                                        "hideTrigger": true,
+                                                                        "labelWidth": 130,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "name": "MyNumberField1",
+                                                                    "designerId": "e6f85d3b-aa12-4d89-a994-bdc18025b13f"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.Checkbox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "boxLabel": null,
+                                                                        "fieldLabel": "Drop Ship",
+                                                                        "itemId": "chkReceiptCommentReq3",
+                                                                        "labelWidth": 130,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "name": "MyCheckbox17",
+                                                                    "designerId": "e4641df8-d669-4587-946f-f557450b8273"
+                                                                }
+                                                            ]
                                                         }
                                                     ]
                                                 },
