@@ -48,7 +48,7 @@
     [dblFreightRate] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [intFreightVendorId] INT NULL, 
     CONSTRAINT [PK_tblICItem] PRIMARY KEY CLUSTERED ([intItemId] ASC),
- UNIQUE NONCLUSTERED ([strItemNo] ASC)
+	UNIQUE NONCLUSTERED ([strItemNo] ASC)
 )
 
 GO
