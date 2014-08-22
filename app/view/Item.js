@@ -243,16 +243,10 @@ Ext.define('Inventory.view.Item', {
                                                             },
                                                             {
                                                                 xtype: 'textareafield',
+                                                                flex: 1,
                                                                 height: 62,
                                                                 itemId: 'txtDescription',
                                                                 fieldLabel: 'Description',
-                                                                labelWidth: 95
-                                                            },
-                                                            {
-                                                                xtype: 'textareafield',
-                                                                height: 62,
-                                                                itemId: 'txtPosDescription',
-                                                                fieldLabel: 'POS Description',
                                                                 labelWidth: 95
                                                             }
                                                         ]
@@ -268,13 +262,9 @@ Ext.define('Inventory.view.Item', {
                                                         items: [
                                                             {
                                                                 xtype: 'combobox',
-                                                                itemId: 'cboVendor',
-                                                                fieldLabel: 'Vendor'
-                                                            },
-                                                            {
-                                                                xtype: 'combobox',
                                                                 itemId: 'cboClass',
-                                                                fieldLabel: 'Class'
+                                                                fieldLabel: 'Class',
+                                                                labelWidth: 80
                                                             },
                                                             {
                                                                 xtype: 'container',
@@ -288,7 +278,8 @@ Ext.define('Inventory.view.Item', {
                                                                         xtype: 'combobox',
                                                                         flex: 1.4,
                                                                         itemId: 'cboManufacturer',
-                                                                        fieldLabel: 'Manufacturer'
+                                                                        fieldLabel: 'Manufacturer',
+                                                                        labelWidth: 80
                                                                     },
                                                                     {
                                                                         xtype: 'combobox',
@@ -303,12 +294,14 @@ Ext.define('Inventory.view.Item', {
                                                             {
                                                                 xtype: 'combobox',
                                                                 itemId: 'cboStatus',
-                                                                fieldLabel: 'Status'
+                                                                fieldLabel: 'Status',
+                                                                labelWidth: 80
                                                             },
                                                             {
                                                                 xtype: 'textfield',
                                                                 itemId: 'txtModelNo',
-                                                                fieldLabel: 'Model No'
+                                                                fieldLabel: 'Model No',
+                                                                labelWidth: 80
                                                             },
                                                             {
                                                                 xtype: 'container',
@@ -321,8 +314,9 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'combobox',
                                                                         flex: 1.4,
-                                                                        itemId: 'cboCostingMethod',
-                                                                        fieldLabel: 'Costing Method'
+                                                                        itemId: 'cboLotTracking',
+                                                                        fieldLabel: 'Lot Tracking',
+                                                                        labelWidth: 80
                                                                     },
                                                                     {
                                                                         xtype: 'combobox',
@@ -789,36 +783,6 @@ Ext.define('Inventory.view.Item', {
                                                                         itemId: 'chkMaterialFee',
                                                                         fieldLabel: 'Material Fee',
                                                                         labelWidth: 125
-                                                                    },
-                                                                    {
-                                                                        xtype: 'checkboxfield',
-                                                                        itemId: 'chkAutoCalcualteFreight',
-                                                                        fieldLabel: 'Auto Calculate Freight',
-                                                                        labelWidth: 125
-                                                                    },
-                                                                    {
-                                                                        xtype: 'combobox',
-                                                                        itemId: 'cboFreightMethod',
-                                                                        fieldLabel: 'Freight Method',
-                                                                        labelWidth: 125
-                                                                    },
-                                                                    {
-                                                                        xtype: 'textfield',
-                                                                        itemId: 'txtFreightRate',
-                                                                        fieldLabel: 'Freight Rate',
-                                                                        labelWidth: 125
-                                                                    },
-                                                                    {
-                                                                        xtype: 'combobox',
-                                                                        itemId: 'cboFreightVendor',
-                                                                        fieldLabel: 'Freight Vendor',
-                                                                        labelWidth: 125
-                                                                    },
-                                                                    {
-                                                                        xtype: 'combobox',
-                                                                        itemId: 'cboLotTracking',
-                                                                        fieldLabel: 'Lot Tracking',
-                                                                        labelWidth: 125
                                                                     }
                                                                 ]
                                                             }
@@ -1141,45 +1105,8 @@ Ext.define('Inventory.view.Item', {
                                                                         items: [
                                                                             {
                                                                                 xtype: 'panel',
-                                                                                bodyPadding: '0 5 4 5',
-                                                                                title: 'Default UOMs',
-                                                                                layout: {
-                                                                                    type: 'hbox',
-                                                                                    align: 'stretch'
-                                                                                },
-                                                                                items: [
-                                                                                    {
-                                                                                        xtype: 'combobox',
-                                                                                        flex: 1,
-                                                                                        itemId: 'txtCaseUom6',
-                                                                                        fieldLabel: 'Standard UOM',
-                                                                                        labelAlign: 'top',
-                                                                                        labelWidth: 125
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'combobox',
-                                                                                        flex: 1,
-                                                                                        itemId: 'txtCaseUom7',
-                                                                                        margin: '0 5',
-                                                                                        fieldLabel: 'Issue UOM',
-                                                                                        labelAlign: 'top',
-                                                                                        labelWidth: 125
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'combobox',
-                                                                                        flex: 1,
-                                                                                        itemId: 'txtCaseUom8',
-                                                                                        fieldLabel: 'Receive UOM',
-                                                                                        labelAlign: 'top',
-                                                                                        labelWidth: 125
-                                                                                    }
-                                                                                ]
-                                                                            },
-                                                                            {
-                                                                                xtype: 'panel',
                                                                                 flex: 1,
                                                                                 height: 306,
-                                                                                margin: '5 0 0 0',
                                                                                 bodyPadding: 7,
                                                                                 title: 'Warehouse Management',
                                                                                 layout: {
@@ -1496,6 +1423,20 @@ Ext.define('Inventory.view.Item', {
                                                                         xtype: 'gridcolumn',
                                                                         width: 215,
                                                                         dataIndex: 'string',
+                                                                        text: 'Location',
+                                                                        flex: 1.5
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        width: 215,
+                                                                        dataIndex: 'string',
+                                                                        text: 'Store',
+                                                                        flex: 1.5
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        width: 215,
+                                                                        dataIndex: 'string',
                                                                         text: 'Customer',
                                                                         flex: 1.5
                                                                     },
@@ -1558,6 +1499,20 @@ Ext.define('Inventory.view.Item', {
                                                                     }
                                                                 ],
                                                                 columns: [
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        width: 215,
+                                                                        dataIndex: 'string',
+                                                                        text: 'Location',
+                                                                        flex: 1.5
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        width: 215,
+                                                                        dataIndex: 'string',
+                                                                        text: 'Store',
+                                                                        flex: 1.5
+                                                                    },
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         width: 215,
@@ -1989,7 +1944,6 @@ Ext.define('Inventory.view.Item', {
                                                                 xtype: 'advancefiltergrid',
                                                                 itemId: 'grdStock',
                                                                 margin: -1,
-                                                                forceFit: true,
                                                                 dockedItems: [
                                                                     {
                                                                         xtype: 'toolbar',
@@ -2029,6 +1983,12 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        width: 100,
+                                                                        dataIndex: 'string',
+                                                                        text: 'Warehouse'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
                                                                         width: 45,
                                                                         dataIndex: 'string',
                                                                         text: 'Unit'
@@ -2041,7 +2001,7 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
-                                                                        width: 70,
+                                                                        width: 80,
                                                                         align: 'right',
                                                                         text: 'Committed'
                                                                     },
@@ -2053,19 +2013,19 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
-                                                                        width: 79,
+                                                                        width: 90,
                                                                         align: 'right',
                                                                         text: 'Reorder Point'
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
-                                                                        width: 62,
+                                                                        width: 70,
                                                                         align: 'right',
                                                                         text: 'Min Order'
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
-                                                                        width: 84,
+                                                                        width: 95,
                                                                         align: 'right',
                                                                         text: 'Suggested Qty'
                                                                     },
@@ -2083,7 +2043,7 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        width: 89,
+                                                                        width: 100,
                                                                         dataIndex: 'string',
                                                                         text: 'Inventory Group'
                                                                     }
