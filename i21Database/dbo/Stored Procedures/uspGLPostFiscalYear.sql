@@ -135,7 +135,7 @@ SELECT
 		,dblExchangeRate			= dblExchangeRate		
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= @dtmDateTo
-		,strJournalLineDescription	= NULL
+		,strJournalLineDescription	= ''
 		,intJournalLineNo			= 0
 		,ysnIsUnposted				= 0
 		,intConcurrencyId			= 1
@@ -233,7 +233,7 @@ SELECT
 		,dblExchangeRate		= @dblDailyRate		
 		,dtmDateEntered			= GETDATE()
 		,dtmTransactionDate		= @dtmDateTo
-		,strJournalLineDescription	= NULL
+		,strJournalLineDescription	= ''
 		,intJournalLineNo		= 0
 		,ysnIsUnposted			= 0
 		,intConcurrencyId		= 1
