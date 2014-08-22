@@ -68,7 +68,9 @@ BEGIN TRY
 		FROM (
 			SELECT 
 				RoleMenu.intUserRoleMenuId,
-				ysnVisible = (CASE WHEN EXISTS((SELECT TOP 1 1 FROM tblSMUserRoleMenu tmpA WHERE tmpA.intParentMenuId = RoleMenu.intUserRoleMenuId AND tmpA.intUserRoleId = @UserRoleID AND ysnVisible = 1)) THEN 1 ELSE 0 END)
+				ysnVisible = (CASE WHEN EXISTS((SELECT TOP 1 1 FROM tblSMUserRoleMenu tmpA WHERE tmpA.intParentMenuId = RoleMenu.intUserRoleMenuId AND tmpA.intUserRoleId = @UserRoleID AND ysnVisible = 1)) THEN 1 
+									WHEN Menu.ysnLeaf = 1 THEN RoleMenu.ysnVisible
+									ELSE 0 END)
 			FROM tblSMUserRoleMenu RoleMenu
 			LEFT JOIN tblSMMasterMenu Menu ON Menu.intMenuID = RoleMenu.intMenuId
 			WHERE RoleMenu.intUserRoleId = @UserRoleID

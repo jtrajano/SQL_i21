@@ -591,10 +591,10 @@
     <Build Include="dbo\Functions\fnHDDecodeComment.sql" />
     <Build Include="dbo\Tables\tblARCustomerToContact.sql" />
     <Build Include="dbo\Tables\tblAPVendorToContact.sql" />
-    <Build Include="dbo\Stored Procedures\uspFRMColumnDescription.sql" />
+    <Build Include="dbo\Tables\tblICItem.sql" />	
+  	<Build Include="dbo\Tables\tblCMBankFileAudit.sql" />	
     <Build Include="dbo\Views\vyuFRMColumnDescription.sql" />
-  </ItemGroup>
-  <ItemGroup>
+    <Build Include="dbo\Stored Procedures\uspFRMColumnDescription.sql" />
     <None Include="i21Database.publish.xml" />
     <None Include="i1410AG.local.publish.xml" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\7_EULA.sql" />
