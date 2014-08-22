@@ -70,6 +70,7 @@
     <Folder Include="Scripts\Pre-Deployment\7_AR" />
     <Folder Include="Scripts\Pre-Deployment\8_AP" />
     <Folder Include="Scripts\Pre-Deployment\9_FRD" />
+    <Folder Include="Scripts\Pre-Deployment\10_RPT" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1_DataCleanup.sql" />
@@ -86,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\Pre-Deployment\PreDeployment.sql" />
+    <None Include="Scripts\Pre-Deployment\10_RPT\1_1430_to_1430.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\1_TM\1_1320_to_1340.sql" />
