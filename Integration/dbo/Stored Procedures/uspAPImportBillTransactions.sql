@@ -98,7 +98,7 @@ BEGIN
 		OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid, inserted.strVendorOrderNumber INTO @InsertedData
 		--Unposted
 		SELECT
-			[intVendorId]			=	D.intEntityId,
+			[intVendorId]			=	D.intVendorId,
 			--[strVendorId]			=	A.aptrx_vnd_no,
 			--[strBillId] 			=	A.aptrx_ivc_no,
 			[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
@@ -134,7 +134,7 @@ BEGIN
 		--Posted
 		UNION
 		SELECT
-			[intVendorId]			=	D.intEntityId, 
+			[intVendorId]			=	D.intVendorId, 
 			--[strVendorId]			=	A.apivc_vnd_no,
 			--[strBillId] 			=	A.apivc_ivc_no,
 			[strVendorOrderNumber] 	=	A.apivc_ivc_no,
@@ -185,7 +185,7 @@ BEGIN
 			C.apegl_gl_amt
 		FROM tblAPBill A
 			INNER JOIN tblAPVendor B
-				ON A.intVendorId = B.intEntityId
+				ON A.intVendorId = B.intVendorId
 			INNER JOIN apeglmst C
 				ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = C.apegl_ivc_no COLLATE Latin1_General_CI_AS
 				AND B.strVendorId COLLATE Latin1_General_CI_AS = C.apegl_vnd_no COLLATE Latin1_General_CI_AS
@@ -197,7 +197,7 @@ BEGIN
 			C.aphgl_gl_amt
 			FROM tblAPBill A
 			INNER JOIN tblAPVendor B
-				ON A.intVendorId = B.intEntityId
+				ON A.intVendorId = B.intVendorId
 			INNER JOIN aphglmst C
 				ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = C.aphgl_ivc_no COLLATE Latin1_General_CI_AS
 				AND B.strVendorId COLLATE Latin1_General_CI_AS = C.aphgl_vnd_no COLLATE Latin1_General_CI_AS
@@ -216,7 +216,7 @@ BEGIN
 				A.intAccountId,
 				@IsPosted,
 				A.dblTotal,
-				A.intEntityId
+				@UserId
 			FROM tblAPBill A
 			WHERE A.intBillId = @BillId
 
@@ -251,7 +251,7 @@ BEGIN
 			AND A.apchk_rev_dt = B.apivc_chk_rev_dt
 			AND A.apchk_cbk_no = B.apivc_cbk_no
 		AND A.apchk_trx_ind <> ''O''
-			INNER JOIN (tblAPBill C INNER JOIN tblAPVendor D ON C.intVendorId = D.intEntityId)
+			INNER JOIN (tblAPBill C INNER JOIN tblAPVendor D ON C.intVendorId = D.intVendorId)
 				ON B.apivc_ivc_no COLLATE Latin1_General_CI_AS = C.strVendorOrderNumber COLLATE Latin1_General_CI_AS
 				AND B.apivc_vnd_no COLLATE Latin1_General_CI_AS = D.strVendorId COLLATE Latin1_General_CI_AS
 			--ORDER BY A.apchk_rev_dt, A.apchk_cbk_no, A.apchk_chk_no
@@ -288,7 +288,7 @@ BEGIN
 
 			SELECT TOP 1
 				@bankAccount = C.intBankAccountId,
-				@intVendorId = B.intEntityId,
+				@intVendorId = B.intVendorId,
 				@paymentInfo = A.apchk_chk_no,
 				@payment = A.apchk_chk_amt,
 				@datePaid = CASE WHEN ISDATE(A.apchk_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apchk_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
@@ -368,7 +368,7 @@ BEGIN
 			AND A.intBankAccountId = B.intBankAccountId
 			AND A.strReferenceNo = B.strPaymentInfo
 		INNER JOIN tblAPVendor C
-			ON B.intVendorId = C.intEntityId
+			ON B.intVendorId = C.intVendorId
 
 		SET @Total = @ImportedRecords;
 	END
@@ -397,7 +397,7 @@ BEGIN
 		OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid, inserted.strVendorOrderNumber INTO @InsertedData
 		--Unposted
 		SELECT
-			[intVendorId]			=	D.intEntityId,
+			[intVendorId]			=	D.intVendorId,
 			--[strVendorId]			=	A.aptrx_vnd_no,
 			--[strBillId] 			=	A.aptrx_ivc_no,
 			[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
@@ -437,7 +437,7 @@ BEGIN
 			--Posted
 --		UNION
 --		SELECT
---			[intVendorId]			=	D.intEntityId,
+--			[intVendorId]			=	D.intVendorId,
 --			--[strVendorId]			=	A.apivc_vnd_no,
 --			--[strBillId] 			=	A.apivc_ivc_no,
 --			[strVendorOrderNumber] 	=	A.apivc_ivc_no,
@@ -466,7 +466,7 @@ BEGIN
 --			INNER JOIN tblAPVendor D
 --				ON A.apivc_vnd_no COLLATE Latin1_General_CI_AS = D.strVendorId COLLATE Latin1_General_CI_AS
 --			LEFT JOIN tblAPBill E
---				ON D.intEntityId  = E.intVendorId
+--				ON D.intVendorId  = E.intVendorId
 --				AND A.apivc_ivc_no COLLATE Latin1_General_CI_AS = E.strVendorOrderNumber COLLATE Latin1_General_CI_AS
 --
 --		WHERE CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
@@ -490,7 +490,7 @@ BEGIN
 			C.apegl_gl_amt
 			FROM tblAPBill A
 				INNER JOIN tblAPVendor B
-					ON A.intVendorId = B.intEntityId
+					ON A.intVendorId = B.intVendorId
 				INNER JOIN apeglmst C
 					ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = C.apegl_ivc_no COLLATE Latin1_General_CI_AS
 					AND B.strVendorId COLLATE Latin1_General_CI_AS = C.apegl_vnd_no COLLATE Latin1_General_CI_AS
@@ -548,7 +548,7 @@ BEGIN
 				A.intAccountId,
 				@IsPosted,
 				A.dblTotal,
-				A.intEntityId
+				@UserId
 			FROM tblAPBill A
 			WHERE A.intBillId = @BillId
 
