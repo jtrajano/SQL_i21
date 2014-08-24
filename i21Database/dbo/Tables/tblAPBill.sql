@@ -32,9 +32,11 @@
     [intOrderById] INT NULL , 
     [intCurrencyId] INT NOT NULL DEFAULT 0,
     [ysnOrigin] BIT NOT NULL DEFAULT 0,
-    CONSTRAINT [PK_dbo.tblAPBill] PRIMARY KEY CLUSTERED ([intBillId] ASC),
-    CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPBillBatch_intBillBatchId] FOREIGN KEY ([intBillBatchId]) REFERENCES [dbo].[tblAPBillBatch] ([intBillBatchId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblSMTerm_intTermId] FOREIGN KEY ([intTermsId]) REFERENCES [dbo].[tblSMTerm] ([intTermID])
+    CONSTRAINT [PK_tblAPBill] PRIMARY KEY CLUSTERED ([intBillId] ASC),
+	CONSTRAINT [FK_tblAPBill_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intVendorId]),
+    CONSTRAINT [FK_tblAPBill_tblAPBillBatch_intBillBatchId] FOREIGN KEY ([intBillBatchId]) REFERENCES [dbo].[tblAPBillBatch] ([intBillBatchId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblAPBill_tblSMTerm_intTermId] FOREIGN KEY ([intTermsId]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),
+	--CONSTRAINT [FK_tblAPBill_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId])
 );
 
 
@@ -42,6 +44,10 @@ GO
 CREATE NONCLUSTERED INDEX [IX_intBillBatchId]
     ON [dbo].[tblAPBill]([intBillBatchId] ASC);
 
+GO
+
+ALTER TABLE dbo.tblAPBill
+NOCHECK CONSTRAINT [FK_tblAPBill_tblAPVendor];
 
 GO
 CREATE TRIGGER trgBillRecordNumber

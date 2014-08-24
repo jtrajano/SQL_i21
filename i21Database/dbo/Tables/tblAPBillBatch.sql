@@ -8,7 +8,8 @@
     [intUserId] INT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     [intEntityId] INT NOT NULL DEFAULT 0, 
-    CONSTRAINT [PK_dbo.tblAPBillBatches] PRIMARY KEY CLUSTERED ([intBillBatchId] ASC)
+    CONSTRAINT [PK_dbo.tblAPBillBatches] PRIMARY KEY CLUSTERED ([intBillBatchId] ASC),
+	--CONSTRAINT [FK_tblAPBillBatch_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId])
 );
 
 
