@@ -12,8 +12,7 @@
     [intUserId]              INT            NULL,
     [intOptionConcurrencyId] INT            NULL,
     [intConcurrencyId]       INT            CONSTRAINT [DF__tblRMOpti__intCo__703483B9] DEFAULT ((1)) NOT NULL,
-    CONSTRAINT [PK_dbo.Options] PRIMARY KEY CLUSTERED ([intOptionId] ASC),
-    CONSTRAINT [FK_tblRMOption_tblRMReport] FOREIGN KEY ([intReportId]) REFERENCES [dbo].[tblRMReport] ([intReportId]) ON DELETE CASCADE
+    CONSTRAINT [PK_dbo.Options] PRIMARY KEY CLUSTERED ([intOptionId] ASC)
 );
 
 
