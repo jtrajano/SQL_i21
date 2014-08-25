@@ -75,6 +75,9 @@ FROM tblAPPayment A
 ALTER TABLE dbo.tblAPPayment
 CHECK CONSTRAINT[FK_tblAPPayment_tblAPVendor];
 
+ALTER TABLE dbo.tblAPBill
+CHECK CONSTRAINT [FK_tblAPBill_tblAPVendor];
+
 IF @@ERROR <> 0 
 	OR @invalidVendor > 0 
 	OR @invalidContact > 0 

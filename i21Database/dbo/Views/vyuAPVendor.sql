@@ -5,6 +5,7 @@ SELECT
 	A.strName, 
 	A.strWebsite,
 	A.strInternalNotes,
+	B.intVendorId,
 	B.intCurrencyId,
 	B.intGLAccountExpenseId,
 	F.strAccountId AS strExpenseAccountId,

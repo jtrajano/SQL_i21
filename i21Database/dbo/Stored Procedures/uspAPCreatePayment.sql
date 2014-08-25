@@ -26,12 +26,12 @@ BEGIN
 	--TODO Allow Multi Vendor
 	SELECT [intID] INTO #tmpBillsId FROM [dbo].fnGetRowsFromDelimitedValues(@billId)
 
-	SELECT TOP 1 @vendorId = C.intEntityId 
+	SELECT TOP 1 @vendorId = C.intVendorId 
 		FROM tblAPBill A
 		INNER JOIN  #tmpBillsId B
 			ON A.intBillId = B.intID
 		INNER JOIN tblAPVendor C
-			ON A.intVendorId = C.intEntityId
+			ON A.intVendorId = C.intVendorId
 
 	SET @queryPayment = '
 	INSERT INTO tblAPPayment(

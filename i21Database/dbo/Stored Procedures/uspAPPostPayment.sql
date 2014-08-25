@@ -337,7 +337,7 @@ BEGIN
 		INNER JOIN [dbo].tblGLAccount GLAccnt
 			ON A.intAccountId = GLAccnt.intAccountId
 		INNER JOIN tblAPVendor C
-			ON A.intVendorId = C.intEntityId
+			ON A.intVendorId = C.intVendorId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		--Withheld
@@ -368,7 +368,7 @@ BEGIN
 		FROM	[dbo].tblAPPayment A INNER JOIN [dbo].tblGLAccount GLAccnt
 					ON A.intBankAccountId = GLAccnt.intAccountId
 				INNER JOIN tblAPVendor B
-					ON A.intVendorId = B.intEntityId AND B.ysnWithholding = 1
+					ON A.intVendorId = B.intVendorId AND B.ysnWithholding = 1
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		--Discount
@@ -400,7 +400,7 @@ BEGIN
 				INNER JOIN tblAPPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblAPVendor C
-					ON A.intVendorId = C.intEntityId
+					ON A.intVendorId = C.intVendorId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 		AND B.dblAmountDue = (B.dblPayment + B.dblDiscount) --fully paid
 		AND B.dblDiscount <> 0
@@ -449,7 +449,7 @@ BEGIN
 		FROM	[dbo].tblAPPayment A 
 				INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 				--INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
-				INNER JOIN tblAPVendor D ON A.intVendorId = D.intEntityId 
+				INNER JOIN tblAPVendor D ON A.intVendorId = D.intVendorId 
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 		AND B.dblPayment <> 0
 		GROUP BY A.[strPaymentRecordNum],
@@ -733,7 +733,7 @@ BEGIN
 			[intConcurrencyId] = 1
 			FROM tblAPPayment A
 				INNER JOIN tblAPVendor B
-					ON A.intVendorId = B.intEntityId
+					ON A.intVendorId = B.intVendorId
 				--LEFT JOIN tblSMPaymentMethod C ON A.intPaymentMethodId = C.intPaymentMethodID
 			WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 			--AND C.strPaymentMethod = 'Check'
@@ -825,7 +825,7 @@ ELSE
 		INNER JOIN [dbo].tblGLAccount GLAccnt
 			ON A.intAccountId = GLAccnt.intAccountId
 		INNER JOIN tblAPVendor C
-			ON A.intVendorId = C.intEntityId
+			ON A.intVendorId = C.intVendorId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 		GROUP BY A.[strPaymentRecordNum],
 		A.intPaymentId,
@@ -861,7 +861,7 @@ ELSE
 			,[strTransactionType]	= @TRAN_TYPE
 		FROM	[dbo].tblAPPayment A 
 				INNER JOIN tblAPVendor B
-					ON A.intVendorId = B.intEntityId AND B.ysnWithholding = 1
+					ON A.intVendorId = B.intVendorId AND B.ysnWithholding = 1
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 		--Discount
 		UNION
@@ -891,7 +891,7 @@ ELSE
 				INNER JOIN tblAPPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblAPVendor C
-					ON A.intVendorId = C.intEntityId
+					ON A.intVendorId = C.intVendorId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 		AND 1 = (CASE WHEN @post = 1 AND B.dblAmountDue = (B.dblPayment + B.dblDiscount) THEN  1--fully paid when unposted
 					  WHEN  @post = 0 AND B.dblAmountDue = 0 THEN 1 --fully paid when posted
@@ -939,7 +939,7 @@ ELSE
 		FROM	[dbo].tblAPPayment A 
 				INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
-				INNER JOIN tblAPVendor D ON A.intVendorId = D.intEntityId
+				INNER JOIN tblAPVendor D ON A.intVendorId = D.intVendorId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 		AND B.dblPayment <> 0
 		GROUP BY A.[strPaymentRecordNum],
