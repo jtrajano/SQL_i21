@@ -36,6 +36,7 @@ Ext.define('Inventory.view.Item', {
         'Ext.form.field.Checkbox',
         'Ext.form.field.Number',
         'Ext.form.field.Date',
+        'Ext.grid.column.Check',
         'Ext.grid.column.Date',
         'Ext.toolbar.Paging'
     ],
@@ -47,7 +48,7 @@ Ext.define('Inventory.view.Item', {
     hidden: false,
     minHeight: 650,
     minWidth: 950,
-    width: 1074,
+    width: 950,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
@@ -794,22 +795,23 @@ Ext.define('Inventory.view.Item', {
                                                         xtype: 'panel',
                                                         title: 'Point of Sale',
                                                         layout: {
-                                                            type: 'hbox',
+                                                            type: 'vbox',
                                                             align: 'stretch',
                                                             padding: 7
                                                         },
                                                         items: [
                                                             {
                                                                 xtype: 'container',
-                                                                flex: 1,
+                                                                height: 200,
                                                                 layout: {
-                                                                    type: 'vbox',
+                                                                    type: 'hbox',
                                                                     align: 'stretch'
                                                                 },
                                                                 items: [
                                                                     {
                                                                         xtype: 'panel',
-                                                                        height: 254,
+                                                                        flex: 1.5,
+                                                                        itemId: 'pnlGeneral',
                                                                         bodyPadding: 5,
                                                                         title: 'General',
                                                                         layout: {
@@ -836,16 +838,29 @@ Ext.define('Inventory.view.Item', {
                                                                                 labelWidth: 130
                                                                             },
                                                                             {
-                                                                                xtype: 'combobox',
-                                                                                itemId: 'cboProductCode',
-                                                                                fieldLabel: 'Product Code',
-                                                                                labelWidth: 130
-                                                                            },
-                                                                            {
-                                                                                xtype: 'combobox',
-                                                                                itemId: 'cboWicCode',
-                                                                                fieldLabel: 'WIC Code',
-                                                                                labelWidth: 130
+                                                                                xtype: 'container',
+                                                                                margin: '0 0 5 0',
+                                                                                layout: {
+                                                                                    type: 'hbox',
+                                                                                    align: 'stretch'
+                                                                                },
+                                                                                items: [
+                                                                                    {
+                                                                                        xtype: 'combobox',
+                                                                                        flex: 1.6,
+                                                                                        itemId: 'cboProductCode',
+                                                                                        margin: '0 5 0 0',
+                                                                                        fieldLabel: 'Product Code',
+                                                                                        labelWidth: 130
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'combobox',
+                                                                                        flex: 1,
+                                                                                        itemId: 'cboWicCode',
+                                                                                        fieldLabel: 'WIC Code',
+                                                                                        labelWidth: 60
+                                                                                    }
+                                                                                ]
                                                                             },
                                                                             {
                                                                                 xtype: 'combobox',
@@ -854,23 +869,123 @@ Ext.define('Inventory.view.Item', {
                                                                                 labelWidth: 130
                                                                             },
                                                                             {
+                                                                                xtype: 'container',
+                                                                                margin: '0 0 5 0',
+                                                                                layout: {
+                                                                                    type: 'hbox',
+                                                                                    align: 'stretch'
+                                                                                },
+                                                                                items: [
+                                                                                    {
+                                                                                        xtype: 'checkboxfield',
+                                                                                        itemId: 'chkReceiptCommentReq',
+                                                                                        fieldLabel: 'Receipt Comment Req',
+                                                                                        labelWidth: 130
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'combobox',
+                                                                                        flex: 1,
+                                                                                        itemId: 'cboCountCode',
+                                                                                        margin: '0 0 0 5',
+                                                                                        fieldLabel: 'Count Code',
+                                                                                        labelWidth: 70
+                                                                                    }
+                                                                                ]
+                                                                            }
+                                                                        ]
+                                                                    },
+                                                                    {
+                                                                        xtype: 'panel',
+                                                                        flex: 1.5,
+                                                                        itemId: 'pnlInventorySetup',
+                                                                        margin: '0 5',
+                                                                        bodyPadding: 5,
+                                                                        title: 'Inventory Setup',
+                                                                        layout: {
+                                                                            type: 'vbox',
+                                                                            align: 'stretch'
+                                                                        },
+                                                                        items: [
+                                                                            {
                                                                                 xtype: 'checkboxfield',
-                                                                                itemId: 'chkReceiptCommentReq',
-                                                                                fieldLabel: 'Receipt Comment Req',
-                                                                                labelWidth: 130
+                                                                                itemId: 'chkLandedCost',
+                                                                                fieldLabel: 'Landed Cost',
+                                                                                labelWidth: 90
                                                                             },
                                                                             {
-                                                                                xtype: 'combobox',
-                                                                                itemId: 'txtCountCode',
-                                                                                fieldLabel: 'Count Code',
-                                                                                labelWidth: 130
+                                                                                xtype: 'container',
+                                                                                margin: '0 0 5 0',
+                                                                                layout: {
+                                                                                    type: 'hbox',
+                                                                                    align: 'stretch'
+                                                                                },
+                                                                                items: [
+                                                                                    {
+                                                                                        xtype: 'textfield',
+                                                                                        flex: 1,
+                                                                                        itemId: 'txtLeadTime',
+                                                                                        margin: '0 5 0 0 ',
+                                                                                        fieldLabel: 'Lead Time',
+                                                                                        labelWidth: 90
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'checkboxfield',
+                                                                                        itemId: 'chkTaxable',
+                                                                                        fieldLabel: 'Taxable',
+                                                                                        labelWidth: 90
+                                                                                    }
+                                                                                ]
+                                                                            },
+                                                                            {
+                                                                                xtype: 'textfield',
+                                                                                itemId: 'txtKeywords',
+                                                                                fieldLabel: 'Keywords',
+                                                                                labelWidth: 90
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numberfield',
+                                                                                itemId: 'txtCaseQty',
+                                                                                fieldLabel: 'Case Qty',
+                                                                                labelWidth: 90,
+                                                                                hideTrigger: true
+                                                                            },
+                                                                            {
+                                                                                xtype: 'datefield',
+                                                                                itemId: 'dtmDateShip',
+                                                                                fieldLabel: 'Date Ship',
+                                                                                labelWidth: 90
+                                                                            },
+                                                                            {
+                                                                                xtype: 'container',
+                                                                                margin: '0 0 5 0',
+                                                                                layout: {
+                                                                                    type: 'hbox',
+                                                                                    align: 'stretch'
+                                                                                },
+                                                                                items: [
+                                                                                    {
+                                                                                        xtype: 'numberfield',
+                                                                                        flex: 1,
+                                                                                        itemId: 'txtTaxExempt',
+                                                                                        margin: '0 5 0 0',
+                                                                                        fieldLabel: 'Tax Exempt',
+                                                                                        labelWidth: 90,
+                                                                                        hideTrigger: true
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'checkboxfield',
+                                                                                        itemId: 'chkDropShip',
+                                                                                        fieldLabel: 'Drop Ship',
+                                                                                        labelWidth: 90
+                                                                                    }
+                                                                                ]
                                                                             }
                                                                         ]
                                                                     },
                                                                     {
                                                                         xtype: 'panel',
                                                                         flex: 1,
-                                                                        margin: '5 0 0 0 ',
+                                                                        itemId: 'pnlCommissionDetail',
                                                                         bodyPadding: 5,
                                                                         title: 'Commision Detail',
                                                                         layout: {
@@ -880,12 +995,13 @@ Ext.define('Inventory.view.Item', {
                                                                         items: [
                                                                             {
                                                                                 xtype: 'checkboxfield',
-                                                                                itemId: 'chkReceiptCommentReq4',
+                                                                                itemId: 'chkCommissionable',
                                                                                 fieldLabel: 'Commisionable',
                                                                                 labelWidth: 130
                                                                             },
                                                                             {
                                                                                 xtype: 'combobox',
+                                                                                itemId: 'cboSpecialCommission',
                                                                                 fieldLabel: 'Special Commission',
                                                                                 labelWidth: 130
                                                                             }
@@ -896,80 +1012,144 @@ Ext.define('Inventory.view.Item', {
                                                             {
                                                                 xtype: 'container',
                                                                 flex: 1,
-                                                                margin: '0 7',
+                                                                margin: '5 0 0 0',
                                                                 layout: {
-                                                                    type: 'vbox',
+                                                                    type: 'hbox',
                                                                     align: 'stretch'
                                                                 },
                                                                 items: [
                                                                     {
-                                                                        xtype: 'panel',
+                                                                        xtype: 'gridpanel',
                                                                         flex: 1,
-                                                                        bodyPadding: 5,
-                                                                        title: 'Inventory Setup Group',
-                                                                        layout: {
-                                                                            type: 'vbox',
-                                                                            align: 'stretch'
-                                                                        },
-                                                                        items: [
+                                                                        itemId: 'grdCategory',
+                                                                        margin: '0 5 0 0 ',
+                                                                        title: 'Categories',
+                                                                        dockedItems: [
                                                                             {
-                                                                                xtype: 'checkboxfield',
-                                                                                itemId: 'chkReceiptCommentReq1',
-                                                                                fieldLabel: 'Landed Cost',
-                                                                                labelWidth: 130
-                                                                            },
-                                                                            {
-                                                                                xtype: 'textfield',
-                                                                                itemId: 'txtCountCode1',
-                                                                                fieldLabel: 'Lead Time',
-                                                                                labelWidth: 130
-                                                                            },
-                                                                            {
-                                                                                xtype: 'checkboxfield',
-                                                                                itemId: 'chkReceiptCommentReq2',
-                                                                                fieldLabel: 'Taxable',
-                                                                                labelWidth: 130
-                                                                            },
-                                                                            {
-                                                                                xtype: 'textfield',
-                                                                                itemId: 'txtCountCode2',
-                                                                                fieldLabel: 'Keywords',
-                                                                                labelWidth: 130
-                                                                            },
-                                                                            {
-                                                                                xtype: 'numberfield',
-                                                                                fieldLabel: 'Case Qty',
-                                                                                labelWidth: 130,
-                                                                                hideTrigger: true
-                                                                            },
-                                                                            {
-                                                                                xtype: 'datefield',
-                                                                                fieldLabel: 'Date Ship',
-                                                                                labelWidth: 130
-                                                                            },
-                                                                            {
-                                                                                xtype: 'numberfield',
-                                                                                fieldLabel: 'Tax Exempt',
-                                                                                labelWidth: 130,
-                                                                                hideTrigger: true
-                                                                            },
-                                                                            {
-                                                                                xtype: 'checkboxfield',
-                                                                                itemId: 'chkReceiptCommentReq3',
-                                                                                fieldLabel: 'Drop Ship',
-                                                                                labelWidth: 130
+                                                                                xtype: 'toolbar',
+                                                                                dock: 'top',
+                                                                                itemId: 'tlbGridOptions',
+                                                                                layout: {
+                                                                                    type: 'hbox',
+                                                                                    padding: '0 0 0 1'
+                                                                                },
+                                                                                items: [
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        tabIndex: -1,
+                                                                                        itemId: 'btnAdd',
+                                                                                        iconCls: 'small-add',
+                                                                                        text: 'Add'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        tabIndex: -1,
+                                                                                        itemId: 'btnEdit',
+                                                                                        iconCls: 'small-edit',
+                                                                                        text: 'Edit'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        tabIndex: -1,
+                                                                                        itemId: 'btnDelete',
+                                                                                        iconCls: 'small-delete',
+                                                                                        text: 'Delete'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'tbseparator'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'filter'
+                                                                                    }
+                                                                                ]
                                                                             }
-                                                                        ]
+                                                                        ],
+                                                                        columns: [
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                dataIndex: 'string',
+                                                                                text: 'Category Name',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        viewConfig: {
+                                                                            itemId: 'grvCategory'
+                                                                        },
+                                                                        selModel: {
+                                                                            selType: 'checkboxmodel'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridpanel',
+                                                                        flex: 1,
+                                                                        itemId: 'grdServiceLevelAgreement',
+                                                                        title: 'Service Level Agreement Setup',
+                                                                        dockedItems: [
+                                                                            {
+                                                                                xtype: 'toolbar',
+                                                                                dock: 'top',
+                                                                                itemId: 'tlbGridOptions',
+                                                                                layout: {
+                                                                                    type: 'hbox',
+                                                                                    padding: '0 0 0 1'
+                                                                                },
+                                                                                items: [
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        tabIndex: -1,
+                                                                                        itemId: 'btnAdd',
+                                                                                        iconCls: 'small-add',
+                                                                                        text: 'Add'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        tabIndex: -1,
+                                                                                        itemId: 'btnEdit',
+                                                                                        iconCls: 'small-edit',
+                                                                                        text: 'Edit'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        tabIndex: -1,
+                                                                                        itemId: 'btnDelete',
+                                                                                        iconCls: 'small-delete',
+                                                                                        text: 'Delete'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'tbseparator'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'filter'
+                                                                                    }
+                                                                                ]
+                                                                            }
+                                                                        ],
+                                                                        columns: [
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                dataIndex: 'string',
+                                                                                text: 'SLA Contract',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numbercolumn',
+                                                                                dataIndex: 'number',
+                                                                                text: 'Contract Price'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'checkcolumn',
+                                                                                width: 112,
+                                                                                text: 'Service & Warranty'
+                                                                            }
+                                                                        ],
+                                                                        viewConfig: {
+                                                                            itemId: 'grvServiceLevelAgreement'
+                                                                        },
+                                                                        selModel: {
+                                                                            selType: 'checkboxmodel'
+                                                                        }
                                                                     }
                                                                 ]
-                                                            },
-                                                            {
-                                                                xtype: 'container',
-                                                                flex: 1,
-                                                                layout: {
-                                                                    type: 'vbox',
-                                                                    align: 'stretch'
-                                                                }
                                                             }
                                                         ]
                                                     },
