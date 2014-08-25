@@ -15,8 +15,7 @@
     [ysnDefault]             BIT            NULL,
     [intUserId]              INT            NOT NULL,
     [intConcurrencyId]       INT            CONSTRAINT [DF__tblRMFilt__intCo__6F405F80] DEFAULT ((1)) NOT NULL,
-    CONSTRAINT [PK_dbo.Filters] PRIMARY KEY CLUSTERED ([intFilterId] ASC),
-    CONSTRAINT [FK_tblRMFilter_tblRMReport] FOREIGN KEY ([intReportId]) REFERENCES [dbo].[tblRMReport] ([intReportId])
+    CONSTRAINT [PK_dbo.Filters] PRIMARY KEY CLUSTERED ([intFilterId] ASC)
 );
 
 
