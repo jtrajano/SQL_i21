@@ -498,27 +498,25 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        width: 50,
                                                                         dataIndex: 'string',
-                                                                        text: 'Row'
+                                                                        text: 'POS Description',
+                                                                        flex: 2
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        width: 50,
                                                                         dataIndex: 'string',
-                                                                        text: 'Bin'
+                                                                        text: 'Default Vendor'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        dataIndex: 'string',
+                                                                        text: 'Costing Method'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         width: 100,
                                                                         dataIndex: 'string',
-                                                                        text: 'Fuel Tank No.'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        width: 50,
-                                                                        dataIndex: 'string',
-                                                                        text: 'Min Age'
+                                                                        text: 'Default UOM'
                                                                     }
                                                                 ],
                                                                 viewConfig: {

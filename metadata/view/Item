@@ -1077,12 +1077,41 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "dataIndex": "string",
+                                                                "flex": 2,
+                                                                "text": "POS Description"
+                                                            },
+                                                            "name": "MyColumn80",
+                                                            "designerId": "a184c032-5cd1-45dc-8b9e-33294aaa2f75"
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "string",
                                                                 "flex": null,
-                                                                "text": "Row",
-                                                                "width": 50
+                                                                "text": "Default Vendor"
+                                                            },
+                                                            "name": "MyColumn79",
+                                                            "designerId": "45fab5c8-dcb5-44c6-aaf4-9e5005ca26f6"
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "string",
+                                                                "flex": null,
+                                                                "text": "Costing Method"
                                                             },
                                                             "name": "MyColumn5",
-                                                            "designerId": "f393bef2-65e0-475e-b4a1-fed0508b4e3c"
+                                                            "designerId": "6957fa03-ab46-46ec-90c3-c7ea53168f96"
                                                         },
                                                         {
                                                             "type": "Ext.grid.column.Column",
@@ -1094,43 +1123,11 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": null,
-                                                                "text": "Bin",
-                                                                "width": 50
-                                                            },
-                                                            "name": "MyColumn6",
-                                                            "designerId": "e806c8ce-149d-492a-b175-74f7a8118312"
-                                                        },
-                                                        {
-                                                            "type": "Ext.grid.column.Column",
-                                                            "reference": {
-                                                                "name": "columns",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "dataIndex": "string",
-                                                                "flex": null,
-                                                                "text": "Fuel Tank No.",
+                                                                "text": "Default UOM",
                                                                 "width": 100
                                                             },
                                                             "name": "MyColumn7",
                                                             "designerId": "2ed9a188-78bb-4837-819e-36b710fec6b1"
-                                                        },
-                                                        {
-                                                            "type": "Ext.grid.column.Column",
-                                                            "reference": {
-                                                                "name": "columns",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "dataIndex": "string",
-                                                                "flex": null,
-                                                                "text": "Min Age",
-                                                                "width": 50
-                                                            },
-                                                            "name": "MyColumn8",
-                                                            "designerId": "11fa4865-21f9-47e3-8e10-1ec5b2e166a8"
                                                         },
                                                         {
                                                             "type": "Ext.grid.View",

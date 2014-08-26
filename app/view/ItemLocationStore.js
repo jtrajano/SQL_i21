@@ -24,6 +24,7 @@ Ext.define('Inventory.view.ItemLocationStore', {
         'Ext.button.Button',
         'Ext.toolbar.Separator',
         'Ext.form.field.ComboBox',
+        'Ext.form.field.TextArea',
         'Ext.form.field.Checkbox',
         'Ext.toolbar.Paging'
     ],
@@ -31,12 +32,12 @@ Ext.define('Inventory.view.ItemLocationStore', {
     viewModel: {
         type: 'itemlocationstore'
     },
-    height: 465,
+    height: 660,
     hidden: false,
-    maxHeight: 465,
-    minHeight: 415,
-    minWidth: 775,
-    width: 775,
+    maxHeight: 660,
+    minHeight: 660,
+    minWidth: 995,
+    width: 995,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
@@ -151,6 +152,52 @@ Ext.define('Inventory.view.ItemLocationStore', {
             items: [
                 {
                     xtype: 'container',
+                    margin: '0 0 5 0',
+                    layout: {
+                        type: 'hbox',
+                        align: 'stretch'
+                    },
+                    items: [
+                        {
+                            xtype: 'combobox',
+                            flex: 1.4,
+                            itemId: 'cboLocation',
+                            fieldLabel: 'Location',
+                            labelWidth: 125
+                        },
+                        {
+                            xtype: 'combobox',
+                            flex: 1,
+                            itemId: 'cboStore',
+                            margin: '0 5',
+                            fieldLabel: 'Store',
+                            labelWidth: 40
+                        },
+                        {
+                            xtype: 'combobox',
+                            flex: 1,
+                            itemId: 'cboDefaultVendor',
+                            fieldLabel: 'Default Vendor',
+                            labelWidth: 90
+                        },
+                        {
+                            xtype: 'combobox',
+                            flex: 1,
+                            itemId: 'cboCostingMethod',
+                            margin: '0 0 0 5',
+                            fieldLabel: 'Costing Method',
+                            labelWidth: 95
+                        }
+                    ]
+                },
+                {
+                    xtype: 'textareafield',
+                    itemId: 'txtPosDescription',
+                    fieldLabel: 'POS Description',
+                    labelWidth: 125
+                },
+                {
+                    xtype: 'container',
                     flex: 1,
                     layout: {
                         type: 'hbox',
@@ -166,18 +213,6 @@ Ext.define('Inventory.view.ItemLocationStore', {
                             },
                             items: [
                                 {
-                                    xtype: 'combobox',
-                                    itemId: 'cboLocation',
-                                    fieldLabel: 'Location',
-                                    labelWidth: 125
-                                },
-                                {
-                                    xtype: 'combobox',
-                                    itemId: 'cboStore',
-                                    fieldLabel: 'Store',
-                                    labelWidth: 125
-                                },
-                                {
                                     xtype: 'textfield',
                                     itemId: 'txtRow',
                                     fieldLabel: 'Row',
@@ -187,6 +222,36 @@ Ext.define('Inventory.view.ItemLocationStore', {
                                     xtype: 'textfield',
                                     itemId: 'txtBin',
                                     fieldLabel: 'Bin',
+                                    labelWidth: 125
+                                },
+                                {
+                                    xtype: 'combobox',
+                                    itemId: 'cboDefaultUom',
+                                    fieldLabel: 'Default UOM',
+                                    labelWidth: 125
+                                },
+                                {
+                                    xtype: 'combobox',
+                                    itemId: 'cboIssueUom',
+                                    fieldLabel: 'Issue UOM',
+                                    labelWidth: 125
+                                },
+                                {
+                                    xtype: 'combobox',
+                                    itemId: 'cboReceiveUom',
+                                    fieldLabel: 'Receive UOM',
+                                    labelWidth: 125
+                                },
+                                {
+                                    xtype: 'combobox',
+                                    itemId: 'cboFamily',
+                                    fieldLabel: 'Family',
+                                    labelWidth: 125
+                                },
+                                {
+                                    xtype: 'combobox',
+                                    itemId: 'cboClass',
+                                    fieldLabel: 'Class',
                                     labelWidth: 125
                                 },
                                 {
@@ -250,6 +315,36 @@ Ext.define('Inventory.view.ItemLocationStore', {
                             items: [
                                 {
                                     xtype: 'checkboxfield',
+                                    itemId: 'chkPromotionalItem',
+                                    fieldLabel: 'Promotional Item',
+                                    labelWidth: 140
+                                },
+                                {
+                                    xtype: 'combobox',
+                                    itemId: 'cboMixMatchCode',
+                                    fieldLabel: 'Mix/Match Code',
+                                    labelWidth: 140
+                                },
+                                {
+                                    xtype: 'checkboxfield',
+                                    itemId: 'chkDepositRequired',
+                                    fieldLabel: 'Deposit Required',
+                                    labelWidth: 140
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    itemId: 'txtBottleDepositNo',
+                                    fieldLabel: 'Bottle Deposit No',
+                                    labelWidth: 140
+                                },
+                                {
+                                    xtype: 'checkboxfield',
+                                    itemId: 'chkSaleable',
+                                    fieldLabel: 'Saleable',
+                                    labelWidth: 140
+                                },
+                                {
+                                    xtype: 'checkboxfield',
                                     itemId: 'chkQuantityRequired',
                                     fieldLabel: 'Quantity Required',
                                     labelWidth: 140
@@ -278,6 +373,52 @@ Ext.define('Inventory.view.ItemLocationStore', {
                                     fieldLabel: 'Pre Priced',
                                     labelWidth: 140
                                 },
+                                {
+                                    xtype: 'checkboxfield',
+                                    itemId: 'chkOpenPricePlu',
+                                    fieldLabel: 'Open Price PLU',
+                                    labelWidth: 140
+                                },
+                                {
+                                    xtype: 'checkboxfield',
+                                    itemId: 'chkLinkedItem',
+                                    fieldLabel: 'Linked Item',
+                                    labelWidth: 140
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    itemId: 'txtBottleDepositNo1',
+                                    fieldLabel: 'Vendor Category',
+                                    labelWidth: 140
+                                },
+                                {
+                                    xtype: 'checkboxfield',
+                                    itemId: 'chkLinkedItem1',
+                                    fieldLabel: 'Count by Serial Number',
+                                    labelWidth: 140
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    itemId: 'txtBottleDepositNo2',
+                                    fieldLabel: 'Serial Number Begin',
+                                    labelWidth: 140
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    itemId: 'txtBottleDepositNo3',
+                                    fieldLabel: 'Serial Number End',
+                                    labelWidth: 140
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'container',
+                            flex: 1,
+                            layout: {
+                                type: 'vbox',
+                                align: 'stretch'
+                            },
+                            items: [
                                 {
                                     xtype: 'checkboxfield',
                                     itemId: 'chkIdRequiredLiqour',
@@ -318,6 +459,30 @@ Ext.define('Inventory.view.ItemLocationStore', {
                                     xtype: 'textfield',
                                     itemId: 'txtItemTypeSubcode',
                                     fieldLabel: 'Item Type Subcode',
+                                    labelWidth: 140
+                                },
+                                {
+                                    xtype: 'checkboxfield',
+                                    itemId: 'chkAutoCalculateFreight',
+                                    fieldLabel: 'Auto Calculate Freight',
+                                    labelWidth: 140
+                                },
+                                {
+                                    xtype: 'combobox',
+                                    itemId: 'cboFreightMethod',
+                                    fieldLabel: 'Freight Method',
+                                    labelWidth: 140
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    itemId: 'txtFreightRate',
+                                    fieldLabel: 'Freight Rate',
+                                    labelWidth: 140
+                                },
+                                {
+                                    xtype: 'combobox',
+                                    itemId: 'cboFreightVendor',
+                                    fieldLabel: 'Freight Vendor',
                                     labelWidth: 140
                                 }
                             ]
