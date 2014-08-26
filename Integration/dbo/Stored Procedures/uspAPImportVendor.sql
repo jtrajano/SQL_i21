@@ -263,10 +263,10 @@ BEGIN
 
             SELECT TOP 1
                 --Entities
-                @strName = CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
+                @strName = ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
                             ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
                                 + '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
-                            END,
+                            END, ''Noname'' +  ssvnd_vnd_no),
                 @strWebsite = '''',
                 @strInternalNotes = '''',
                 @ysnPrint1099   = CASE WHEN ssvnd_1099_yn = ''Y'' THEN 1 ELSE 0 END,
