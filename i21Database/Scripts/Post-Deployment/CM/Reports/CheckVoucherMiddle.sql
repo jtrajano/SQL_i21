@@ -34,6 +34,18 @@ WHERE [intReportId] = @intReportId
 DELETE FROM [dbo].[tblRMCriteriaField]
 WHERE [intReportId] = @intReportId
 
+-- Delete the default option
+DELETE FROM [dbo].[tblRMDefaultOption]
+WHERE [intReportId] = @intReportId
+
+-- Delete the default filter
+DELETE FROM [dbo].[tblRMDefaultFilter]
+WHERE [intReportId] = @intReportId
+
+-- Delete the default sort
+DELETE FROM [dbo].[tblRMDefaultSort]
+WHERE [intReportId] = @intReportId
+
 -- Delete the data source
 DELETE FROM [dbo].[tblRMDatasource] 
 WHERE [intReportId] = @intReportId
