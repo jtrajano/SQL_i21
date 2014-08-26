@@ -12,7 +12,7 @@
     [intStatusId] INT NOT NULL DEFAULT 1, 
     [strModelNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [intCostingMethodId] INT NOT NULL DEFAULT 1, 
-    [intCategoryId] INT NULL, 
+    [intTrackingId] INT NULL, 
     [intPatronageId]  INT NULL, 
     [intTaxClassId] INT NULL, 
     [ysnStockedItem]  BIT NOT NULL DEFAULT 1, 
@@ -31,8 +31,7 @@
     [intRINFuelType]  INT NULL, 
     [dblRINDenaturantPercentage] NUMERIC(18, 6) NULL, 
     [ysnFeedTonnageTax]  BIT NOT NULL DEFAULT 0, 
-    [strFeedLotTracking] NVARCHAR(1)  COLLATE Latin1_General_CI_AS NULL , 
-    [ysnFeedLoadTracking] BIT NOT NULL DEFAULT 0, 
+    [ysnFeedLoadTracking] BIT NOT NULL DEFAULT 0,
     [intFeedMixOrder]  INT NULL  , 
     [ysnFeedHandAddIngredients]  BIT  NOT NULL DEFAULT 0, 
     [intFeedMedicationTag] INT NULL, 
@@ -47,6 +46,7 @@
     [intFreightMethodId]  INT NULL, 
     [dblFreightRate] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [intFreightVendorId] INT NULL, 
+    [intLotTracking] INT NOT NULL DEFAULT 1, 
     CONSTRAINT [PK_tblICItem] PRIMARY KEY CLUSTERED ([intItemId] ASC),
 	UNIQUE NONCLUSTERED ([strItemNo] ASC)
 
@@ -180,7 +180,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intPatronageId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'FK. ?? Origin: agitm-tax-cls',
+    @value = N'FK. Field used to map tax codes used in Motor Fuel Tax report. Origin: agitm-tax-cls',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -332,14 +332,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'ysnFeedTonnageTax'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Lot Tracking (Y=yes, N=no, S=Serial Number). Origin: agitm-lot-yns',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICItem',
-    @level2type = N'COLUMN',
-    @level2name = N'strFeedLotTracking'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Load Tracking (yes or no). Origin: agitm-load-yn',
@@ -475,3 +468,22 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICItem',
     @level2type = N'COLUMN',
     @level2name = 'intFreightVendorId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'FK. Linked to the Category table. ',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItem',
+    @level2type = N'COLUMN',
+    @level2name = N'intTrackingId'
+GO
+
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'1=yes, 2=no, 3=Serial Number, 4=Bulk. Origin: agitm-lot-yns',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItem',
+    @level2type = N'COLUMN',
+    @level2name = N'intLotTracking'
