@@ -18,7 +18,7 @@
     [intUserId]            INT             NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     [dtmBillDate] DATETIME NOT NULL DEFAULT GETDATE(), 
-    [intEntityId] INT NOT NULL DEFAULT 0, 
+    [intEntityId] INT NULL , 
     [intVendorId] INT NOT NULL  , 
     [dblWithheld] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
     [dblDiscount] DECIMAL(18, 6) NOT NULL DEFAULT 0, 

@@ -7,8 +7,7 @@ GO
 
 IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()) = 1
 BEGIN
-EXEC(
-	'CREATE PROCEDURE uspARImportCustomer
+EXEC('CREATE PROCEDURE uspARImportCustomer
 	@CustomerId NVARCHAR(50) = NULL,
 	@Update BIT = 0,
 	@Total INT = 0 OUTPUT
@@ -32,43 +31,43 @@ EXEC(
 			--Entity
 			agcus_last_name = ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,1,25) ELSE SUBSTRING(Ent.strName, 1, (CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  -1 ELSE 25 END)) END),''''),
 			agcus_first_name = ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,26,50) ELSE SUBSTRING(Ent.strName,(CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  + 2 ELSE 50 END),50) END),''''),
-			agcus_comments = Ent.strInternalNotes,
-			agcus_1099_name = Ent.str1099Name,
+			agcus_comments = SUBSTRING(Ent.strInternalNotes,1,30),
+			agcus_1099_name = SUBSTRING(Ent.str1099Name,1,50),
 			--Location
 			agcus_addr = CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(Loc.strAddress, 0, CHARINDEX(CHAR(10),Loc.strAddress)) ELSE Loc.strAddress END,
 			agcus_addr2 = CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(Loc.strAddress, CHARINDEX(CHAR(10),Loc.strAddress), LEN(Loc.strAddress)) ELSE NULL END,
-			agcus_city = Loc.strCity,
-			agcus_state = Loc.strState,
-			agcus_zip = Loc.strZipCode,
+			agcus_city = SUBSTRING(Loc.strCity,1,20),
+			agcus_state = SUBSTRING(Loc.strState,1,2),
+			agcus_zip = SUBSTRING(Loc.strZipCode,1,10),
 			agcus_country = (CASE WHEN LEN(Loc.strCountry) = 3 THEN Loc.strCountry ELSE '''' END),
 			--Contact
-			agcus_contact = (SELECT strName FROM tblEntity WHERE intEntityId = Con.intEntityId),
-			agcus_phone = Con.strPhone,
-			agcus_phone2 = Con.strPhone2,
+			agcus_contact = SUBSTRING((SELECT strName FROM tblEntity WHERE intEntityId = Con.intEntityId),1,20),
+			agcus_phone = SUBSTRING(Con.strPhone,1,15),
+			agcus_phone2 = SUBSTRING(Con.strPhone2,1,15),
 			--Customer
-			agcus_key = Cus.strCustomerNumber,
+			agcus_key = SUBSTRING(Cus.strCustomerNumber,1,10),
 			agcus_co_per_ind_cp = CASE WHEN Cus.strType = ''Company'' THEN ''C'' ELSE ''P'' END,
 			agcus_cred_limit = Cus.dblCreditLimit,
-			agcus_tax_exempt = Cus.strTaxNumber,
-			agcus_dflt_currency = Cus.strCurrency,
+			agcus_tax_exempt = SUBSTRING(Cus.strTaxNumber,1,15),
+			agcus_dflt_currency = SUBSTRING(Cus.strCurrency,1,3),
 			agcus_active_yn = CASE WHEN Cus.ysnActive = 1 THEN ''Y'' ELSE ''N'' END,
 			agcus_req_po_yn = CASE WHEN Cus.ysnPORequired = 1 THEN ''Y'' ELSE ''N'' END,
 			agcus_stmt_dtl_yn = CASE WHEN Cus.ysnStatementDetail = 1 THEN ''Y'' ELSE ''N'' END,
-			agcus_stmt_fmt = Cus.strStatementFormat,
+			agcus_stmt_fmt = CASE WHEN Cus.strStatementFormat = ''Open Item'' THEN ''O'' WHEN Cus.strStatementFormat = ''Balance Forward'' THEN ''B'' WHEN Cus.strStatementFormat = ''Budget Reminder'' THEN ''R'' WHEN Cus.strStatementFormat = ''None'' THEN ''N'' WHEN Cus.strStatementFormat IS NULL THEN Null ELSE '''' END,
 			agcus_cred_stop_days = Cus.intCreditStopDays,
-			agcus_tax_auth_id1 = Cus.strTaxAuthority1,
-			agcus_tax_auth_id2 = Cus.strTaxAuthority2,
+			agcus_tax_auth_id1 = SUBSTRING(Cus.strTaxAuthority1,1,3),
+			agcus_tax_auth_id2 = SUBSTRING(Cus.strTaxAuthority2,1,3),
 			agcus_pic_prc_yn = CASE WHEN Cus.ysnPrintPriceOnPrintTicket = 1 THEN ''Y'' ELSE ''N'' END,
 			agcus_tax_ynp = CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN ''Y'' ELSE ''N'' END,
 			agcus_budget_amt = Cus.dblBudgetAmountForBudgetBilling,
-			agcus_budget_beg_mm = Cus.strBudgetBillingBeginMonth,
-			agcus_budget_end_mm = Cus.strBudgetBillingEndMonth,
-			agcus_dpa_cnt = Cus.strDPAContract,
+			agcus_budget_beg_mm = SUBSTRING(Cus.strBudgetBillingBeginMonth,1,2),
+			agcus_budget_end_mm = SUBSTRING(Cus.strBudgetBillingEndMonth,1,2),
+			agcus_dpa_cnt = SUBSTRING(Cus.strDPAContract,1,6),
 			agcus_dpa_rev_dt = CONVERT(int,''20'' + CONVERT(nvarchar,Cus.dtmDPADate,12)),
-			agcus_gb_rcpt_no = Cus.strGBReceiptNumber,
+			agcus_gb_rcpt_no = SUBSTRING(Cus.strGBReceiptNumber,1,6),
 			agcus_ckoff_exempt_yn = CASE WHEN Cus.ysnCheckoffExempt = 1 THEN ''Y'' ELSE ''N'' END,
 			agcus_ckoff_vol_yn = CASE WHEN Cus.ysnVoluntaryCheckoff = 1 THEN ''Y'' ELSE ''N'' END,
-			agcus_ga_origin_st = Cus.strCheckoffState,
+			agcus_ga_origin_st = SUBSTRING(Cus.strCheckoffState,1,2),
 			agcus_mkt_sign_yn = CASE WHEN Cus.ysnMarketAgreementSigned = 1 THEN ''Y'' ELSE ''N'' END,
 			agcus_dflt_mkt_zone = Cus.intMarketZoneId,
 			agcus_ga_hold_pay_yn = CASE WHEN Cus.ysnHoldBatchGrainPayment = 1 THEN ''Y'' ELSE ''N'' END,
@@ -134,43 +133,43 @@ EXEC(
 			--Entity
 			ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,1,25) ELSE SUBSTRING(Ent.strName, 1, (CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  -1 ELSE 25 END)) END),'''') AS strLastName,
 			ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,26,50) ELSE SUBSTRING(Ent.strName,(CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  + 2 ELSE 50 END),50) END),'''') AS strFirsName,
-			Ent.strInternalNotes ,
-			Ent.str1099Name,
+			SUBSTRING(Ent.strInternalNotes,1,30) as strInternalNotes ,
+			SUBSTRING(Ent.str1099Name,1,50) as str1099Name,
 			--Contact
-			(SELECT strName FROM tblEntity WHERE intEntityId = Con.intEntityId) AS strContactName,
-			Con.strPhone,
-			Con.strPhone2,
+			SUBSTRING((SELECT strName FROM tblEntity WHERE intEntityId = Con.intEntityId),1,20) AS strContactName,
+			SUBSTRING(Con.strPhone,1,15) as strPhone,
+			SUBSTRING(Con.strPhone2,1,15) as strPhone2,
 			--Location
 			(CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(Loc.strAddress, 0, CHARINDEX(CHAR(10),Loc.strAddress)) ELSE Loc.strAddress END) AS strAddress1,
 			(CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(Loc.strAddress, CHARINDEX(CHAR(10),Loc.strAddress), LEN(Loc.strAddress)) ELSE NULL END) AS strAddress2,
-			Loc.strCity,
-			Loc.strState,
-			Loc.strZipCode,
+			SUBSTRING(Loc.strCity,1,20) as strCity,
+			SUBSTRING(Loc.strState,1,2) as strState,
+			SUBSTRING(Loc.strZipCode,1,10) as strZipCode,
 			(CASE WHEN LEN(Loc.strCountry) = 3 THEN Loc.strCountry ELSE '''' END)as strCountry,
 			--Customer
-			Cus.strCustomerNumber,
+			SUBSTRING(Cus.strCustomerNumber,1,10) as strCustomerNumber,
 			(CASE WHEN Cus.strType = ''Company'' THEN ''C'' ELSE ''P'' END) AS strType,
 			Cus.dblCreditLimit,
-			Cus.strTaxNumber,
-			Cus.strCurrency,
+			SUBSTRING(Cus.strTaxNumber,1,15) as strTaxNumber,
+			SUBSTRING(Cus.strCurrency,1,3) as strCurrency,
 			(CASE WHEN Cus.ysnActive = 1 THEN ''Y'' ELSE ''N'' END) AS ysnActive,
 			(CASE WHEN Cus.ysnPORequired = 1 THEN ''Y'' ELSE ''N'' END) AS ysnPORequired,
 			(CASE WHEN Cus.ysnStatementDetail = 1 THEN ''Y'' ELSE ''N'' END) AS ysnStatementDetail,
-			Cus.strStatementFormat,
+			(CASE WHEN Cus.strStatementFormat = ''Open Item'' THEN ''O'' WHEN Cus.strStatementFormat = ''Balance Forward'' THEN ''B'' WHEN Cus.strStatementFormat = ''Budget Reminder'' THEN ''R'' WHEN Cus.strStatementFormat = ''None'' THEN ''N'' WHEN Cus.strStatementFormat IS NULL THEN Null ELSE '''' END) as strStatementFormat ,
 			Cus.intCreditStopDays,
-			Cus.strTaxAuthority1,
-			Cus.strTaxAuthority2,
+			SUBSTRING(Cus.strTaxAuthority1,1,3) as strTaxAuthority1,
+			SUBSTRING(Cus.strTaxAuthority2,1,3) as strTaxAuthority2,
 			(CASE WHEN Cus.ysnPrintPriceOnPrintTicket = 1 THEN ''Y'' ELSE ''N'' END) AS ysnPrintPriceOnPrintTicket,
 			(CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN ''Y'' ELSE ''N'' END) AS ysnApplyPrepaidTax,
 			Cus.dblBudgetAmountForBudgetBilling,
-			Cus.strBudgetBillingBeginMonth,
-			Cus.strBudgetBillingEndMonth,
-			Cus.strDPAContract,				
+			SUBSTRING(Cus.strBudgetBillingBeginMonth,1,2) as strBudgetBillingBeginMonth,
+			SUBSTRING(Cus.strBudgetBillingEndMonth,1,2) as strBudgetBillingEndMonth,
+			SUBSTRING(Cus.strDPAContract,1,6) as strDPAContract,				
 			CONVERT(int,''20'' + CONVERT(nvarchar,Cus.dtmDPADate,12)),					
-			Cus.strGBReceiptNumber,			
+			SUBSTRING(Cus.strGBReceiptNumber,1,6) as strGBReceiptNumber,			
 			(CASE WHEN Cus.ysnCheckoffExempt = 1 THEN ''Y'' ELSE ''N'' END) as ysnCheckoffExempt,			
 			(CASE WHEN Cus.ysnVoluntaryCheckoff = 1 THEN ''Y'' ELSE ''N'' END) as ysnVoluntaryCheckoff,		
-			Cus.strCheckoffState,			
+			SUBSTRING(Cus.strCheckoffState,1,2) as strCheckoffState,			
 			(CASE WHEN Cus.ysnMarketAgreementSigned = 1 THEN ''Y'' ELSE ''N'' END) as ysnMarketAgreementSigned,	
 			Cus.intMarketZoneId,			
 			(CASE WHEN Cus.ysnHoldBatchGrainPayment = 1 THEN ''Y'' ELSE ''N'' END) as ysnHoldBatchGrainPayment,	
@@ -352,7 +351,7 @@ EXEC(
 				@ysnActive				= CASE WHEN agcus_active_yn = ''Y'' THEN 1 ELSE 0 END,					
 				@ysnPORequired			= CASE WHEN agcus_req_po_yn = ''Y'' THEN 1 ELSE 0 END,									
 				@ysnStatementDetail		= CASE WHEN agcus_stmt_dtl_yn = ''Y'' THEN 1 ELSE 0 END,			
-				@strStatementFormat		= agcus_stmt_fmt,			
+				@strStatementFormat		= CASE WHEN agcus_stmt_fmt = ''O'' THEN ''Open Item'' WHEN agcus_stmt_fmt = ''B'' THEN ''Balance Forward'' WHEN agcus_stmt_fmt = ''R'' THEN ''Budget Reminder'' WHEN agcus_stmt_fmt = ''N'' THEN ''None'' WHEN agcus_stmt_fmt IS NULL THEN Null Else '''' END ,			
 				@intCreditStopDays		= agcus_cred_stop_days,			
 				@strTaxAuthority1		= agcus_tax_auth_id1,			
 				@strTaxAuthority2		= agcus_tax_auth_id2,			
@@ -534,14 +533,12 @@ EXEC(
 	IF(@Update = 1 AND @CustomerId IS NULL) 
 	BEGIN
 		SELECT @Total = COUNT(agcus_key) from tblARTempCustomer
-	END'
-)
+	END')
 END
 
 IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1
 BEGIN
-EXEC(
-		'CREATE PROCEDURE uspARImportCustomer
+EXEC('CREATE PROCEDURE uspARImportCustomer
 	@CustomerId NVARCHAR(50) = NULL,
 	@Update BIT = 0,
 	@Total INT = 0 OUTPUT
@@ -565,37 +562,37 @@ EXEC(
 			--Entity
 			ptcus_last_name = ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,1,25) ELSE SUBSTRING(Ent.strName, 1, (CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  -1 ELSE 25 END)) END),''''),
 			ptcus_first_name = ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,26,50) ELSE SUBSTRING(Ent.strName,(CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  + 2 ELSE 50 END),50) END),''''),
-			ptcus_comment = Ent.strInternalNotes,
-			--ptcus_1099_name = Ent.str1099Name,
+			ptcus_comment = SUBSTRING(Ent.strInternalNotes,1,30),
+			--ptcus_1099_name = SUBSTRING(Ent.str1099Name,1,50),
 			--Location
 			ptcus_addr = CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(Loc.strAddress, 0, CHARINDEX(CHAR(10),Loc.strAddress)) ELSE Loc.strAddress END,
 			ptcus_addr2 = CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(Loc.strAddress, CHARINDEX(CHAR(10),Loc.strAddress), LEN(Loc.strAddress)) ELSE NULL END,
-			ptcus_city = Loc.strCity,
-			ptcus_state = Loc.strState,
-			ptcus_zip = Loc.strZipCode,
+			ptcus_city = SUBSTRING(Loc.strCity,1,20),
+			ptcus_state = SUBSTRING(Loc.strState,1,2),
+			ptcus_zip = SUBSTRING(Loc.strZipCode,1,10),
 			ptcus_country = (CASE WHEN LEN(Loc.strCountry) = 10 THEN Loc.strCountry ELSE '''' END),
 			--Contact
-			ptcus_contact = (SELECT strName FROM tblEntity WHERE intEntityId = Con.intEntityId),
-			ptcus_phone = Con.strPhone,
-			ptcus_phone2 = Con.strPhone2,
+			ptcus_contact = SUBSTRING((SELECT strName FROM tblEntity WHERE intEntityId = Con.intEntityId),1,20),
+			ptcus_phone = SUBSTRING(Con.strPhone,1,15),
+			ptcus_phone2 = SUBSTRING(Con.strPhone2,1,15),
 			--Customer
-			ptcus_cus_no = Cus.strCustomerNumber,
+			ptcus_cus_no = SUBSTRING(Cus.strCustomerNumber,1,10),
 			ptcus_co_per_ind_cp = CASE WHEN Cus.strType = ''Company'' THEN ''C'' ELSE ''P'' END,
 			ptcus_credit_limit = Cus.dblCreditLimit,
-			ptcus_sales_tax_id = Cus.strTaxNumber,
+			ptcus_sales_tax_id = SUBSTRING(Cus.strTaxNumber,1,15),
 			--ptcus_dflt_currency = Cus.strCurrency,
 			ptcus_active_yn = CASE WHEN Cus.ysnActive = 1 THEN ''Y'' ELSE ''N'' END,
 			--ptcus_req_po_yn = CASE WHEN Cus.ysnPORequired = 1 THEN ''Y'' ELSE ''N'' END,
 			ptcus_prt_stmnt_dtl_yn = CASE WHEN Cus.ysnStatementDetail = 1 THEN ''Y'' ELSE ''N'' END,
-			ptcus_stmt_fmt = Cus.strStatementFormat,
+			ptcus_stmt_fmt = CASE WHEN Cus.strStatementFormat = ''Open Item'' THEN ''O'' WHEN Cus.strStatementFormat = ''Balance Forward'' THEN ''B'' WHEN Cus.strStatementFormat = ''Budget Reminder'' THEN ''R'' WHEN Cus.strStatementFormat = ''None'' THEN ''N'' WHEN Cus.strStatementFormat IS NULL THEN Null ELSE '''' END,
 			ptcus_crd_stop_days = Cus.intCreditStopDays,
-			ptcus_local1 = Cus.strTaxAuthority1,
-			ptcus_local2 = Cus.strTaxAuthority2,
+			ptcus_local1 = SUBSTRING(Cus.strTaxAuthority1,1,3),
+			ptcus_local2 = SUBSTRING(Cus.strTaxAuthority2,1,3),
 			ptcus_pic_prc_yn = CASE WHEN Cus.ysnPrintPriceOnPrintTicket = 1 THEN ''Y'' ELSE ''N'' END,
 			ptcus_sales_tax_yn = CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN ''Y'' ELSE ''N'' END,
 			ptcus_budget_amt = Cus.dblBudgetAmountForBudgetBilling,
-			ptcus_budget_beg_mm = Cus.strBudgetBillingBeginMonth,
-			ptcus_budget_end_mm = Cus.strBudgetBillingEndMonth
+			ptcus_budget_beg_mm = SUBSTRING(Cus.strBudgetBillingBeginMonth,1,2),
+			ptcus_budget_end_mm = SUBSTRING(Cus.strBudgetBillingEndMonth,1,2)
 			--ptcus_dpa_cnt = Cus.strDPAContract,
 			--ptcus_dpa_rev_dt = CONVERT(int,''20'' + CONVERT(nvarchar,Cus.dtmDPADate,12)),
 			--ptcus_gb_rcpt_no = Cus.strGBReceiptNumber,
@@ -664,35 +661,35 @@ EXEC(
 			--Entity
 			ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,1,25) ELSE SUBSTRING(Ent.strName, 1, (CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  -1 ELSE 25 END)) END),'''') AS strLastName,
 			ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,26,50) ELSE SUBSTRING(Ent.strName,(CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  + 2 ELSE 50 END),50) END),'''') AS strFirsName,
-			Ent.strInternalNotes ,
+			SUBSTRING(Ent.strInternalNotes,1,30) as strInternalNotes,
 			--Ent.str1099Name,
 			--Contact
-			(SELECT strName FROM tblEntity WHERE intEntityId = Con.intEntityId) AS strContactName,
-			Con.strPhone,
-			Con.strPhone2,
+			SUBSTRING((SELECT strName FROM tblEntity WHERE intEntityId = Con.intEntityId),1,20) AS strContactName,
+			SUBSTRING(Con.strPhone,1,15) as strPhone,
+			SUBSTRING(Con.strPhone2,1,15) as strPhone2,
 			--Location
 			(CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(Loc.strAddress, 0, CHARINDEX(CHAR(10),Loc.strAddress)) ELSE Loc.strAddress END) AS strAddress1,
 			(CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(Loc.strAddress, CHARINDEX(CHAR(10),Loc.strAddress), LEN(Loc.strAddress)) ELSE NULL END) AS strAddress2,
-			Loc.strCity,
-			Loc.strState,
-			Loc.strZipCode,
+			SUBSTRING(Loc.strCity,1,20) as strCity,
+			SUBSTRING(Loc.strState,1,2) as strState,
+			SUBSTRING(Loc.strZipCode,1,10) as strZipCode,
 			(CASE WHEN LEN(Loc.strCountry) = 10 THEN Loc.strCountry ELSE '''' END)as strCountry,
 			--Customer
-			Cus.strCustomerNumber,
+			SUBSTRING(Cus.strCustomerNumber,1,10) as strCustomerNumber,
 			(CASE WHEN Cus.strType = ''Company'' THEN ''C'' ELSE ''P'' END) AS strType,
 			Cus.dblCreditLimit,
-			Cus.strTaxNumber,
+			SUBSTRING(Cus.strTaxNumber,1,15) as strTaxNumber,
 			(CASE WHEN Cus.ysnActive = 1 THEN ''Y'' ELSE ''N'' END) AS ysnActive,
 			(CASE WHEN Cus.ysnStatementDetail = 1 THEN ''Y'' ELSE ''N'' END) AS ysnStatementDetail,
-			Cus.strStatementFormat,
+			(CASE WHEN Cus.strStatementFormat = ''Open Item'' THEN ''O'' WHEN Cus.strStatementFormat = ''Balance Forward'' THEN ''B'' WHEN Cus.strStatementFormat = ''Budget Reminder'' THEN ''R'' WHEN Cus.strStatementFormat = ''None'' THEN ''N'' WHEN Cus.strStatementFormat IS NULL THEN Null ELSE '''' END) as strStatementFormat ,
 			Cus.intCreditStopDays,
-			Cus.strTaxAuthority1,
-			Cus.strTaxAuthority2,
+			SUBSTRING(Cus.strTaxAuthority1,1,3) as strTaxAuthority1,
+			SUBSTRING(Cus.strTaxAuthority2,1,3) as strTaxAuthority2,
 			(CASE WHEN Cus.ysnPrintPriceOnPrintTicket = 1 THEN ''Y'' ELSE ''N'' END) AS ysnPrintPriceOnPrintTicket,
 			(CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN ''Y'' ELSE ''N'' END) AS ysnApplyPrepaidTax,
 			Cus.dblBudgetAmountForBudgetBilling,
-			Cus.strBudgetBillingBeginMonth,
-			Cus.strBudgetBillingEndMonth
+			SUBSTRING(Cus.strBudgetBillingBeginMonth,1,2) as strBudgetBillingBeginMonth,
+			SUBSTRING(Cus.strBudgetBillingEndMonth,1,2) as strBudgetBillingEndMonth
 			--Cus.strDPAContract,				
 			--CONVERT(int,''20'' + CONVERT(nvarchar,Cus.dtmDPADate,12)),					
 			--Cus.strGBReceiptNumber,			
@@ -877,7 +874,7 @@ EXEC(
 				@ysnActive				= CASE WHEN ptcus_active_yn = ''Y'' THEN 1 ELSE 0 END,					
 				--@ysnPORequired			= CASE WHEN agcus_req_po_yn = ''Y'' THEN 1 ELSE 0 END,									
 				@ysnStatementDetail		= CASE WHEN ptcus_prt_stmnt_dtl_yn = ''Y'' THEN 1 ELSE 0 END,			
-				@strStatementFormat		= ptcus_stmt_fmt,			
+				@strStatementFormat		= CASE WHEN ptcus_stmt_fmt = ''O'' THEN ''Open Item'' WHEN ptcus_stmt_fmt = ''B'' THEN ''Balance Forward'' WHEN ptcus_stmt_fmt = ''R'' THEN ''Budget Reminder'' WHEN ptcus_stmt_fmt = ''N'' THEN ''None'' WHEN ptcus_stmt_fmt IS NULL THEN Null Else '''' END ,			
 				@intCreditStopDays		= ptcus_crd_stop_days,			
 				@strTaxAuthority1		= ptcus_local1,			
 				@strTaxAuthority2		= ptcus_local2,			
@@ -1062,6 +1059,5 @@ EXEC(
 	BEGIN
 		SELECT @Total = COUNT(ptcus_cus_no) from tblARTempCustomer
 	END'
-
-)
+	)
 END

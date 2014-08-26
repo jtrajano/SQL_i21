@@ -477,19 +477,7 @@ GO
 
 	IF NOT EXISTS(SELECT * FROM tblSMMasterMenu WHERE strMenuName = 'Export Hours Worked' AND strType = 'Screen' AND strModuleName = 'Help Desk' AND intParentMenuID = @intParent)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Export Hours Worked', N'Help Desk', @intParent, N'Export Hours Worked', N'Screen', N'HelpDesk.controller.ExportHoursWorked', N'small-screen', 0, 0, 0, 1, NULL, 1)
-GO
-	IF NOT EXISTS(SELECT * FROM tblSMMasterMenu WHERE strMenuName = 'Receive Payments' AND strType = 'Screen' AND strModuleName = 'Accounts Receivable')
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Receive Payments', N'Accounts Receivable', 132, N'Receive Payments', N'Screen', N'AccountsReceivable.controller.ReceivePaymentsDetail', N'small-screen', 0, 0, 0, 1, 1, 1)
-GO
-	IF NOT EXISTS(SELECT * FROM tblSMMasterMenu WHERE strMenuName = 'Receive Payments (Multi Customer)' AND strType = 'Screen' AND strModuleName = 'Accounts Receivable')
-		INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Receive Payments (Multi Customer)', N'Accounts Receivable', 132, N'Receive Payments (Multi Customer)', N'Screen', N'AccountsReceivable.controller.ReceivePayments', N'small-screen', 0, 0, 0, 1, 2, 1)
-	ELSE
-		UPDATE tblSMMasterMenu
-		SET strCommand = 'AccountsReceivable.controller.ReceivePayments',
-			intSort = 2
-		WHERE strMenuName = 'Receive Payments (Multi Customer)' AND strType = 'Screen' AND strModuleName = 'Accounts Receivable'
-			AND strCommand != 'AccountsReceivable.controller.ReceivePayments'
-GO
+GO	
 	DECLARE @intModule INT, @intParent INT
 	SELECT @intModule = intMenuID FROM tblSMMasterMenu Main 
 							WHERE strMenuName = 'Cash Management' AND intParentMenuID = 0
