@@ -505,7 +505,7 @@ EXEC('CREATE PROCEDURE uspARImportCustomer
 			SET intDefaultContactId = @CustomerToContactId, 
 				intDefaultLocationId = @EntityLocationId,
 				intBillToId = @EntityLocationId,
-				intShipToId = @EntityLocationId,
+				intShipToId = @EntityLocationId
 			WHERE intEntityId = @EntityId 
 		
 			IF(@@ERROR <> 0) 
@@ -1028,7 +1028,7 @@ EXEC('CREATE PROCEDURE uspARImportCustomer
 			SET intDefaultContactId = @CustomerToContactId, 
 				intDefaultLocationId = @EntityLocationId,
 				intBillToId = @EntityLocationId,
-				intShipToId = @EntityLocationId,
+				intShipToId = @EntityLocationId
 			WHERE intEntityId = @EntityId 
 	
 		
