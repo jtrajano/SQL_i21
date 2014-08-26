@@ -568,3 +568,7 @@ GO
 	DELETE FROM tblSMMasterMenu WHERE intParentMenuID = @intParent
 	DELETE FROM tblSMMasterMenu WHERE intMenuID = @intParent
 GO
+	DELETE FROM tblSMMasterMenu
+	WHERE intParentMenuID NOT IN (SELECT intMenuID FROM tblSMMasterMenu)
+	AND ISNULL(intParentMenuID, 0) <> 0
+GO
