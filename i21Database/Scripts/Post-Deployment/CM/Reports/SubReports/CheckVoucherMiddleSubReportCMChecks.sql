@@ -26,6 +26,18 @@ WHERE	RPT_SETTING.intReportId = @intReportId
 DELETE FROM [dbo].[tblRMSubreportSetting]
 WHERE [intReportId] = @intReportId
 
+-- Delete the default option
+DELETE FROM [dbo].[tblRMDefaultOption]
+WHERE [intReportId] = @intReportId
+
+-- Delete the default filter
+DELETE FROM [dbo].[tblRMDefaultFilter]
+WHERE [intReportId] = @intReportId
+
+-- Delete the default sort
+DELETE FROM [dbo].[tblRMDefaultSort]
+WHERE [intReportId] = @intReportId
+
 -- Delete the criteria fields 
 DELETE FROM [dbo].[tblRMCriteriaField]
 WHERE [intReportId] = @intReportId
