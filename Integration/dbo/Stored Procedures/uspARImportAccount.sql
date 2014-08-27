@@ -30,7 +30,7 @@ GO
 			UPDATE ssascmst
 				SET 
 				ssasc_code = Accnt.strAccountStatusCode,
-				ssasc_desc = SUBSTRING(Accnt.strDescription,0,15)
+				ssasc_desc = SUBSTRING(Accnt.strDescription,1,15)
 			FROM tblARAccountStatus Accnt
 				WHERE strAccountStatusCode = @AccountCode AND ssasc_code = @AccountCode
 		END
@@ -42,7 +42,7 @@ GO
 			)
 			SELECT 
 				strAccountStatusCode,
-				SUBSTRING(strDescription,0,15)
+				SUBSTRING(strDescription,1,15)
 			FROM tblARAccountStatus
 			WHERE strAccountStatusCode = @AccountCode
 		
@@ -72,7 +72,7 @@ GO
 		LEFT JOIN tblARAccountStatus
 			ON ssascmst.ssasc_code COLLATE Latin1_General_CI_AS = tblARAccountStatus.strAccountStatusCode COLLATE Latin1_General_CI_AS
 		WHERE tblARAccountStatus.strAccountStatusCode IS NULL
-		ORDER BY ssascmst.ssasc_code
+		ORDER BY ssascmst.ssasc_code DESC
 
 		WHILE (EXISTS(SELECT 1 FROM #tmpssascmst))
 		BEGIN
