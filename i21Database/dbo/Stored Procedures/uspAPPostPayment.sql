@@ -612,7 +612,8 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 		UPDATE tblAPBill
 			SET tblAPBill.dblAmountDue = B.dblAmountDue,
 				tblAPBill.ysnPaid = 0,
-				tblAPBill.dtmDatePaid = NULL
+				tblAPBill.dtmDatePaid = NULL,
+				tblAPBill.dblWithheld = 0
 		FROM tblAPPayment A
 					INNER JOIN tblAPPaymentDetail B 
 							ON A.intPaymentId = B.intPaymentId
