@@ -125,6 +125,8 @@
     <None Include="dbo\Stored Procedures\uspARImportCustomer.sql" />
     <None Include="Scripts\AP\TransferImportedTermsData.sql" />
     <None Include="Scripts\AP\TransferImportedVendorData.sql" />
+    <None Include="dbo\Stored Procedures\uspARImportMarketZone.sql" />
+    <None Include="dbo\Stored Procedures\uspARImportServiceCharge.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />

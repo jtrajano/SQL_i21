@@ -8,12 +8,10 @@
     [strSpouse]               NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strType]                 NVARCHAR (20)   COLLATE Latin1_General_CI_AS NULL,
     [strTitle]                NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
-    [imgSalespersonPhoto]     VARBINARY (MAX) NULL,
     [intTerritoryId]          INT             NULL,
     [strPhone]                NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strAltPhone]             NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strMobile]               NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
-    [strEmail]                NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strAltEmail]             NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strFax]                  NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strAddress]              NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
@@ -32,6 +30,7 @@
     [intConcurrencyId]        INT             CONSTRAINT [DF_tblARSalesperson_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARSalesperson] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
     CONSTRAINT [FK_tblARSalesperson_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
+	CONSTRAINT [UK_intSalespersonId] UNIQUE NONCLUSTERED ([intSalespersonId] ASC),
     CONSTRAINT [UKstrSalespersonId] UNIQUE NONCLUSTERED ([strSalespersonId] ASC)
 );
 
