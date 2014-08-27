@@ -50,3 +50,11 @@ END
 GO
 
 CREATE INDEX [IX_tblAPBillBatch_strBillBatchNumber] ON [dbo].[tblAPBillBatch] ([strBillBatchNumber])
+
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblAPBillBatch_intBillBatchId] ON [dbo].[tblAPBillBatch] 
+(
+	[intBillBatchId] ASC
+)WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+

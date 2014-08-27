@@ -18,6 +18,11 @@
 
 
 GO
-CREATE NONCLUSTERED INDEX [IX_intPaymentId]
-    ON [dbo].[tblAPPaymentDetail]([intPaymentId] ASC);
 
+
+CREATE NONCLUSTERED INDEX [IX_tblAPPaymentDetail_intPaymentId_intBillId] ON [dbo].[tblAPPaymentDetail] 
+(
+	[intBillId] ASC,
+	[intPaymentId] ASC
+)
+WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]

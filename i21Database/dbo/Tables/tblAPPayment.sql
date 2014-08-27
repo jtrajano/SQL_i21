@@ -26,6 +26,16 @@
 );
 GO
 
+CREATE NONCLUSTERED INDEX [IX_tblAPPayment_intVendorId_intPaymentId] ON [dbo].[tblAPPayment] 
+(
+	[intVendorId] ASC,
+	[intPaymentId] ASC
+)
+WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+
+
+GO
+
 ALTER TABLE dbo.tblAPPayment
 NOCHECK CONSTRAINT[FK_tblAPPayment_tblAPVendor];
 
