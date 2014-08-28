@@ -73,12 +73,17 @@ IF ISNULL(@ysnPost, 0) = 0
 							'You cannot Unpost this General Journal. You must Unpost and Delete the Reversing transaction: ' + A.strJournalId + ' first!' AS strMessage
 						FROM tblGLJournal A 
 						WHERE A.strReverseLink IN (SELECT strJournalId FROM tblGLJournal WHERE intJournalId IN (SELECT intJournalId FROM #tmpPostJournals))
+						UNION
+						SELECT DISTINCT A.intJournalId,
+							'Unable to find an open accounting period to match the transaction date.' AS strMessage
+						FROM tblGLJournal A 
+						WHERE A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals) AND ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0) = 0 
 					) tmpBatchResults
 			END
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 
-		IF (NOT EXISTS(SELECT TOP 1 1 FROM tblGLJournal A WHERE A.strReverseLink IN (SELECT strJournalId FROM tblGLJournal WHERE intJournalId IN (SELECT intJournalId FROM #tmpPostJournals))) OR ISNULL(@ysnRecap, 0) = 1)
+		IF (NOT EXISTS(SELECT TOP 1 1 FROM tblGLPostResult WHERE strBatchId = @strBatchId))
 			BEGIN
 				SET @Param = (SELECT strJournalId FROM tblGLJournal WHERE intJournalId IN (SELECT intJournalId FROM #tmpPostJournals))
 				EXEC [dbo].[uspGLReverseGLEntries] @strBatchId, @Param, @ysnRecap, 'GJ', NULL, @intEntityId, @intCount	OUT
@@ -259,7 +264,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strBatchId]			= @strBatchId
 			,[strCode]				= 'GJ'			
 			,[strJournalLineDescription] = A.[strDescription]
-			,[intJournalLineNo]		= A.intLineNo			
+			,[intJournalLineNo]		= A.[intJournalDetailId]			
 			,[strTransactionType]	= B.[strJournalType]
 			,[strTransactionForm]	= B.[strTransactionType]
 			,[strModuleName]		= 'General Ledger'
