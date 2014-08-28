@@ -213,7 +213,7 @@ BEGIN
 				A.intPaymentId
 			FROM tblAPPayment A 
 				INNER JOIN tblCMBankTransaction B ON A.strPaymentRecordNum = B.strTransactionId
-			WHERE B.ysnClr = 1
+			WHERE B.ysnClr = 1 AND intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		--CM Voiding Validation
 		INSERT INTO #tmpPayableInvalidData
