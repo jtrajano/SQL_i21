@@ -18,7 +18,7 @@ BEGIN
 	AS  
   
 		/*
-		set @xmlparam = ''<?xml version="1.0" encoding="utf-16"?><xmlparam>''''<options><option><name>List Totals Only</name><enable>False</enable></option><option><name>List Unit Price</name><enable>True</enable></option><option><name>Print Tank Info</name><enable>True</enable></option><option><name>Print Contracts</name><enable>True</enable></option><option><name>Print Regulator Info</name><enable>True</enable></option><option><name>Include Consumption Sites On Hold</name><enable>True</enable></option><option><name>Include Consumption Site in the same Fill Group</name><enable>True</enable></option></options></xmlparam>''  
+		set @xmlparam = ''<?xml version="1.0" encoding="utf-16"?><xmlparam>''''<options><option><name>List Totals Only</name><enable>False</enable></option><option><name>List Unit Price</name><enable>True</enable></option><option><name>Print Tank Info</name><enable>True</enable></option><option><name>Print Contracts</name><enable>True</enable></option><option><name>Print Regulator Info</name><enable>True</enable></option><option><name>Print On Hold Detail</name><enable>True</enable></option><option><name>Include Consumption Site in the same Fill Group</name><enable>True</enable></option></options></xmlparam>''  
 		*/  
 		 SET NOCOUNT ON  
 		 IF (ISNULL(@xmlParam,'''') = '''')  
@@ -308,7 +308,7 @@ BEGIN
 		 SELECT @FillGroup = [enable] FROM @temp_designParam WHERE [name] = ''Include Consumption Site in the same Fill Group''  
    
 		 --On Hold  
-		 SELECT @OnHold = [enable] FROM @temp_designParam WHERE [name] = ''Include Consumption Sites On Hold''  
+		 SELECT @OnHold = [enable] FROM @temp_designParam WHERE [name] = ''Print On Hold Detail''  
    
 		 --Building the where clause  
    
