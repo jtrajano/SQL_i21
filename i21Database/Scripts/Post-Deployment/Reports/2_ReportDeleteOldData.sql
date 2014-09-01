@@ -3,7 +3,6 @@
 /*******************  BEGIN DELETE old records  *******************/
 	
 	print('/*******************  BEGIN DELETE old records  *******************/')
-	delete from tblRMArchive
 	delete from tblRMReport
 	delete from tblRMCriteriaFieldSelection
 	delete from tblRMDatasource
