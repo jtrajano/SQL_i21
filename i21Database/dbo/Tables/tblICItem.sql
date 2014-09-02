@@ -161,15 +161,15 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'intCostingMethodId'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'FK. An item may belong to a category (Tracking in the screen). Origin: agitm-class',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICItem',
-    @level2type = N'COLUMN',
-    @level2name = N'intCategoryId'
-GO
+--EXEC sp_addextendedproperty @name = N'MS_Description',
+--    @value = N'FK. An item may belong to a category (Tracking in the screen). Origin: agitm-class',
+--    @level0type = N'SCHEMA',
+--    @level0name = N'dbo',
+--    @level1type = N'TABLE',
+--    @level1name = N'tblICItem',
+--    @level2type = N'COLUMN',
+--    @level2name = N'intCategoryId'
+--GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'FK. An item may belong to a patronage. Origin: agitm-pat-cat-code ',
     @level0type = N'SCHEMA',
