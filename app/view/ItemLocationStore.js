@@ -47,9 +47,9 @@ Ext.define('Inventory.view.ItemLocationStore', {
     items: [
         {
             xtype: 'form',
+            reference: 'frmItemLocationStore',
             autoShow: true,
             height: 350,
-            itemId: 'frmItemLocationStore',
             margin: -1,
             width: 450,
             bodyBorder: false,
@@ -72,9 +72,9 @@ Ext.define('Inventory.view.ItemLocationStore', {
                     items: [
                         {
                             xtype: 'button',
+                            reference: 'btnNew',
                             tabIndex: -1,
                             height: 57,
-                            itemId: 'btnNew',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-new',
@@ -83,9 +83,9 @@ Ext.define('Inventory.view.ItemLocationStore', {
                         },
                         {
                             xtype: 'button',
+                            reference: 'btnSave',
                             tabIndex: -1,
                             height: 57,
-                            itemId: 'btnSave',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-save',
@@ -94,9 +94,9 @@ Ext.define('Inventory.view.ItemLocationStore', {
                         },
                         {
                             xtype: 'button',
+                            reference: 'btnSearch',
                             tabIndex: -1,
                             height: 57,
-                            itemId: 'btnSearch',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-search',
@@ -105,9 +105,9 @@ Ext.define('Inventory.view.ItemLocationStore', {
                         },
                         {
                             xtype: 'button',
+                            reference: 'btnDelete',
                             tabIndex: -1,
                             height: 57,
-                            itemId: 'btnDelete',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-delete',
@@ -116,9 +116,9 @@ Ext.define('Inventory.view.ItemLocationStore', {
                         },
                         {
                             xtype: 'button',
+                            reference: 'btnUndo',
                             tabIndex: -1,
                             height: 57,
-                            itemId: 'btnUndo',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-undo',
@@ -131,9 +131,9 @@ Ext.define('Inventory.view.ItemLocationStore', {
                         },
                         {
                             xtype: 'button',
+                            reference: 'btnClose',
                             tabIndex: -1,
                             height: 57,
-                            itemId: 'btnClose',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-close',
@@ -144,7 +144,7 @@ Ext.define('Inventory.view.ItemLocationStore', {
                 },
                 {
                     xtype: 'ipagingstatusbar',
-                    itemId: 'pagingtoolbar',
+                    reference: 'pagingtoolbar',
                     flex: 1,
                     dock: 'bottom'
                 }
@@ -161,14 +161,14 @@ Ext.define('Inventory.view.ItemLocationStore', {
                         {
                             xtype: 'combobox',
                             flex: 1.4,
-                            itemId: 'cboLocation',
+                            reference: 'cboLocation',
                             fieldLabel: 'Location',
                             labelWidth: 125
                         },
                         {
                             xtype: 'combobox',
                             flex: 1,
-                            itemId: 'cboStore',
+                            reference: 'cboStore',
                             margin: '0 5',
                             fieldLabel: 'Store',
                             labelWidth: 40
@@ -176,14 +176,14 @@ Ext.define('Inventory.view.ItemLocationStore', {
                         {
                             xtype: 'combobox',
                             flex: 1,
-                            itemId: 'cboDefaultVendor',
+                            reference: 'cboDefaultVendor',
                             fieldLabel: 'Default Vendor',
                             labelWidth: 90
                         },
                         {
                             xtype: 'combobox',
                             flex: 1,
-                            itemId: 'cboCostingMethod',
+                            reference: 'cboCostingMethod',
                             margin: '0 0 0 5',
                             fieldLabel: 'Costing Method',
                             labelWidth: 95
@@ -192,7 +192,7 @@ Ext.define('Inventory.view.ItemLocationStore', {
                 },
                 {
                     xtype: 'textareafield',
-                    itemId: 'txtPosDescription',
+                    reference: 'txtPosDescription',
                     fieldLabel: 'POS Description',
                     labelWidth: 125
                 },
@@ -214,91 +214,91 @@ Ext.define('Inventory.view.ItemLocationStore', {
                             items: [
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtRow',
+                                    reference: 'txtRow',
                                     fieldLabel: 'Row',
                                     labelWidth: 125
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtBin',
+                                    reference: 'txtBin',
                                     fieldLabel: 'Bin',
                                     labelWidth: 125
                                 },
                                 {
                                     xtype: 'combobox',
-                                    itemId: 'cboDefaultUom',
+                                    reference: 'cboDefaultUom',
                                     fieldLabel: 'Default UOM',
                                     labelWidth: 125
                                 },
                                 {
                                     xtype: 'combobox',
-                                    itemId: 'cboIssueUom',
+                                    reference: 'cboIssueUom',
                                     fieldLabel: 'Issue UOM',
                                     labelWidth: 125
                                 },
                                 {
                                     xtype: 'combobox',
-                                    itemId: 'cboReceiveUom',
+                                    reference: 'cboReceiveUom',
                                     fieldLabel: 'Receive UOM',
                                     labelWidth: 125
                                 },
                                 {
                                     xtype: 'combobox',
-                                    itemId: 'cboFamily',
+                                    reference: 'cboFamily',
                                     fieldLabel: 'Family',
                                     labelWidth: 125
                                 },
                                 {
                                     xtype: 'combobox',
-                                    itemId: 'cboClass',
+                                    reference: 'cboClass',
                                     fieldLabel: 'Class',
                                     labelWidth: 125
                                 },
                                 {
                                     xtype: 'combobox',
-                                    itemId: 'cboFuelTankNo',
+                                    reference: 'cboFuelTankNo',
                                     fieldLabel: 'Fuel Tank No',
                                     labelWidth: 125
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtPassportFuelId1',
+                                    reference: 'txtPassportFuelId1',
                                     fieldLabel: 'Passport Fuel ID 1',
                                     labelWidth: 125
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtPassportFuelId2',
+                                    reference: 'txtPassportFuelId2',
                                     fieldLabel: 'Passport Fuel ID 2',
                                     labelWidth: 125
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtPassportFuelId3',
+                                    reference: 'txtPassportFuelId3',
                                     fieldLabel: 'Passport Fuel ID 3',
                                     labelWidth: 125
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkTaxFlag1',
+                                    reference: 'chkTaxFlag1',
                                     fieldLabel: 'Tax Flag 1',
                                     labelWidth: 125
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkTaxFlag2',
+                                    reference: 'chkTaxFlag2',
                                     fieldLabel: 'Tax Flag 2',
                                     labelWidth: 125
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkTaxFlag3',
+                                    reference: 'chkTaxFlag3',
                                     fieldLabel: 'Tax Flag 3',
                                     labelWidth: 125
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkTaxFlag4',
+                                    reference: 'chkTaxFlag4',
                                     fieldLabel: 'Tax Flag 4',
                                     labelWidth: 125
                                 }
@@ -315,97 +315,97 @@ Ext.define('Inventory.view.ItemLocationStore', {
                             items: [
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkPromotionalItem',
+                                    reference: 'chkPromotionalItem',
                                     fieldLabel: 'Promotional Item',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'combobox',
-                                    itemId: 'cboMixMatchCode',
+                                    reference: 'cboMixMatchCode',
                                     fieldLabel: 'Mix/Match Code',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkDepositRequired',
+                                    reference: 'chkDepositRequired',
                                     fieldLabel: 'Deposit Required',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtBottleDepositNo',
+                                    reference: 'txtBottleDepositNo',
                                     fieldLabel: 'Bottle Deposit No',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkSaleable',
+                                    reference: 'chkSaleable',
                                     fieldLabel: 'Saleable',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkQuantityRequired',
+                                    reference: 'chkQuantityRequired',
                                     fieldLabel: 'Quantity Required',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkScaleItem',
+                                    reference: 'chkScaleItem',
                                     fieldLabel: 'Scale Item',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkFoodStampable',
+                                    reference: 'chkFoodStampable',
                                     fieldLabel: 'Food Stampable',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkReturnable',
+                                    reference: 'chkReturnable',
                                     fieldLabel: 'Returnable',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkPrePriced',
+                                    reference: 'chkPrePriced',
                                     fieldLabel: 'Pre Priced',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkOpenPricePlu',
+                                    reference: 'chkOpenPricePlu',
                                     fieldLabel: 'Open Price PLU',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkLinkedItem',
+                                    reference: 'chkLinkedItem',
                                     fieldLabel: 'Linked Item',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtBottleDepositNo1',
+                                    reference: 'txtBottleDepositNo1',
                                     fieldLabel: 'Vendor Category',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkLinkedItem1',
+                                    reference: 'chkLinkedItem1',
                                     fieldLabel: 'Count by Serial Number',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtBottleDepositNo2',
+                                    reference: 'txtBottleDepositNo2',
                                     fieldLabel: 'Serial Number Begin',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtBottleDepositNo3',
+                                    reference: 'txtBottleDepositNo3',
                                     fieldLabel: 'Serial Number End',
                                     labelWidth: 140
                                 }
@@ -421,67 +421,67 @@ Ext.define('Inventory.view.ItemLocationStore', {
                             items: [
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkIdRequiredLiqour',
+                                    reference: 'chkIdRequiredLiqour',
                                     fieldLabel: 'ID Required (liqour)',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkIdRequiredCigarettes',
+                                    reference: 'chkIdRequiredCigarettes',
                                     fieldLabel: 'ID Required (Cigarettes)',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtMinimumAge',
+                                    reference: 'txtMinimumAge',
                                     fieldLabel: 'Minimum Age',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkApplyBlueLaw1',
+                                    reference: 'chkApplyBlueLaw1',
                                     fieldLabel: 'Apply Blue Law 1',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkApplyBlueLaw2',
+                                    reference: 'chkApplyBlueLaw2',
                                     fieldLabel: 'Apply Blue Law 2',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'combobox',
-                                    itemId: 'cboItemTypeCode',
+                                    reference: 'cboItemTypeCode',
                                     fieldLabel: 'Item Type Code',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtItemTypeSubcode',
+                                    reference: 'txtItemTypeSubcode',
                                     fieldLabel: 'Item Type Subcode',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkAutoCalculateFreight',
+                                    reference: 'chkAutoCalculateFreight',
                                     fieldLabel: 'Auto Calculate Freight',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'combobox',
-                                    itemId: 'cboFreightMethod',
+                                    reference: 'cboFreightMethod',
                                     fieldLabel: 'Freight Method',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtFreightRate',
+                                    reference: 'txtFreightRate',
                                     fieldLabel: 'Freight Rate',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'combobox',
-                                    itemId: 'cboFreightVendor',
+                                    reference: 'cboFreightVendor',
                                     fieldLabel: 'Freight Vendor',
                                     labelWidth: 140
                                 }

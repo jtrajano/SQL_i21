@@ -22,8 +22,6 @@ Ext.define('Inventory.view.Item', {
         'Inventory.view.Filter',
         'Inventory.view.StatusbarPaging',
         'Ext.toolbar.Separator',
-        'Ext.menu.Menu',
-        'Ext.menu.Item',
         'Ext.form.Panel',
         'Ext.tab.Panel',
         'Ext.tab.Tab',
@@ -125,27 +123,14 @@ Ext.define('Inventory.view.Item', {
                 },
                 {
                     xtype: 'button',
-                    reference: 'btnAdditional',
+                    reference: 'btnDuplicate',
                     tabIndex: -1,
                     height: 57,
-                    width: 56,
+                    width: 60,
                     iconAlign: 'top',
-                    iconCls: 'large-additional',
+                    iconCls: 'large-duplicate',
                     scale: 'large',
-                    text: 'Tools',
-                    menu: {
-                        xtype: 'menu',
-                        items: [
-                            {
-                                xtype: 'menuitem',
-                                text: 'Menu Item 1'
-                            },
-                            {
-                                xtype: 'menuitem',
-                                text: 'Menu Item 2'
-                            }
-                        ]
-                    }
+                    text: 'Duplicate'
                 },
                 {
                     xtype: 'tbseparator',
@@ -431,7 +416,7 @@ Ext.define('Inventory.view.Item', {
                                                 xtype: 'tabpanel',
                                                 flex: 1,
                                                 reference: 'tabSetup',
-                                                activeTab: 1,
+                                                activeTab: 0,
                                                 plain: true,
                                                 items: [
                                                     {
@@ -455,21 +440,21 @@ Ext.define('Inventory.view.Item', {
                                                                         items: [
                                                                             {
                                                                                 xtype: 'button',
-                                                                                reference: 'btnAdd',
+                                                                                reference: 'btnAddLocation',
                                                                                 tabIndex: -1,
                                                                                 iconCls: 'small-add',
                                                                                 text: 'Add'
                                                                             },
                                                                             {
                                                                                 xtype: 'button',
-                                                                                reference: 'btnEdit',
+                                                                                reference: 'btnEditLocation',
                                                                                 tabIndex: -1,
                                                                                 iconCls: 'small-edit',
                                                                                 text: 'Edit'
                                                                             },
                                                                             {
                                                                                 xtype: 'button',
-                                                                                reference: 'btnDelete',
+                                                                                reference: 'btnDeleteLocation',
                                                                                 tabIndex: -1,
                                                                                 iconCls: 'small-delete',
                                                                                 text: 'Delete'
@@ -1034,21 +1019,21 @@ Ext.define('Inventory.view.Item', {
                                                                                 items: [
                                                                                     {
                                                                                         xtype: 'button',
-                                                                                        reference: 'btnAdd',
+                                                                                        reference: 'btnAddCategories',
                                                                                         tabIndex: -1,
                                                                                         iconCls: 'small-add',
                                                                                         text: 'Add'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'button',
-                                                                                        reference: 'btnEdit',
+                                                                                        reference: 'btnEditCategories',
                                                                                         tabIndex: -1,
                                                                                         iconCls: 'small-edit',
                                                                                         text: 'Edit'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'button',
-                                                                                        reference: 'btnDelete',
+                                                                                        reference: 'btnDeleteCategories',
                                                                                         tabIndex: -1,
                                                                                         iconCls: 'small-delete',
                                                                                         text: 'Delete'
@@ -1094,21 +1079,21 @@ Ext.define('Inventory.view.Item', {
                                                                                 items: [
                                                                                     {
                                                                                         xtype: 'button',
-                                                                                        reference: 'btnAdd',
+                                                                                        reference: 'btnAddSLA',
                                                                                         tabIndex: -1,
                                                                                         iconCls: 'small-add',
                                                                                         text: 'Add'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'button',
-                                                                                        reference: 'btnEdit',
+                                                                                        reference: 'btnEditSLA',
                                                                                         tabIndex: -1,
                                                                                         iconCls: 'small-edit',
                                                                                         text: 'Edit'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'button',
-                                                                                        reference: 'btnDelete',
+                                                                                        reference: 'btnDeleteSLA',
                                                                                         tabIndex: -1,
                                                                                         iconCls: 'small-delete',
                                                                                         text: 'Delete'
@@ -1531,7 +1516,7 @@ Ext.define('Inventory.view.Item', {
                                                                         items: [
                                                                             {
                                                                                 xtype: 'button',
-                                                                                reference: 'btnDelete',
+                                                                                reference: 'btnDeleteUPC',
                                                                                 tabIndex: -1,
                                                                                 iconCls: 'small-delete',
                                                                                 text: 'Delete'
@@ -1601,7 +1586,7 @@ Ext.define('Inventory.view.Item', {
                                                                         items: [
                                                                             {
                                                                                 xtype: 'button',
-                                                                                reference: 'btnDelete',
+                                                                                reference: 'btnDeleteCustomerXref',
                                                                                 tabIndex: -1,
                                                                                 iconCls: 'small-delete',
                                                                                 text: 'Delete'
@@ -1681,7 +1666,7 @@ Ext.define('Inventory.view.Item', {
                                                                         items: [
                                                                             {
                                                                                 xtype: 'button',
-                                                                                reference: 'btnDelete',
+                                                                                reference: 'btnDeleteVendorXref',
                                                                                 tabIndex: -1,
                                                                                 iconCls: 'small-delete',
                                                                                 text: 'Delete'
@@ -1777,7 +1762,7 @@ Ext.define('Inventory.view.Item', {
                                                                         items: [
                                                                             {
                                                                                 xtype: 'button',
-                                                                                reference: 'btnDelete',
+                                                                                reference: 'btnDeleteContractItem',
                                                                                 tabIndex: -1,
                                                                                 iconCls: 'small-delete',
                                                                                 text: 'Delete'
@@ -1896,7 +1881,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 items: [
                                                                                     {
                                                                                         xtype: 'button',
-                                                                                        reference: 'btnDelete',
+                                                                                        reference: 'btnDeleteDocumentAssociation',
                                                                                         tabIndex: -1,
                                                                                         iconCls: 'small-delete',
                                                                                         text: 'Delete'
@@ -1944,7 +1929,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 items: [
                                                                                     {
                                                                                         xtype: 'button',
-                                                                                        reference: 'btnDelete',
+                                                                                        reference: 'btnDeleteCertification',
                                                                                         tabIndex: -1,
                                                                                         iconCls: 'small-delete',
                                                                                         text: 'Delete'
@@ -2007,21 +1992,21 @@ Ext.define('Inventory.view.Item', {
                                                         items: [
                                                             {
                                                                 xtype: 'button',
-                                                                reference: 'btnAdd',
+                                                                reference: 'btnAddPricing',
                                                                 tabIndex: -1,
                                                                 iconCls: 'small-add',
                                                                 text: 'Add'
                                                             },
                                                             {
                                                                 xtype: 'button',
-                                                                reference: 'btnEdit',
+                                                                reference: 'btnEditPricing',
                                                                 tabIndex: -1,
                                                                 iconCls: 'small-edit',
                                                                 text: 'Edit'
                                                             },
                                                             {
                                                                 xtype: 'button',
-                                                                reference: 'btnDelete',
+                                                                reference: 'btnDeletePricing',
                                                                 tabIndex: -1,
                                                                 iconCls: 'small-delete',
                                                                 text: 'Delete'
@@ -2124,7 +2109,7 @@ Ext.define('Inventory.view.Item', {
                                                                         items: [
                                                                             {
                                                                                 xtype: 'button',
-                                                                                reference: 'btnDelete',
+                                                                                reference: 'btnDeletePricingLevel',
                                                                                 tabIndex: -1,
                                                                                 iconCls: 'small-delete',
                                                                                 text: 'Delete'
@@ -2253,7 +2238,7 @@ Ext.define('Inventory.view.Item', {
                                                                         items: [
                                                                             {
                                                                                 xtype: 'button',
-                                                                                reference: 'btnDelete',
+                                                                                reference: 'btnDeleteRebate',
                                                                                 tabIndex: -1,
                                                                                 iconCls: 'small-delete',
                                                                                 text: 'Delete'
@@ -2380,7 +2365,7 @@ Ext.define('Inventory.view.Item', {
                                                                         items: [
                                                                             {
                                                                                 xtype: 'button',
-                                                                                reference: 'btnDelete',
+                                                                                reference: 'btnDeleteStock',
                                                                                 tabIndex: -1,
                                                                                 iconCls: 'small-delete',
                                                                                 text: 'Delete'
@@ -2503,7 +2488,7 @@ Ext.define('Inventory.view.Item', {
                                                                         items: [
                                                                             {
                                                                                 xtype: 'button',
-                                                                                reference: 'btnDelete',
+                                                                                reference: 'btnDeleteGlAccounts',
                                                                                 tabIndex: -1,
                                                                                 iconCls: 'small-delete',
                                                                                 text: 'Delete'
@@ -2657,7 +2642,7 @@ Ext.define('Inventory.view.Item', {
                                                         items: [
                                                             {
                                                                 xtype: 'button',
-                                                                reference: 'btnDelete',
+                                                                reference: 'btnDeleteNotes',
                                                                 tabIndex: -1,
                                                                 iconCls: 'small-delete',
                                                                 text: 'Delete'

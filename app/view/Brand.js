@@ -135,7 +135,7 @@ Ext.define('Inventory.view.Brand', {
                                         items: [
                                             {
                                                 xtype: 'button',
-                                                reference: 'btnDelete',
+                                                reference: 'btnDeleteBrand',
                                                 tabIndex: -1,
                                                 iconCls: 'small-delete',
                                                 text: 'Delete'

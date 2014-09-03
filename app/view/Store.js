@@ -250,10 +250,7 @@ Ext.define('Inventory.view.Store', {
                                                                 reference: 'txtAddress',
                                                                 height: 58,
                                                                 hideLabel: true,
-                                                                labelWidth: 0,
-                                                                name: 'strAddress',
-                                                                enforceMaxLength: true,
-                                                                maxLength: 65
+                                                                labelWidth: 0
                                                             }
                                                         ]
                                                     },
@@ -263,53 +260,19 @@ Ext.define('Inventory.view.Store', {
                                                         layout: 'hbox',
                                                         items: [
                                                             {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
-                                                                    {
-                                                                        dataIndex: 'intZipCodeId',
-                                                                        text: 'Zip Code Id',
-                                                                        hidden: true
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strZipCode',
-                                                                        text: 'Zip/Postal Code',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strCity',
-                                                                        text: 'City',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strState',
-                                                                        text: 'State/Province',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strCountry',
-                                                                        text: 'Country',
-                                                                        flex: 1
-                                                                    }
-                                                                ],
+                                                                xtype: 'combobox',
                                                                 flex: 1.2,
                                                                 reference: 'cboZipCode',
                                                                 fieldLabel: 'Zip/Postal Code',
-                                                                labelWidth: 90,
-                                                                name: 'strZipCode',
-                                                                displayField: 'strZipCode',
-                                                                valueField: 'strZipCode'
+                                                                labelWidth: 90
                                                             },
                                                             {
                                                                 xtype: 'textfield',
                                                                 flex: 1,
                                                                 reference: 'txtCity',
-                                                                tabIndex: -1,
                                                                 margin: '0 0 0 5',
                                                                 fieldLabel: 'City',
-                                                                labelWidth: 50,
-                                                                name: 'strCity',
-                                                                enforceMaxLength: true,
-                                                                maxLength: 85
+                                                                labelWidth: 50
                                                             }
                                                         ]
                                                     },
@@ -322,38 +285,17 @@ Ext.define('Inventory.view.Store', {
                                                                 xtype: 'textfield',
                                                                 flex: 1.2,
                                                                 reference: 'txtState',
-                                                                tabIndex: -1,
                                                                 fieldLabel: 'State/Province',
-                                                                labelWidth: 90,
-                                                                name: 'strState',
-                                                                enforceMaxLength: true,
-                                                                maxLength: 60
+                                                                labelWidth: 90
                                                             },
                                                             {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
-                                                                    {
-                                                                        dataIndex: 'intCountryId',
-                                                                        text: 'Country Id',
-                                                                        hidden: true
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strCountry',
-                                                                        text: 'Country',
-                                                                        flex: 1
-                                                                    }
-                                                                ],
+                                                                xtype: 'combobox',
                                                                 flex: 1,
                                                                 reference: 'cboCountry',
                                                                 tabIndex: -1,
                                                                 margin: '0 0 0 5',
                                                                 fieldLabel: 'Country',
-                                                                labelWidth: 50,
-                                                                name: 'strCountry',
-                                                                enforceMaxLength: true,
-                                                                maxLength: 75,
-                                                                displayField: 'strCountry',
-                                                                valueField: 'strCountry'
+                                                                labelWidth: 50
                                                             }
                                                         ]
                                                     },
@@ -367,11 +309,7 @@ Ext.define('Inventory.view.Store', {
                                                                 flex: 1.2,
                                                                 reference: 'txtPhone',
                                                                 fieldLabel: 'Phone',
-                                                                labelWidth: 90,
-                                                                name: 'strPhone',
-                                                                enforceMaxLength: true,
-                                                                maxLength: 30,
-                                                                vtype: 'phone'
+                                                                labelWidth: 90
                                                             },
                                                             {
                                                                 xtype: 'textfield',
@@ -379,11 +317,7 @@ Ext.define('Inventory.view.Store', {
                                                                 reference: 'txtFax',
                                                                 margin: '0 0 0 5',
                                                                 fieldLabel: 'Fax',
-                                                                labelWidth: 50,
-                                                                name: 'strFax',
-                                                                enforceMaxLength: true,
-                                                                maxLength: 30,
-                                                                vtype: 'phone'
+                                                                labelWidth: 50
                                                             }
                                                         ]
                                                     },
@@ -421,10 +355,7 @@ Ext.define('Inventory.view.Store', {
                                                                 flex: 1,
                                                                 reference: 'txtEmail',
                                                                 hideLabel: true,
-                                                                labelWidth: 0,
-                                                                name: 'strEmail',
-                                                                enforceMaxLength: true,
-                                                                maxLength: 225
+                                                                labelWidth: 0
                                                             }
                                                         ]
                                                     },
@@ -463,10 +394,7 @@ Ext.define('Inventory.view.Store', {
                                                                 flex: 1,
                                                                 reference: 'txtWebsite',
                                                                 hideLabel: true,
-                                                                labelWidth: 0,
-                                                                name: 'strWebsite',
-                                                                enforceMaxLength: true,
-                                                                maxLength: 125
+                                                                labelWidth: 0
                                                             }
                                                         ]
                                                     },
@@ -710,21 +638,21 @@ Ext.define('Inventory.view.Store', {
                                                         items: [
                                                             {
                                                                 xtype: 'button',
-                                                                reference: 'btnAdd',
+                                                                reference: 'btnAddPaymentMethod',
                                                                 tabIndex: -1,
                                                                 iconCls: 'small-add',
                                                                 text: 'Add'
                                                             },
                                                             {
                                                                 xtype: 'button',
-                                                                reference: 'btnEdit',
+                                                                reference: 'btnEditPaymentMethod',
                                                                 tabIndex: -1,
                                                                 iconCls: 'small-edit',
                                                                 text: 'Edit'
                                                             },
                                                             {
                                                                 xtype: 'button',
-                                                                reference: 'btnDelete',
+                                                                reference: 'btnDeletePaymentMethod',
                                                                 tabIndex: -1,
                                                                 iconCls: 'small-delete',
                                                                 text: 'Delete'
@@ -806,7 +734,7 @@ Ext.define('Inventory.view.Store', {
                                                         items: [
                                                             {
                                                                 xtype: 'button',
-                                                                reference: 'btnDelete',
+                                                                reference: 'btnDeletePaidOuts',
                                                                 tabIndex: -1,
                                                                 iconCls: 'small-delete',
                                                                 text: 'Delete'
@@ -1151,7 +1079,7 @@ Ext.define('Inventory.view.Store', {
                                                         items: [
                                                             {
                                                                 xtype: 'button',
-                                                                reference: 'btnDelete',
+                                                                reference: 'btnDeleteGlAccounts',
                                                                 tabIndex: -1,
                                                                 iconCls: 'small-delete',
                                                                 text: 'Delete'

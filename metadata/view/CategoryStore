@@ -14,13 +14,13 @@
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
-        "reference": null,
         "layout": "fit",
         "maxHeight": 415,
         "maximizable": true,
         "minHeight": 415,
         "minWidth": 675,
         "minimizable": null,
+        "reference": null,
         "title": "Category Store",
         "width": 675
     },
@@ -44,9 +44,9 @@
                 "frame": null,
                 "header": false,
                 "height": 350,
-                "reference": "frmCategoryStore",
                 "layout": "vbox",
                 "margin": -1,
+                "reference": "frmCategoryStore",
                 "title": null,
                 "trackResetOnLoad": true,
                 "url": null,
@@ -84,9 +84,9 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-new",
-                                "reference": "btnNew",
                                 "layout|flex": null,
                                 "layout|margins": null,
+                                "reference": "btnNew",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "New",
@@ -108,8 +108,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-save",
-                                "reference": "btnSave",
                                 "layout|flex": null,
+                                "reference": "btnSave",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Save",
@@ -131,8 +131,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-search",
-                                "reference": "btnSearch",
                                 "layout|flex": null,
+                                "reference": "btnSearch",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Search",
@@ -154,8 +154,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-delete",
-                                "reference": "btnDelete",
                                 "layout|flex": null,
+                                "reference": "btnDelete",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Delete",
@@ -177,8 +177,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-undo",
-                                "reference": "btnUndo",
                                 "layout|flex": null,
+                                "reference": "btnUndo",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Undo",
@@ -215,8 +215,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-close",
-                                "reference": "btnClose",
                                 "layout|flex": null,
+                                "reference": "btnClose",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Close",
@@ -271,10 +271,10 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Store",
-                                        "reference": "txtStore",
                                         "labelWidth": 165,
                                         "layout|flex": null,
-                                        "maxWidth": null
+                                        "maxWidth": null,
+                                        "reference": "txtStore"
                                     },
                                     "name": "MyTextField63",
                                     "designerId": "12a9be54-5117-450b-8e1c-b826d6648b11"
@@ -288,10 +288,10 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Cash Register Department",
-                                        "reference": "txtCashRegisterDepartment",
                                         "labelWidth": 165,
                                         "layout|flex": null,
-                                        "maxWidth": null
+                                        "maxWidth": null,
+                                        "reference": "txtCashRegisterDepartment"
                                     },
                                     "name": "MyTextField64",
                                     "designerId": "4842972c-e5f4-47f8-bcdb-7262c3bb0a1e"
@@ -306,9 +306,9 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Update Prices on PB Imports",
-                                        "reference": "chkUpdatePricesOnPbImports",
                                         "labelWidth": 165,
-                                        "layout|flex": null
+                                        "layout|flex": null,
+                                        "reference": "chkUpdatePricesOnPbImports"
                                     },
                                     "name": "MyCheckbox56",
                                     "designerId": "0cc40fef-ecbf-4a6d-a267-046dd7df67c6"
@@ -323,10 +323,10 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Default Use Tax Flag 1",
-                                        "reference": "chkDefaultUseTaxFlag1",
                                         "labelWidth": 165,
                                         "layout|flex": null,
-                                        "layout|margins": null
+                                        "layout|margins": null,
+                                        "reference": "chkDefaultUseTaxFlag1"
                                     },
                                     "name": "MyCheckbox57",
                                     "designerId": "36263610-3ca4-411b-9d45-0cab7fb7ff02"
@@ -341,10 +341,10 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Default Use Tax Flag 2",
-                                        "reference": "chkDefaultUseTaxFlag2",
                                         "labelWidth": 165,
                                         "layout|flex": null,
-                                        "layout|margins": null
+                                        "layout|margins": null,
+                                        "reference": "chkDefaultUseTaxFlag2"
                                     },
                                     "name": "MyCheckbox58",
                                     "designerId": "b310aac9-8850-48d4-908b-b273403f0076"
@@ -359,10 +359,10 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Default Use Tax Flag 3",
-                                        "reference": "chkDefaultUseTaxFlag3",
                                         "labelWidth": 165,
                                         "layout|flex": null,
-                                        "layout|margins": null
+                                        "layout|margins": null,
+                                        "reference": "chkDefaultUseTaxFlag3"
                                     },
                                     "name": "MyCheckbox59",
                                     "designerId": "5ac4d646-2886-4c9d-9f84-58c30b975d25"
@@ -377,10 +377,10 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Default Use Tax Flag 4",
-                                        "reference": "chkDefaultUseTaxFlag4",
                                         "labelWidth": 165,
                                         "layout|flex": null,
-                                        "layout|margins": null
+                                        "layout|margins": null,
+                                        "reference": "chkDefaultUseTaxFlag4"
                                     },
                                     "name": "MyCheckbox60",
                                     "designerId": "bd242e7a-e597-46ef-b705-ccd9538ee6c6"
@@ -395,10 +395,10 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Default Blue Law 1",
-                                        "reference": "chkDefaultBlueLaw1",
                                         "labelWidth": 165,
                                         "layout|flex": null,
-                                        "layout|margins": null
+                                        "layout|margins": null,
+                                        "reference": "chkDefaultBlueLaw1"
                                     },
                                     "name": "MyCheckbox61",
                                     "designerId": "525fc6c5-08d0-413b-ab94-50f954bf9447"
@@ -413,10 +413,10 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Default Blue Law 2",
-                                        "reference": "chkDefaultBlueLaw2",
                                         "labelWidth": 165,
                                         "layout|flex": null,
-                                        "layout|margins": null
+                                        "layout|margins": null,
+                                        "reference": "chkDefaultBlueLaw2"
                                     },
                                     "name": "MyCheckbox62",
                                     "designerId": "feeedac1-3383-476d-8703-4099cabad1ea"
@@ -449,10 +449,10 @@
                                     "userConfig": {
                                         "fieldLabel": "Default Nucleus Group ID",
                                         "hideTrigger": true,
-                                        "reference": "txtDefaultNucleusGroupId",
                                         "labelWidth": 165,
                                         "layout|flex": null,
                                         "maxWidth": null,
+                                        "reference": "txtDefaultNucleusGroupId",
                                         "width": null
                                     },
                                     "name": "MyNumberField10",
@@ -488,10 +488,10 @@
                                     "userConfig": {
                                         "fieldLabel": "Target Gross Profit %",
                                         "hideTrigger": true,
-                                        "reference": "txtTargetGrossProfitPercent",
                                         "labelWidth": 160,
                                         "layout|flex": null,
                                         "maxWidth": null,
+                                        "reference": "txtTargetGrossProfitPercent",
                                         "width": null
                                     },
                                     "name": "MyNumberField11",
@@ -507,10 +507,10 @@
                                     "userConfig": {
                                         "fieldLabel": "Target Inventory at Cost",
                                         "hideTrigger": true,
-                                        "reference": "txtTargetInventoryAtCost",
                                         "labelWidth": 160,
                                         "layout|flex": null,
                                         "maxWidth": null,
+                                        "reference": "txtTargetInventoryAtCost",
                                         "width": null
                                     },
                                     "name": "MyNumberField12",
@@ -526,10 +526,10 @@
                                     "userConfig": {
                                         "fieldLabel": "Cost of Inventory at BOM",
                                         "hideTrigger": true,
-                                        "reference": "txtCostOfInventoryAtBom",
                                         "labelWidth": 160,
                                         "layout|flex": null,
                                         "maxWidth": null,
+                                        "reference": "txtCostOfInventoryAtBom",
                                         "width": null
                                     },
                                     "name": "MyNumberField13",
@@ -545,10 +545,10 @@
                                     "userConfig": {
                                         "fieldLabel": "Actual Gross Profit %",
                                         "hideTrigger": true,
-                                        "reference": "txtActualGrossProfitPercent",
                                         "labelWidth": 160,
                                         "layout|flex": null,
                                         "maxWidth": null,
+                                        "reference": "txtActualGrossProfitPercent",
                                         "width": null
                                     },
                                     "name": "MyNumberField14",
@@ -564,10 +564,10 @@
                                     "userConfig": {
                                         "fieldLabel": "Low Gross Margin % Alert",
                                         "hideTrigger": true,
-                                        "reference": "txtLowGrossMarginPercentAlert",
                                         "labelWidth": 160,
                                         "layout|flex": null,
                                         "maxWidth": null,
+                                        "reference": "txtLowGrossMarginPercentAlert",
                                         "width": null
                                     },
                                     "name": "MyNumberField15",
@@ -583,10 +583,10 @@
                                     "userConfig": {
                                         "fieldLabel": "High Gross Margin % Alert",
                                         "hideTrigger": true,
-                                        "reference": "txtHighGrossMarginPercentAlert",
                                         "labelWidth": 160,
                                         "layout|flex": null,
                                         "maxWidth": null,
+                                        "reference": "txtHighGrossMarginPercentAlert",
                                         "width": null
                                     },
                                     "name": "MyNumberField16",
@@ -602,10 +602,10 @@
                                     "userConfig": {
                                         "fieldLabel": "Department Value at Cost",
                                         "hideTrigger": true,
-                                        "reference": "txtDepartmentValueAtCost",
                                         "labelWidth": 160,
                                         "layout|flex": null,
                                         "maxWidth": null,
+                                        "reference": "txtDepartmentValueAtCost",
                                         "width": null
                                     },
                                     "name": "MyNumberField17",
@@ -621,10 +621,10 @@
                                     "userConfig": {
                                         "fieldLabel": "Department Value at Sell",
                                         "hideTrigger": true,
-                                        "reference": "txtDepartmentValueAtSell",
                                         "labelWidth": 160,
                                         "layout|flex": null,
                                         "maxWidth": null,
+                                        "reference": "txtDepartmentValueAtSell",
                                         "width": null
                                     },
                                     "name": "MyNumberField18",
@@ -639,10 +639,10 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Last Inventory Level Entry",
-                                        "reference": "dtmLastInventoryLevelEntry",
                                         "labelWidth": 160,
                                         "layout|flex": null,
-                                        "maxWidth": null
+                                        "maxWidth": null,
+                                        "reference": "dtmLastInventoryLevelEntry"
                                     },
                                     "name": "MyDateField2",
                                     "designerId": "b3011212-985e-49d2-9a8a-82d9a26cdaec"
@@ -663,11 +663,11 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "designer|displayName": "",
                         "dock": "bottom",
-                        "reference": "pagingtoolbar",
                         "layout|flex": 1,
+                        "reference": "pagingtoolbar",
                         "store": null
                     },
-                    "name": "statusbarpaging2",
+                    "name": "statusbarpaging3",
                     "designerId": "61a83781-4c49-4581-8dd0-248eb965f747",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

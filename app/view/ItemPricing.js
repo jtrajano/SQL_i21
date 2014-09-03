@@ -44,9 +44,9 @@ Ext.define('Inventory.view.ItemPricing', {
     items: [
         {
             xtype: 'form',
+            reference: 'frmItemPricing',
             autoShow: true,
             height: 350,
-            itemId: 'frmItemPricing',
             margin: -1,
             width: 450,
             bodyBorder: false,
@@ -69,9 +69,9 @@ Ext.define('Inventory.view.ItemPricing', {
                     items: [
                         {
                             xtype: 'button',
+                            reference: 'btnNew',
                             tabIndex: -1,
                             height: 57,
-                            itemId: 'btnNew',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-new',
@@ -80,9 +80,9 @@ Ext.define('Inventory.view.ItemPricing', {
                         },
                         {
                             xtype: 'button',
+                            reference: 'btnSave',
                             tabIndex: -1,
                             height: 57,
-                            itemId: 'btnSave',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-save',
@@ -91,9 +91,9 @@ Ext.define('Inventory.view.ItemPricing', {
                         },
                         {
                             xtype: 'button',
+                            reference: 'btnSearch',
                             tabIndex: -1,
                             height: 57,
-                            itemId: 'btnSearch',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-search',
@@ -102,9 +102,9 @@ Ext.define('Inventory.view.ItemPricing', {
                         },
                         {
                             xtype: 'button',
+                            reference: 'btnDelete',
                             tabIndex: -1,
                             height: 57,
-                            itemId: 'btnDelete',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-delete',
@@ -113,9 +113,9 @@ Ext.define('Inventory.view.ItemPricing', {
                         },
                         {
                             xtype: 'button',
+                            reference: 'btnUndo',
                             tabIndex: -1,
                             height: 57,
-                            itemId: 'btnUndo',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-undo',
@@ -128,9 +128,9 @@ Ext.define('Inventory.view.ItemPricing', {
                         },
                         {
                             xtype: 'button',
+                            reference: 'btnClose',
                             tabIndex: -1,
                             height: 57,
-                            itemId: 'btnClose',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-close',
@@ -141,7 +141,7 @@ Ext.define('Inventory.view.ItemPricing', {
                 },
                 {
                     xtype: 'ipagingstatusbar',
-                    itemId: 'pagingtoolbar',
+                    reference: 'pagingtoolbar',
                     flex: 1,
                     dock: 'bottom'
                 }
@@ -165,55 +165,55 @@ Ext.define('Inventory.view.ItemPricing', {
                             items: [
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtLocation',
+                                    reference: 'txtLocation',
                                     fieldLabel: 'Location',
                                     labelWidth: 110
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtStoreName',
+                                    reference: 'txtStoreName',
                                     fieldLabel: 'Store Name',
                                     labelWidth: 110
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtRetailPrice',
+                                    reference: 'txtRetailPrice',
                                     fieldLabel: 'Retail Price',
                                     labelWidth: 110
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtWolesalePrice',
+                                    reference: 'txtWolesalePrice',
                                     fieldLabel: 'Wholesale Price',
                                     labelWidth: 110
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtLargeVolumePrice',
+                                    reference: 'txtLargeVolumePrice',
                                     fieldLabel: 'Large Volume Price',
                                     labelWidth: 110
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtMsrp',
+                                    reference: 'txtMsrp',
                                     fieldLabel: 'MSRP',
                                     labelWidth: 110
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtCommissionRate',
+                                    reference: 'txtCommissionRate',
                                     fieldLabel: 'Commission Rate',
                                     labelWidth: 110
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtDiscountCode',
+                                    reference: 'txtDiscountCode',
                                     fieldLabel: 'Discount Code',
                                     labelWidth: 110
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtMinOverride',
+                                    reference: 'txtMinOverride',
                                     fieldLabel: 'Min Override',
                                     labelWidth: 110
                                 }
@@ -230,55 +230,55 @@ Ext.define('Inventory.view.ItemPricing', {
                             items: [
                                 {
                                     xtype: 'combobox',
-                                    itemId: 'cboPricingMethod',
+                                    reference: 'cboPricingMethod',
                                     fieldLabel: 'Pricing Method',
                                     labelWidth: 110
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtLastCost',
+                                    reference: 'txtLastCost',
                                     fieldLabel: 'Last Cost',
                                     labelWidth: 110
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtAverageCost',
+                                    reference: 'txtAverageCost',
                                     fieldLabel: 'Average Cost',
                                     labelWidth: 110
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtStandardCost',
+                                    reference: 'txtStandardCost',
                                     fieldLabel: 'Standard Cost',
                                     labelWidth: 110
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtEndofMonthCost',
+                                    reference: 'txtEndofMonthCost',
                                     fieldLabel: 'End of Month Cost',
                                     labelWidth: 110
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtDefaultSalesTax',
+                                    reference: 'txtDefaultSalesTax',
                                     fieldLabel: 'Default Sales Tax',
                                     labelWidth: 110
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtCommissionUnits',
+                                    reference: 'txtCommissionUnits',
                                     fieldLabel: 'Commission Units',
                                     labelWidth: 110
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtDiscountRate',
+                                    reference: 'txtDiscountRate',
                                     fieldLabel: 'Discount Rate',
                                     labelWidth: 110
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtMaxOverride',
+                                    reference: 'txtMaxOverride',
                                     fieldLabel: 'Max Override',
                                     labelWidth: 110
                                 }

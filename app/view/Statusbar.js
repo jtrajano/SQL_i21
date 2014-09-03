@@ -28,7 +28,7 @@ Ext.define('Inventory.view.Statusbar', {
     viewModel: {
         type: 'statusbar'
     },
-    itemId: 'tlbStatusbar',
+    reference: 'tlbStatusbar',
     width: 1265,
 
     layout: {
@@ -38,22 +38,22 @@ Ext.define('Inventory.view.Statusbar', {
     items: [
         {
             xtype: 'button',
+            reference: 'btnHelp',
             tabIndex: -1,
-            itemId: 'btnHelp',
             iconCls: 'small-help',
             tooltip: 'Click to get help on this screen'
         },
         {
             xtype: 'button',
+            reference: 'btnSupport',
             tabIndex: -1,
-            itemId: 'btnSupport',
             iconCls: 'small-support',
             tooltip: 'Click for support on this screen'
         },
         {
             xtype: 'button',
+            reference: 'btnFieldName',
             tabIndex: -1,
-            itemId: 'btnFieldName',
             iconCls: 'small-light-bulb-off',
             tooltip: 'Click to display table/field name tooltips'
         },
@@ -62,7 +62,7 @@ Ext.define('Inventory.view.Statusbar', {
         },
         {
             xtype: 'label',
-            itemId: 'lblReady',
+            reference: 'lblReady',
             margin: '0 5',
             text: 'Ready'
         },

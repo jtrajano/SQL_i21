@@ -27,8 +27,8 @@
                 "designer|displayName": null,
                 "icon": null,
                 "iconCls": "small-help",
-                "reference": "btnHelp",
                 "layout|flex": null,
+                "reference": "btnHelp",
                 "tabIndex": -1,
                 "text": null,
                 "tooltip": "Click to get help on this screen"
@@ -50,8 +50,8 @@
                 "designer|displayName": null,
                 "icon": null,
                 "iconCls": "small-support",
-                "reference": "btnSupport",
                 "layout|flex": null,
+                "reference": "btnSupport",
                 "tabIndex": -1,
                 "text": null,
                 "tooltip": "Click for support on this screen"
@@ -73,8 +73,8 @@
                 "designer|displayName": null,
                 "icon": null,
                 "iconCls": "small-light-bulb-off",
-                "reference": "btnFieldName",
                 "layout|flex": null,
+                "reference": "btnFieldName",
                 "tabIndex": -1,
                 "text": null,
                 "tooltip": "Click to display table/field name tooltips"
@@ -108,10 +108,10 @@
             "codeClass": null,
             "userConfig": {
                 "designer|displayName": null,
-                "reference": "lblReady",
                 "layout|flex": null,
                 "layout|margins": null,
                 "margin": "0 5",
+                "reference": "lblReady",
                 "text": "Ready"
             },
             "name": "MyLabel11",

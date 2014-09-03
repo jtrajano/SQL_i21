@@ -187,60 +187,16 @@
                         "height": 57,
                         "icon": null,
                         "iconAlign": "top",
-                        "iconCls": "large-additional",
+                        "iconCls": "large-duplicate",
                         "layout|flex": null,
-                        "reference": "btnAdditional",
+                        "reference": "btnDuplicate",
                         "scale": "large",
                         "tabIndex": -1,
-                        "text": "Tools",
-                        "width": 56
+                        "text": "Duplicate",
+                        "width": 60
                     },
                     "name": "MyButton8",
-                    "designerId": "1ca15b90-5e78-4c25-bfa5-a7a6d8e06a35",
-                    "cn": [
-                        {
-                            "type": "Ext.menu.Menu",
-                            "reference": {
-                                "name": "menu",
-                                "type": "object"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "width": null
-                            },
-                            "name": "MyMenu",
-                            "designerId": "42d30793-3a77-4032-9ea2-83583acc6d2e",
-                            "cn": [
-                                {
-                                    "type": "Ext.menu.Item",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "text": "Menu Item 1"
-                                    },
-                                    "name": "MyMenuItem",
-                                    "designerId": "ea2f2318-5c64-4da6-89a2-c0c1fcb82aa9"
-                                },
-                                {
-                                    "type": "Ext.menu.Item",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "iconCls": null,
-                                        "text": "Menu Item 2"
-                                    },
-                                    "name": "MyMenuItem1",
-                                    "designerId": "0e8de9f9-0647-4ca6-885e-c21ad418f92d"
-                                }
-                            ]
-                        }
-                    ]
+                    "designerId": "5d1fd672-1ffb-4812-943a-378a5df3e2ad"
                 },
                 {
                     "type": "Ext.toolbar.Separator",
@@ -891,7 +847,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "activeTab": 1,
+                                        "activeTab": 0,
                                         "layout|flex": 1,
                                         "plain": true,
                                         "reference": "tabSetup"
@@ -965,7 +921,7 @@
                                                                         "icon": null,
                                                                         "iconCls": "small-add",
                                                                         "layout|flex": null,
-                                                                        "reference": "btnAdd",
+                                                                        "reference": "btnAddLocation",
                                                                         "tabIndex": -1,
                                                                         "text": "Add"
                                                                     },
@@ -983,7 +939,7 @@
                                                                         "icon": null,
                                                                         "iconCls": "small-edit",
                                                                         "layout|flex": null,
-                                                                        "reference": "btnEdit",
+                                                                        "reference": "btnEditLocation",
                                                                         "tabIndex": -1,
                                                                         "text": "Edit"
                                                                     },
@@ -1001,7 +957,7 @@
                                                                         "icon": null,
                                                                         "iconCls": "small-delete",
                                                                         "layout|flex": null,
-                                                                        "reference": "btnDelete",
+                                                                        "reference": "btnDeleteLocation",
                                                                         "tabIndex": -1,
                                                                         "text": "Delete"
                                                                     },
@@ -1032,7 +988,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter",
+                                                                    "name": "filter22",
                                                                     "designerId": "cbd9067a-ce03-4810-b0cb-7bd07d00d877",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2343,7 +2299,7 @@
                                                                                 "icon": null,
                                                                                 "iconCls": "small-add",
                                                                                 "layout|flex": null,
-                                                                                "reference": "btnAdd",
+                                                                                "reference": "btnAddCategories",
                                                                                 "tabIndex": -1,
                                                                                 "text": "Add"
                                                                             },
@@ -2361,7 +2317,7 @@
                                                                                 "icon": null,
                                                                                 "iconCls": "small-edit",
                                                                                 "layout|flex": null,
-                                                                                "reference": "btnEdit",
+                                                                                "reference": "btnEditCategories",
                                                                                 "tabIndex": -1,
                                                                                 "text": "Edit"
                                                                             },
@@ -2379,7 +2335,7 @@
                                                                                 "icon": null,
                                                                                 "iconCls": "small-delete",
                                                                                 "layout|flex": null,
-                                                                                "reference": "btnDelete",
+                                                                                "reference": "btnDeleteCategories",
                                                                                 "tabIndex": -1,
                                                                                 "text": "Delete"
                                                                             },
@@ -2410,7 +2366,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter1",
+                                                                            "name": "filter23",
                                                                             "designerId": "2857c700-ed36-43f0-8ef5-f340b95fdfba",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -2497,7 +2453,7 @@
                                                                                 "icon": null,
                                                                                 "iconCls": "small-add",
                                                                                 "layout|flex": null,
-                                                                                "reference": "btnAdd",
+                                                                                "reference": "btnAddSLA",
                                                                                 "tabIndex": -1,
                                                                                 "text": "Add"
                                                                             },
@@ -2515,7 +2471,7 @@
                                                                                 "icon": null,
                                                                                 "iconCls": "small-edit",
                                                                                 "layout|flex": null,
-                                                                                "reference": "btnEdit",
+                                                                                "reference": "btnEditSLA",
                                                                                 "tabIndex": -1,
                                                                                 "text": "Edit"
                                                                             },
@@ -2533,7 +2489,7 @@
                                                                                 "icon": null,
                                                                                 "iconCls": "small-delete",
                                                                                 "layout|flex": null,
-                                                                                "reference": "btnDelete",
+                                                                                "reference": "btnDeleteSLA",
                                                                                 "tabIndex": -1,
                                                                                 "text": "Delete"
                                                                             },
@@ -2564,7 +2520,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter2",
+                                                                            "name": "filter24",
                                                                             "designerId": "f74d03b6-8d20-468c-ab10-a1782ac46fa4",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -2906,7 +2862,7 @@
                                                                                     "userConfig": {
                                                                                         "layout|flex": null
                                                                                     },
-                                                                                    "name": "filter3",
+                                                                                    "name": "filter25",
                                                                                     "designerId": "3fdba5e7-278e-4e6b-ad42-9ec658e4c660",
                                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                                 }
@@ -3512,7 +3468,7 @@
                                                                         "icon": null,
                                                                         "iconCls": "small-delete",
                                                                         "layout|flex": null,
-                                                                        "reference": "btnDelete",
+                                                                        "reference": "btnDeleteUPC",
                                                                         "tabIndex": -1,
                                                                         "text": "Delete"
                                                                     },
@@ -3543,7 +3499,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter4",
+                                                                    "name": "filter26",
                                                                     "designerId": "87274c48-fa61-4ab3-acd1-2696486c13a3",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3691,7 +3647,7 @@
                                                                         "icon": null,
                                                                         "iconCls": "small-delete",
                                                                         "layout|flex": null,
-                                                                        "reference": "btnDelete",
+                                                                        "reference": "btnDeleteCustomerXref",
                                                                         "tabIndex": -1,
                                                                         "text": "Delete"
                                                                     },
@@ -3722,7 +3678,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter5",
+                                                                    "name": "filter27",
                                                                     "designerId": "f11b92d2-d17f-4030-af6e-5449c5557e10",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3890,7 +3846,7 @@
                                                                         "icon": null,
                                                                         "iconCls": "small-delete",
                                                                         "layout|flex": null,
-                                                                        "reference": "btnDelete",
+                                                                        "reference": "btnDeleteVendorXref",
                                                                         "tabIndex": -1,
                                                                         "text": "Delete"
                                                                     },
@@ -3921,7 +3877,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter6",
+                                                                    "name": "filter28",
                                                                     "designerId": "317ae54f-a81d-4657-8d0b-3edd670adaca",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -4131,7 +4087,7 @@
                                                                         "icon": null,
                                                                         "iconCls": "small-delete",
                                                                         "layout|flex": null,
-                                                                        "reference": "btnDelete",
+                                                                        "reference": "btnDeleteContractItem",
                                                                         "tabIndex": -1,
                                                                         "text": "Delete"
                                                                     },
@@ -4162,7 +4118,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter7",
+                                                                    "name": "filter29",
                                                                     "designerId": "1de0066e-eb37-44ae-af83-adcc5f465797",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -4422,7 +4378,7 @@
                                                                                 "icon": null,
                                                                                 "iconCls": "small-delete",
                                                                                 "layout|flex": null,
-                                                                                "reference": "btnDelete",
+                                                                                "reference": "btnDeleteDocumentAssociation",
                                                                                 "tabIndex": -1,
                                                                                 "text": "Delete"
                                                                             },
@@ -4453,7 +4409,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter8",
+                                                                            "name": "filter30",
                                                                             "designerId": "102ea262-7cce-4c88-bd43-2f80cfa1e9a8",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -4544,7 +4500,7 @@
                                                                                 "icon": null,
                                                                                 "iconCls": "small-delete",
                                                                                 "layout|flex": null,
-                                                                                "reference": "btnDelete",
+                                                                                "reference": "btnDeleteCertification",
                                                                                 "tabIndex": -1,
                                                                                 "text": "Delete"
                                                                             },
@@ -4575,7 +4531,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter9",
+                                                                            "name": "filter31",
                                                                             "designerId": "437f9756-d7eb-404d-89dd-762a18b9132c",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -4698,7 +4654,7 @@
                                                         "icon": null,
                                                         "iconCls": "small-add",
                                                         "layout|flex": null,
-                                                        "reference": "btnAdd",
+                                                        "reference": "btnAddPricing",
                                                         "tabIndex": -1,
                                                         "text": "Add"
                                                     },
@@ -4716,7 +4672,7 @@
                                                         "icon": null,
                                                         "iconCls": "small-edit",
                                                         "layout|flex": null,
-                                                        "reference": "btnEdit",
+                                                        "reference": "btnEditPricing",
                                                         "tabIndex": -1,
                                                         "text": "Edit"
                                                     },
@@ -4734,7 +4690,7 @@
                                                         "icon": null,
                                                         "iconCls": "small-delete",
                                                         "layout|flex": null,
-                                                        "reference": "btnDelete",
+                                                        "reference": "btnDeletePricing",
                                                         "tabIndex": -1,
                                                         "text": "Delete"
                                                     },
@@ -4765,7 +4721,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter10",
+                                                    "name": "filter32",
                                                     "designerId": "efa99b46-2432-478a-97f2-c35eb7b7ed7c",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -5013,7 +4969,7 @@
                                                                         "icon": null,
                                                                         "iconCls": "small-delete",
                                                                         "layout|flex": null,
-                                                                        "reference": "btnDelete",
+                                                                        "reference": "btnDeletePricingLevel",
                                                                         "tabIndex": -1,
                                                                         "text": "Delete"
                                                                     },
@@ -5044,7 +5000,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter11",
+                                                                    "name": "filter33",
                                                                     "designerId": "8c12842b-2ead-456f-b4dc-8a0da80ee35f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -5349,7 +5305,7 @@
                                                                         "icon": null,
                                                                         "iconCls": "small-delete",
                                                                         "layout|flex": null,
-                                                                        "reference": "btnDelete",
+                                                                        "reference": "btnDeleteRebate",
                                                                         "tabIndex": -1,
                                                                         "text": "Delete"
                                                                     },
@@ -5380,7 +5336,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter12",
+                                                                    "name": "filter34",
                                                                     "designerId": "df49b4ec-5d3e-4ec5-8704-5a1a7a595dd1",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -5698,7 +5654,7 @@
                                                                         "icon": null,
                                                                         "iconCls": "small-delete",
                                                                         "layout|flex": null,
-                                                                        "reference": "btnDelete",
+                                                                        "reference": "btnDeleteStock",
                                                                         "tabIndex": -1,
                                                                         "text": "Delete"
                                                                     },
@@ -5729,7 +5685,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter13",
+                                                                    "name": "filter35",
                                                                     "designerId": "1359797a-01d3-4908-862b-ecee335db0ef",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -6029,7 +5985,7 @@
                                                                         "icon": null,
                                                                         "iconCls": "small-delete",
                                                                         "layout|flex": null,
-                                                                        "reference": "btnDelete",
+                                                                        "reference": "btnDeleteGlAccounts",
                                                                         "tabIndex": -1,
                                                                         "text": "Delete"
                                                                     },
@@ -6060,7 +6016,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter14",
+                                                                    "name": "filter36",
                                                                     "designerId": "9949aed9-86f7-4f15-aac6-afedae027c18",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -6436,7 +6392,7 @@
                                                         "icon": null,
                                                         "iconCls": "small-delete",
                                                         "layout|flex": null,
-                                                        "reference": "btnDelete",
+                                                        "reference": "btnDeleteNotes",
                                                         "tabIndex": -1,
                                                         "text": "Delete"
                                                     },
@@ -6467,7 +6423,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter15",
+                                                    "name": "filter37",
                                                     "designerId": "ab092e2c-0602-4213-baf5-e07813015a04",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -6648,7 +6604,7 @@
                         "layout|flex": 1,
                         "reference": "tlbStatusbarPaging"
                     },
-                    "name": "statusbarpaging",
+                    "name": "statusbarpaging20",
                     "designerId": "64f13019-953f-46dc-920e-9a395d3cb3c9",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

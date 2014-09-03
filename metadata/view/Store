@@ -501,14 +501,14 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "enforceMaxLength": true,
+                                                        "enforceMaxLength": null,
                                                         "fieldLabel": null,
                                                         "height": 58,
                                                         "hideLabel": true,
                                                         "labelWidth": 0,
                                                         "layout|flex": 1,
-                                                        "maxLength": 65,
-                                                        "name": "strAddress",
+                                                        "maxLength": null,
+                                                        "name": null,
                                                         "reference": "txtAddress",
                                                         "tabIndex": null
                                                     },
@@ -542,24 +542,16 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "columns": [
-                                                            "[\r",
-                                                            "    {dataIndex: 'intZipCodeId', text: 'Zip Code Id', hidden: true}, \r",
-                                                            "    {dataIndex: 'strZipCode', text: 'Zip/Postal Code', flex: 1},\r",
-                                                            "    {dataIndex: 'strCity', text: 'City', flex: 1},\r",
-                                                            "    {dataIndex: 'strState', text: 'State/Province', flex: 1},\r",
-                                                            "    {dataIndex: 'strCountry', text: 'Country', flex: 1}\r",
-                                                            "]"
-                                                        ],
-                                                        "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strZipCode",
+                                                        "columns": null,
+                                                        "designer|createAlias": null,
+                                                        "displayField": null,
                                                         "fieldLabel": "Zip/Postal Code",
                                                         "labelWidth": 90,
                                                         "layout|flex": 1.2,
-                                                        "name": "strZipCode",
+                                                        "name": null,
                                                         "reference": "cboZipCode",
                                                         "store": null,
-                                                        "valueField": "strZipCode"
+                                                        "valueField": null
                                                     },
                                                     "name": "MyComboBox73",
                                                     "configAlternates": {
@@ -582,16 +574,16 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "enforceMaxLength": true,
+                                                        "enforceMaxLength": null,
                                                         "fieldLabel": "City",
                                                         "labelWidth": 50,
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
                                                         "margin": "0 0 0 5",
-                                                        "maxLength": 85,
-                                                        "name": "strCity",
+                                                        "maxLength": null,
+                                                        "name": null,
                                                         "reference": "txtCity",
-                                                        "tabIndex": -1
+                                                        "tabIndex": null
                                                     },
                                                     "name": "MyTextField95",
                                                     "designerId": "f704fff8-6150-41f5-8cc4-f85f0650798e"
@@ -623,14 +615,14 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "enforceMaxLength": true,
+                                                        "enforceMaxLength": null,
                                                         "fieldLabel": "State/Province",
                                                         "labelWidth": 90,
                                                         "layout|flex": 1.2,
-                                                        "maxLength": 60,
-                                                        "name": "strState",
+                                                        "maxLength": null,
+                                                        "name": null,
                                                         "reference": "txtState",
-                                                        "tabIndex": -1
+                                                        "tabIndex": null
                                                     },
                                                     "name": "MyTextField96",
                                                     "designerId": "aaa87312-d241-4753-a077-78cfb3b1f8f4"
@@ -643,26 +635,21 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "columns": [
-                                                            "[\r",
-                                                            "    {dataIndex: 'intCountryId', text: 'Country Id', hidden: true}, \r",
-                                                            "    {dataIndex: 'strCountry', text: 'Country', flex: 1}\r",
-                                                            "]"
-                                                        ],
-                                                        "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strCountry",
-                                                        "enforceMaxLength": true,
+                                                        "columns": null,
+                                                        "designer|createAlias": null,
+                                                        "displayField": null,
+                                                        "enforceMaxLength": null,
                                                         "fieldLabel": "Country",
                                                         "labelWidth": 50,
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
                                                         "margin": "0 0 0 5",
-                                                        "maxLength": 75,
-                                                        "name": "strCountry",
+                                                        "maxLength": null,
+                                                        "name": null,
                                                         "reference": "cboCountry",
                                                         "store": null,
                                                         "tabIndex": -1,
-                                                        "valueField": "strCountry"
+                                                        "valueField": null
                                                     },
                                                     "name": "MyComboBox74",
                                                     "configAlternates": {
@@ -704,14 +691,14 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "enforceMaxLength": true,
+                                                        "enforceMaxLength": null,
                                                         "fieldLabel": "Phone",
                                                         "labelWidth": 90,
                                                         "layout|flex": 1.2,
-                                                        "maxLength": 30,
-                                                        "name": "strPhone",
+                                                        "maxLength": null,
+                                                        "name": null,
                                                         "reference": "txtPhone",
-                                                        "vtype": "phone"
+                                                        "vtype": null
                                                     },
                                                     "name": "MyTextField97",
                                                     "designerId": "daa8714c-4d6f-4b6b-8fc8-d273c47da000"
@@ -724,16 +711,16 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "enforceMaxLength": true,
+                                                        "enforceMaxLength": null,
                                                         "fieldLabel": "Fax",
                                                         "labelWidth": 50,
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
                                                         "margin": "0 0 0 5",
-                                                        "maxLength": 30,
-                                                        "name": "strFax",
+                                                        "maxLength": null,
+                                                        "name": null,
                                                         "reference": "txtFax",
-                                                        "vtype": "phone"
+                                                        "vtype": null
                                                     },
                                                     "name": "MyTextField98",
                                                     "designerId": "72bc7b7e-a58a-448d-9c5a-dc455d144d52"
@@ -825,13 +812,13 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "enforceMaxLength": true,
+                                                        "enforceMaxLength": null,
                                                         "fieldLabel": null,
                                                         "hideLabel": true,
                                                         "labelWidth": 0,
                                                         "layout|flex": 1,
-                                                        "maxLength": 225,
-                                                        "name": "strEmail",
+                                                        "maxLength": null,
+                                                        "name": null,
                                                         "reference": "txtEmail",
                                                         "tabIndex": null
                                                     },
@@ -923,13 +910,13 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "enforceMaxLength": true,
+                                                        "enforceMaxLength": null,
                                                         "fieldLabel": null,
                                                         "hideLabel": true,
                                                         "labelWidth": 0,
                                                         "layout|flex": 1,
-                                                        "maxLength": 125,
-                                                        "name": "strWebsite",
+                                                        "maxLength": null,
+                                                        "name": null,
                                                         "reference": "txtWebsite",
                                                         "tabIndex": null
                                                     },
@@ -1572,7 +1559,7 @@
                                                         "icon": null,
                                                         "iconCls": "small-add",
                                                         "layout|flex": null,
-                                                        "reference": "btnAdd",
+                                                        "reference": "btnAddPaymentMethod",
                                                         "tabIndex": -1,
                                                         "text": "Add"
                                                     },
@@ -1590,7 +1577,7 @@
                                                         "icon": null,
                                                         "iconCls": "small-edit",
                                                         "layout|flex": null,
-                                                        "reference": "btnEdit",
+                                                        "reference": "btnEditPaymentMethod",
                                                         "tabIndex": -1,
                                                         "text": "Edit"
                                                     },
@@ -1608,7 +1595,7 @@
                                                         "icon": null,
                                                         "iconCls": "small-delete",
                                                         "layout|flex": null,
-                                                        "reference": "btnDelete",
+                                                        "reference": "btnDeletePaymentMethod",
                                                         "tabIndex": -1,
                                                         "text": "Delete"
                                                     },
@@ -1639,7 +1626,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter17",
+                                                    "name": "filter16",
                                                     "designerId": "d1d95af0-9c50-4846-90d7-8a8eba7180aa",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1831,7 +1818,7 @@
                                                         "icon": null,
                                                         "iconCls": "small-delete",
                                                         "layout|flex": null,
-                                                        "reference": "btnDelete",
+                                                        "reference": "btnDeletePaidOuts",
                                                         "tabIndex": -1,
                                                         "text": "Delete"
                                                     },
@@ -1862,7 +1849,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter18",
+                                                    "name": "filter17",
                                                     "designerId": "01b5694b-ea5d-4f25-b0ab-a281b2fe4e6d",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2717,7 +2704,7 @@
                                                         "icon": null,
                                                         "iconCls": "small-delete",
                                                         "layout|flex": null,
-                                                        "reference": "btnDelete",
+                                                        "reference": "btnDeleteGlAccounts",
                                                         "tabIndex": -1,
                                                         "text": "Delete"
                                                     },
@@ -2748,7 +2735,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter19",
+                                                    "name": "filter18",
                                                     "designerId": "8a248dba-b8fb-4383-bd50-63165f748df8",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2841,7 +2828,7 @@
                         "layout|flex": 1,
                         "reference": "tlbStatusbarPaging"
                     },
-                    "name": "statusbarpaging3",
+                    "name": "statusbarpaging17",
                     "designerId": "7971c615-1be1-4e70-a9e4-da46d5e3f739",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

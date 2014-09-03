@@ -238,7 +238,7 @@ Ext.define('Inventory.view.PromotionItemList', {
                             xtype: 'gridpanel',
                             flex: 1,
                             reference: 'grdItemList',
-                            title: 'My Grid Panel',
+                            title: 'Item List',
                             columns: [
                                 {
                                     xtype: 'gridcolumn',

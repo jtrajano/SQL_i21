@@ -261,7 +261,7 @@ Ext.define('Inventory.view.ReasonCode', {
                                             items: [
                                                 {
                                                     xtype: 'button',
-                                                    reference: 'btnEdit',
+                                                    reference: 'btnEditWorkCenterMapping',
                                                     tabIndex: -1,
                                                     iconCls: 'small-edit',
                                                     text: 'Edit'

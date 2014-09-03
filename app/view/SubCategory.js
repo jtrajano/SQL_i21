@@ -52,9 +52,9 @@ Ext.define('Inventory.view.SubCategory', {
                 items: [
                     {
                         xtype: 'form',
+                        reference: 'frmSubCategory',
                         autoShow: true,
                         height: 350,
-                        itemId: 'frmSubCategory',
                         margin: -1,
                         width: 450,
                         bodyPadding: 5,
@@ -75,9 +75,9 @@ Ext.define('Inventory.view.SubCategory', {
                                 items: [
                                     {
                                         xtype: 'button',
+                                        reference: 'btnNew',
                                         tabIndex: -1,
                                         height: 57,
-                                        itemId: 'btnNew',
                                         width: 45,
                                         iconAlign: 'top',
                                         iconCls: 'large-new',
@@ -86,9 +86,9 @@ Ext.define('Inventory.view.SubCategory', {
                                     },
                                     {
                                         xtype: 'button',
+                                        reference: 'btnSave',
                                         tabIndex: -1,
                                         height: 57,
-                                        itemId: 'btnSave',
                                         width: 45,
                                         iconAlign: 'top',
                                         iconCls: 'large-save',
@@ -97,9 +97,9 @@ Ext.define('Inventory.view.SubCategory', {
                                     },
                                     {
                                         xtype: 'button',
+                                        reference: 'btnSearch',
                                         tabIndex: -1,
                                         height: 57,
-                                        itemId: 'btnSearch',
                                         width: 45,
                                         iconAlign: 'top',
                                         iconCls: 'large-search',
@@ -108,9 +108,9 @@ Ext.define('Inventory.view.SubCategory', {
                                     },
                                     {
                                         xtype: 'button',
+                                        reference: 'btnDelete',
                                         tabIndex: -1,
                                         height: 57,
-                                        itemId: 'btnDelete',
                                         width: 45,
                                         iconAlign: 'top',
                                         iconCls: 'large-delete',
@@ -119,9 +119,9 @@ Ext.define('Inventory.view.SubCategory', {
                                     },
                                     {
                                         xtype: 'button',
+                                        reference: 'btnUndo',
                                         tabIndex: -1,
                                         height: 57,
-                                        itemId: 'btnUndo',
                                         width: 45,
                                         iconAlign: 'top',
                                         iconCls: 'large-undo',
@@ -134,9 +134,9 @@ Ext.define('Inventory.view.SubCategory', {
                                     },
                                     {
                                         xtype: 'button',
+                                        reference: 'btnClose',
                                         tabIndex: -1,
                                         height: 57,
-                                        itemId: 'btnClose',
                                         width: 45,
                                         iconAlign: 'top',
                                         iconCls: 'large-close',
@@ -147,7 +147,7 @@ Ext.define('Inventory.view.SubCategory', {
                             },
                             {
                                 xtype: 'ipagingstatusbar',
-                                itemId: 'pagingtoolbar',
+                                reference: 'pagingtoolbar',
                                 flex: 1,
                                 dock: 'bottom'
                             }
@@ -156,7 +156,7 @@ Ext.define('Inventory.view.SubCategory', {
                             {
                                 xtype: 'tabpanel',
                                 flex: 1,
-                                itemId: 'tabSubCategory',
+                                reference: 'tabSubCategory',
                                 activeTab: 0,
                                 plain: true,
                                 items: [
@@ -168,12 +168,12 @@ Ext.define('Inventory.view.SubCategory', {
                                         items: [
                                             {
                                                 xtype: 'gridpanel',
-                                                itemId: 'grdFamily',
+                                                reference: 'grdFamily',
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
-                                                        itemId: 'tlbGridOptions',
+                                                        reference: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
                                                             padding: '0 0 0 1'
@@ -181,8 +181,8 @@ Ext.define('Inventory.view.SubCategory', {
                                                         items: [
                                                             {
                                                                 xtype: 'button',
+                                                                reference: 'btnDeleteSubcategory',
                                                                 tabIndex: -1,
-                                                                itemId: 'btnDelete',
                                                                 iconCls: 'small-delete',
                                                                 text: 'Delete'
                                                             },
@@ -216,7 +216,7 @@ Ext.define('Inventory.view.SubCategory', {
                                                     }
                                                 ],
                                                 viewConfig: {
-                                                    itemId: 'grvFamily'
+                                                    reference: 'grvFamily'
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'
@@ -232,12 +232,12 @@ Ext.define('Inventory.view.SubCategory', {
                                         items: [
                                             {
                                                 xtype: 'gridpanel',
-                                                itemId: 'grdClass',
+                                                reference: 'grdClass',
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
-                                                        itemId: 'tlbGridOptions',
+                                                        reference: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
                                                             padding: '0 0 0 1'
@@ -245,8 +245,8 @@ Ext.define('Inventory.view.SubCategory', {
                                                         items: [
                                                             {
                                                                 xtype: 'button',
+                                                                reference: 'btnDeleteClass',
                                                                 tabIndex: -1,
-                                                                itemId: 'btnDelete',
                                                                 iconCls: 'small-delete',
                                                                 text: 'Delete'
                                                             },
@@ -280,7 +280,7 @@ Ext.define('Inventory.view.SubCategory', {
                                                     }
                                                 ],
                                                 viewConfig: {
-                                                    itemId: 'grvClass'
+                                                    reference: 'grvClass'
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'
@@ -296,12 +296,12 @@ Ext.define('Inventory.view.SubCategory', {
                                         items: [
                                             {
                                                 xtype: 'gridpanel',
-                                                itemId: 'grdRegisterProduct',
+                                                reference: 'grdRegisterProduct',
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
-                                                        itemId: 'tlbGridOptions',
+                                                        reference: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
                                                             padding: '0 0 0 1'
@@ -309,8 +309,8 @@ Ext.define('Inventory.view.SubCategory', {
                                                         items: [
                                                             {
                                                                 xtype: 'button',
+                                                                reference: 'btnDeleteRegisterProduct',
                                                                 tabIndex: -1,
-                                                                itemId: 'btnDelete',
                                                                 iconCls: 'small-delete',
                                                                 text: 'Delete'
                                                             },
@@ -350,7 +350,7 @@ Ext.define('Inventory.view.SubCategory', {
                                                     }
                                                 ],
                                                 viewConfig: {
-                                                    itemId: 'grvRegisterProduct'
+                                                    reference: 'grvRegisterProduct'
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'

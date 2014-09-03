@@ -14,12 +14,12 @@
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
-        "reference": null,
         "layout": "fit",
         "maximizable": true,
         "minHeight": 500,
         "minWidth": 530,
         "minimizable": null,
+        "reference": null,
         "title": "Paid Outs",
         "width": 530
     },
@@ -43,9 +43,9 @@
                 "frame": null,
                 "header": null,
                 "height": 350,
-                "reference": "frmPaidOuts",
                 "layout": "vbox",
                 "margin": -1,
+                "reference": "frmPaidOuts",
                 "title": null,
                 "trackResetOnLoad": true,
                 "url": null,
@@ -83,8 +83,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-save",
-                                "reference": "btnSave",
                                 "layout|flex": null,
+                                "reference": "btnSave",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Save",
@@ -106,8 +106,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-undo",
-                                "reference": "btnUndo",
                                 "layout|flex": null,
+                                "reference": "btnUndo",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Undo",
@@ -144,8 +144,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-close",
-                                "reference": "btnClose",
                                 "layout|flex": null,
+                                "reference": "btnClose",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Close",
@@ -164,8 +164,8 @@
                     },
                     "codeClass": null,
                     "userConfig": {
-                        "reference": "grdPaidOuts",
                         "layout|flex": 1,
+                        "reference": "grdPaidOuts",
                         "title": null
                     },
                     "name": "MyGridPanel46",
@@ -196,8 +196,8 @@
                                     "userConfig": {
                                         "icon": null,
                                         "iconCls": "small-delete",
-                                        "reference": "btnDelete",
                                         "layout|flex": null,
+                                        "reference": "btnDeletePaidOuts",
                                         "tabIndex": -1,
                                         "text": "Delete"
                                     },
@@ -228,7 +228,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter24",
+                                    "name": "filter14",
                                     "designerId": "ace35c7c-9896-43a5-a978-4fde9a6fa754",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -301,8 +301,8 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "designer|displayName": "",
                         "dock": "bottom",
-                        "reference": "pagingtoolbar",
                         "layout|flex": 1,
+                        "reference": "pagingtoolbar",
                         "store": null
                     },
                     "name": "statusbarpaging13",

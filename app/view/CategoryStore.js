@@ -47,9 +47,9 @@ Ext.define('Inventory.view.CategoryStore', {
     items: [
         {
             xtype: 'form',
+            reference: 'frmCategoryStore',
             autoShow: true,
             height: 350,
-            itemId: 'frmCategoryStore',
             margin: -1,
             width: 450,
             bodyBorder: false,
@@ -72,9 +72,9 @@ Ext.define('Inventory.view.CategoryStore', {
                     items: [
                         {
                             xtype: 'button',
+                            reference: 'btnNew',
                             tabIndex: -1,
                             height: 57,
-                            itemId: 'btnNew',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-new',
@@ -83,9 +83,9 @@ Ext.define('Inventory.view.CategoryStore', {
                         },
                         {
                             xtype: 'button',
+                            reference: 'btnSave',
                             tabIndex: -1,
                             height: 57,
-                            itemId: 'btnSave',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-save',
@@ -94,9 +94,9 @@ Ext.define('Inventory.view.CategoryStore', {
                         },
                         {
                             xtype: 'button',
+                            reference: 'btnSearch',
                             tabIndex: -1,
                             height: 57,
-                            itemId: 'btnSearch',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-search',
@@ -105,9 +105,9 @@ Ext.define('Inventory.view.CategoryStore', {
                         },
                         {
                             xtype: 'button',
+                            reference: 'btnDelete',
                             tabIndex: -1,
                             height: 57,
-                            itemId: 'btnDelete',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-delete',
@@ -116,9 +116,9 @@ Ext.define('Inventory.view.CategoryStore', {
                         },
                         {
                             xtype: 'button',
+                            reference: 'btnUndo',
                             tabIndex: -1,
                             height: 57,
-                            itemId: 'btnUndo',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-undo',
@@ -131,9 +131,9 @@ Ext.define('Inventory.view.CategoryStore', {
                         },
                         {
                             xtype: 'button',
+                            reference: 'btnClose',
                             tabIndex: -1,
                             height: 57,
-                            itemId: 'btnClose',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-close',
@@ -144,7 +144,7 @@ Ext.define('Inventory.view.CategoryStore', {
                 },
                 {
                     xtype: 'ipagingstatusbar',
-                    itemId: 'pagingtoolbar',
+                    reference: 'pagingtoolbar',
                     flex: 1,
                     dock: 'bottom'
                 }
@@ -169,55 +169,55 @@ Ext.define('Inventory.view.CategoryStore', {
                             items: [
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtStore',
+                                    reference: 'txtStore',
                                     fieldLabel: 'Store',
                                     labelWidth: 165
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtCashRegisterDepartment',
+                                    reference: 'txtCashRegisterDepartment',
                                     fieldLabel: 'Cash Register Department',
                                     labelWidth: 165
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkUpdatePricesOnPbImports',
+                                    reference: 'chkUpdatePricesOnPbImports',
                                     fieldLabel: 'Update Prices on PB Imports',
                                     labelWidth: 165
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkDefaultUseTaxFlag1',
+                                    reference: 'chkDefaultUseTaxFlag1',
                                     fieldLabel: 'Default Use Tax Flag 1',
                                     labelWidth: 165
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkDefaultUseTaxFlag2',
+                                    reference: 'chkDefaultUseTaxFlag2',
                                     fieldLabel: 'Default Use Tax Flag 2',
                                     labelWidth: 165
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkDefaultUseTaxFlag3',
+                                    reference: 'chkDefaultUseTaxFlag3',
                                     fieldLabel: 'Default Use Tax Flag 3',
                                     labelWidth: 165
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkDefaultUseTaxFlag4',
+                                    reference: 'chkDefaultUseTaxFlag4',
                                     fieldLabel: 'Default Use Tax Flag 4',
                                     labelWidth: 165
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkDefaultBlueLaw1',
+                                    reference: 'chkDefaultBlueLaw1',
                                     fieldLabel: 'Default Blue Law 1',
                                     labelWidth: 165
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkDefaultBlueLaw2',
+                                    reference: 'chkDefaultBlueLaw2',
                                     fieldLabel: 'Default Blue Law 2',
                                     labelWidth: 165
                                 },
@@ -231,7 +231,7 @@ Ext.define('Inventory.view.CategoryStore', {
                                 },
                                 {
                                     xtype: 'numberfield',
-                                    itemId: 'txtDefaultNucleusGroupId',
+                                    reference: 'txtDefaultNucleusGroupId',
                                     fieldLabel: 'Default Nucleus Group ID',
                                     labelWidth: 165,
                                     hideTrigger: true
@@ -249,63 +249,63 @@ Ext.define('Inventory.view.CategoryStore', {
                             items: [
                                 {
                                     xtype: 'numberfield',
-                                    itemId: 'txtTargetGrossProfitPercent',
+                                    reference: 'txtTargetGrossProfitPercent',
                                     fieldLabel: 'Target Gross Profit %',
                                     labelWidth: 160,
                                     hideTrigger: true
                                 },
                                 {
                                     xtype: 'numberfield',
-                                    itemId: 'txtTargetInventoryAtCost',
+                                    reference: 'txtTargetInventoryAtCost',
                                     fieldLabel: 'Target Inventory at Cost',
                                     labelWidth: 160,
                                     hideTrigger: true
                                 },
                                 {
                                     xtype: 'numberfield',
-                                    itemId: 'txtCostOfInventoryAtBom',
+                                    reference: 'txtCostOfInventoryAtBom',
                                     fieldLabel: 'Cost of Inventory at BOM',
                                     labelWidth: 160,
                                     hideTrigger: true
                                 },
                                 {
                                     xtype: 'numberfield',
-                                    itemId: 'txtActualGrossProfitPercent',
+                                    reference: 'txtActualGrossProfitPercent',
                                     fieldLabel: 'Actual Gross Profit %',
                                     labelWidth: 160,
                                     hideTrigger: true
                                 },
                                 {
                                     xtype: 'numberfield',
-                                    itemId: 'txtLowGrossMarginPercentAlert',
+                                    reference: 'txtLowGrossMarginPercentAlert',
                                     fieldLabel: 'Low Gross Margin % Alert',
                                     labelWidth: 160,
                                     hideTrigger: true
                                 },
                                 {
                                     xtype: 'numberfield',
-                                    itemId: 'txtHighGrossMarginPercentAlert',
+                                    reference: 'txtHighGrossMarginPercentAlert',
                                     fieldLabel: 'High Gross Margin % Alert',
                                     labelWidth: 160,
                                     hideTrigger: true
                                 },
                                 {
                                     xtype: 'numberfield',
-                                    itemId: 'txtDepartmentValueAtCost',
+                                    reference: 'txtDepartmentValueAtCost',
                                     fieldLabel: 'Department Value at Cost',
                                     labelWidth: 160,
                                     hideTrigger: true
                                 },
                                 {
                                     xtype: 'numberfield',
-                                    itemId: 'txtDepartmentValueAtSell',
+                                    reference: 'txtDepartmentValueAtSell',
                                     fieldLabel: 'Department Value at Sell',
                                     labelWidth: 160,
                                     hideTrigger: true
                                 },
                                 {
                                     xtype: 'datefield',
-                                    itemId: 'dtmLastInventoryLevelEntry',
+                                    reference: 'dtmLastInventoryLevelEntry',
                                     fieldLabel: 'Last Inventory Level Entry',
                                     labelWidth: 160
                                 }

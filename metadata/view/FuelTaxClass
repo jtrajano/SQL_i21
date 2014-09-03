@@ -14,12 +14,12 @@
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
-        "reference": null,
         "layout": "fit",
         "maximizable": true,
         "minHeight": 525,
         "minWidth": 425,
         "minimizable": null,
+        "reference": null,
         "title": "Fuel Tax Class",
         "width": 425
     },
@@ -43,9 +43,9 @@
                 "frame": null,
                 "header": false,
                 "height": 350,
-                "reference": "frmFuelTaxClass",
                 "layout": "vbox",
                 "margin": -1,
+                "reference": "frmFuelTaxClass",
                 "title": null,
                 "trackResetOnLoad": true,
                 "url": null,
@@ -83,9 +83,9 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-new",
-                                "reference": "btnNew",
                                 "layout|flex": null,
                                 "layout|margins": null,
+                                "reference": "btnNew",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "New",
@@ -107,8 +107,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-save",
-                                "reference": "btnSave",
                                 "layout|flex": null,
+                                "reference": "btnSave",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Save",
@@ -130,8 +130,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-search",
-                                "reference": "btnSearch",
                                 "layout|flex": null,
+                                "reference": "btnSearch",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Search",
@@ -153,8 +153,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-delete",
-                                "reference": "btnDelete",
                                 "layout|flex": null,
+                                "reference": "btnDelete",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Delete",
@@ -176,8 +176,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-undo",
-                                "reference": "btnUndo",
                                 "layout|flex": null,
+                                "reference": "btnUndo",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Undo",
@@ -214,8 +214,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-close",
-                                "reference": "btnClose",
                                 "layout|flex": null,
+                                "reference": "btnClose",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Close",
@@ -274,10 +274,10 @@
                                         "columns": null,
                                         "designer|createAlias": null,
                                         "fieldLabel": "Tax Class Code",
-                                        "reference": "txtTaxClassCode",
                                         "labelWidth": 90,
                                         "layout|flex": 1,
-                                        "name": null
+                                        "name": null,
+                                        "reference": "txtTaxClassCode"
                                     },
                                     "name": "MyTextField69",
                                     "configAlternates": {
@@ -303,12 +303,12 @@
                                         "columns": null,
                                         "designer|createAlias": null,
                                         "fieldLabel": "IRS Tax Code",
-                                        "reference": "txtIrsTaxCode",
                                         "labelWidth": 90,
                                         "layout|flex": 1,
                                         "layout|margins": null,
                                         "margin": "0 0 0 5",
-                                        "name": null
+                                        "name": null,
+                                        "reference": "txtIrsTaxCode"
                                     },
                                     "name": "MyTextField70",
                                     "configAlternates": {
@@ -335,12 +335,12 @@
                             "userConfig": {
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Description",
-                                "reference": "txtDescription",
                                 "labelWidth": 90,
                                 "layout|flex": null,
                                 "layout|margins": null,
                                 "maxLength": null,
                                 "name": null,
+                                "reference": "txtDescription",
                                 "tabIndex": null
                             },
                             "name": "MyTextField71",
@@ -354,8 +354,8 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "reference": "grdProductCode",
                                 "layout|flex": 1,
+                                "reference": "grdProductCode",
                                 "title": "Product Codes"
                             },
                             "name": "MyGridPanel35",
@@ -386,7 +386,7 @@
                                             "userConfig": {
                                                 "layout|flex": null
                                             },
-                                            "name": "filter12",
+                                            "name": "filter13",
                                             "designerId": "a6edc1ac-3fb1-409c-8533-ee41ecdec8f5",
                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                         }
@@ -450,11 +450,11 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "designer|displayName": "",
                         "dock": "bottom",
-                        "reference": "pagingtoolbar",
                         "layout|flex": 1,
+                        "reference": "pagingtoolbar",
                         "store": null
                     },
-                    "name": "statusbarpaging5",
+                    "name": "statusbarpaging6",
                     "designerId": "3ce78bff-7020-4a1e-8c5e-085e96515140",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
