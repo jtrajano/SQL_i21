@@ -14,12 +14,12 @@
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
-        "itemId": null,
         "layout": "fit",
         "maximizable": true,
         "minHeight": 625,
         "minWidth": 775,
         "minimizable": null,
+        "reference": null,
         "title": "RIN",
         "width": 775
     },
@@ -43,9 +43,9 @@
                 "frame": null,
                 "header": false,
                 "height": 350,
-                "itemId": "frmRin",
                 "layout": "vbox",
                 "margin": -1,
+                "reference": "frmRin",
                 "title": null,
                 "trackResetOnLoad": true,
                 "url": null,
@@ -83,9 +83,9 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-new",
-                                "itemId": "btnNew",
                                 "layout|flex": null,
                                 "layout|margins": null,
+                                "reference": "btnNew",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "New",
@@ -107,8 +107,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-save",
-                                "itemId": "btnSave",
                                 "layout|flex": null,
+                                "reference": "btnSave",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Save",
@@ -130,8 +130,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-search",
-                                "itemId": "btnSearch",
                                 "layout|flex": null,
+                                "reference": "btnSearch",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Search",
@@ -153,8 +153,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-delete",
-                                "itemId": "btnDelete",
                                 "layout|flex": null,
+                                "reference": "btnDelete",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Delete",
@@ -176,8 +176,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-undo",
-                                "itemId": "btnUndo",
                                 "layout|flex": null,
+                                "reference": "btnUndo",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Undo",
@@ -214,8 +214,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-close",
-                                "itemId": "btnClose",
                                 "layout|flex": null,
+                                "reference": "btnClose",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Close",
@@ -234,8 +234,8 @@
                     },
                     "codeClass": null,
                     "userConfig": {
-                        "itemId": "grdFuelType",
                         "layout|flex": 1,
+                        "reference": "grdFuelType",
                         "title": "Fuel Type"
                     },
                     "name": "MyGridPanel30",
@@ -294,7 +294,7 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "itemId": "grvFuelType"
+                                "reference": "grvFuelType"
                             },
                             "name": "MyGridView30",
                             "designerId": "37832b77-0462-43cb-a15d-2a6bfe219e0b"
@@ -325,10 +325,10 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "itemId": "grdFuelCode",
                                 "layout|flex": 1,
                                 "layout|margins": null,
                                 "margin": "5 0 0 0 ",
+                                "reference": "grdFuelCode",
                                 "title": "Fuel Code"
                             },
                             "name": "MyGridPanel31",
@@ -372,7 +372,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "itemId": "grvFuelCode"
+                                        "reference": "grvFuelCode"
                                     },
                                     "name": "MyGridView31",
                                     "designerId": "1a5e4b76-c1c0-44b0-a1ca-45f1951042c2"
@@ -387,10 +387,10 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "itemId": "grdProcessCode",
                                 "layout|flex": 1,
                                 "layout|margins": null,
                                 "margin": "5 0 0 5",
+                                "reference": "grdProcessCode",
                                 "title": "Process Code"
                             },
                             "name": "MyGridPanel32",
@@ -434,7 +434,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "itemId": "grvProcessCode"
+                                        "reference": "grvProcessCode"
                                     },
                                     "name": "MyGridView32",
                                     "designerId": "8c355fb5-8920-485b-beae-d6f864906e0e"
@@ -467,10 +467,10 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "itemId": "grdFeedStockCode",
                                 "layout|flex": 1,
                                 "layout|margins": null,
                                 "margin": "5 0 0 0 ",
+                                "reference": "grdFeedStockCode",
                                 "title": "Feed Stock Code"
                             },
                             "name": "MyGridPanel33",
@@ -514,7 +514,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "itemId": "grvFeedStockCode"
+                                        "reference": "grvFeedStockCode"
                                     },
                                     "name": "MyGridView33",
                                     "designerId": "56f2e907-0c6f-4dee-970d-de46be9ab0fd"
@@ -529,10 +529,10 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "itemId": "grvFeedStockUom",
                                 "layout|flex": 1,
                                 "layout|margins": null,
                                 "margin": "5 0 0 5",
+                                "reference": "grvFeedStockUom",
                                 "title": "Feed Stock UOM"
                             },
                             "name": "MyGridPanel34",
@@ -576,7 +576,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "itemId": "grvFeedStockUom"
+                                        "reference": "grvFeedStockUom"
                                     },
                                     "name": "MyGridView34",
                                     "designerId": "50da17cc-8d5e-4d20-bc10-d1f205a54834"
@@ -597,11 +597,11 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "designer|displayName": "",
                         "dock": "bottom",
-                        "itemId": "pagingtoolbar",
                         "layout|flex": 1,
+                        "reference": "pagingtoolbar",
                         "store": null
                     },
-                    "name": "statusbarpaging16",
+                    "name": "statusbarpaging2",
                     "designerId": "34adbb44-2c90-4aa8-a5a9-2b5a6f92c50f",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

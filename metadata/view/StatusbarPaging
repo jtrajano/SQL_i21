@@ -13,9 +13,9 @@
         "floating": null,
         "frame": null,
         "inputItemWidth": 60,
-        "itemId": "tlbPaging",
         "margin": null,
         "prependButtons": true,
+        "reference": "tlbPaging",
         "width": null
     },
     "designerId": "6e9d32bd-1b77-41b2-9662-434eced19679",
@@ -33,8 +33,8 @@
                 "designer|displayName": null,
                 "icon": null,
                 "iconCls": "small-help",
-                "itemId": "btnHelp",
                 "layout|flex": null,
+                "reference": "btnHelp",
                 "tabIndex": -1,
                 "text": null,
                 "tooltip": "Click to get help on this screen"
@@ -56,8 +56,8 @@
                 "designer|displayName": null,
                 "icon": null,
                 "iconCls": "small-support",
-                "itemId": "btnSupport",
                 "layout|flex": null,
+                "reference": "btnSupport",
                 "tabIndex": -1,
                 "text": null,
                 "tooltip": "Click for support on this screen"
@@ -79,8 +79,8 @@
                 "designer|displayName": null,
                 "icon": null,
                 "iconCls": "small-light-bulb-off",
-                "itemId": "btnFieldname",
                 "layout|flex": null,
+                "reference": "btnFieldname",
                 "tabIndex": -1,
                 "text": null,
                 "tooltip": "Click to display table/field name tooltips"
@@ -114,10 +114,10 @@
             "codeClass": null,
             "userConfig": {
                 "designer|displayName": null,
-                "itemId": "lblReady",
                 "layout|flex": null,
                 "layout|margins": null,
                 "margin": "0 5",
+                "reference": "lblReady",
                 "text": "Ready"
             },
             "name": "MyLabel",

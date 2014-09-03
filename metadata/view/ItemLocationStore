@@ -14,7 +14,7 @@
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
-        "itemId": null,
+        "reference": null,
         "layout": "fit",
         "maxHeight": 660,
         "maximizable": true,
@@ -44,7 +44,7 @@
                 "frame": null,
                 "header": false,
                 "height": 350,
-                "itemId": "frmItemLocationStore",
+                "reference": "frmItemLocationStore",
                 "layout": "vbox",
                 "margin": -1,
                 "title": null,
@@ -84,7 +84,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-new",
-                                "itemId": "btnNew",
+                                "reference": "btnNew",
                                 "layout|flex": null,
                                 "layout|margins": null,
                                 "scale": "large",
@@ -108,7 +108,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-save",
-                                "itemId": "btnSave",
+                                "reference": "btnSave",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
@@ -131,7 +131,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-search",
-                                "itemId": "btnSearch",
+                                "reference": "btnSearch",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
@@ -154,7 +154,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-delete",
-                                "itemId": "btnDelete",
+                                "reference": "btnDelete",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
@@ -177,7 +177,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-undo",
-                                "itemId": "btnUndo",
+                                "reference": "btnUndo",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
@@ -215,7 +215,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-close",
-                                "itemId": "btnClose",
+                                "reference": "btnClose",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
@@ -253,7 +253,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "fieldLabel": "Location",
-                                "itemId": "cboLocation",
+                                "reference": "cboLocation",
                                 "labelWidth": 125,
                                 "layout|flex": 1.4
                             },
@@ -269,7 +269,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "fieldLabel": "Store",
-                                "itemId": "cboStore",
+                                "reference": "cboStore",
                                 "labelWidth": 40,
                                 "layout|flex": 1,
                                 "margin": "0 5"
@@ -286,7 +286,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "fieldLabel": "Default Vendor",
-                                "itemId": "cboDefaultVendor",
+                                "reference": "cboDefaultVendor",
                                 "labelWidth": 90,
                                 "layout|flex": 1
                             },
@@ -302,7 +302,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "fieldLabel": "Costing Method",
-                                "itemId": "cboCostingMethod",
+                                "reference": "cboCostingMethod",
                                 "labelWidth": 95,
                                 "layout|flex": 1,
                                 "margin": "0 0 0 5"
@@ -321,7 +321,7 @@
                     "codeClass": null,
                     "userConfig": {
                         "fieldLabel": "POS Description",
-                        "itemId": "txtPosDescription",
+                        "reference": "txtPosDescription",
                         "labelWidth": 125,
                         "layout|flex": null,
                         "width": null
@@ -370,7 +370,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Row",
-                                        "itemId": "txtRow",
+                                        "reference": "txtRow",
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
@@ -386,7 +386,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Bin",
-                                        "itemId": "txtBin",
+                                        "reference": "txtBin",
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
@@ -402,7 +402,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Default UOM",
-                                        "itemId": "cboDefaultUom",
+                                        "reference": "cboDefaultUom",
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
@@ -418,7 +418,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Issue UOM",
-                                        "itemId": "cboIssueUom",
+                                        "reference": "cboIssueUom",
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
@@ -434,7 +434,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Receive UOM",
-                                        "itemId": "cboReceiveUom",
+                                        "reference": "cboReceiveUom",
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
@@ -450,7 +450,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Family",
-                                        "itemId": "cboFamily",
+                                        "reference": "cboFamily",
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
@@ -466,7 +466,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Class",
-                                        "itemId": "cboClass",
+                                        "reference": "cboClass",
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
@@ -482,7 +482,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Fuel Tank No",
-                                        "itemId": "cboFuelTankNo",
+                                        "reference": "cboFuelTankNo",
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
@@ -498,7 +498,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Passport Fuel ID 1",
-                                        "itemId": "txtPassportFuelId1",
+                                        "reference": "txtPassportFuelId1",
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
@@ -514,7 +514,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Passport Fuel ID 2",
-                                        "itemId": "txtPassportFuelId2",
+                                        "reference": "txtPassportFuelId2",
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
@@ -530,7 +530,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Passport Fuel ID 3",
-                                        "itemId": "txtPassportFuelId3",
+                                        "reference": "txtPassportFuelId3",
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
@@ -547,7 +547,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Tax Flag 1",
-                                        "itemId": "chkTaxFlag1",
+                                        "reference": "chkTaxFlag1",
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
@@ -564,7 +564,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Tax Flag 2",
-                                        "itemId": "chkTaxFlag2",
+                                        "reference": "chkTaxFlag2",
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
@@ -581,7 +581,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Tax Flag 3",
-                                        "itemId": "chkTaxFlag3",
+                                        "reference": "chkTaxFlag3",
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
@@ -598,7 +598,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Tax Flag 4",
-                                        "itemId": "chkTaxFlag4",
+                                        "reference": "chkTaxFlag4",
                                         "labelWidth": 125,
                                         "layout|flex": null
                                     },
@@ -635,7 +635,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Promotional Item",
-                                        "itemId": "chkPromotionalItem",
+                                        "reference": "chkPromotionalItem",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -651,7 +651,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Mix/Match Code",
-                                        "itemId": "cboMixMatchCode",
+                                        "reference": "cboMixMatchCode",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -668,7 +668,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Deposit Required",
-                                        "itemId": "chkDepositRequired",
+                                        "reference": "chkDepositRequired",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -684,7 +684,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Bottle Deposit No",
-                                        "itemId": "txtBottleDepositNo",
+                                        "reference": "txtBottleDepositNo",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -701,7 +701,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Saleable",
-                                        "itemId": "chkSaleable",
+                                        "reference": "chkSaleable",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -718,7 +718,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Quantity Required",
-                                        "itemId": "chkQuantityRequired",
+                                        "reference": "chkQuantityRequired",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -735,7 +735,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Scale Item",
-                                        "itemId": "chkScaleItem",
+                                        "reference": "chkScaleItem",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -752,7 +752,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Food Stampable",
-                                        "itemId": "chkFoodStampable",
+                                        "reference": "chkFoodStampable",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -769,7 +769,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Returnable",
-                                        "itemId": "chkReturnable",
+                                        "reference": "chkReturnable",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -786,7 +786,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Pre Priced",
-                                        "itemId": "chkPrePriced",
+                                        "reference": "chkPrePriced",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -803,7 +803,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Open Price PLU",
-                                        "itemId": "chkOpenPricePlu",
+                                        "reference": "chkOpenPricePlu",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -820,7 +820,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Linked Item",
-                                        "itemId": "chkLinkedItem",
+                                        "reference": "chkLinkedItem",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -836,7 +836,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Vendor Category",
-                                        "itemId": "txtBottleDepositNo1",
+                                        "reference": "txtBottleDepositNo1",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -853,7 +853,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Count by Serial Number",
-                                        "itemId": "chkLinkedItem1",
+                                        "reference": "chkLinkedItem1",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -869,7 +869,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Serial Number Begin",
-                                        "itemId": "txtBottleDepositNo2",
+                                        "reference": "txtBottleDepositNo2",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -885,7 +885,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Serial Number End",
-                                        "itemId": "txtBottleDepositNo3",
+                                        "reference": "txtBottleDepositNo3",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -920,7 +920,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "ID Required (liqour)",
-                                        "itemId": "chkIdRequiredLiqour",
+                                        "reference": "chkIdRequiredLiqour",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -937,7 +937,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "ID Required (Cigarettes)",
-                                        "itemId": "chkIdRequiredCigarettes",
+                                        "reference": "chkIdRequiredCigarettes",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -953,7 +953,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Minimum Age",
-                                        "itemId": "txtMinimumAge",
+                                        "reference": "txtMinimumAge",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -970,7 +970,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Apply Blue Law 1",
-                                        "itemId": "chkApplyBlueLaw1",
+                                        "reference": "chkApplyBlueLaw1",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -987,7 +987,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Apply Blue Law 2",
-                                        "itemId": "chkApplyBlueLaw2",
+                                        "reference": "chkApplyBlueLaw2",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -1003,7 +1003,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Item Type Code",
-                                        "itemId": "cboItemTypeCode",
+                                        "reference": "cboItemTypeCode",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -1019,7 +1019,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Item Type Subcode",
-                                        "itemId": "txtItemTypeSubcode",
+                                        "reference": "txtItemTypeSubcode",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -1036,7 +1036,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Auto Calculate Freight",
-                                        "itemId": "chkAutoCalculateFreight",
+                                        "reference": "chkAutoCalculateFreight",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -1052,7 +1052,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Freight Method",
-                                        "itemId": "cboFreightMethod",
+                                        "reference": "cboFreightMethod",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -1068,7 +1068,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Freight Rate",
-                                        "itemId": "txtFreightRate",
+                                        "reference": "txtFreightRate",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -1084,7 +1084,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Freight Vendor",
-                                        "itemId": "cboFreightVendor",
+                                        "reference": "cboFreightVendor",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -1107,7 +1107,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "designer|displayName": "",
                         "dock": "bottom",
-                        "itemId": "pagingtoolbar",
+                        "reference": "pagingtoolbar",
                         "layout|flex": 1,
                         "store": null
                     },

@@ -14,7 +14,7 @@
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
-        "itemId": null,
+        "reference": null,
         "layout": "fit",
         "maxHeight": 390,
         "maximizable": true,
@@ -44,7 +44,7 @@
                 "frame": null,
                 "header": false,
                 "height": 350,
-                "itemId": "frmItemPricing",
+                "reference": "frmItemPricing",
                 "layout": "vbox",
                 "margin": -1,
                 "title": null,
@@ -84,7 +84,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-new",
-                                "itemId": "btnNew",
+                                "reference": "btnNew",
                                 "layout|flex": null,
                                 "layout|margins": null,
                                 "scale": "large",
@@ -108,7 +108,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-save",
-                                "itemId": "btnSave",
+                                "reference": "btnSave",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
@@ -131,7 +131,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-search",
-                                "itemId": "btnSearch",
+                                "reference": "btnSearch",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
@@ -154,7 +154,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-delete",
-                                "itemId": "btnDelete",
+                                "reference": "btnDelete",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
@@ -177,7 +177,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-undo",
-                                "itemId": "btnUndo",
+                                "reference": "btnUndo",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
@@ -215,7 +215,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-close",
-                                "itemId": "btnClose",
+                                "reference": "btnClose",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
@@ -269,7 +269,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Location",
-                                        "itemId": "txtLocation",
+                                        "reference": "txtLocation",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
@@ -285,7 +285,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Store Name",
-                                        "itemId": "txtStoreName",
+                                        "reference": "txtStoreName",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
@@ -301,7 +301,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Retail Price",
-                                        "itemId": "txtRetailPrice",
+                                        "reference": "txtRetailPrice",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
@@ -317,7 +317,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Wholesale Price",
-                                        "itemId": "txtWolesalePrice",
+                                        "reference": "txtWolesalePrice",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
@@ -333,7 +333,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Large Volume Price",
-                                        "itemId": "txtLargeVolumePrice",
+                                        "reference": "txtLargeVolumePrice",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
@@ -349,7 +349,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "MSRP",
-                                        "itemId": "txtMsrp",
+                                        "reference": "txtMsrp",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
@@ -365,7 +365,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Commission Rate",
-                                        "itemId": "txtCommissionRate",
+                                        "reference": "txtCommissionRate",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
@@ -381,7 +381,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Discount Code",
-                                        "itemId": "txtDiscountCode",
+                                        "reference": "txtDiscountCode",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
@@ -397,7 +397,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Min Override",
-                                        "itemId": "txtMinOverride",
+                                        "reference": "txtMinOverride",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
@@ -433,7 +433,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Pricing Method",
-                                        "itemId": "cboPricingMethod",
+                                        "reference": "cboPricingMethod",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
@@ -449,7 +449,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Last Cost",
-                                        "itemId": "txtLastCost",
+                                        "reference": "txtLastCost",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
@@ -465,7 +465,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Average Cost",
-                                        "itemId": "txtAverageCost",
+                                        "reference": "txtAverageCost",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
@@ -481,7 +481,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Standard Cost",
-                                        "itemId": "txtStandardCost",
+                                        "reference": "txtStandardCost",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
@@ -497,7 +497,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "End of Month Cost",
-                                        "itemId": "txtEndofMonthCost",
+                                        "reference": "txtEndofMonthCost",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
@@ -513,7 +513,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Default Sales Tax",
-                                        "itemId": "txtDefaultSalesTax",
+                                        "reference": "txtDefaultSalesTax",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
@@ -529,7 +529,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Commission Units",
-                                        "itemId": "txtCommissionUnits",
+                                        "reference": "txtCommissionUnits",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
@@ -545,7 +545,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Discount Rate",
-                                        "itemId": "txtDiscountRate",
+                                        "reference": "txtDiscountRate",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
@@ -561,7 +561,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Max Override",
-                                        "itemId": "txtMaxOverride",
+                                        "reference": "txtMaxOverride",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
@@ -584,7 +584,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "designer|displayName": "",
                         "dock": "bottom",
-                        "itemId": "pagingtoolbar",
+                        "reference": "pagingtoolbar",
                         "layout|flex": 1,
                         "store": null
                     },

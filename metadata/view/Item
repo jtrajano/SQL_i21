@@ -15,13 +15,13 @@
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
-        "itemId": null,
         "layout": "fit",
         "maximizable": true,
         "minHeight": 650,
         "minWidth": 950,
         "minimizable": null,
         "mixins": null,
+        "reference": null,
         "title": "Item: 000000015 - Ultralow Sulfur #2 Diesel",
         "width": 950
     },
@@ -58,8 +58,8 @@
                         "icon": null,
                         "iconAlign": "top",
                         "iconCls": "large-new",
-                        "itemId": "btnNew",
                         "layout|flex": null,
+                        "reference": "btnNew",
                         "scale": "large",
                         "tabIndex": -1,
                         "text": "New",
@@ -81,8 +81,8 @@
                         "icon": null,
                         "iconAlign": "top",
                         "iconCls": "large-save",
-                        "itemId": "btnSave",
                         "layout|flex": null,
+                        "reference": "btnSave",
                         "scale": "large",
                         "tabIndex": -1,
                         "text": "Save",
@@ -104,8 +104,8 @@
                         "icon": null,
                         "iconAlign": "top",
                         "iconCls": "large-search",
-                        "itemId": "btnFind",
                         "layout|flex": null,
+                        "reference": "btnFind",
                         "scale": "large",
                         "tabIndex": -1,
                         "text": "Search",
@@ -127,8 +127,8 @@
                         "icon": null,
                         "iconAlign": "top",
                         "iconCls": "large-delete",
-                        "itemId": "btnDelete",
                         "layout|flex": null,
+                        "reference": "btnDelete",
                         "scale": "large",
                         "tabIndex": -1,
                         "text": "Delete",
@@ -150,8 +150,8 @@
                         "icon": null,
                         "iconAlign": "top",
                         "iconCls": "large-undo",
-                        "itemId": "btnUndo",
                         "layout|flex": null,
+                        "reference": "btnUndo",
                         "scale": "large",
                         "tabIndex": -1,
                         "text": "Undo",
@@ -188,8 +188,8 @@
                         "icon": null,
                         "iconAlign": "top",
                         "iconCls": "large-additional",
-                        "itemId": "btnAdditional",
                         "layout|flex": null,
+                        "reference": "btnAdditional",
                         "scale": "large",
                         "tabIndex": -1,
                         "text": "Tools",
@@ -270,8 +270,8 @@
                         "icon": null,
                         "iconAlign": "top",
                         "iconCls": "large-close",
-                        "itemId": "btnClose",
                         "layout|flex": null,
+                        "reference": "btnClose",
                         "scale": "large",
                         "tabIndex": -1,
                         "text": "Close",
@@ -298,9 +298,9 @@
                 "frame": null,
                 "header": false,
                 "height": 350,
-                "itemId": "frmItem",
                 "layout": "vbox",
                 "margin": -1,
+                "reference": "frmItem",
                 "title": null,
                 "url": null,
                 "width": 450
@@ -317,9 +317,9 @@
                     "codeClass": null,
                     "userConfig": {
                         "activeTab": 0,
-                        "itemId": "tabItem",
                         "layout|flex": 1,
-                        "plain": true
+                        "plain": true,
+                        "reference": "tabItem"
                     },
                     "name": "MyTabPanel",
                     "designerId": "f7456a04-2bd2-4761-bc74-9eae9090c5ac",
@@ -412,13 +412,13 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "fieldLabel": "Item No",
-                                                                "itemId": "txtItemNo",
                                                                 "labelWidth": 95,
                                                                 "layout|flex": 1.5,
                                                                 "layout|margins": null,
                                                                 "margin": null,
                                                                 "name": null,
                                                                 "readOnly": null,
+                                                                "reference": "txtItemNo",
                                                                 "validateOnBlur": null,
                                                                 "validateOnChange": null,
                                                                 "width": null
@@ -436,13 +436,13 @@
                                                             "userConfig": {
                                                                 "designer|displayName": null,
                                                                 "fieldLabel": "Type",
-                                                                "itemId": "cboType",
                                                                 "labelPad": null,
                                                                 "labelSeparator": null,
                                                                 "labelWidth": 40,
                                                                 "layout|flex": 1,
                                                                 "margin": "0 1 0 5",
                                                                 "name": null,
+                                                                "reference": "cboType",
                                                                 "tabIndex": null,
                                                                 "width": 170
                                                             },
@@ -461,11 +461,11 @@
                                                     "userConfig": {
                                                         "fieldLabel": "Description",
                                                         "height": 62,
-                                                        "itemId": "txtDescription",
                                                         "labelWidth": 95,
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
-                                                        "padding": null
+                                                        "padding": null,
+                                                        "reference": "txtDescription"
                                                     },
                                                     "name": "MyTextArea",
                                                     "designerId": "e489b9ca-7d25-4827-89ca-f713f80148ad"
@@ -502,7 +502,6 @@
                                                         "editable": null,
                                                         "fieldLabel": "Class",
                                                         "forceSelection": null,
-                                                        "itemId": "cboClass",
                                                         "labelPad": null,
                                                         "labelSeparator": null,
                                                         "labelWidth": 80,
@@ -510,6 +509,7 @@
                                                         "margin": null,
                                                         "name": null,
                                                         "queryMode": null,
+                                                        "reference": "cboClass",
                                                         "store": null,
                                                         "tabIndex": null,
                                                         "width": null
@@ -547,9 +547,9 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "fieldLabel": "Manufacturer",
-                                                                "itemId": "cboManufacturer",
                                                                 "labelWidth": 80,
-                                                                "layout|flex": 1.4
+                                                                "layout|flex": 1.4,
+                                                                "reference": "cboManufacturer"
                                                             },
                                                             "name": "MyComboBox3",
                                                             "designerId": "34f0af06-4236-4a61-b532-dbe6d49190d5"
@@ -563,11 +563,11 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "fieldLabel": "Brand",
-                                                                "itemId": "cboBrand",
                                                                 "labelWidth": 50,
                                                                 "layout|flex": 1,
                                                                 "layout|margins": null,
-                                                                "margin": "0 0 0 5"
+                                                                "margin": "0 0 0 5",
+                                                                "reference": "cboBrand"
                                                             },
                                                             "name": "MyComboBox4",
                                                             "designerId": "a8637949-68fc-45cd-9d4d-cc92e49d1022"
@@ -583,9 +583,9 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Status",
-                                                        "itemId": "cboStatus",
                                                         "labelWidth": 80,
-                                                        "layout|flex": null
+                                                        "layout|flex": null,
+                                                        "reference": "cboStatus"
                                                     },
                                                     "name": "MyComboBox5",
                                                     "designerId": "b047e1a1-e9d3-4e6c-a2cb-65904a7aa1d9"
@@ -599,9 +599,9 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Model No",
-                                                        "itemId": "txtModelNo",
                                                         "labelWidth": 80,
-                                                        "layout|flex": null
+                                                        "layout|flex": null,
+                                                        "reference": "txtModelNo"
                                                     },
                                                     "name": "MyTextField1",
                                                     "designerId": "752a5c36-9e0a-45f3-b8e3-ca85fdd54ea6"
@@ -633,9 +633,9 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "fieldLabel": "Lot Tracking",
-                                                                "itemId": "cboLotTracking",
                                                                 "labelWidth": 80,
-                                                                "layout|flex": 1.4
+                                                                "layout|flex": 1.4,
+                                                                "reference": "cboLotTracking"
                                                             },
                                                             "name": "MyComboBox6",
                                                             "designerId": "3a43a43f-e0cb-4c25-8d07-ede2f4b76de2"
@@ -649,11 +649,11 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "fieldLabel": "Tracking",
-                                                                "itemId": "cboTracking",
                                                                 "labelWidth": 50,
                                                                 "layout|flex": 1,
                                                                 "layout|margins": null,
-                                                                "margin": "0 0 0 5"
+                                                                "margin": "0 0 0 5",
+                                                                "reference": "cboTracking"
                                                             },
                                                             "name": "MyComboBox7",
                                                             "designerId": "8fbc06ee-4a99-4463-a83f-f3bdb93d70eb"
@@ -674,8 +674,8 @@
                                     "userConfig": {
                                         "designer|createAlias": "advancefiltergrid",
                                         "forceFit": true,
-                                        "itemId": "grdUnitOfMeasure",
                                         "layout|flex": 1,
+                                        "reference": "grdUnitOfMeasure",
                                         "title": "Unit of Measure"
                                     },
                                     "name": "MyGridPanel",
@@ -848,7 +848,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "itemId": "grvUnitOfMeasure"
+                                                "reference": "grvUnitOfMeasure"
                                             },
                                             "name": "MyGridView",
                                             "designerId": "71233b33-5769-437e-9dbb-1418a84c7c30"
@@ -892,9 +892,9 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "activeTab": 1,
-                                        "itemId": "tabSetup",
                                         "layout|flex": 1,
-                                        "plain": true
+                                        "plain": true,
+                                        "reference": "tabSetup"
                                     },
                                     "name": "MyTabPanel1",
                                     "designerId": "72cd91b6-1552-4b04-9668-999ce08484d8",
@@ -932,8 +932,8 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "designer|createAlias": "advancefiltergrid",
-                                                        "itemId": "grdLocationStore",
                                                         "margin": -1,
+                                                        "reference": "grdLocationStore",
                                                         "title": null
                                                     },
                                                     "name": "MyGridPanel2",
@@ -949,7 +949,7 @@
                                                             "userConfig": {
                                                                 "container|padding": "0 0 0 1",
                                                                 "dock": "top",
-                                                                "itemId": "tlbGridOptions"
+                                                                "reference": "tlbGridOptions"
                                                             },
                                                             "name": "MyToolbar2",
                                                             "designerId": "5071cfe3-6946-4198-8dfe-a2bcf7619691",
@@ -964,8 +964,8 @@
                                                                     "userConfig": {
                                                                         "icon": null,
                                                                         "iconCls": "small-add",
-                                                                        "itemId": "btnAdd",
                                                                         "layout|flex": null,
+                                                                        "reference": "btnAdd",
                                                                         "tabIndex": -1,
                                                                         "text": "Add"
                                                                     },
@@ -982,8 +982,8 @@
                                                                     "userConfig": {
                                                                         "icon": null,
                                                                         "iconCls": "small-edit",
-                                                                        "itemId": "btnEdit",
                                                                         "layout|flex": null,
+                                                                        "reference": "btnEdit",
                                                                         "tabIndex": -1,
                                                                         "text": "Edit"
                                                                     },
@@ -1000,8 +1000,8 @@
                                                                     "userConfig": {
                                                                         "icon": null,
                                                                         "iconCls": "small-delete",
-                                                                        "itemId": "btnDelete",
                                                                         "layout|flex": null,
+                                                                        "reference": "btnDelete",
                                                                         "tabIndex": -1,
                                                                         "text": "Delete"
                                                                     },
@@ -1137,7 +1137,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "itemId": "grvLocationStore"
+                                                                "reference": "grvLocationStore"
                                                             },
                                                             "name": "MyGridView2",
                                                             "designerId": "0e23bd4d-0ecb-4a3e-93e9-5fa9c8472a62"
@@ -1207,9 +1207,9 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "fieldLabel": "Patronage",
-                                                                "itemId": "cboPatronage",
                                                                 "labelWidth": 110,
-                                                                "layout|flex": null
+                                                                "layout|flex": null,
+                                                                "reference": "cboPatronage"
                                                             },
                                                             "name": "MyComboBox8",
                                                             "designerId": "672c6f55-2007-4948-baa8-26d02b7bdedf"
@@ -1223,9 +1223,9 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "fieldLabel": "Tax Class",
-                                                                "itemId": "cboTaxClass",
                                                                 "labelWidth": 110,
-                                                                "layout|flex": null
+                                                                "layout|flex": null,
+                                                                "reference": "cboTaxClass"
                                                             },
                                                             "name": "MyComboBox9",
                                                             "designerId": "383ec3e6-0a59-4430-9a95-db8790b1a65a"
@@ -1240,9 +1240,9 @@
                                                             "userConfig": {
                                                                 "boxLabel": null,
                                                                 "fieldLabel": "Stocked Item",
-                                                                "itemId": "chkStockedItem",
                                                                 "labelWidth": 110,
-                                                                "layout|flex": null
+                                                                "layout|flex": null,
+                                                                "reference": "chkStockedItem"
                                                             },
                                                             "name": "MyCheckbox",
                                                             "designerId": "cdbcfd23-fdd1-4f74-ad5e-fc0f796c2073"
@@ -1257,9 +1257,9 @@
                                                             "userConfig": {
                                                                 "boxLabel": null,
                                                                 "fieldLabel": "Dyed Fuel",
-                                                                "itemId": "chkDyedFuel",
                                                                 "labelWidth": 110,
-                                                                "layout|flex": null
+                                                                "layout|flex": null,
+                                                                "reference": "chkDyedFuel"
                                                             },
                                                             "name": "MyCheckbox1",
                                                             "designerId": "2af7640a-550b-430a-881c-5472200aae7a"
@@ -1273,9 +1273,9 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "fieldLabel": "Barcode Print",
-                                                                "itemId": "cboBarcodePrint",
                                                                 "labelWidth": 110,
-                                                                "layout|flex": null
+                                                                "layout|flex": null,
+                                                                "reference": "cboBarcodePrint"
                                                             },
                                                             "name": "MyComboBox10",
                                                             "designerId": "549f5f41-42a5-4fcc-b8e1-fb4fb0dd21a9"
@@ -1290,9 +1290,9 @@
                                                             "userConfig": {
                                                                 "boxLabel": null,
                                                                 "fieldLabel": "MSDS Required",
-                                                                "itemId": "chkMsdsRequired",
                                                                 "labelWidth": 110,
-                                                                "layout|flex": null
+                                                                "layout|flex": null,
+                                                                "reference": "chkMsdsRequired"
                                                             },
                                                             "name": "MyCheckbox2",
                                                             "designerId": "da428243-da90-49b8-b887-d63c3495bc66"
@@ -1306,9 +1306,9 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "fieldLabel": "EPA Number",
-                                                                "itemId": "txtEpaNumber",
                                                                 "labelWidth": 110,
-                                                                "layout|flex": null
+                                                                "layout|flex": null,
+                                                                "reference": "txtEpaNumber"
                                                             },
                                                             "name": "MyTextField2",
                                                             "designerId": "26617644-a1f6-4c7a-b5bc-78d2bb4f4e28"
@@ -1323,9 +1323,9 @@
                                                             "userConfig": {
                                                                 "boxLabel": null,
                                                                 "fieldLabel": "Inbound Tax",
-                                                                "itemId": "chkInboundTax",
                                                                 "labelWidth": 110,
-                                                                "layout|flex": null
+                                                                "layout|flex": null,
+                                                                "reference": "chkInboundTax"
                                                             },
                                                             "name": "MyCheckbox3",
                                                             "designerId": "d771942a-85fd-4243-88ac-96d2fb974102"
@@ -1340,9 +1340,9 @@
                                                             "userConfig": {
                                                                 "boxLabel": null,
                                                                 "fieldLabel": "Outbound Tax",
-                                                                "itemId": "chkOutboundTax",
                                                                 "labelWidth": 110,
-                                                                "layout|flex": null
+                                                                "layout|flex": null,
+                                                                "reference": "chkOutboundTax"
                                                             },
                                                             "name": "MyCheckbox4",
                                                             "designerId": "e3106b2e-adee-4a14-ace9-7b9c39ab1c70"
@@ -1357,9 +1357,9 @@
                                                             "userConfig": {
                                                                 "boxLabel": null,
                                                                 "fieldLabel": "Restricted Chemical",
-                                                                "itemId": "chkRestrictedChemical",
                                                                 "labelWidth": 110,
-                                                                "layout|flex": null
+                                                                "layout|flex": null,
+                                                                "reference": "chkRestrictedChemical"
                                                             },
                                                             "name": "MyCheckbox5",
                                                             "designerId": "768ad6ad-271d-43d8-8e6a-7e3f9b9c3738"
@@ -1374,9 +1374,9 @@
                                                             "userConfig": {
                                                                 "container|align": "stretch",
                                                                 "container|padding": 5,
-                                                                "itemId": "pnlTankManagment",
                                                                 "layout": "vbox",
                                                                 "layout|flex": 1,
+                                                                "reference": "pnlTankManagment",
                                                                 "title": "Tank Management"
                                                             },
                                                             "name": "MyPanel3",
@@ -1392,9 +1392,9 @@
                                                                     "userConfig": {
                                                                         "boxLabel": null,
                                                                         "fieldLabel": "Tank Required",
-                                                                        "itemId": "chkTankRequired",
                                                                         "labelWidth": 110,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "chkTankRequired"
                                                                     },
                                                                     "name": "MyCheckbox6",
                                                                     "designerId": "3a9d5e7a-a7ba-47d1-8165-50be51c5b6c5"
@@ -1409,9 +1409,9 @@
                                                                     "userConfig": {
                                                                         "boxLabel": null,
                                                                         "fieldLabel": "Available for TM",
-                                                                        "itemId": "chkAvailableForTm",
                                                                         "labelWidth": 110,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "chkAvailableForTm"
                                                                     },
                                                                     "name": "MyCheckbox7",
                                                                     "designerId": "0258b273-bd2c-4db7-8869-9da3d1cf826d"
@@ -1425,9 +1425,9 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldLabel": "Default % Full",
-                                                                        "itemId": "txtDefaultPercentFull",
                                                                         "labelWidth": 110,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "txtDefaultPercentFull"
                                                                     },
                                                                     "name": "MyTextField3",
                                                                     "designerId": "b256e5c4-0313-42e2-9da1-160a1c127369"
@@ -1464,9 +1464,9 @@
                                                             "userConfig": {
                                                                 "bodyPadding": 5,
                                                                 "container|align": "stretch",
-                                                                "itemId": "pnlRins",
                                                                 "layout": "vbox",
                                                                 "layout|flex": null,
+                                                                "reference": "pnlRins",
                                                                 "title": "RINS"
                                                             },
                                                             "name": "MyPanel4",
@@ -1481,9 +1481,9 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldLabel": "Fuel Inspect Fee",
-                                                                        "itemId": "cboFuelInspectionFee",
                                                                         "labelWidth": 125,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "cboFuelInspectionFee"
                                                                     },
                                                                     "name": "MyComboBox11",
                                                                     "designerId": "2fa9cecd-27ee-449c-bf62-6ffa882061d7"
@@ -1497,9 +1497,9 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldLabel": "RIN Required",
-                                                                        "itemId": "cboRinRequired",
                                                                         "labelWidth": 125,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "cboRinRequired"
                                                                     },
                                                                     "name": "MyComboBox12",
                                                                     "designerId": "4b86207d-4a74-4122-b64b-d27f53454bbe"
@@ -1513,9 +1513,9 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldLabel": "RIN Fuel Type",
-                                                                        "itemId": "cboRinFuelType",
                                                                         "labelWidth": 125,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "cboRinFuelType"
                                                                     },
                                                                     "name": "MyComboBox13",
                                                                     "designerId": "a00f7dc2-472c-444e-a6d2-883383dcbcfb"
@@ -1529,9 +1529,9 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldLabel": "% Denaturant",
-                                                                        "itemId": "txtPercentDenaturant",
                                                                         "labelWidth": 125,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "txtPercentDenaturant"
                                                                     },
                                                                     "name": "MyTextField4",
                                                                     "designerId": "8b01a6c8-6079-4fbc-b1f0-53bbd5886971"
@@ -1548,11 +1548,11 @@
                                                             "userConfig": {
                                                                 "bodyPadding": 5,
                                                                 "container|align": "stretch",
-                                                                "itemId": "pnlFeed",
                                                                 "layout": "vbox",
                                                                 "layout|flex": 1,
                                                                 "layout|margins": null,
                                                                 "margin": "5 0 0 0",
+                                                                "reference": "pnlFeed",
                                                                 "title": "Feed"
                                                             },
                                                             "name": "MyPanel5",
@@ -1568,9 +1568,9 @@
                                                                     "userConfig": {
                                                                         "boxLabel": null,
                                                                         "fieldLabel": "Tonnage Tax",
-                                                                        "itemId": "chkTonnageTax",
                                                                         "labelWidth": 125,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "chkTonnageTax"
                                                                     },
                                                                     "name": "MyCheckbox8",
                                                                     "designerId": "419bbb07-3286-4ae8-9db2-cf457734a23e"
@@ -1585,9 +1585,9 @@
                                                                     "userConfig": {
                                                                         "boxLabel": null,
                                                                         "fieldLabel": "Load tracking",
-                                                                        "itemId": "chkLoadTracking",
                                                                         "labelWidth": 125,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "chkLoadTracking"
                                                                     },
                                                                     "name": "MyCheckbox9",
                                                                     "designerId": "4cd69304-1925-46a4-a812-92eb9c844f7a"
@@ -1601,9 +1601,9 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldLabel": "Formula Level",
-                                                                        "itemId": "cboFormulaLevel",
                                                                         "labelWidth": 125,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "cboFormulaLevel"
                                                                     },
                                                                     "name": "MyComboBox14",
                                                                     "designerId": "6ca065ec-e6b3-4ca7-869e-dfc4c1023655"
@@ -1617,9 +1617,9 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldLabel": "Mix Order",
-                                                                        "itemId": "txtMinOrder",
                                                                         "labelWidth": 125,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "txtMinOrder"
                                                                     },
                                                                     "name": "MyTextField5",
                                                                     "designerId": "f5cf816b-acc6-4191-b1b9-aaa1c4050f31"
@@ -1634,9 +1634,9 @@
                                                                     "userConfig": {
                                                                         "boxLabel": null,
                                                                         "fieldLabel": "Hand Add Ingredients",
-                                                                        "itemId": "chkHandAddIngredients",
                                                                         "labelWidth": 125,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "chkHandAddIngredients"
                                                                     },
                                                                     "name": "MyCheckbox10",
                                                                     "designerId": "512f8006-93b0-4408-a79a-c3ed93249ddf"
@@ -1650,9 +1650,9 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldLabel": "Medication Tag",
-                                                                        "itemId": "cboMedicationTag",
                                                                         "labelWidth": 125,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "cboMedicationTag"
                                                                     },
                                                                     "name": "MyComboBox15",
                                                                     "designerId": "cb709d0d-72ac-43ac-a04f-9a9f93b0afde"
@@ -1666,9 +1666,9 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldLabel": "Ingredient Tag",
-                                                                        "itemId": "cboIngredientTag",
                                                                         "labelWidth": 125,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "cboIngredientTag"
                                                                     },
                                                                     "name": "MyComboBox16",
                                                                     "designerId": "c1e9e750-3130-47d2-8a3a-8d65d328144a"
@@ -1682,9 +1682,9 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldLabel": "Volume Rebate Group",
-                                                                        "itemId": "txtVolumeRebateGroup",
                                                                         "labelWidth": 125,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "txtVolumeRebateGroup"
                                                                     },
                                                                     "name": "MyTextField6",
                                                                     "designerId": "01b11927-708f-4e72-80e9-2ec703fbde30"
@@ -1718,9 +1718,9 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "fieldLabel": "Physical Item",
-                                                                "itemId": "cboPhysicalItem",
                                                                 "labelWidth": 125,
-                                                                "layout|flex": null
+                                                                "layout|flex": null,
+                                                                "reference": "cboPhysicalItem"
                                                             },
                                                             "name": "MyComboBox17",
                                                             "designerId": "77f584fa-04db-4e11-b23d-548b1f86a6a4"
@@ -1735,9 +1735,9 @@
                                                             "userConfig": {
                                                                 "boxLabel": null,
                                                                 "fieldLabel": "Extend on Pick Ticket",
-                                                                "itemId": "chkExtendOnPickTicket",
                                                                 "labelWidth": 125,
-                                                                "layout|flex": null
+                                                                "layout|flex": null,
+                                                                "reference": "chkExtendOnPickTicket"
                                                             },
                                                             "name": "MyCheckbox11",
                                                             "designerId": "712da0bd-ffb2-4df4-93e6-b04d2e22eebb"
@@ -1752,9 +1752,9 @@
                                                             "userConfig": {
                                                                 "boxLabel": null,
                                                                 "fieldLabel": "Export EDI",
-                                                                "itemId": "chkExportEdi",
                                                                 "labelWidth": 125,
-                                                                "layout|flex": null
+                                                                "layout|flex": null,
+                                                                "reference": "chkExportEdi"
                                                             },
                                                             "name": "MyCheckbox12",
                                                             "designerId": "091f5564-044c-4a1b-9172-d34d9bb80939"
@@ -1769,9 +1769,9 @@
                                                             "userConfig": {
                                                                 "boxLabel": null,
                                                                 "fieldLabel": "Hazard Material",
-                                                                "itemId": "chkHazardMaterial",
                                                                 "labelWidth": 125,
-                                                                "layout|flex": null
+                                                                "layout|flex": null,
+                                                                "reference": "chkHazardMaterial"
                                                             },
                                                             "name": "MyCheckbox13",
                                                             "designerId": "f2b75f1a-d5ae-494e-a784-dccd15580568"
@@ -1786,9 +1786,9 @@
                                                             "userConfig": {
                                                                 "boxLabel": null,
                                                                 "fieldLabel": "Material Fee",
-                                                                "itemId": "chkMaterialFee",
                                                                 "labelWidth": 125,
-                                                                "layout|flex": null
+                                                                "layout|flex": null,
+                                                                "reference": "chkMaterialFee"
                                                             },
                                                             "name": "MyCheckbox14",
                                                             "designerId": "97b4566e-806d-4ee9-bdd0-6467441ee095"
@@ -1851,9 +1851,9 @@
                                                                 "bodyPadding": 5,
                                                                 "container|align": "stretch",
                                                                 "height": null,
-                                                                "itemId": "pnlGeneral",
                                                                 "layout": "vbox",
                                                                 "layout|flex": 1.5,
+                                                                "reference": "pnlGeneral",
                                                                 "title": "General"
                                                             },
                                                             "name": "MyPanel28",
@@ -1868,9 +1868,9 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldLabel": "Order UPC No",
-                                                                        "itemId": "txtOrderUpcNo",
                                                                         "labelWidth": 130,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "txtOrderUpcNo"
                                                                     },
                                                                     "name": "MyTextField8",
                                                                     "designerId": "b2cd731f-c9c2-432f-9c85-eb6def174e34"
@@ -1884,9 +1884,9 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldLabel": "Case UOM",
-                                                                        "itemId": "cboCaseUom",
                                                                         "labelWidth": 130,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "cboCaseUom"
                                                                     },
                                                                     "name": "MyComboBox21",
                                                                     "designerId": "74408f32-bff1-4f1d-91fc-e8013ff9aadb"
@@ -1900,9 +1900,9 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldLabel": "NACS Category",
-                                                                        "itemId": "txtNacsCategory",
                                                                         "labelWidth": 130,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "txtNacsCategory"
                                                                     },
                                                                     "name": "MyTextField10",
                                                                     "designerId": "c7516f3f-c657-4737-81ff-ff508caed194"
@@ -1933,10 +1933,10 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "fieldLabel": "Product Code",
-                                                                                "itemId": "cboProductCode",
                                                                                 "labelWidth": 130,
                                                                                 "layout|flex": 1.6,
-                                                                                "margin": "0 5 0 0"
+                                                                                "margin": "0 5 0 0",
+                                                                                "reference": "cboProductCode"
                                                                             },
                                                                             "name": "MyComboBox24",
                                                                             "designerId": "567ecaa3-77d0-4409-97d5-f25289641d79"
@@ -1950,9 +1950,9 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "fieldLabel": "WIC Code",
-                                                                                "itemId": "cboWicCode",
                                                                                 "labelWidth": 60,
-                                                                                "layout|flex": 1
+                                                                                "layout|flex": 1,
+                                                                                "reference": "cboWicCode"
                                                                             },
                                                                             "name": "MyComboBox25",
                                                                             "designerId": "efccb1bf-f068-42c5-a713-08f896d73eea"
@@ -1968,9 +1968,9 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldLabel": "AG Category",
-                                                                        "itemId": "cboAgCategory",
                                                                         "labelWidth": 130,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "cboAgCategory"
                                                                     },
                                                                     "name": "MyComboBox27",
                                                                     "designerId": "00dcda8f-94e4-4c14-86b5-03e2411f4835"
@@ -2002,9 +2002,9 @@
                                                                             "userConfig": {
                                                                                 "boxLabel": null,
                                                                                 "fieldLabel": "Receipt Comment Req",
-                                                                                "itemId": "chkReceiptCommentReq",
                                                                                 "labelWidth": 130,
-                                                                                "layout|flex": null
+                                                                                "layout|flex": null,
+                                                                                "reference": "chkReceiptCommentReq"
                                                                             },
                                                                             "name": "MyCheckbox21",
                                                                             "designerId": "4fe496f7-7117-4962-90fa-c21de9a576ab"
@@ -2018,10 +2018,10 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "fieldLabel": "Count Code",
-                                                                                "itemId": "cboCountCode",
                                                                                 "labelWidth": 70,
                                                                                 "layout|flex": 1,
-                                                                                "margin": "0 0 0 5"
+                                                                                "margin": "0 0 0 5",
+                                                                                "reference": "cboCountCode"
                                                                             },
                                                                             "name": "MyComboBox19",
                                                                             "designerId": "02c4f961-3c5e-494a-b987-38998d0859f8"
@@ -2040,10 +2040,10 @@
                                                             "userConfig": {
                                                                 "bodyPadding": 5,
                                                                 "container|align": "stretch",
-                                                                "itemId": "pnlInventorySetup",
                                                                 "layout": "vbox",
                                                                 "layout|flex": 1.5,
                                                                 "margin": "0 5",
+                                                                "reference": "pnlInventorySetup",
                                                                 "title": "Inventory Setup"
                                                             },
                                                             "name": "MyPanel11",
@@ -2059,9 +2059,9 @@
                                                                     "userConfig": {
                                                                         "boxLabel": null,
                                                                         "fieldLabel": "Landed Cost",
-                                                                        "itemId": "chkLandedCost",
                                                                         "labelWidth": 90,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "chkLandedCost"
                                                                     },
                                                                     "name": "MyCheckbox15",
                                                                     "designerId": "8984b96a-d4e0-4223-a758-8fd4fd4ebbf6"
@@ -2092,10 +2092,10 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "fieldLabel": "Lead Time",
-                                                                                "itemId": "txtLeadTime",
                                                                                 "labelWidth": 90,
                                                                                 "layout|flex": 1,
-                                                                                "margin": "0 5 0 0 "
+                                                                                "margin": "0 5 0 0 ",
+                                                                                "reference": "txtLeadTime"
                                                                             },
                                                                             "name": "MyTextField9",
                                                                             "designerId": "3d350dbe-3489-43a0-9632-205a4232b43a"
@@ -2110,10 +2110,10 @@
                                                                             "userConfig": {
                                                                                 "boxLabel": null,
                                                                                 "fieldLabel": "Taxable",
-                                                                                "itemId": "chkTaxable",
                                                                                 "labelWidth": 90,
                                                                                 "layout|flex": null,
-                                                                                "margin": null
+                                                                                "margin": null,
+                                                                                "reference": "chkTaxable"
                                                                             },
                                                                             "name": "MyCheckbox16",
                                                                             "designerId": "f04ab63a-f500-412d-afb6-95c148328417"
@@ -2129,9 +2129,9 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldLabel": "Keywords",
-                                                                        "itemId": "txtKeywords",
                                                                         "labelWidth": 90,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "txtKeywords"
                                                                     },
                                                                     "name": "MyTextField11",
                                                                     "designerId": "84887daf-ade1-4981-b96c-030f72bd9f9b"
@@ -2146,9 +2146,9 @@
                                                                     "userConfig": {
                                                                         "fieldLabel": "Case Qty",
                                                                         "hideTrigger": true,
-                                                                        "itemId": "txtCaseQty",
                                                                         "labelWidth": 90,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "txtCaseQty"
                                                                     },
                                                                     "name": "MyNumberField",
                                                                     "designerId": "0a8375ba-c05f-417c-adaf-f0774a3b7052"
@@ -2162,9 +2162,9 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldLabel": "Date Ship",
-                                                                        "itemId": "dtmDateShip",
                                                                         "labelWidth": 90,
                                                                         "layout|flex": null,
+                                                                        "reference": "dtmDateShip",
                                                                         "width": null
                                                                     },
                                                                     "name": "MyDateField",
@@ -2197,10 +2197,10 @@
                                                                             "userConfig": {
                                                                                 "fieldLabel": "Tax Exempt",
                                                                                 "hideTrigger": true,
-                                                                                "itemId": "txtTaxExempt",
                                                                                 "labelWidth": 90,
                                                                                 "layout|flex": 1,
-                                                                                "margin": "0 5 0 0"
+                                                                                "margin": "0 5 0 0",
+                                                                                "reference": "txtTaxExempt"
                                                                             },
                                                                             "name": "MyNumberField1",
                                                                             "designerId": "e6f85d3b-aa12-4d89-a994-bdc18025b13f"
@@ -2216,10 +2216,10 @@
                                                                                 "boxLabel": null,
                                                                                 "fieldLabel": "Drop Ship",
                                                                                 "hidden": null,
-                                                                                "itemId": "chkDropShip",
                                                                                 "labelWidth": 90,
                                                                                 "layout|flex": null,
-                                                                                "margin": null
+                                                                                "margin": null,
+                                                                                "reference": "chkDropShip"
                                                                             },
                                                                             "name": "MyCheckbox17",
                                                                             "designerId": "e4641df8-d669-4587-946f-f557450b8273"
@@ -2238,10 +2238,10 @@
                                                             "userConfig": {
                                                                 "bodyPadding": 5,
                                                                 "container|align": "stretch",
-                                                                "itemId": "pnlCommissionDetail",
                                                                 "layout": "vbox",
                                                                 "layout|flex": 1,
                                                                 "margin": null,
+                                                                "reference": "pnlCommissionDetail",
                                                                 "title": "Commision Detail"
                                                             },
                                                             "name": "MyPanel27",
@@ -2257,9 +2257,9 @@
                                                                     "userConfig": {
                                                                         "boxLabel": null,
                                                                         "fieldLabel": "Commisionable",
-                                                                        "itemId": "chkCommissionable",
                                                                         "labelWidth": 130,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "chkCommissionable"
                                                                     },
                                                                     "name": "MyCheckbox18",
                                                                     "designerId": "05d7aaf7-b099-466c-bf9f-5d2ffdf86cb7"
@@ -2273,9 +2273,9 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldLabel": "Special Commission",
-                                                                        "itemId": "cboSpecialCommission",
                                                                         "labelWidth": 130,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "cboSpecialCommission"
                                                                     },
                                                                     "name": "MyComboBox18",
                                                                     "designerId": "03909eba-b782-4808-a975-09b5c59ef6a9"
@@ -2309,9 +2309,9 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "itemId": "grdCategory",
                                                                 "layout|flex": 1,
                                                                 "margin": "0 5 0 0 ",
+                                                                "reference": "grdCategory",
                                                                 "title": "Categories"
                                                             },
                                                             "name": "MyGridPanel15",
@@ -2327,7 +2327,7 @@
                                                                     "userConfig": {
                                                                         "container|padding": "0 0 0 1",
                                                                         "dock": "top",
-                                                                        "itemId": "tlbGridOptions"
+                                                                        "reference": "tlbGridOptions"
                                                                     },
                                                                     "name": "MyToolbar12",
                                                                     "designerId": "80184c9a-8340-454f-bc73-1b642c41aa70",
@@ -2342,8 +2342,8 @@
                                                                             "userConfig": {
                                                                                 "icon": null,
                                                                                 "iconCls": "small-add",
-                                                                                "itemId": "btnAdd",
                                                                                 "layout|flex": null,
+                                                                                "reference": "btnAdd",
                                                                                 "tabIndex": -1,
                                                                                 "text": "Add"
                                                                             },
@@ -2360,8 +2360,8 @@
                                                                             "userConfig": {
                                                                                 "icon": null,
                                                                                 "iconCls": "small-edit",
-                                                                                "itemId": "btnEdit",
                                                                                 "layout|flex": null,
+                                                                                "reference": "btnEdit",
                                                                                 "tabIndex": -1,
                                                                                 "text": "Edit"
                                                                             },
@@ -2378,8 +2378,8 @@
                                                                             "userConfig": {
                                                                                 "icon": null,
                                                                                 "iconCls": "small-delete",
-                                                                                "itemId": "btnDelete",
                                                                                 "layout|flex": null,
+                                                                                "reference": "btnDelete",
                                                                                 "tabIndex": -1,
                                                                                 "text": "Delete"
                                                                             },
@@ -2410,7 +2410,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter15",
+                                                                            "name": "filter1",
                                                                             "designerId": "2857c700-ed36-43f0-8ef5-f340b95fdfba",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -2439,7 +2439,7 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "itemId": "grvCategory"
+                                                                        "reference": "grvCategory"
                                                                     },
                                                                     "name": "MyGridView13",
                                                                     "designerId": "126be114-474f-4515-a1dc-6270223e3af4"
@@ -2464,8 +2464,8 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "itemId": "grdServiceLevelAgreement",
                                                                 "layout|flex": 1,
+                                                                "reference": "grdServiceLevelAgreement",
                                                                 "title": "Service Level Agreement Setup"
                                                             },
                                                             "name": "MyGridPanel16",
@@ -2481,7 +2481,7 @@
                                                                     "userConfig": {
                                                                         "container|padding": "0 0 0 1",
                                                                         "dock": "top",
-                                                                        "itemId": "tlbGridOptions"
+                                                                        "reference": "tlbGridOptions"
                                                                     },
                                                                     "name": "MyToolbar13",
                                                                     "designerId": "ac26e7bc-b670-480d-b49b-6a710665d34a",
@@ -2496,8 +2496,8 @@
                                                                             "userConfig": {
                                                                                 "icon": null,
                                                                                 "iconCls": "small-add",
-                                                                                "itemId": "btnAdd",
                                                                                 "layout|flex": null,
+                                                                                "reference": "btnAdd",
                                                                                 "tabIndex": -1,
                                                                                 "text": "Add"
                                                                             },
@@ -2514,8 +2514,8 @@
                                                                             "userConfig": {
                                                                                 "icon": null,
                                                                                 "iconCls": "small-edit",
-                                                                                "itemId": "btnEdit",
                                                                                 "layout|flex": null,
+                                                                                "reference": "btnEdit",
                                                                                 "tabIndex": -1,
                                                                                 "text": "Edit"
                                                                             },
@@ -2532,8 +2532,8 @@
                                                                             "userConfig": {
                                                                                 "icon": null,
                                                                                 "iconCls": "small-delete",
-                                                                                "itemId": "btnDelete",
                                                                                 "layout|flex": null,
+                                                                                "reference": "btnDelete",
                                                                                 "tabIndex": -1,
                                                                                 "text": "Delete"
                                                                             },
@@ -2564,7 +2564,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter16",
+                                                                            "name": "filter2",
                                                                             "designerId": "f74d03b6-8d20-468c-ab10-a1782ac46fa4",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -2621,7 +2621,7 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "itemId": "grvServiceLevelAgreement"
+                                                                        "reference": "grvServiceLevelAgreement"
                                                                     },
                                                                     "name": "MyGridView13",
                                                                     "designerId": "4c81cab8-b6ce-4bbd-b6f4-3b38d8d6c66c"
@@ -2729,9 +2729,9 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldLabel": "Associated Recipe",
-                                                                        "itemId": "cboFamily1",
                                                                         "labelWidth": 125,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "cboFamily1"
                                                                     },
                                                                     "name": "MyComboBox28",
                                                                     "designerId": "92f805f6-3f09-478a-936d-0ea49203960b"
@@ -2801,9 +2801,9 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "fieldLabel": "Life Time",
-                                                                                "itemId": "txtCaseUom1",
                                                                                 "labelWidth": 125,
-                                                                                "layout|flex": 2
+                                                                                "layout|flex": 2,
+                                                                                "reference": "txtCaseUom1"
                                                                             },
                                                                             "name": "MyTextField15",
                                                                             "designerId": "c0831b70-ac20-46b0-aecb-839f88168b04"
@@ -2817,11 +2817,11 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "fieldLabel": null,
-                                                                                "itemId": "cboFamily",
                                                                                 "labelWidth": 125,
                                                                                 "layout|flex": 1,
                                                                                 "layout|margins": null,
-                                                                                "margin": "0 0 0 5"
+                                                                                "margin": "0 0 0 5",
+                                                                                "reference": "cboFamily"
                                                                             },
                                                                             "name": "MyComboBox29",
                                                                             "designerId": "f21e13d2-4a10-4eea-ac33-540e6ea1d803"
@@ -2837,9 +2837,9 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldLabel": "Receive Life",
-                                                                        "itemId": "txtCaseUom",
                                                                         "labelWidth": 125,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "reference": "txtCaseUom"
                                                                     },
                                                                     "name": "MyTextField16",
                                                                     "designerId": "d788b1a5-9420-46f0-a492-bc52850a0b88"
@@ -2874,8 +2874,8 @@
                                                                     "userConfig": {
                                                                         "designer|createAlias": "advancefiltergrid",
                                                                         "hideHeaders": null,
-                                                                        "itemId": "grdBOM",
                                                                         "margin": -1,
+                                                                        "reference": "grdBOM",
                                                                         "title": null
                                                                     },
                                                                     "name": "MyGridPanel1",
@@ -2891,7 +2891,7 @@
                                                                             "userConfig": {
                                                                                 "container|padding": "0 0 0 1",
                                                                                 "dock": "top",
-                                                                                "itemId": "tlbGridOptions"
+                                                                                "reference": "tlbGridOptions"
                                                                             },
                                                                             "name": "MyToolbar1",
                                                                             "designerId": "8acbe05b-b8d8-4fcd-889f-2db6ef6c9ab3",
@@ -2906,7 +2906,7 @@
                                                                                     "userConfig": {
                                                                                         "layout|flex": null
                                                                                     },
-                                                                                    "name": "filter1",
+                                                                                    "name": "filter3",
                                                                                     "designerId": "3fdba5e7-278e-4e6b-ad42-9ec658e4c660",
                                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                                 }
@@ -2936,7 +2936,7 @@
                                                                             },
                                                                             "codeClass": null,
                                                                             "userConfig": {
-                                                                                "itemId": "grvBOM"
+                                                                                "reference": "grvBOM"
                                                                             },
                                                                             "name": "MyGridView1",
                                                                             "designerId": "34f2c68c-c8e5-4f8b-b2a5-3437c35e71cf"
@@ -3013,9 +3013,9 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "fieldLabel": "GTIN",
-                                                                                "itemId": "txtCaseUom12",
                                                                                 "labelWidth": 125,
-                                                                                "layout|flex": null
+                                                                                "layout|flex": null,
+                                                                                "reference": "txtCaseUom12"
                                                                             },
                                                                             "name": "MyTextField17",
                                                                             "designerId": "394d6504-8a0c-492d-863f-79b78e44281e"
@@ -3029,9 +3029,9 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "fieldLabel": "Rotation Type",
-                                                                                "itemId": "cboFamily2",
                                                                                 "labelWidth": 125,
-                                                                                "layout|flex": null
+                                                                                "layout|flex": null,
+                                                                                "reference": "cboFamily2"
                                                                             },
                                                                             "name": "MyComboBox33",
                                                                             "designerId": "3902d355-656c-49b5-aabc-435a352e4257"
@@ -3063,9 +3063,9 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "NMFC",
-                                                                                        "itemId": "cboFamily1",
                                                                                         "labelWidth": 125,
-                                                                                        "layout|flex": 1
+                                                                                        "layout|flex": 1,
+                                                                                        "reference": "cboFamily1"
                                                                                     },
                                                                                     "name": "MyComboBox34",
                                                                                     "designerId": "a9916175-f9ec-4a78-8adb-a5f3dd003d59"
@@ -3116,9 +3116,9 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "Height",
-                                                                                        "itemId": "txtCaseUom1",
                                                                                         "labelWidth": 125,
-                                                                                        "layout|flex": 1.9
+                                                                                        "layout|flex": 1.9,
+                                                                                        "reference": "txtCaseUom1"
                                                                                     },
                                                                                     "name": "MyTextField18",
                                                                                     "designerId": "3a7abdfb-ce83-4142-81c4-ab39933ee63b"
@@ -3132,11 +3132,11 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "Width",
-                                                                                        "itemId": "txtCaseUom2",
                                                                                         "labelWidth": 40,
                                                                                         "layout|flex": 1,
                                                                                         "layout|margins": null,
-                                                                                        "margin": "0 5"
+                                                                                        "margin": "0 5",
+                                                                                        "reference": "txtCaseUom2"
                                                                                     },
                                                                                     "name": "MyTextField19",
                                                                                     "designerId": "37fc84cc-6bc3-46b1-82a4-1a8749b104cc"
@@ -3150,10 +3150,10 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "Depth",
-                                                                                        "itemId": "txtCaseUom3",
                                                                                         "labelWidth": 40,
                                                                                         "layout|flex": 1,
-                                                                                        "layout|margins": null
+                                                                                        "layout|margins": null,
+                                                                                        "reference": "txtCaseUom3"
                                                                                     },
                                                                                     "name": "MyTextField20",
                                                                                     "designerId": "3b114221-c7bc-40f5-8582-e163f41abb1d"
@@ -3187,9 +3187,9 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "Dimension UOM",
-                                                                                        "itemId": "cboFamily",
                                                                                         "labelWidth": 125,
-                                                                                        "layout|flex": 1.4
+                                                                                        "layout|flex": 1.4,
+                                                                                        "reference": "cboFamily"
                                                                                     },
                                                                                     "name": "MyComboBox35",
                                                                                     "designerId": "e22c07a0-db85-42e3-ab23-1b77244d7298"
@@ -3203,11 +3203,11 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "Weight UOM",
-                                                                                        "itemId": "cboFamily1",
                                                                                         "labelWidth": 87,
                                                                                         "layout|flex": 1,
                                                                                         "layout|margins": null,
-                                                                                        "margin": "0 0 0 5"
+                                                                                        "margin": "0 0 0 5",
+                                                                                        "reference": "cboFamily1"
                                                                                     },
                                                                                     "name": "MyComboBox36",
                                                                                     "designerId": "fa44ba2b-3b05-4d61-a406-dbd5f0ab26a2"
@@ -3240,9 +3240,9 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "Weight",
-                                                                                        "itemId": "txtCaseUom1",
                                                                                         "labelWidth": 125,
-                                                                                        "layout|flex": 1.4
+                                                                                        "layout|flex": 1.4,
+                                                                                        "reference": "txtCaseUom1"
                                                                                     },
                                                                                     "name": "MyTextField21",
                                                                                     "designerId": "520e4dfc-cdec-4186-bccc-92e9bb207d54"
@@ -3256,11 +3256,11 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "Material Pack",
-                                                                                        "itemId": "txtCaseUom2",
                                                                                         "labelWidth": 87,
                                                                                         "layout|flex": 1,
                                                                                         "layout|margins": null,
-                                                                                        "margin": "0 0 0 5"
+                                                                                        "margin": "0 0 0 5",
+                                                                                        "reference": "txtCaseUom2"
                                                                                     },
                                                                                     "name": "MyTextField22",
                                                                                     "designerId": "b186a856-481e-4284-b242-94ef50a5d866"
@@ -3293,9 +3293,9 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "Material Size Code",
-                                                                                        "itemId": "txtCaseUom1",
                                                                                         "labelWidth": 125,
-                                                                                        "layout|flex": 1.4
+                                                                                        "layout|flex": 1.4,
+                                                                                        "reference": "txtCaseUom1"
                                                                                     },
                                                                                     "name": "MyTextField23",
                                                                                     "designerId": "ca71cab5-b0b6-4d09-b7ce-440299008b9b"
@@ -3309,11 +3309,11 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "Inner Units",
-                                                                                        "itemId": "txtCaseUom2",
                                                                                         "labelWidth": 87,
                                                                                         "layout|flex": 1,
                                                                                         "layout|margins": null,
-                                                                                        "margin": "0 0 0 5"
+                                                                                        "margin": "0 0 0 5",
+                                                                                        "reference": "txtCaseUom2"
                                                                                     },
                                                                                     "name": "MyTextField24",
                                                                                     "designerId": "43ab8d92-09fb-4d1e-8fb3-50e922a4d415"
@@ -3347,9 +3347,9 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "Layers per Pallet",
-                                                                                        "itemId": "txtCaseUom3",
                                                                                         "labelWidth": 125,
-                                                                                        "layout|flex": 1.4
+                                                                                        "layout|flex": 1.4,
+                                                                                        "reference": "txtCaseUom3"
                                                                                     },
                                                                                     "name": "MyTextField25",
                                                                                     "designerId": "f7d34ec8-ed9d-4fa2-974d-a29d2517eb5c"
@@ -3363,11 +3363,11 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "Units per Layer",
-                                                                                        "itemId": "txtCaseUom4",
                                                                                         "labelWidth": 87,
                                                                                         "layout|flex": 1,
                                                                                         "layout|margins": null,
-                                                                                        "margin": "0 0 0 5"
+                                                                                        "margin": "0 0 0 5",
+                                                                                        "reference": "txtCaseUom4"
                                                                                     },
                                                                                     "name": "MyTextField26",
                                                                                     "designerId": "c91c6792-6145-4ecb-8944-89559d8cb5c6"
@@ -3383,9 +3383,9 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "fieldLabel": "Std. Pallet Ratio (%)",
-                                                                                "itemId": "txtCaseUom5",
                                                                                 "labelWidth": 125,
-                                                                                "layout|flex": null
+                                                                                "layout|flex": null,
+                                                                                "reference": "txtCaseUom5"
                                                                             },
                                                                             "name": "MyTextField27",
                                                                             "designerId": "cebac8a5-b9a5-489e-b6c0-0e4d349052b1"
@@ -3399,9 +3399,9 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "fieldLabel": "Mask 1",
-                                                                                "itemId": "txtMask1",
                                                                                 "labelWidth": 125,
-                                                                                "layout|flex": null
+                                                                                "layout|flex": null,
+                                                                                "reference": "txtMask1"
                                                                             },
                                                                             "name": "MyTextField28",
                                                                             "designerId": "d83b8176-eeee-494c-98dd-8d2e04063cdc"
@@ -3415,9 +3415,9 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "fieldLabel": "Mask 2",
-                                                                                "itemId": "txtMask2",
                                                                                 "labelWidth": 125,
-                                                                                "layout|flex": null
+                                                                                "layout|flex": null,
+                                                                                "reference": "txtMask2"
                                                                             },
                                                                             "name": "MyTextField29",
                                                                             "designerId": "0146248e-97b8-45a7-8ac2-61ec18807624"
@@ -3431,9 +3431,9 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "fieldLabel": "Mask 3",
-                                                                                "itemId": "txtMask3",
                                                                                 "labelWidth": 125,
-                                                                                "layout|flex": null
+                                                                                "layout|flex": null,
+                                                                                "reference": "txtMask3"
                                                                             },
                                                                             "name": "MyTextField30",
                                                                             "designerId": "2a93544d-ddff-4081-98cc-491dc9710b73"
@@ -3479,8 +3479,8 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "designer|createAlias": "advancefiltergrid",
-                                                        "itemId": "grvUPC",
                                                         "margin": -1,
+                                                        "reference": "grvUPC",
                                                         "title": null
                                                     },
                                                     "name": "MyGridPanel3",
@@ -3496,7 +3496,7 @@
                                                             "userConfig": {
                                                                 "container|padding": "0 0 0 1",
                                                                 "dock": "top",
-                                                                "itemId": "tlbGridOptions"
+                                                                "reference": "tlbGridOptions"
                                                             },
                                                             "name": "MyToolbar3",
                                                             "designerId": "74532410-3498-4640-a2a4-53f6b5f3edee",
@@ -3511,8 +3511,8 @@
                                                                     "userConfig": {
                                                                         "icon": null,
                                                                         "iconCls": "small-delete",
-                                                                        "itemId": "btnDelete",
                                                                         "layout|flex": null,
+                                                                        "reference": "btnDelete",
                                                                         "tabIndex": -1,
                                                                         "text": "Delete"
                                                                     },
@@ -3543,7 +3543,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter2",
+                                                                    "name": "filter4",
                                                                     "designerId": "87274c48-fa61-4ab3-acd1-2696486c13a3",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3603,7 +3603,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "itemId": "grvUPC"
+                                                                "reference": "grvUPC"
                                                             },
                                                             "name": "MyGridView3",
                                                             "designerId": "1dbb666c-4366-46f6-aa37-56cd789a779d"
@@ -3656,10 +3656,10 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "designer|createAlias": "advancefiltergrid",
-                                                        "itemId": "grdCustomerXref",
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
                                                         "margin": "-1 -1 4 -1",
+                                                        "reference": "grdCustomerXref",
                                                         "title": "Customer Item Cross Reference Grid"
                                                     },
                                                     "name": "MyGridPanel4",
@@ -3675,7 +3675,7 @@
                                                             "userConfig": {
                                                                 "container|padding": "0 0 0 1",
                                                                 "dock": "top",
-                                                                "itemId": "tlbGridOptions"
+                                                                "reference": "tlbGridOptions"
                                                             },
                                                             "name": "MyToolbar4",
                                                             "designerId": "3afaed71-ac5b-4c4f-af61-92331dd95cd8",
@@ -3690,8 +3690,8 @@
                                                                     "userConfig": {
                                                                         "icon": null,
                                                                         "iconCls": "small-delete",
-                                                                        "itemId": "btnDelete",
                                                                         "layout|flex": null,
+                                                                        "reference": "btnDelete",
                                                                         "tabIndex": -1,
                                                                         "text": "Delete"
                                                                     },
@@ -3722,7 +3722,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter3",
+                                                                    "name": "filter5",
                                                                     "designerId": "f11b92d2-d17f-4030-af6e-5449c5557e10",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3829,7 +3829,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "itemId": "grvCustomerXref"
+                                                                "reference": "grvCustomerXref"
                                                             },
                                                             "name": "MyGridView4",
                                                             "designerId": "97385928-1a62-4838-b427-a6b770d35318"
@@ -3855,10 +3855,10 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "designer|createAlias": "advancefiltergrid",
-                                                        "itemId": "grdVendorXref",
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
                                                         "margin": "4 -1 -1 -1",
+                                                        "reference": "grdVendorXref",
                                                         "title": "Vendor Item Cross Reference Grid"
                                                     },
                                                     "name": "MyGridPanel5",
@@ -3874,7 +3874,7 @@
                                                             "userConfig": {
                                                                 "container|padding": "0 0 0 1",
                                                                 "dock": "top",
-                                                                "itemId": "tlbGridOptions"
+                                                                "reference": "tlbGridOptions"
                                                             },
                                                             "name": "MyToolbar5",
                                                             "designerId": "2d8cdc4c-3364-45ba-9554-ff3bb8c29618",
@@ -3889,8 +3889,8 @@
                                                                     "userConfig": {
                                                                         "icon": null,
                                                                         "iconCls": "small-delete",
-                                                                        "itemId": "btnDelete",
                                                                         "layout|flex": null,
+                                                                        "reference": "btnDelete",
                                                                         "tabIndex": -1,
                                                                         "text": "Delete"
                                                                     },
@@ -3921,7 +3921,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter4",
+                                                                    "name": "filter6",
                                                                     "designerId": "317ae54f-a81d-4657-8d0b-3edd670adaca",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -4043,7 +4043,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "itemId": "grvVendorXref"
+                                                                "reference": "grvVendorXref"
                                                             },
                                                             "name": "MyGridView5",
                                                             "designerId": "62046b20-39fd-456b-be84-52fb6c4b714c"
@@ -4096,10 +4096,10 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "designer|createAlias": "advancefiltergrid",
-                                                        "itemId": "grdContractItem",
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
                                                         "margin": "-1 -1 4 -1",
+                                                        "reference": "grdContractItem",
                                                         "title": "Contract Item"
                                                     },
                                                     "name": "MyGridPanel4",
@@ -4115,7 +4115,7 @@
                                                             "userConfig": {
                                                                 "container|padding": "0 0 0 1",
                                                                 "dock": "top",
-                                                                "itemId": "tlbGridOptions"
+                                                                "reference": "tlbGridOptions"
                                                             },
                                                             "name": "MyToolbar4",
                                                             "designerId": "724c29b0-9592-46a3-8fe4-243b82f150b8",
@@ -4130,8 +4130,8 @@
                                                                     "userConfig": {
                                                                         "icon": null,
                                                                         "iconCls": "small-delete",
-                                                                        "itemId": "btnDelete",
                                                                         "layout|flex": null,
+                                                                        "reference": "btnDelete",
                                                                         "tabIndex": -1,
                                                                         "text": "Delete"
                                                                     },
@@ -4162,7 +4162,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter11",
+                                                                    "name": "filter7",
                                                                     "designerId": "1de0066e-eb37-44ae-af83-adcc5f465797",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -4344,7 +4344,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "itemId": "grvContractItem"
+                                                                "reference": "grvContractItem"
                                                             },
                                                             "name": "MyGridView4",
                                                             "designerId": "3ef519de-d075-4b36-926a-14e8f1c305e2"
@@ -4387,10 +4387,10 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "designer|createAlias": "advancefiltergrid",
-                                                                "itemId": "grdDocumentAssociation",
                                                                 "layout|flex": 1,
                                                                 "layout|margins": null,
                                                                 "margin": "0 4 -1 -1",
+                                                                "reference": "grdDocumentAssociation",
                                                                 "title": "Document Association"
                                                             },
                                                             "name": "MyGridPanel5",
@@ -4406,7 +4406,7 @@
                                                                     "userConfig": {
                                                                         "container|padding": "0 0 0 1",
                                                                         "dock": "top",
-                                                                        "itemId": "tlbGridOptions"
+                                                                        "reference": "tlbGridOptions"
                                                                     },
                                                                     "name": "MyToolbar5",
                                                                     "designerId": "7aeb3cad-ba5a-454c-aabf-2b44acef0d81",
@@ -4421,8 +4421,8 @@
                                                                             "userConfig": {
                                                                                 "icon": null,
                                                                                 "iconCls": "small-delete",
-                                                                                "itemId": "btnDelete",
                                                                                 "layout|flex": null,
+                                                                                "reference": "btnDelete",
                                                                                 "tabIndex": -1,
                                                                                 "text": "Delete"
                                                                             },
@@ -4453,7 +4453,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter12",
+                                                                            "name": "filter8",
                                                                             "designerId": "102ea262-7cce-4c88-bd43-2f80cfa1e9a8",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -4483,7 +4483,7 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "itemId": "grvDocumentAssociation"
+                                                                        "reference": "grvDocumentAssociation"
                                                                     },
                                                                     "name": "MyGridView5",
                                                                     "designerId": "103743e0-fbc7-4714-bf17-d1e47d89f04f"
@@ -4509,10 +4509,10 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "designer|createAlias": "advancefiltergrid",
-                                                                "itemId": "grdCertification",
                                                                 "layout|flex": 1,
                                                                 "layout|margins": null,
                                                                 "margin": "0 -1 -1 4",
+                                                                "reference": "grdCertification",
                                                                 "title": "Certification"
                                                             },
                                                             "name": "MyGridPanel14",
@@ -4528,7 +4528,7 @@
                                                                     "userConfig": {
                                                                         "container|padding": "0 0 0 1",
                                                                         "dock": "top",
-                                                                        "itemId": "tlbGridOptions"
+                                                                        "reference": "tlbGridOptions"
                                                                     },
                                                                     "name": "MyToolbar5",
                                                                     "designerId": "e1050534-f129-45c8-a19d-fbff47d22d04",
@@ -4543,8 +4543,8 @@
                                                                             "userConfig": {
                                                                                 "icon": null,
                                                                                 "iconCls": "small-delete",
-                                                                                "itemId": "btnDelete",
                                                                                 "layout|flex": null,
+                                                                                "reference": "btnDelete",
                                                                                 "tabIndex": -1,
                                                                                 "text": "Delete"
                                                                             },
@@ -4575,7 +4575,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter14",
+                                                                            "name": "filter9",
                                                                             "designerId": "437f9756-d7eb-404d-89dd-762a18b9132c",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -4605,7 +4605,7 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "itemId": "grvCertification"
+                                                                        "reference": "grvCertification"
                                                                     },
                                                                     "name": "MyGridView5",
                                                                     "designerId": "3ba7d71a-0cc7-4a1b-a3cb-a931e3d4871c"
@@ -4664,9 +4664,9 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "designer|createAlias": "advancefiltergrid",
-                                        "itemId": "grdLocationStore1",
                                         "layout|flex": 1,
                                         "margin": -1,
+                                        "reference": "grdLocationStore1",
                                         "title": null
                                     },
                                     "name": "MyGridPanel6",
@@ -4682,7 +4682,7 @@
                                             "userConfig": {
                                                 "container|padding": "0 0 0 1",
                                                 "dock": "top",
-                                                "itemId": "tlbGridOptions"
+                                                "reference": "tlbGridOptions"
                                             },
                                             "name": "MyToolbar6",
                                             "designerId": "a72bdcd2-fc7a-4148-b1ae-536d9f945403",
@@ -4697,8 +4697,8 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-add",
-                                                        "itemId": "btnAdd",
                                                         "layout|flex": null,
+                                                        "reference": "btnAdd",
                                                         "tabIndex": -1,
                                                         "text": "Add"
                                                     },
@@ -4715,8 +4715,8 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-edit",
-                                                        "itemId": "btnEdit",
                                                         "layout|flex": null,
+                                                        "reference": "btnEdit",
                                                         "tabIndex": -1,
                                                         "text": "Edit"
                                                     },
@@ -4733,8 +4733,8 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-delete",
-                                                        "itemId": "btnDelete",
                                                         "layout|flex": null,
+                                                        "reference": "btnDelete",
                                                         "tabIndex": -1,
                                                         "text": "Delete"
                                                     },
@@ -4765,7 +4765,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter5",
+                                                    "name": "filter10",
                                                     "designerId": "efa99b46-2432-478a-97f2-c35eb7b7ed7c",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4921,7 +4921,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "itemId": "grvLocationStore"
+                                                "reference": "grvLocationStore"
                                             },
                                             "name": "MyGridView6",
                                             "designerId": "ddb7774d-2450-4845-8743-0ab7f3b3e989"
@@ -4938,11 +4938,11 @@
                                     "userConfig": {
                                         "activeTab": 0,
                                         "bodyPadding": null,
-                                        "itemId": "tabPricing",
                                         "layout|flex": 1,
                                         "layout|margins": null,
                                         "margin": "7 3 3 3",
-                                        "plain": true
+                                        "plain": true,
+                                        "reference": "tabPricing"
                                     },
                                     "name": "MyTabPanel2",
                                     "designerId": "240a0a38-ec21-4a2b-beff-060091f0938e",
@@ -4980,8 +4980,8 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "designer|createAlias": "advancefiltergrid",
-                                                        "itemId": "grdPricingLevel",
                                                         "margin": -1,
+                                                        "reference": "grdPricingLevel",
                                                         "title": null
                                                     },
                                                     "name": "MyGridPanel7",
@@ -4997,7 +4997,7 @@
                                                             "userConfig": {
                                                                 "container|padding": "0 0 0 1",
                                                                 "dock": "top",
-                                                                "itemId": "tlbGridOptions"
+                                                                "reference": "tlbGridOptions"
                                                             },
                                                             "name": "MyToolbar7",
                                                             "designerId": "a26bb02a-bf0d-4e9f-9fd0-b3a2d925ee11",
@@ -5012,8 +5012,8 @@
                                                                     "userConfig": {
                                                                         "icon": null,
                                                                         "iconCls": "small-delete",
-                                                                        "itemId": "btnDelete",
                                                                         "layout|flex": null,
+                                                                        "reference": "btnDelete",
                                                                         "tabIndex": -1,
                                                                         "text": "Delete"
                                                                     },
@@ -5044,7 +5044,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter6",
+                                                                    "name": "filter11",
                                                                     "designerId": "8c12842b-2ead-456f-b4dc-8a0da80ee35f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -5261,7 +5261,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "itemId": "grvPricingLevel"
+                                                                "reference": "grvPricingLevel"
                                                             },
                                                             "name": "MyGridView7",
                                                             "designerId": "4efab4c0-4180-45ad-ad70-f7c2fb286c2f"
@@ -5316,8 +5316,8 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "designer|createAlias": "advancefiltergrid",
-                                                        "itemId": "grdRebateDiscount",
                                                         "margin": -1,
+                                                        "reference": "grdRebateDiscount",
                                                         "title": null
                                                     },
                                                     "name": "MyGridPanel8",
@@ -5333,7 +5333,7 @@
                                                             "userConfig": {
                                                                 "container|padding": "0 0 0 1",
                                                                 "dock": "top",
-                                                                "itemId": "tlbGridOptions"
+                                                                "reference": "tlbGridOptions"
                                                             },
                                                             "name": "MyToolbar8",
                                                             "designerId": "6b04774f-e876-4d56-bce7-1047c905c79c",
@@ -5348,8 +5348,8 @@
                                                                     "userConfig": {
                                                                         "icon": null,
                                                                         "iconCls": "small-delete",
-                                                                        "itemId": "btnDelete",
                                                                         "layout|flex": null,
+                                                                        "reference": "btnDelete",
                                                                         "tabIndex": -1,
                                                                         "text": "Delete"
                                                                     },
@@ -5380,7 +5380,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter7",
+                                                                    "name": "filter12",
                                                                     "designerId": "df49b4ec-5d3e-4ec5-8704-5a1a7a595dd1",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -5562,7 +5562,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "itemId": "grvRebateDiscount"
+                                                                "reference": "grvRebateDiscount"
                                                             },
                                                             "name": "MyGridView8",
                                                             "designerId": "54b65c53-38ba-46b3-9bb7-30a710120268"
@@ -5622,8 +5622,8 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "activeTab": 0,
-                                        "itemId": "tabStock",
-                                        "plain": true
+                                        "plain": true,
+                                        "reference": "tabStock"
                                     },
                                     "name": "MyTabPanel3",
                                     "designerId": "8ab21e5f-40bd-4e66-bd5e-b1f405604e68",
@@ -5665,8 +5665,8 @@
                                                         "designer|createAlias": "advancefiltergrid",
                                                         "forceFit": null,
                                                         "hideHeaders": null,
-                                                        "itemId": "grdStock",
                                                         "margin": -1,
+                                                        "reference": "grdStock",
                                                         "title": null
                                                     },
                                                     "name": "MyGridPanel9",
@@ -5682,7 +5682,7 @@
                                                             "userConfig": {
                                                                 "container|padding": "0 0 0 1",
                                                                 "dock": "top",
-                                                                "itemId": "tlbGridOptions"
+                                                                "reference": "tlbGridOptions"
                                                             },
                                                             "name": "MyToolbar9",
                                                             "designerId": "7f499762-9870-484d-b684-39ff66efc1e9",
@@ -5697,8 +5697,8 @@
                                                                     "userConfig": {
                                                                         "icon": null,
                                                                         "iconCls": "small-delete",
-                                                                        "itemId": "btnDelete",
                                                                         "layout|flex": null,
+                                                                        "reference": "btnDelete",
                                                                         "tabIndex": -1,
                                                                         "text": "Delete"
                                                                     },
@@ -5729,7 +5729,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter8",
+                                                                    "name": "filter13",
                                                                     "designerId": "1359797a-01d3-4908-862b-ecee335db0ef",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -5943,7 +5943,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "itemId": "grvStock"
+                                                                "reference": "grvStock"
                                                             },
                                                             "name": "MyGridView9",
                                                             "designerId": "cc01b0e0-efa6-416e-bc38-90b3062613aa"
@@ -5996,8 +5996,8 @@
                                                     "userConfig": {
                                                         "designer|createAlias": "advancefiltergrid",
                                                         "forceFit": true,
-                                                        "itemId": "grdGlAccounts",
                                                         "margin": -1,
+                                                        "reference": "grdGlAccounts",
                                                         "title": null
                                                     },
                                                     "name": "MyGridPanel10",
@@ -6013,7 +6013,7 @@
                                                             "userConfig": {
                                                                 "container|padding": "0 0 0 1",
                                                                 "dock": "top",
-                                                                "itemId": "tlbGridOptions"
+                                                                "reference": "tlbGridOptions"
                                                             },
                                                             "name": "MyToolbar10",
                                                             "designerId": "a4870dd1-492b-4429-9517-f661d5f479d3",
@@ -6028,8 +6028,8 @@
                                                                     "userConfig": {
                                                                         "icon": null,
                                                                         "iconCls": "small-delete",
-                                                                        "itemId": "btnDelete",
                                                                         "layout|flex": null,
+                                                                        "reference": "btnDelete",
                                                                         "tabIndex": -1,
                                                                         "text": "Delete"
                                                                     },
@@ -6060,7 +6060,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter9",
+                                                                    "name": "filter14",
                                                                     "designerId": "9949aed9-86f7-4f15-aac6-afedae027c18",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -6149,7 +6149,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "itemId": "grvGlAccounts"
+                                                                "reference": "grvGlAccounts"
                                                             },
                                                             "name": "MyGridView10",
                                                             "designerId": "bdeee52d-4477-4785-8a69-10a0efb814fa"
@@ -6223,8 +6223,8 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "fieldLabel": "Commodity",
-                                                "itemId": "cboCommodity",
-                                                "layout|flex": null
+                                                "layout|flex": null,
+                                                "reference": "cboCommodity"
                                             },
                                             "name": "MyComboBox37",
                                             "designerId": "80d14e45-593b-4314-9c9d-36c51d6a7e9f"
@@ -6238,8 +6238,8 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "fieldLabel": "GA Shrink Factor",
-                                                "itemId": "txtGaShrinkFactor",
-                                                "layout|flex": null
+                                                "layout|flex": null,
+                                                "reference": "txtGaShrinkFactor"
                                             },
                                             "name": "MyTextField31",
                                             "designerId": "0ada3a39-9637-4eaf-b37d-d240ba2e4b84"
@@ -6253,8 +6253,8 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "fieldLabel": "Origin",
-                                                "itemId": "cboOrigin",
-                                                "layout|flex": null
+                                                "layout|flex": null,
+                                                "reference": "cboOrigin"
                                             },
                                             "name": "MyComboBox38",
                                             "designerId": "7cb68cb6-4970-4026-8058-5d3619ef764e"
@@ -6268,8 +6268,8 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "fieldLabel": "Product Type",
-                                                "itemId": "cboProductType",
-                                                "layout|flex": null
+                                                "layout|flex": null,
+                                                "reference": "cboProductType"
                                             },
                                             "name": "MyComboBox39",
                                             "designerId": "595b4e1b-4113-4354-93ea-e4b2a96d7d03"
@@ -6283,8 +6283,8 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "fieldLabel": "Region",
-                                                "itemId": "cboRegion",
-                                                "layout|flex": null
+                                                "layout|flex": null,
+                                                "reference": "cboRegion"
                                             },
                                             "name": "MyComboBox40",
                                             "designerId": "b32ff339-871a-4903-b5fd-0f0dc8da2c7d"
@@ -6298,8 +6298,8 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "fieldLabel": "Season",
-                                                "itemId": "cboSeason",
-                                                "layout|flex": null
+                                                "layout|flex": null,
+                                                "reference": "cboSeason"
                                             },
                                             "name": "MyComboBox41",
                                             "designerId": "d0525a9f-30a8-4d0f-b52f-1352560491ac"
@@ -6313,8 +6313,8 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "fieldLabel": "Class",
-                                                "itemId": "cboClass",
-                                                "layout|flex": null
+                                                "layout|flex": null,
+                                                "reference": "cboClass"
                                             },
                                             "name": "MyComboBox42",
                                             "designerId": "7f0f60dc-1a8a-423b-a94e-6b939a78b712"
@@ -6328,8 +6328,8 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "fieldLabel": "Product Line",
-                                                "itemId": "cboProductLine",
-                                                "layout|flex": null
+                                                "layout|flex": null,
+                                                "reference": "cboProductLine"
                                             },
                                             "name": "MyComboBox43",
                                             "designerId": "5d1f49b1-a905-4d49-91a0-63241fa6d161"
@@ -6343,8 +6343,8 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "fieldLabel": "Market Valuation",
-                                                "itemId": "cboMarketValuation",
-                                                "layout|flex": null
+                                                "layout|flex": null,
+                                                "reference": "cboMarketValuation"
                                             },
                                             "name": "MyComboBox44",
                                             "designerId": "73a5c479-e095-4ef9-9e19-efcc7e932399"
@@ -6403,8 +6403,8 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "designer|createAlias": "advancefiltergrid",
-                                        "itemId": "grnNotes",
                                         "margin": -1,
+                                        "reference": "grnNotes",
                                         "title": null
                                     },
                                     "name": "MyGridPanel11",
@@ -6420,7 +6420,7 @@
                                             "userConfig": {
                                                 "container|padding": "0 0 0 1",
                                                 "dock": "top",
-                                                "itemId": "tlbGridOptions"
+                                                "reference": "tlbGridOptions"
                                             },
                                             "name": "MyToolbar11",
                                             "designerId": "5ed9d6ae-9c8c-481f-b4cb-807e209cc75f",
@@ -6435,8 +6435,8 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-delete",
-                                                        "itemId": "btnDelete",
                                                         "layout|flex": null,
+                                                        "reference": "btnDelete",
                                                         "tabIndex": -1,
                                                         "text": "Delete"
                                                     },
@@ -6467,7 +6467,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter10",
+                                                    "name": "filter15",
                                                     "designerId": "ab092e2c-0602-4213-baf5-e07813015a04",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -6541,7 +6541,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "itemId": "grvNotes"
+                                                "reference": "grvNotes"
                                             },
                                             "name": "MyGridView11",
                                             "designerId": "ea3606ca-524e-4900-ae71-2be118a93593"
@@ -6595,8 +6595,8 @@
                                     "userConfig": {
                                         "designer|createAlias": "attachmentgrid",
                                         "forceFit": true,
-                                        "itemId": "grdAttachment",
                                         "margin": -1,
+                                        "reference": "grdAttachment",
                                         "title": null
                                     },
                                     "name": "MyGridPanel12",
@@ -6624,7 +6624,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "itemId": "grvAttachment"
+                                                "reference": "grvAttachment"
                                             },
                                             "name": "MyGridView12",
                                             "designerId": "46f59bae-546a-401e-bfdb-b1fafc32e881"
@@ -6645,8 +6645,8 @@
                     "userConfig": {
                         "designer|displayName": "",
                         "dock": "bottom",
-                        "itemId": "tlbStatusbarPaging",
-                        "layout|flex": 1
+                        "layout|flex": 1,
+                        "reference": "tlbStatusbarPaging"
                     },
                     "name": "statusbarpaging",
                     "designerId": "64f13019-953f-46dc-920e-9a395d3cb3c9",

@@ -14,7 +14,7 @@
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
-        "itemId": null,
+        "reference": null,
         "layout": "fit",
         "maximizable": true,
         "minHeight": 500,
@@ -43,7 +43,7 @@
                 "frame": null,
                 "header": null,
                 "height": 350,
-                "itemId": "frmFuelTank",
+                "reference": "frmFuelTank",
                 "layout": "vbox",
                 "margin": -1,
                 "title": null,
@@ -83,7 +83,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-save",
-                                "itemId": "btnSave",
+                                "reference": "btnSave",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
@@ -106,7 +106,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-undo",
-                                "itemId": "btnUndo",
+                                "reference": "btnUndo",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
@@ -144,7 +144,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-close",
-                                "itemId": "btnClose",
+                                "reference": "btnClose",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
@@ -164,7 +164,7 @@
                     },
                     "codeClass": null,
                     "userConfig": {
-                        "itemId": "grdFuelTank",
+                        "reference": "grdFuelTank",
                         "layout|flex": 1,
                         "title": null
                     },
@@ -181,7 +181,7 @@
                             "userConfig": {
                                 "container|padding": "0 0 0 1",
                                 "dock": "top",
-                                "itemId": "tlbGridOptions"
+                                "reference": "tlbGridOptions"
                             },
                             "name": "MyToolbar51",
                             "designerId": "dcd99f50-05d1-4087-a44d-e1b29ec87d55",
@@ -196,7 +196,7 @@
                                     "userConfig": {
                                         "icon": null,
                                         "iconCls": "small-delete",
-                                        "itemId": "btnDelete",
+                                        "reference": "btnDelete",
                                         "layout|flex": null,
                                         "tabIndex": -1,
                                         "text": "Delete"
@@ -362,7 +362,7 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "itemId": "grvFuelTank"
+                                "reference": "grvFuelTank"
                             },
                             "name": "MyGridView41",
                             "designerId": "656b6d89-a6a2-4826-9dfb-26a7399222d9"
@@ -391,7 +391,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "designer|displayName": "",
                         "dock": "bottom",
-                        "itemId": "pagingtoolbar",
+                        "reference": "pagingtoolbar",
                         "layout|flex": 1,
                         "store": null
                     },

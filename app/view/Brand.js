@@ -51,9 +51,9 @@ Ext.define('Inventory.view.Brand', {
                 items: [
                     {
                         xtype: 'form',
+                        reference: 'frmBrand',
                         autoShow: true,
                         height: 350,
-                        itemId: 'frmBrand',
                         margin: -1,
                         width: 450,
                         bodyPadding: 5,
@@ -74,9 +74,9 @@ Ext.define('Inventory.view.Brand', {
                                 items: [
                                     {
                                         xtype: 'button',
+                                        reference: 'btnSave',
                                         tabIndex: -1,
                                         height: 57,
-                                        itemId: 'btnSave',
                                         width: 45,
                                         iconAlign: 'top',
                                         iconCls: 'large-save',
@@ -85,9 +85,9 @@ Ext.define('Inventory.view.Brand', {
                                     },
                                     {
                                         xtype: 'button',
+                                        reference: 'btnUndo',
                                         tabIndex: -1,
                                         height: 57,
-                                        itemId: 'btnUndo',
                                         width: 45,
                                         iconAlign: 'top',
                                         iconCls: 'large-undo',
@@ -100,9 +100,9 @@ Ext.define('Inventory.view.Brand', {
                                     },
                                     {
                                         xtype: 'button',
+                                        reference: 'btnClose',
                                         tabIndex: -1,
                                         height: 57,
-                                        itemId: 'btnClose',
                                         width: 45,
                                         iconAlign: 'top',
                                         iconCls: 'large-close',
@@ -113,7 +113,7 @@ Ext.define('Inventory.view.Brand', {
                             },
                             {
                                 xtype: 'ipagingstatusbar',
-                                itemId: 'pagingtoolbar',
+                                reference: 'pagingtoolbar',
                                 flex: 1,
                                 dock: 'bottom'
                             }
@@ -122,12 +122,12 @@ Ext.define('Inventory.view.Brand', {
                             {
                                 xtype: 'gridpanel',
                                 flex: 1,
-                                itemId: 'grdBrand',
+                                reference: 'grdBrand',
                                 dockedItems: [
                                     {
                                         xtype: 'toolbar',
                                         dock: 'top',
-                                        itemId: 'tlbGridOptions',
+                                        reference: 'tlbGridOptions',
                                         layout: {
                                             type: 'hbox',
                                             padding: '0 0 0 1'
@@ -135,8 +135,8 @@ Ext.define('Inventory.view.Brand', {
                                         items: [
                                             {
                                                 xtype: 'button',
+                                                reference: 'btnDelete',
                                                 tabIndex: -1,
-                                                itemId: 'btnDelete',
                                                 iconCls: 'small-delete',
                                                 text: 'Delete'
                                             },
@@ -170,7 +170,7 @@ Ext.define('Inventory.view.Brand', {
                                     }
                                 ],
                                 viewConfig: {
-                                    itemId: 'grvBrand'
+                                    reference: 'grvBrand'
                                 },
                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                     selType: 'checkboxmodel'

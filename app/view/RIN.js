@@ -46,9 +46,9 @@ Ext.define('Inventory.view.RIN', {
     items: [
         {
             xtype: 'form',
+            reference: 'frmRin',
             autoShow: true,
             height: 350,
-            itemId: 'frmRin',
             margin: -1,
             width: 450,
             bodyBorder: false,
@@ -71,9 +71,9 @@ Ext.define('Inventory.view.RIN', {
                     items: [
                         {
                             xtype: 'button',
+                            reference: 'btnNew',
                             tabIndex: -1,
                             height: 57,
-                            itemId: 'btnNew',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-new',
@@ -82,9 +82,9 @@ Ext.define('Inventory.view.RIN', {
                         },
                         {
                             xtype: 'button',
+                            reference: 'btnSave',
                             tabIndex: -1,
                             height: 57,
-                            itemId: 'btnSave',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-save',
@@ -93,9 +93,9 @@ Ext.define('Inventory.view.RIN', {
                         },
                         {
                             xtype: 'button',
+                            reference: 'btnSearch',
                             tabIndex: -1,
                             height: 57,
-                            itemId: 'btnSearch',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-search',
@@ -104,9 +104,9 @@ Ext.define('Inventory.view.RIN', {
                         },
                         {
                             xtype: 'button',
+                            reference: 'btnDelete',
                             tabIndex: -1,
                             height: 57,
-                            itemId: 'btnDelete',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-delete',
@@ -115,9 +115,9 @@ Ext.define('Inventory.view.RIN', {
                         },
                         {
                             xtype: 'button',
+                            reference: 'btnUndo',
                             tabIndex: -1,
                             height: 57,
-                            itemId: 'btnUndo',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-undo',
@@ -130,9 +130,9 @@ Ext.define('Inventory.view.RIN', {
                         },
                         {
                             xtype: 'button',
+                            reference: 'btnClose',
                             tabIndex: -1,
                             height: 57,
-                            itemId: 'btnClose',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-close',
@@ -143,7 +143,7 @@ Ext.define('Inventory.view.RIN', {
                 },
                 {
                     xtype: 'ipagingstatusbar',
-                    itemId: 'pagingtoolbar',
+                    reference: 'pagingtoolbar',
                     flex: 1,
                     dock: 'bottom'
                 }
@@ -152,7 +152,7 @@ Ext.define('Inventory.view.RIN', {
                 {
                     xtype: 'gridpanel',
                     flex: 1,
-                    itemId: 'grdFuelType',
+                    reference: 'grdFuelType',
                     title: 'Fuel Type',
                     columns: [
                         {
@@ -175,7 +175,7 @@ Ext.define('Inventory.view.RIN', {
                         }
                     ],
                     viewConfig: {
-                        itemId: 'grvFuelType'
+                        reference: 'grvFuelType'
                     }
                 },
                 {
@@ -189,7 +189,7 @@ Ext.define('Inventory.view.RIN', {
                         {
                             xtype: 'gridpanel',
                             flex: 1,
-                            itemId: 'grdFuelCode',
+                            reference: 'grdFuelCode',
                             margin: '5 0 0 0 ',
                             title: 'Fuel Code',
                             columns: [
@@ -207,13 +207,13 @@ Ext.define('Inventory.view.RIN', {
                                 }
                             ],
                             viewConfig: {
-                                itemId: 'grvFuelCode'
+                                reference: 'grvFuelCode'
                             }
                         },
                         {
                             xtype: 'gridpanel',
                             flex: 1,
-                            itemId: 'grdProcessCode',
+                            reference: 'grdProcessCode',
                             margin: '5 0 0 5',
                             title: 'Process Code',
                             columns: [
@@ -231,7 +231,7 @@ Ext.define('Inventory.view.RIN', {
                                 }
                             ],
                             viewConfig: {
-                                itemId: 'grvProcessCode'
+                                reference: 'grvProcessCode'
                             }
                         }
                     ]
@@ -247,7 +247,7 @@ Ext.define('Inventory.view.RIN', {
                         {
                             xtype: 'gridpanel',
                             flex: 1,
-                            itemId: 'grdFeedStockCode',
+                            reference: 'grdFeedStockCode',
                             margin: '5 0 0 0 ',
                             title: 'Feed Stock Code',
                             columns: [
@@ -265,13 +265,13 @@ Ext.define('Inventory.view.RIN', {
                                 }
                             ],
                             viewConfig: {
-                                itemId: 'grvFeedStockCode'
+                                reference: 'grvFeedStockCode'
                             }
                         },
                         {
                             xtype: 'gridpanel',
                             flex: 1,
-                            itemId: 'grvFeedStockUom',
+                            reference: 'grvFeedStockUom',
                             margin: '5 0 0 5',
                             title: 'Feed Stock UOM',
                             columns: [
@@ -289,7 +289,7 @@ Ext.define('Inventory.view.RIN', {
                                 }
                             ],
                             viewConfig: {
-                                itemId: 'grvFeedStockUom'
+                                reference: 'grvFeedStockUom'
                             }
                         }
                     ]

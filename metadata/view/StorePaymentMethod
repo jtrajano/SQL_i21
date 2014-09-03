@@ -14,7 +14,7 @@
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
-        "itemId": null,
+        "reference": null,
         "layout": "fit",
         "maximizable": true,
         "minHeight": 570,
@@ -43,7 +43,7 @@
                 "frame": null,
                 "header": false,
                 "height": 350,
-                "itemId": "frmStorePaymentMethod",
+                "reference": "frmStorePaymentMethod",
                 "layout": "vbox",
                 "margin": -1,
                 "title": null,
@@ -83,7 +83,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-new",
-                                "itemId": "btnNew",
+                                "reference": "btnNew",
                                 "layout|flex": null,
                                 "layout|margins": null,
                                 "scale": "large",
@@ -107,7 +107,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-save",
-                                "itemId": "btnSave",
+                                "reference": "btnSave",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
@@ -130,7 +130,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-search",
-                                "itemId": "btnSearch",
+                                "reference": "btnSearch",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
@@ -153,7 +153,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-delete",
-                                "itemId": "btnDelete",
+                                "reference": "btnDelete",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
@@ -176,7 +176,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-undo",
-                                "itemId": "btnUndo",
+                                "reference": "btnUndo",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
@@ -214,7 +214,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-close",
-                                "itemId": "btnClose",
+                                "reference": "btnClose",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
@@ -257,7 +257,7 @@
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Store Name",
-                                "itemId": "txtStoreName",
+                                "reference": "txtStoreName",
                                 "labelPad": null,
                                 "labelSeparator": null,
                                 "labelWidth": 175,
@@ -285,7 +285,7 @@
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Payment Method",
-                                "itemId": "txtPaymentMethod",
+                                "reference": "txtPaymentMethod",
                                 "labelPad": null,
                                 "labelSeparator": null,
                                 "labelWidth": 175,
@@ -310,7 +310,7 @@
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Description",
-                                "itemId": "txtDescription",
+                                "reference": "txtDescription",
                                 "labelPad": null,
                                 "labelSeparator": null,
                                 "labelWidth": 175,
@@ -334,7 +334,7 @@
                             "userConfig": {
                                 "fieldLabel": "Minimum Sale Amount",
                                 "hideTrigger": true,
-                                "itemId": "txtMinimumSaleAmount",
+                                "reference": "txtMinimumSaleAmount",
                                 "labelWidth": 175,
                                 "layout|flex": null
                             },
@@ -351,7 +351,7 @@
                             "userConfig": {
                                 "fieldLabel": "Maximum Sale Amount",
                                 "hideTrigger": true,
-                                "itemId": "txtMaximumSaleAmount",
+                                "reference": "txtMaximumSaleAmount",
                                 "labelWidth": 175,
                                 "layout|flex": null
                             },
@@ -368,7 +368,7 @@
                             "userConfig": {
                                 "fieldLabel": "MOP Register Code",
                                 "hideTrigger": true,
-                                "itemId": "txtMopRegisterCode",
+                                "reference": "txtMopRegisterCode",
                                 "labelWidth": 175,
                                 "layout|flex": null
                             },
@@ -385,7 +385,7 @@
                             "userConfig": {
                                 "boxLabel": null,
                                 "fieldLabel": "Force Safe Drop",
-                                "itemId": "chkForceSafeDrop",
+                                "reference": "chkForceSafeDrop",
                                 "labelWidth": 175,
                                 "layout|flex": null
                             },
@@ -402,7 +402,7 @@
                             "userConfig": {
                                 "fieldLabel": "Dollar Amount to Require Drop",
                                 "hideTrigger": true,
-                                "itemId": "txtDollarAmountToRequireDrop",
+                                "reference": "txtDollarAmountToRequireDrop",
                                 "labelWidth": 175,
                                 "layout|flex": null
                             },
@@ -420,7 +420,7 @@
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "GL Ledger Account",
-                                "itemId": "cboGlLedgerAccount",
+                                "reference": "cboGlLedgerAccount",
                                 "labelPad": null,
                                 "labelSeparator": null,
                                 "labelWidth": 175,
@@ -444,7 +444,7 @@
                             "userConfig": {
                                 "fieldLabel": "Register Extended MOP",
                                 "hideTrigger": true,
-                                "itemId": "txtRegisterExtendedMop",
+                                "reference": "txtRegisterExtendedMop",
                                 "labelWidth": 175,
                                 "layout|flex": null
                             },
@@ -478,7 +478,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Open Drawer on Sale",
-                                        "itemId": "chkOpenDrawerOnSale",
+                                        "reference": "chkOpenDrawerOnSale",
                                         "labelWidth": 175,
                                         "layout|flex": null
                                     },
@@ -495,7 +495,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Tender Amount Required",
-                                        "itemId": "chkTenderAmountRequired",
+                                        "reference": "chkTenderAmountRequired",
                                         "labelWidth": 175,
                                         "layout|flex": null,
                                         "layout|margins": null,
@@ -533,7 +533,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Enable Report Prompt",
-                                        "itemId": "chkEnableReportPrompt",
+                                        "reference": "chkEnableReportPrompt",
                                         "labelWidth": 175,
                                         "layout|flex": null
                                     },
@@ -550,7 +550,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Allow Zero Actual",
-                                        "itemId": "chkAllowZeroActual",
+                                        "reference": "chkAllowZeroActual",
                                         "labelWidth": 175,
                                         "layout|flex": null,
                                         "layout|margins": null,
@@ -588,7 +588,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Depositable",
-                                        "itemId": "chkDepositable",
+                                        "reference": "chkDepositable",
                                         "labelWidth": 175,
                                         "layout|flex": null
                                     },
@@ -605,7 +605,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Allowed Without Sale",
-                                        "itemId": "chkAllowedWithoutSale",
+                                        "reference": "chkAllowedWithoutSale",
                                         "labelWidth": 175,
                                         "layout|flex": null,
                                         "layout|margins": null,
@@ -643,7 +643,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Allow Refund",
-                                        "itemId": "chkAllowRefund",
+                                        "reference": "chkAllowRefund",
                                         "labelWidth": 175,
                                         "layout|flex": null
                                     },
@@ -660,7 +660,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Allow Change",
-                                        "itemId": "chkAllowChange",
+                                        "reference": "chkAllowChange",
                                         "labelWidth": 175,
                                         "layout|flex": null,
                                         "layout|margins": null,
@@ -698,7 +698,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Allow Safe Drop",
-                                        "itemId": "chkAllowSafeDrop",
+                                        "reference": "chkAllowSafeDrop",
                                         "labelWidth": 175,
                                         "layout|flex": null
                                     },
@@ -715,7 +715,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Allow Money Orders",
-                                        "itemId": "chkAllowMoneyOrders",
+                                        "reference": "chkAllowMoneyOrders",
                                         "labelWidth": 175,
                                         "layout|flex": null,
                                         "layout|margins": null,
@@ -736,7 +736,7 @@
                             "userConfig": {
                                 "boxLabel": null,
                                 "fieldLabel": "Force Ticket Print",
-                                "itemId": "chkForceTicketPrint",
+                                "reference": "chkForceTicketPrint",
                                 "labelWidth": 175,
                                 "layout|flex": null
                             },
@@ -757,7 +757,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "designer|displayName": "",
                         "dock": "bottom",
-                        "itemId": "pagingtoolbar",
+                        "reference": "pagingtoolbar",
                         "layout|flex": 1,
                         "store": null
                     },

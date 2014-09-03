@@ -14,12 +14,12 @@
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
-        "itemId": null,
         "layout": "fit",
         "maximizable": true,
         "minHeight": 585,
         "minWidth": 700,
         "minimizable": null,
+        "reference": null,
         "title": "Promotion Item List",
         "width": 700
     },
@@ -43,9 +43,9 @@
                 "frame": null,
                 "header": false,
                 "height": 350,
-                "itemId": "frmPromotionItemList",
                 "layout": "vbox",
                 "margin": -1,
+                "reference": "frmPromotionItemList",
                 "title": null,
                 "trackResetOnLoad": true,
                 "url": null,
@@ -83,9 +83,9 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-new",
-                                "itemId": "btnNew",
                                 "layout|flex": null,
                                 "layout|margins": null,
+                                "reference": "btnNew",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "New",
@@ -107,8 +107,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-save",
-                                "itemId": "btnSave",
                                 "layout|flex": null,
+                                "reference": "btnSave",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Save",
@@ -130,8 +130,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-search",
-                                "itemId": "btnSearch",
                                 "layout|flex": null,
+                                "reference": "btnSearch",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Search",
@@ -153,8 +153,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-delete",
-                                "itemId": "btnDelete",
                                 "layout|flex": null,
+                                "reference": "btnDelete",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Delete",
@@ -176,8 +176,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-undo",
-                                "itemId": "btnUndo",
                                 "layout|flex": null,
+                                "reference": "btnUndo",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Undo",
@@ -214,8 +214,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-close",
-                                "itemId": "btnClose",
                                 "layout|flex": null,
+                                "reference": "btnClose",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Close",
@@ -274,7 +274,6 @@
                                         "designer|displayName": null,
                                         "enforceMaxLength": null,
                                         "fieldLabel": "Store",
-                                        "itemId": "txtStore",
                                         "labelPad": null,
                                         "labelSeparator": null,
                                         "labelWidth": 95,
@@ -282,6 +281,7 @@
                                         "margin": null,
                                         "maxLength": null,
                                         "name": null,
+                                        "reference": "txtStore",
                                         "tabIndex": null,
                                         "width": 170
                                     },
@@ -336,7 +336,6 @@
                                         "designer|displayName": null,
                                         "enforceMaxLength": null,
                                         "fieldLabel": "Item List No",
-                                        "itemId": "txtItemListNo",
                                         "labelPad": null,
                                         "labelSeparator": null,
                                         "labelWidth": 95,
@@ -344,6 +343,7 @@
                                         "margin": null,
                                         "maxLength": null,
                                         "name": null,
+                                        "reference": "txtItemListNo",
                                         "tabIndex": null,
                                         "width": 170
                                     },
@@ -364,7 +364,6 @@
                                         "designer|displayName": null,
                                         "enforceMaxLength": null,
                                         "fieldLabel": "Item List ID",
-                                        "itemId": "txtItemListId",
                                         "labelPad": null,
                                         "labelSeparator": null,
                                         "labelWidth": 120,
@@ -373,6 +372,7 @@
                                         "margin": "0 0 0 5",
                                         "maxLength": null,
                                         "name": null,
+                                        "reference": "txtItemListId",
                                         "tabIndex": null,
                                         "width": 170
                                     },
@@ -411,9 +411,9 @@
                                     "userConfig": {
                                         "fieldLabel": "Total Unit Price",
                                         "hideTrigger": true,
-                                        "itemId": "txtTotalUnitPrice",
                                         "labelWidth": 95,
-                                        "layout|flex": 1
+                                        "layout|flex": 1,
+                                        "reference": "txtTotalUnitPrice"
                                     },
                                     "name": "MyNumberField34",
                                     "designerId": "8043d40c-9daf-4daf-a0e0-0bafd03b86aa"
@@ -428,11 +428,11 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Delete from Register",
-                                        "itemId": "chkDeleteFromRegister",
                                         "labelWidth": 120,
                                         "layout|flex": 1,
                                         "layout|margins": null,
-                                        "margin": "0 0 0 5"
+                                        "margin": "0 0 0 5",
+                                        "reference": "chkDeleteFromRegister"
                                     },
                                     "name": "MyCheckbox97",
                                     "designerId": "16fb3420-bfeb-4386-9da2-3bec8a7e0b73"
@@ -450,7 +450,6 @@
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Description",
-                                "itemId": "txtDescription",
                                 "labelPad": null,
                                 "labelSeparator": null,
                                 "labelWidth": 95,
@@ -458,6 +457,7 @@
                                 "margin": null,
                                 "maxLength": null,
                                 "name": null,
+                                "reference": "txtDescription",
                                 "tabIndex": null,
                                 "width": 170
                             },
@@ -475,8 +475,8 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "itemId": "grdItemList",
                                 "layout|flex": 1,
+                                "reference": "grdItemList",
                                 "title": "My Grid Panel"
                             },
                             "name": "MyGridPanel42",
@@ -551,7 +551,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "itemId": "grvItemList"
+                                        "reference": "grvItemList"
                                     },
                                     "name": "MyGridView42",
                                     "designerId": "3cb303f7-800f-492e-9cce-51ec4e446905"
@@ -572,11 +572,11 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "designer|displayName": "",
                         "dock": "bottom",
-                        "itemId": "pagingtoolbar",
                         "layout|flex": 1,
+                        "reference": "pagingtoolbar",
                         "store": null
                     },
-                    "name": "statusbarpaging15",
+                    "name": "statusbarpaging5",
                     "designerId": "9985e3d6-7f09-455e-8a03-f74bd6fb8ac9",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

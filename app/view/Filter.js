@@ -33,8 +33,8 @@ Ext.define('Inventory.view.Filter', {
     items: [
         {
             xtype: 'textfield',
+            reference: 'txtFitlerGrid',
             tabIndex: -1,
-            itemId: 'txtFitlerGrid',
             margin: '0 0 0 5',
             width: 189,
             fieldLabel: 'Filter',
@@ -47,7 +47,7 @@ Ext.define('Inventory.view.Filter', {
         },
         {
             xtype: 'label',
-            itemId: 'lblTotalRecords',
+            reference: 'lblTotalRecords',
             padding: 3,
             text: ''
         }

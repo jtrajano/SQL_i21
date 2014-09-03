@@ -14,12 +14,12 @@
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
-        "itemId": null,
         "layout": "fit",
         "maximizable": true,
         "minHeight": 500,
         "minWidth": 530,
         "minimizable": null,
+        "reference": null,
         "title": "Brand",
         "width": 530
     },
@@ -43,9 +43,9 @@
                 "frame": null,
                 "header": null,
                 "height": 350,
-                "itemId": "frmBrand",
                 "layout": "vbox",
                 "margin": -1,
+                "reference": "frmBrand",
                 "title": null,
                 "trackResetOnLoad": true,
                 "url": null,
@@ -83,8 +83,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-save",
-                                "itemId": "btnSave",
                                 "layout|flex": null,
+                                "reference": "btnSave",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Save",
@@ -106,8 +106,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-undo",
-                                "itemId": "btnUndo",
                                 "layout|flex": null,
+                                "reference": "btnUndo",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Undo",
@@ -144,8 +144,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-close",
-                                "itemId": "btnClose",
                                 "layout|flex": null,
+                                "reference": "btnClose",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Close",
@@ -164,8 +164,8 @@
                     },
                     "codeClass": null,
                     "userConfig": {
-                        "itemId": "grdBrand",
                         "layout|flex": 1,
+                        "reference": "grdBrand",
                         "title": null
                     },
                     "name": "MyGridPanel40",
@@ -181,7 +181,7 @@
                             "userConfig": {
                                 "container|padding": "0 0 0 1",
                                 "dock": "top",
-                                "itemId": "tlbGridOptions"
+                                "reference": "tlbGridOptions"
                             },
                             "name": "MyToolbar49",
                             "designerId": "2a24edeb-4779-4adb-8c23-4582c0c2afc8",
@@ -196,8 +196,8 @@
                                     "userConfig": {
                                         "icon": null,
                                         "iconCls": "small-delete",
-                                        "itemId": "btnDelete",
                                         "layout|flex": null,
+                                        "reference": "btnDelete",
                                         "tabIndex": -1,
                                         "text": "Delete"
                                     },
@@ -228,7 +228,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter",
+                                    "name": "filter20",
                                     "designerId": "1c51bbf4-69ba-4770-a731-1f09cb4d80e1",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -288,7 +288,7 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "itemId": "grvBrand"
+                                "reference": "grvBrand"
                             },
                             "name": "MyGridView40",
                             "designerId": "acc2ebaa-3dc1-4338-9732-8437432ac741"
@@ -317,11 +317,11 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "designer|displayName": "",
                         "dock": "bottom",
-                        "itemId": "pagingtoolbar",
                         "layout|flex": 1,
+                        "reference": "pagingtoolbar",
                         "store": null
                     },
-                    "name": "statusbarpaging",
+                    "name": "statusbarpaging4",
                     "designerId": "9b0a6e72-56bd-4c64-bfca-064da234da01",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

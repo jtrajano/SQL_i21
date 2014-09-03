@@ -14,7 +14,7 @@
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
-        "itemId": null,
+        "reference": null,
         "layout": "fit",
         "maximizable": true,
         "minHeight": 560,
@@ -57,7 +57,7 @@
                         "icon": null,
                         "iconAlign": "top",
                         "iconCls": "large-new",
-                        "itemId": "btnNew",
+                        "reference": "btnNew",
                         "layout|flex": null,
                         "scale": "large",
                         "tabIndex": -1,
@@ -80,7 +80,7 @@
                         "icon": null,
                         "iconAlign": "top",
                         "iconCls": "large-save",
-                        "itemId": "btnSave",
+                        "reference": "btnSave",
                         "layout|flex": null,
                         "scale": "large",
                         "tabIndex": -1,
@@ -103,7 +103,7 @@
                         "icon": null,
                         "iconAlign": "top",
                         "iconCls": "large-search",
-                        "itemId": "btnFind",
+                        "reference": "btnFind",
                         "layout|flex": null,
                         "scale": "large",
                         "tabIndex": -1,
@@ -126,7 +126,7 @@
                         "icon": null,
                         "iconAlign": "top",
                         "iconCls": "large-delete",
-                        "itemId": "btnDelete",
+                        "reference": "btnDelete",
                         "layout|flex": null,
                         "scale": "large",
                         "tabIndex": -1,
@@ -149,7 +149,7 @@
                         "icon": null,
                         "iconAlign": "top",
                         "iconCls": "large-undo",
-                        "itemId": "btnUndo",
+                        "reference": "btnUndo",
                         "layout|flex": null,
                         "scale": "large",
                         "tabIndex": -1,
@@ -187,7 +187,7 @@
                         "icon": null,
                         "iconAlign": "top",
                         "iconCls": "large-close",
-                        "itemId": "btnClose",
+                        "reference": "btnClose",
                         "layout|flex": null,
                         "scale": "large",
                         "tabIndex": -1,
@@ -215,7 +215,7 @@
                 "frame": null,
                 "header": false,
                 "height": 350,
-                "itemId": "frmCategory",
+                "reference": "frmCategory",
                 "layout": "vbox",
                 "margin": -1,
                 "title": null,
@@ -234,7 +234,7 @@
                     "codeClass": null,
                     "userConfig": {
                         "activeTab": 0,
-                        "itemId": "tabCategory",
+                        "reference": "tabCategory",
                         "layout|flex": 1,
                         "plain": true
                     },
@@ -310,7 +310,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Category Code",
-                                                        "itemId": "txtCategoryCode",
+                                                        "reference": "txtCategoryCode",
                                                         "labelWidth": 110,
                                                         "layout|flex": null
                                                     },
@@ -326,7 +326,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Description",
-                                                        "itemId": "txtDescription",
+                                                        "reference": "txtDescription",
                                                         "labelWidth": 110,
                                                         "layout|flex": null
                                                     },
@@ -342,7 +342,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Line of Business",
-                                                        "itemId": "cboLineOfBusiness",
+                                                        "reference": "cboLineOfBusiness",
                                                         "labelWidth": 110,
                                                         "layout|flex": null,
                                                         "layout|margins": null
@@ -359,7 +359,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Catalog Group",
-                                                        "itemId": "cboCatalogGroup",
+                                                        "reference": "cboCatalogGroup",
                                                         "labelWidth": 110,
                                                         "layout|flex": null,
                                                         "layout|margins": null
@@ -376,7 +376,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Costing Method",
-                                                        "itemId": "cboCostingMethod",
+                                                        "reference": "cboCostingMethod",
                                                         "labelWidth": 110,
                                                         "layout|flex": null,
                                                         "layout|margins": null
@@ -393,7 +393,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Inventory Tracking",
-                                                        "itemId": "cboInventoryTracking",
+                                                        "reference": "cboInventoryTracking",
                                                         "labelWidth": 110,
                                                         "layout|flex": null,
                                                         "layout|margins": null
@@ -411,7 +411,7 @@
                                                     "userConfig": {
                                                         "fieldLabel": "Standard Qty",
                                                         "hideTrigger": true,
-                                                        "itemId": "txtStandardQty",
+                                                        "reference": "txtStandardQty",
                                                         "labelWidth": 110,
                                                         "layout|flex": null,
                                                         "maxWidth": 225
@@ -428,7 +428,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Standard UOM",
-                                                        "itemId": "cboStandardUom",
+                                                        "reference": "cboStandardUom",
                                                         "labelWidth": 110,
                                                         "layout|flex": null,
                                                         "layout|margins": null
@@ -529,7 +529,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "GL Division Number",
-                                                        "itemId": "txtGlDivisionNumber",
+                                                        "reference": "txtGlDivisionNumber",
                                                         "labelWidth": 160,
                                                         "layout|flex": null
                                                     },
@@ -546,7 +546,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Sales Analysis by Ton",
-                                                        "itemId": "chkSalesAnalysisByTon",
+                                                        "reference": "chkSalesAnalysisByTon",
                                                         "labelWidth": 160,
                                                         "layout|flex": null
                                                     },
@@ -562,7 +562,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Material Fee",
-                                                        "itemId": "cboMaterialFee",
+                                                        "reference": "cboMaterialFee",
                                                         "labelWidth": 160,
                                                         "layout|flex": 1,
                                                         "layout|margins": null
@@ -579,7 +579,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Material Item",
-                                                        "itemId": "cboMaterialItem",
+                                                        "reference": "cboMaterialItem",
                                                         "labelWidth": 160,
                                                         "layout|flex": 1,
                                                         "layout|margins": null
@@ -597,7 +597,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Auto Calculate Freight",
-                                                        "itemId": "chkAutoCalculateFreight",
+                                                        "reference": "chkAutoCalculateFreight",
                                                         "labelWidth": 160,
                                                         "layout|flex": null
                                                     },
@@ -613,7 +613,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Freight Item",
-                                                        "itemId": "cboFreightItem",
+                                                        "reference": "cboFreightItem",
                                                         "labelWidth": 160,
                                                         "layout|flex": 1,
                                                         "layout|margins": null
@@ -631,7 +631,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Non Retail Use Department",
-                                                        "itemId": "chkNonRetailUseDepartment",
+                                                        "reference": "chkNonRetailUseDepartment",
                                                         "labelWidth": 160,
                                                         "layout|flex": null
                                                     },
@@ -648,7 +648,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Report in Net or Gross",
-                                                        "itemId": "chkReportInNetOrGross",
+                                                        "reference": "chkReportInNetOrGross",
                                                         "labelWidth": 160,
                                                         "layout|flex": null
                                                     },
@@ -665,7 +665,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Department for Pumps",
-                                                        "itemId": "chkDepartmentForPumps",
+                                                        "reference": "chkDepartmentForPumps",
                                                         "labelWidth": 160,
                                                         "layout|flex": null
                                                     },
@@ -681,7 +681,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Convert to Paidout",
-                                                        "itemId": "cboConvertToPaidout",
+                                                        "reference": "cboConvertToPaidout",
                                                         "labelWidth": 160,
                                                         "layout|flex": 1,
                                                         "layout|margins": null
@@ -699,7 +699,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Delete from Register",
-                                                        "itemId": "chkDeleteFromRegister",
+                                                        "reference": "chkDeleteFromRegister",
                                                         "labelWidth": 160,
                                                         "layout|flex": null
                                                     },
@@ -736,7 +736,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Department Key Taxed",
-                                                        "itemId": "chkDepartmentKeyTaxed",
+                                                        "reference": "chkDepartmentKeyTaxed",
                                                         "labelWidth": 175,
                                                         "layout|flex": null
                                                     },
@@ -752,7 +752,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Default Product Code",
-                                                        "itemId": "cboDefaultProductCode",
+                                                        "reference": "cboDefaultProductCode",
                                                         "labelWidth": 175,
                                                         "layout|flex": null,
                                                         "layout|margins": null
@@ -769,7 +769,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Default Family",
-                                                        "itemId": "cboDefaultFamily",
+                                                        "reference": "cboDefaultFamily",
                                                         "labelWidth": 175,
                                                         "layout|flex": null,
                                                         "layout|margins": null
@@ -786,7 +786,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Default Class",
-                                                        "itemId": "cboDefaultClass",
+                                                        "reference": "cboDefaultClass",
                                                         "labelWidth": 175,
                                                         "layout|flex": null,
                                                         "layout|margins": null
@@ -804,7 +804,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Default Food Stampable",
-                                                        "itemId": "chkDefaultFoodStampable",
+                                                        "reference": "chkDefaultFoodStampable",
                                                         "labelWidth": 175,
                                                         "layout|flex": null
                                                     },
@@ -821,7 +821,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Default Returnable",
-                                                        "itemId": "chkDefaultReturnable",
+                                                        "reference": "chkDefaultReturnable",
                                                         "labelWidth": 175,
                                                         "layout|flex": null
                                                     },
@@ -838,7 +838,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Default Saleable",
-                                                        "itemId": "chkDefaultSaleable",
+                                                        "reference": "chkDefaultSaleable",
                                                         "labelWidth": 175,
                                                         "layout|flex": null
                                                     },
@@ -855,7 +855,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Default Pre-priced",
-                                                        "itemId": "chkDefaultPrepriced",
+                                                        "reference": "chkDefaultPrepriced",
                                                         "labelWidth": 175,
                                                         "layout|flex": null
                                                     },
@@ -872,7 +872,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Default ID Required (liquor)",
-                                                        "itemId": "chkDefaultIdRequiredLiquor",
+                                                        "reference": "chkDefaultIdRequiredLiquor",
                                                         "labelWidth": 175,
                                                         "layout|flex": null
                                                     },
@@ -889,7 +889,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Default ID Required (cigarette)",
-                                                        "itemId": "chkDefaultIdRequiredCigarette",
+                                                        "reference": "chkDefaultIdRequiredCigarette",
                                                         "labelWidth": 175,
                                                         "layout|flex": null
                                                     },
@@ -906,7 +906,7 @@
                                                     "userConfig": {
                                                         "fieldLabel": "Default Minimum Age",
                                                         "hideTrigger": true,
-                                                        "itemId": "txtDefaultMinimumAge",
+                                                        "reference": "txtDefaultMinimumAge",
                                                         "labelWidth": 175,
                                                         "layout|flex": null,
                                                         "maxWidth": 225
@@ -953,7 +953,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "designer|createAlias": "advancefiltergrid",
-                                        "itemId": "grdStore",
+                                        "reference": "grdStore",
                                         "margin": -1,
                                         "title": null
                                     },
@@ -970,7 +970,7 @@
                                             "userConfig": {
                                                 "container|padding": "0 0 0 1",
                                                 "dock": "top",
-                                                "itemId": "tlbGridOptions"
+                                                "reference": "tlbGridOptions"
                                             },
                                             "name": "MyToolbar29",
                                             "designerId": "1fcec194-f074-4203-8c8e-01ab8a7ed3b4",
@@ -985,7 +985,7 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-add",
-                                                        "itemId": "btnAdd",
+                                                        "reference": "btnAdd",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Add"
@@ -1003,7 +1003,7 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-edit",
-                                                        "itemId": "btnEdit",
+                                                        "reference": "btnEdit",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Edit"
@@ -1021,7 +1021,7 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-delete",
-                                                        "itemId": "btnDelete",
+                                                        "reference": "btnDelete",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Delete"
@@ -1142,7 +1142,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "itemId": "grvStore"
+                                                "reference": "grvStore"
                                             },
                                             "name": "MyGridView26",
                                             "designerId": "c06fa758-6922-41cb-8f73-abad3d235286"
@@ -1195,7 +1195,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "designer|createAlias": "advancefiltergrid",
-                                        "itemId": "grdGlAccounts",
+                                        "reference": "grdGlAccounts",
                                         "margin": -1,
                                         "title": null
                                     },
@@ -1212,7 +1212,7 @@
                                             "userConfig": {
                                                 "container|padding": "0 0 0 1",
                                                 "dock": "top",
-                                                "itemId": "tlbGridOptions"
+                                                "reference": "tlbGridOptions"
                                             },
                                             "name": "MyToolbar30",
                                             "designerId": "ce149b4d-7e4b-485b-a4da-d64658543f19",
@@ -1227,7 +1227,7 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-delete",
-                                                        "itemId": "btnDelete",
+                                                        "reference": "btnDelete",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Delete"
@@ -1333,7 +1333,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "itemId": "grvGlAccounts"
+                                                "reference": "grvGlAccounts"
                                             },
                                             "name": "MyGridView27",
                                             "designerId": "30c8450c-05b4-48ca-b43c-944037b63bb6"
@@ -1386,7 +1386,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "designer|createAlias": "advancefiltergrid",
-                                        "itemId": "grdVendorCategoryXref",
+                                        "reference": "grdVendorCategoryXref",
                                         "margin": -1,
                                         "title": null
                                     },
@@ -1403,7 +1403,7 @@
                                             "userConfig": {
                                                 "container|padding": "0 0 0 1",
                                                 "dock": "top",
-                                                "itemId": "tlbGridOptions"
+                                                "reference": "tlbGridOptions"
                                             },
                                             "name": "MyToolbar31",
                                             "designerId": "03f60c71-12ef-48ae-b2c6-b53410320b83",
@@ -1418,7 +1418,7 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-delete",
-                                                        "itemId": "btnDelete",
+                                                        "reference": "btnDelete",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Delete"
@@ -1588,7 +1588,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "itemId": "grvVendorCategoryXref"
+                                                "reference": "grvVendorCategoryXref"
                                             },
                                             "name": "MyGridView28",
                                             "designerId": "7d406433-6d73-44ee-bcf2-b049b88c1701"
@@ -1641,7 +1641,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "designer|createAlias": "advancefiltergrid",
-                                        "itemId": "grdCatalog",
+                                        "reference": "grdCatalog",
                                         "margin": -1,
                                         "title": null
                                     },
@@ -1658,7 +1658,7 @@
                                             "userConfig": {
                                                 "container|padding": "0 0 0 1",
                                                 "dock": "top",
-                                                "itemId": "tlbGridOptions"
+                                                "reference": "tlbGridOptions"
                                             },
                                             "name": "MyToolbar32",
                                             "designerId": "a043d027-ec13-45ca-a590-30052c18dea1",
@@ -1673,7 +1673,7 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-delete",
-                                                        "itemId": "btnDelete",
+                                                        "reference": "btnDelete",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Delete"
@@ -1749,7 +1749,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "itemId": "grvCatalog"
+                                                "reference": "grvCatalog"
                                             },
                                             "name": "MyGridView29",
                                             "designerId": "e6064f37-57b5-4034-8858-748cb9c5ec79"
@@ -1837,7 +1837,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "ERP Item Class",
-                                                        "itemId": "txtERPItemClass",
+                                                        "reference": "txtERPItemClass",
                                                         "labelWidth": 160,
                                                         "layout|flex": null
                                                     },
@@ -1854,7 +1854,7 @@
                                                     "userConfig": {
                                                         "fieldLabel": "Life Time (mins)",
                                                         "hideTrigger": true,
-                                                        "itemId": "txtLifeTime",
+                                                        "reference": "txtLifeTime",
                                                         "labelWidth": 160,
                                                         "layout|flex": 1
                                                     },
@@ -1871,7 +1871,7 @@
                                                     "userConfig": {
                                                         "fieldLabel": "BOM Item Shrinkage",
                                                         "hideTrigger": true,
-                                                        "itemId": "txtBOMItemShrinkage",
+                                                        "reference": "txtBOMItemShrinkage",
                                                         "labelWidth": 160,
                                                         "layout|flex": 1
                                                     },
@@ -1888,7 +1888,7 @@
                                                     "userConfig": {
                                                         "fieldLabel": "BOM Item Upper Tolerance",
                                                         "hideTrigger": true,
-                                                        "itemId": "txtBOMItemUpperTolerance",
+                                                        "reference": "txtBOMItemUpperTolerance",
                                                         "labelWidth": 160,
                                                         "layout|flex": 1
                                                     },
@@ -1905,7 +1905,7 @@
                                                     "userConfig": {
                                                         "fieldLabel": "BOM Item Lower Tolerance",
                                                         "hideTrigger": true,
-                                                        "itemId": "txtBOMItemLowerTolerance",
+                                                        "reference": "txtBOMItemLowerTolerance",
                                                         "labelWidth": 160,
                                                         "layout|flex": 1
                                                     },
@@ -1922,7 +1922,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Scaled",
-                                                        "itemId": "chkScaled",
+                                                        "reference": "chkScaled",
                                                         "labelWidth": 160,
                                                         "layout|flex": null
                                                     },
@@ -1939,7 +1939,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Output Item Mandatory",
-                                                        "itemId": "chkOutputItemMandatory",
+                                                        "reference": "chkOutputItemMandatory",
                                                         "labelWidth": 160,
                                                         "layout|flex": null
                                                     },
@@ -1955,7 +1955,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Consumption Method",
-                                                        "itemId": "txtConsumptionMethod",
+                                                        "reference": "txtConsumptionMethod",
                                                         "labelWidth": 160,
                                                         "layout|flex": null
                                                     },
@@ -1971,7 +1971,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "BOM Item Type",
-                                                        "itemId": "txtBOMItemType",
+                                                        "reference": "txtBOMItemType",
                                                         "labelWidth": 160,
                                                         "layout|flex": null
                                                     },
@@ -1987,7 +1987,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Short Name",
-                                                        "itemId": "txtShortName",
+                                                        "reference": "txtShortName",
                                                         "labelWidth": 160,
                                                         "layout|flex": null
                                                     },
@@ -2023,7 +2023,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Receipt Image",
-                                                        "itemId": "txtReceiptImage",
+                                                        "reference": "txtReceiptImage",
                                                         "labelWidth": 160,
                                                         "layout|flex": null
                                                     },
@@ -2039,7 +2039,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "WIP Image",
-                                                        "itemId": "txtWIPImage",
+                                                        "reference": "txtWIPImage",
                                                         "labelWidth": 160,
                                                         "layout|flex": null
                                                     },
@@ -2055,7 +2055,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "FG Image",
-                                                        "itemId": "txtFGImage",
+                                                        "reference": "txtFGImage",
                                                         "labelWidth": 160,
                                                         "layout|flex": null
                                                     },
@@ -2071,7 +2071,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Ship Image",
-                                                        "itemId": "txtShipImage",
+                                                        "reference": "txtShipImage",
                                                         "labelWidth": 160,
                                                         "layout|flex": null
                                                     },
@@ -2088,7 +2088,7 @@
                                                     "userConfig": {
                                                         "fieldLabel": "Labor Cost",
                                                         "hideTrigger": true,
-                                                        "itemId": "txtLaborCost",
+                                                        "reference": "txtLaborCost",
                                                         "labelWidth": 160,
                                                         "layout|flex": null,
                                                         "maxWidth": 275
@@ -2106,7 +2106,7 @@
                                                     "userConfig": {
                                                         "fieldLabel": "Over Head",
                                                         "hideTrigger": true,
-                                                        "itemId": "txtOverHead",
+                                                        "reference": "txtOverHead",
                                                         "labelWidth": 160,
                                                         "layout|flex": null,
                                                         "maxWidth": 275
@@ -2124,7 +2124,7 @@
                                                     "userConfig": {
                                                         "fieldLabel": "Percentage",
                                                         "hideTrigger": true,
-                                                        "itemId": "txtPercentage",
+                                                        "reference": "txtPercentage",
                                                         "labelWidth": 160,
                                                         "layout|flex": null,
                                                         "maxWidth": 275
@@ -2141,7 +2141,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Cost Distribution Method",
-                                                        "itemId": "txtCostDistributionMethod",
+                                                        "reference": "txtCostDistributionMethod",
                                                         "labelWidth": 160,
                                                         "layout|flex": null
                                                     },
@@ -2158,7 +2158,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Sellable",
-                                                        "itemId": "chkSellable",
+                                                        "reference": "chkSellable",
                                                         "labelWidth": 160,
                                                         "layout|flex": null
                                                     },
@@ -2175,7 +2175,7 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Yield Adjustment",
-                                                        "itemId": "chkYieldAdjustment",
+                                                        "reference": "chkYieldAdjustment",
                                                         "labelWidth": 160,
                                                         "layout|flex": null
                                                     },
@@ -2200,7 +2200,7 @@
                     "userConfig": {
                         "designer|displayName": "",
                         "dock": "bottom",
-                        "itemId": "tlbStatusbarPaging",
+                        "reference": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
                     "name": "statusbarpaging",

@@ -14,7 +14,7 @@
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
-        "itemId": null,
+        "reference": null,
         "layout": "fit",
         "maxHeight": 415,
         "maximizable": true,
@@ -44,7 +44,7 @@
                 "frame": null,
                 "header": false,
                 "height": 350,
-                "itemId": "frmCategoryStore",
+                "reference": "frmCategoryStore",
                 "layout": "vbox",
                 "margin": -1,
                 "title": null,
@@ -84,7 +84,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-new",
-                                "itemId": "btnNew",
+                                "reference": "btnNew",
                                 "layout|flex": null,
                                 "layout|margins": null,
                                 "scale": "large",
@@ -108,7 +108,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-save",
-                                "itemId": "btnSave",
+                                "reference": "btnSave",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
@@ -131,7 +131,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-search",
-                                "itemId": "btnSearch",
+                                "reference": "btnSearch",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
@@ -154,7 +154,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-delete",
-                                "itemId": "btnDelete",
+                                "reference": "btnDelete",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
@@ -177,7 +177,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-undo",
-                                "itemId": "btnUndo",
+                                "reference": "btnUndo",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
@@ -215,7 +215,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-close",
-                                "itemId": "btnClose",
+                                "reference": "btnClose",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
@@ -271,7 +271,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Store",
-                                        "itemId": "txtStore",
+                                        "reference": "txtStore",
                                         "labelWidth": 165,
                                         "layout|flex": null,
                                         "maxWidth": null
@@ -288,7 +288,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Cash Register Department",
-                                        "itemId": "txtCashRegisterDepartment",
+                                        "reference": "txtCashRegisterDepartment",
                                         "labelWidth": 165,
                                         "layout|flex": null,
                                         "maxWidth": null
@@ -306,7 +306,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Update Prices on PB Imports",
-                                        "itemId": "chkUpdatePricesOnPbImports",
+                                        "reference": "chkUpdatePricesOnPbImports",
                                         "labelWidth": 165,
                                         "layout|flex": null
                                     },
@@ -323,7 +323,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Default Use Tax Flag 1",
-                                        "itemId": "chkDefaultUseTaxFlag1",
+                                        "reference": "chkDefaultUseTaxFlag1",
                                         "labelWidth": 165,
                                         "layout|flex": null,
                                         "layout|margins": null
@@ -341,7 +341,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Default Use Tax Flag 2",
-                                        "itemId": "chkDefaultUseTaxFlag2",
+                                        "reference": "chkDefaultUseTaxFlag2",
                                         "labelWidth": 165,
                                         "layout|flex": null,
                                         "layout|margins": null
@@ -359,7 +359,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Default Use Tax Flag 3",
-                                        "itemId": "chkDefaultUseTaxFlag3",
+                                        "reference": "chkDefaultUseTaxFlag3",
                                         "labelWidth": 165,
                                         "layout|flex": null,
                                         "layout|margins": null
@@ -377,7 +377,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Default Use Tax Flag 4",
-                                        "itemId": "chkDefaultUseTaxFlag4",
+                                        "reference": "chkDefaultUseTaxFlag4",
                                         "labelWidth": 165,
                                         "layout|flex": null,
                                         "layout|margins": null
@@ -395,7 +395,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Default Blue Law 1",
-                                        "itemId": "chkDefaultBlueLaw1",
+                                        "reference": "chkDefaultBlueLaw1",
                                         "labelWidth": 165,
                                         "layout|flex": null,
                                         "layout|margins": null
@@ -413,7 +413,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Default Blue Law 2",
-                                        "itemId": "chkDefaultBlueLaw2",
+                                        "reference": "chkDefaultBlueLaw2",
                                         "labelWidth": 165,
                                         "layout|flex": null,
                                         "layout|margins": null
@@ -449,7 +449,7 @@
                                     "userConfig": {
                                         "fieldLabel": "Default Nucleus Group ID",
                                         "hideTrigger": true,
-                                        "itemId": "txtDefaultNucleusGroupId",
+                                        "reference": "txtDefaultNucleusGroupId",
                                         "labelWidth": 165,
                                         "layout|flex": null,
                                         "maxWidth": null,
@@ -488,7 +488,7 @@
                                     "userConfig": {
                                         "fieldLabel": "Target Gross Profit %",
                                         "hideTrigger": true,
-                                        "itemId": "txtTargetGrossProfitPercent",
+                                        "reference": "txtTargetGrossProfitPercent",
                                         "labelWidth": 160,
                                         "layout|flex": null,
                                         "maxWidth": null,
@@ -507,7 +507,7 @@
                                     "userConfig": {
                                         "fieldLabel": "Target Inventory at Cost",
                                         "hideTrigger": true,
-                                        "itemId": "txtTargetInventoryAtCost",
+                                        "reference": "txtTargetInventoryAtCost",
                                         "labelWidth": 160,
                                         "layout|flex": null,
                                         "maxWidth": null,
@@ -526,7 +526,7 @@
                                     "userConfig": {
                                         "fieldLabel": "Cost of Inventory at BOM",
                                         "hideTrigger": true,
-                                        "itemId": "txtCostOfInventoryAtBom",
+                                        "reference": "txtCostOfInventoryAtBom",
                                         "labelWidth": 160,
                                         "layout|flex": null,
                                         "maxWidth": null,
@@ -545,7 +545,7 @@
                                     "userConfig": {
                                         "fieldLabel": "Actual Gross Profit %",
                                         "hideTrigger": true,
-                                        "itemId": "txtActualGrossProfitPercent",
+                                        "reference": "txtActualGrossProfitPercent",
                                         "labelWidth": 160,
                                         "layout|flex": null,
                                         "maxWidth": null,
@@ -564,7 +564,7 @@
                                     "userConfig": {
                                         "fieldLabel": "Low Gross Margin % Alert",
                                         "hideTrigger": true,
-                                        "itemId": "txtLowGrossMarginPercentAlert",
+                                        "reference": "txtLowGrossMarginPercentAlert",
                                         "labelWidth": 160,
                                         "layout|flex": null,
                                         "maxWidth": null,
@@ -583,7 +583,7 @@
                                     "userConfig": {
                                         "fieldLabel": "High Gross Margin % Alert",
                                         "hideTrigger": true,
-                                        "itemId": "txtHighGrossMarginPercentAlert",
+                                        "reference": "txtHighGrossMarginPercentAlert",
                                         "labelWidth": 160,
                                         "layout|flex": null,
                                         "maxWidth": null,
@@ -602,7 +602,7 @@
                                     "userConfig": {
                                         "fieldLabel": "Department Value at Cost",
                                         "hideTrigger": true,
-                                        "itemId": "txtDepartmentValueAtCost",
+                                        "reference": "txtDepartmentValueAtCost",
                                         "labelWidth": 160,
                                         "layout|flex": null,
                                         "maxWidth": null,
@@ -621,7 +621,7 @@
                                     "userConfig": {
                                         "fieldLabel": "Department Value at Sell",
                                         "hideTrigger": true,
-                                        "itemId": "txtDepartmentValueAtSell",
+                                        "reference": "txtDepartmentValueAtSell",
                                         "labelWidth": 160,
                                         "layout|flex": null,
                                         "maxWidth": null,
@@ -639,7 +639,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Last Inventory Level Entry",
-                                        "itemId": "dtmLastInventoryLevelEntry",
+                                        "reference": "dtmLastInventoryLevelEntry",
                                         "labelWidth": 160,
                                         "layout|flex": null,
                                         "maxWidth": null
@@ -663,7 +663,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "designer|displayName": "",
                         "dock": "bottom",
-                        "itemId": "pagingtoolbar",
+                        "reference": "pagingtoolbar",
                         "layout|flex": 1,
                         "store": null
                     },
