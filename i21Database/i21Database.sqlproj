@@ -617,6 +617,37 @@
     <Build Include="dbo\Tables\tblRMDefaultFilter.sql" />
     <Build Include="dbo\Tables\tblRMDefaultOption.sql" />
     <Build Include="dbo\Tables\tblRMDefaultSort.sql" />
+    <Build Include="dbo\Tables\tblPRDeductionGroup.sql" />
+    <Build Include="dbo\Tables\tblPRDeductionGroupDetail.sql" />
+    <Build Include="dbo\Tables\tblPRDeductionGroupDetailTax.sql" />
+    <Build Include="dbo\Tables\tblPRDeductionType.sql" />
+    <Build Include="dbo\Tables\tblPRDeductionTypeTax.sql" />
+    <Build Include="dbo\Tables\tblPRDivision.sql" />
+    <Build Include="dbo\Tables\tblPREarningGroup.sql" />
+    <Build Include="dbo\Tables\tblPREarningGroupDetail.sql" />
+    <Build Include="dbo\Tables\tblPREarningGroupDetailTax.sql" />
+    <Build Include="dbo\Tables\tblPREarningType.sql" />
+    <Build Include="dbo\Tables\tblPREarningTypeTax.sql" />
+    <Build Include="dbo\Tables\tblPREmployee.sql" />
+    <Build Include="dbo\Tables\tblPREmployeeDeduction.sql" />
+    <Build Include="dbo\Tables\tblPREmployeeEarning.sql" />
+    <Build Include="dbo\Tables\tblPREmployeePaycheckRegister.sql" />
+    <Build Include="dbo\Tables\tblPREmployeeTax.sql" />
+    <Build Include="dbo\Tables\tblPREmployeeTimeOff.sql" />
+    <Build Include="dbo\Tables\tblPREthnicOrigin.sql" />
+    <Build Include="dbo\Tables\tblPRPaycheck.sql" />
+    <Build Include="dbo\Tables\tblPRPaycheckDeduction.sql" />
+    <Build Include="dbo\Tables\tblPRPaycheckEarning.sql" />
+    <Build Include="dbo\Tables\tblPRPaycheckTax.sql" />
+    <Build Include="dbo\Tables\tblPRPayGroup.sql" />
+    <Build Include="dbo\Tables\tblPRTaxAgency.sql" />
+    <Build Include="dbo\Tables\tblPRTaxGroup.sql" />
+    <Build Include="dbo\Tables\tblPRTaxGroupDetail.sql" />
+    <Build Include="dbo\Tables\tblPRTaxType.sql" />
+    <Build Include="dbo\Tables\tblPRTaxTypeCounty.sql" />
+    <Build Include="dbo\Tables\tblPRTaxTypeLocal.sql" />
+    <Build Include="dbo\Tables\tblPRTaxTypeProvince.sql" />
+    <Build Include="dbo\Tables\tblPRTaxTypeState.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

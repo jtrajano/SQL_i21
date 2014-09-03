@@ -1,0 +1,23 @@
+﻿CREATE TABLE [dbo].[tblPRTaxGroupDetail](
+	[intTaxGroupDetailId] [int] IDENTITY(1,1) NOT NULL,
+	[intTaxGroupId] [int] NOT NULL,
+	[intTaxId] [int] NOT NULL,
+	[strCalculationType] [nvarchar](20) NULL,
+	[strType] [nvarchar](40) NULL,
+	[dblAmount] [numeric](18, 6) NULL DEFAULT ((0)),
+	[dblPercent] [numeric](18, 6) NULL DEFAULT ((0)),
+	[dblLimit] [numeric](18, 6) NULL DEFAULT ((0)),
+	[intTaxTypeStateId] INT NULL,
+	[intTaxTypeCountyId] INT NULL,
+	[intTaxAgencyId] INT NULL,
+	[intAccountId] INT NULL,
+	[intExpenseAccountId] INT NULL,
+	[strPaidBy] [nvarchar](10) NULL DEFAULT ('Employee'),
+	[ysnCreatePayable] [bit]  NOT NULL DEFAULT ((0)),
+	[intVendorId] INT NULL,
+	[ysnActive] [bit] NOT NULL DEFAULT ((1)),
+	[intSort] [int] NULL,
+	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
+    CONSTRAINT [PK_tblPRTaxGroupDetail] PRIMARY KEY ([intTaxGroupId], [intTaxId]),
+) ON [PRIMARY]
+GO
