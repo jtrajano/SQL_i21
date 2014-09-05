@@ -320,7 +320,7 @@ BEGIN
 			,[dblDebitUnit]			= CASE WHEN @post = 1 THEN ISNULL(A.[dblAmountPaid], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0) ELSE 0 END
 			,[dblCreditUnit]		= CASE WHEN @post = 1 THEN ISNULL(A.[dblAmountPaid], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0) ELSE 0 END
 			,A.[dtmDatePaid]
-			,0
+			,CASE WHEN @post = 1 THEN 0 ELSE 1 END
 			,1
 			,[dblExchangeRate]		= 1
 			,[intUserId]			= @userId
@@ -354,7 +354,7 @@ BEGIN
 			,[dblDebitUnit]			= CASE WHEN @post = 1 THEN ISNULL(A.dblWithheld, 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0) ELSE 0 END
 			,[dblCreditUnit]		= CASE WHEN @post = 1 THEN ISNULL(A.dblWithheld, 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0) ELSE 0 END
 			,A.[dtmDatePaid]
-			,0
+			,CASE WHEN @post = 1 THEN 0 ELSE 1 END
 			,1
 			,[dblExchangeRate]		= 1
 			,[intUserId]			= @userId
@@ -385,7 +385,7 @@ BEGIN
 			,[dblDebitUnit]			= CASE WHEN @post = 1 THEN SUM(ISNULL(B.dblDiscount, 0))  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @DiscountAccount), 0) ELSE 0 END
 			,[dblCreditUnit]		= CASE WHEN @post = 1 THEN SUM(ISNULL(B.dblDiscount, 0)) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @DiscountAccount), 0) ELSE 0 END
 			,A.[dtmDatePaid]
-			,0
+			,CASE WHEN @post = 1 THEN 0 ELSE 1 END
 			,1
 			,[dblExchangeRate]		= 1
 			,[intUserId]			= @userId
@@ -435,7 +435,7 @@ BEGIN
 												ELSE B.dblPayment END) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = B.[intAccountId]), 0)
 										  ELSE 0 END
 				,A.[dtmDatePaid]
-				,0
+				,CASE WHEN @post = 1 THEN 0 ELSE 1 END
 				,1
 				,[dblExchangeRate]		= 1
 				,[intUserId]			= @userId
@@ -626,6 +626,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 		FROM tblAPPayment A
 			INNER JOIN tblGLDetail B
 				ON A.strPaymentRecordNum = B.strTransactionId
+		WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		-- Creating the temp table:
 		DECLARE @isSuccessful BIT
@@ -1106,9 +1107,9 @@ Post_Cleanup:
 	IF(ISNULL(@recap,0) = 0)
 	BEGIN
 		--DELETE PAYMENT DETAIL WITH PAYMENT AMOUNT
-		DELETE FROM tblAPPaymentDetail
-		WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-		AND dblPayment = 0
+		--DELETE FROM tblAPPaymentDetail
+		--WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		--AND dblPayment = 0
 
 		--IF(@post = 1)
 		--BEGIN
