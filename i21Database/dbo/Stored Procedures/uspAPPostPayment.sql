@@ -1126,7 +1126,7 @@ Post_Cleanup:
 		--	--INNER JOIN #tmpPayablePostData B ON A.intTransactionId = B.intPaymentId 
 
 		--END
-
+		SET @success = 1
 	END
 
 Post_Exit:
