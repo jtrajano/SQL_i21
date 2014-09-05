@@ -456,7 +456,7 @@
                                                     "userConfig": {
                                                         "designer|displayName": null,
                                                         "editable": null,
-                                                        "fieldLabel": "Class",
+                                                        "fieldLabel": "Category",
                                                         "forceSelection": null,
                                                         "labelPad": null,
                                                         "labelSeparator": null,
@@ -465,7 +465,7 @@
                                                         "margin": null,
                                                         "name": null,
                                                         "queryMode": null,
-                                                        "reference": "cboClass",
+                                                        "reference": "cboCategory",
                                                         "store": null,
                                                         "tabIndex": null,
                                                         "width": null
@@ -988,7 +988,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter22",
+                                                                    "name": "filter",
                                                                     "designerId": "cbd9067a-ce03-4810-b0cb-7bd07d00d877",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -1163,7 +1163,7 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "fieldLabel": "Patronage",
-                                                                "labelWidth": 110,
+                                                                "labelWidth": 116,
                                                                 "layout|flex": null,
                                                                 "reference": "cboPatronage"
                                                             },
@@ -1179,7 +1179,7 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "fieldLabel": "Tax Class",
-                                                                "labelWidth": 110,
+                                                                "labelWidth": 116,
                                                                 "layout|flex": null,
                                                                 "reference": "cboTaxClass"
                                                             },
@@ -1196,7 +1196,7 @@
                                                             "userConfig": {
                                                                 "boxLabel": null,
                                                                 "fieldLabel": "Stocked Item",
-                                                                "labelWidth": 110,
+                                                                "labelWidth": 116,
                                                                 "layout|flex": null,
                                                                 "reference": "chkStockedItem"
                                                             },
@@ -1213,7 +1213,7 @@
                                                             "userConfig": {
                                                                 "boxLabel": null,
                                                                 "fieldLabel": "Dyed Fuel",
-                                                                "labelWidth": 110,
+                                                                "labelWidth": 116,
                                                                 "layout|flex": null,
                                                                 "reference": "chkDyedFuel"
                                                             },
@@ -1229,7 +1229,7 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "fieldLabel": "Barcode Print",
-                                                                "labelWidth": 110,
+                                                                "labelWidth": 116,
                                                                 "layout|flex": null,
                                                                 "reference": "cboBarcodePrint"
                                                             },
@@ -1246,7 +1246,7 @@
                                                             "userConfig": {
                                                                 "boxLabel": null,
                                                                 "fieldLabel": "MSDS Required",
-                                                                "labelWidth": 110,
+                                                                "labelWidth": 116,
                                                                 "layout|flex": null,
                                                                 "reference": "chkMsdsRequired"
                                                             },
@@ -1262,7 +1262,7 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "fieldLabel": "EPA Number",
-                                                                "labelWidth": 110,
+                                                                "labelWidth": 116,
                                                                 "layout|flex": null,
                                                                 "reference": "txtEpaNumber"
                                                             },
@@ -1279,7 +1279,7 @@
                                                             "userConfig": {
                                                                 "boxLabel": null,
                                                                 "fieldLabel": "Inbound Tax",
-                                                                "labelWidth": 110,
+                                                                "labelWidth": 116,
                                                                 "layout|flex": null,
                                                                 "reference": "chkInboundTax"
                                                             },
@@ -1296,7 +1296,7 @@
                                                             "userConfig": {
                                                                 "boxLabel": null,
                                                                 "fieldLabel": "Outbound Tax",
-                                                                "labelWidth": 110,
+                                                                "labelWidth": 116,
                                                                 "layout|flex": null,
                                                                 "reference": "chkOutboundTax"
                                                             },
@@ -1313,7 +1313,7 @@
                                                             "userConfig": {
                                                                 "boxLabel": null,
                                                                 "fieldLabel": "Restricted Chemical",
-                                                                "labelWidth": 110,
+                                                                "labelWidth": 116,
                                                                 "layout|flex": null,
                                                                 "reference": "chkRestrictedChemical"
                                                             },
@@ -1547,22 +1547,6 @@
                                                                     },
                                                                     "name": "MyCheckbox9",
                                                                     "designerId": "4cd69304-1925-46a4-a812-92eb9c844f7a"
-                                                                },
-                                                                {
-                                                                    "type": "Ext.form.field.ComboBox",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "fieldLabel": "Formula Level",
-                                                                        "labelWidth": 125,
-                                                                        "layout|flex": null,
-                                                                        "reference": "cboFormulaLevel"
-                                                                    },
-                                                                    "name": "MyComboBox14",
-                                                                    "designerId": "6ca065ec-e6b3-4ca7-869e-dfc4c1023655"
                                                                 },
                                                                 {
                                                                     "type": "Ext.form.field.Text",
@@ -2366,7 +2350,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter23",
+                                                                            "name": "filter1",
                                                                             "designerId": "2857c700-ed36-43f0-8ef5-f340b95fdfba",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -2520,7 +2504,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter24",
+                                                                            "name": "filter2",
                                                                             "designerId": "f74d03b6-8d20-468c-ab10-a1782ac46fa4",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -2862,7 +2846,7 @@
                                                                                     "userConfig": {
                                                                                         "layout|flex": null
                                                                                     },
-                                                                                    "name": "filter25",
+                                                                                    "name": "filter3",
                                                                                     "designerId": "3fdba5e7-278e-4e6b-ad42-9ec658e4c660",
                                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                                 }
@@ -3499,7 +3483,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter26",
+                                                                    "name": "filter4",
                                                                     "designerId": "87274c48-fa61-4ab3-acd1-2696486c13a3",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3678,7 +3662,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter27",
+                                                                    "name": "filter5",
                                                                     "designerId": "f11b92d2-d17f-4030-af6e-5449c5557e10",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3877,7 +3861,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter28",
+                                                                    "name": "filter6",
                                                                     "designerId": "317ae54f-a81d-4657-8d0b-3edd670adaca",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -4118,7 +4102,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter29",
+                                                                    "name": "filter7",
                                                                     "designerId": "1de0066e-eb37-44ae-af83-adcc5f465797",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -4409,7 +4393,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter30",
+                                                                            "name": "filter8",
                                                                             "designerId": "102ea262-7cce-4c88-bd43-2f80cfa1e9a8",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -4531,7 +4515,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter31",
+                                                                            "name": "filter9",
                                                                             "designerId": "437f9756-d7eb-404d-89dd-762a18b9132c",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -4721,7 +4705,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter32",
+                                                    "name": "filter10",
                                                     "designerId": "efa99b46-2432-478a-97f2-c35eb7b7ed7c",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -5000,7 +4984,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter33",
+                                                                    "name": "filter11",
                                                                     "designerId": "8c12842b-2ead-456f-b4dc-8a0da80ee35f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -5336,7 +5320,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter34",
+                                                                    "name": "filter12",
                                                                     "designerId": "df49b4ec-5d3e-4ec5-8704-5a1a7a595dd1",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -5685,7 +5669,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter35",
+                                                                    "name": "filter13",
                                                                     "designerId": "1359797a-01d3-4908-862b-ecee335db0ef",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -6016,7 +6000,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter36",
+                                                                    "name": "filter14",
                                                                     "designerId": "9949aed9-86f7-4f15-aac6-afedae027c18",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -6423,7 +6407,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter37",
+                                                    "name": "filter15",
                                                     "designerId": "ab092e2c-0602-4213-baf5-e07813015a04",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -6604,7 +6588,7 @@
                         "layout|flex": 1,
                         "reference": "tlbStatusbarPaging"
                     },
-                    "name": "statusbarpaging20",
+                    "name": "statusbarpaging1",
                     "designerId": "64f13019-953f-46dc-920e-9a395d3cb3c9",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

@@ -250,8 +250,8 @@ Ext.define('Inventory.view.Item', {
                                                         items: [
                                                             {
                                                                 xtype: 'combobox',
-                                                                reference: 'cboClass',
-                                                                fieldLabel: 'Class',
+                                                                reference: 'cboCategory',
+                                                                fieldLabel: 'Category',
                                                                 labelWidth: 80
                                                             },
                                                             {
@@ -534,61 +534,61 @@ Ext.define('Inventory.view.Item', {
                                                                         xtype: 'combobox',
                                                                         reference: 'cboPatronage',
                                                                         fieldLabel: 'Patronage',
-                                                                        labelWidth: 110
+                                                                        labelWidth: 116
                                                                     },
                                                                     {
                                                                         xtype: 'combobox',
                                                                         reference: 'cboTaxClass',
                                                                         fieldLabel: 'Tax Class',
-                                                                        labelWidth: 110
+                                                                        labelWidth: 116
                                                                     },
                                                                     {
                                                                         xtype: 'checkboxfield',
                                                                         reference: 'chkStockedItem',
                                                                         fieldLabel: 'Stocked Item',
-                                                                        labelWidth: 110
+                                                                        labelWidth: 116
                                                                     },
                                                                     {
                                                                         xtype: 'checkboxfield',
                                                                         reference: 'chkDyedFuel',
                                                                         fieldLabel: 'Dyed Fuel',
-                                                                        labelWidth: 110
+                                                                        labelWidth: 116
                                                                     },
                                                                     {
                                                                         xtype: 'combobox',
                                                                         reference: 'cboBarcodePrint',
                                                                         fieldLabel: 'Barcode Print',
-                                                                        labelWidth: 110
+                                                                        labelWidth: 116
                                                                     },
                                                                     {
                                                                         xtype: 'checkboxfield',
                                                                         reference: 'chkMsdsRequired',
                                                                         fieldLabel: 'MSDS Required',
-                                                                        labelWidth: 110
+                                                                        labelWidth: 116
                                                                     },
                                                                     {
                                                                         xtype: 'textfield',
                                                                         reference: 'txtEpaNumber',
                                                                         fieldLabel: 'EPA Number',
-                                                                        labelWidth: 110
+                                                                        labelWidth: 116
                                                                     },
                                                                     {
                                                                         xtype: 'checkboxfield',
                                                                         reference: 'chkInboundTax',
                                                                         fieldLabel: 'Inbound Tax',
-                                                                        labelWidth: 110
+                                                                        labelWidth: 116
                                                                     },
                                                                     {
                                                                         xtype: 'checkboxfield',
                                                                         reference: 'chkOutboundTax',
                                                                         fieldLabel: 'Outbound Tax',
-                                                                        labelWidth: 110
+                                                                        labelWidth: 116
                                                                     },
                                                                     {
                                                                         xtype: 'checkboxfield',
                                                                         reference: 'chkRestrictedChemical',
                                                                         fieldLabel: 'Restricted Chemical',
-                                                                        labelWidth: 110
+                                                                        labelWidth: 116
                                                                     },
                                                                     {
                                                                         xtype: 'panel',
@@ -690,12 +690,6 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'checkboxfield',
                                                                                 reference: 'chkLoadTracking',
                                                                                 fieldLabel: 'Load tracking',
-                                                                                labelWidth: 125
-                                                                            },
-                                                                            {
-                                                                                xtype: 'combobox',
-                                                                                reference: 'cboFormulaLevel',
-                                                                                fieldLabel: 'Formula Level',
                                                                                 labelWidth: 125
                                                                             },
                                                                             {

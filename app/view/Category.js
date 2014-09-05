@@ -29,9 +29,9 @@ Ext.define('Inventory.view.Category', {
         'Ext.form.field.Number',
         'Ext.form.field.Checkbox',
         'Ext.grid.Panel',
-        'Ext.grid.column.Column',
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
+        'Ext.grid.column.Check',
         'Ext.toolbar.Paging'
     ],
 
@@ -643,9 +643,22 @@ Ext.define('Inventory.view.Category', {
                                                         text: 'Vendor<br>Department'
                                                     },
                                                     {
-                                                        xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
-                                                        text: 'Store<br>Category'
+                                                        xtype: 'checkcolumn',
+                                                        text: 'Add Ordering<br>UPC to Pricebook'
+                                                    },
+                                                    {
+                                                        xtype: 'checkcolumn',
+                                                        text: 'Update<br>Existing Records'
+                                                    },
+                                                    {
+                                                        xtype: 'checkcolumn',
+                                                        width: 86,
+                                                        text: 'Add<br>New Records'
+                                                    },
+                                                    {
+                                                        xtype: 'checkcolumn',
+                                                        width: 67,
+                                                        text: 'Update<br>Price'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',

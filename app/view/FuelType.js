@@ -162,14 +162,12 @@ Ext.define('Inventory.view.FuelType', {
                         {
                             xtype: 'combobox',
                             reference: 'cboFuelType',
-                            width: 170,
                             fieldLabel: 'Fuel Type',
                             labelWidth: 165
                         },
                         {
                             xtype: 'combobox',
                             reference: 'cboFeedStock',
-                            width: 170,
                             fieldLabel: 'Feed Stock',
                             labelWidth: 165
                         },

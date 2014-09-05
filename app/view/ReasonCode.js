@@ -261,6 +261,13 @@ Ext.define('Inventory.view.ReasonCode', {
                                             items: [
                                                 {
                                                     xtype: 'button',
+                                                    reference: 'btnAddWorkCenterMapping',
+                                                    tabIndex: -1,
+                                                    iconCls: 'small-add',
+                                                    text: 'Add'
+                                                },
+                                                {
+                                                    xtype: 'button',
                                                     reference: 'btnEditWorkCenterMapping',
                                                     tabIndex: -1,
                                                     iconCls: 'small-edit',
@@ -279,13 +286,7 @@ Ext.define('Inventory.view.ReasonCode', {
                                         {
                                             xtype: 'gridcolumn',
                                             dataIndex: 'string',
-                                            text: 'Reason Code',
-                                            flex: 1
-                                        },
-                                        {
-                                            xtype: 'gridcolumn',
-                                            dataIndex: 'string',
-                                            text: 'Workcenter',
+                                            text: 'Work Center',
                                             flex: 1
                                         }
                                     ],

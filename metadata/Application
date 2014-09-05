@@ -8,9 +8,9 @@
     "userConfig": {
         "name": "Inventory",
         "views": [
-            "Filter1",
             "Statusbar1",
-            "StatusbarPaging1"
+            "StatusbarPaging1",
+            "WorkCenterAdd"
         ]
     },
     "name": "Application",

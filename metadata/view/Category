@@ -1053,7 +1053,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter2",
+                                                    "name": "filter18",
                                                     "designerId": "9be921ca-705f-47f3-98b7-abf79fa0ae14",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1259,7 +1259,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter3",
+                                                    "name": "filter19",
                                                     "designerId": "336cd22c-55d7-4f75-bd45-20820dfc01b5",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1450,7 +1450,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter4",
+                                                    "name": "filter20",
                                                     "designerId": "1f016d2c-d6a9-4998-be84-a17777e4dd56",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1504,19 +1504,58 @@
                                             "designerId": "9d0f2d3d-7a79-4008-9bbb-a948d63efc9b"
                                         },
                                         {
-                                            "type": "Ext.grid.column.Column",
+                                            "type": "Ext.grid.column.Check",
                                             "reference": {
                                                 "name": "columns",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "dataIndex": "string",
-                                                "flex": null,
-                                                "text": "Store<br>Category"
+                                                "text": "Add Ordering<br>UPC to Pricebook"
                                             },
-                                            "name": "MyColumn107",
-                                            "designerId": "d76edd5e-bc9b-43bf-8830-131a6fd71889"
+                                            "name": "MyCheck1",
+                                            "designerId": "d1f9d6e0-5ec1-4dc3-bd78-07b0a5133a28"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Check",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "text": "Update<br>Existing Records"
+                                            },
+                                            "name": "MyCheck2",
+                                            "designerId": "515c2a52-c755-48e0-8923-9c60033e2eb7"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Check",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "text": "Add<br>New Records",
+                                                "width": 86
+                                            },
+                                            "name": "MyCheck3",
+                                            "designerId": "88bcb908-7d25-4f94-86ab-2a814eef7558"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Check",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "text": "Update<br>Price",
+                                                "width": 67
+                                            },
+                                            "name": "MyCheck4",
+                                            "designerId": "a14c914a-07eb-4ba3-becb-cecb54b47bf0"
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -1705,7 +1744,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter5",
+                                                    "name": "filter21",
                                                     "designerId": "0763d06c-c630-47e6-91f4-89ddac6c34ff",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2203,7 +2242,7 @@
                         "layout|flex": 1,
                         "reference": "tlbStatusbarPaging"
                     },
-                    "name": "statusbarpaging2",
+                    "name": "statusbarpaging4",
                     "designerId": "0ca3c6d6-785e-4ad8-ac4f-3eaa2d75593b",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

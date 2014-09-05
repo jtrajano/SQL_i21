@@ -21,9 +21,9 @@ Ext.Loader.setConfig({
 
 Ext.application({
     views: [
-        'Filter1',
         'Statusbar1',
-        'StatusbarPaging1'
+        'StatusbarPaging1',
+        'WorkCenterAdd'
     ],
     name: 'Inventory',
 

@@ -1,0 +1,226 @@
+{
+    "type": "Ext.window.Window",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "collapsible": true,
+        "defaultFocus": null,
+        "designer|userAlias": "workcenteradd",
+        "designer|userClassName": "WorkCenterAdd",
+        "height": 424,
+        "hidden": false,
+        "icon": null,
+        "iconCls": "small-icon-i21",
+        "layout": "fit",
+        "maximizable": true,
+        "minHeight": 300,
+        "minWidth": 400,
+        "minimizable": null,
+        "reference": null,
+        "title": "Add Work Centers",
+        "width": 400
+    },
+    "name": "ReasonCode1",
+    "designerId": "d55cecac-0f56-47d4-a630-50b94482506b",
+    "viewControllerInstanceId": "8f101643-0015-41f2-b940-a422137b34e6",
+    "viewModelInstanceId": "423369f8-5b15-4402-93aa-1f98c1a76b13",
+    "cn": [
+        {
+            "type": "Ext.form.Panel",
+            "reference": {
+                "name": "items",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "autoShow": true,
+                "bodyBorder": false,
+                "bodyPadding": 5,
+                "container|align": "stretch",
+                "dock": null,
+                "frame": null,
+                "header": false,
+                "height": 350,
+                "layout": "vbox",
+                "margin": -1,
+                "reference": "frmReasonCodeAdd",
+                "title": null,
+                "trackResetOnLoad": true,
+                "url": null,
+                "width": 450
+            },
+            "name": "MyForm8",
+            "designerId": "523f88ad-5ce1-464d-9eb9-71b3168b0e26",
+            "cn": [
+                {
+                    "type": "Ext.toolbar.Toolbar",
+                    "reference": {
+                        "name": "dockedItems",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|padding": "0 0 0 1",
+                        "designer|displayName": "toolbar",
+                        "dock": "top",
+                        "width": 588
+                    },
+                    "name": "MyToolbar36",
+                    "designerId": "de9be0fc-ce0e-4b49-a014-67133307273e",
+                    "cn": [
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-ok",
+                                "layout|flex": null,
+                                "reference": "btnOk",
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "OK",
+                                "width": 45
+                            },
+                            "name": "MyButton100",
+                            "designerId": "a285f773-a290-48a8-95b7-df7c48b5b756"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-cancel",
+                                "layout|flex": null,
+                                "reference": "btnCancel",
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Cancel",
+                                "width": 45
+                            },
+                            "name": "MyButton104",
+                            "designerId": "05dce15f-4b33-40fd-9d0c-aa2456654898"
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.grid.Panel",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "layout|flex": 1,
+                        "margin": null,
+                        "reference": "grdWorkcenter",
+                        "title": null
+                    },
+                    "name": "MyGridPanel13",
+                    "designerId": "a7863dac-2d30-4b4b-9a0f-94c941da9711",
+                    "cn": [
+                        {
+                            "type": "Ext.toolbar.Toolbar",
+                            "reference": {
+                                "name": "dockedItems",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|padding": "0 0 0 1",
+                                "dock": "top",
+                                "reference": "tlbGridOptions"
+                            },
+                            "name": "MyToolbar12",
+                            "designerId": "028f8132-1dbb-431a-95ce-110bfebae8b0",
+                            "cn": [
+                                {
+                                    "type": "linkedinstance",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "layout|flex": null
+                                    },
+                                    "name": "filter17",
+                                    "designerId": "b05d5e22-4ae0-47cd-836d-f6e836bc730b",
+                                    "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.grid.column.Column",
+                            "reference": {
+                                "name": "columns",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "dataIndex": "string",
+                                "flex": 1,
+                                "text": "Work Center"
+                            },
+                            "name": "MyColumn69",
+                            "designerId": "b26d589c-8238-43d4-9691-f869027ef3d5"
+                        },
+                        {
+                            "type": "Ext.grid.View",
+                            "reference": {
+                                "name": "viewConfig",
+                                "type": "object"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "reference": "grvWorkcenter"
+                            },
+                            "name": "MyGridView13",
+                            "designerId": "649548b0-8dff-41b0-95c0-17a5229355cf"
+                        },
+                        {
+                            "type": "Ext.selection.CheckboxModel",
+                            "reference": {
+                                "name": "selModel",
+                                "type": "object"
+                            },
+                            "codeClass": null,
+                            "name": "MyCheckboxSelectionModel9",
+                            "designerId": "e402b260-09e5-498f-b7d3-f840b7591a65"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "linkedinstance",
+            "reference": {
+                "name": "dockedItems",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "dock": "bottom"
+            },
+            "name": "statusbar",
+            "designerId": "4039ff2e-e200-43e3-b2bb-0d84a794a755",
+            "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
+        }
+    ]
+}

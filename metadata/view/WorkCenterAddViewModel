@@ -1,0 +1,14 @@
+{
+    "type": "Ext.app.ViewModel",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "workcenteradd",
+        "designer|userClassName": "WorkCenterAddViewModel"
+    },
+    "name": "ReasonCodeViewModel1",
+    "designerId": "423369f8-5b15-4402-93aa-1f98c1a76b13"
+}

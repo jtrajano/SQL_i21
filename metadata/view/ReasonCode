@@ -533,14 +533,32 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "icon": null,
+                                                        "iconCls": "small-add",
+                                                        "layout|flex": null,
+                                                        "reference": "btnAddWorkCenterMapping",
+                                                        "tabIndex": -1,
+                                                        "text": "Add"
+                                                    },
+                                                    "name": "MyButton163",
+                                                    "designerId": "83828159-e121-46ed-a2d0-b16f6bb43286"
+                                                },
+                                                {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "icon": null,
                                                         "iconCls": "small-edit",
                                                         "layout|flex": null,
                                                         "reference": "btnEditWorkCenterMapping",
                                                         "tabIndex": -1,
                                                         "text": "Edit"
                                                     },
-                                                    "name": "MyButton163",
-                                                    "designerId": "83828159-e121-46ed-a2d0-b16f6bb43286"
+                                                    "name": "MyButton24",
+                                                    "designerId": "7d0f5763-9b1b-4717-bc5a-50d05ab6eb8d"
                                                 },
                                                 {
                                                     "type": "Ext.toolbar.Separator",
@@ -566,7 +584,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter",
+                                                    "name": "filter16",
                                                     "designerId": "cbc3d1e3-0a16-459a-a5d5-96b049143686",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -582,22 +600,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
-                                                "text": "Reason Code"
-                                            },
-                                            "name": "MyColumn68",
-                                            "designerId": "da56779f-529f-4ae8-bfec-15fefd2ce15e"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "string",
-                                                "flex": 1,
-                                                "text": "Workcenter"
+                                                "text": "Work Center"
                                             },
                                             "name": "MyColumn69",
                                             "designerId": "eb949b2b-122b-44b1-82bf-130d1372c8b0"
@@ -647,7 +650,7 @@
                         "reference": "pagingtoolbar",
                         "store": null
                     },
-                    "name": "statusbarpaging",
+                    "name": "statusbarpaging2",
                     "designerId": "ef3325fc-949c-4d8a-b81c-1b8eeaac6a57",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
