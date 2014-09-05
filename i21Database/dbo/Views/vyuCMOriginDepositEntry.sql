@@ -1,5 +1,5 @@
 ﻿
--- Create a dummy view that can be used if the Origin Integration is not established. 
+-- Create a stub view that can be used if the Origin Integration is not established. 
 CREATE VIEW [dbo].[vyuCMOriginDepositEntry]
 AS
 

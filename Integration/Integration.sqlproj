@@ -191,6 +191,16 @@
     <None Include="dbo\Views\vyuECCFCardTransaction.sql" />
     <Build Include="dbo\Tables\tblAPTermsImported.sql" />
     <Build Include="dbo\Tables\tblAPImportedVendors.sql" />
+    <None Include="dbo\Functions\fnGetCurrencyIdFromi21ToOrigin.sql" />
+    <None Include="dbo\Stored Procedures\uspCMImportBankAccountsFromOrigin.sql" />
+    <None Include="dbo\Stored Procedures\uspCMImportBankReconciliationFromOrigin.sql" />
+    <None Include="dbo\Stored Procedures\uspCMImportBankTransactionsFromOrigin.sql" />
+    <None Include="dbo\Stored Procedures\uspCMImportValidations.sql" />
+    <None Include="dbo\Stored Procedures\uspGLImportOriginCOA.sql" />
+    <None Include="dbo\Stored Procedures\uspGLAccountOriginSync.sql" />
+    <None Include="dbo\Stored Procedures\uspGLBuildAccount.sql" />
+    <None Include="dbo\Stored Procedures\uspGLBuildOriginAccount.sql" />
+    <None Include="dbo\Stored Procedures\uspSMMigrateCurrency.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

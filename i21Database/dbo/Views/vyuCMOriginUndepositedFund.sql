@@ -1,6 +1,6 @@
 ﻿
--- Create a dummy view
--- The real view is in the integration script. The dummy view is used to avoid errors in the undeposited screen process when the 
+-- Create a stub view
+-- The real view is in the integration script. A stub view is used to avoid errors in the undeposited screen process when the 
 -- origin AP module is not installed. 
 
 CREATE VIEW [dbo].[vyuCMOriginUndepositedFund]

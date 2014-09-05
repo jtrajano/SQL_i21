@@ -977,5 +977,5 @@ Post_Cleanup:
 	END
 
 Post_Exit:
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE ID = OBJECT_ID('tempdb..#tmpARReceivablePostData')) DROP TABLE #tmpARReceivablePostData
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE ID = OBJECT_ID('tempdb..##tmpARReceivableInvalidData')) DROP TABLE #tmpARReceivableInvalidData
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpARReceivablePostData')) DROP TABLE #tmpARReceivablePostData
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..##tmpARReceivableInvalidData')) DROP TABLE #tmpARReceivableInvalidData

@@ -333,8 +333,12 @@
     <Build Include="dbo\Stored Procedures\uspCMApplyCheckChangeBankReconciliation.sql" />
     <Build Include="dbo\Stored Procedures\uspCMApplyCheckChangeForCheckPrint.sql" />
     <Build Include="dbo\Stored Procedures\uspCMApplyCheckChangeForPrintFail.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMBookGLEntries.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMCheckPrint_QueuePrintJobs.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMBookGLEntries.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Stored Procedures\uspCMCheckPrint_QueuePrintJobs.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Stored Procedures\uspCMCheckPrint_ValidatePrintJobs.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCommitPrintCheckVerification.sql" />
     <Build Include="dbo\Stored Procedures\uspCMGenerateCheckNumbers.sql" />
@@ -354,20 +358,30 @@
     <Build Include="dbo\Stored Procedures\uspCMPostMiscChecks.sql" />
     <Build Include="dbo\Stored Procedures\uspCMPostMessages.sql" />
     <Build Include="dbo\Stored Procedures\uspCMPostRecap.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMReconcileBankRecords.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMReverseGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMReconcileBankRecords.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Stored Procedures\uspCMReverseGLEntries.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Stored Procedures\uspGLAccountClone.sql" />
     <Build Include="dbo\Stored Procedures\uspGLAccountOriginSync.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildAccountTemporary.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildOriginAccount.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLBuildTempCOASegment.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLBuildTempCOASegment.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Stored Procedures\uspGLImportOriginCOA.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournal.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournal.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Stored Procedures\uspGLPostFiscalYear.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBill.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBillBatch.sql" />
-    <Build Include="dbo\Stored Procedures\uspRMInsertDynamicParameterFields.sql" />
+    <Build Include="dbo\Stored Procedures\uspRMInsertDynamicParameterFields.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\User Defined Types\RecapTableType.sql" />
     <None Include="Script.PreDeployment1.sql" />
     <None Include="Script.PostDeployment1.sql" />
@@ -502,12 +516,16 @@
     <Build Include="dbo\Tables\tblARCustomerBuyback.sql" />
     <Build Include="dbo\Tables\tblARCustomer.sql" />
     <Build Include="dbo\Tables\tblARAccountStatus.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMBuildCustomTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMBuildCustomTable.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Functions\fnGetUserDefaultLocation.sql" />
     <Build Include="dbo\Tables\tblCPPreference.sql" />
     <Build Include="dbo\Tables\tblHDUpload.sql" />
     <Build Include="dbo\Tables\tblARInvoice.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPPostPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPPostPayment.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Tables\tblSMUserSecurityMenuFavorite.sql" />
     <Build Include="dbo\Views\vyuHDUserDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSMResetOriginMenus.sql" />
@@ -544,7 +562,9 @@
     <Build Include="dbo\Functions\fnGetEntityIdFromUser.sql" />
     <Build Include="dbo\Stored Procedures\uspSMMigrateUserEntity.sql" />
     <Build Include="dbo\Stored Procedures\uspSMMigrateCurrency.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMMigrateTransactionUser.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMMigrateTransactionUser.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Tables\tblHDTicketJIRAIssue.sql" />
     <Build Include="dbo\Stored Procedures\uspCMImportValidations.sql" />
     <Build Include="dbo\Tables\tblFREmailFinancial.sql" />
@@ -552,7 +572,9 @@
     <Build Include="dbo\Tables\tblFRMappingDetail.sql" />
     <Build Include="dbo\Views\vyuAPBill.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRecreateCOASegmentMapping.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMBankTransactionReversal.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMBankTransactionReversal.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Functions\fnGetBankTransactionReversalErrors.sql" />
     <Build Include="dbo\Stored Procedures\uspGLFixStartingNumbers.sql" />
     <Build Include="dbo\Tables\tblSMSearchFilter.sql" />
@@ -648,6 +670,7 @@
     <Build Include="dbo\Tables\tblPRTaxTypeLocal.sql" />
     <Build Include="dbo\Tables\tblPRTaxTypeProvince.sql" />
     <Build Include="dbo\Tables\tblPRTaxTypeState.sql" />
+    <Build Include="dbo\Views\vyuCMBankAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

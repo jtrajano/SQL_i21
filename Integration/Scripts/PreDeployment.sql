@@ -9,18 +9,32 @@
                SELECT * FROM [$(TableName)]					
 --------------------------------------------------------------------------------------
 */
+
 :r .\LoadModules.sql
 
--- CASH MANAGEMENT
+-- SYSTEM MANAGER
+:r "..\dbo\Stored Procedures\uspSMMigrateCurrency.sql"
 
+-- GENERAL LEDGER
+:r "..\dbo\Stored Procedures\uspGLImportOriginCOA.sql"
+:r "..\dbo\Stored Procedures\uspGLAccountOriginSync.sql"
+:r "..\dbo\Stored Procedures\uspGLBuildAccount.sql"
+:r "..\dbo\Stored Procedures\uspGLBuildOriginAccount.sql"
+
+-- CASH MANAGEMENT
 :r ..\dbo\Views\apcbkmst.sql
 :r ..\dbo\Views\apchkmst.sql
 :r ..\dbo\Functions\fnIsDepositEntry.sql 
+:r ..\dbo\Functions\fnGetCurrencyIdFromi21ToOrigin.sql 
 :r ..\dbo\Views\vyuCMBankAccount.sql
 :r ..\dbo\Views\vyuCMOriginDepositEntry.sql
 :r ..\dbo\Views\vyuCMOriginUndepositedFund.sql
 :r "..\dbo\Stored Procedures\uspCMProcessUndepositedFunds.sql"
 :r "..\dbo\Stored Procedures\uspCMBankTransactionReversalOrigin.sql"
+:r "..\dbo\Stored Procedures\uspCMImportBankAccountsFromOrigin.sql"
+:r "..\dbo\Stored Procedures\uspCMImportBankReconciliationFromOrigin.sql"
+:r "..\dbo\Stored Procedures\uspCMImportBankTransactionsFromOrigin.sql"
+:r "..\dbo\Stored Procedures\uspCMImportValidations.sql"
 
 -- ACCOUNTS PAYABLE
 :r ..\dbo\Views\vwapivcmst.sql
