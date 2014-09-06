@@ -1626,7 +1626,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter15",
+                                                    "name": "filter20",
                                                     "designerId": "d1d95af0-9c50-4846-90d7-8a8eba7180aa",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1849,7 +1849,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter16",
+                                                    "name": "filter21",
                                                     "designerId": "01b5694b-ea5d-4f25-b0ab-a281b2fe4e6d",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2735,7 +2735,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter17",
+                                                    "name": "filter22",
                                                     "designerId": "8a248dba-b8fb-4383-bd50-63165f748df8",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2766,7 +2766,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
-                                                "text": "Account Type"
+                                                "text": "Account Description"
                                             },
                                             "name": "MyColumn143",
                                             "designerId": "17bcb874-4c4b-47d5-b68a-c77d25ef4e93"
@@ -2781,7 +2781,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
-                                                "text": "Account Id"
+                                                "text": "Account ID"
                                             },
                                             "name": "MyColumn144",
                                             "designerId": "9951ec59-3d4d-415e-9e19-f9282c359a06"
@@ -2828,7 +2828,7 @@
                         "layout|flex": 1,
                         "reference": "tlbStatusbarPaging"
                     },
-                    "name": "statusbarpaging10",
+                    "name": "statusbarpaging2",
                     "designerId": "7971c615-1be1-4e70-a9e4-da46d5e3f739",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

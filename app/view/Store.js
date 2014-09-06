@@ -1103,13 +1103,13 @@ Ext.define('Inventory.view.Store', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         dataIndex: 'string',
-                                                        text: 'Account Type',
+                                                        text: 'Account Description',
                                                         flex: 1
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         dataIndex: 'string',
-                                                        text: 'Account Id',
+                                                        text: 'Account ID',
                                                         flex: 1
                                                     }
                                                 ],

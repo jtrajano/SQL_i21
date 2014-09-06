@@ -570,7 +570,7 @@ Ext.define('Inventory.view.Category', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         dataIndex: 'string',
-                                                        text: 'Account Type',
+                                                        text: 'Account Description',
                                                         flex: 1
                                                     },
                                                     {
