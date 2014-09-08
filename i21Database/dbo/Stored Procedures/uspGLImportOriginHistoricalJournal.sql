@@ -60,7 +60,7 @@ BEGIN
 		1 AS intConcurrencyId,																											-- intConcurrencyId
 		NULL AS strReverseLink,
 		NULL AS strRecurringStatus,
-		NULL AS dtmJournalDate,																												-- dtmJournalDate
+		GETDATE() AS dtmDateEntered,																												-- dtmJournalDate/dtmDateEntered
 		NULL AS dtmReverseDate,																												-- We should not import reversing transactions	
 		NULL AS dblExchangeRate,																											-- exchange rate
 		NULL AS dtmPosted																												-- date posted--convert(varchar,(12),MAX(glhst_period)) removed per liz	
@@ -96,7 +96,7 @@ BEGIN
 	--+++++++++++++++++++++++++++++++++
 
 	INSERT tblGLJournal (dtmReverseDate,strJournalId,strTransactionType, dtmDate,strReverseLink,intCurrencyId,dblExchangeRate,dtmPosted,strDescription,
-							ysnPosted,intConcurrencyId,dtmJournalDate,intEntityId,strSourceId,strJournalType,strRecurringStatus,strSourceType)
+							ysnPosted,intConcurrencyId,dtmDateEntered,intEntityId,strSourceId,strJournalType,strRecurringStatus,strSourceType)
 	SELECT  dtmReverseDate,
 			strJournalId,
 			strTransactionType, 
@@ -108,7 +108,7 @@ BEGIN
 			strDescription,
 			ysnPosted,
 			intConcurrencyId,
-			dtmJournalDate,
+			dtmDateEntered,
 			intEntityId,
 			strSourceId,
 			strJournalType,

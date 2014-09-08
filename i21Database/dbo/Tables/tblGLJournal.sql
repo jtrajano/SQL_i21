@@ -11,7 +11,7 @@
     [strDescription]     NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
     [ysnPosted]          BIT              NULL,
     [intConcurrencyId]   INT              DEFAULT 1 NOT NULL,
-    [dtmJournalDate]     DATETIME         NULL,
+    [dtmDateEntered]     DATETIME         DEFAULT (GETDATE()) NULL,
     [intUserId]          INT              NULL,
     [intEntityId]        INT              NULL,
     [strSourceId]        NVARCHAR (10)    COLLATE Latin1_General_CI_AS NULL,

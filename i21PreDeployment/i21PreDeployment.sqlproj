@@ -81,6 +81,7 @@
     <None Include="Scripts\Pre-Deployment\7_AR\1_1410_to_1420.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\1_1410_to_1420.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\1_1420_to_1430.sql" />
+    <None Include="Scripts\Pre-Deployment\6_GL\2_1430_to_1440.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />

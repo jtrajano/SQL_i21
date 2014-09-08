@@ -564,7 +564,7 @@ BEGIN
 				,[strDescription]
 				,[ysnPosted]
 				,[intConcurrencyId]
-				,[dtmJournalDate]
+				,[dtmDateEntered]
 				,[intUserId]
 				,[intEntityId]				
 				,[strSourceId]
@@ -584,7 +584,7 @@ BEGIN
 				,'Reversing transaction for ' + A.strJournalId
 				,[ysnPosted]
 				,[intConcurrencyId]
-				,[dtmJournalDate]
+				,[dtmDateEntered]
 				,[intUserId]
 				,[intEntityId]
 				,[strSourceId]
