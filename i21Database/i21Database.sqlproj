@@ -671,6 +671,7 @@
     <Build Include="dbo\Tables\tblPRTaxTypeProvince.sql" />
     <Build Include="dbo\Tables\tblPRTaxTypeState.sql" />
     <Build Include="dbo\Views\vyuCMBankAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreatePaymentFromOriginBill.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
