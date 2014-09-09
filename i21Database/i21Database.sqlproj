@@ -672,6 +672,8 @@
     <Build Include="dbo\Tables\tblPRTaxAgency.sql" />
     <Build Include="dbo\Views\vyuCMBankAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreatePaymentFromOriginBill.sql" />
+    <Build Include="dbo\Functions\fnGetItemCostingMethod.sql" />
+    <Build Include="dbo\Tables\tblICInventoryTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -691,5 +693,8 @@
       <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
       <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
     </ArtifactReference>
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="i21Database.refactorlog" />
   </ItemGroup>
 </Project>
