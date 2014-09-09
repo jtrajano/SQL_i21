@@ -639,23 +639,21 @@
     <Build Include="dbo\Tables\tblRMDefaultFilter.sql" />
     <Build Include="dbo\Tables\tblRMDefaultOption.sql" />
     <Build Include="dbo\Tables\tblRMDefaultSort.sql" />
-    <Build Include="dbo\Tables\tblPRDeductionGroup.sql" />
-    <Build Include="dbo\Tables\tblPRDeductionGroupDetail.sql" />
-    <Build Include="dbo\Tables\tblPRDeductionGroupDetailTax.sql" />
-    <Build Include="dbo\Tables\tblPRDeductionType.sql" />
-    <Build Include="dbo\Tables\tblPRDeductionTypeTax.sql" />
+    <Build Include="dbo\Tables\tblPRTemplateDeduction.sql" />
+    <Build Include="dbo\Tables\tblPRTemplateDeductionTax.sql" />
+    <Build Include="dbo\Tables\tblPRTypeDeduction.sql" />
+    <Build Include="dbo\Tables\tblPRTypeDeductionTax.sql" />
     <Build Include="dbo\Tables\tblPRDivision.sql" />
-    <Build Include="dbo\Tables\tblPREarningGroup.sql" />
-    <Build Include="dbo\Tables\tblPREarningGroupDetail.sql" />
-    <Build Include="dbo\Tables\tblPREarningGroupDetailTax.sql" />
-    <Build Include="dbo\Tables\tblPREarningType.sql" />
-    <Build Include="dbo\Tables\tblPREarningTypeTax.sql" />
+    <Build Include="dbo\Tables\tblPRTemplateEarning.sql" />
+    <Build Include="dbo\Tables\tblPRTemplateEarningTax.sql" />
+    <Build Include="dbo\Tables\tblPRTypeEarning.sql" />
+    <Build Include="dbo\Tables\tblPRTypeEarningTax.sql" />
     <Build Include="dbo\Tables\tblPREmployee.sql" />
     <Build Include="dbo\Tables\tblPREmployeeDeduction.sql" />
     <Build Include="dbo\Tables\tblPREmployeeEarning.sql" />
     <Build Include="dbo\Tables\tblPREmployeePaycheckRegister.sql" />
     <Build Include="dbo\Tables\tblPREmployeeTax.sql" />
-    <Build Include="dbo\Tables\tblPREmployeeTimeOff.sql" />
+    <Build Include="dbo\Tables\tblPREmployeeLeave.sql" />
     <Build Include="dbo\Tables\tblPREthnicOrigin.sql" />
     <Build Include="dbo\Tables\tblPRPaycheck.sql" />
     <Build Include="dbo\Tables\tblPRPaycheckDeduction.sql" />
@@ -663,14 +661,16 @@
     <Build Include="dbo\Tables\tblPRPaycheckTax.sql" />
     <Build Include="dbo\Tables\tblPRPayGroup.sql" />
     <Build Include="dbo\Tables\tblPRTaxAgency.sql" />
-    <Build Include="dbo\Tables\tblPRTaxGroup.sql" />
-    <Build Include="dbo\Tables\tblPRTaxGroupDetail.sql" />
-    <Build Include="dbo\Tables\tblPRTaxType.sql" />
-    <Build Include="dbo\Tables\tblPRTaxTypeCounty.sql" />
-    <Build Include="dbo\Tables\tblPRTaxTypeLocal.sql" />
-    <Build Include="dbo\Tables\tblPRTaxTypeProvince.sql" />
-    <Build Include="dbo\Tables\tblPRTaxTypeState.sql" />
+    <Build Include="dbo\Tables\tblPRTemplateTax.sql" />
+    <Build Include="dbo\Tables\tblPRTypeTax.sql" />
+    <Build Include="dbo\Tables\tblPRTypeTaxLocal.sql" />
+    <Build Include="dbo\Tables\tblPRTypeTaxState.sql" />
     <Build Include="dbo\Views\vyuCMBankAccount.sql" />
+    <Build Include="dbo\Tables\tblPRTypeTimeOff.sql" />
+    <Build Include="dbo\Tables\tblPRTypeTimeOffTax.sql" />
+    <Build Include="dbo\Tables\tblPRTemplate.sql" />
+    <Build Include="dbo\Tables\tblPRTemplateTimeOffTax.sql" />
+    <Build Include="dbo\Tables\tblPRTemplateTimeOff.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -690,5 +690,8 @@
       <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
       <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
     </ArtifactReference>
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="i21Database.refactorlog" />
   </ItemGroup>
 </Project>

@@ -1,13 +1,13 @@
-﻿CREATE TABLE [dbo].[tblPRDeductionGroupDetailTax]
+﻿CREATE TABLE [dbo].[tblPRTemplateDeductionTax]
 (
-	[intDeductionGroupDetailTaxId] INT NOT NULL IDENTITY , 
-    [intDeductionGroupDetailId] INT NOT NULL, 
-    [intTaxTypeId] INT NOT NULL, 
+	[intTemplateDeductionTaxId] INT NOT NULL IDENTITY , 
+    [intTemplateDeductionId] INT NOT NULL, 
+    [intTypeTaxId] INT NOT NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT ((1)), 
-    CONSTRAINT [PK_tblPRDeductionGroupDetailTax] PRIMARY KEY ([intDeductionGroupDetailTaxId]), 
-    CONSTRAINT [FK_tblPRDeductionGroupDetailTax_tblPRDeductionGroupDetail] FOREIGN KEY ([intDeductionGroupDetailId]) REFERENCES [tblPRDeductionGroupDetail]([intDeductionGroupDetailId]) ON DELETE CASCADE, 
-    CONSTRAINT [FK_tblPRDeductionGroupDetailTax_tblPRTaxType] FOREIGN KEY ([intTaxTypeId]) REFERENCES [tblPRTaxType]([intTaxTypeId])
+    CONSTRAINT [PK_tblPRTemplateDeductionTax] PRIMARY KEY ([intTemplateDeductionTaxId]), 
+    CONSTRAINT [FK_tblPRTemplateDeductionTax_tblPRTemplateDeduction] FOREIGN KEY ([intTemplateDeductionId]) REFERENCES [tblPRTemplateDeduction]([intTemplateDeductionId]) ON DELETE CASCADE, 
+    CONSTRAINT [FK_tblPRTemplateDeductionTax_tblPRTypeTax] FOREIGN KEY ([intTypeTaxId]) REFERENCES [tblPRTypeTax]([intTypeTaxId])
 )
 
 GO
@@ -16,16 +16,16 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRDeductionGroupDetailTax',
+    @level1name = N'tblPRTemplateDeductionTax',
     @level2type = N'COLUMN',
-    @level2name = N'intDeductionGroupDetailTaxId'
+    @level2name = N'intTemplateDeductionTaxId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Sort Field',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRDeductionGroupDetailTax',
+    @level1name = N'tblPRTemplateDeductionTax',
     @level2type = N'COLUMN',
     @level2name = N'intSort'
 GO
@@ -34,7 +34,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRDeductionGroupDetailTax',
+    @level1name = N'tblPRTemplateDeductionTax',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
 GO
@@ -43,36 +43,36 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRDeductionGroupDetailTax',
+    @level1name = N'tblPRTemplateDeductionTax',
     @level2type = N'COLUMN',
-    @level2name = N'intTaxTypeId'
+    @level2name = N'intTypeTaxId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Deduction Group Detail Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRDeductionGroupDetailTax',
+    @level1name = N'tblPRTemplateDeductionTax',
     @level2type = N'COLUMN',
-    @level2name = N'intDeductionGroupDetailId'
+    @level2name = N'intTemplateDeductionId'
 GO
 EXEC sp_addextendedproperty @name=N'MS_Description',
 	@value = N'Deduction Group Detail is used in Deduction Group Detail Tax' ,
 	@level0type = N'SCHEMA',
 	@level0name = N'dbo', 
 	@level1type = N'TABLE',
-	@level1name = N'tblPRDeductionGroupDetail', 
+	@level1name = N'tblPRTemplateDeduction', 
 	@level2type = N'CONSTRAINT',
-	@level2name = N'FK_tblPRDeductionGroupDetailTax_tblPRDeductionGroupDetail'
+	@level2name = N'FK_tblPRTemplateDeductionTax_tblPRTemplateDeduction'
 GO
 EXEC sp_addextendedproperty @name=N'MS_Description',
 	@value = N'Tax Type is used in Deduction Group Detail Tax' ,
 	@level0type = N'SCHEMA',
 	@level0name = N'dbo', 
 	@level1type = N'TABLE',
-	@level1name = N'tblPRTaxType', 
+	@level1name = N'tblPRTypeTax', 
 	@level2type = N'CONSTRAINT',
-	@level2name = N'FK_tblPRDeductionGroupDetailTax_tblPRTaxType'
+	@level2name = N'FK_tblPRTemplateDeductionTax_tblPRTypeTax'
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblPRDeductionGroupDetailTax] ON [dbo].[tblPRDeductionGroupDetailTax] ([intDeductionGroupDetailId], [intTaxTypeId]) WITH (IGNORE_DUP_KEY = OFF)
+CREATE NONCLUSTERED INDEX [IX_tblPRTemplateDeductionTax] ON [dbo].[tblPRTemplateDeductionTax] ([intTemplateDeductionId], [intTypeTaxId]) WITH (IGNORE_DUP_KEY = OFF)

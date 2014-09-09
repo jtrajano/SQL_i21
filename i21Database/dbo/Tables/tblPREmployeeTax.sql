@@ -1,13 +1,13 @@
 ﻿CREATE TABLE [dbo].[tblPREmployeeTax](
 	[intEmployeeTaxId] [int] NOT NULL IDENTITY,
 	[intEmployeeId] INT NOT NULL,
-	[intTaxTypeId] INT NOT NULL,
+	[intTypeTaxId] INT NOT NULL,
 	[strCalculationType] [nvarchar](50) NULL,
 	[dblAmount] [numeric](18, 6) NULL DEFAULT ((0)),
 	[dblPercent] [numeric](18, 6) NULL DEFAULT ((0)),
 	[dblLimit] [numeric](18, 6) NULL DEFAULT ((0)),
-	[intTaxTypeStateId] INT NULL,
-	[intTaxTypeCountyId] INT NULL,
+	[intTypeTaxStateId] INT NULL,
+	[intTypeTaxCountyId] INT NULL,
 	[intAccountId] INT NULL,
 	[dblExtraWithholding] [numeric](18, 6) NULL DEFAULT ((0)),
 	[strFilingStatus] [nvarchar](25) NULL,
@@ -24,12 +24,12 @@
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblPREmployeeTax] PRIMARY KEY ([intEmployeeTaxId]), 
     CONSTRAINT [FK_tblPREmployeeTax_tblPREmployee] FOREIGN KEY ([intEmployeeId]) REFERENCES [tblPREmployee]([intEmployeeId]), 
-    CONSTRAINT [FK_tblPREmployeeTax_tblPRTaxType] FOREIGN KEY ([intTaxTypeId]) REFERENCES [tblPRTaxType]([intTaxTypeId]),
+    CONSTRAINT [FK_tblPREmployeeTax_tblPRTypeTax] FOREIGN KEY ([intTypeTaxId]) REFERENCES [tblPRTypeTax]([intTypeTaxId]),
 ) ON [PRIMARY]
 GO
 
 
-CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPREmployeeTax] ON [dbo].[tblPREmployeeTax] ([intEmployeeId], [intTaxTypeId]) WITH (IGNORE_DUP_KEY = OFF)
+CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPREmployeeTax] ON [dbo].[tblPREmployeeTax] ([intEmployeeId], [intTypeTaxId]) WITH (IGNORE_DUP_KEY = OFF)
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
@@ -57,7 +57,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployeeTax',
     @level2type = N'COLUMN',
-    @level2name = N'intTaxTypeId'
+    @level2name = N'intTypeTaxId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Calculation Type',
@@ -102,7 +102,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployeeTax',
     @level2type = N'COLUMN',
-    @level2name = N'intTaxTypeStateId'
+    @level2name = N'intTypeTaxStateId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Tax Type County Id',
@@ -111,7 +111,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployeeTax',
     @level2type = N'COLUMN',
-    @level2name = N'intTaxTypeCountyId'
+    @level2name = N'intTypeTaxCountyId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Account Id',

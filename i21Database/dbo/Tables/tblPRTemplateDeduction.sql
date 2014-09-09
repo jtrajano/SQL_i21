@@ -1,7 +1,7 @@
-﻿CREATE TABLE [dbo].[tblPRDeductionGroupDetail](
-	[intDeductionGroupDetailId] [int] NOT NULL IDENTITY,
-	[intDeductionGroupId] [int] NOT NULL,
-	[intDeductionTypeId] INT NOT NULL,
+﻿CREATE TABLE [dbo].[tblPRTemplateDeduction](
+	[intTemplateDeductionId] [int] NOT NULL IDENTITY,
+	[intTemplateId] [int] NOT NULL,
+	[intTypeDeductionId] INT NOT NULL,
 	[strDeductFrom] [nvarchar](50) NULL,
 	[strCalculationType] [nvarchar](50) NULL,
 	[dblAmount] [numeric](18, 6) NOT NULL DEFAULT ((0)),
@@ -16,9 +16,8 @@
 	[intSort] [int] NULL,
 	[ysnActive] [bit] NOT NULL DEFAULT ((1)), 
 	[intConcurrencyId] [int] NULL DEFAULT ((1)),
-    CONSTRAINT [PK_tblPRDeductionGroupDetail] PRIMARY KEY ([intDeductionGroupDetailId]), 
-    CONSTRAINT [FK_tblPRDeductionGroupDetail_tblPRDeductionGroup] FOREIGN KEY ([intDeductionGroupId]) REFERENCES [tblPRDeductionGroup]([intDeductionGroupId]) ON DELETE CASCADE, 
-    CONSTRAINT [FK_tblPRDeductionGroupDetail_tblPRDeductionType] FOREIGN KEY ([intDeductionTypeId]) REFERENCES [tblPRDeductionType]([intDeductionTypeId]),
+    CONSTRAINT [PK_tblPRTemplateDeduction] PRIMARY KEY ([intTemplateDeductionId]), 
+    CONSTRAINT [FK_tblPRTemplateDeduction_tblPRTypeDeduction] FOREIGN KEY ([intTypeDeductionId]) REFERENCES [tblPRTypeDeduction]([intTypeDeductionId]),
 ) ON [PRIMARY]
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
@@ -26,34 +25,25 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRDeductionGroupDetail',
+    @level1name = N'tblPRTemplateDeduction',
     @level2type = N'COLUMN',
-    @level2name = N'intDeductionGroupDetailId'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Deduction Group Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPRDeductionGroupDetail',
-    @level2type = N'COLUMN',
-    @level2name = N'intDeductionGroupId'
+    @level2name = N'intTemplateDeductionId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Deduction Type Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRDeductionGroupDetail',
+    @level1name = N'tblPRTemplateDeduction',
     @level2type = N'COLUMN',
-    @level2name = 'intDeductionTypeId'
+    @level2name = 'intTypeDeductionId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Deduct From',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRDeductionGroupDetail',
+    @level1name = N'tblPRTemplateDeduction',
     @level2type = N'COLUMN',
     @level2name = N'strDeductFrom'
 GO
@@ -62,7 +52,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRDeductionGroupDetail',
+    @level1name = N'tblPRTemplateDeduction',
     @level2type = N'COLUMN',
     @level2name = N'strCalculationType'
 GO
@@ -71,7 +61,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRDeductionGroupDetail',
+    @level1name = N'tblPRTemplateDeduction',
     @level2type = N'COLUMN',
     @level2name = N'dblAmount'
 GO
@@ -80,7 +70,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRDeductionGroupDetail',
+    @level1name = N'tblPRTemplateDeduction',
     @level2type = N'COLUMN',
     @level2name = N'dblPercent'
 GO
@@ -89,7 +79,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRDeductionGroupDetail',
+    @level1name = N'tblPRTemplateDeduction',
     @level2type = N'COLUMN',
     @level2name = N'dblLimit'
 GO
@@ -98,7 +88,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRDeductionGroupDetail',
+    @level1name = N'tblPRTemplateDeduction',
     @level2type = N'COLUMN',
     @level2name = N'dtmBeginDate'
 GO
@@ -107,7 +97,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRDeductionGroupDetail',
+    @level1name = N'tblPRTemplateDeduction',
     @level2type = N'COLUMN',
     @level2name = N'dtmEndDate'
 GO
@@ -116,7 +106,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRDeductionGroupDetail',
+    @level1name = N'tblPRTemplateDeduction',
     @level2type = N'COLUMN',
     @level2name = N'intAccountId'
 GO
@@ -125,7 +115,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRDeductionGroupDetail',
+    @level1name = N'tblPRTemplateDeduction',
     @level2type = N'COLUMN',
     @level2name = N'strPaidBy'
 GO
@@ -134,7 +124,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRDeductionGroupDetail',
+    @level1name = N'tblPRTemplateDeduction',
     @level2type = N'COLUMN',
     @level2name = N'ysnCreatePayable'
 GO
@@ -143,7 +133,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRDeductionGroupDetail',
+    @level1name = N'tblPRTemplateDeduction',
     @level2type = N'COLUMN',
     @level2name = N'intVendorId'
 GO
@@ -152,7 +142,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRDeductionGroupDetail',
+    @level1name = N'tblPRTemplateDeduction',
     @level2type = N'COLUMN',
     @level2name = N'intSort'
 GO
@@ -161,7 +151,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRDeductionGroupDetail',
+    @level1name = N'tblPRTemplateDeduction',
     @level2type = N'COLUMN',
     @level2name = N'ysnActive'
 GO
@@ -170,27 +160,28 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRDeductionGroupDetail',
+    @level1name = N'tblPRTemplateDeduction',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
 GO
 EXEC sp_addextendedproperty @name=N'MS_Description',
-	@value = N'Deduction Group is used in Deduction Group Details' ,
+	@value = N'Deduction Type is used in Deduction Group s' ,
 	@level0type = N'SCHEMA',
 	@level0name = N'dbo', 
 	@level1type = N'TABLE',
-	@level1name = N'tblPRDeductionGroup', 
+	@level1name = N'tblPRTypeDeduction', 
 	@level2type = N'CONSTRAINT',
-	@level2name = N'FK_tblPRDeductionGroupDetail_tblPRDeductionGroup'
-GO
-EXEC sp_addextendedproperty @name=N'MS_Description',
-	@value = N'Deduction Type is used in Deduction Group Details' ,
-	@level0type = N'SCHEMA',
-	@level0name = N'dbo', 
-	@level1type = N'TABLE',
-	@level1name = N'tblPRDeductionType', 
-	@level2type = N'CONSTRAINT',
-	@level2name = N'FK_tblPRDeductionGroupDetail_tblPRDeductionType'
+	@level2name = N'FK_tblPRTemplateDeduction_tblPRTypeDeduction'
 GO
 
-CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPRDeductionGroupDetail] ON [dbo].[tblPRDeductionGroupDetail] ([intDeductionGroupId], [intDeductionTypeId]) WITH (IGNORE_DUP_KEY = OFF)
+CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPRTemplateDeduction] ON [dbo].[tblPRTemplateDeduction] ([intTemplateDeductionId], [intTypeDeductionId]) WITH (IGNORE_DUP_KEY = OFF)
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Employee Template Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTemplateDeduction',
+    @level2type = N'COLUMN',
+    @level2name = N'intTemplateId'
