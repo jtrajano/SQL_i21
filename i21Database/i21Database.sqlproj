@@ -672,6 +672,30 @@
     <Build Include="dbo\Tables\tblPRTaxAgency.sql" />
     <Build Include="dbo\Views\vyuCMBankAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreatePaymentFromOriginBill.sql" />
+    <Build Include="dbo\Tables\tblICBrand.sql" />
+    <Build Include="dbo\Tables\tblICCatalog.sql" />
+    <Build Include="dbo\Tables\tblICCategory.sql" />
+    <Build Include="dbo\Tables\tblICCategoryAccount.sql" />
+    <Build Include="dbo\Tables\tblICCategoryStore.sql" />
+    <Build Include="dbo\Tables\tblICCategoryVendor.sql" />
+    <Build Include="dbo\Tables\tblICClass.sql" />
+    <Build Include="dbo\Tables\tblICCommodity.sql" />
+    <Build Include="dbo\Tables\tblICCommodityGroup.sql" />
+    <Build Include="dbo\Tables\tblICCommodityUnitMeasure.sql" />
+    <Build Include="dbo\Tables\tblICFamily.sql" />
+    <Build Include="dbo\Tables\tblICFuelType.sql" />
+    <Build Include="dbo\Tables\tblICManufacturer.sql" />
+    <Build Include="dbo\Tables\tblICPatronageCategory.sql" />
+    <Build Include="dbo\Tables\tblICReasonCode.sql" />
+    <Build Include="dbo\Tables\tblICReasonCodeWorkCenter.sql" />
+    <Build Include="dbo\Tables\tblICRinFeedStock.sql" />
+    <Build Include="dbo\Tables\tblICRinFeedStockUOM.sql" />
+    <Build Include="dbo\Tables\tblICRinFuel.sql" />
+    <Build Include="dbo\Tables\tblICRinFuelType.sql" />
+    <Build Include="dbo\Tables\tblICRinProcess.sql" />
+    <Build Include="dbo\Tables\tblICTag.sql" />
+    <Build Include="dbo\Tables\tblICUnitMeasure.sql" />
+    <Build Include="dbo\Tables\tblICUnitType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
