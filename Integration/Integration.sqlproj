@@ -186,7 +186,6 @@
     <None Include="dbo\Functions\fnGetVendorLastName.sql" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="dbo\Stored Procedures\uspAPCreatePaymentFromOriginBill.sql" />
     <None Include="dbo\Stored Procedures\uspAPPostOriginPayment.sql" />
     <None Include="dbo\Views\vyuECCFCardTransaction.sql" />
     <Build Include="dbo\Tables\tblAPTermsImported.sql" />
@@ -214,5 +213,6 @@
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPaptrxmst.sql" />
     <None Include="dbo\Stored Procedures\uspCMBankTransactionReversalOrigin.sql" />
+    <None Include="dbo\Stored Procedures\uspAPCreatePaymentFromOriginBill.sql" />
   </ItemGroup>
 </Project>

@@ -41,6 +41,7 @@
 :r ..\dbo\Views\vwclsmst.sql
 :r ..\dbo\Views\vwcmtmst.sql
 :r ..\dbo\Views\vwcntmst.sql
+:r "..\dbo\Stored Procedures\uspAPCreatePaymentFromOriginBill.sql"
 
 -- CUSTOMER PORTAL
 :r ..\dbo\Views\vyuCPAgcusMst.sql
