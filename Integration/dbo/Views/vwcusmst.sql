@@ -80,6 +80,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 		,vwcus_ptd_sls = agcus_ptd_sls   
 		,vwcus_lyr_sls = agcus_lyr_sls
 		,dblFutureCurrent = ISNULL(agcus_ar_future,0.0) + ISNULL(agcus_ar_per1,0.0)
+		,intConcurrencyId = 0
 		FROM agcusmst
 		')
 GO
@@ -183,6 +184,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 		,vwcus_ptd_sls = ptcus_ptd_sales   
 		,vwcus_lyr_sls = CAST(0 AS DECIMAL)
 		,dblFutureCurrent = ptcus_ar_curr
+		,intConcurrencyId = 0
 		FROM ptcusmst
 		')
 GO
