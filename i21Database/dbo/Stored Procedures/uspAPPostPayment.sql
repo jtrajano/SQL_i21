@@ -610,6 +610,7 @@ BEGIN
 	FROM tblAPPayment A
 		INNER JOIN tblGLDetail B
 			ON A.strPaymentRecordNum = B.strTransactionId
+		WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 	-- Creating the temp table:
 	DECLARE @isSuccessful BIT
