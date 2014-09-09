@@ -198,7 +198,7 @@
     <None Include="Scripts\SetClrEnabled.sql" />
     <Build Include="Schema\testi21Database.sql" />
     <Build Include="Schema\tSQLt.sql" />
-    <Build Include="testi21Database\Functions\test the fnAddZeroPrexies function.sql" />
+    <Build Include="testi21Database\Functions\test the fnAddZeroPrefixes function.sql" />
     <Build Include="testi21Database\Stored Procedures\test the uspCMAddDeposit stored procedure.sql" />
   </ItemGroup>
   <ItemGroup>

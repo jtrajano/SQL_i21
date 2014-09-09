@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [testi21Database].[test the uspCMAddDeposit stored procedure]
 AS
 BEGIN
-	-- Prepare the fake table 
+	-- Arrange the fake table 
 	EXEC tSQLt.FakeTable 'dbo.tblCMBankTransaction', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblCMBankTransactionDetail';
 

@@ -1,7 +1,7 @@
-﻿CREATE PROCEDURE testi21Database.[test the fnAddZeroPrexies function]
+﻿CREATE PROCEDURE testi21Database.[test the fnAddZeroPrefixes function]
 AS 
 BEGIN
-	-- Prepare
+	-- Arrange
 	DECLARE @value AS NVARCHAR(20); 
 	SET @value = '39588'
 
