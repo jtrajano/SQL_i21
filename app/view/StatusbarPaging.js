@@ -28,7 +28,7 @@ Ext.define('Inventory.view.StatusbarPaging', {
     viewModel: {
         type: 'statusbarpaging'
     },
-    reference: 'tlbPaging',
+    itemId: 'tlbPaging',
     inputItemWidth: 60,
     prependButtons: true,
 
@@ -39,22 +39,22 @@ Ext.define('Inventory.view.StatusbarPaging', {
     items: [
         {
             xtype: 'button',
-            reference: 'btnHelp',
             tabIndex: -1,
+            itemId: 'btnHelp',
             iconCls: 'small-help',
             tooltip: 'Click to get help on this screen'
         },
         {
             xtype: 'button',
-            reference: 'btnSupport',
             tabIndex: -1,
+            itemId: 'btnSupport',
             iconCls: 'small-support',
             tooltip: 'Click for support on this screen'
         },
         {
             xtype: 'button',
-            reference: 'btnFieldname',
             tabIndex: -1,
+            itemId: 'btnFieldname',
             iconCls: 'small-light-bulb-off',
             tooltip: 'Click to display table/field name tooltips'
         },
@@ -63,7 +63,7 @@ Ext.define('Inventory.view.StatusbarPaging', {
         },
         {
             xtype: 'label',
-            reference: 'lblReady',
+            itemId: 'lblReady',
             margin: '0 5',
             text: 'Ready'
         },

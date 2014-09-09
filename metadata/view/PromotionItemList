@@ -45,7 +45,7 @@
                 "height": 350,
                 "layout": "vbox",
                 "margin": -1,
-                "reference": "frmPromotionItemList",
+                "itemId": "frmPromotionItemList",
                 "title": null,
                 "trackResetOnLoad": true,
                 "url": null,
@@ -85,7 +85,7 @@
                                 "iconCls": "large-new",
                                 "layout|flex": null,
                                 "layout|margins": null,
-                                "reference": "btnNew",
+                                "itemId": "btnNew",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "New",
@@ -108,7 +108,7 @@
                                 "iconAlign": "top",
                                 "iconCls": "large-save",
                                 "layout|flex": null,
-                                "reference": "btnSave",
+                                "itemId": "btnSave",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Save",
@@ -131,7 +131,7 @@
                                 "iconAlign": "top",
                                 "iconCls": "large-search",
                                 "layout|flex": null,
-                                "reference": "btnSearch",
+                                "itemId": "btnSearch",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Search",
@@ -154,7 +154,7 @@
                                 "iconAlign": "top",
                                 "iconCls": "large-delete",
                                 "layout|flex": null,
-                                "reference": "btnDelete",
+                                "itemId": "btnDelete",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Delete",
@@ -177,7 +177,7 @@
                                 "iconAlign": "top",
                                 "iconCls": "large-undo",
                                 "layout|flex": null,
-                                "reference": "btnUndo",
+                                "itemId": "btnUndo",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Undo",
@@ -215,7 +215,7 @@
                                 "iconAlign": "top",
                                 "iconCls": "large-close",
                                 "layout|flex": null,
-                                "reference": "btnClose",
+                                "itemId": "btnClose",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Close",
@@ -281,7 +281,7 @@
                                         "margin": null,
                                         "maxLength": null,
                                         "name": null,
-                                        "reference": "txtStore",
+                                        "itemId": "txtStore",
                                         "tabIndex": null,
                                         "width": 170
                                     },
@@ -343,7 +343,7 @@
                                         "margin": null,
                                         "maxLength": null,
                                         "name": null,
-                                        "reference": "txtItemListNo",
+                                        "itemId": "txtItemListNo",
                                         "tabIndex": null,
                                         "width": 170
                                     },
@@ -372,7 +372,7 @@
                                         "margin": "0 0 0 5",
                                         "maxLength": null,
                                         "name": null,
-                                        "reference": "txtItemListId",
+                                        "itemId": "txtItemListId",
                                         "tabIndex": null,
                                         "width": 170
                                     },
@@ -413,7 +413,7 @@
                                         "hideTrigger": true,
                                         "labelWidth": 95,
                                         "layout|flex": 1,
-                                        "reference": "txtTotalUnitPrice"
+                                        "itemId": "txtTotalUnitPrice"
                                     },
                                     "name": "MyNumberField34",
                                     "designerId": "8043d40c-9daf-4daf-a0e0-0bafd03b86aa"
@@ -432,7 +432,7 @@
                                         "layout|flex": 1,
                                         "layout|margins": null,
                                         "margin": "0 0 0 5",
-                                        "reference": "chkDeleteFromRegister"
+                                        "itemId": "chkDeleteFromRegister"
                                     },
                                     "name": "MyCheckbox97",
                                     "designerId": "16fb3420-bfeb-4386-9da2-3bec8a7e0b73"
@@ -457,7 +457,7 @@
                                 "margin": null,
                                 "maxLength": null,
                                 "name": null,
-                                "reference": "txtDescription",
+                                "itemId": "txtDescription",
                                 "tabIndex": null,
                                 "width": 170
                             },
@@ -476,7 +476,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "layout|flex": 1,
-                                "reference": "grdItemList",
+                                "itemId": "grdItemList",
                                 "title": "Item List"
                             },
                             "name": "MyGridPanel42",
@@ -551,7 +551,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "reference": "grvItemList"
+                                        "itemId": "grvItemList"
                                     },
                                     "name": "MyGridView42",
                                     "designerId": "3cb303f7-800f-492e-9cce-51ec4e446905"
@@ -573,7 +573,7 @@
                         "designer|displayName": "",
                         "dock": "bottom",
                         "layout|flex": 1,
-                        "reference": "pagingtoolbar",
+                        "itemId": "pagingtoolbar",
                         "store": null
                     },
                     "name": "statusbarpaging9",

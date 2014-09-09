@@ -45,7 +45,7 @@
                 "height": 350,
                 "layout": "vbox",
                 "margin": -1,
-                "reference": "frmFuelTaxClass",
+                "itemId": "frmFuelTaxClass",
                 "title": null,
                 "trackResetOnLoad": true,
                 "url": null,
@@ -85,7 +85,7 @@
                                 "iconCls": "large-new",
                                 "layout|flex": null,
                                 "layout|margins": null,
-                                "reference": "btnNew",
+                                "itemId": "btnNew",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "New",
@@ -108,7 +108,7 @@
                                 "iconAlign": "top",
                                 "iconCls": "large-save",
                                 "layout|flex": null,
-                                "reference": "btnSave",
+                                "itemId": "btnSave",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Save",
@@ -131,7 +131,7 @@
                                 "iconAlign": "top",
                                 "iconCls": "large-search",
                                 "layout|flex": null,
-                                "reference": "btnSearch",
+                                "itemId": "btnSearch",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Search",
@@ -154,7 +154,7 @@
                                 "iconAlign": "top",
                                 "iconCls": "large-delete",
                                 "layout|flex": null,
-                                "reference": "btnDelete",
+                                "itemId": "btnDelete",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Delete",
@@ -177,7 +177,7 @@
                                 "iconAlign": "top",
                                 "iconCls": "large-undo",
                                 "layout|flex": null,
-                                "reference": "btnUndo",
+                                "itemId": "btnUndo",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Undo",
@@ -215,7 +215,7 @@
                                 "iconAlign": "top",
                                 "iconCls": "large-close",
                                 "layout|flex": null,
-                                "reference": "btnClose",
+                                "itemId": "btnClose",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Close",
@@ -277,7 +277,7 @@
                                         "labelWidth": 90,
                                         "layout|flex": 1,
                                         "name": null,
-                                        "reference": "txtTaxClassCode"
+                                        "itemId": "txtTaxClassCode"
                                     },
                                     "name": "MyTextField69",
                                     "configAlternates": {
@@ -308,7 +308,7 @@
                                         "layout|margins": null,
                                         "margin": "0 0 0 5",
                                         "name": null,
-                                        "reference": "txtIrsTaxCode"
+                                        "itemId": "txtIrsTaxCode"
                                     },
                                     "name": "MyTextField70",
                                     "configAlternates": {
@@ -340,7 +340,7 @@
                                 "layout|margins": null,
                                 "maxLength": null,
                                 "name": null,
-                                "reference": "txtDescription",
+                                "itemId": "txtDescription",
                                 "tabIndex": null
                             },
                             "name": "MyTextField71",
@@ -355,7 +355,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "layout|flex": 1,
-                                "reference": "grdProductCode",
+                                "itemId": "grdProductCode",
                                 "title": "Product Codes"
                             },
                             "name": "MyGridPanel35",
@@ -371,7 +371,7 @@
                                     "userConfig": {
                                         "container|padding": "0 0 0 1",
                                         "dock": "top",
-                                        "reference": "tlbGridOptions"
+                                        "itemId": "tlbGridOptions"
                                     },
                                     "name": "MyToolbar37",
                                     "designerId": "b01bca24-1d9c-4cd0-8623-ef6e9ea35d8d",
@@ -429,7 +429,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "reference": "grvProductCode"
+                                        "itemId": "grvProductCode"
                                     },
                                     "name": "MyGridView35",
                                     "designerId": "19b9d11e-b6ed-47a4-93c6-712fbdabf462"
@@ -451,7 +451,7 @@
                         "designer|displayName": "",
                         "dock": "bottom",
                         "layout|flex": 1,
-                        "reference": "pagingtoolbar",
+                        "itemId": "pagingtoolbar",
                         "store": null
                     },
                     "name": "statusbarpaging5",

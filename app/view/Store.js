@@ -64,9 +64,9 @@ Ext.define('Inventory.view.Store', {
             items: [
                 {
                     xtype: 'button',
-                    reference: 'btnNew',
                     tabIndex: -1,
                     height: 57,
+                    itemId: 'btnNew',
                     width: 45,
                     iconAlign: 'top',
                     iconCls: 'large-new',
@@ -75,9 +75,9 @@ Ext.define('Inventory.view.Store', {
                 },
                 {
                     xtype: 'button',
-                    reference: 'btnSave',
                     tabIndex: -1,
                     height: 57,
+                    itemId: 'btnSave',
                     width: 45,
                     iconAlign: 'top',
                     iconCls: 'large-save',
@@ -86,9 +86,9 @@ Ext.define('Inventory.view.Store', {
                 },
                 {
                     xtype: 'button',
-                    reference: 'btnFind',
                     tabIndex: -1,
                     height: 57,
+                    itemId: 'btnFind',
                     width: 45,
                     iconAlign: 'top',
                     iconCls: 'large-search',
@@ -97,9 +97,9 @@ Ext.define('Inventory.view.Store', {
                 },
                 {
                     xtype: 'button',
-                    reference: 'btnDelete',
                     tabIndex: -1,
                     height: 57,
+                    itemId: 'btnDelete',
                     width: 45,
                     iconAlign: 'top',
                     iconCls: 'large-delete',
@@ -108,9 +108,9 @@ Ext.define('Inventory.view.Store', {
                 },
                 {
                     xtype: 'button',
-                    reference: 'btnUndo',
                     tabIndex: -1,
                     height: 57,
+                    itemId: 'btnUndo',
                     width: 45,
                     iconAlign: 'top',
                     iconCls: 'large-undo',
@@ -123,9 +123,9 @@ Ext.define('Inventory.view.Store', {
                 },
                 {
                     xtype: 'button',
-                    reference: 'btnClose',
                     tabIndex: -1,
                     height: 57,
+                    itemId: 'btnClose',
                     width: 45,
                     iconAlign: 'top',
                     iconCls: 'large-close',
@@ -142,9 +142,9 @@ Ext.define('Inventory.view.Store', {
                 items: [
                     {
                         xtype: 'form',
-                        reference: 'frmStore',
                         autoShow: true,
                         height: 350,
+                        itemId: 'frmStore',
                         margin: -1,
                         width: 450,
                         bodyBorder: false,
@@ -158,7 +158,7 @@ Ext.define('Inventory.view.Store', {
                             {
                                 xtype: 'tabpanel',
                                 flex: 1,
-                                reference: 'tabStore',
+                                itemId: 'tabStore',
                                 plain: true,
                                 items: [
                                     {
@@ -182,35 +182,35 @@ Ext.define('Inventory.view.Store', {
                                                 items: [
                                                     {
                                                         xtype: 'textfield',
-                                                        reference: 'txtStoreNo',
+                                                        itemId: 'txtStoreNo',
                                                         width: 170,
                                                         fieldLabel: 'Store No',
                                                         labelWidth: 90
                                                     },
                                                     {
                                                         xtype: 'textfield',
-                                                        reference: 'txtStoreName',
+                                                        itemId: 'txtStoreName',
                                                         width: 170,
                                                         fieldLabel: 'Store Name',
                                                         labelWidth: 90
                                                     },
                                                     {
                                                         xtype: 'textfield',
-                                                        reference: 'txtDescription',
+                                                        itemId: 'txtDescription',
                                                         width: 170,
                                                         fieldLabel: 'Description',
                                                         labelWidth: 90
                                                     },
                                                     {
                                                         xtype: 'textfield',
-                                                        reference: 'txtRegion',
+                                                        itemId: 'txtRegion',
                                                         width: 170,
                                                         fieldLabel: 'Region',
                                                         labelWidth: 90
                                                     },
                                                     {
                                                         xtype: 'textfield',
-                                                        reference: 'txtDistrict',
+                                                        itemId: 'txtDistrict',
                                                         width: 170,
                                                         fieldLabel: 'District',
                                                         labelWidth: 90
@@ -234,8 +234,8 @@ Ext.define('Inventory.view.Store', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'button',
-                                                                        reference: 'btnAddressMap',
                                                                         tabIndex: -1,
+                                                                        itemId: 'btnAddressMap',
                                                                         style: {
                                                                             background: 'transparent',
                                                                             borderColor: 'transparent'
@@ -247,8 +247,8 @@ Ext.define('Inventory.view.Store', {
                                                             {
                                                                 xtype: 'textareafield',
                                                                 flex: 1,
-                                                                reference: 'txtAddress',
                                                                 height: 58,
+                                                                itemId: 'txtAddress',
                                                                 hideLabel: true,
                                                                 labelWidth: 0
                                                             }
@@ -262,14 +262,14 @@ Ext.define('Inventory.view.Store', {
                                                             {
                                                                 xtype: 'combobox',
                                                                 flex: 1.2,
-                                                                reference: 'cboZipCode',
+                                                                itemId: 'cboZipCode',
                                                                 fieldLabel: 'Zip/Postal Code',
                                                                 labelWidth: 90
                                                             },
                                                             {
                                                                 xtype: 'textfield',
                                                                 flex: 1,
-                                                                reference: 'txtCity',
+                                                                itemId: 'txtCity',
                                                                 margin: '0 0 0 5',
                                                                 fieldLabel: 'City',
                                                                 labelWidth: 50
@@ -284,15 +284,15 @@ Ext.define('Inventory.view.Store', {
                                                             {
                                                                 xtype: 'textfield',
                                                                 flex: 1.2,
-                                                                reference: 'txtState',
+                                                                itemId: 'txtState',
                                                                 fieldLabel: 'State/Province',
                                                                 labelWidth: 90
                                                             },
                                                             {
                                                                 xtype: 'combobox',
                                                                 flex: 1,
-                                                                reference: 'cboCountry',
                                                                 tabIndex: -1,
+                                                                itemId: 'cboCountry',
                                                                 margin: '0 0 0 5',
                                                                 fieldLabel: 'Country',
                                                                 labelWidth: 50
@@ -307,14 +307,14 @@ Ext.define('Inventory.view.Store', {
                                                             {
                                                                 xtype: 'textfield',
                                                                 flex: 1.2,
-                                                                reference: 'txtPhone',
+                                                                itemId: 'txtPhone',
                                                                 fieldLabel: 'Phone',
                                                                 labelWidth: 90
                                                             },
                                                             {
                                                                 xtype: 'textfield',
                                                                 flex: 1,
-                                                                reference: 'txtFax',
+                                                                itemId: 'txtFax',
                                                                 margin: '0 0 0 5',
                                                                 fieldLabel: 'Fax',
                                                                 labelWidth: 50
@@ -340,8 +340,8 @@ Ext.define('Inventory.view.Store', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'button',
-                                                                        reference: 'btnEmail',
                                                                         tabIndex: -1,
+                                                                        itemId: 'btnEmail',
                                                                         style: {
                                                                             background: 'transparent',
                                                                             borderColor: 'transparent'
@@ -353,7 +353,7 @@ Ext.define('Inventory.view.Store', {
                                                             {
                                                                 xtype: 'textfield',
                                                                 flex: 1,
-                                                                reference: 'txtEmail',
+                                                                itemId: 'txtEmail',
                                                                 hideLabel: true,
                                                                 labelWidth: 0
                                                             }
@@ -378,8 +378,8 @@ Ext.define('Inventory.view.Store', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'button',
-                                                                        reference: 'btnWebsite',
                                                                         tabIndex: -1,
+                                                                        itemId: 'btnWebsite',
                                                                         style: {
                                                                             background: 'transparent',
                                                                             borderColor: 'transparent'
@@ -392,7 +392,7 @@ Ext.define('Inventory.view.Store', {
                                                             {
                                                                 xtype: 'textfield',
                                                                 flex: 1,
-                                                                reference: 'txtWebsite',
+                                                                itemId: 'txtWebsite',
                                                                 hideLabel: true,
                                                                 labelWidth: 0
                                                             }
@@ -400,7 +400,7 @@ Ext.define('Inventory.view.Store', {
                                                     },
                                                     {
                                                         xtype: 'combobox',
-                                                        reference: 'cboProfitCenter',
+                                                        itemId: 'cboProfitCenter',
                                                         width: 170,
                                                         fieldLabel: 'Profit Center',
                                                         labelWidth: 90
@@ -444,73 +444,73 @@ Ext.define('Inventory.view.Store', {
                                                         items: [
                                                             {
                                                                 xtype: 'checkboxfield',
-                                                                reference: 'chkStoreSystemOnHostComputer',
+                                                                itemId: 'chkStoreSystemOnHostComputer',
                                                                 fieldLabel: 'Store System on Host Computer',
                                                                 labelWidth: 200
                                                             },
                                                             {
                                                                 xtype: 'combobox',
-                                                                reference: 'cboPriceBook',
+                                                                itemId: 'cboPriceBook',
                                                                 fieldLabel: 'Price Book',
                                                                 labelWidth: 200
                                                             },
                                                             {
                                                                 xtype: 'combobox',
-                                                                reference: 'cboHandheldDeviceCostBasis',
+                                                                itemId: 'cboHandheldDeviceCostBasis',
                                                                 fieldLabel: 'Handheld Device Cost Basis',
                                                                 labelWidth: 200
                                                             },
                                                             {
                                                                 xtype: 'combobox',
-                                                                reference: 'cboDefaultVendor',
+                                                                itemId: 'cboDefaultVendor',
                                                                 fieldLabel: 'Default Vendor',
                                                                 labelWidth: 200
                                                             },
                                                             {
                                                                 xtype: 'combobox',
-                                                                reference: 'cboLocationCode',
+                                                                itemId: 'cboLocationCode',
                                                                 fieldLabel: 'Location Code',
                                                                 labelWidth: 200
                                                             },
                                                             {
                                                                 xtype: 'combobox',
-                                                                reference: 'cboCompanyIdForGL',
+                                                                itemId: 'cboCompanyIdForGL',
                                                                 fieldLabel: 'Company ID for GL',
                                                                 labelWidth: 200
                                                             },
                                                             {
                                                                 xtype: 'combobox',
-                                                                reference: 'cboCompanyIdForAR',
+                                                                itemId: 'cboCompanyIdForAR',
                                                                 fieldLabel: 'Company ID for AR',
                                                                 labelWidth: 200
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
-                                                                reference: 'chkUsePriceBookAtThisStore',
+                                                                itemId: 'chkUsePriceBookAtThisStore',
                                                                 fieldLabel: 'Use Price Book at this Store',
                                                                 labelWidth: 200
                                                             },
                                                             {
                                                                 xtype: 'textfield',
-                                                                reference: 'txtMaximumPluNumber',
+                                                                itemId: 'txtMaximumPluNumber',
                                                                 fieldLabel: 'Maximum PLU Number',
                                                                 labelWidth: 200
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
-                                                                reference: 'chkTreat7DigitUpcsAsPlus',
+                                                                itemId: 'chkTreat7DigitUpcsAsPlus',
                                                                 fieldLabel: 'Treat 7 Digit UPCs as PLUs',
                                                                 labelWidth: 200
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
-                                                                reference: 'chkInterfaceProprietaryCardsToCfn',
+                                                                itemId: 'chkInterfaceProprietaryCardsToCfn',
                                                                 fieldLabel: 'Interface Proprietary Cards to CFN',
                                                                 labelWidth: 200
                                                             },
                                                             {
                                                                 xtype: 'textfield',
-                                                                reference: 'txtCfnSiteId',
+                                                                itemId: 'txtCfnSiteId',
                                                                 fieldLabel: 'CFN Site ID',
                                                                 labelWidth: 200
                                                             }
@@ -527,87 +527,87 @@ Ext.define('Inventory.view.Store', {
                                                         items: [
                                                             {
                                                                 xtype: 'checkboxfield',
-                                                                reference: 'chkInterfaceChecksToCheckbook',
+                                                                itemId: 'chkInterfaceChecksToCheckbook',
                                                                 fieldLabel: 'Interface Checks to Checkbook',
                                                                 labelWidth: 250
                                                             },
                                                             {
                                                                 xtype: 'combobox',
-                                                                reference: 'cboCheckbook',
+                                                                itemId: 'cboCheckbook',
                                                                 fieldLabel: 'Checkbook',
                                                                 labelWidth: 250
                                                             },
                                                             {
                                                                 xtype: 'textfield',
-                                                                reference: 'txtQuickbookInterfaceClass',
+                                                                itemId: 'txtQuickbookInterfaceClass',
                                                                 fieldLabel: 'Quickbook Interface Class',
                                                                 labelWidth: 250
                                                             },
                                                             {
                                                                 xtype: 'textfield',
-                                                                reference: 'txtBarcodePrinter',
+                                                                itemId: 'txtBarcodePrinter',
                                                                 fieldLabel: 'Barcode Printer',
                                                                 labelWidth: 250
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
-                                                                reference: 'txtServiceChargeRate',
+                                                                itemId: 'txtServiceChargeRate',
                                                                 fieldLabel: 'Service Charge Rate',
                                                                 labelWidth: 250,
                                                                 hideTrigger: true
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
-                                                                reference: 'chkUseArStatementForms',
+                                                                itemId: 'chkUseArStatementForms',
                                                                 fieldLabel: 'Use AR Statement Forms',
                                                                 labelWidth: 250
                                                             },
                                                             {
                                                                 xtype: 'datefield',
-                                                                reference: 'dtmLastShiftOpenDate',
+                                                                itemId: 'dtmLastShiftOpenDate',
                                                                 fieldLabel: 'Last Shift Open Date',
                                                                 labelWidth: 250
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
-                                                                reference: 'txtLastShiftNumber',
+                                                                itemId: 'txtLastShiftNumber',
                                                                 fieldLabel: 'Last Shift Number',
                                                                 labelWidth: 250,
                                                                 hideTrigger: true
                                                             },
                                                             {
                                                                 xtype: 'datefield',
-                                                                reference: 'dtmLastPhysicalImportDate',
+                                                                itemId: 'dtmLastPhysicalImportDate',
                                                                 fieldLabel: 'Last Physical Import Date',
                                                                 labelWidth: 250
                                                             },
                                                             {
                                                                 xtype: 'datefield',
-                                                                reference: 'dtmLastStatementRollDate',
+                                                                itemId: 'dtmLastStatementRollDate',
                                                                 fieldLabel: 'Last Statement Roll Date',
                                                                 labelWidth: 250
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
-                                                                reference: 'chkAllowChangeToShiftsPhysicalQtyReceived',
+                                                                itemId: 'chkAllowChangeToShiftsPhysicalQtyReceived',
                                                                 fieldLabel: 'Allow Change to Shifts Physical Qty Received',
                                                                 labelWidth: 250
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
-                                                                reference: 'chkAllowChangeToShiftsPhysicalQtySold',
+                                                                itemId: 'chkAllowChangeToShiftsPhysicalQtySold',
                                                                 fieldLabel: 'Allow Change to Shifts Physical Qty Sold',
                                                                 labelWidth: 250
                                                             },
                                                             {
                                                                 xtype: 'textfield',
-                                                                reference: 'txtHandheldDeviceModel',
+                                                                itemId: 'txtHandheldDeviceModel',
                                                                 fieldLabel: 'Handheld Device Model',
                                                                 labelWidth: 250
                                                             },
                                                             {
                                                                 xtype: 'combobox',
-                                                                reference: 'cboDepositLookupType',
+                                                                itemId: 'cboDepositLookupType',
                                                                 fieldLabel: 'Deposit Lookup Type',
                                                                 labelWidth: 250
                                                             }
@@ -624,13 +624,13 @@ Ext.define('Inventory.view.Store', {
                                         items: [
                                             {
                                                 xtype: 'advancefiltergrid',
-                                                reference: 'grdPaymentMethod',
+                                                itemId: 'grdPaymentMethod',
                                                 margin: -1,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
-                                                        reference: 'tlbGridOptions',
+                                                        itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
                                                             padding: '0 0 0 1'
@@ -638,22 +638,22 @@ Ext.define('Inventory.view.Store', {
                                                         items: [
                                                             {
                                                                 xtype: 'button',
-                                                                reference: 'btnAddPaymentMethod',
                                                                 tabIndex: -1,
+                                                                itemId: 'btnAddPaymentMethod',
                                                                 iconCls: 'small-add',
                                                                 text: 'Add'
                                                             },
                                                             {
                                                                 xtype: 'button',
-                                                                reference: 'btnEditPaymentMethod',
                                                                 tabIndex: -1,
+                                                                itemId: 'btnEditPaymentMethod',
                                                                 iconCls: 'small-edit',
                                                                 text: 'Edit'
                                                             },
                                                             {
                                                                 xtype: 'button',
-                                                                reference: 'btnDeletePaymentMethod',
                                                                 tabIndex: -1,
+                                                                itemId: 'btnDeletePaymentMethod',
                                                                 iconCls: 'small-delete',
                                                                 text: 'Delete'
                                                             },
@@ -705,7 +705,7 @@ Ext.define('Inventory.view.Store', {
                                                     }
                                                 ],
                                                 viewConfig: {
-                                                    reference: 'grvPaymentMethod'
+                                                    itemId: 'grvPaymentMethod'
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'
@@ -720,13 +720,13 @@ Ext.define('Inventory.view.Store', {
                                         items: [
                                             {
                                                 xtype: 'advancefiltergrid',
-                                                reference: 'grdPaidOuts',
+                                                itemId: 'grdPaidOuts',
                                                 margin: -1,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
-                                                        reference: 'tlbGridOptions',
+                                                        itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
                                                             padding: '0 0 0 1'
@@ -734,8 +734,8 @@ Ext.define('Inventory.view.Store', {
                                                         items: [
                                                             {
                                                                 xtype: 'button',
-                                                                reference: 'btnDeletePaidOuts',
                                                                 tabIndex: -1,
+                                                                itemId: 'btnDeletePaidOuts',
                                                                 iconCls: 'small-delete',
                                                                 text: 'Delete'
                                                             },
@@ -781,7 +781,7 @@ Ext.define('Inventory.view.Store', {
                                                     }
                                                 ],
                                                 viewConfig: {
-                                                    reference: 'grvPaidOuts'
+                                                    itemId: 'grvPaidOuts'
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'
@@ -817,52 +817,52 @@ Ext.define('Inventory.view.Store', {
                                                         items: [
                                                             {
                                                                 xtype: 'combobox',
-                                                                reference: 'cboDefaultPaidOut',
+                                                                itemId: 'cboDefaultPaidOut',
                                                                 fieldLabel: 'Default Paid Out',
                                                                 labelWidth: 220
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
-                                                                reference: 'txtMopForCustomerCharges',
+                                                                itemId: 'txtMopForCustomerCharges',
                                                                 fieldLabel: 'MOP for Customer Charges',
                                                                 labelWidth: 220,
                                                                 hideTrigger: true
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
-                                                                reference: 'txtMopForCashTransactions',
+                                                                itemId: 'txtMopForCashTransactions',
                                                                 fieldLabel: 'MOP for Cash Transactions',
                                                                 labelWidth: 220,
                                                                 hideTrigger: true
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
-                                                                reference: 'chkAllowMassPriceChanges',
+                                                                itemId: 'chkAllowMassPriceChanges',
                                                                 fieldLabel: 'Allow Mass Price Changes',
                                                                 labelWidth: 220
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
-                                                                reference: 'chkUsingTankMonitors',
+                                                                itemId: 'chkUsingTankMonitors',
                                                                 fieldLabel: 'Using Tank Monitors',
                                                                 labelWidth: 220
                                                             },
                                                             {
                                                                 xtype: 'textfield',
-                                                                reference: 'txtPosRegisterId',
+                                                                itemId: 'txtPosRegisterId',
                                                                 fieldLabel: 'POS Register ID',
                                                                 labelWidth: 220
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
-                                                                reference: 'txtMaximumRegisterPlus',
+                                                                itemId: 'txtMaximumRegisterPlus',
                                                                 fieldLabel: 'Maximum Register PLUs',
                                                                 labelWidth: 220,
                                                                 hideTrigger: true
                                                             },
                                                             {
                                                                 xtype: 'combobox',
-                                                                reference: 'cboReportDepartmentsAtGrossNet',
+                                                                itemId: 'cboReportDepartmentsAtGrossNet',
                                                                 fieldLabel: 'Report Departments at Gross/Net',
                                                                 labelWidth: 220
                                                             }
@@ -879,59 +879,59 @@ Ext.define('Inventory.view.Store', {
                                                         items: [
                                                             {
                                                                 xtype: 'numberfield',
-                                                                reference: 'txtMopForLoyaltyDiscount',
+                                                                itemId: 'txtMopForLoyaltyDiscount',
                                                                 fieldLabel: 'MOP for Loyalty Discount',
                                                                 labelWidth: 250,
                                                                 hideTrigger: true
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
-                                                                reference: 'txtLoyaltyDiscountDepartment',
+                                                                itemId: 'txtLoyaltyDiscountDepartment',
                                                                 fieldLabel: 'Loyalty Discount Department',
                                                                 labelWidth: 250,
                                                                 hideTrigger: true
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
-                                                                reference: 'chkBreakoutProprietaryCardTotals',
+                                                                itemId: 'chkBreakoutProprietaryCardTotals',
                                                                 fieldLabel: 'Breakout Proprietary Card Totals',
                                                                 labelWidth: 250
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
-                                                                reference: 'txtRemoveProprietartTotalsFromExistingMop',
+                                                                itemId: 'txtRemoveProprietartTotalsFromExistingMop',
                                                                 fieldLabel: 'Remove Proprietart Totals from Existing MOP',
                                                                 labelWidth: 250,
                                                                 hideTrigger: true
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
-                                                                reference: 'txtAddProprietaryTotalsToNewMop',
+                                                                itemId: 'txtAddProprietaryTotalsToNewMop',
                                                                 fieldLabel: 'Add Proprietary Totals to New MOP',
                                                                 labelWidth: 250,
                                                                 hideTrigger: true
                                                             },
                                                             {
                                                                 xtype: 'textfield',
-                                                                reference: 'txtProprietaryTotalsNetworkCardName',
+                                                                itemId: 'txtProprietaryTotalsNetworkCardName',
                                                                 fieldLabel: 'Proprietary Totals Network Card Name',
                                                                 labelWidth: 250
                                                             },
                                                             {
                                                                 xtype: 'combobox',
-                                                                reference: 'cboAllowRegisterMarkUpsDown',
+                                                                itemId: 'cboAllowRegisterMarkUpsDown',
                                                                 fieldLabel: 'Allow Register Mark Ups/Down',
                                                                 labelWidth: 250
                                                             },
                                                             {
                                                                 xtype: 'combobox',
-                                                                reference: 'cboRegisterCheckoutDataEntry',
+                                                                itemId: 'cboRegisterCheckoutDataEntry',
                                                                 fieldLabel: 'Register Checkout Data Entry',
                                                                 labelWidth: 250
                                                             },
                                                             {
                                                                 xtype: 'combobox',
-                                                                reference: 'cboReconcileFuels',
+                                                                itemId: 'cboReconcileFuels',
                                                                 fieldLabel: 'Reconcile Fuels',
                                                                 labelWidth: 250
                                                             }
@@ -969,77 +969,77 @@ Ext.define('Inventory.view.Store', {
                                                         items: [
                                                             {
                                                                 xtype: 'checkboxfield',
-                                                                reference: 'chkReceiveProductByDepartment',
+                                                                itemId: 'chkReceiveProductByDepartment',
                                                                 fieldLabel: 'Receive Product by Department',
                                                                 labelWidth: 220
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
-                                                                reference: 'chkKeepArAtStoreLevel',
+                                                                itemId: 'chkKeepArAtStoreLevel',
                                                                 fieldLabel: 'Keep AR at Store Level',
                                                                 labelWidth: 220
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
-                                                                reference: 'chkUsingCheckWriter',
+                                                                itemId: 'chkUsingCheckWriter',
                                                                 fieldLabel: 'Using Check Writer',
                                                                 labelWidth: 220
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
-                                                                reference: 'chkLoadFuelCostOnCheckoutPosting',
+                                                                itemId: 'chkLoadFuelCostOnCheckoutPosting',
                                                                 fieldLabel: 'Load Fuel Cost on Checkout Posting',
                                                                 labelWidth: 220
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
-                                                                reference: 'chkUseSafeChangeFundInCheckouts',
+                                                                itemId: 'chkUseSafeChangeFundInCheckouts',
                                                                 fieldLabel: 'Use Safe Change Fund in Checkouts',
                                                                 labelWidth: 220
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
-                                                                reference: 'chkClearAllPricebookFieldsOnAdd',
+                                                                itemId: 'chkClearAllPricebookFieldsOnAdd',
                                                                 fieldLabel: 'Clear All Pricebook Fields on Add',
                                                                 labelWidth: 220
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
-                                                                reference: 'txtNumberOfShiftsInADay',
+                                                                itemId: 'txtNumberOfShiftsInADay',
                                                                 fieldLabel: 'Number of Shifts in a Day',
                                                                 labelWidth: 220,
                                                                 hideTrigger: true
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
-                                                                reference: 'chkUpdatePricebookRetailsFromReceipts',
+                                                                itemId: 'chkUpdatePricebookRetailsFromReceipts',
                                                                 fieldLabel: 'Update Pricebook Retails from Receipts',
                                                                 labelWidth: 220
                                                             },
                                                             {
                                                                 xtype: 'combobox',
                                                                 flex: 1,
-                                                                reference: 'cboGlSalesIndicator',
+                                                                itemId: 'cboGlSalesIndicator',
                                                                 fieldLabel: 'GL Sales Indicator',
                                                                 labelWidth: 220
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
-                                                                reference: 'chkUpdatePricebookCaseCostFromHost',
+                                                                itemId: 'chkUpdatePricebookCaseCostFromHost',
                                                                 fieldLabel: 'Update Pricebook Case Cost from Host',
                                                                 labelWidth: 220
                                                             },
                                                             {
                                                                 xtype: 'datefield',
                                                                 flex: 1,
-                                                                reference: 'dtmLastInventoryCloseDate',
+                                                                itemId: 'dtmLastInventoryCloseDate',
                                                                 fieldLabel: 'Last Inventory Close Date',
                                                                 labelWidth: 220
                                                             },
                                                             {
                                                                 xtype: 'textfield',
                                                                 flex: 1,
-                                                                reference: 'txtTaxIdPassword',
+                                                                itemId: 'txtTaxIdPassword',
                                                                 fieldLabel: 'Tax Id Password',
                                                                 labelWidth: 220
                                                             }
@@ -1065,13 +1065,13 @@ Ext.define('Inventory.view.Store', {
                                         items: [
                                             {
                                                 xtype: 'advancefiltergrid',
-                                                reference: 'grdGlAccounts',
+                                                itemId: 'grdGlAccounts',
                                                 margin: -1,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
-                                                        reference: 'tlbGridOptions',
+                                                        itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
                                                             padding: '0 0 0 1'
@@ -1079,8 +1079,8 @@ Ext.define('Inventory.view.Store', {
                                                         items: [
                                                             {
                                                                 xtype: 'button',
-                                                                reference: 'btnDeleteGlAccounts',
                                                                 tabIndex: -1,
+                                                                itemId: 'btnDeleteGlAccounts',
                                                                 iconCls: 'small-delete',
                                                                 text: 'Delete'
                                                             },
@@ -1114,7 +1114,7 @@ Ext.define('Inventory.view.Store', {
                                                     }
                                                 ],
                                                 viewConfig: {
-                                                    reference: 'grvGlAccounts'
+                                                    itemId: 'grvGlAccounts'
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'
@@ -1128,7 +1128,7 @@ Ext.define('Inventory.view.Store', {
                         dockedItems: [
                             {
                                 xtype: 'statusbarpaging',
-                                reference: 'tlbStatusbarPaging',
+                                itemId: 'tlbStatusbarPaging',
                                 flex: 1,
                                 dock: 'bottom'
                             }

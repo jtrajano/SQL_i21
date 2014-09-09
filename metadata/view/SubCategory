@@ -45,7 +45,7 @@
                 "height": 350,
                 "layout": "vbox",
                 "margin": -1,
-                "reference": "frmSubCategory",
+                "itemId": "frmSubCategory",
                 "title": null,
                 "trackResetOnLoad": true,
                 "url": null,
@@ -85,7 +85,7 @@
                                 "iconCls": "large-new",
                                 "layout|flex": null,
                                 "layout|margins": null,
-                                "reference": "btnNew",
+                                "itemId": "btnNew",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "New",
@@ -108,7 +108,7 @@
                                 "iconAlign": "top",
                                 "iconCls": "large-save",
                                 "layout|flex": null,
-                                "reference": "btnSave",
+                                "itemId": "btnSave",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Save",
@@ -131,7 +131,7 @@
                                 "iconAlign": "top",
                                 "iconCls": "large-search",
                                 "layout|flex": null,
-                                "reference": "btnSearch",
+                                "itemId": "btnSearch",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Search",
@@ -154,7 +154,7 @@
                                 "iconAlign": "top",
                                 "iconCls": "large-delete",
                                 "layout|flex": null,
-                                "reference": "btnDelete",
+                                "itemId": "btnDelete",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Delete",
@@ -177,7 +177,7 @@
                                 "iconAlign": "top",
                                 "iconCls": "large-undo",
                                 "layout|flex": null,
-                                "reference": "btnUndo",
+                                "itemId": "btnUndo",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Undo",
@@ -215,7 +215,7 @@
                                 "iconAlign": "top",
                                 "iconCls": "large-close",
                                 "layout|flex": null,
-                                "reference": "btnClose",
+                                "itemId": "btnClose",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Close",
@@ -237,7 +237,7 @@
                         "activeTab": 0,
                         "layout|flex": 1,
                         "plain": true,
-                        "reference": "tabSubCategory"
+                        "itemId": "tabSubCategory"
                     },
                     "name": "MyTabPanel7",
                     "designerId": "a9d1df5f-0f1e-452a-86d4-92b7e2281568",
@@ -275,7 +275,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "reference": "grdFamily",
+                                        "itemId": "grdFamily",
                                         "title": null
                                     },
                                     "name": "MyGridPanel43",
@@ -291,7 +291,7 @@
                                             "userConfig": {
                                                 "container|padding": "0 0 0 1",
                                                 "dock": "top",
-                                                "reference": "tlbGridOptions"
+                                                "itemId": "tlbGridOptions"
                                             },
                                             "name": "MyToolbar54",
                                             "designerId": "19f4cb9d-74a4-4f23-b8d2-2280742fb96a",
@@ -307,7 +307,7 @@
                                                         "icon": null,
                                                         "iconCls": "small-delete",
                                                         "layout|flex": null,
-                                                        "reference": "btnDeleteSubcategory",
+                                                        "itemId": "btnDeleteSubcategory",
                                                         "tabIndex": -1,
                                                         "text": "Delete"
                                                     },
@@ -398,7 +398,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "reference": "grvFamily"
+                                                "itemId": "grvFamily"
                                             },
                                             "name": "MyGridView43",
                                             "designerId": "5fb7cc2c-40b5-4eba-a00d-3de37ca1c5d9"
@@ -450,7 +450,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "reference": "grdClass",
+                                        "itemId": "grdClass",
                                         "title": null
                                     },
                                     "name": "MyGridPanel44",
@@ -466,7 +466,7 @@
                                             "userConfig": {
                                                 "container|padding": "0 0 0 1",
                                                 "dock": "top",
-                                                "reference": "tlbGridOptions"
+                                                "itemId": "tlbGridOptions"
                                             },
                                             "name": "MyToolbar55",
                                             "designerId": "a723fddd-344e-4be1-8ec6-e06a67d555cc",
@@ -482,7 +482,7 @@
                                                         "icon": null,
                                                         "iconCls": "small-delete",
                                                         "layout|flex": null,
-                                                        "reference": "btnDeleteClass",
+                                                        "itemId": "btnDeleteClass",
                                                         "tabIndex": -1,
                                                         "text": "Delete"
                                                     },
@@ -573,7 +573,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "reference": "grvClass"
+                                                "itemId": "grvClass"
                                             },
                                             "name": "MyGridView44",
                                             "designerId": "8b5892b9-61a4-40b9-b527-6e909f5b3e6c"
@@ -625,7 +625,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "reference": "grdRegisterProduct",
+                                        "itemId": "grdRegisterProduct",
                                         "title": null
                                     },
                                     "name": "MyGridPanel45",
@@ -641,7 +641,7 @@
                                             "userConfig": {
                                                 "container|padding": "0 0 0 1",
                                                 "dock": "top",
-                                                "reference": "tlbGridOptions"
+                                                "itemId": "tlbGridOptions"
                                             },
                                             "name": "MyToolbar56",
                                             "designerId": "d0e1b775-e510-4fea-89aa-75c3fef533db",
@@ -657,7 +657,7 @@
                                                         "icon": null,
                                                         "iconCls": "small-delete",
                                                         "layout|flex": null,
-                                                        "reference": "btnDeleteRegisterProduct",
+                                                        "itemId": "btnDeleteRegisterProduct",
                                                         "tabIndex": -1,
                                                         "text": "Delete"
                                                     },
@@ -763,7 +763,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "reference": "grvRegisterProduct"
+                                                "itemId": "grvRegisterProduct"
                                             },
                                             "name": "MyGridView45",
                                             "designerId": "7e600470-1238-4f8b-8278-a432b50b5518"
@@ -797,7 +797,7 @@
                         "designer|displayName": "",
                         "dock": "bottom",
                         "layout|flex": 1,
-                        "reference": "pagingtoolbar",
+                        "itemId": "pagingtoolbar",
                         "store": null
                     },
                     "name": "statusbarpaging11",

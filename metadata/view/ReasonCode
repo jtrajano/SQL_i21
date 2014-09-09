@@ -46,7 +46,7 @@
                 "height": 350,
                 "layout": "vbox",
                 "margin": -1,
-                "reference": "frmFuelTaxClass",
+                "itemId": "frmFuelTaxClass",
                 "title": null,
                 "trackResetOnLoad": true,
                 "url": null,
@@ -86,7 +86,7 @@
                                 "iconCls": "large-new",
                                 "layout|flex": null,
                                 "layout|margins": null,
-                                "reference": "btnNew",
+                                "itemId": "btnNew",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "New",
@@ -109,7 +109,7 @@
                                 "iconAlign": "top",
                                 "iconCls": "large-save",
                                 "layout|flex": null,
-                                "reference": "btnSave",
+                                "itemId": "btnSave",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Save",
@@ -132,7 +132,7 @@
                                 "iconAlign": "top",
                                 "iconCls": "large-search",
                                 "layout|flex": null,
-                                "reference": "btnSearch",
+                                "itemId": "btnSearch",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Search",
@@ -155,7 +155,7 @@
                                 "iconAlign": "top",
                                 "iconCls": "large-delete",
                                 "layout|flex": null,
-                                "reference": "btnDelete",
+                                "itemId": "btnDelete",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Delete",
@@ -178,7 +178,7 @@
                                 "iconAlign": "top",
                                 "iconCls": "large-undo",
                                 "layout|flex": null,
-                                "reference": "btnUndo",
+                                "itemId": "btnUndo",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Undo",
@@ -216,7 +216,7 @@
                                 "iconAlign": "top",
                                 "iconCls": "large-close",
                                 "layout|flex": null,
-                                "reference": "btnClose",
+                                "itemId": "btnClose",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Close",
@@ -238,7 +238,7 @@
                         "activeTab": 0,
                         "layout|flex": 1,
                         "plain": true,
-                        "reference": "tabReasonCode"
+                        "itemId": "tabReasonCode"
                     },
                     "name": "MyTabPanel4",
                     "designerId": "71404b6a-dfed-44cc-897f-bfd3f5c10292",
@@ -320,7 +320,7 @@
                                                         "labelWidth": 130,
                                                         "layout|flex": 1,
                                                         "name": null,
-                                                        "reference": "txtReasonCode"
+                                                        "itemId": "txtReasonCode"
                                                     },
                                                     "name": "MyTextField69",
                                                     "configAlternates": {
@@ -351,7 +351,7 @@
                                                         "layout|margins": null,
                                                         "margin": "0 0 0 5",
                                                         "name": null,
-                                                        "reference": "cboType",
+                                                        "itemId": "cboType",
                                                         "width": 175
                                                     },
                                                     "name": "MyComboBox",
@@ -384,7 +384,7 @@
                                                 "layout|margins": null,
                                                 "maxLength": null,
                                                 "name": null,
-                                                "reference": "txtDescription",
+                                                "itemId": "txtDescription",
                                                 "tabIndex": null
                                             },
                                             "name": "MyTextField71",
@@ -405,7 +405,7 @@
                                                 "layout|margins": null,
                                                 "maxLength": null,
                                                 "name": null,
-                                                "reference": "cboLotTransactionType",
+                                                "itemId": "cboLotTransactionType",
                                                 "tabIndex": null
                                             },
                                             "name": "MyComboBox1",
@@ -423,7 +423,7 @@
                                                 "fieldLabel": "Default",
                                                 "labelWidth": 130,
                                                 "layout|flex": null,
-                                                "reference": "chkDefault"
+                                                "itemId": "chkDefault"
                                             },
                                             "name": "MyCheckbox",
                                             "designerId": "793bc5fb-9a05-4c53-8fed-cf6cad98f64b"
@@ -441,7 +441,7 @@
                                                 "labelWidth": 130,
                                                 "layout|flex": null,
                                                 "margin": null,
-                                                "reference": "chkReduceAvailableTime"
+                                                "itemId": "chkReduceAvailableTime"
                                             },
                                             "name": "MyCheckbox3",
                                             "designerId": "5ccd840a-6522-4ccb-b404-ba540cd3b713"
@@ -459,7 +459,7 @@
                                                 "labelWidth": 130,
                                                 "layout|flex": null,
                                                 "margin": null,
-                                                "reference": "chkExplanationRequired"
+                                                "itemId": "chkExplanationRequired"
                                             },
                                             "name": "MyCheckbox4",
                                             "designerId": "f5fc2df8-a55e-4cea-9a8d-db8cb7a54957"
@@ -503,7 +503,7 @@
                                     "userConfig": {
                                         "layout|flex": 1,
                                         "margin": -1,
-                                        "reference": "grdWorkcenter",
+                                        "itemId": "grdWorkcenter",
                                         "title": null
                                     },
                                     "name": "MyGridPanel13",
@@ -519,7 +519,7 @@
                                             "userConfig": {
                                                 "container|padding": "0 0 0 1",
                                                 "dock": "top",
-                                                "reference": "tlbGridOptions1"
+                                                "itemId": "tlbGridOptions1"
                                             },
                                             "name": "MyToolbar12",
                                             "designerId": "acdfbba6-6bfe-40f1-99b7-99696254dedf",
@@ -535,7 +535,7 @@
                                                         "icon": null,
                                                         "iconCls": "small-add",
                                                         "layout|flex": null,
-                                                        "reference": "btnAddWorkCenterMapping",
+                                                        "itemId": "btnAddWorkCenterMapping",
                                                         "tabIndex": -1,
                                                         "text": "Add"
                                                     },
@@ -553,7 +553,7 @@
                                                         "icon": null,
                                                         "iconCls": "small-edit",
                                                         "layout|flex": null,
-                                                        "reference": "btnEditWorkCenterMapping",
+                                                        "itemId": "btnEditWorkCenterMapping",
                                                         "tabIndex": -1,
                                                         "text": "Edit"
                                                     },
@@ -613,7 +613,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "reference": "grvWorkcenter"
+                                                "itemId": "grvWorkcenter"
                                             },
                                             "name": "MyGridView13",
                                             "designerId": "854370b4-55f6-46d8-9d4c-2d5b30579f44"
@@ -647,7 +647,7 @@
                         "designer|displayName": "",
                         "dock": "bottom",
                         "layout|flex": 1,
-                        "reference": "pagingtoolbar",
+                        "itemId": "pagingtoolbar",
                         "store": null
                     },
                     "name": "statusbarpaging2",

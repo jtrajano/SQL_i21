@@ -46,7 +46,7 @@
                 "height": 350,
                 "layout": "vbox",
                 "margin": -1,
-                "reference": "frmReasonCodeAdd",
+                "itemId": "frmReasonCodeAdd",
                 "title": null,
                 "trackResetOnLoad": true,
                 "url": null,
@@ -85,7 +85,7 @@
                                 "iconAlign": "top",
                                 "iconCls": "large-ok",
                                 "layout|flex": null,
-                                "reference": "btnOk",
+                                "itemId": "btnOk",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "OK",
@@ -108,7 +108,7 @@
                                 "iconAlign": "top",
                                 "iconCls": "large-cancel",
                                 "layout|flex": null,
-                                "reference": "btnCancel",
+                                "itemId": "btnCancel",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Cancel",
@@ -129,7 +129,7 @@
                     "userConfig": {
                         "layout|flex": 1,
                         "margin": null,
-                        "reference": "grdWorkcenter",
+                        "itemId": "grdWorkcenter",
                         "title": null
                     },
                     "name": "MyGridPanel13",
@@ -145,7 +145,7 @@
                             "userConfig": {
                                 "container|padding": "0 0 0 1",
                                 "dock": "top",
-                                "reference": "tlbGridOptions"
+                                "itemId": "tlbGridOptions"
                             },
                             "name": "MyToolbar12",
                             "designerId": "028f8132-1dbb-431a-95ce-110bfebae8b0",
@@ -189,7 +189,7 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "reference": "grvWorkcenter"
+                                "itemId": "grvWorkcenter"
                             },
                             "name": "MyGridView13",
                             "designerId": "649548b0-8dff-41b0-95c0-17a5229355cf"

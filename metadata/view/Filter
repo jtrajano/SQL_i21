@@ -24,7 +24,7 @@
             "codeClass": null,
             "userConfig": {
                 "fieldLabel": "Filter",
-                "reference": "txtFitlerGrid",
+                "itemId": "txtFitlerGrid",
                 "labelWidth": 35,
                 "margin": "0 0 0 5",
                 "onTrigger1Click": null,
@@ -81,7 +81,7 @@
             },
             "codeClass": null,
             "userConfig": {
-                "reference": "lblTotalRecords",
+                "itemId": "lblTotalRecords",
                 "padding": 3,
                 "text": ""
             },

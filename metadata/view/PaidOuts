@@ -45,7 +45,7 @@
                 "height": 350,
                 "layout": "vbox",
                 "margin": -1,
-                "reference": "frmPaidOuts",
+                "itemId": "frmPaidOuts",
                 "title": null,
                 "trackResetOnLoad": true,
                 "url": null,
@@ -84,7 +84,7 @@
                                 "iconAlign": "top",
                                 "iconCls": "large-save",
                                 "layout|flex": null,
-                                "reference": "btnSave",
+                                "itemId": "btnSave",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Save",
@@ -107,7 +107,7 @@
                                 "iconAlign": "top",
                                 "iconCls": "large-undo",
                                 "layout|flex": null,
-                                "reference": "btnUndo",
+                                "itemId": "btnUndo",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Undo",
@@ -145,7 +145,7 @@
                                 "iconAlign": "top",
                                 "iconCls": "large-close",
                                 "layout|flex": null,
-                                "reference": "btnClose",
+                                "itemId": "btnClose",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Close",
@@ -165,7 +165,7 @@
                     "codeClass": null,
                     "userConfig": {
                         "layout|flex": 1,
-                        "reference": "grdPaidOuts",
+                        "itemId": "grdPaidOuts",
                         "title": null
                     },
                     "name": "MyGridPanel46",
@@ -181,7 +181,7 @@
                             "userConfig": {
                                 "container|padding": "0 0 0 1",
                                 "dock": "top",
-                                "reference": "tlbGridOptions"
+                                "itemId": "tlbGridOptions"
                             },
                             "name": "MyToolbar58",
                             "designerId": "e53d6365-c09f-4a85-956f-8b6d35da7324",
@@ -197,7 +197,7 @@
                                         "icon": null,
                                         "iconCls": "small-delete",
                                         "layout|flex": null,
-                                        "reference": "btnDeletePaidOuts",
+                                        "itemId": "btnDeletePaidOuts",
                                         "tabIndex": -1,
                                         "text": "Delete"
                                     },
@@ -272,7 +272,7 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "reference": "grvPaidOuts"
+                                "itemId": "grvPaidOuts"
                             },
                             "name": "MyGridView46",
                             "designerId": "72fa1b0e-98f9-45b6-906c-e735bde27821"
@@ -302,7 +302,7 @@
                         "designer|displayName": "",
                         "dock": "bottom",
                         "layout|flex": 1,
-                        "reference": "pagingtoolbar",
+                        "itemId": "pagingtoolbar",
                         "store": null
                     },
                     "name": "statusbarpaging7",

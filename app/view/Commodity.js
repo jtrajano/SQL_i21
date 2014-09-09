@@ -32,6 +32,9 @@ Ext.define('Inventory.view.Commodity', {
         'Ext.grid.Panel',
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
+        'Ext.tree.Panel',
+        'Ext.tree.View',
+        'Ext.tree.Column',
         'Ext.grid.column.Number',
         'Ext.grid.column.Date',
         'Ext.toolbar.Paging'
@@ -63,9 +66,9 @@ Ext.define('Inventory.view.Commodity', {
             items: [
                 {
                     xtype: 'button',
-                    reference: 'btnNew',
                     tabIndex: -1,
                     height: 57,
+                    itemId: 'btnNew',
                     width: 45,
                     iconAlign: 'top',
                     iconCls: 'large-new',
@@ -74,9 +77,9 @@ Ext.define('Inventory.view.Commodity', {
                 },
                 {
                     xtype: 'button',
-                    reference: 'btnSave',
                     tabIndex: -1,
                     height: 57,
+                    itemId: 'btnSave',
                     width: 45,
                     iconAlign: 'top',
                     iconCls: 'large-save',
@@ -85,9 +88,9 @@ Ext.define('Inventory.view.Commodity', {
                 },
                 {
                     xtype: 'button',
-                    reference: 'btnFind',
                     tabIndex: -1,
                     height: 57,
+                    itemId: 'btnFind',
                     width: 45,
                     iconAlign: 'top',
                     iconCls: 'large-search',
@@ -96,9 +99,9 @@ Ext.define('Inventory.view.Commodity', {
                 },
                 {
                     xtype: 'button',
-                    reference: 'btnDelete',
                     tabIndex: -1,
                     height: 57,
+                    itemId: 'btnDelete',
                     width: 45,
                     iconAlign: 'top',
                     iconCls: 'large-delete',
@@ -107,9 +110,9 @@ Ext.define('Inventory.view.Commodity', {
                 },
                 {
                     xtype: 'button',
-                    reference: 'btnUndo',
                     tabIndex: -1,
                     height: 57,
+                    itemId: 'btnUndo',
                     width: 45,
                     iconAlign: 'top',
                     iconCls: 'large-undo',
@@ -122,9 +125,9 @@ Ext.define('Inventory.view.Commodity', {
                 },
                 {
                     xtype: 'button',
-                    reference: 'btnClose',
                     tabIndex: -1,
                     height: 57,
+                    itemId: 'btnClose',
                     width: 45,
                     iconAlign: 'top',
                     iconCls: 'large-close',
@@ -141,9 +144,9 @@ Ext.define('Inventory.view.Commodity', {
                 items: [
                     {
                         xtype: 'form',
-                        reference: 'frmCommodity',
                         autoShow: true,
                         height: 350,
+                        itemId: 'frmCommodity',
                         margin: -1,
                         width: 450,
                         bodyBorder: false,
@@ -157,7 +160,7 @@ Ext.define('Inventory.view.Commodity', {
                             {
                                 xtype: 'tabpanel',
                                 flex: 1,
-                                reference: 'tabCommodity',
+                                itemId: 'tabCommodity',
                                 activeTab: 0,
                                 plain: true,
                                 items: [
@@ -188,19 +191,19 @@ Ext.define('Inventory.view.Commodity', {
                                                         items: [
                                                             {
                                                                 xtype: 'textfield',
-                                                                reference: 'txtCommodityCode',
+                                                                itemId: 'txtCommodityCode',
                                                                 fieldLabel: 'Commodity Code',
                                                                 labelWidth: 140
                                                             },
                                                             {
                                                                 xtype: 'textfield',
-                                                                reference: 'txtDescription',
+                                                                itemId: 'txtDescription',
                                                                 fieldLabel: 'Description',
                                                                 labelWidth: 140
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
-                                                                reference: 'txtDecimalsOnDpr',
+                                                                itemId: 'txtDecimalsOnDpr',
                                                                 fieldLabel: 'Decimals on DPR',
                                                                 labelWidth: 140,
                                                                 hideTrigger: true
@@ -215,7 +218,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'numberfield',
-                                                                        reference: 'txtConsolidateFactor',
+                                                                        itemId: 'txtConsolidateFactor',
                                                                         width: 280,
                                                                         fieldLabel: 'Consolidate Factor',
                                                                         labelWidth: 140,
@@ -223,7 +226,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                     },
                                                                     {
                                                                         xtype: 'checkboxfield',
-                                                                        reference: 'chkFxExposure',
+                                                                        itemId: 'chkFxExposure',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'FX Exposure',
                                                                         labelWidth: 164
@@ -240,7 +243,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'numberfield',
-                                                                        reference: 'txtPriceChecksMin',
+                                                                        itemId: 'txtPriceChecksMin',
                                                                         width: 280,
                                                                         fieldLabel: 'Price Checks - Min',
                                                                         labelWidth: 140,
@@ -249,7 +252,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                     {
                                                                         xtype: 'numberfield',
                                                                         flex: 1,
-                                                                        reference: 'txtPriceChecksMax',
+                                                                        itemId: 'txtPriceChecksMax',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'Max',
                                                                         labelWidth: 60,
@@ -267,7 +270,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'textfield',
-                                                                        reference: 'txtCheckoffTaxDesc',
+                                                                        itemId: 'txtCheckoffTaxDesc',
                                                                         width: 280,
                                                                         fieldLabel: 'Checkoff Tax Desc',
                                                                         labelWidth: 140
@@ -275,7 +278,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                     {
                                                                         xtype: 'combobox',
                                                                         flex: 1,
-                                                                        reference: 'cboCheckoffTaxAllStates',
+                                                                        itemId: 'cboCheckoffTaxAllStates',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'All States',
                                                                         labelWidth: 60
@@ -292,7 +295,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'textfield',
-                                                                        reference: 'txtInsuranceTaxDesc',
+                                                                        itemId: 'txtInsuranceTaxDesc',
                                                                         width: 280,
                                                                         fieldLabel: 'Insurance Tax Desc',
                                                                         labelWidth: 140
@@ -300,7 +303,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                     {
                                                                         xtype: 'combobox',
                                                                         flex: 1,
-                                                                        reference: 'cboInsuranceTaxAllStates',
+                                                                        itemId: 'cboInsuranceTaxAllStates',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'All States',
                                                                         labelWidth: 60
@@ -317,7 +320,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'datefield',
-                                                                        reference: 'dtmCropEndDateCurrent',
+                                                                        itemId: 'dtmCropEndDateCurrent',
                                                                         width: 280,
                                                                         fieldLabel: 'Crop End Date Current',
                                                                         labelWidth: 140
@@ -325,7 +328,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                     {
                                                                         xtype: 'datefield',
                                                                         flex: 1,
-                                                                        reference: 'dtmCropEndDateNew',
+                                                                        itemId: 'dtmCropEndDateNew',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'New',
                                                                         labelWidth: 60
@@ -334,7 +337,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             },
                                                             {
                                                                 xtype: 'textfield',
-                                                                reference: 'txtEdiCode',
+                                                                itemId: 'txtEdiCode',
                                                                 fieldLabel: 'EDI Code',
                                                                 labelWidth: 140
                                                             },
@@ -348,7 +351,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'numberfield',
-                                                                        reference: 'txtDefaultScheduleStore',
+                                                                        itemId: 'txtDefaultScheduleStore',
                                                                         width: 280,
                                                                         fieldLabel: 'Default Schedule Store',
                                                                         labelWidth: 140,
@@ -357,7 +360,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                     {
                                                                         xtype: 'numberfield',
                                                                         flex: 1,
-                                                                        reference: 'txtDefaultScheduleDiscount',
+                                                                        itemId: 'txtDefaultScheduleDiscount',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'Discount',
                                                                         labelWidth: 60,
@@ -375,14 +378,14 @@ Ext.define('Inventory.view.Commodity', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'textfield',
-                                                                        reference: 'txtTextPurchase',
+                                                                        itemId: 'txtTextPurchase',
                                                                         width: 200,
                                                                         fieldLabel: 'Text Purchase',
                                                                         labelWidth: 140
                                                                     },
                                                                     {
                                                                         xtype: 'textfield',
-                                                                        reference: 'txtTextSales',
+                                                                        itemId: 'txtTextSales',
                                                                         margin: '0 5',
                                                                         width: 135,
                                                                         fieldLabel: 'Text Sales',
@@ -391,7 +394,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                     {
                                                                         xtype: 'numberfield',
                                                                         flex: 1,
-                                                                        reference: 'txtTextFees',
+                                                                        itemId: 'txtTextFees',
                                                                         fieldLabel: 'Text Fees',
                                                                         labelWidth: 60,
                                                                         hideTrigger: true
@@ -400,7 +403,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             },
                                                             {
                                                                 xtype: 'textfield',
-                                                                reference: 'txtAgItemNumber',
+                                                                itemId: 'txtAgItemNumber',
                                                                 width: 280,
                                                                 fieldLabel: 'AG Item Number',
                                                                 labelWidth: 140
@@ -408,7 +411,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             {
                                                                 xtype: 'combobox',
                                                                 flex: 1,
-                                                                reference: 'cboScaleAutoDistDefault',
+                                                                itemId: 'cboScaleAutoDistDefault',
                                                                 fieldLabel: 'Scale Auto Dist Default',
                                                                 labelWidth: 140
                                                             },
@@ -422,14 +425,14 @@ Ext.define('Inventory.view.Commodity', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'checkboxfield',
-                                                                        reference: 'chkRequireLoadNoAtKiosk',
+                                                                        itemId: 'chkRequireLoadNoAtKiosk',
                                                                         fieldLabel: 'Require Load No at Kiosk',
                                                                         labelWidth: 140
                                                                     },
                                                                     {
                                                                         xtype: 'checkboxfield',
                                                                         flex: 1,
-                                                                        reference: 'chkAllowVariety',
+                                                                        itemId: 'chkAllowVariety',
                                                                         margin: '0 0 0 15',
                                                                         fieldLabel: 'Allow Variety',
                                                                         labelWidth: 80
@@ -446,14 +449,14 @@ Ext.define('Inventory.view.Commodity', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'checkboxfield',
-                                                                        reference: 'chkAllowLoadContracts',
+                                                                        itemId: 'chkAllowLoadContracts',
                                                                         fieldLabel: 'Allow Load Contracts',
                                                                         labelWidth: 140
                                                                     },
                                                                     {
                                                                         xtype: 'numberfield',
                                                                         flex: 1,
-                                                                        reference: 'txtMaximumUnder',
+                                                                        itemId: 'txtMaximumUnder',
                                                                         margin: '0 0 0 15',
                                                                         fieldLabel: 'Max Under',
                                                                         labelWidth: 65,
@@ -462,7 +465,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                     {
                                                                         xtype: 'numberfield',
                                                                         flex: 1,
-                                                                        reference: 'txtMaximumOver',
+                                                                        itemId: 'txtMaximumOver',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'Max Over',
                                                                         labelWidth: 55,
@@ -480,7 +483,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'combobox',
-                                                                        reference: 'cboPatronageCategory',
+                                                                        itemId: 'cboPatronageCategory',
                                                                         width: 280,
                                                                         fieldLabel: 'Patronage Category',
                                                                         labelWidth: 140
@@ -488,7 +491,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                     {
                                                                         xtype: 'combobox',
                                                                         flex: 1,
-                                                                        reference: 'cboPatronageCategoryDirect',
+                                                                        itemId: 'cboPatronageCategoryDirect',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'Direct',
                                                                         labelWidth: 45
@@ -521,13 +524,13 @@ Ext.define('Inventory.view.Commodity', {
                                             {
                                                 xtype: 'advancefiltergrid',
                                                 flex: 1,
-                                                reference: 'grdUom',
+                                                itemId: 'grdUom',
                                                 margin: -1,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
-                                                        reference: 'tlbGridOptions',
+                                                        itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
                                                             padding: '0 0 0 1'
@@ -535,8 +538,8 @@ Ext.define('Inventory.view.Commodity', {
                                                         items: [
                                                             {
                                                                 xtype: 'button',
-                                                                reference: 'btnDeleteUom',
                                                                 tabIndex: -1,
+                                                                itemId: 'btnDeleteUom',
                                                                 iconCls: 'small-delete',
                                                                 text: 'Delete'
                                                             },
@@ -564,7 +567,7 @@ Ext.define('Inventory.view.Commodity', {
                                                     }
                                                 ],
                                                 viewConfig: {
-                                                    reference: 'grvUom'
+                                                    itemId: 'grvUom'
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel',
@@ -579,14 +582,16 @@ Ext.define('Inventory.view.Commodity', {
                                         title: 'Group',
                                         items: [
                                             {
-                                                xtype: 'advancefiltergrid',
-                                                reference: 'grdCommodityGroup',
+                                                xtype: 'treepanel',
+                                                height: 250,
+                                                itemId: 'grdCommodityGroup',
                                                 margin: -1,
+                                                width: 400,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
-                                                        reference: 'tlbGridOptions',
+                                                        itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
                                                             padding: '0 0 0 1'
@@ -594,8 +599,15 @@ Ext.define('Inventory.view.Commodity', {
                                                         items: [
                                                             {
                                                                 xtype: 'button',
-                                                                reference: 'btnDeleteGroup',
                                                                 tabIndex: -1,
+                                                                itemId: 'btnAddGroup',
+                                                                iconCls: 'small-add',
+                                                                text: 'Add'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnDeleteGroup1',
                                                                 iconCls: 'small-delete',
                                                                 text: 'Delete'
                                                             },
@@ -608,25 +620,17 @@ Ext.define('Inventory.view.Commodity', {
                                                         ]
                                                     }
                                                 ],
+                                                viewConfig: {
+
+                                                },
                                                 columns: [
                                                     {
-                                                        xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
-                                                        text: 'Level'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
-                                                        text: 'Commodity Group',
+                                                        xtype: 'treecolumn',
+                                                        dataIndex: 'text',
+                                                        text: 'Nodes',
                                                         flex: 1
                                                     }
-                                                ],
-                                                viewConfig: {
-                                                    reference: 'grvCommodityGroup'
-                                                },
-                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                    selType: 'checkboxmodel'
-                                                })
+                                                ]
                                             }
                                         ]
                                     },
@@ -650,13 +654,13 @@ Ext.define('Inventory.view.Commodity', {
                                                     {
                                                         xtype: 'advancefiltergrid',
                                                         flex: 1,
-                                                        reference: 'grdOrigin',
+                                                        itemId: 'grdOrigin',
                                                         title: 'Origins',
                                                         dockedItems: [
                                                             {
                                                                 xtype: 'toolbar',
                                                                 dock: 'top',
-                                                                reference: 'tlbGridOptions',
+                                                                itemId: 'tlbGridOptions',
                                                                 layout: {
                                                                     type: 'hbox',
                                                                     padding: '0 0 0 1'
@@ -664,8 +668,8 @@ Ext.define('Inventory.view.Commodity', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'button',
-                                                                        reference: 'btnDeleteOrigins',
                                                                         tabIndex: -1,
+                                                                        itemId: 'btnDeleteOrigins',
                                                                         iconCls: 'small-delete',
                                                                         text: 'Delete'
                                                                     },
@@ -674,15 +678,15 @@ Ext.define('Inventory.view.Commodity', {
                                                                     },
                                                                     {
                                                                         xtype: 'button',
-                                                                        reference: 'btnMoveUpOrigins',
                                                                         tabIndex: -1,
+                                                                        itemId: 'btnMoveUpOrigins',
                                                                         iconCls: 'small-up',
                                                                         text: 'Up'
                                                                     },
                                                                     {
                                                                         xtype: 'button',
-                                                                        reference: 'btnMoveDownOrigins',
                                                                         tabIndex: -1,
+                                                                        itemId: 'btnMoveDownOrigins',
                                                                         iconCls: 'small-down',
                                                                         text: 'Down'
                                                                     }
@@ -698,7 +702,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             }
                                                         ],
                                                         viewConfig: {
-                                                            reference: 'grvOrigin'
+                                                            itemId: 'grvOrigin'
                                                         },
                                                         selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                             selType: 'checkboxmodel'
@@ -707,14 +711,14 @@ Ext.define('Inventory.view.Commodity', {
                                                     {
                                                         xtype: 'advancefiltergrid',
                                                         flex: 1,
-                                                        reference: 'grdProductType',
+                                                        itemId: 'grdProductType',
                                                         margin: '0 0 0 5',
                                                         title: 'Product Types',
                                                         dockedItems: [
                                                             {
                                                                 xtype: 'toolbar',
                                                                 dock: 'top',
-                                                                reference: 'tlbGridOptions',
+                                                                itemId: 'tlbGridOptions',
                                                                 layout: {
                                                                     type: 'hbox',
                                                                     padding: '0 0 0 1'
@@ -722,8 +726,8 @@ Ext.define('Inventory.view.Commodity', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'button',
-                                                                        reference: 'btnDeleteProductTypes',
                                                                         tabIndex: -1,
+                                                                        itemId: 'btnDeleteProductTypes',
                                                                         iconCls: 'small-delete',
                                                                         text: 'Delete'
                                                                     },
@@ -732,15 +736,15 @@ Ext.define('Inventory.view.Commodity', {
                                                                     },
                                                                     {
                                                                         xtype: 'button',
-                                                                        reference: 'btnMoveUpProductTypes',
                                                                         tabIndex: -1,
+                                                                        itemId: 'btnMoveUpProductTypes',
                                                                         iconCls: 'small-up',
                                                                         text: 'Up'
                                                                     },
                                                                     {
                                                                         xtype: 'button',
-                                                                        reference: 'btnMoveDownProductTypes',
                                                                         tabIndex: -1,
+                                                                        itemId: 'btnMoveDownProductTypes',
                                                                         iconCls: 'small-down',
                                                                         text: 'Down'
                                                                     }
@@ -756,7 +760,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             }
                                                         ],
                                                         viewConfig: {
-                                                            reference: 'grvProductType'
+                                                            itemId: 'grvProductType'
                                                         },
                                                         selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                             selType: 'checkboxmodel'
@@ -765,14 +769,14 @@ Ext.define('Inventory.view.Commodity', {
                                                     {
                                                         xtype: 'advancefiltergrid',
                                                         flex: 1,
-                                                        reference: 'grdRegion',
+                                                        itemId: 'grdRegion',
                                                         margin: '0 0 0 5',
                                                         title: 'Regions',
                                                         dockedItems: [
                                                             {
                                                                 xtype: 'toolbar',
                                                                 dock: 'top',
-                                                                reference: 'tlbGridOptions',
+                                                                itemId: 'tlbGridOptions',
                                                                 layout: {
                                                                     type: 'hbox',
                                                                     padding: '0 0 0 1'
@@ -780,8 +784,8 @@ Ext.define('Inventory.view.Commodity', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'button',
-                                                                        reference: 'btnDeleteRegions',
                                                                         tabIndex: -1,
+                                                                        itemId: 'btnDeleteRegions',
                                                                         iconCls: 'small-delete',
                                                                         text: 'Delete'
                                                                     },
@@ -790,15 +794,15 @@ Ext.define('Inventory.view.Commodity', {
                                                                     },
                                                                     {
                                                                         xtype: 'button',
-                                                                        reference: 'btnMoveUpRegions',
                                                                         tabIndex: -1,
+                                                                        itemId: 'btnMoveUpRegions',
                                                                         iconCls: 'small-up',
                                                                         text: 'Up'
                                                                     },
                                                                     {
                                                                         xtype: 'button',
-                                                                        reference: 'btnMoveDownRegions',
                                                                         tabIndex: -1,
+                                                                        itemId: 'btnMoveDownRegions',
                                                                         iconCls: 'small-down',
                                                                         text: 'Down'
                                                                     }
@@ -814,7 +818,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             }
                                                         ],
                                                         viewConfig: {
-                                                            reference: 'grvRegion'
+                                                            itemId: 'grvRegion'
                                                         },
                                                         selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                             selType: 'checkboxmodel'
@@ -823,14 +827,14 @@ Ext.define('Inventory.view.Commodity', {
                                                     {
                                                         xtype: 'advancefiltergrid',
                                                         flex: 1,
-                                                        reference: 'grdClassVarient',
+                                                        itemId: 'grdClassVarient',
                                                         margin: '0 0 0 5',
                                                         title: 'Classes and Varients',
                                                         dockedItems: [
                                                             {
                                                                 xtype: 'toolbar',
                                                                 dock: 'top',
-                                                                reference: 'tlbGridOptions',
+                                                                itemId: 'tlbGridOptions',
                                                                 layout: {
                                                                     type: 'hbox',
                                                                     padding: '0 0 0 1'
@@ -838,8 +842,8 @@ Ext.define('Inventory.view.Commodity', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'button',
-                                                                        reference: 'btnDeleteClasses',
                                                                         tabIndex: -1,
+                                                                        itemId: 'btnDeleteClasses',
                                                                         iconCls: 'small-delete',
                                                                         text: 'Delete'
                                                                     },
@@ -848,15 +852,15 @@ Ext.define('Inventory.view.Commodity', {
                                                                     },
                                                                     {
                                                                         xtype: 'button',
-                                                                        reference: 'btnMoveUpClasses',
                                                                         tabIndex: -1,
+                                                                        itemId: 'btnMoveUpClasses',
                                                                         iconCls: 'small-up',
                                                                         text: 'Up'
                                                                     },
                                                                     {
                                                                         xtype: 'button',
-                                                                        reference: 'btnMoveDownClasses',
                                                                         tabIndex: -1,
+                                                                        itemId: 'btnMoveDownClasses',
                                                                         iconCls: 'small-down',
                                                                         text: 'Down'
                                                                     }
@@ -872,7 +876,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             }
                                                         ],
                                                         viewConfig: {
-                                                            reference: 'grvClassVarient'
+                                                            itemId: 'grvClassVarient'
                                                         },
                                                         selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                             selType: 'checkboxmodel'
@@ -892,13 +896,13 @@ Ext.define('Inventory.view.Commodity', {
                                                     {
                                                         xtype: 'advancefiltergrid',
                                                         flex: 1,
-                                                        reference: 'grdSeason',
+                                                        itemId: 'grdSeason',
                                                         title: 'Seasons',
                                                         dockedItems: [
                                                             {
                                                                 xtype: 'toolbar',
                                                                 dock: 'top',
-                                                                reference: 'tlbGridOptions',
+                                                                itemId: 'tlbGridOptions',
                                                                 layout: {
                                                                     type: 'hbox',
                                                                     padding: '0 0 0 1'
@@ -906,8 +910,8 @@ Ext.define('Inventory.view.Commodity', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'button',
-                                                                        reference: 'btnDeleteSeasons',
                                                                         tabIndex: -1,
+                                                                        itemId: 'btnDeleteSeasons',
                                                                         iconCls: 'small-delete',
                                                                         text: 'Delete'
                                                                     },
@@ -916,15 +920,15 @@ Ext.define('Inventory.view.Commodity', {
                                                                     },
                                                                     {
                                                                         xtype: 'button',
-                                                                        reference: 'btnMoveUpSeasons',
                                                                         tabIndex: -1,
+                                                                        itemId: 'btnMoveUpSeasons',
                                                                         iconCls: 'small-up',
                                                                         text: 'Up'
                                                                     },
                                                                     {
                                                                         xtype: 'button',
-                                                                        reference: 'btnMoveDownSeasons',
                                                                         tabIndex: -1,
+                                                                        itemId: 'btnMoveDownSeasons',
                                                                         iconCls: 'small-down',
                                                                         text: 'Down'
                                                                     }
@@ -940,7 +944,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             }
                                                         ],
                                                         viewConfig: {
-                                                            reference: 'grvSeason'
+                                                            itemId: 'grvSeason'
                                                         },
                                                         selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                             selType: 'checkboxmodel'
@@ -949,14 +953,14 @@ Ext.define('Inventory.view.Commodity', {
                                                     {
                                                         xtype: 'advancefiltergrid',
                                                         flex: 1,
-                                                        reference: 'grdGrade',
+                                                        itemId: 'grdGrade',
                                                         margin: '0 0 0 5',
                                                         title: 'Grades',
                                                         dockedItems: [
                                                             {
                                                                 xtype: 'toolbar',
                                                                 dock: 'top',
-                                                                reference: 'tlbGridOptions',
+                                                                itemId: 'tlbGridOptions',
                                                                 layout: {
                                                                     type: 'hbox',
                                                                     padding: '0 0 0 1'
@@ -964,8 +968,8 @@ Ext.define('Inventory.view.Commodity', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'button',
-                                                                        reference: 'btnDeleteGrades',
                                                                         tabIndex: -1,
+                                                                        itemId: 'btnDeleteGrades',
                                                                         iconCls: 'small-delete',
                                                                         text: 'Delete'
                                                                     },
@@ -974,15 +978,15 @@ Ext.define('Inventory.view.Commodity', {
                                                                     },
                                                                     {
                                                                         xtype: 'button',
-                                                                        reference: 'btnMoveUpGrades',
                                                                         tabIndex: -1,
+                                                                        itemId: 'btnMoveUpGrades',
                                                                         iconCls: 'small-up',
                                                                         text: 'Up'
                                                                     },
                                                                     {
                                                                         xtype: 'button',
-                                                                        reference: 'btnMoveDownGrades',
                                                                         tabIndex: -1,
+                                                                        itemId: 'btnMoveDownGrades',
                                                                         iconCls: 'small-down',
                                                                         text: 'Down'
                                                                     }
@@ -998,7 +1002,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             }
                                                         ],
                                                         viewConfig: {
-                                                            reference: 'grvGrade'
+                                                            itemId: 'grvGrade'
                                                         },
                                                         selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                             selType: 'checkboxmodel'
@@ -1007,14 +1011,14 @@ Ext.define('Inventory.view.Commodity', {
                                                     {
                                                         xtype: 'advancefiltergrid',
                                                         flex: 1,
-                                                        reference: 'grdProductLine',
+                                                        itemId: 'grdProductLine',
                                                         margin: '0 0 0 5',
                                                         title: 'Product Lines',
                                                         dockedItems: [
                                                             {
                                                                 xtype: 'toolbar',
                                                                 dock: 'top',
-                                                                reference: 'tlbGridOptions',
+                                                                itemId: 'tlbGridOptions',
                                                                 layout: {
                                                                     type: 'hbox',
                                                                     padding: '0 0 0 1'
@@ -1022,8 +1026,8 @@ Ext.define('Inventory.view.Commodity', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'button',
-                                                                        reference: 'btnDeleteProductLines',
                                                                         tabIndex: -1,
+                                                                        itemId: 'btnDeleteProductLines',
                                                                         iconCls: 'small-delete',
                                                                         text: 'Delete'
                                                                     },
@@ -1032,15 +1036,15 @@ Ext.define('Inventory.view.Commodity', {
                                                                     },
                                                                     {
                                                                         xtype: 'button',
-                                                                        reference: 'btnMoveUpProductLines',
                                                                         tabIndex: -1,
+                                                                        itemId: 'btnMoveUpProductLines',
                                                                         iconCls: 'small-up',
                                                                         text: 'Up'
                                                                     },
                                                                     {
                                                                         xtype: 'button',
-                                                                        reference: 'btnMoveDownProductLines',
                                                                         tabIndex: -1,
+                                                                        itemId: 'btnMoveDownProductLines',
                                                                         iconCls: 'small-down',
                                                                         text: 'Down'
                                                                     }
@@ -1056,7 +1060,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             }
                                                         ],
                                                         viewConfig: {
-                                                            reference: 'grvProductLine'
+                                                            itemId: 'grvProductLine'
                                                         },
                                                         selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                             selType: 'checkboxmodel'
@@ -1078,13 +1082,13 @@ Ext.define('Inventory.view.Commodity', {
                                         items: [
                                             {
                                                 xtype: 'advancefiltergrid',
-                                                reference: 'grdQuality',
+                                                itemId: 'grdQuality',
                                                 margin: -1,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
-                                                        reference: 'tlbGridOptions',
+                                                        itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
                                                             padding: '0 0 0 1'
@@ -1092,8 +1096,8 @@ Ext.define('Inventory.view.Commodity', {
                                                         items: [
                                                             {
                                                                 xtype: 'button',
-                                                                reference: 'btnDeleteQualitySpecifications',
                                                                 tabIndex: -1,
+                                                                itemId: 'btnDeleteQualitySpecifications',
                                                                 iconCls: 'small-delete',
                                                                 text: 'Delete'
                                                             },
@@ -1156,7 +1160,7 @@ Ext.define('Inventory.view.Commodity', {
                                                     }
                                                 ],
                                                 viewConfig: {
-                                                    reference: 'grvQuality'
+                                                    itemId: 'grvQuality'
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'
@@ -1175,14 +1179,14 @@ Ext.define('Inventory.view.Commodity', {
                                             {
                                                 xtype: 'advancefiltergrid',
                                                 flex: 1,
-                                                reference: 'grdFuturesExchange',
+                                                itemId: 'grdFuturesExchange',
                                                 margin: -1,
                                                 title: 'Futures Exchange',
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
-                                                        reference: 'tlbGridOptions',
+                                                        itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
                                                             padding: '0 0 0 1'
@@ -1190,8 +1194,8 @@ Ext.define('Inventory.view.Commodity', {
                                                         items: [
                                                             {
                                                                 xtype: 'button',
-                                                                reference: 'btnDeleteFutureExchange',
                                                                 tabIndex: -1,
+                                                                itemId: 'btnDeleteFutureExchange',
                                                                 iconCls: 'small-delete',
                                                                 text: 'Delete'
                                                             },
@@ -1243,7 +1247,7 @@ Ext.define('Inventory.view.Commodity', {
                                                     }
                                                 ],
                                                 viewConfig: {
-                                                    reference: 'grvFuturesExchange'
+                                                    itemId: 'grvFuturesExchange'
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'
@@ -1252,14 +1256,14 @@ Ext.define('Inventory.view.Commodity', {
                                             {
                                                 xtype: 'advancefiltergrid',
                                                 flex: 1,
-                                                reference: 'grdFuturesMonth',
+                                                itemId: 'grdFuturesMonth',
                                                 margin: '5 -1 -1 -1',
                                                 title: 'Futures Month',
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
-                                                        reference: 'tlbGridOptions',
+                                                        itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
                                                             padding: '0 0 0 1'
@@ -1267,8 +1271,8 @@ Ext.define('Inventory.view.Commodity', {
                                                         items: [
                                                             {
                                                                 xtype: 'button',
-                                                                reference: 'btnDeleteFutureMonth',
                                                                 tabIndex: -1,
+                                                                itemId: 'btnDeleteFutureMonth',
                                                                 iconCls: 'small-delete',
                                                                 text: 'Delete'
                                                             },
@@ -1310,7 +1314,7 @@ Ext.define('Inventory.view.Commodity', {
                                                     }
                                                 ],
                                                 viewConfig: {
-                                                    reference: 'grvFuturesMonth'
+                                                    itemId: 'grvFuturesMonth'
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'
@@ -1325,13 +1329,13 @@ Ext.define('Inventory.view.Commodity', {
                                         items: [
                                             {
                                                 xtype: 'advancefiltergrid',
-                                                reference: 'grdGlAccounts',
+                                                itemId: 'grdGlAccounts',
                                                 margin: -1,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
-                                                        reference: 'tlbGridOptions',
+                                                        itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
                                                             padding: '0 0 0 1'
@@ -1339,8 +1343,8 @@ Ext.define('Inventory.view.Commodity', {
                                                         items: [
                                                             {
                                                                 xtype: 'button',
-                                                                reference: 'btnDeleteGlAccounts',
                                                                 tabIndex: -1,
+                                                                itemId: 'btnDeleteGlAccounts',
                                                                 iconCls: 'small-delete',
                                                                 text: 'Delete'
                                                             },
@@ -1374,7 +1378,7 @@ Ext.define('Inventory.view.Commodity', {
                                                     }
                                                 ],
                                                 viewConfig: {
-                                                    reference: 'grvGlAccounts'
+                                                    itemId: 'grvGlAccounts'
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'
@@ -1388,7 +1392,7 @@ Ext.define('Inventory.view.Commodity', {
                         dockedItems: [
                             {
                                 xtype: 'statusbarpaging',
-                                reference: 'tlbStatusbarPaging',
+                                itemId: 'tlbStatusbarPaging',
                                 flex: 1,
                                 dock: 'bottom'
                             }
