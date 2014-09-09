@@ -1,0 +1,127 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{6E9BBE31-E2DD-4A82-8519-29AFC4615179}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>iRely.Inventory.Model</RootNamespace>
+    <AssemblyName>iRely.Inventory.Model</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="EntityFramework, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\EntityFramework.5.0.0\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer">
+      <HintPath>..\..\..\resources\references\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="iRely.Common">
+      <HintPath>..\..\..\resources\references\iRely.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Entity" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="InventoryContext.cs" />
+    <Compile Include="Mappings\tblICBrandMap.cs" />
+    <Compile Include="Mappings\tblICCatalogMap.cs" />
+    <Compile Include="Mappings\tblICCategoryAccountMap.cs" />
+    <Compile Include="Mappings\tblICCategoryMap.cs" />
+    <Compile Include="Mappings\tblICCategoryStoreMap.cs" />
+    <Compile Include="Mappings\tblICCategoryVendorMap.cs" />
+    <Compile Include="Mappings\tblICClassMap.cs" />
+    <Compile Include="Mappings\tblICCommodityGroupMap.cs" />
+    <Compile Include="Mappings\tblICCommodityMap.cs" />
+    <Compile Include="Mappings\tblICCommodityUnitMeasureMap.cs" />
+    <Compile Include="Mappings\tblICFamilyMap.cs" />
+    <Compile Include="Mappings\tblICFuelTypeMap.cs" />
+    <Compile Include="Mappings\tblICItemMap.cs" />
+    <Compile Include="Mappings\tblICManufacturerMap.cs" />
+    <Compile Include="Mappings\tblICPatronageCategoryMap.cs" />
+    <Compile Include="Mappings\tblICReasonCodeMap.cs" />
+    <Compile Include="Mappings\tblICReasonCodeWorkCenterMap.cs" />
+    <Compile Include="Mappings\tblICRinFeedStockMap.cs" />
+    <Compile Include="Mappings\tblICRinFeedStockUOMMap.cs" />
+    <Compile Include="Mappings\tblICRinFuelMap.cs" />
+    <Compile Include="Mappings\tblICRinFuelTypeMap.cs" />
+    <Compile Include="Mappings\tblICRinProcessMap.cs" />
+    <Compile Include="Mappings\tblICTagMap.cs" />
+    <Compile Include="Mappings\tblICUnitMeasureMap.cs" />
+    <Compile Include="Mappings\tblICUnitTypeMap.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tables\tblICBrand.cs" />
+    <Compile Include="Tables\tblICCatalog.cs" />
+    <Compile Include="Tables\tblICCategory.cs" />
+    <Compile Include="Tables\tblICCategoryAccount.cs" />
+    <Compile Include="Tables\tblICCategoryStore.cs" />
+    <Compile Include="Tables\tblICCategoryVendor.cs" />
+    <Compile Include="Tables\tblICClass.cs" />
+    <Compile Include="Tables\tblICCommodity.cs" />
+    <Compile Include="Tables\tblICCommodityGroup.cs" />
+    <Compile Include="Tables\tblICCommodityUnitMeasure.cs" />
+    <Compile Include="Tables\tblICFamily.cs" />
+    <Compile Include="Tables\tblICFuelType.cs" />
+    <Compile Include="Tables\tblICItem.cs" />
+    <Compile Include="Tables\tblICManufacturer.cs" />
+    <Compile Include="Tables\tblICPatronageCategory.cs" />
+    <Compile Include="Tables\tblICReasonCode.cs" />
+    <Compile Include="Tables\tblICReasonCodeWorkCenter.cs" />
+    <Compile Include="Tables\tblICRinFeedStock.cs" />
+    <Compile Include="Tables\tblICRinFeedStockUOM.cs" />
+    <Compile Include="Tables\tblICRinFuel.cs" />
+    <Compile Include="Tables\tblICRinFuelType.cs" />
+    <Compile Include="Tables\tblICRinProcess.cs" />
+    <Compile Include="Tables\tblICTag.cs" />
+    <Compile Include="Tables\tblICUnitMeasure.cs" />
+    <Compile Include="Tables\tblICUnitType.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
