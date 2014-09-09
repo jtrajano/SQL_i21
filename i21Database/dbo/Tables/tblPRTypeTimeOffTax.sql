@@ -43,7 +43,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intSort'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Leave Type Id',
+    @value = N'Time-Off Type Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',

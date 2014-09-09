@@ -662,7 +662,7 @@
     <Build Include="dbo\Tables\tblPREmployeeEarning.sql" />
     <Build Include="dbo\Tables\tblPREmployeePaycheckRegister.sql" />
     <Build Include="dbo\Tables\tblPREmployeeTax.sql" />
-    <Build Include="dbo\Tables\tblPREmployeeLeave.sql" />
+    <Build Include="dbo\Tables\tblPREmployeeTimeOff.sql" />
     <Build Include="dbo\Tables\tblPREthnicOrigin.sql" />
     <Build Include="dbo\Tables\tblPRPaycheck.sql" />
     <Build Include="dbo\Tables\tblPRPaycheckDeduction.sql" />
