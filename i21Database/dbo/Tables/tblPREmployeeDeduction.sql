@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblPREmployeeDeduction](
 	[intEmployeeDeductionId] [int] NOT NULL IDENTITY,
 	[intEmployeeId] INT NOT NULL,
-	[intDeductionTypeId] INT NOT NULL,
+	[intTypeDeductionId] INT NOT NULL,
 	[strDeductFrom] [nvarchar](50) NULL,
 	[strCalculationType] [nvarchar](50) NULL,
 	[dblAmount] [numeric](18, 6) NULL DEFAULT ((0)),
@@ -16,11 +16,11 @@
 	[intConcurrencyId] [int] NULL DEFAULT ((1)),
     CONSTRAINT [PK_tblPREmployeeDeduction] PRIMARY KEY ([intEmployeeDeductionId]),
 	CONSTRAINT [FK_tblPREmployeeDeduction_tblPREmployee] FOREIGN KEY ([intEmployeeId]) REFERENCES [tblPREmployee]([intEmployeeId]), 
-    CONSTRAINT [FK_tblPREmployeeDeduction_tblPRDeductionType] FOREIGN KEY ([intDeductionTypeId]) REFERENCES [tblPRDeductionType]([intDeductionTypeId])
+    CONSTRAINT [FK_tblPREmployeeDeduction_tblPRTypeDeduction] FOREIGN KEY ([intTypeDeductionId]) REFERENCES [tblPRTypeDeduction]([intTypeDeductionId])
 ) ON [PRIMARY]
 GO
 
-CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPREmployeeDeduction] ON [dbo].[tblPREmployeeDeduction] ([intEmployeeId], [intDeductionTypeId]) WITH (IGNORE_DUP_KEY = OFF)
+CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPREmployeeDeduction] ON [dbo].[tblPREmployeeDeduction] ([intEmployeeId], [intTypeDeductionId]) WITH (IGNORE_DUP_KEY = OFF)
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
@@ -48,7 +48,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployeeDeduction',
     @level2type = N'COLUMN',
-    @level2name = N'intDeductionTypeId'
+    @level2name = N'intTypeDeductionId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Deduct From',

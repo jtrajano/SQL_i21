@@ -1,7 +1,7 @@
-﻿CREATE TABLE [dbo].[tblPREarningGroupDetail](
-	[intEarningGroupDetailId] [int] IDENTITY(1,1) NOT NULL,
-	[intEarningGroupId] INT NOT NULL,
-	[intEarningTypeId] INT NOT NULL,
+﻿CREATE TABLE [dbo].[tblPRTemplateEarning](
+	[intTemplateEarningId] [int] IDENTITY(1,1) NOT NULL,
+	[intTemplateId] INT NOT NULL, 
+	[intTypeEarningId] INT NOT NULL,
 	[strCalculationType] [nvarchar](50) NOT NULL,
 	[dblAmount] [numeric](18, 6) NULL DEFAULT ((0)),
 	[dblDefaultHours] [numeric](18, 6) NULL DEFAULT ((0)),
@@ -12,44 +12,29 @@
 	[intSort] [int] NULL,
 	[ysnActive] [bit] NOT NULL DEFAULT ((1)),
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
-    CONSTRAINT [PK_tblPREarningGroupDetail] PRIMARY KEY ([intEarningGroupDetailId]), 
-    CONSTRAINT [FK_tblPREarningGroupDetail_tblPREarningGroup] FOREIGN KEY ([intEarningGroupId]) REFERENCES [tblPREarningGroup]([intEarningGroupId]) ON DELETE CASCADE, 
-    CONSTRAINT [FK_tblPREarningGroupDetail_tblPREarningType] FOREIGN KEY ([intEarningTypeId]) REFERENCES [tblPREarningType]([intEarningTypeId]),
+    CONSTRAINT [PK_tblPRTemplateEarning] PRIMARY KEY ([intTemplateEarningId]), 
+    CONSTRAINT [FK_tblPRTemplateEarning_tblPRTypeEarning] FOREIGN KEY ([intTypeEarningId]) REFERENCES [tblPRTypeEarning]([intTypeEarningId]),
 ) ON [PRIMARY]
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Identity Field',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREarningGroupDetail',
-    @level2type = N'COLUMN',
-    @level2name = N'intEarningGroupDetailId'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Earning Group Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREarningGroupDetail',
-    @level2type = N'COLUMN',
-    @level2name = N'intEarningGroupId'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Earning Type Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPREarningGroupDetail',
+    @level1name = N'tblPRTemplateEarning',
     @level2type = N'COLUMN',
-    @level2name = 'intEarningTypeId'
+    @level2name = 'intTypeEarningId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Calculation Type',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPREarningGroupDetail',
+    @level1name = N'tblPRTemplateEarning',
     @level2type = N'COLUMN',
     @level2name = N'strCalculationType'
 GO
@@ -58,7 +43,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPREarningGroupDetail',
+    @level1name = N'tblPRTemplateEarning',
     @level2type = N'COLUMN',
     @level2name = N'dblAmount'
 GO
@@ -67,7 +52,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPREarningGroupDetail',
+    @level1name = N'tblPRTemplateEarning',
     @level2type = N'COLUMN',
     @level2name = N'dblDefaultHours'
 GO
@@ -76,7 +61,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPREarningGroupDetail',
+    @level1name = N'tblPRTemplateEarning',
     @level2type = N'COLUMN',
     @level2name = N'intAccountId'
 GO
@@ -85,7 +70,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPREarningGroupDetail',
+    @level1name = N'tblPRTemplateEarning',
     @level2type = N'COLUMN',
     @level2name = N'strW2Code'
 GO
@@ -94,7 +79,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPREarningGroupDetail',
+    @level1name = N'tblPRTemplateEarning',
     @level2type = N'COLUMN',
     @level2name = N'ysnCreatePayable'
 GO
@@ -103,7 +88,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPREarningGroupDetail',
+    @level1name = N'tblPRTemplateEarning',
     @level2type = N'COLUMN',
     @level2name = N'intVendorId'
 GO
@@ -112,7 +97,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPREarningGroupDetail',
+    @level1name = N'tblPRTemplateEarning',
     @level2type = N'COLUMN',
     @level2name = N'intSort'
 GO
@@ -121,7 +106,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPREarningGroupDetail',
+    @level1name = N'tblPRTemplateEarning',
     @level2type = N'COLUMN',
     @level2name = N'ysnActive'
 GO
@@ -130,9 +115,28 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPREarningGroupDetail',
+    @level1name = N'tblPRTemplateEarning',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
 GO
 
-CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPREarningGroupDetail] ON [dbo].[tblPREarningGroupDetail] ([intEarningGroupId], [intEarningTypeId]) WITH (IGNORE_DUP_KEY = OFF)
+CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPRTemplateEarning] ON [dbo].[tblPRTemplateEarning] ([intTemplateEarningId], [intTypeEarningId]) WITH (IGNORE_DUP_KEY = OFF)
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Employee Template Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTemplateEarning',
+    @level2type = N'COLUMN',
+    @level2name = 'intTemplateId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Identity Field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTemplateEarning',
+    @level2type = N'COLUMN',
+    @level2name = 'intTemplateEarningId'

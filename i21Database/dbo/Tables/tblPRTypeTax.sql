@@ -1,15 +1,14 @@
-﻿CREATE TABLE [dbo].[tblPRTaxType](
-	[intTaxTypeId] [int] IDENTITY(1,1) NOT NULL,
+﻿CREATE TABLE [dbo].[tblPRTypeTax](
+	[intTypeTaxId] [int] IDENTITY(1,1) NOT NULL,
 	[strTax] [nvarchar](50) NOT NULL,
 	[strDescription] [nvarchar](50) NULL,
 	[strCheckLiteral] [nvarchar](50) NOT NULL,
 	[strCalculationType] [nvarchar](20) NULL,
 	[strType] [nvarchar](40) NULL,
 	[dblAmount] [numeric](18, 6) NULL DEFAULT ((0)),
-	[dblPercent] [numeric](18, 6) NULL DEFAULT ((0)),
 	[dblLimit] [numeric](18, 6) NULL DEFAULT ((0)),
-	[intTaxTypeStateId] INT NULL,
-	[intTaxTypeCountyId] INT NULL,
+	[intTypeTaxStateId] INT NULL,
+	[intTypeTaxLocalId] INT NULL,
 	[intTaxAgencyId] INT NULL,
 	[intAccountId] INT NULL,
 	[intExpenseAccountId] INT NULL,
@@ -18,7 +17,7 @@
 	[intVendorId] INT NULL,
 	[intSort] INT NULL,
 	[intConcurrencyId] INT NULL DEFAULT ((1)), 
-    CONSTRAINT [PK_tblPRTaxType] PRIMARY KEY ([intTaxTypeId]), 
-    CONSTRAINT [AK_tblPRTaxType_strTax] UNIQUE ([strTax]),
+    CONSTRAINT [PK_tblPRTypeTax] PRIMARY KEY ([intTypeTaxId]), 
+    CONSTRAINT [AK_tblPRTypeTax_strTax] UNIQUE ([strTax]),
 ) ON [PRIMARY]
 GO

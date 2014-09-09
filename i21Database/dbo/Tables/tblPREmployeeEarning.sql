@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblPREmployeeEarning](
 	[intEmployeeEarningId] [int] NOT NULL IDENTITY,
 	[intEmployeeId] [int] NOT NULL,
-	[intEarningTypeId] [int] NOT NULL,
+	[intTypeEarningId] [int] NOT NULL,
 	[strCalculationType] [nvarchar](50) NULL,
 	[dblAmount] [numeric](18, 6) NULL DEFAULT ((0)),
 	[dblDefaultHours] [numeric](18, 6) NULL DEFAULT ((0)),
@@ -14,11 +14,11 @@
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblPREmployeeEarning] PRIMARY KEY ([intEmployeeEarningId]), 
     CONSTRAINT [FK_tblPREmployeeEarning_tblPREmployee] FOREIGN KEY ([intEmployeeId]) REFERENCES [tblPREmployee]([intEmployeeId]), 
-    CONSTRAINT [FK_tblPREmployeeEarning_tblPREarningType] FOREIGN KEY ([intEarningTypeId]) REFERENCES [tblPREarningType]([intEarningTypeId]),
+    CONSTRAINT [FK_tblPREmployeeEarning_tblPRTypeEarning] FOREIGN KEY ([intTypeEarningId]) REFERENCES [tblPRTypeEarning]([intTypeEarningId]),
 ) ON [PRIMARY]
 GO
 
-CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPREmployeeEarning] ON [dbo].[tblPREmployeeEarning] ([intEmployeeId], [intEarningTypeId]) WITH (IGNORE_DUP_KEY = OFF)
+CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPREmployeeEarning] ON [dbo].[tblPREmployeeEarning] ([intEmployeeId], [intTypeEarningId]) WITH (IGNORE_DUP_KEY = OFF)
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
@@ -46,7 +46,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployeeEarning',
     @level2type = N'COLUMN',
-    @level2name = N'intEarningTypeId'
+    @level2name = N'intTypeEarningId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Calculation Type',

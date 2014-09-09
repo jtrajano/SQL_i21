@@ -1,10 +1,10 @@
-﻿CREATE TABLE [dbo].[tblPRTaxTypeProvince](
-	[intTaxTypeProvinceId] [int] IdENTITY(1,1) NOT NULL,
-	[strProvince] [nvarchar](50) NOT NULL,
-	[intSort] [int] NULL,
-	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
-    CONSTRAINT [PK_tblPRTaxTypeProvince] PRIMARY KEY ([intTaxTypeProvinceId]), 
-    CONSTRAINT [AK_tblPRTaxTypeProvince_strProvince] UNIQUE ([strProvince]),
+﻿CREATE TABLE [dbo].[tblPRTemplate](
+	[intTemplateId] [int] IDENTITY(1,1) NOT NULL,
+	[strTemplateName] [nvarchar](50) NOT NULL,
+	[strDescription] [nvarchar](100) NULL,
+	[intConcurrencyId] [int] NOT NULL DEFAULT ((1)), 
+    CONSTRAINT [PK_tblPRTemplate] PRIMARY KEY ([intTemplateId]), 
+    CONSTRAINT [AK_tblPRTemplate_strTemplateName] UNIQUE ([strTemplateName]),
 ) ON [PRIMARY]
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
@@ -12,33 +12,33 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRTaxTypeProvince',
+    @level1name = N'tblPRTemplate',
     @level2type = N'COLUMN',
-    @level2name = N'intTaxTypeProvinceId'
+    @level2name = 'intTemplateId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Province',
+    @value = N'Template Name',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRTaxTypeProvince',
+    @level1name = N'tblPRTemplate',
     @level2type = N'COLUMN',
-    @level2name = N'strProvince'
+    @level2name = N'strTemplateName'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Sort Field',
+    @value = N'Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRTaxTypeProvince',
+    @level1name = N'tblPRTemplate',
     @level2type = N'COLUMN',
-    @level2name = N'intSort'
+    @level2name = N'strDescription'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Concurrency Field',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRTaxTypeProvince',
+    @level1name = N'tblPRTemplate',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
