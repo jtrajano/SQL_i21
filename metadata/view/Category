@@ -1320,7 +1320,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
-                                                "text": "Account Id"
+                                                "text": "Account ID"
                                             },
                                             "name": "MyColumn103",
                                             "designerId": "97a1bc1c-4b25-4d49-a445-dfe55fbd4f15"
