@@ -18,7 +18,7 @@ Ext.define('Inventory.view.FuelCode', {
     alias: 'widget.fuelcode',
 
     requires: [
-        'Inventory.view.FuelCodeModel',
+        'Inventory.view.FuelCodeViewModel',
         'Inventory.view.Filter',
         'Inventory.view.Statusbar',
         'Ext.form.Panel',

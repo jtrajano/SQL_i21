@@ -1,0 +1,14 @@
+{
+    "type": "Ext.app.ViewModel",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "feedstockuom",
+        "designer|userClassName": "FeedStockUomViewModel"
+    },
+    "name": "FeedStockCodeModel1",
+    "designerId": "dd85ab30-8353-4100-8f21-9bdf9a63a279"
+}

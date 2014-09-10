@@ -1,0 +1,14 @@
+{
+    "type": "Ext.app.ViewController",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "feedstockuom",
+        "designer|userClassName": "FeedStockUomViewController"
+    },
+    "name": "FeedStockCodeViewController1",
+    "designerId": "ef38b30f-1b30-49bb-9a9b-368229bc0d87"
+}

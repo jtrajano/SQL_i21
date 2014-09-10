@@ -14,7 +14,8 @@
             "FuelCategory",
             "FuelCode",
             "ProcessCode",
-            "FeedStockCode"
+            "FeedStockCode",
+            "FeedStockUom"
         ]
     },
     "name": "Application",

@@ -27,7 +27,8 @@ Ext.application({
         'FuelCategory',
         'FuelCode',
         'ProcessCode',
-        'FeedStockCode'
+        'FeedStockCode',
+        'FeedStockUom'
     ],
     name: 'Inventory',
 

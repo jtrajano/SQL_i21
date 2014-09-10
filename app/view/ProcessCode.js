@@ -18,7 +18,7 @@ Ext.define('Inventory.view.ProcessCode', {
     alias: 'widget.processcode',
 
     requires: [
-        'Inventory.view.ProcessCodeModel',
+        'Inventory.view.ProcessCodeViewModel',
         'Inventory.view.Filter',
         'Inventory.view.Statusbar',
         'Ext.form.Panel',

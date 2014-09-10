@@ -7,7 +7,7 @@
     "codeClass": null,
     "userConfig": {
         "designer|userAlias": "feedstockcode",
-        "designer|userClassName": "FeedStockCodeModel"
+        "designer|userClassName": "FeedStockCodeViewModel"
     },
     "name": "ProcessCodeModel1",
     "designerId": "09dd7561-8138-4617-8c0f-ef647b721da5"
