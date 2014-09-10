@@ -1,7 +1,7 @@
 ﻿using System.Web;
 using System.Web.Optimization;
 
-namespace iRely.Invetory.WebAPI
+namespace iRely.Inventory.WebAPI
 {
     public class BundleConfig
     {

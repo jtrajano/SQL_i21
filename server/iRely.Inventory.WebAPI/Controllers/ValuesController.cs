@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 
-namespace iRely.Invetory.WebAPI.Controllers
+namespace iRely.Inventory.WebAPI.Controllers
 {
     public class ValuesController : ApiController
     {

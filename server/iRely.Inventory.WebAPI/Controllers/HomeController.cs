@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 
-namespace iRely.Invetory.WebAPI.Controllers
+namespace iRely.Inventory.WebAPI.Controllers
 {
     public class HomeController : Controller
     {

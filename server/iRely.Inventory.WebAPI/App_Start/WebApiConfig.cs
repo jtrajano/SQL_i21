@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
 
-namespace iRely.Invetory.WebAPI
+namespace iRely.Inventory.WebAPI
 {
     public static class WebApiConfig
     {

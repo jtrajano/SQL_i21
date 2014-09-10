@@ -5,7 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace iRely.Invetory.WebAPI
+namespace iRely.Inventory.WebAPI
 {
     public class RouteConfig
     {

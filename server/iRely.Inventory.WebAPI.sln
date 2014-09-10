@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iRely.Invetory.WebAPI", "iRely.Invetory.WebAPI\iRely.Invetory.WebAPI.csproj", "{8A65DC04-81CF-44DA-887D-03E20E71B40C}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iRely.Inventory.Model", "iRely.Inventory.Model\iRely.Inventory.Model.csproj", "{6E9BBE31-E2DD-4A82-8519-29AFC4615179}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iRely.Inventory.BRL", "iRely.Inventory.BRL\iRely.Inventory.BRL.csproj", "{D4E9BC20-D5DA-476B-BD7D-60B74A53C291}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iRely.Inventory.WebAPI", "iRely.Inventory.WebAPI\iRely.Inventory.WebAPI.csproj", "{8A65DC04-81CF-44DA-887D-03E20E71B40C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,10 +13,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8A65DC04-81CF-44DA-887D-03E20E71B40C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8A65DC04-81CF-44DA-887D-03E20E71B40C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8A65DC04-81CF-44DA-887D-03E20E71B40C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8A65DC04-81CF-44DA-887D-03E20E71B40C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6E9BBE31-E2DD-4A82-8519-29AFC4615179}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6E9BBE31-E2DD-4A82-8519-29AFC4615179}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6E9BBE31-E2DD-4A82-8519-29AFC4615179}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -25,6 +21,10 @@ Global
 		{D4E9BC20-D5DA-476B-BD7D-60B74A53C291}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4E9BC20-D5DA-476B-BD7D-60B74A53C291}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D4E9BC20-D5DA-476B-BD7D-60B74A53C291}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A65DC04-81CF-44DA-887D-03E20E71B40C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A65DC04-81CF-44DA-887D-03E20E71B40C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A65DC04-81CF-44DA-887D-03E20E71B40C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A65DC04-81CF-44DA-887D-03E20E71B40C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
