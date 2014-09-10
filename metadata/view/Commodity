@@ -334,23 +334,6 @@
                                                     "designerId": "8c86ca5f-eb7c-45ae-979f-e89193670635"
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Decimals on DPR",
-                                                        "hideTrigger": true,
-                                                        "itemId": "txtDecimalsOnDpr",
-                                                        "labelWidth": 140,
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "MyNumberField",
-                                                    "designerId": "dd3ac8f9-4ea8-4507-8c4c-ef8b436fbe23"
-                                                },
-                                                {
                                                     "type": "Ext.container.Container",
                                                     "reference": {
                                                         "name": "items",
@@ -369,6 +352,65 @@
                                                     "designerId": "9eac48ba-7099-43ed-8df8-26471a9c68ef",
                                                     "cn": [
                                                         {
+                                                            "type": "Ext.form.field.Checkbox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "boxLabel": null,
+                                                                "fieldLabel": "FX Exposure",
+                                                                "itemId": "chkFxExposure",
+                                                                "labelWidth": 140,
+                                                                "layout|flex": null,
+                                                                "layout|margins": null,
+                                                                "margin": null,
+                                                                "width": 280
+                                                            },
+                                                            "name": "MyCheckbox39",
+                                                            "designerId": "b17a71c9-8fde-4a6c-a17e-526e19d7508b"
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.Number",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "fieldLabel": "Decimals on DPR",
+                                                                "hideTrigger": true,
+                                                                "itemId": "txtDecimalsOnDpr",
+                                                                "labelWidth": 95,
+                                                                "layout|flex": 1,
+                                                                "margin": "0 0 0 5",
+                                                                "width": null
+                                                            },
+                                                            "name": "MyNumberField",
+                                                            "designerId": "dd3ac8f9-4ea8-4507-8c4c-ef8b436fbe23"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.container.Container",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "container|align": "stretch",
+                                                        "designer|displayName": "container",
+                                                        "layout": "hbox",
+                                                        "layout|flex": null,
+                                                        "layout|margins": null,
+                                                        "margin": "0 0 5 0"
+                                                    },
+                                                    "name": "MyContainer",
+                                                    "designerId": "c02a4a26-ee6a-4f9e-9c3e-0d1b3e996a61",
+                                                    "cn": [
+                                                        {
                                                             "type": "Ext.form.field.Number",
                                                             "reference": {
                                                                 "name": "items",
@@ -384,7 +426,7 @@
                                                                 "width": 280
                                                             },
                                                             "name": "MyNumberField1",
-                                                            "designerId": "3f02a2ee-c2d9-40b7-a7a2-dd9bccd9bbd8"
+                                                            "designerId": "cbe8ccbc-ca25-4d4b-b72c-3173bf19d611"
                                                         },
                                                         {
                                                             "type": "Ext.form.field.Checkbox",
@@ -403,7 +445,7 @@
                                                                 "margin": "0 0 0 5"
                                                             },
                                                             "name": "MyCheckbox39",
-                                                            "designerId": "b17a71c9-8fde-4a6c-a17e-526e19d7508b"
+                                                            "designerId": "afe9bb9c-2de3-4972-8baa-4df9587bfab9"
                                                         }
                                                     ]
                                                 },

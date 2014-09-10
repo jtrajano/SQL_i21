@@ -25,8 +25,8 @@ Ext.define('Inventory.view.Commodity', {
         'Ext.form.Panel',
         'Ext.tab.Panel',
         'Ext.tab.Tab',
-        'Ext.form.field.Number',
         'Ext.form.field.Checkbox',
+        'Ext.form.field.Number',
         'Ext.form.field.ComboBox',
         'Ext.form.field.Date',
         'Ext.grid.Panel',
@@ -202,11 +202,30 @@ Ext.define('Inventory.view.Commodity', {
                                                                 labelWidth: 140
                                                             },
                                                             {
-                                                                xtype: 'numberfield',
-                                                                itemId: 'txtDecimalsOnDpr',
-                                                                fieldLabel: 'Decimals on DPR',
-                                                                labelWidth: 140,
-                                                                hideTrigger: true
+                                                                xtype: 'container',
+                                                                margin: '0 0 5 0',
+                                                                layout: {
+                                                                    type: 'hbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'checkboxfield',
+                                                                        itemId: 'chkFxExposure',
+                                                                        width: 280,
+                                                                        fieldLabel: 'FX Exposure',
+                                                                        labelWidth: 140
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numberfield',
+                                                                        flex: 1,
+                                                                        itemId: 'txtDecimalsOnDpr',
+                                                                        margin: '0 0 0 5',
+                                                                        fieldLabel: 'Decimals on DPR',
+                                                                        labelWidth: 95,
+                                                                        hideTrigger: true
+                                                                    }
+                                                                ]
                                                             },
                                                             {
                                                                 xtype: 'container',
