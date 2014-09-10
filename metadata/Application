@@ -13,7 +13,8 @@
             "WorkCenterAdd",
             "FuelCategory",
             "FuelCode",
-            "ProcessCode"
+            "ProcessCode",
+            "FeedStockCode"
         ]
     },
     "name": "Application",
