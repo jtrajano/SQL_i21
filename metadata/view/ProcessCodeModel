@@ -1,0 +1,14 @@
+{
+    "type": "Ext.app.ViewModel",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "processcode",
+        "designer|userClassName": "ProcessCodeModel"
+    },
+    "name": "FuelCodeModel1",
+    "designerId": "dad21b90-f668-4ed0-a941-033c31f89788"
+}

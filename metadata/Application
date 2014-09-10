@@ -12,7 +12,8 @@
             "StatusbarPaging1",
             "WorkCenterAdd",
             "FuelCategory",
-            "FuelCode"
+            "FuelCode",
+            "ProcessCode"
         ]
     },
     "name": "Application",
