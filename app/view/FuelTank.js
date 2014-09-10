@@ -52,9 +52,9 @@ Ext.define('Inventory.view.FuelTank', {
                 items: [
                     {
                         xtype: 'form',
-                        reference: 'frmFuelTank',
                         autoShow: true,
                         height: 350,
+                        itemId: 'frmFuelTank',
                         margin: -1,
                         width: 450,
                         bodyPadding: 5,
@@ -75,9 +75,9 @@ Ext.define('Inventory.view.FuelTank', {
                                 items: [
                                     {
                                         xtype: 'button',
-                                        reference: 'btnSave',
                                         tabIndex: -1,
                                         height: 57,
+                                        itemId: 'btnSave',
                                         width: 45,
                                         iconAlign: 'top',
                                         iconCls: 'large-save',
@@ -86,9 +86,9 @@ Ext.define('Inventory.view.FuelTank', {
                                     },
                                     {
                                         xtype: 'button',
-                                        reference: 'btnUndo',
                                         tabIndex: -1,
                                         height: 57,
+                                        itemId: 'btnUndo',
                                         width: 45,
                                         iconAlign: 'top',
                                         iconCls: 'large-undo',
@@ -101,9 +101,9 @@ Ext.define('Inventory.view.FuelTank', {
                                     },
                                     {
                                         xtype: 'button',
-                                        reference: 'btnClose',
                                         tabIndex: -1,
                                         height: 57,
+                                        itemId: 'btnClose',
                                         width: 45,
                                         iconAlign: 'top',
                                         iconCls: 'large-close',
@@ -114,7 +114,7 @@ Ext.define('Inventory.view.FuelTank', {
                             },
                             {
                                 xtype: 'ipagingstatusbar',
-                                reference: 'pagingtoolbar',
+                                itemId: 'pagingtoolbar',
                                 flex: 1,
                                 dock: 'bottom'
                             }
@@ -123,12 +123,12 @@ Ext.define('Inventory.view.FuelTank', {
                             {
                                 xtype: 'gridpanel',
                                 flex: 1,
-                                reference: 'grdFuelTank',
+                                itemId: 'grdFuelTank',
                                 dockedItems: [
                                     {
                                         xtype: 'toolbar',
                                         dock: 'top',
-                                        reference: 'tlbGridOptions',
+                                        itemId: 'tlbGridOptions',
                                         layout: {
                                             type: 'hbox',
                                             padding: '0 0 0 1'
@@ -136,8 +136,8 @@ Ext.define('Inventory.view.FuelTank', {
                                         items: [
                                             {
                                                 xtype: 'button',
-                                                reference: 'btnDeleteFuelTank',
                                                 tabIndex: -1,
+                                                itemId: 'btnDeleteFuelTank',
                                                 iconCls: 'small-delete',
                                                 text: 'Delete'
                                             },
@@ -197,7 +197,7 @@ Ext.define('Inventory.view.FuelTank', {
                                     }
                                 ],
                                 viewConfig: {
-                                    reference: 'grvFuelTank'
+                                    itemId: 'grvFuelTank'
                                 },
                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                     selType: 'checkboxmodel'

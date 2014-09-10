@@ -43,9 +43,9 @@
                 "frame": null,
                 "header": null,
                 "height": 350,
+                "itemId": "frmSubCategory",
                 "layout": "vbox",
                 "margin": -1,
-                "itemId": "frmSubCategory",
                 "title": null,
                 "trackResetOnLoad": true,
                 "url": null,
@@ -83,9 +83,9 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-new",
+                                "itemId": "btnNew",
                                 "layout|flex": null,
                                 "layout|margins": null,
-                                "itemId": "btnNew",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "New",
@@ -107,8 +107,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-save",
-                                "layout|flex": null,
                                 "itemId": "btnSave",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Save",
@@ -130,8 +130,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-search",
-                                "layout|flex": null,
                                 "itemId": "btnSearch",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Search",
@@ -153,8 +153,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-delete",
-                                "layout|flex": null,
                                 "itemId": "btnDelete",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Delete",
@@ -176,8 +176,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-undo",
-                                "layout|flex": null,
                                 "itemId": "btnUndo",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Undo",
@@ -214,8 +214,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-close",
-                                "layout|flex": null,
                                 "itemId": "btnClose",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Close",
@@ -235,9 +235,9 @@
                     "codeClass": null,
                     "userConfig": {
                         "activeTab": 0,
+                        "itemId": "tabSubCategory",
                         "layout|flex": 1,
-                        "plain": true,
-                        "itemId": "tabSubCategory"
+                        "plain": true
                     },
                     "name": "MyTabPanel7",
                     "designerId": "a9d1df5f-0f1e-452a-86d4-92b7e2281568",
@@ -306,8 +306,8 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-delete",
-                                                        "layout|flex": null,
                                                         "itemId": "btnDeleteSubcategory",
+                                                        "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Delete"
                                                     },
@@ -338,7 +338,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter18",
+                                                    "name": "filter30",
                                                     "designerId": "2150b022-a69c-4522-991b-30a023947955",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -481,8 +481,8 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-delete",
-                                                        "layout|flex": null,
                                                         "itemId": "btnDeleteClass",
+                                                        "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Delete"
                                                     },
@@ -513,7 +513,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter19",
+                                                    "name": "filter31",
                                                     "designerId": "93a4ad95-161a-451b-ab55-2a41f673a901",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -656,8 +656,8 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-delete",
-                                                        "layout|flex": null,
                                                         "itemId": "btnDeleteRegisterProduct",
+                                                        "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Delete"
                                                     },
@@ -688,7 +688,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter20",
+                                                    "name": "filter32",
                                                     "designerId": "d27780aa-d5f4-4959-af52-38bbddf6300e",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -796,11 +796,11 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "designer|displayName": "",
                         "dock": "bottom",
-                        "layout|flex": 1,
                         "itemId": "pagingtoolbar",
+                        "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging17",
                     "designerId": "84a3d1aa-e72b-4a03-8c5c-c454daf56dce",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

@@ -46,9 +46,9 @@ Ext.define('Inventory.view.StorePaymentMethod', {
     items: [
         {
             xtype: 'form',
-            reference: 'frmStorePaymentMethod',
             autoShow: true,
             height: 350,
+            itemId: 'frmStorePaymentMethod',
             margin: -1,
             width: 450,
             bodyBorder: false,
@@ -71,9 +71,9 @@ Ext.define('Inventory.view.StorePaymentMethod', {
                     items: [
                         {
                             xtype: 'button',
-                            reference: 'btnNew',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnNew',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-new',
@@ -82,9 +82,9 @@ Ext.define('Inventory.view.StorePaymentMethod', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnSave',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnSave',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-save',
@@ -93,9 +93,9 @@ Ext.define('Inventory.view.StorePaymentMethod', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnSearch',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnSearch',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-search',
@@ -104,9 +104,9 @@ Ext.define('Inventory.view.StorePaymentMethod', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnDelete',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnDelete',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-delete',
@@ -115,9 +115,9 @@ Ext.define('Inventory.view.StorePaymentMethod', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnUndo',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnUndo',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-undo',
@@ -130,9 +130,9 @@ Ext.define('Inventory.view.StorePaymentMethod', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnClose',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnClose',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-close',
@@ -143,7 +143,7 @@ Ext.define('Inventory.view.StorePaymentMethod', {
                 },
                 {
                     xtype: 'ipagingstatusbar',
-                    reference: 'pagingtoolbar',
+                    itemId: 'pagingtoolbar',
                     flex: 1,
                     dock: 'bottom'
                 }
@@ -161,65 +161,65 @@ Ext.define('Inventory.view.StorePaymentMethod', {
                     items: [
                         {
                             xtype: 'textfield',
-                            reference: 'txtStoreName',
+                            itemId: 'txtStoreName',
                             fieldLabel: 'Store Name',
                             labelWidth: 175
                         },
                         {
                             xtype: 'textfield',
-                            reference: 'txtPaymentMethod',
+                            itemId: 'txtPaymentMethod',
                             fieldLabel: 'Payment Method',
                             labelWidth: 175
                         },
                         {
                             xtype: 'textfield',
-                            reference: 'txtDescription',
+                            itemId: 'txtDescription',
                             fieldLabel: 'Description',
                             labelWidth: 175
                         },
                         {
                             xtype: 'numberfield',
-                            reference: 'txtMinimumSaleAmount',
+                            itemId: 'txtMinimumSaleAmount',
                             fieldLabel: 'Minimum Sale Amount',
                             labelWidth: 175,
                             hideTrigger: true
                         },
                         {
                             xtype: 'numberfield',
-                            reference: 'txtMaximumSaleAmount',
+                            itemId: 'txtMaximumSaleAmount',
                             fieldLabel: 'Maximum Sale Amount',
                             labelWidth: 175,
                             hideTrigger: true
                         },
                         {
                             xtype: 'numberfield',
-                            reference: 'txtMopRegisterCode',
+                            itemId: 'txtMopRegisterCode',
                             fieldLabel: 'MOP Register Code',
                             labelWidth: 175,
                             hideTrigger: true
                         },
                         {
                             xtype: 'checkboxfield',
-                            reference: 'chkForceSafeDrop',
+                            itemId: 'chkForceSafeDrop',
                             fieldLabel: 'Force Safe Drop',
                             labelWidth: 175
                         },
                         {
                             xtype: 'numberfield',
-                            reference: 'txtDollarAmountToRequireDrop',
+                            itemId: 'txtDollarAmountToRequireDrop',
                             fieldLabel: 'Dollar Amount to Require Drop',
                             labelWidth: 175,
                             hideTrigger: true
                         },
                         {
                             xtype: 'combobox',
-                            reference: 'cboGlLedgerAccount',
+                            itemId: 'cboGlLedgerAccount',
                             fieldLabel: 'GL Ledger Account',
                             labelWidth: 175
                         },
                         {
                             xtype: 'numberfield',
-                            reference: 'txtRegisterExtendedMop',
+                            itemId: 'txtRegisterExtendedMop',
                             fieldLabel: 'Register Extended MOP',
                             labelWidth: 175,
                             hideTrigger: true
@@ -231,13 +231,13 @@ Ext.define('Inventory.view.StorePaymentMethod', {
                             items: [
                                 {
                                     xtype: 'checkboxfield',
-                                    reference: 'chkOpenDrawerOnSale',
+                                    itemId: 'chkOpenDrawerOnSale',
                                     fieldLabel: 'Open Drawer on Sale',
                                     labelWidth: 175
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    reference: 'chkTenderAmountRequired',
+                                    itemId: 'chkTenderAmountRequired',
                                     margin: '0 0 0 75',
                                     fieldLabel: 'Tender Amount Required',
                                     labelWidth: 175
@@ -251,13 +251,13 @@ Ext.define('Inventory.view.StorePaymentMethod', {
                             items: [
                                 {
                                     xtype: 'checkboxfield',
-                                    reference: 'chkEnableReportPrompt',
+                                    itemId: 'chkEnableReportPrompt',
                                     fieldLabel: 'Enable Report Prompt',
                                     labelWidth: 175
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    reference: 'chkAllowZeroActual',
+                                    itemId: 'chkAllowZeroActual',
                                     margin: '0 0 0 75',
                                     fieldLabel: 'Allow Zero Actual',
                                     labelWidth: 175
@@ -271,13 +271,13 @@ Ext.define('Inventory.view.StorePaymentMethod', {
                             items: [
                                 {
                                     xtype: 'checkboxfield',
-                                    reference: 'chkDepositable',
+                                    itemId: 'chkDepositable',
                                     fieldLabel: 'Depositable',
                                     labelWidth: 175
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    reference: 'chkAllowedWithoutSale',
+                                    itemId: 'chkAllowedWithoutSale',
                                     margin: '0 0 0 75',
                                     fieldLabel: 'Allowed Without Sale',
                                     labelWidth: 175
@@ -291,13 +291,13 @@ Ext.define('Inventory.view.StorePaymentMethod', {
                             items: [
                                 {
                                     xtype: 'checkboxfield',
-                                    reference: 'chkAllowRefund',
+                                    itemId: 'chkAllowRefund',
                                     fieldLabel: 'Allow Refund',
                                     labelWidth: 175
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    reference: 'chkAllowChange',
+                                    itemId: 'chkAllowChange',
                                     margin: '0 0 0 75',
                                     fieldLabel: 'Allow Change',
                                     labelWidth: 175
@@ -311,13 +311,13 @@ Ext.define('Inventory.view.StorePaymentMethod', {
                             items: [
                                 {
                                     xtype: 'checkboxfield',
-                                    reference: 'chkAllowSafeDrop',
+                                    itemId: 'chkAllowSafeDrop',
                                     fieldLabel: 'Allow Safe Drop',
                                     labelWidth: 175
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    reference: 'chkAllowMoneyOrders',
+                                    itemId: 'chkAllowMoneyOrders',
                                     margin: '0 0 0 75',
                                     fieldLabel: 'Allow Money Orders',
                                     labelWidth: 175
@@ -326,7 +326,7 @@ Ext.define('Inventory.view.StorePaymentMethod', {
                         },
                         {
                             xtype: 'checkboxfield',
-                            reference: 'chkForceTicketPrint',
+                            itemId: 'chkForceTicketPrint',
                             fieldLabel: 'Force Ticket Print',
                             labelWidth: 175
                         }

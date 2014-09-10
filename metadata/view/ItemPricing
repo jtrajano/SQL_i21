@@ -44,9 +44,9 @@
                 "frame": null,
                 "header": false,
                 "height": 350,
+                "itemId": "frmItemPricing",
                 "layout": "vbox",
                 "margin": -1,
-                "itemId": "frmItemPricing",
                 "title": null,
                 "trackResetOnLoad": true,
                 "url": null,
@@ -84,9 +84,9 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-new",
+                                "itemId": "btnNew",
                                 "layout|flex": null,
                                 "layout|margins": null,
-                                "itemId": "btnNew",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "New",
@@ -108,8 +108,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-save",
-                                "layout|flex": null,
                                 "itemId": "btnSave",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Save",
@@ -131,8 +131,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-search",
-                                "layout|flex": null,
                                 "itemId": "btnSearch",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Search",
@@ -154,8 +154,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-delete",
-                                "layout|flex": null,
                                 "itemId": "btnDelete",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Delete",
@@ -177,8 +177,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-undo",
-                                "layout|flex": null,
                                 "itemId": "btnUndo",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Undo",
@@ -215,8 +215,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-close",
-                                "layout|flex": null,
                                 "itemId": "btnClose",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Close",
@@ -269,9 +269,9 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Location",
+                                        "itemId": "txtLocation",
                                         "labelWidth": 110,
-                                        "layout|flex": null,
-                                        "itemId": "txtLocation"
+                                        "layout|flex": null
                                     },
                                     "name": "MyTextField39",
                                     "designerId": "ebe91a3b-12ae-4c5b-9400-e4c3c5093492"
@@ -285,9 +285,9 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Store Name",
+                                        "itemId": "txtStoreName",
                                         "labelWidth": 110,
-                                        "layout|flex": null,
-                                        "itemId": "txtStoreName"
+                                        "layout|flex": null
                                     },
                                     "name": "MyTextField40",
                                     "designerId": "688219b0-f594-4341-b02c-e2749adff01f"
@@ -301,9 +301,9 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Retail Price",
+                                        "itemId": "txtRetailPrice",
                                         "labelWidth": 110,
-                                        "layout|flex": null,
-                                        "itemId": "txtRetailPrice"
+                                        "layout|flex": null
                                     },
                                     "name": "MyTextField41",
                                     "designerId": "887aa2b4-9b87-46bf-9231-4f1bcfaec4ab"
@@ -317,9 +317,9 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Wholesale Price",
+                                        "itemId": "txtWolesalePrice",
                                         "labelWidth": 110,
-                                        "layout|flex": null,
-                                        "itemId": "txtWolesalePrice"
+                                        "layout|flex": null
                                     },
                                     "name": "MyTextField42",
                                     "designerId": "76f0714f-fcbc-442f-a075-7cc3adb0a9ac"
@@ -333,9 +333,9 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Large Volume Price",
+                                        "itemId": "txtLargeVolumePrice",
                                         "labelWidth": 110,
-                                        "layout|flex": null,
-                                        "itemId": "txtLargeVolumePrice"
+                                        "layout|flex": null
                                     },
                                     "name": "MyTextField43",
                                     "designerId": "35aa5c9e-32e0-4966-993a-4ed186303e8b"
@@ -349,9 +349,9 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "MSRP",
+                                        "itemId": "txtMsrp",
                                         "labelWidth": 110,
-                                        "layout|flex": null,
-                                        "itemId": "txtMsrp"
+                                        "layout|flex": null
                                     },
                                     "name": "MyTextField44",
                                     "designerId": "a662b97c-8638-443d-b1e8-3b7ffd88cf0c"
@@ -365,9 +365,9 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Commission Rate",
+                                        "itemId": "txtCommissionRate",
                                         "labelWidth": 110,
-                                        "layout|flex": null,
-                                        "itemId": "txtCommissionRate"
+                                        "layout|flex": null
                                     },
                                     "name": "MyTextField45",
                                     "designerId": "d35a2d36-bf32-4cae-b9b2-81c5a90feabf"
@@ -381,9 +381,9 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Discount Code",
+                                        "itemId": "txtDiscountCode",
                                         "labelWidth": 110,
-                                        "layout|flex": null,
-                                        "itemId": "txtDiscountCode"
+                                        "layout|flex": null
                                     },
                                     "name": "MyTextField46",
                                     "designerId": "e6376841-b6f6-466a-baa1-1e9a31f7e7c6"
@@ -397,9 +397,9 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Min Override",
+                                        "itemId": "txtMinOverride",
                                         "labelWidth": 110,
-                                        "layout|flex": null,
-                                        "itemId": "txtMinOverride"
+                                        "layout|flex": null
                                     },
                                     "name": "MyTextField47",
                                     "designerId": "27e43c2a-888b-4426-affb-8e4fa6fe7e51"
@@ -433,9 +433,9 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Pricing Method",
+                                        "itemId": "cboPricingMethod",
                                         "labelWidth": 110,
-                                        "layout|flex": null,
-                                        "itemId": "cboPricingMethod"
+                                        "layout|flex": null
                                     },
                                     "name": "MyComboBox48",
                                     "designerId": "fa631e75-86d5-472d-93bd-ed222c9cb1fb"
@@ -449,9 +449,9 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Last Cost",
+                                        "itemId": "txtLastCost",
                                         "labelWidth": 110,
-                                        "layout|flex": null,
-                                        "itemId": "txtLastCost"
+                                        "layout|flex": null
                                     },
                                     "name": "MyTextField48",
                                     "designerId": "968f3f82-abdf-4bc9-9d5b-24627a7c1c8e"
@@ -465,9 +465,9 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Average Cost",
+                                        "itemId": "txtAverageCost",
                                         "labelWidth": 110,
-                                        "layout|flex": null,
-                                        "itemId": "txtAverageCost"
+                                        "layout|flex": null
                                     },
                                     "name": "MyTextField49",
                                     "designerId": "9c7aa544-87b2-4f8e-950a-b9c7f291d7f5"
@@ -481,9 +481,9 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Standard Cost",
+                                        "itemId": "txtStandardCost",
                                         "labelWidth": 110,
-                                        "layout|flex": null,
-                                        "itemId": "txtStandardCost"
+                                        "layout|flex": null
                                     },
                                     "name": "MyTextField50",
                                     "designerId": "da85e908-4dbe-460a-9736-911b711029b3"
@@ -497,9 +497,9 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "End of Month Cost",
+                                        "itemId": "txtEndofMonthCost",
                                         "labelWidth": 110,
-                                        "layout|flex": null,
-                                        "itemId": "txtEndofMonthCost"
+                                        "layout|flex": null
                                     },
                                     "name": "MyTextField51",
                                     "designerId": "65129da8-fe40-45a9-b634-58915ede5a85"
@@ -513,9 +513,9 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Default Sales Tax",
+                                        "itemId": "txtDefaultSalesTax",
                                         "labelWidth": 110,
-                                        "layout|flex": null,
-                                        "itemId": "txtDefaultSalesTax"
+                                        "layout|flex": null
                                     },
                                     "name": "MyTextField52",
                                     "designerId": "c05b8d56-0ef2-4775-aca0-66151c537c64"
@@ -529,9 +529,9 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Commission Units",
+                                        "itemId": "txtCommissionUnits",
                                         "labelWidth": 110,
-                                        "layout|flex": null,
-                                        "itemId": "txtCommissionUnits"
+                                        "layout|flex": null
                                     },
                                     "name": "MyTextField53",
                                     "designerId": "74ea5405-c2ea-4645-8ad2-66db71b1675c"
@@ -545,9 +545,9 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Discount Rate",
+                                        "itemId": "txtDiscountRate",
                                         "labelWidth": 110,
-                                        "layout|flex": null,
-                                        "itemId": "txtDiscountRate"
+                                        "layout|flex": null
                                     },
                                     "name": "MyTextField54",
                                     "designerId": "1523889a-708f-4fbf-ac2e-661c6a84f193"
@@ -561,9 +561,9 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Max Override",
+                                        "itemId": "txtMaxOverride",
                                         "labelWidth": 110,
-                                        "layout|flex": null,
-                                        "itemId": "txtMaxOverride"
+                                        "layout|flex": null
                                     },
                                     "name": "MyTextField55",
                                     "designerId": "a3af28dc-2218-4dc5-9237-9c3517bbadd0"
@@ -584,11 +584,11 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "designer|displayName": "",
                         "dock": "bottom",
-                        "layout|flex": 1,
                         "itemId": "pagingtoolbar",
+                        "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging8",
                     "designerId": "ee98d62c-330d-4829-b90b-22407d93d85f",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

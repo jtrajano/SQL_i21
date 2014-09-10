@@ -47,9 +47,9 @@ Ext.define('Inventory.view.WorkCenterAdd', {
     items: [
         {
             xtype: 'form',
-            reference: 'frmReasonCodeAdd',
             autoShow: true,
             height: 350,
+            itemId: 'frmReasonCodeAdd',
             margin: -1,
             width: 450,
             bodyBorder: false,
@@ -72,9 +72,9 @@ Ext.define('Inventory.view.WorkCenterAdd', {
                     items: [
                         {
                             xtype: 'button',
-                            reference: 'btnOk',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnOk',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-ok',
@@ -83,9 +83,9 @@ Ext.define('Inventory.view.WorkCenterAdd', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnCancel',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnCancel',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-cancel',
@@ -99,12 +99,12 @@ Ext.define('Inventory.view.WorkCenterAdd', {
                 {
                     xtype: 'gridpanel',
                     flex: 1,
-                    reference: 'grdWorkcenter',
+                    itemId: 'grdWorkcenter',
                     dockedItems: [
                         {
                             xtype: 'toolbar',
                             dock: 'top',
-                            reference: 'tlbGridOptions',
+                            itemId: 'tlbGridOptions',
                             layout: {
                                 type: 'hbox',
                                 padding: '0 0 0 1'
@@ -125,7 +125,7 @@ Ext.define('Inventory.view.WorkCenterAdd', {
                         }
                     ],
                     viewConfig: {
-                        reference: 'grvWorkcenter'
+                        itemId: 'grvWorkcenter'
                     },
                     selModel: {
                         selType: 'checkboxmodel'

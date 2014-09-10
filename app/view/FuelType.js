@@ -46,9 +46,9 @@ Ext.define('Inventory.view.FuelType', {
     items: [
         {
             xtype: 'form',
-            reference: 'frmFuelType',
             autoShow: true,
             height: 350,
+            itemId: 'frmFuelType',
             margin: -1,
             width: 450,
             bodyBorder: false,
@@ -71,9 +71,9 @@ Ext.define('Inventory.view.FuelType', {
                     items: [
                         {
                             xtype: 'button',
-                            reference: 'btnNew',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnNew',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-new',
@@ -82,9 +82,9 @@ Ext.define('Inventory.view.FuelType', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnSave',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnSave',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-save',
@@ -93,9 +93,9 @@ Ext.define('Inventory.view.FuelType', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnSearch',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnSearch',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-search',
@@ -104,9 +104,9 @@ Ext.define('Inventory.view.FuelType', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnDelete',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnDelete',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-delete',
@@ -115,9 +115,9 @@ Ext.define('Inventory.view.FuelType', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnUndo',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnUndo',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-undo',
@@ -130,9 +130,9 @@ Ext.define('Inventory.view.FuelType', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnClose',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnClose',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-close',
@@ -143,7 +143,7 @@ Ext.define('Inventory.view.FuelType', {
                 },
                 {
                     xtype: 'ipagingstatusbar',
-                    reference: 'pagingtoolbar',
+                    itemId: 'pagingtoolbar',
                     flex: 1,
                     dock: 'bottom'
                 }
@@ -161,77 +161,77 @@ Ext.define('Inventory.view.FuelType', {
                     items: [
                         {
                             xtype: 'combobox',
-                            reference: 'cboFuelType',
+                            itemId: 'cboFuelType',
                             fieldLabel: 'Fuel Type',
                             labelWidth: 165
                         },
                         {
                             xtype: 'combobox',
-                            reference: 'cboFeedStock',
+                            itemId: 'cboFeedStock',
                             fieldLabel: 'Feed Stock',
                             labelWidth: 165
                         },
                         {
                             xtype: 'textfield',
-                            reference: 'txtBatchNo',
+                            itemId: 'txtBatchNo',
                             fieldLabel: 'Batch No',
                             labelWidth: 165
                         },
                         {
                             xtype: 'textfield',
-                            reference: 'txtEndingRinGallonsForBatch',
+                            itemId: 'txtEndingRinGallonsForBatch',
                             fieldLabel: 'Ending RIN Gallons for Batch',
                             labelWidth: 165
                         },
                         {
-                            xtype: 'combobox',
-                            reference: 'cboEquivalenceValue',
+                            xtype: 'textfield',
+                            itemId: 'txtEquivalenceValue',
                             width: 170,
                             fieldLabel: 'Equivalence Value',
                             labelWidth: 165
                         },
                         {
                             xtype: 'combobox',
-                            reference: 'cboFuelCode',
+                            itemId: 'cboFuelCode',
                             width: 170,
                             fieldLabel: 'Fuel Code',
                             labelWidth: 165
                         },
                         {
                             xtype: 'combobox',
-                            reference: 'cboProcessCode',
+                            itemId: 'cboProcessCode',
                             width: 170,
                             fieldLabel: 'Process Code',
                             labelWidth: 165
                         },
                         {
                             xtype: 'combobox',
-                            reference: 'cboFeedStockUom',
+                            itemId: 'cboFeedStockUom',
                             width: 170,
                             fieldLabel: 'Feed Stock UOM',
                             labelWidth: 165
                         },
                         {
                             xtype: 'textfield',
-                            reference: 'txtFeedStockFactor',
+                            itemId: 'txtFeedStockFactor',
                             fieldLabel: 'Feed Stock Factor',
                             labelWidth: 165
                         },
                         {
                             xtype: 'checkboxfield',
-                            reference: 'chkRenewableBiomass',
+                            itemId: 'chkRenewableBiomass',
                             fieldLabel: 'Renewable Biomass',
                             labelWidth: 165
                         },
                         {
                             xtype: 'textfield',
-                            reference: 'txtPercentOfDenaturant',
+                            itemId: 'txtPercentOfDenaturant',
                             fieldLabel: 'Percent of Denaturant',
                             labelWidth: 165
                         },
                         {
                             xtype: 'checkboxfield',
-                            reference: 'chkDeductDenaturantFromRin',
+                            itemId: 'chkDeductDenaturantFromRin',
                             fieldLabel: 'Deduct Denaturant from RIN',
                             labelWidth: 165
                         }

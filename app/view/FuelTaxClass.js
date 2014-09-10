@@ -48,9 +48,9 @@ Ext.define('Inventory.view.FuelTaxClass', {
     items: [
         {
             xtype: 'form',
-            reference: 'frmFuelTaxClass',
             autoShow: true,
             height: 350,
+            itemId: 'frmFuelTaxClass',
             margin: -1,
             width: 450,
             bodyBorder: false,
@@ -73,9 +73,9 @@ Ext.define('Inventory.view.FuelTaxClass', {
                     items: [
                         {
                             xtype: 'button',
-                            reference: 'btnNew',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnNew',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-new',
@@ -84,9 +84,9 @@ Ext.define('Inventory.view.FuelTaxClass', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnSave',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnSave',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-save',
@@ -95,9 +95,9 @@ Ext.define('Inventory.view.FuelTaxClass', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnSearch',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnSearch',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-search',
@@ -106,9 +106,9 @@ Ext.define('Inventory.view.FuelTaxClass', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnDelete',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnDelete',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-delete',
@@ -117,9 +117,9 @@ Ext.define('Inventory.view.FuelTaxClass', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnUndo',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnUndo',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-undo',
@@ -132,9 +132,9 @@ Ext.define('Inventory.view.FuelTaxClass', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnClose',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnClose',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-close',
@@ -145,7 +145,7 @@ Ext.define('Inventory.view.FuelTaxClass', {
                 },
                 {
                     xtype: 'ipagingstatusbar',
-                    reference: 'pagingtoolbar',
+                    itemId: 'pagingtoolbar',
                     flex: 1,
                     dock: 'bottom'
                 }
@@ -169,14 +169,14 @@ Ext.define('Inventory.view.FuelTaxClass', {
                                 {
                                     xtype: 'textfield',
                                     flex: 1,
-                                    reference: 'txtTaxClassCode',
+                                    itemId: 'txtTaxClassCode',
                                     fieldLabel: 'Tax Class Code',
                                     labelWidth: 90
                                 },
                                 {
                                     xtype: 'textfield',
                                     flex: 1,
-                                    reference: 'txtIrsTaxCode',
+                                    itemId: 'txtIrsTaxCode',
                                     margin: '0 0 0 5',
                                     fieldLabel: 'IRS Tax Code',
                                     labelWidth: 90
@@ -185,20 +185,20 @@ Ext.define('Inventory.view.FuelTaxClass', {
                         },
                         {
                             xtype: 'textfield',
-                            reference: 'txtDescription',
+                            itemId: 'txtDescription',
                             fieldLabel: 'Description',
                             labelWidth: 90
                         },
                         {
                             xtype: 'gridpanel',
                             flex: 1,
-                            reference: 'grdProductCode',
+                            itemId: 'grdProductCode',
                             title: 'Product Codes',
                             dockedItems: [
                                 {
                                     xtype: 'toolbar',
                                     dock: 'top',
-                                    reference: 'tlbGridOptions',
+                                    itemId: 'tlbGridOptions',
                                     layout: {
                                         type: 'hbox',
                                         padding: '0 0 0 1'
@@ -224,7 +224,7 @@ Ext.define('Inventory.view.FuelTaxClass', {
                                 }
                             ],
                             viewConfig: {
-                                reference: 'grvProductCode'
+                                itemId: 'grvProductCode'
                             }
                         }
                     ]

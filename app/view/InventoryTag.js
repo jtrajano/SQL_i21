@@ -45,9 +45,9 @@ Ext.define('Inventory.view.InventoryTag', {
     items: [
         {
             xtype: 'form',
-            reference: 'frmInventoryTag',
             autoShow: true,
             height: 350,
+            itemId: 'frmInventoryTag',
             margin: -1,
             width: 450,
             bodyBorder: false,
@@ -70,9 +70,9 @@ Ext.define('Inventory.view.InventoryTag', {
                     items: [
                         {
                             xtype: 'button',
-                            reference: 'btnNew',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnNew',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-new',
@@ -81,9 +81,9 @@ Ext.define('Inventory.view.InventoryTag', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnSave',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnSave',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-save',
@@ -92,9 +92,9 @@ Ext.define('Inventory.view.InventoryTag', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnSearch',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnSearch',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-search',
@@ -103,9 +103,9 @@ Ext.define('Inventory.view.InventoryTag', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnDelete',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnDelete',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-delete',
@@ -114,9 +114,9 @@ Ext.define('Inventory.view.InventoryTag', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnUndo',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnUndo',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-undo',
@@ -129,9 +129,9 @@ Ext.define('Inventory.view.InventoryTag', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnClose',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnClose',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-close',
@@ -142,7 +142,7 @@ Ext.define('Inventory.view.InventoryTag', {
                 },
                 {
                     xtype: 'ipagingstatusbar',
-                    reference: 'pagingtoolbar',
+                    itemId: 'pagingtoolbar',
                     flex: 1,
                     dock: 'bottom'
                 }
@@ -165,14 +165,14 @@ Ext.define('Inventory.view.InventoryTag', {
                             items: [
                                 {
                                     xtype: 'textfield',
-                                    reference: 'txtTagNumber',
+                                    itemId: 'txtTagNumber',
                                     width: 300,
                                     fieldLabel: 'Tag Number',
                                     labelWidth: 90
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    reference: 'chkHAZMATMessage',
+                                    itemId: 'chkHAZMATMessage',
                                     margin: '0 0 0 5',
                                     fieldLabel: 'HAZMAT Message',
                                     labelWidth: 110
@@ -181,14 +181,14 @@ Ext.define('Inventory.view.InventoryTag', {
                         },
                         {
                             xtype: 'textfield',
-                            reference: 'txtDescription',
+                            itemId: 'txtDescription',
                             fieldLabel: 'Description',
                             labelWidth: 90
                         },
                         {
                             xtype: 'textareafield',
                             flex: 1,
-                            reference: 'txtMessage',
+                            itemId: 'txtMessage',
                             fieldLabel: 'Message',
                             labelWidth: 90
                         }

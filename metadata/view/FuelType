@@ -44,9 +44,9 @@
                 "frame": null,
                 "header": false,
                 "height": 350,
+                "itemId": "frmFuelType",
                 "layout": "vbox",
                 "margin": -1,
-                "itemId": "frmFuelType",
                 "title": null,
                 "trackResetOnLoad": true,
                 "url": null,
@@ -84,9 +84,9 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-new",
+                                "itemId": "btnNew",
                                 "layout|flex": null,
                                 "layout|margins": null,
-                                "itemId": "btnNew",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "New",
@@ -108,8 +108,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-save",
-                                "layout|flex": null,
                                 "itemId": "btnSave",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Save",
@@ -131,8 +131,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-search",
-                                "layout|flex": null,
                                 "itemId": "btnSearch",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Search",
@@ -154,8 +154,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-delete",
-                                "layout|flex": null,
                                 "itemId": "btnDelete",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Delete",
@@ -177,8 +177,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-undo",
-                                "layout|flex": null,
                                 "itemId": "btnUndo",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Undo",
@@ -215,8 +215,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-close",
-                                "layout|flex": null,
                                 "itemId": "btnClose",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Close",
@@ -258,6 +258,7 @@
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Fuel Type",
+                                "itemId": "cboFuelType",
                                 "labelPad": null,
                                 "labelSeparator": null,
                                 "labelWidth": 165,
@@ -265,7 +266,6 @@
                                 "margin": null,
                                 "maxLength": null,
                                 "name": null,
-                                "itemId": "cboFuelType",
                                 "tabIndex": null,
                                 "width": null
                             },
@@ -286,6 +286,7 @@
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Feed Stock",
+                                "itemId": "cboFeedStock",
                                 "labelPad": null,
                                 "labelSeparator": null,
                                 "labelWidth": 165,
@@ -293,7 +294,6 @@
                                 "margin": null,
                                 "maxLength": null,
                                 "name": null,
-                                "itemId": "cboFeedStock",
                                 "tabIndex": null,
                                 "width": null
                             },
@@ -312,6 +312,7 @@
                                 "enforceMaxLength": null,
                                 "fieldCls": null,
                                 "fieldLabel": "Batch No",
+                                "itemId": "txtBatchNo",
                                 "labelPad": null,
                                 "labelSeparator": null,
                                 "labelWidth": 165,
@@ -320,7 +321,6 @@
                                 "maxLength": null,
                                 "name": null,
                                 "readOnly": null,
-                                "itemId": "txtBatchNo",
                                 "tabIndex": null,
                                 "value": null,
                                 "width": null
@@ -339,6 +339,7 @@
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Ending RIN Gallons for Batch",
+                                "itemId": "txtEndingRinGallonsForBatch",
                                 "labelPad": null,
                                 "labelSeparator": null,
                                 "labelWidth": 165,
@@ -346,7 +347,6 @@
                                 "margin": null,
                                 "maxLength": null,
                                 "name": null,
-                                "itemId": "txtEndingRinGallonsForBatch",
                                 "tabIndex": null,
                                 "width": null
                             },
@@ -354,7 +354,7 @@
                             "designerId": "1b19e950-2f0f-4e8f-93a0-d9150376cc3a"
                         },
                         {
-                            "type": "Ext.form.field.ComboBox",
+                            "type": "Ext.form.field.Text",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
@@ -364,6 +364,7 @@
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Equivalence Value",
+                                "itemId": "txtEquivalenceValue",
                                 "labelPad": null,
                                 "labelSeparator": null,
                                 "labelWidth": 165,
@@ -371,11 +372,10 @@
                                 "margin": null,
                                 "maxLength": null,
                                 "name": null,
-                                "itemId": "cboEquivalenceValue",
                                 "tabIndex": null,
                                 "width": 170
                             },
-                            "name": "MyComboBox65",
+                            "name": "MyTextField",
                             "designerId": "cb947ddc-b53d-408a-828e-21ff31f0b23d"
                         },
                         {
@@ -389,6 +389,7 @@
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Fuel Code",
+                                "itemId": "cboFuelCode",
                                 "labelPad": null,
                                 "labelSeparator": null,
                                 "labelWidth": 165,
@@ -396,7 +397,6 @@
                                 "margin": null,
                                 "maxLength": null,
                                 "name": null,
-                                "itemId": "cboFuelCode",
                                 "tabIndex": null,
                                 "width": 170
                             },
@@ -414,6 +414,7 @@
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Process Code",
+                                "itemId": "cboProcessCode",
                                 "labelPad": null,
                                 "labelSeparator": null,
                                 "labelWidth": 165,
@@ -421,7 +422,6 @@
                                 "margin": null,
                                 "maxLength": null,
                                 "name": null,
-                                "itemId": "cboProcessCode",
                                 "tabIndex": null,
                                 "width": 170
                             },
@@ -439,6 +439,7 @@
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Feed Stock UOM",
+                                "itemId": "cboFeedStockUom",
                                 "labelPad": null,
                                 "labelSeparator": null,
                                 "labelWidth": 165,
@@ -446,7 +447,6 @@
                                 "margin": null,
                                 "maxLength": null,
                                 "name": null,
-                                "itemId": "cboFeedStockUom",
                                 "tabIndex": null,
                                 "width": 170
                             },
@@ -464,6 +464,7 @@
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Feed Stock Factor",
+                                "itemId": "txtFeedStockFactor",
                                 "labelPad": null,
                                 "labelSeparator": null,
                                 "labelWidth": 165,
@@ -471,7 +472,6 @@
                                 "margin": null,
                                 "maxLength": null,
                                 "name": null,
-                                "itemId": "txtFeedStockFactor",
                                 "tabIndex": null,
                                 "width": null
                             },
@@ -488,9 +488,9 @@
                             "userConfig": {
                                 "boxLabel": null,
                                 "fieldLabel": "Renewable Biomass",
+                                "itemId": "chkRenewableBiomass",
                                 "labelWidth": 165,
-                                "layout|flex": null,
-                                "itemId": "chkRenewableBiomass"
+                                "layout|flex": null
                             },
                             "name": "MyCheckbox63",
                             "designerId": "5519542f-ed1d-4d6d-8ba8-98517576a584"
@@ -506,6 +506,7 @@
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Percent of Denaturant",
+                                "itemId": "txtPercentOfDenaturant",
                                 "labelPad": null,
                                 "labelSeparator": null,
                                 "labelWidth": 165,
@@ -513,7 +514,6 @@
                                 "margin": null,
                                 "maxLength": null,
                                 "name": null,
-                                "itemId": "txtPercentOfDenaturant",
                                 "tabIndex": null,
                                 "width": null
                             },
@@ -530,9 +530,9 @@
                             "userConfig": {
                                 "boxLabel": null,
                                 "fieldLabel": "Deduct Denaturant from RIN",
+                                "itemId": "chkDeductDenaturantFromRin",
                                 "labelWidth": 165,
-                                "layout|flex": null,
-                                "itemId": "chkDeductDenaturantFromRin"
+                                "layout|flex": null
                             },
                             "name": "MyCheckbox64",
                             "designerId": "70fc0d5d-47e2-4d04-aec9-c7a5648ab50c"
@@ -551,11 +551,11 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "designer|displayName": "",
                         "dock": "bottom",
-                        "layout|flex": 1,
                         "itemId": "pagingtoolbar",
+                        "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging",
+                    "name": "statusbarpaging1",
                     "designerId": "ef7cd9cb-b7a1-4f5a-a180-5e26b5c5119a",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

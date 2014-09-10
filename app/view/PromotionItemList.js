@@ -48,9 +48,9 @@ Ext.define('Inventory.view.PromotionItemList', {
     items: [
         {
             xtype: 'form',
-            reference: 'frmPromotionItemList',
             autoShow: true,
             height: 350,
+            itemId: 'frmPromotionItemList',
             margin: -1,
             width: 450,
             bodyBorder: false,
@@ -73,9 +73,9 @@ Ext.define('Inventory.view.PromotionItemList', {
                     items: [
                         {
                             xtype: 'button',
-                            reference: 'btnNew',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnNew',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-new',
@@ -84,9 +84,9 @@ Ext.define('Inventory.view.PromotionItemList', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnSave',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnSave',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-save',
@@ -95,9 +95,9 @@ Ext.define('Inventory.view.PromotionItemList', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnSearch',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnSearch',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-search',
@@ -106,9 +106,9 @@ Ext.define('Inventory.view.PromotionItemList', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnDelete',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnDelete',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-delete',
@@ -117,9 +117,9 @@ Ext.define('Inventory.view.PromotionItemList', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnUndo',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnUndo',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-undo',
@@ -132,9 +132,9 @@ Ext.define('Inventory.view.PromotionItemList', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnClose',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnClose',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-close',
@@ -145,7 +145,7 @@ Ext.define('Inventory.view.PromotionItemList', {
                 },
                 {
                     xtype: 'ipagingstatusbar',
-                    reference: 'pagingtoolbar',
+                    itemId: 'pagingtoolbar',
                     flex: 1,
                     dock: 'bottom'
                 }
@@ -169,7 +169,7 @@ Ext.define('Inventory.view.PromotionItemList', {
                                 {
                                     xtype: 'textfield',
                                     flex: 1,
-                                    reference: 'txtStore',
+                                    itemId: 'txtStore',
                                     width: 170,
                                     fieldLabel: 'Store',
                                     labelWidth: 95
@@ -188,7 +188,7 @@ Ext.define('Inventory.view.PromotionItemList', {
                                 {
                                     xtype: 'textfield',
                                     flex: 1,
-                                    reference: 'txtItemListNo',
+                                    itemId: 'txtItemListNo',
                                     width: 170,
                                     fieldLabel: 'Item List No',
                                     labelWidth: 95
@@ -196,7 +196,7 @@ Ext.define('Inventory.view.PromotionItemList', {
                                 {
                                     xtype: 'textfield',
                                     flex: 1,
-                                    reference: 'txtItemListId',
+                                    itemId: 'txtItemListId',
                                     margin: '0 0 0 5',
                                     width: 170,
                                     fieldLabel: 'Item List ID',
@@ -212,7 +212,7 @@ Ext.define('Inventory.view.PromotionItemList', {
                                 {
                                     xtype: 'numberfield',
                                     flex: 1,
-                                    reference: 'txtTotalUnitPrice',
+                                    itemId: 'txtTotalUnitPrice',
                                     fieldLabel: 'Total Unit Price',
                                     labelWidth: 95,
                                     hideTrigger: true
@@ -220,7 +220,7 @@ Ext.define('Inventory.view.PromotionItemList', {
                                 {
                                     xtype: 'checkboxfield',
                                     flex: 1,
-                                    reference: 'chkDeleteFromRegister',
+                                    itemId: 'chkDeleteFromRegister',
                                     margin: '0 0 0 5',
                                     fieldLabel: 'Delete from Register',
                                     labelWidth: 120
@@ -229,7 +229,7 @@ Ext.define('Inventory.view.PromotionItemList', {
                         },
                         {
                             xtype: 'textfield',
-                            reference: 'txtDescription',
+                            itemId: 'txtDescription',
                             width: 170,
                             fieldLabel: 'Description',
                             labelWidth: 95
@@ -237,7 +237,7 @@ Ext.define('Inventory.view.PromotionItemList', {
                         {
                             xtype: 'gridpanel',
                             flex: 1,
-                            reference: 'grdItemList',
+                            itemId: 'grdItemList',
                             title: 'Item List',
                             columns: [
                                 {
@@ -267,7 +267,7 @@ Ext.define('Inventory.view.PromotionItemList', {
                                 }
                             ],
                             viewConfig: {
-                                reference: 'grvItemList'
+                                itemId: 'grvItemList'
                             }
                         }
                     ]

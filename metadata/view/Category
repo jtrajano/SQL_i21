@@ -57,8 +57,8 @@
                         "icon": null,
                         "iconAlign": "top",
                         "iconCls": "large-new",
-                        "layout|flex": null,
                         "itemId": "btnNew",
+                        "layout|flex": null,
                         "scale": "large",
                         "tabIndex": -1,
                         "text": "New",
@@ -80,8 +80,8 @@
                         "icon": null,
                         "iconAlign": "top",
                         "iconCls": "large-save",
-                        "layout|flex": null,
                         "itemId": "btnSave",
+                        "layout|flex": null,
                         "scale": "large",
                         "tabIndex": -1,
                         "text": "Save",
@@ -103,8 +103,8 @@
                         "icon": null,
                         "iconAlign": "top",
                         "iconCls": "large-search",
-                        "layout|flex": null,
                         "itemId": "btnFind",
+                        "layout|flex": null,
                         "scale": "large",
                         "tabIndex": -1,
                         "text": "Search",
@@ -126,8 +126,8 @@
                         "icon": null,
                         "iconAlign": "top",
                         "iconCls": "large-delete",
-                        "layout|flex": null,
                         "itemId": "btnDelete",
+                        "layout|flex": null,
                         "scale": "large",
                         "tabIndex": -1,
                         "text": "Delete",
@@ -149,8 +149,8 @@
                         "icon": null,
                         "iconAlign": "top",
                         "iconCls": "large-undo",
-                        "layout|flex": null,
                         "itemId": "btnUndo",
+                        "layout|flex": null,
                         "scale": "large",
                         "tabIndex": -1,
                         "text": "Undo",
@@ -187,8 +187,8 @@
                         "icon": null,
                         "iconAlign": "top",
                         "iconCls": "large-close",
-                        "layout|flex": null,
                         "itemId": "btnClose",
+                        "layout|flex": null,
                         "scale": "large",
                         "tabIndex": -1,
                         "text": "Close",
@@ -215,9 +215,9 @@
                 "frame": null,
                 "header": false,
                 "height": 350,
+                "itemId": "frmCategory",
                 "layout": "vbox",
                 "margin": -1,
-                "itemId": "frmCategory",
                 "title": null,
                 "url": null,
                 "width": 450
@@ -234,9 +234,9 @@
                     "codeClass": null,
                     "userConfig": {
                         "activeTab": 0,
+                        "itemId": "tabCategory",
                         "layout|flex": 1,
-                        "plain": true,
-                        "itemId": "tabCategory"
+                        "plain": true
                     },
                     "name": "MyTabPanel5",
                     "designerId": "ae88d0ce-f85c-4c1c-b276-06f98ad1cf1a",
@@ -310,9 +310,9 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Category Code",
+                                                        "itemId": "txtCategoryCode",
                                                         "labelWidth": 110,
-                                                        "layout|flex": null,
-                                                        "itemId": "txtCategoryCode"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyTextField62",
                                                     "designerId": "e8465eb5-6b33-40d2-8ff1-8362ce020dc3"
@@ -326,9 +326,9 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Description",
+                                                        "itemId": "txtDescription",
                                                         "labelWidth": 110,
-                                                        "layout|flex": null,
-                                                        "itemId": "txtDescription"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyTextField32",
                                                     "designerId": "8107b6d5-6d85-4362-b9d0-54d5295f4811"
@@ -342,10 +342,10 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Line of Business",
+                                                        "itemId": "cboLineOfBusiness",
                                                         "labelWidth": 110,
                                                         "layout|flex": null,
-                                                        "layout|margins": null,
-                                                        "itemId": "cboLineOfBusiness"
+                                                        "layout|margins": null
                                                     },
                                                     "name": "MyComboBox56",
                                                     "designerId": "a52f72ea-715c-4363-9d0b-b602e792186a"
@@ -359,10 +359,10 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Catalog Group",
+                                                        "itemId": "cboCatalogGroup",
                                                         "labelWidth": 110,
                                                         "layout|flex": null,
-                                                        "layout|margins": null,
-                                                        "itemId": "cboCatalogGroup"
+                                                        "layout|margins": null
                                                     },
                                                     "name": "MyComboBox45",
                                                     "designerId": "b3ad680d-810e-40cc-9b25-28aa9f6639fd"
@@ -376,10 +376,10 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Costing Method",
+                                                        "itemId": "cboCostingMethod",
                                                         "labelWidth": 110,
                                                         "layout|flex": null,
-                                                        "layout|margins": null,
-                                                        "itemId": "cboCostingMethod"
+                                                        "layout|margins": null
                                                     },
                                                     "name": "MyComboBox46",
                                                     "designerId": "59274c24-26d9-416b-9f19-dc30d33250fa"
@@ -393,10 +393,10 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Inventory Tracking",
+                                                        "itemId": "cboInventoryTracking",
                                                         "labelWidth": 110,
                                                         "layout|flex": null,
-                                                        "layout|margins": null,
-                                                        "itemId": "cboInventoryTracking"
+                                                        "layout|margins": null
                                                     },
                                                     "name": "MyComboBox47",
                                                     "designerId": "37e7f1d0-03b3-4119-bb62-22ead8e21bd3"
@@ -411,10 +411,10 @@
                                                     "userConfig": {
                                                         "fieldLabel": "Standard Qty",
                                                         "hideTrigger": true,
+                                                        "itemId": "txtStandardQty",
                                                         "labelWidth": 110,
                                                         "layout|flex": null,
-                                                        "maxWidth": 225,
-                                                        "itemId": "txtStandardQty"
+                                                        "maxWidth": 225
                                                     },
                                                     "name": "MyNumberField9",
                                                     "designerId": "9d9a3bea-c2c0-4a48-9227-d75640140c9a"
@@ -428,10 +428,10 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Standard UOM",
+                                                        "itemId": "cboStandardUom",
                                                         "labelWidth": 110,
                                                         "layout|flex": null,
-                                                        "layout|margins": null,
-                                                        "itemId": "cboStandardUom"
+                                                        "layout|margins": null
                                                     },
                                                     "name": "MyComboBox48",
                                                     "designerId": "abaef6be-bb9b-4e0b-9874-8e76a298c4ea"
@@ -529,9 +529,9 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "GL Division Number",
+                                                        "itemId": "txtGlDivisionNumber",
                                                         "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "itemId": "txtGlDivisionNumber"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyTextField62",
                                                     "designerId": "8fcd142f-a646-4459-9fe4-fe0f9932df87"
@@ -546,9 +546,9 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Sales Analysis by Ton",
+                                                        "itemId": "chkSalesAnalysisByTon",
                                                         "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "itemId": "chkSalesAnalysisByTon"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyCheckbox43",
                                                     "designerId": "4b49a370-474e-49f5-9267-283a0eb444dd"
@@ -562,10 +562,10 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Material Fee",
+                                                        "itemId": "cboMaterialFee",
                                                         "labelWidth": 160,
                                                         "layout|flex": 1,
-                                                        "layout|margins": null,
-                                                        "itemId": "cboMaterialFee"
+                                                        "layout|margins": null
                                                     },
                                                     "name": "MyComboBox56",
                                                     "designerId": "95d7f6e1-a269-455e-9f5f-492111d427eb"
@@ -579,10 +579,10 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Material Item",
+                                                        "itemId": "cboMaterialItem",
                                                         "labelWidth": 160,
                                                         "layout|flex": 1,
-                                                        "layout|margins": null,
-                                                        "itemId": "cboMaterialItem"
+                                                        "layout|margins": null
                                                     },
                                                     "name": "MyComboBox57",
                                                     "designerId": "8d9a2d7b-337a-4da1-b75d-f2d4b95799c3"
@@ -597,9 +597,9 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Auto Calculate Freight",
+                                                        "itemId": "chkAutoCalculateFreight",
                                                         "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "itemId": "chkAutoCalculateFreight"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyCheckbox44",
                                                     "designerId": "e177899a-17be-402e-9ced-031bd237fd17"
@@ -613,10 +613,10 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Freight Item",
+                                                        "itemId": "cboFreightItem",
                                                         "labelWidth": 160,
                                                         "layout|flex": 1,
-                                                        "layout|margins": null,
-                                                        "itemId": "cboFreightItem"
+                                                        "layout|margins": null
                                                     },
                                                     "name": "MyComboBox58",
                                                     "designerId": "c9d92bba-f833-4bcd-980c-50b84b0be7d6"
@@ -631,9 +631,9 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Non Retail Use Department",
+                                                        "itemId": "chkNonRetailUseDepartment",
                                                         "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "itemId": "chkNonRetailUseDepartment"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyCheckbox45",
                                                     "designerId": "9ffb9089-fb54-4554-a3da-758b21754736"
@@ -648,9 +648,9 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Report in Net or Gross",
+                                                        "itemId": "chkReportInNetOrGross",
                                                         "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "itemId": "chkReportInNetOrGross"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyCheckbox46",
                                                     "designerId": "1cd13504-7064-4387-b706-55771339a091"
@@ -665,9 +665,9 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Department for Pumps",
+                                                        "itemId": "chkDepartmentForPumps",
                                                         "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "itemId": "chkDepartmentForPumps"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyCheckbox47",
                                                     "designerId": "6f3e05d2-ccb6-4377-8a3d-7ef114406bf0"
@@ -681,10 +681,10 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Convert to Paidout",
+                                                        "itemId": "cboConvertToPaidout",
                                                         "labelWidth": 160,
                                                         "layout|flex": 1,
-                                                        "layout|margins": null,
-                                                        "itemId": "cboConvertToPaidout"
+                                                        "layout|margins": null
                                                     },
                                                     "name": "MyComboBox59",
                                                     "designerId": "d91a876a-885f-44c1-9863-84827cabae45"
@@ -699,9 +699,9 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Delete from Register",
+                                                        "itemId": "chkDeleteFromRegister",
                                                         "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "itemId": "chkDeleteFromRegister"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyCheckbox48",
                                                     "designerId": "d4268969-4014-488f-b74e-9e281170afa3"
@@ -736,9 +736,9 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Department Key Taxed",
+                                                        "itemId": "chkDepartmentKeyTaxed",
                                                         "labelWidth": 175,
-                                                        "layout|flex": null,
-                                                        "itemId": "chkDepartmentKeyTaxed"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyCheckbox49",
                                                     "designerId": "59d4d7ff-ed76-449f-845b-ce907f7c47ac"
@@ -752,10 +752,10 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Default Product Code",
+                                                        "itemId": "cboDefaultProductCode",
                                                         "labelWidth": 175,
                                                         "layout|flex": null,
-                                                        "layout|margins": null,
-                                                        "itemId": "cboDefaultProductCode"
+                                                        "layout|margins": null
                                                     },
                                                     "name": "MyComboBox60",
                                                     "designerId": "c11e30ae-8aaa-451f-98e5-9b24f032b53f"
@@ -769,10 +769,10 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Default Family",
+                                                        "itemId": "cboDefaultFamily",
                                                         "labelWidth": 175,
                                                         "layout|flex": null,
-                                                        "layout|margins": null,
-                                                        "itemId": "cboDefaultFamily"
+                                                        "layout|margins": null
                                                     },
                                                     "name": "MyComboBox61",
                                                     "designerId": "57907fa0-2429-466b-9207-b5a9451863c7"
@@ -786,10 +786,10 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Default Class",
+                                                        "itemId": "cboDefaultClass",
                                                         "labelWidth": 175,
                                                         "layout|flex": null,
-                                                        "layout|margins": null,
-                                                        "itemId": "cboDefaultClass"
+                                                        "layout|margins": null
                                                     },
                                                     "name": "MyComboBox62",
                                                     "designerId": "5fb1ad2d-612d-44d3-b945-55d42380dfcd"
@@ -804,9 +804,9 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Default Food Stampable",
+                                                        "itemId": "chkDefaultFoodStampable",
                                                         "labelWidth": 175,
-                                                        "layout|flex": null,
-                                                        "itemId": "chkDefaultFoodStampable"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyCheckbox50",
                                                     "designerId": "e54d657e-c331-4ccd-9478-9183f3f0b029"
@@ -821,9 +821,9 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Default Returnable",
+                                                        "itemId": "chkDefaultReturnable",
                                                         "labelWidth": 175,
-                                                        "layout|flex": null,
-                                                        "itemId": "chkDefaultReturnable"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyCheckbox51",
                                                     "designerId": "315f0303-18ac-4c14-9378-eda317eb80ec"
@@ -838,9 +838,9 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Default Saleable",
+                                                        "itemId": "chkDefaultSaleable",
                                                         "labelWidth": 175,
-                                                        "layout|flex": null,
-                                                        "itemId": "chkDefaultSaleable"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyCheckbox52",
                                                     "designerId": "11f51868-1764-451d-a0fe-0ba54dfc61f3"
@@ -855,9 +855,9 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Default Pre-priced",
+                                                        "itemId": "chkDefaultPrepriced",
                                                         "labelWidth": 175,
-                                                        "layout|flex": null,
-                                                        "itemId": "chkDefaultPrepriced"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyCheckbox53",
                                                     "designerId": "3993ad59-4030-4495-88b6-cc056ef96acd"
@@ -872,9 +872,9 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Default ID Required (liquor)",
+                                                        "itemId": "chkDefaultIdRequiredLiquor",
                                                         "labelWidth": 175,
-                                                        "layout|flex": null,
-                                                        "itemId": "chkDefaultIdRequiredLiquor"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyCheckbox54",
                                                     "designerId": "4416cdcb-aab4-4653-a6dc-9a197e1bf2e5"
@@ -889,9 +889,9 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Default ID Required (cigarette)",
+                                                        "itemId": "chkDefaultIdRequiredCigarette",
                                                         "labelWidth": 175,
-                                                        "layout|flex": null,
-                                                        "itemId": "chkDefaultIdRequiredCigarette"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyCheckbox55",
                                                     "designerId": "1f97fa6b-906b-4f3c-a8e8-5b5f4aafeaa5"
@@ -906,10 +906,10 @@
                                                     "userConfig": {
                                                         "fieldLabel": "Default Minimum Age",
                                                         "hideTrigger": true,
+                                                        "itemId": "txtDefaultMinimumAge",
                                                         "labelWidth": 175,
                                                         "layout|flex": null,
-                                                        "maxWidth": 225,
-                                                        "itemId": "txtDefaultMinimumAge"
+                                                        "maxWidth": 225
                                                     },
                                                     "name": "MyNumberField9",
                                                     "designerId": "7459d47d-1bc4-42a3-aeb4-088fa4039e93"
@@ -953,8 +953,8 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "designer|createAlias": "advancefiltergrid",
-                                        "margin": -1,
                                         "itemId": "grdStore",
+                                        "margin": -1,
                                         "title": null
                                     },
                                     "name": "MyGridPanel26",
@@ -985,8 +985,8 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-add",
-                                                        "layout|flex": null,
                                                         "itemId": "btnAddStore",
+                                                        "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Add"
                                                     },
@@ -1003,8 +1003,8 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-edit",
-                                                        "layout|flex": null,
                                                         "itemId": "btnEditStore",
+                                                        "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Edit"
                                                     },
@@ -1021,8 +1021,8 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-delete",
-                                                        "layout|flex": null,
                                                         "itemId": "btnDeleteStore",
+                                                        "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Delete"
                                                     },
@@ -1195,8 +1195,8 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "designer|createAlias": "advancefiltergrid",
-                                        "margin": -1,
                                         "itemId": "grdGlAccounts",
+                                        "margin": -1,
                                         "title": null
                                     },
                                     "name": "MyGridPanel27",
@@ -1227,8 +1227,8 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-delete",
-                                                        "layout|flex": null,
                                                         "itemId": "btnDeleteGlAccounts",
+                                                        "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Delete"
                                                     },
@@ -1386,8 +1386,8 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "designer|createAlias": "advancefiltergrid",
-                                        "margin": -1,
                                         "itemId": "grdVendorCategoryXref",
+                                        "margin": -1,
                                         "title": null
                                     },
                                     "name": "MyGridPanel28",
@@ -1418,8 +1418,8 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-delete",
-                                                        "layout|flex": null,
                                                         "itemId": "btnDeleteVendorCategoryXref",
+                                                        "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Delete"
                                                     },
@@ -1680,8 +1680,8 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "designer|createAlias": "advancefiltergrid",
-                                        "margin": -1,
                                         "itemId": "grdCatalog",
+                                        "margin": -1,
                                         "title": null
                                     },
                                     "name": "MyGridPanel29",
@@ -1712,8 +1712,8 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-delete",
-                                                        "layout|flex": null,
                                                         "itemId": "btnDeleteCatalog",
+                                                        "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Delete"
                                                     },
@@ -1876,9 +1876,9 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "ERP Item Class",
+                                                        "itemId": "txtERPItemClass",
                                                         "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "itemId": "txtERPItemClass"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyTextField62",
                                                     "designerId": "7c623759-91ed-41a7-bdf4-4468f4586ac3"
@@ -1893,9 +1893,9 @@
                                                     "userConfig": {
                                                         "fieldLabel": "Life Time (mins)",
                                                         "hideTrigger": true,
+                                                        "itemId": "txtLifeTime",
                                                         "labelWidth": 160,
-                                                        "layout|flex": 1,
-                                                        "itemId": "txtLifeTime"
+                                                        "layout|flex": 1
                                                     },
                                                     "name": "MyNumberField12",
                                                     "designerId": "574a6410-c8b5-4c43-a2b5-d9c9f47ce0f0"
@@ -1910,9 +1910,9 @@
                                                     "userConfig": {
                                                         "fieldLabel": "BOM Item Shrinkage",
                                                         "hideTrigger": true,
+                                                        "itemId": "txtBOMItemShrinkage",
                                                         "labelWidth": 160,
-                                                        "layout|flex": 1,
-                                                        "itemId": "txtBOMItemShrinkage"
+                                                        "layout|flex": 1
                                                     },
                                                     "name": "MyNumberField13",
                                                     "designerId": "abc764a7-235a-4f49-a479-f73e56f57d77"
@@ -1927,9 +1927,9 @@
                                                     "userConfig": {
                                                         "fieldLabel": "BOM Item Upper Tolerance",
                                                         "hideTrigger": true,
+                                                        "itemId": "txtBOMItemUpperTolerance",
                                                         "labelWidth": 160,
-                                                        "layout|flex": 1,
-                                                        "itemId": "txtBOMItemUpperTolerance"
+                                                        "layout|flex": 1
                                                     },
                                                     "name": "MyNumberField14",
                                                     "designerId": "e088aa99-cc3c-419f-b701-32b79f57f740"
@@ -1944,9 +1944,9 @@
                                                     "userConfig": {
                                                         "fieldLabel": "BOM Item Lower Tolerance",
                                                         "hideTrigger": true,
+                                                        "itemId": "txtBOMItemLowerTolerance",
                                                         "labelWidth": 160,
-                                                        "layout|flex": 1,
-                                                        "itemId": "txtBOMItemLowerTolerance"
+                                                        "layout|flex": 1
                                                     },
                                                     "name": "MyNumberField15",
                                                     "designerId": "00893aaf-59f7-4a43-9ac1-f8acaa9b07f9"
@@ -1961,9 +1961,9 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Scaled",
+                                                        "itemId": "chkScaled",
                                                         "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "itemId": "chkScaled"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyCheckbox43",
                                                     "designerId": "69f7ff6c-6791-48b9-8eb7-f0fdd7099eb9"
@@ -1978,9 +1978,9 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Output Item Mandatory",
+                                                        "itemId": "chkOutputItemMandatory",
                                                         "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "itemId": "chkOutputItemMandatory"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyCheckbox26",
                                                     "designerId": "ade28c1c-8c9d-4926-96f7-062a431d3084"
@@ -1994,9 +1994,9 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Consumption Method",
+                                                        "itemId": "txtConsumptionMethod",
                                                         "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "itemId": "txtConsumptionMethod"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyTextField34",
                                                     "designerId": "0f938a87-2017-4beb-8085-0719af8b0530"
@@ -2010,9 +2010,9 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "BOM Item Type",
+                                                        "itemId": "txtBOMItemType",
                                                         "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "itemId": "txtBOMItemType"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyTextField35",
                                                     "designerId": "92719f37-f909-4d81-911e-b52f728c9be0"
@@ -2026,9 +2026,9 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Short Name",
+                                                        "itemId": "txtShortName",
                                                         "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "itemId": "txtShortName"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyTextField36",
                                                     "designerId": "75ef587b-a49e-4d23-878e-f5c3468d7885"
@@ -2062,9 +2062,9 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Receipt Image",
+                                                        "itemId": "txtReceiptImage",
                                                         "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "itemId": "txtReceiptImage"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyTextField37",
                                                     "designerId": "21c0bb0c-8cc6-49f8-bb8c-d494fbb2a20a"
@@ -2078,9 +2078,9 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "WIP Image",
+                                                        "itemId": "txtWIPImage",
                                                         "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "itemId": "txtWIPImage"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyTextField38",
                                                     "designerId": "dec56de1-4e03-4585-9090-28d5886e729f"
@@ -2094,9 +2094,9 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "FG Image",
+                                                        "itemId": "txtFGImage",
                                                         "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "itemId": "txtFGImage"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyTextField39",
                                                     "designerId": "435689b8-0df0-4792-b676-5b73ad370e11"
@@ -2110,9 +2110,9 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Ship Image",
+                                                        "itemId": "txtShipImage",
                                                         "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "itemId": "txtShipImage"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyTextField40",
                                                     "designerId": "f473c514-0421-435b-9056-b4e079eeb70a"
@@ -2127,10 +2127,10 @@
                                                     "userConfig": {
                                                         "fieldLabel": "Labor Cost",
                                                         "hideTrigger": true,
+                                                        "itemId": "txtLaborCost",
                                                         "labelWidth": 160,
                                                         "layout|flex": null,
-                                                        "maxWidth": 275,
-                                                        "itemId": "txtLaborCost"
+                                                        "maxWidth": 275
                                                     },
                                                     "name": "MyNumberField9",
                                                     "designerId": "0eb1f7b1-a6fe-4779-a0cb-6f60ffb4f51f"
@@ -2145,10 +2145,10 @@
                                                     "userConfig": {
                                                         "fieldLabel": "Over Head",
                                                         "hideTrigger": true,
+                                                        "itemId": "txtOverHead",
                                                         "labelWidth": 160,
                                                         "layout|flex": null,
-                                                        "maxWidth": 275,
-                                                        "itemId": "txtOverHead"
+                                                        "maxWidth": 275
                                                     },
                                                     "name": "MyNumberField16",
                                                     "designerId": "b017b5ee-6292-4e84-9258-b805c49a9499"
@@ -2163,10 +2163,10 @@
                                                     "userConfig": {
                                                         "fieldLabel": "Percentage",
                                                         "hideTrigger": true,
+                                                        "itemId": "txtPercentage",
                                                         "labelWidth": 160,
                                                         "layout|flex": null,
-                                                        "maxWidth": 275,
-                                                        "itemId": "txtPercentage"
+                                                        "maxWidth": 275
                                                     },
                                                     "name": "MyNumberField17",
                                                     "designerId": "c3e0956f-c924-44d2-8755-71b415d03e43"
@@ -2180,9 +2180,9 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Cost Distribution Method",
+                                                        "itemId": "txtCostDistributionMethod",
                                                         "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "itemId": "txtCostDistributionMethod"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyTextField41",
                                                     "designerId": "517a5d90-e539-490c-80d7-4d11b264fc1b"
@@ -2197,9 +2197,9 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Sellable",
+                                                        "itemId": "chkSellable",
                                                         "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "itemId": "chkSellable"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyCheckbox27",
                                                     "designerId": "e7c5501b-444b-4715-8cbe-8a8a84ca49a2"
@@ -2214,9 +2214,9 @@
                                                     "userConfig": {
                                                         "boxLabel": null,
                                                         "fieldLabel": "Yield Adjustment",
+                                                        "itemId": "chkYieldAdjustment",
                                                         "labelWidth": 160,
-                                                        "layout|flex": null,
-                                                        "itemId": "chkYieldAdjustment"
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyCheckbox28",
                                                     "designerId": "6a9d534f-6a68-4d7d-a4da-5139aaa57da4"
@@ -2239,8 +2239,8 @@
                     "userConfig": {
                         "designer|displayName": "",
                         "dock": "bottom",
-                        "layout|flex": 1,
-                        "itemId": "tlbStatusbarPaging"
+                        "itemId": "tlbStatusbarPaging",
+                        "layout|flex": 1
                     },
                     "name": "statusbarpaging",
                     "designerId": "0ca3c6d6-785e-4ad8-ac4f-3eaa2d75593b",

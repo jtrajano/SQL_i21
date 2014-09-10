@@ -47,9 +47,9 @@ Ext.define('Inventory.view.FuturesExchange', {
     items: [
         {
             xtype: 'form',
-            reference: 'frmFuturesExchange',
             autoShow: true,
             height: 350,
+            itemId: 'frmFuturesExchange',
             margin: -1,
             width: 450,
             bodyBorder: false,
@@ -72,9 +72,9 @@ Ext.define('Inventory.view.FuturesExchange', {
                     items: [
                         {
                             xtype: 'button',
-                            reference: 'btnNew',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnNew',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-new',
@@ -83,9 +83,9 @@ Ext.define('Inventory.view.FuturesExchange', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnSave',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnSave',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-save',
@@ -94,9 +94,9 @@ Ext.define('Inventory.view.FuturesExchange', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnSearch',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnSearch',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-search',
@@ -105,9 +105,9 @@ Ext.define('Inventory.view.FuturesExchange', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnDelete',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnDelete',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-delete',
@@ -116,9 +116,9 @@ Ext.define('Inventory.view.FuturesExchange', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnUndo',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnUndo',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-undo',
@@ -131,9 +131,9 @@ Ext.define('Inventory.view.FuturesExchange', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnClose',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnClose',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-close',
@@ -144,7 +144,7 @@ Ext.define('Inventory.view.FuturesExchange', {
                 },
                 {
                     xtype: 'ipagingstatusbar',
-                    reference: 'pagingtoolbar',
+                    itemId: 'pagingtoolbar',
                     flex: 1,
                     dock: 'bottom'
                 }
@@ -162,14 +162,14 @@ Ext.define('Inventory.view.FuturesExchange', {
                     items: [
                         {
                             xtype: 'textfield',
-                            reference: 'txtExchangeCode',
+                            itemId: 'txtExchangeCode',
                             width: 170,
                             fieldLabel: 'Exchange Code',
                             labelWidth: 95
                         },
                         {
                             xtype: 'textfield',
-                            reference: 'txtExchangeName',
+                            itemId: 'txtExchangeName',
                             width: 170,
                             fieldLabel: 'Exchange Name',
                             labelWidth: 95
@@ -193,8 +193,8 @@ Ext.define('Inventory.view.FuturesExchange', {
                                     items: [
                                         {
                                             xtype: 'button',
-                                            reference: 'btnAddressMap',
                                             tabIndex: -1,
+                                            itemId: 'btnAddressMap',
                                             style: {
                                                 background: 'transparent',
                                                 borderColor: 'transparent'
@@ -206,8 +206,8 @@ Ext.define('Inventory.view.FuturesExchange', {
                                 {
                                     xtype: 'textareafield',
                                     flex: 1,
-                                    reference: 'txtAddress',
                                     height: 58,
+                                    itemId: 'txtAddress',
                                     hideLabel: true,
                                     labelWidth: 0
                                 }
@@ -221,14 +221,14 @@ Ext.define('Inventory.view.FuturesExchange', {
                                 {
                                     xtype: 'combobox',
                                     flex: 1.2,
-                                    reference: 'cboZipCode',
+                                    itemId: 'cboZipCode',
                                     fieldLabel: 'Zip/Postal Code',
                                     labelWidth: 95
                                 },
                                 {
                                     xtype: 'textfield',
                                     flex: 1,
-                                    reference: 'txtCity',
+                                    itemId: 'txtCity',
                                     margin: '0 0 0 5',
                                     fieldLabel: 'City',
                                     labelWidth: 50
@@ -243,14 +243,14 @@ Ext.define('Inventory.view.FuturesExchange', {
                                 {
                                     xtype: 'textfield',
                                     flex: 1.2,
-                                    reference: 'txtState',
+                                    itemId: 'txtState',
                                     fieldLabel: 'State/Province',
                                     labelWidth: 95
                                 },
                                 {
                                     xtype: 'combobox',
                                     flex: 1,
-                                    reference: 'cboCountry',
+                                    itemId: 'cboCountry',
                                     margin: '0 0 0 5',
                                     fieldLabel: 'Country',
                                     labelWidth: 50
@@ -265,14 +265,14 @@ Ext.define('Inventory.view.FuturesExchange', {
                                 {
                                     xtype: 'textfield',
                                     flex: 1.2,
-                                    reference: 'txtPhone',
+                                    itemId: 'txtPhone',
                                     fieldLabel: 'Phone',
                                     labelWidth: 95
                                 },
                                 {
                                     xtype: 'textfield',
                                     flex: 1,
-                                    reference: 'txtFax',
+                                    itemId: 'txtFax',
                                     margin: '0 0 0 5',
                                     fieldLabel: 'Fax',
                                     labelWidth: 50
@@ -298,8 +298,8 @@ Ext.define('Inventory.view.FuturesExchange', {
                                     items: [
                                         {
                                             xtype: 'button',
-                                            reference: 'btnWebsite',
                                             tabIndex: -1,
+                                            itemId: 'btnWebsite',
                                             style: {
                                                 background: 'transparent',
                                                 borderColor: 'transparent'
@@ -312,7 +312,7 @@ Ext.define('Inventory.view.FuturesExchange', {
                                 {
                                     xtype: 'textfield',
                                     flex: 1,
-                                    reference: 'txtWebsite',
+                                    itemId: 'txtWebsite',
                                     hideLabel: true,
                                     labelWidth: 0
                                 }
@@ -337,8 +337,8 @@ Ext.define('Inventory.view.FuturesExchange', {
                                     items: [
                                         {
                                             xtype: 'button',
-                                            reference: 'btnEmail',
                                             tabIndex: -1,
+                                            itemId: 'btnEmail',
                                             style: {
                                                 background: 'transparent',
                                                 borderColor: 'transparent'
@@ -350,7 +350,7 @@ Ext.define('Inventory.view.FuturesExchange', {
                                 {
                                     xtype: 'textfield',
                                     flex: 1,
-                                    reference: 'txtEmail',
+                                    itemId: 'txtEmail',
                                     hideLabel: true,
                                     labelWidth: 0
                                 }

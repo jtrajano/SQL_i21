@@ -44,9 +44,9 @@
                 "frame": null,
                 "header": false,
                 "height": 350,
+                "itemId": "frmFuelTaxClass",
                 "layout": "vbox",
                 "margin": -1,
-                "itemId": "frmFuelTaxClass",
                 "title": null,
                 "trackResetOnLoad": true,
                 "url": null,
@@ -84,9 +84,9 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-new",
+                                "itemId": "btnNew",
                                 "layout|flex": null,
                                 "layout|margins": null,
-                                "itemId": "btnNew",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "New",
@@ -108,8 +108,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-save",
-                                "layout|flex": null,
                                 "itemId": "btnSave",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Save",
@@ -131,8 +131,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-search",
-                                "layout|flex": null,
                                 "itemId": "btnSearch",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Search",
@@ -154,8 +154,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-delete",
-                                "layout|flex": null,
                                 "itemId": "btnDelete",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Delete",
@@ -177,8 +177,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-undo",
-                                "layout|flex": null,
                                 "itemId": "btnUndo",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Undo",
@@ -215,8 +215,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-close",
-                                "layout|flex": null,
                                 "itemId": "btnClose",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Close",
@@ -236,9 +236,9 @@
                     "codeClass": null,
                     "userConfig": {
                         "activeTab": 0,
+                        "itemId": "tabReasonCode",
                         "layout|flex": 1,
-                        "plain": true,
-                        "itemId": "tabReasonCode"
+                        "plain": true
                     },
                     "name": "MyTabPanel4",
                     "designerId": "71404b6a-dfed-44cc-897f-bfd3f5c10292",
@@ -317,10 +317,10 @@
                                                         "columns": null,
                                                         "designer|createAlias": null,
                                                         "fieldLabel": "Reason Code",
+                                                        "itemId": "txtReasonCode",
                                                         "labelWidth": 130,
                                                         "layout|flex": 1,
-                                                        "name": null,
-                                                        "itemId": "txtReasonCode"
+                                                        "name": null
                                                     },
                                                     "name": "MyTextField69",
                                                     "configAlternates": {
@@ -346,12 +346,12 @@
                                                         "columns": null,
                                                         "designer|createAlias": null,
                                                         "fieldLabel": "Type",
+                                                        "itemId": "cboType",
                                                         "labelWidth": 40,
                                                         "layout|flex": null,
                                                         "layout|margins": null,
                                                         "margin": "0 0 0 5",
                                                         "name": null,
-                                                        "itemId": "cboType",
                                                         "width": 175
                                                     },
                                                     "name": "MyComboBox",
@@ -379,12 +379,12 @@
                                             "userConfig": {
                                                 "enforceMaxLength": null,
                                                 "fieldLabel": "Description",
+                                                "itemId": "txtDescription",
                                                 "labelWidth": 130,
                                                 "layout|flex": null,
                                                 "layout|margins": null,
                                                 "maxLength": null,
                                                 "name": null,
-                                                "itemId": "txtDescription",
                                                 "tabIndex": null
                                             },
                                             "name": "MyTextField71",
@@ -400,12 +400,12 @@
                                             "userConfig": {
                                                 "enforceMaxLength": null,
                                                 "fieldLabel": "Lot Transaction Type",
+                                                "itemId": "cboLotTransactionType",
                                                 "labelWidth": 130,
                                                 "layout|flex": null,
                                                 "layout|margins": null,
                                                 "maxLength": null,
                                                 "name": null,
-                                                "itemId": "cboLotTransactionType",
                                                 "tabIndex": null
                                             },
                                             "name": "MyComboBox1",
@@ -421,9 +421,9 @@
                                             "userConfig": {
                                                 "boxLabel": null,
                                                 "fieldLabel": "Default",
+                                                "itemId": "chkDefault",
                                                 "labelWidth": 130,
-                                                "layout|flex": null,
-                                                "itemId": "chkDefault"
+                                                "layout|flex": null
                                             },
                                             "name": "MyCheckbox",
                                             "designerId": "793bc5fb-9a05-4c53-8fed-cf6cad98f64b"
@@ -438,10 +438,10 @@
                                             "userConfig": {
                                                 "boxLabel": null,
                                                 "fieldLabel": "Reduce Available Time",
+                                                "itemId": "chkReduceAvailableTime",
                                                 "labelWidth": 130,
                                                 "layout|flex": null,
-                                                "margin": null,
-                                                "itemId": "chkReduceAvailableTime"
+                                                "margin": null
                                             },
                                             "name": "MyCheckbox3",
                                             "designerId": "5ccd840a-6522-4ccb-b404-ba540cd3b713"
@@ -456,10 +456,10 @@
                                             "userConfig": {
                                                 "boxLabel": null,
                                                 "fieldLabel": "Explanation Required",
+                                                "itemId": "chkExplanationRequired",
                                                 "labelWidth": 130,
                                                 "layout|flex": null,
-                                                "margin": null,
-                                                "itemId": "chkExplanationRequired"
+                                                "margin": null
                                             },
                                             "name": "MyCheckbox4",
                                             "designerId": "f5fc2df8-a55e-4cea-9a8d-db8cb7a54957"
@@ -501,9 +501,9 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "itemId": "grdWorkcenter",
                                         "layout|flex": 1,
                                         "margin": -1,
-                                        "itemId": "grdWorkcenter",
                                         "title": null
                                     },
                                     "name": "MyGridPanel13",
@@ -534,8 +534,8 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-add",
-                                                        "layout|flex": null,
                                                         "itemId": "btnAddWorkCenterMapping",
+                                                        "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Add"
                                                     },
@@ -552,8 +552,8 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-edit",
-                                                        "layout|flex": null,
                                                         "itemId": "btnEditWorkCenterMapping",
+                                                        "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Edit"
                                                     },
@@ -584,7 +584,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter16",
+                                                    "name": "filter26",
                                                     "designerId": "cbc3d1e3-0a16-459a-a5d5-96b049143686",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -646,11 +646,11 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "designer|displayName": "",
                         "dock": "bottom",
-                        "layout|flex": 1,
                         "itemId": "pagingtoolbar",
+                        "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging2",
+                    "name": "statusbarpaging13",
                     "designerId": "ef3325fc-949c-4d8a-b81c-1b8eeaac6a57",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

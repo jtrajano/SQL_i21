@@ -51,9 +51,9 @@ Ext.define('Inventory.view.ReasonCode', {
     items: [
         {
             xtype: 'form',
-            reference: 'frmFuelTaxClass',
             autoShow: true,
             height: 350,
+            itemId: 'frmFuelTaxClass',
             margin: -1,
             width: 450,
             bodyBorder: false,
@@ -76,9 +76,9 @@ Ext.define('Inventory.view.ReasonCode', {
                     items: [
                         {
                             xtype: 'button',
-                            reference: 'btnNew',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnNew',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-new',
@@ -87,9 +87,9 @@ Ext.define('Inventory.view.ReasonCode', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnSave',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnSave',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-save',
@@ -98,9 +98,9 @@ Ext.define('Inventory.view.ReasonCode', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnSearch',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnSearch',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-search',
@@ -109,9 +109,9 @@ Ext.define('Inventory.view.ReasonCode', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnDelete',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnDelete',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-delete',
@@ -120,9 +120,9 @@ Ext.define('Inventory.view.ReasonCode', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnUndo',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnUndo',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-undo',
@@ -135,9 +135,9 @@ Ext.define('Inventory.view.ReasonCode', {
                         },
                         {
                             xtype: 'button',
-                            reference: 'btnClose',
                             tabIndex: -1,
                             height: 57,
+                            itemId: 'btnClose',
                             width: 45,
                             iconAlign: 'top',
                             iconCls: 'large-close',
@@ -148,7 +148,7 @@ Ext.define('Inventory.view.ReasonCode', {
                 },
                 {
                     xtype: 'ipagingstatusbar',
-                    reference: 'pagingtoolbar',
+                    itemId: 'pagingtoolbar',
                     flex: 1,
                     dock: 'bottom'
                 }
@@ -157,7 +157,7 @@ Ext.define('Inventory.view.ReasonCode', {
                 {
                     xtype: 'tabpanel',
                     flex: 1,
-                    reference: 'tabReasonCode',
+                    itemId: 'tabReasonCode',
                     activeTab: 0,
                     plain: true,
                     items: [
@@ -188,13 +188,13 @@ Ext.define('Inventory.view.ReasonCode', {
                                                 {
                                                     xtype: 'textfield',
                                                     flex: 1,
-                                                    reference: 'txtReasonCode',
+                                                    itemId: 'txtReasonCode',
                                                     fieldLabel: 'Reason Code',
                                                     labelWidth: 130
                                                 },
                                                 {
                                                     xtype: 'combobox',
-                                                    reference: 'cboType',
+                                                    itemId: 'cboType',
                                                     margin: '0 0 0 5',
                                                     width: 175,
                                                     fieldLabel: 'Type',
@@ -204,31 +204,31 @@ Ext.define('Inventory.view.ReasonCode', {
                                         },
                                         {
                                             xtype: 'textfield',
-                                            reference: 'txtDescription',
+                                            itemId: 'txtDescription',
                                             fieldLabel: 'Description',
                                             labelWidth: 130
                                         },
                                         {
                                             xtype: 'combobox',
-                                            reference: 'cboLotTransactionType',
+                                            itemId: 'cboLotTransactionType',
                                             fieldLabel: 'Lot Transaction Type',
                                             labelWidth: 130
                                         },
                                         {
                                             xtype: 'checkboxfield',
-                                            reference: 'chkDefault',
+                                            itemId: 'chkDefault',
                                             fieldLabel: 'Default',
                                             labelWidth: 130
                                         },
                                         {
                                             xtype: 'checkboxfield',
-                                            reference: 'chkReduceAvailableTime',
+                                            itemId: 'chkReduceAvailableTime',
                                             fieldLabel: 'Reduce Available Time',
                                             labelWidth: 130
                                         },
                                         {
                                             xtype: 'checkboxfield',
-                                            reference: 'chkExplanationRequired',
+                                            itemId: 'chkExplanationRequired',
                                             fieldLabel: 'Explanation Required',
                                             labelWidth: 130
                                         }
@@ -247,13 +247,13 @@ Ext.define('Inventory.view.ReasonCode', {
                                 {
                                     xtype: 'gridpanel',
                                     flex: 1,
-                                    reference: 'grdWorkcenter',
+                                    itemId: 'grdWorkcenter',
                                     margin: -1,
                                     dockedItems: [
                                         {
                                             xtype: 'toolbar',
                                             dock: 'top',
-                                            reference: 'tlbGridOptions1',
+                                            itemId: 'tlbGridOptions1',
                                             layout: {
                                                 type: 'hbox',
                                                 padding: '0 0 0 1'
@@ -261,15 +261,15 @@ Ext.define('Inventory.view.ReasonCode', {
                                             items: [
                                                 {
                                                     xtype: 'button',
-                                                    reference: 'btnAddWorkCenterMapping',
                                                     tabIndex: -1,
+                                                    itemId: 'btnAddWorkCenterMapping',
                                                     iconCls: 'small-add',
                                                     text: 'Add'
                                                 },
                                                 {
                                                     xtype: 'button',
-                                                    reference: 'btnEditWorkCenterMapping',
                                                     tabIndex: -1,
+                                                    itemId: 'btnEditWorkCenterMapping',
                                                     iconCls: 'small-edit',
                                                     text: 'Edit'
                                                 },
@@ -291,7 +291,7 @@ Ext.define('Inventory.view.ReasonCode', {
                                         }
                                     ],
                                     viewConfig: {
-                                        reference: 'grvWorkcenter'
+                                        itemId: 'grvWorkcenter'
                                     },
                                     selModel: {
                                         selType: 'checkboxmodel'

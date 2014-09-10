@@ -44,9 +44,9 @@
                 "frame": null,
                 "header": false,
                 "height": 350,
+                "itemId": "frmReasonCodeAdd",
                 "layout": "vbox",
                 "margin": -1,
-                "itemId": "frmReasonCodeAdd",
                 "title": null,
                 "trackResetOnLoad": true,
                 "url": null,
@@ -84,8 +84,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-ok",
-                                "layout|flex": null,
                                 "itemId": "btnOk",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "OK",
@@ -107,8 +107,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-cancel",
-                                "layout|flex": null,
                                 "itemId": "btnCancel",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Cancel",
@@ -127,9 +127,9 @@
                     },
                     "codeClass": null,
                     "userConfig": {
+                        "itemId": "grdWorkcenter",
                         "layout|flex": 1,
                         "margin": null,
-                        "itemId": "grdWorkcenter",
                         "title": null
                     },
                     "name": "MyGridPanel13",
@@ -160,7 +160,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter17",
+                                    "name": "filter33",
                                     "designerId": "b05d5e22-4ae0-47cd-836d-f6e836bc730b",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }

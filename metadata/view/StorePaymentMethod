@@ -43,9 +43,9 @@
                 "frame": null,
                 "header": false,
                 "height": 350,
+                "itemId": "frmStorePaymentMethod",
                 "layout": "vbox",
                 "margin": -1,
-                "itemId": "frmStorePaymentMethod",
                 "title": null,
                 "trackResetOnLoad": true,
                 "url": null,
@@ -83,9 +83,9 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-new",
+                                "itemId": "btnNew",
                                 "layout|flex": null,
                                 "layout|margins": null,
-                                "itemId": "btnNew",
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "New",
@@ -107,8 +107,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-save",
-                                "layout|flex": null,
                                 "itemId": "btnSave",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Save",
@@ -130,8 +130,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-search",
-                                "layout|flex": null,
                                 "itemId": "btnSearch",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Search",
@@ -153,8 +153,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-delete",
-                                "layout|flex": null,
                                 "itemId": "btnDelete",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Delete",
@@ -176,8 +176,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-undo",
-                                "layout|flex": null,
                                 "itemId": "btnUndo",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Undo",
@@ -214,8 +214,8 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-close",
-                                "layout|flex": null,
                                 "itemId": "btnClose",
+                                "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
                                 "text": "Close",
@@ -257,6 +257,7 @@
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Store Name",
+                                "itemId": "txtStoreName",
                                 "labelPad": null,
                                 "labelSeparator": null,
                                 "labelWidth": 175,
@@ -264,7 +265,6 @@
                                 "margin": null,
                                 "maxLength": null,
                                 "name": null,
-                                "itemId": "txtStoreName",
                                 "tabIndex": null,
                                 "width": null
                             },
@@ -285,6 +285,7 @@
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Payment Method",
+                                "itemId": "txtPaymentMethod",
                                 "labelPad": null,
                                 "labelSeparator": null,
                                 "labelWidth": 175,
@@ -292,7 +293,6 @@
                                 "margin": null,
                                 "maxLength": null,
                                 "name": null,
-                                "itemId": "txtPaymentMethod",
                                 "tabIndex": null,
                                 "width": null
                             },
@@ -310,6 +310,7 @@
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Description",
+                                "itemId": "txtDescription",
                                 "labelPad": null,
                                 "labelSeparator": null,
                                 "labelWidth": 175,
@@ -317,7 +318,6 @@
                                 "margin": null,
                                 "maxLength": null,
                                 "name": null,
-                                "itemId": "txtDescription",
                                 "tabIndex": null,
                                 "width": null
                             },
@@ -334,9 +334,9 @@
                             "userConfig": {
                                 "fieldLabel": "Minimum Sale Amount",
                                 "hideTrigger": true,
+                                "itemId": "txtMinimumSaleAmount",
                                 "labelWidth": 175,
-                                "layout|flex": null,
-                                "itemId": "txtMinimumSaleAmount"
+                                "layout|flex": null
                             },
                             "name": "MyNumberField29",
                             "designerId": "a7e19547-efc2-4e03-94a8-74996c50cc56"
@@ -351,9 +351,9 @@
                             "userConfig": {
                                 "fieldLabel": "Maximum Sale Amount",
                                 "hideTrigger": true,
+                                "itemId": "txtMaximumSaleAmount",
                                 "labelWidth": 175,
-                                "layout|flex": null,
-                                "itemId": "txtMaximumSaleAmount"
+                                "layout|flex": null
                             },
                             "name": "MyNumberField30",
                             "designerId": "69480da7-a13e-4ad5-bca7-3e4aa5982ed7"
@@ -368,9 +368,9 @@
                             "userConfig": {
                                 "fieldLabel": "MOP Register Code",
                                 "hideTrigger": true,
+                                "itemId": "txtMopRegisterCode",
                                 "labelWidth": 175,
-                                "layout|flex": null,
-                                "itemId": "txtMopRegisterCode"
+                                "layout|flex": null
                             },
                             "name": "MyNumberField31",
                             "designerId": "1df1f3e9-ddd0-400d-a082-74b5e16d6ab3"
@@ -385,9 +385,9 @@
                             "userConfig": {
                                 "boxLabel": null,
                                 "fieldLabel": "Force Safe Drop",
+                                "itemId": "chkForceSafeDrop",
                                 "labelWidth": 175,
-                                "layout|flex": null,
-                                "itemId": "chkForceSafeDrop"
+                                "layout|flex": null
                             },
                             "name": "MyCheckbox85",
                             "designerId": "b527fe8b-fcfd-4a34-8733-8651c736a187"
@@ -402,9 +402,9 @@
                             "userConfig": {
                                 "fieldLabel": "Dollar Amount to Require Drop",
                                 "hideTrigger": true,
+                                "itemId": "txtDollarAmountToRequireDrop",
                                 "labelWidth": 175,
-                                "layout|flex": null,
-                                "itemId": "txtDollarAmountToRequireDrop"
+                                "layout|flex": null
                             },
                             "name": "MyNumberField32",
                             "designerId": "18231e17-d7e0-40cc-880a-63f07a50158a"
@@ -420,6 +420,7 @@
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "GL Ledger Account",
+                                "itemId": "cboGlLedgerAccount",
                                 "labelPad": null,
                                 "labelSeparator": null,
                                 "labelWidth": 175,
@@ -427,7 +428,6 @@
                                 "margin": null,
                                 "maxLength": null,
                                 "name": null,
-                                "itemId": "cboGlLedgerAccount",
                                 "tabIndex": null,
                                 "width": null
                             },
@@ -444,9 +444,9 @@
                             "userConfig": {
                                 "fieldLabel": "Register Extended MOP",
                                 "hideTrigger": true,
+                                "itemId": "txtRegisterExtendedMop",
                                 "labelWidth": 175,
-                                "layout|flex": null,
-                                "itemId": "txtRegisterExtendedMop"
+                                "layout|flex": null
                             },
                             "name": "MyNumberField33",
                             "designerId": "0dc0e81c-3596-4018-8bd4-6a1ed1166847"
@@ -478,9 +478,9 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Open Drawer on Sale",
+                                        "itemId": "chkOpenDrawerOnSale",
                                         "labelWidth": 175,
-                                        "layout|flex": null,
-                                        "itemId": "chkOpenDrawerOnSale"
+                                        "layout|flex": null
                                     },
                                     "name": "MyCheckbox86",
                                     "designerId": "888a5e0f-79b0-4768-bf40-93b157f64e18"
@@ -495,11 +495,11 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Tender Amount Required",
+                                        "itemId": "chkTenderAmountRequired",
                                         "labelWidth": 175,
                                         "layout|flex": null,
                                         "layout|margins": null,
-                                        "margin": "0 0 0 75",
-                                        "itemId": "chkTenderAmountRequired"
+                                        "margin": "0 0 0 75"
                                     },
                                     "name": "MyCheckbox87",
                                     "designerId": "35362c32-350a-481d-aec1-4103af5a034a"
@@ -533,9 +533,9 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Enable Report Prompt",
+                                        "itemId": "chkEnableReportPrompt",
                                         "labelWidth": 175,
-                                        "layout|flex": null,
-                                        "itemId": "chkEnableReportPrompt"
+                                        "layout|flex": null
                                     },
                                     "name": "MyCheckbox88",
                                     "designerId": "3b8b1205-0d81-49ca-934d-06dc9f7ea3eb"
@@ -550,11 +550,11 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Allow Zero Actual",
+                                        "itemId": "chkAllowZeroActual",
                                         "labelWidth": 175,
                                         "layout|flex": null,
                                         "layout|margins": null,
-                                        "margin": "0 0 0 75",
-                                        "itemId": "chkAllowZeroActual"
+                                        "margin": "0 0 0 75"
                                     },
                                     "name": "MyCheckbox89",
                                     "designerId": "84982d43-cc6f-4cb1-91b1-79965ed750c1"
@@ -588,9 +588,9 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Depositable",
+                                        "itemId": "chkDepositable",
                                         "labelWidth": 175,
-                                        "layout|flex": null,
-                                        "itemId": "chkDepositable"
+                                        "layout|flex": null
                                     },
                                     "name": "MyCheckbox90",
                                     "designerId": "61841604-4c12-44a3-bf86-6fc85f1b2c68"
@@ -605,11 +605,11 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Allowed Without Sale",
+                                        "itemId": "chkAllowedWithoutSale",
                                         "labelWidth": 175,
                                         "layout|flex": null,
                                         "layout|margins": null,
-                                        "margin": "0 0 0 75",
-                                        "itemId": "chkAllowedWithoutSale"
+                                        "margin": "0 0 0 75"
                                     },
                                     "name": "MyCheckbox91",
                                     "designerId": "0a1c084f-9273-4726-bb2a-62f5380da71b"
@@ -643,9 +643,9 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Allow Refund",
+                                        "itemId": "chkAllowRefund",
                                         "labelWidth": 175,
-                                        "layout|flex": null,
-                                        "itemId": "chkAllowRefund"
+                                        "layout|flex": null
                                     },
                                     "name": "MyCheckbox92",
                                     "designerId": "669fa0d2-0a69-41bd-9e7e-759d32eca9b2"
@@ -660,11 +660,11 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Allow Change",
+                                        "itemId": "chkAllowChange",
                                         "labelWidth": 175,
                                         "layout|flex": null,
                                         "layout|margins": null,
-                                        "margin": "0 0 0 75",
-                                        "itemId": "chkAllowChange"
+                                        "margin": "0 0 0 75"
                                     },
                                     "name": "MyCheckbox93",
                                     "designerId": "24d65191-ba84-48a7-be65-7913119f64bb"
@@ -698,9 +698,9 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Allow Safe Drop",
+                                        "itemId": "chkAllowSafeDrop",
                                         "labelWidth": 175,
-                                        "layout|flex": null,
-                                        "itemId": "chkAllowSafeDrop"
+                                        "layout|flex": null
                                     },
                                     "name": "MyCheckbox94",
                                     "designerId": "8a5d6f30-3644-4263-86cd-11bd611cd6fc"
@@ -715,11 +715,11 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Allow Money Orders",
+                                        "itemId": "chkAllowMoneyOrders",
                                         "labelWidth": 175,
                                         "layout|flex": null,
                                         "layout|margins": null,
-                                        "margin": "0 0 0 75",
-                                        "itemId": "chkAllowMoneyOrders"
+                                        "margin": "0 0 0 75"
                                     },
                                     "name": "MyCheckbox95",
                                     "designerId": "8f6af6d1-7f0f-4e61-8f78-47a95fdaa1e7"
@@ -736,9 +736,9 @@
                             "userConfig": {
                                 "boxLabel": null,
                                 "fieldLabel": "Force Ticket Print",
+                                "itemId": "chkForceTicketPrint",
                                 "labelWidth": 175,
-                                "layout|flex": null,
-                                "itemId": "chkForceTicketPrint"
+                                "layout|flex": null
                             },
                             "name": "MyCheckbox96",
                             "designerId": "3c5254d7-b357-4106-bbb1-c5e06633d659"
@@ -757,11 +757,11 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "designer|displayName": "",
                         "dock": "bottom",
-                        "layout|flex": 1,
                         "itemId": "pagingtoolbar",
+                        "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging18",
+                    "name": "statusbarpaging16",
                     "designerId": "02bea3a0-93d8-4224-a4ca-bc7026df437a",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

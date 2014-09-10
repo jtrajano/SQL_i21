@@ -51,9 +51,9 @@ Ext.define('Inventory.view.PatronageCategory', {
                 items: [
                     {
                         xtype: 'form',
-                        reference: 'frmPatronageCategory',
                         autoShow: true,
                         height: 350,
+                        itemId: 'frmPatronageCategory',
                         margin: -1,
                         width: 450,
                         bodyBorder: false,
@@ -76,9 +76,9 @@ Ext.define('Inventory.view.PatronageCategory', {
                                 items: [
                                     {
                                         xtype: 'button',
-                                        reference: 'btnNew',
                                         tabIndex: -1,
                                         height: 57,
+                                        itemId: 'btnNew',
                                         width: 45,
                                         iconAlign: 'top',
                                         iconCls: 'large-new',
@@ -87,9 +87,9 @@ Ext.define('Inventory.view.PatronageCategory', {
                                     },
                                     {
                                         xtype: 'button',
-                                        reference: 'btnSave',
                                         tabIndex: -1,
                                         height: 57,
+                                        itemId: 'btnSave',
                                         width: 45,
                                         iconAlign: 'top',
                                         iconCls: 'large-save',
@@ -98,9 +98,9 @@ Ext.define('Inventory.view.PatronageCategory', {
                                     },
                                     {
                                         xtype: 'button',
-                                        reference: 'btnSearch',
                                         tabIndex: -1,
                                         height: 57,
+                                        itemId: 'btnSearch',
                                         width: 45,
                                         iconAlign: 'top',
                                         iconCls: 'large-search',
@@ -109,9 +109,9 @@ Ext.define('Inventory.view.PatronageCategory', {
                                     },
                                     {
                                         xtype: 'button',
-                                        reference: 'btnDelete',
                                         tabIndex: -1,
                                         height: 57,
+                                        itemId: 'btnDelete',
                                         width: 45,
                                         iconAlign: 'top',
                                         iconCls: 'large-delete',
@@ -120,9 +120,9 @@ Ext.define('Inventory.view.PatronageCategory', {
                                     },
                                     {
                                         xtype: 'button',
-                                        reference: 'btnUndo',
                                         tabIndex: -1,
                                         height: 57,
+                                        itemId: 'btnUndo',
                                         width: 45,
                                         iconAlign: 'top',
                                         iconCls: 'large-undo',
@@ -135,9 +135,9 @@ Ext.define('Inventory.view.PatronageCategory', {
                                     },
                                     {
                                         xtype: 'button',
-                                        reference: 'btnClose',
                                         tabIndex: -1,
                                         height: 57,
+                                        itemId: 'btnClose',
                                         width: 45,
                                         iconAlign: 'top',
                                         iconCls: 'large-close',
@@ -148,7 +148,7 @@ Ext.define('Inventory.view.PatronageCategory', {
                             },
                             {
                                 xtype: 'ipagingstatusbar',
-                                reference: 'pagingtoolbar',
+                                itemId: 'pagingtoolbar',
                                 flex: 1,
                                 dock: 'bottom'
                             }
@@ -157,12 +157,12 @@ Ext.define('Inventory.view.PatronageCategory', {
                             {
                                 xtype: 'gridpanel',
                                 flex: 1,
-                                reference: 'grdPatronageCategory',
+                                itemId: 'grdPatronageCategory',
                                 dockedItems: [
                                     {
                                         xtype: 'toolbar',
                                         dock: 'top',
-                                        reference: 'tlbGridOptions',
+                                        itemId: 'tlbGridOptions',
                                         layout: {
                                             type: 'hbox',
                                             padding: '0 0 0 1'
@@ -170,8 +170,8 @@ Ext.define('Inventory.view.PatronageCategory', {
                                         items: [
                                             {
                                                 xtype: 'button',
-                                                reference: 'btnDeletePatronage',
                                                 tabIndex: -1,
+                                                itemId: 'btnDeletePatronage',
                                                 iconCls: 'small-delete',
                                                 text: 'Delete'
                                             },
@@ -211,7 +211,7 @@ Ext.define('Inventory.view.PatronageCategory', {
                                     }
                                 ],
                                 viewConfig: {
-                                    reference: 'grvPatronageCategory'
+                                    itemId: 'grvPatronageCategory'
                                 },
                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                     selType: 'checkboxmodel'
