@@ -46,6 +46,7 @@
     [intFreightMethodId]         INT             NULL,
     [dblFreightRate]             NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,
     [intFreightVendorId]         INT             NULL,
+	[dblAverageCost]             NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,			
     CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 
     CONSTRAINT [PK_tblICItem] PRIMARY KEY ([intItemId])
 );
@@ -238,3 +239,13 @@ EXECUTE sp_addextendedproperty @name = N'MS_Description', @value = N'Freight Rat
 GO
 EXECUTE sp_addextendedproperty @name = N'MS_Description', @value = N'FK. Item may have a vendor that provides Freight services. ', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'tblICItem', @level2type = N'COLUMN', @level2name = N'intFreightVendorId';
 
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'The moving average cost of an item. ',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItem',
+    @level2type = N'COLUMN',
+    @level2name = N'dblAverageCost'

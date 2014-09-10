@@ -698,6 +698,10 @@
     <Build Include="dbo\Tables\tblICUnitType.sql" />
     <Build Include="dbo\Functions\fnGetItemCostingMethod.sql" />
     <Build Include="dbo\Tables\tblICInventoryTransaction.sql" />
+    <Build Include="dbo\Tables\tblICInventoryStockSummary.sql" />
+    <Build Include="dbo\Tables\tblICInventoryFIFO.sql" />
+    <Build Include="dbo\Tables\tblICInventoryLIFO.sql" />
+    <Build Include="dbo\Tables\tblICItemLocationStore.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
