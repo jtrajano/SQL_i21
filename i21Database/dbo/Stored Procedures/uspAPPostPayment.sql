@@ -587,10 +587,12 @@ BEGIN
 	FROM tblAPPayment WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 	UPDATE tblAPPaymentDetail
-		SET tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount + B.dblPayment ELSE B.dblPayment END)
+		SET tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount + C.dblAmountDue + B.dblPayment ELSE (C.dblAmountDue + B.dblPayment) END)
 	FROM tblAPPayment A
 		LEFT JOIN tblAPPaymentDetail B
 			ON A.intPaymentId = B.intPaymentId
+		LEFT JOIN tblAPBill C
+			ON B.intBillId = C.intBillId
 	WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 	--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
@@ -649,7 +651,7 @@ BEGIN
 	WHERE	intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 	UPDATE tblAPPaymentDetail
-		SET tblAPPaymentDetail.dblAmountDue = (B.dblTotal) - (B.dblPayment + B.dblDiscount)
+		SET tblAPPaymentDetail.dblAmountDue = (B.dblAmountDue) - (B.dblPayment + B.dblDiscount)
 	FROM tblAPPayment A
 		LEFT JOIN tblAPPaymentDetail B
 			ON A.intPaymentId = B.intPaymentId
