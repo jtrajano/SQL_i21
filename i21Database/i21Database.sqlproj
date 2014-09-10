@@ -133,6 +133,7 @@
     <Folder Include="Scripts\Post-Deployment\AP" />
     <Folder Include="Scripts\Post-Deployment\CM\Reports" />
     <Folder Include="Scripts\Post-Deployment\CM\Reports\SubReports" />
+    <Folder Include="Scripts\Post-Deployment\IC" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -702,6 +703,10 @@
     <Build Include="dbo\Tables\tblICInventoryFIFO.sql" />
     <Build Include="dbo\Tables\tblICInventoryLIFO.sql" />
     <Build Include="dbo\Tables\tblICItemLocationStore.sql" />
+    <Build Include="dbo\Stored Procedures\uspICItemCosting.sql" />
+    <Build Include="dbo\User Defined Types\ItemCostingTableType.sql" />
+    <Build Include="dbo\Tables\tblICInventoryTransactionType.sql" />
+    <None Include="Scripts\Post-Deployment\IC\1_InventoryTransactionTypes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -721,5 +726,8 @@
       <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
       <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
     </ArtifactReference>
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="i21Database.refactorlog" />
   </ItemGroup>
 </Project>

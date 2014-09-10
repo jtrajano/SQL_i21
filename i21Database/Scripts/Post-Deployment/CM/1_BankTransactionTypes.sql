@@ -1,8 +1,6 @@
 ﻿-- --------------------------------------------------
 -- Script for SQL Server 2005, 2008, and Azure
--- Purpose: Insert fresh data for the transaction types. 
--- This table holds the prefix and number for the bank 
--- transaction ids. 
+-- Purpose: Insert fresh data for CM transaction types. 
 -- --------------------------------------------------
 -- Date Created: 10/09/2013 5:32 PM
 -- Created by: Feb Montefrio

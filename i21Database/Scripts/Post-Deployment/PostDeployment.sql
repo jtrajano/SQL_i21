@@ -76,6 +76,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\RestoreVendorId.sql
 :r .\AP\FixEntitiesData.sql
 
+-- Inventory 
+:r .\IC\1_InventoryTransactionTypes.sql 
+
 -- Version Update
 :r .\VersionUpdate.sql
 
