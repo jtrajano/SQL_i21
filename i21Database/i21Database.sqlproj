@@ -727,7 +727,4 @@
       <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
     </ArtifactReference>
   </ItemGroup>
-  <ItemGroup>
-    <RefactorLog Include="i21Database.refactorlog" />
-  </ItemGroup>
 </Project>
