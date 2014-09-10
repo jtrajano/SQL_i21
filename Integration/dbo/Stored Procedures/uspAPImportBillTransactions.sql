@@ -195,7 +195,8 @@ BEGIN
 			INNER JOIN (aptrxmst C2 INNER JOIN apeglmst C 
 							ON C2.aptrx_ivc_no = C.apegl_ivc_no 
 							AND C2.aptrx_vnd_no = C.apegl_vnd_no
-							AND C2.aptrx_cbk_no = C.apegl_cbk_no)
+							AND C2.aptrx_cbk_no = C.apegl_cbk_no
+							AND C2.aptrx_trans_type = C.apegl_trx_ind)
 				ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C2.aptrx_ivc_no
 				AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.aptrx_vnd_no
 			ORDER BY C.apegl_dist_no
@@ -217,7 +218,8 @@ BEGIN
 			INNER JOIN (apivcmst C2 INNER JOIN aphglmst C 
 						ON C2.apivc_ivc_no = C.aphgl_ivc_no 
 						AND C2.apivc_vnd_no = C.aphgl_vnd_no
-						AND C2.apivc_cbk_no = C.aphgl_cbk_no)
+						AND C2.apivc_cbk_no = C.aphgl_cbk_no
+						AND C2.apivc_trans_type = C.aphgl_trx_ind)
 				ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C2.apivc_ivc_no
 				AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.apivc_vnd_no
 				ORDER BY C.aphgl_dist_no
@@ -513,7 +515,8 @@ BEGIN
 				INNER JOIN (aptrxmst C2 INNER JOIN apeglmst C 
 							ON C2.aptrx_ivc_no = C.apegl_ivc_no 
 							AND C2.aptrx_vnd_no = C.apegl_vnd_no
-							AND C2.aptrx_cbk_no = C.apegl_cbk_no)
+							AND C2.aptrx_cbk_no = C.apegl_cbk_no
+							AND C2.aptrx_trans_type = C.apegl_trx_ind)
 				ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C2.aptrx_ivc_no
 				AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.aptrx_vnd_no
 				ORDER BY C.apegl_dist_no
