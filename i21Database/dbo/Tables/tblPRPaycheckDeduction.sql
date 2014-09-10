@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblPRPaycheckDeduction](
-	[cntId] [int] IdENTITY(1,1) NOT NULL,
-	[strPaycheckId] [nvarchar](20) NOT NULL,
+	[intPaycheckDeductionId] [int] IDENTITY(1,1) NOT NULL,
+	[intPaycheckId] [int] NOT NULL,
 	[strDeductionId] [nvarchar](15) NOT NULL,
 	[strDeductFrom] [nvarchar](10) NULL,
 	[strCalculationType] [nvarchar](15) NULL,
@@ -17,8 +17,7 @@
 	[intConcurrencyId] [int] NULL,
  CONSTRAINT [PK_tblPRPaycheckDeduction] PRIMARY KEY CLUSTERED 
 (
-	[strPaycheckId] ASC,
-	[strDeductionId] ASC
+	[intPaycheckId] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
