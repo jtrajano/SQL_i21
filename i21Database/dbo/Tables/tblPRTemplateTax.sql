@@ -1,6 +1,6 @@
-﻿CREATE TABLE [dbo].[tblPRTaxGroupDetail](
-	[intTaxGroupDetailId] [int] IDENTITY(1,1) NOT NULL,
-	[intTaxGroupId] [int] NOT NULL,
+﻿CREATE TABLE [dbo].[tblPRTemplateTax](
+	[intTemplateTaxId] [int] IDENTITY(1,1) NOT NULL,
+	[intTemplateId] [int] NOT NULL,
 	[intTaxId] [int] NOT NULL,
 	[strCalculationType] [nvarchar](20) NULL,
 	[strType] [nvarchar](40) NULL,
@@ -18,6 +18,6 @@
 	[ysnActive] [bit] NOT NULL DEFAULT ((1)),
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
-    CONSTRAINT [PK_tblPRTaxGroupDetail] PRIMARY KEY ([intTaxGroupId], [intTaxId]),
+    CONSTRAINT [PK_tblPRTemplateTax] PRIMARY KEY ([intTemplateTaxId], [intTaxId]),
 ) ON [PRIMARY]
 GO

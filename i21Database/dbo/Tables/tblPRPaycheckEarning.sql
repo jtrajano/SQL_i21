@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblPRPaycheckEarning](
-	[cntId] [int] IdENTITY(1,1) NOT NULL,
-	[strPaycheckId] [nvarchar](20) NOT NULL,
+	[intPaycheckEarningId] [int] IdENTITY(1,1) NOT NULL,
+	[intPaycheckId] INT NOT NULL,
 	[strEarningId] [nvarchar](15) NOT NULL,
 	[strCalculationType] [nvarchar](15) NULL,
 	[dblHours] [numeric](18, 6) NOT NULL,
@@ -15,8 +15,8 @@
 	[intConcurrencyId] [int] NULL,
  CONSTRAINT [PK_tblPRPaycheckEarning] PRIMARY KEY CLUSTERED 
 (
-	[cntId] ASC,
-	[strPaycheckId] ASC,
+	[intPaycheckEarningId] ASC,
+	[intPaycheckId] ASC,
 	[strEarningId] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 ) ON [PRIMARY]
