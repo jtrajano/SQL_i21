@@ -602,10 +602,12 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 		
 		--Unposting Process
 		UPDATE tblAPPaymentDetail
-			SET tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount + B.dblPayment ELSE B.dblPayment END)
+		SET tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount + C.dblAmountDue + B.dblPayment ELSE (C.dblAmountDue + B.dblPayment) END)
 		FROM tblAPPayment A
 			LEFT JOIN tblAPPaymentDetail B
 				ON A.intPaymentId = B.intPaymentId
+			LEFT JOIN tblAPBill C
+				ON B.intBillId = C.intBillId
 		WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
