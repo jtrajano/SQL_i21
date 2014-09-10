@@ -10,7 +10,8 @@
         "views": [
             "Statusbar1",
             "StatusbarPaging1",
-            "WorkCenterAdd"
+            "WorkCenterAdd",
+            "FuelCategory"
         ]
     },
     "name": "Application",

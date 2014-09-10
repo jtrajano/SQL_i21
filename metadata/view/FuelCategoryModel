@@ -1,0 +1,14 @@
+{
+    "type": "Ext.app.ViewModel",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "fuelcategory",
+        "designer|userClassName": "FuelCategoryModel"
+    },
+    "name": "FuelTankViewModel1",
+    "designerId": "a38521bc-8d21-4442-9969-fcdebd0d1647"
+}
