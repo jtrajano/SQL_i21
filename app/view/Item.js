@@ -249,12 +249,6 @@ Ext.define('Inventory.view.Item', {
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'combobox',
-                                                                itemId: 'cboCategory',
-                                                                fieldLabel: 'Category',
-                                                                labelWidth: 80
-                                                            },
-                                                            {
                                                                 xtype: 'container',
                                                                 margin: '0 0 5 0',
                                                                 layout: {
@@ -322,7 +316,7 @@ Ext.define('Inventory.view.Item', {
                                             },
                                             {
                                                 xtype: 'advancefiltergrid',
-                                                flex: 1,
+                                                flex: 3,
                                                 itemId: 'grdUnitOfMeasure',
                                                 title: 'Unit of Measure',
                                                 forceFit: true,
@@ -486,6 +480,13 @@ Ext.define('Inventory.view.Item', {
                                                                         dataIndex: 'string',
                                                                         text: 'POS Description',
                                                                         flex: 2
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        width: 96,
+                                                                        dataIndex: 'string',
+                                                                        text: 'Category',
+                                                                        flex: 1
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
@@ -1058,7 +1059,7 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridpanel',
-                                                                        flex: 1,
+                                                                        flex: 1.2,
                                                                         itemId: 'grdServiceLevelAgreement',
                                                                         title: 'Service Level Agreement Setup',
                                                                         dockedItems: [

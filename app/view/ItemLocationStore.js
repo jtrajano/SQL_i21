@@ -162,8 +162,10 @@ Ext.define('Inventory.view.ItemLocationStore', {
                             xtype: 'combobox',
                             flex: 1.4,
                             itemId: 'cboLocation',
+                            margin: '0 0 0 110',
                             fieldLabel: 'Location',
-                            labelWidth: 125
+                            labelAlign: 'top',
+                            labelWidth: 105
                         },
                         {
                             xtype: 'combobox',
@@ -171,14 +173,16 @@ Ext.define('Inventory.view.ItemLocationStore', {
                             itemId: 'cboStore',
                             margin: '0 5',
                             fieldLabel: 'Store',
+                            labelAlign: 'top',
                             labelWidth: 40
                         },
                         {
                             xtype: 'combobox',
                             flex: 1,
                             itemId: 'cboDefaultVendor',
-                            fieldLabel: 'Default Vendor',
-                            labelWidth: 90
+                            fieldLabel: 'Vendor',
+                            labelAlign: 'top',
+                            labelWidth: 50
                         },
                         {
                             xtype: 'combobox',
@@ -186,7 +190,17 @@ Ext.define('Inventory.view.ItemLocationStore', {
                             itemId: 'cboCostingMethod',
                             margin: '0 0 0 5',
                             fieldLabel: 'Costing Method',
+                            labelAlign: 'top',
                             labelWidth: 95
+                        },
+                        {
+                            xtype: 'combobox',
+                            flex: 1,
+                            itemId: 'cboCategory',
+                            margin: '0 0 0 5',
+                            fieldLabel: 'Category',
+                            labelAlign: 'top',
+                            labelWidth: 55
                         }
                     ]
                 },
@@ -194,7 +208,7 @@ Ext.define('Inventory.view.ItemLocationStore', {
                     xtype: 'textareafield',
                     itemId: 'txtPosDescription',
                     fieldLabel: 'POS Description',
-                    labelWidth: 125
+                    labelWidth: 105
                 },
                 {
                     xtype: 'container',
@@ -216,91 +230,91 @@ Ext.define('Inventory.view.ItemLocationStore', {
                                     xtype: 'textfield',
                                     itemId: 'txtRow',
                                     fieldLabel: 'Row',
-                                    labelWidth: 125
+                                    labelWidth: 105
                                 },
                                 {
                                     xtype: 'textfield',
                                     itemId: 'txtBin',
                                     fieldLabel: 'Bin',
-                                    labelWidth: 125
+                                    labelWidth: 105
                                 },
                                 {
                                     xtype: 'combobox',
                                     itemId: 'cboDefaultUom',
                                     fieldLabel: 'Default UOM',
-                                    labelWidth: 125
+                                    labelWidth: 105
                                 },
                                 {
                                     xtype: 'combobox',
                                     itemId: 'cboIssueUom',
                                     fieldLabel: 'Issue UOM',
-                                    labelWidth: 125
+                                    labelWidth: 105
                                 },
                                 {
                                     xtype: 'combobox',
                                     itemId: 'cboReceiveUom',
                                     fieldLabel: 'Receive UOM',
-                                    labelWidth: 125
+                                    labelWidth: 105
                                 },
                                 {
                                     xtype: 'combobox',
                                     itemId: 'cboFamily',
                                     fieldLabel: 'Family',
-                                    labelWidth: 125
+                                    labelWidth: 105
                                 },
                                 {
                                     xtype: 'combobox',
                                     itemId: 'cboClass',
                                     fieldLabel: 'Class',
-                                    labelWidth: 125
+                                    labelWidth: 105
                                 },
                                 {
                                     xtype: 'combobox',
                                     itemId: 'cboFuelTankNo',
                                     fieldLabel: 'Fuel Tank No',
-                                    labelWidth: 125
+                                    labelWidth: 105
                                 },
                                 {
                                     xtype: 'textfield',
                                     itemId: 'txtPassportFuelId1',
                                     fieldLabel: 'Passport Fuel ID 1',
-                                    labelWidth: 125
+                                    labelWidth: 105
                                 },
                                 {
                                     xtype: 'textfield',
                                     itemId: 'txtPassportFuelId2',
                                     fieldLabel: 'Passport Fuel ID 2',
-                                    labelWidth: 125
+                                    labelWidth: 105
                                 },
                                 {
                                     xtype: 'textfield',
                                     itemId: 'txtPassportFuelId3',
                                     fieldLabel: 'Passport Fuel ID 3',
-                                    labelWidth: 125
+                                    labelWidth: 105
                                 },
                                 {
                                     xtype: 'checkboxfield',
                                     itemId: 'chkTaxFlag1',
                                     fieldLabel: 'Tax Flag 1',
-                                    labelWidth: 125
+                                    labelWidth: 105
                                 },
                                 {
                                     xtype: 'checkboxfield',
                                     itemId: 'chkTaxFlag2',
                                     fieldLabel: 'Tax Flag 2',
-                                    labelWidth: 125
+                                    labelWidth: 105
                                 },
                                 {
                                     xtype: 'checkboxfield',
                                     itemId: 'chkTaxFlag3',
                                     fieldLabel: 'Tax Flag 3',
-                                    labelWidth: 125
+                                    labelWidth: 105
                                 },
                                 {
                                     xtype: 'checkboxfield',
                                     itemId: 'chkTaxFlag4',
                                     fieldLabel: 'Tax Flag 4',
-                                    labelWidth: 125
+                                    labelWidth: 105
                                 }
                             ]
                         },
