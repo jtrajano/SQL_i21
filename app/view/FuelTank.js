@@ -18,7 +18,6 @@ Ext.define('Inventory.view.FuelTank', {
     alias: 'widget.fueltank',
 
     requires: [
-        'Inventory.view.FuelTankViewModel',
         'Inventory.view.Filter',
         'Inventory.view.Statusbar',
         'Ext.form.Panel',
@@ -32,9 +31,6 @@ Ext.define('Inventory.view.FuelTank', {
         'Ext.selection.CheckboxModel'
     ],
 
-    viewModel: {
-        type: 'fueltank'
-    },
     controller: {
         type: 'fueltank'
     },
