@@ -42,6 +42,9 @@ Ext.define('Inventory.view.Item', {
     viewModel: {
         type: 'item'
     },
+    controller: {
+        type: 'item'
+    },
     height: 650,
     hidden: false,
     minHeight: 650,

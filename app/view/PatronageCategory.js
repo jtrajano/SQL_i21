@@ -34,6 +34,9 @@ Ext.define('Inventory.view.PatronageCategory', {
     viewModel: {
         type: 'patronagecategory'
     },
+    controller: {
+        type: 'patronagecategory'
+    },
     height: 500,
     hidden: false,
     minHeight: 500,
