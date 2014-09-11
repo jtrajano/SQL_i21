@@ -4,14 +4,13 @@
 	[intTypeDeductionId] INT NOT NULL,
 	[strDeductFrom] [nvarchar](50) NULL,
 	[strCalculationType] [nvarchar](50) NULL,
-	[dblAmount] [numeric](18, 6) NULL DEFAULT ((0)),
-	[dblPercent] [numeric](18, 6) NULL DEFAULT ((0)),
-	[dblLimit] [numeric](18, 6) NULL DEFAULT ((0)),
+	[dblAmount] [numeric](18, 6) NOT NULL DEFAULT ((0)),
+	[dblLimit] [numeric](18, 6) NOT NULL DEFAULT ((0)),
 	[dtmBeginDate] [datetime] NULL,
 	[dtmEndDate] [datetime] NULL,
 	[intAccountId] INT NULL,
-	[strPaidBy] [nvarchar](50) NULL,
-	[ysnActive] [bit] NOT NULL DEFAULT ((1)),
+	[strPaidBy] [nvarchar](50) NOT NULL DEFAULT ('Employee'),
+	[ysnDefault] [bit] NOT NULL DEFAULT ((1)),
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NULL DEFAULT ((1)),
     CONSTRAINT [PK_tblPREmployeeDeduction] PRIMARY KEY ([intEmployeeDeductionId]),
@@ -77,14 +76,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'dblAmount'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Percent',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployeeDeduction',
-    @level2type = N'COLUMN',
-    @level2name = N'dblPercent'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Limit',
@@ -132,13 +124,13 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strPaidBy'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Active',
+    @value = N'Default',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployeeDeduction',
     @level2type = N'COLUMN',
-    @level2name = N'ysnActive'
+    @level2name = 'ysnDefault'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Sort Field',

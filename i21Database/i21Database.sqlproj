@@ -640,21 +640,19 @@
     <Build Include="dbo\Tables\tblRMDefaultFilter.sql" />
     <Build Include="dbo\Tables\tblRMDefaultOption.sql" />
     <Build Include="dbo\Tables\tblRMDefaultSort.sql" />
-    <Build Include="dbo\Tables\tblPRDivision.sql" />
+    <Build Include="dbo\Tables\tblPRRace.sql" />
     <Build Include="dbo\Tables\tblPRTemplate.sql" />
     <Build Include="dbo\Tables\tblPRTemplateEarning.sql" />
     <Build Include="dbo\Tables\tblPRTemplateEarningTax.sql" />
     <Build Include="dbo\Tables\tblPRTemplateDeduction.sql" />
     <Build Include="dbo\Tables\tblPRTemplateDeductionTax.sql" />
     <Build Include="dbo\Tables\tblPRTemplateTimeOff.sql" />
-    <Build Include="dbo\Tables\tblPRTemplateTimeOffTax.sql" />
     <Build Include="dbo\Tables\tblPRTemplateTax.sql" />
     <Build Include="dbo\Tables\tblPRTypeEarning.sql" />
     <Build Include="dbo\Tables\tblPRTypeEarningTax.sql" />
     <Build Include="dbo\Tables\tblPRTypeDeduction.sql" />
     <Build Include="dbo\Tables\tblPRTypeDeductionTax.sql" />
     <Build Include="dbo\Tables\tblPRTypeTimeOff.sql" />
-    <Build Include="dbo\Tables\tblPRTypeTimeOffTax.sql" />
     <Build Include="dbo\Tables\tblPRTypeTax.sql" />
     <Build Include="dbo\Tables\tblPRTypeTaxLocal.sql" />
     <Build Include="dbo\Tables\tblPRTypeTaxState.sql" />
@@ -707,6 +705,8 @@
     <Build Include="dbo\User Defined Types\ItemCostingTableType.sql" />
     <Build Include="dbo\Tables\tblICInventoryTransactionType.sql" />
     <None Include="Scripts\Post-Deployment\IC\1_InventoryTransactionTypes.sql" />
+    <Build Include="dbo\Tables\tblPREmployeeDeductionTax.sql" />
+    <Build Include="dbo\Tables\tblPREmployeeEarningTax.sql" />
     <Build Include="dbo\Tables\tblICInventoryTransactionFIFO.sql" />
     <Build Include="dbo\Tables\tblICInventoryTransactionLIFO.sql" />
   </ItemGroup>

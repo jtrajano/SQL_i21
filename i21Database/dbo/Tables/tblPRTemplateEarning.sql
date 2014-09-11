@@ -2,15 +2,14 @@
 	[intTemplateEarningId] [int] IDENTITY(1,1) NOT NULL,
 	[intTemplateId] INT NOT NULL, 
 	[intTypeEarningId] INT NOT NULL,
-	[strCalculationType] [nvarchar](50) NOT NULL,
+	[strCalculationType] [nvarchar](50) NULL,
 	[dblAmount] [numeric](18, 6) NULL DEFAULT ((0)),
 	[dblDefaultHours] [numeric](18, 6) NULL DEFAULT ((0)),
 	[intAccountId] INT NULL,
 	[strW2Code] [nvarchar](50) NULL,
-	[ysnCreatePayable] [bit] NULL DEFAULT ((0)),
-	[intVendorId] [int] NULL,
+	[intTemplateTimeOffId] [int] NULL,
+	[ysnDefault] [bit] NOT NULL DEFAULT ((1)),
 	[intSort] [int] NULL,
-	[ysnActive] [bit] NOT NULL DEFAULT ((1)),
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblPRTemplateEarning] PRIMARY KEY ([intTemplateEarningId]), 
     CONSTRAINT [FK_tblPRTemplateEarning_tblPRTypeEarning] FOREIGN KEY ([intTypeEarningId]) REFERENCES [tblPRTypeEarning]([intTypeEarningId]),
@@ -57,7 +56,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblDefaultHours'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Account Id',
+    @value = N'Expense Account',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -74,23 +73,16 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'strW2Code'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Create Payable',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPRTemplateEarning',
-    @level2type = N'COLUMN',
-    @level2name = N'ysnCreatePayable'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Vendor Id',
+    @value = N'Time Off Type Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblPRTemplateEarning',
     @level2type = N'COLUMN',
-    @level2name = N'intVendorId'
+    @level2name = 'intTemplateTimeOffId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Sort Field',
@@ -102,13 +94,13 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intSort'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Active',
+    @value = N'Default',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblPRTemplateEarning',
     @level2type = N'COLUMN',
-    @level2name = N'ysnActive'
+    @level2name = 'ysnDefault'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Concurrency Field',

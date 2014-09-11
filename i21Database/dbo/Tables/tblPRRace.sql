@@ -1,11 +1,11 @@
-﻿CREATE TABLE [dbo].[tblPRDivision]
+﻿CREATE TABLE [dbo].[tblPRRace]
 (
-	[intDivisionId] INT NOT NULL IDENTITY , 
-    [strDivision] NVARCHAR(50) NOT NULL, 
+	[intRaceId] INT NOT NULL IDENTITY , 
+    [strRace] NVARCHAR(50) NOT NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
-    CONSTRAINT [PK_tblPRDivision] PRIMARY KEY ([intDivisionId]), 
-    CONSTRAINT [AK_tblPRDivision_strDivision] UNIQUE ([strDivision]) 
+    CONSTRAINT [PK_tblPRRace] PRIMARY KEY ([intRaceId]), 
+    CONSTRAINT [AK_tblPRRace_strDivision] UNIQUE ([strRace]) 
 )
 
 GO
@@ -14,25 +14,25 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRDivision',
+    @level1name = N'tblPRRace',
     @level2type = N'COLUMN',
-    @level2name = N'intDivisionId'
+    @level2name = N'intRaceId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'DIvision Name',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRDivision',
+    @level1name = N'tblPRRace',
     @level2type = N'COLUMN',
-    @level2name = N'strDivision'
+    @level2name = N'strRace'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Sort Field',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRDivision',
+    @level1name = N'tblPRRace',
     @level2type = N'COLUMN',
     @level2name = N'intSort'
 GO
@@ -41,6 +41,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblPRDivision',
+    @level1name = N'tblPRRace',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'

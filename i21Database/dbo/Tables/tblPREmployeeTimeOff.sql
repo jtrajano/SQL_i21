@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblPREmployeeTimeOff](
 	[intEmployeeTimeOffId] [int] NOT NULL IDENTITY,
 	[intEmployeeId] INT NOT NULL,
-	[intTimeOffTypeId] INT NOT NULL,
+	[intTypeTimeOffId] INT NOT NULL,
 	[intAccountId] INT NULL,
 	[dtmEligible] [datetime] NULL DEFAULT (getdate()),
 	[dblHoursPerYear] [numeric](18, 6) NULL DEFAULT ((0)),
@@ -9,16 +9,16 @@
 	[dblHoursAccrued] [numeric](18, 6) NULL DEFAULT ((0)),
 	[dblHoursUsed] [numeric](18, 6) NULL DEFAULT ((0)),
 	[dblCarryOver] [numeric](18, 6) NULL DEFAULT ((0)),
-	[ysnActive] [bit] NULL DEFAULT ((1)),
+	[ysnDefault] [bit] NULL DEFAULT ((1)),
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblPREmployeeTimeOff] PRIMARY KEY ([intEmployeeTimeOffId]), 
     CONSTRAINT [FK_tblPREmployeeTimeOff_tblPREmployee] FOREIGN KEY ([intEmployeeId]) REFERENCES [tblPREmployee]([intEmployeeId]), 
-    --CONSTRAINT [FK_tblPREmployeeTimeOff_tblPRTimeOffType] FOREIGN KEY ([intTimeOffTypeId]) REFERENCES [tblPRTimeOffType]([intTimeOffTypeId]),
+    CONSTRAINT [FK_tblPREmployeeTimeOff_tblPRTypeTimeOff] FOREIGN KEY ([intTypeTimeOffId]) REFERENCES [tblPRTypeTimeOff]([intTypeTimeOffId]),
 ) ON [PRIMARY]
 GO
 
-CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPREmployeeTimeOff] ON [dbo].[tblPREmployeeTimeOff] ([intEmployeeId], [intTimeOffTypeId]) WITH (IGNORE_DUP_KEY = OFF)
+CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPREmployeeTimeOff] ON [dbo].[tblPREmployeeTimeOff] ([intEmployeeId], [intTypeTimeOffId]) WITH (IGNORE_DUP_KEY = OFF)
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
@@ -46,10 +46,10 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployeeTimeOff',
     @level2type = N'COLUMN',
-    @level2name = N'intTimeOffTypeId'
+    @level2name = N'intTypeTimeOffId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Account Id',
+    @value = N'Liability Account',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -112,13 +112,13 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblCarryOver'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Active',
+    @value = N'Default',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployeeTimeOff',
     @level2type = N'COLUMN',
-    @level2name = N'ysnActive'
+    @level2name = 'ysnDefault'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Sort Field',

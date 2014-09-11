@@ -5,11 +5,10 @@
 	[strCalculationType] [nvarchar](50) NULL,
 	[dblAmount] [numeric](18, 6) NULL DEFAULT ((0)),
 	[dblDefaultHours] [numeric](18, 6) NULL DEFAULT ((0)),
-	[strW2Code] [nvarchar](50) NULL,
 	[intAccountId] INT NULL,
-	[ysnTimeOff] [bit] NULL DEFAULT ((0)),
-	[intTimeOffTypeId] [int] NULL,
-	[ysnActive] [bit] NULL DEFAULT ((1)),
+	[strW2Code] [nvarchar](50) NULL,
+	[intEmployeeTimeOffId] [int] NULL,
+	[ysnDefault] [bit] NOT NULL DEFAULT ((1)),
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblPREmployeeEarning] PRIMARY KEY ([intEmployeeEarningId]), 
@@ -85,7 +84,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strW2Code'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Account Id',
+    @value = N'Expense Account',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -93,14 +92,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'intAccountId'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Earning is a Time Off',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployeeEarning',
-    @level2type = N'COLUMN',
-    @level2name = N'ysnTimeOff'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Time Off Type Id',
@@ -109,16 +101,16 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployeeEarning',
     @level2type = N'COLUMN',
-    @level2name = N'intTimeOffTypeId'
+    @level2name = 'intEmployeeTimeOffId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Active',
+    @value = N'Default',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployeeEarning',
     @level2type = N'COLUMN',
-    @level2name = N'ysnActive'
+    @level2name = 'ysnDefault'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Sort Field',
