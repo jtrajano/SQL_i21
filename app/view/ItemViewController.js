@@ -15,5 +15,9 @@
 
 Ext.define('Inventory.view.ItemViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.item'
+    alias: 'controller.item',
+
+    requires: [
+        'Inventory.view.override.ItemViewController'
+    ]
 });

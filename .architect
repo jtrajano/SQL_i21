@@ -3,6 +3,7 @@
         "view": true,
         "d7ef9c4d-9fa7-40a9-ac40-8922ff13c54c": {
             "id": "d7ef9c4d-9fa7-40a9-ac40-8922ff13c54c",
+            "expanded": false,
             "cn": [
                 {
                     "id": "76b180be-b7ce-479d-8f48-96a2e7c4aea2",
@@ -5614,13 +5615,13 @@
         "openTabs": []
     },
     "canvasState": {
-        "topInstance": "b1b5c701-1609-4313-862e-0f0cfdb93272"
+        "topInstance": null
     },
     "inspectorState": {
-        "topInstance": null,
-        "selectedInstance": null
+        "topInstance": "b320bf44-45ff-473f-94a9-356ec5e70c21",
+        "selectedInstance": "b320bf44-45ff-473f-94a9-356ec5e70c21"
     },
-    "editMode": "design",
+    "editMode": "code",
     "userSettings": {
         "no-cmd": true
     }
