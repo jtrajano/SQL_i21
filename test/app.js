@@ -53,23 +53,6 @@ Ext.application({
         //noinspection JSHint
         app = this;
 
-        //noinspection JSUnresolvedVariable
-//        i21.ModuleMgr.all.each(function (e) {
-//            try {
-//                //noinspection JSUnresolvedVariable
-//                var module = i21.ModuleMgr.all.get(e);
-//
-//                //noinspection JSUnresolvedVariable
-//                if (module.init && module.$classname === 'CashManagement.controller.CashManagement' ) {
-//                    window.alert('CashManagement is initialized!');
-//                    module.init();
-//                }
-//            }
-//            catch(err) {
-//                window.alert(err);
-//            }
-//        });
-
         Ext.onReady(function(){
             // Wait for Ext to be ready before running the karma test suite.
             window.__karma__.start();
