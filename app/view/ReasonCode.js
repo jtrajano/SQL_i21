@@ -37,6 +37,9 @@ Ext.define('Inventory.view.ReasonCode', {
     viewModel: {
         type: 'reasoncode'
     },
+    controller: {
+        type: 'reasoncode'
+    },
     height: 335,
     hidden: false,
     minHeight: 335,

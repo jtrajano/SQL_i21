@@ -34,6 +34,9 @@ Ext.define('Inventory.view.FuelTaxClass', {
     viewModel: {
         type: 'fueltaxclass'
     },
+    controller: {
+        type: 'fueltaxclass'
+    },
     height: 525,
     hidden: false,
     minHeight: 525,

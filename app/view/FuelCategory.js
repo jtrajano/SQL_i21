@@ -34,6 +34,9 @@ Ext.define('Inventory.view.FuelCategory', {
     viewModel: {
         type: 'fuelcategory'
     },
+    controller: {
+        type: 'fuelcategory'
+    },
     height: 535,
     hidden: false,
     minHeight: 535,

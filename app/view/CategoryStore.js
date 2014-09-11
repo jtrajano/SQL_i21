@@ -32,6 +32,9 @@ Ext.define('Inventory.view.CategoryStore', {
     viewModel: {
         type: 'categorystore'
     },
+    controller: {
+        type: 'categorystore'
+    },
     height: 415,
     hidden: false,
     maxHeight: 415,

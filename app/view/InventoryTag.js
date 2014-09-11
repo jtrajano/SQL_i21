@@ -31,6 +31,9 @@ Ext.define('Inventory.view.InventoryTag', {
     viewModel: {
         type: 'inventorytag'
     },
+    controller: {
+        type: 'inventorytag'
+    },
     height: 525,
     hidden: false,
     minHeight: 525,

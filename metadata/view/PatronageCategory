@@ -7,6 +7,11 @@
     "codeClass": null,
     "userConfig": {
         "collapsible": true,
+        "controller": [
+            "{",
+            "        type: 'patronagecategory'",
+            "    }"
+        ],
         "defaultFocus": null,
         "designer|userAlias": "patronagecategory",
         "designer|userClassName": "PatronageCategory",
@@ -298,7 +303,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter25",
+                                    "name": "filter24",
                                     "designerId": "a18798ff-eca4-42bf-a94e-9881fa91b221",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -405,7 +410,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging8",
                     "designerId": "d9923d36-c9c9-4f82-aba9-fd564ebbac8d",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

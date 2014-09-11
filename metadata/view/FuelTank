@@ -7,6 +7,11 @@
     "codeClass": null,
     "userConfig": {
         "collapsible": true,
+        "controller": [
+            "{",
+            "        type: 'fueltank'",
+            "    }"
+        ],
         "defaultFocus": null,
         "designer|userAlias": "fueltank",
         "designer|userClassName": "FuelTank",
@@ -228,7 +233,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter19",
+                                    "name": "filter22",
                                     "designerId": "2fae70be-eb75-4432-8b9e-f69f8ff60559",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -390,7 +395,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbar",
+                    "name": "statusbar2",
                     "designerId": "f1d262d7-d497-4c2d-84fb-fd762dfd64d2",
                     "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
                 }

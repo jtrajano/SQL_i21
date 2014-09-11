@@ -32,6 +32,9 @@ Ext.define('Inventory.view.Manufacturer', {
     viewModel: {
         type: 'manufacturer'
     },
+    controller: {
+        type: 'manufacturer'
+    },
     height: 455,
     hidden: false,
     minHeight: 455,

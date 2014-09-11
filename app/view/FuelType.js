@@ -31,6 +31,9 @@ Ext.define('Inventory.view.FuelType', {
     viewModel: {
         type: 'fueltype'
     },
+    controller: {
+        type: 'fueltype'
+    },
     height: 465,
     hidden: false,
     maxHeight: 465,

@@ -38,6 +38,9 @@ Ext.define('Inventory.view.Category', {
     viewModel: {
         type: 'category'
     },
+    controller: {
+        type: 'category'
+    },
     height: 560,
     hidden: false,
     minHeight: 560,
