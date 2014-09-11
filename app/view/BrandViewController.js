@@ -15,5 +15,9 @@
 
 Ext.define('Inventory.view.BrandViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.brand'
+    alias: 'controller.brand',
+
+    requires: [
+        'Inventory.view.override.BrandViewController'
+    ]
 });
