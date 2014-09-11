@@ -12,7 +12,7 @@ namespace iRely.Inventory.Model
     {
         public int intReasonCodeWorkCenterId { get; set; }
         public int intReasonCodeId { get; set; }
-        public int strWorkCenterId { get; set; }
+        public string strWorkCenterId { get; set; }
         public int intSort { get; set; }
     }
 }

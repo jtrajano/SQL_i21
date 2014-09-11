@@ -11,8 +11,12 @@ namespace iRely.Inventory.Model
     public class tblICFamily : BaseEntity
     {
         public int intFamilyId { get; set; }
-        public int strFamily { get; set; }
-        public int strDesciption { get; set; }
+        public string strFamily { get; set; }
+        public string strDesciption { get; set; }
         public int intSort { get; set; }
+
+        public ICollection<tblICCategory> tblICCategories { get; set; }
+        public ICollection<tblICCategoryVendor> tblICCategoryVendors { get; set; }
+
     }
 }

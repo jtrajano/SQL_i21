@@ -39,6 +39,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="IdeaBlade.Core">
+      <HintPath>..\..\..\resources\references\IdeaBlade.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="IdeaBlade.EntityModel">
+      <HintPath>..\..\..\resources\references\IdeaBlade.EntityModel.dll</HintPath>
+    </Reference>
+    <Reference Include="IdeaBlade.Linq">
+      <HintPath>..\..\..\resources\references\IdeaBlade.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="iRely.Common">
+      <HintPath>..\..\..\resources\references\iRely.Common.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -123,6 +135,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\ItemController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -235,6 +248,16 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\iRely.Inventory.BRL\iRely.Inventory.BRL.csproj">
+      <Project>{d4e9bc20-d5da-476b-bd7d-60b74a53c291}</Project>
+      <Name>iRely.Inventory.BRL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\iRely.Inventory.Model\iRely.Inventory.Model.csproj">
+      <Project>{6e9bbe31-e2dd-4a82-8519-29afc4615179}</Project>
+      <Name>iRely.Inventory.Model</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

@@ -11,10 +11,15 @@ namespace iRely.Inventory.Model
     public class tblICPatronageCategory : BaseEntity
     {
         public int intPatronageCategoryId { get; set; }
-        public int strCategoryCode { get; set; }
-        public int strDescription { get; set; }
-        public int strPurchaseSale { get; set; }
-        public int strUnitAmount { get; set; }
+        public string strCategoryCode { get; set; }
+        public string strDescription { get; set; }
+        public string strPurchaseSale { get; set; }
+        public string strUnitAmount { get; set; }
         public int intSort { get; set; }
+
+        public ICollection<tblICCommodity> tblICCommodities { get; set; }
+        public ICollection<tblICCommodity> tblICCommoditiesDirect { get; set; }
+
+
     }
 }

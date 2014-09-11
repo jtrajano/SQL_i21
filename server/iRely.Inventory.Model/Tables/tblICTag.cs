@@ -11,9 +11,9 @@ namespace iRely.Inventory.Model
     public class tblICTag : BaseEntity
     {
         public int intTagId { get; set; }
-        public int strTagNumber { get; set; }
-        public int strDescription { get; set; }
-        public int strMessage { get; set; }
+        public string strTagNumber { get; set; }
+        public string strDescription { get; set; }
+        public string strMessage { get; set; }
         public bool ysnHazMat { get; set; }
     }
 }

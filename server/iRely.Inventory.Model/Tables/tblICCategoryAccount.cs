@@ -14,7 +14,9 @@ namespace iRely.Inventory.Model
         public int intCategoryId { get; set; }
         public int intLocationId { get; set; }
         public int intStoreId { get; set; }
-        public int strAccountDescription { get; set; }
+        public string strAccountDescription { get; set; }
         public int intAccountId { get; set; }
+
+        public tblICCategory tblICCategory { get; set; }
     }
 }

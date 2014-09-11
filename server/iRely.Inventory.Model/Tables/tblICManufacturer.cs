@@ -11,17 +11,17 @@ namespace iRely.Inventory.Model
     public class tblICManufacturer : BaseEntity
     {
         public int intManufacturerId { get; set; }
-        public int strManufacturer { get; set; }
-        public int strContact { get; set; }
-        public int strAddress { get; set; }
-        public int strZipCode { get; set; }
-        public int strCity { get; set; }
-        public int strState { get; set; }
-        public int strCountry { get; set; }
-        public int strPhone { get; set; }
-        public int strFax { get; set; }
-        public int strWebsite { get; set; }
-        public int strEmail { get; set; }
-        public int strNotes { get; set; }
+        public string strManufacturer { get; set; }
+        public string strContact { get; set; }
+        public string strAddress { get; set; }
+        public string strZipCode { get; set; }
+        public string strCity { get; set; }
+        public string strState { get; set; }
+        public string strCountry { get; set; }
+        public string strPhone { get; set; }
+        public string strFax { get; set; }
+        public string strWebsite { get; set; }
+        public string strEmail { get; set; }
+        public string strNotes { get; set; }
     }
 }

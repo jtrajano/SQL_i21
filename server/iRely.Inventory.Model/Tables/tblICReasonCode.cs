@@ -11,14 +11,14 @@ namespace iRely.Inventory.Model
     public class tblICReasonCode : BaseEntity
     {
         public int intReasonCodeId { get; set; }
-        public int strReasonCode { get; set; }
-        public int strType { get; set; }
-        public int strDescription { get; set; }
-        public int strLotTransactionType { get; set; }
+        public string strReasonCode { get; set; }
+        public string strType { get; set; }
+        public string strDescription { get; set; }
+        public string strLotTransactionType { get; set; }
         public bool ysnDefault { get; set; }
         public bool ysnReduceAvailableTime { get; set; }
         public bool ysnExplanationRequired { get; set; }
-        public int strLastUpdatedBy { get; set; }
+        public string strLastUpdatedBy { get; set; }
         public DateTime dtmLastUpdatedOn { get; set; }
     }
 }
