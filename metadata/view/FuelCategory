@@ -8,24 +8,25 @@
     "userConfig": {
         "collapsible": true,
         "defaultFocus": null,
-        "designer|userAlias": "fueltank",
-        "designer|userClassName": "FuelTank",
-        "height": 621,
+        "designer|userAlias": "fuelcategory",
+        "designer|userClassName": "FuelCategory",
+        "height": 535,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
         "layout": "fit",
         "maximizable": true,
-        "minHeight": 500,
+        "minHeight": 535,
         "minWidth": 530,
         "minimizable": null,
         "reference": null,
-        "title": "Fuel Tank",
-        "width": 875
+        "title": "Fuel Category",
+        "width": 530
     },
-    "designerId": "6285c4d9-7aed-4586-9945-1e0cfe0cd00f",
-    "viewControllerInstanceId": "ccde470c-0c4b-44a6-929d-1762ef5fd35c",
-    "viewModelInstanceId": "55df8b07-ac6a-4fb7-8a78-34fe59ddeed1",
+    "name": "FuelTank1",
+    "designerId": "2a4be1e4-5ea6-4048-a731-cab26cb3e5bd",
+    "viewControllerInstanceId": "a4ee5b12-69f3-455f-9857-a76f8bec9966",
+    "viewModelInstanceId": "a38521bc-8d21-4442-9969-fcdebd0d1647",
     "cn": [
         {
             "type": "Ext.form.Panel",
@@ -43,7 +44,7 @@
                 "frame": null,
                 "header": null,
                 "height": 350,
-                "itemId": "frmFuelTank",
+                "itemId": "frmFuelCategory",
                 "layout": "vbox",
                 "margin": -1,
                 "title": null,
@@ -52,7 +53,7 @@
                 "width": 450
             },
             "name": "MyForm16",
-            "designerId": "7ac5f650-8198-4f3a-8f07-cdab29d4c0f5",
+            "designerId": "a55c86fe-3d16-4669-886c-372e2908b010",
             "cn": [
                 {
                     "type": "Ext.toolbar.Toolbar",
@@ -68,7 +69,7 @@
                         "width": 588
                     },
                     "name": "MyToolbar50",
-                    "designerId": "93ebf9e0-06b6-47a2-865e-0103a9903a2b",
+                    "designerId": "549dd181-b4f6-4172-b8f5-283721a4ecf7",
                     "cn": [
                         {
                             "type": "Ext.button.Button",
@@ -91,7 +92,7 @@
                                 "width": 45
                             },
                             "name": "MyButton160",
-                            "designerId": "bb226d27-8348-4b67-a0dd-8a1bef832c70"
+                            "designerId": "6c1e6dbd-5341-4cf2-96d8-29a9c8224f3e"
                         },
                         {
                             "type": "Ext.button.Button",
@@ -114,7 +115,7 @@
                                 "width": 45
                             },
                             "name": "MyButton161",
-                            "designerId": "5fafd892-cecf-4925-a497-caccce7b5717"
+                            "designerId": "fc1a999f-26e7-45df-aad5-424f8912846d"
                         },
                         {
                             "type": "Ext.toolbar.Separator",
@@ -129,7 +130,7 @@
                                 "layout|flex": null
                             },
                             "name": "MySeparator50",
-                            "designerId": "f4a1759d-7440-4313-b89d-185f8bcc7649"
+                            "designerId": "7e05d5d1-2f3a-467c-aa17-c16494801605"
                         },
                         {
                             "type": "Ext.button.Button",
@@ -152,7 +153,7 @@
                                 "width": 45
                             },
                             "name": "MyButton162",
-                            "designerId": "b4fe8b90-31e3-4367-b355-35be274236d1"
+                            "designerId": "b5c0fcc4-c251-4104-a625-dc669afa3411"
                         }
                     ]
                 },
@@ -164,12 +165,12 @@
                     },
                     "codeClass": null,
                     "userConfig": {
-                        "itemId": "grdFuelTank",
+                        "itemId": "grdFuelCategory",
                         "layout|flex": 1,
                         "title": null
                     },
                     "name": "MyGridPanel41",
-                    "designerId": "112f6a0c-7564-4945-a845-949a86809b62",
+                    "designerId": "2ee0a4ae-f105-4033-b02c-bd5ddec00c07",
                     "cn": [
                         {
                             "type": "Ext.toolbar.Toolbar",
@@ -184,7 +185,7 @@
                                 "itemId": "tlbGridOptions"
                             },
                             "name": "MyToolbar51",
-                            "designerId": "dcd99f50-05d1-4087-a44d-e1b29ec87d55",
+                            "designerId": "93eea16b-b5fc-4389-8936-1b26e30f0f04",
                             "cn": [
                                 {
                                     "type": "Ext.button.Button",
@@ -196,13 +197,13 @@
                                     "userConfig": {
                                         "icon": null,
                                         "iconCls": "small-delete",
-                                        "itemId": "btnDeleteFuelTank",
+                                        "itemId": "btnDeleteFuelCategory",
                                         "layout|flex": null,
                                         "tabIndex": -1,
                                         "text": "Delete"
                                     },
                                     "name": "MyButton163",
-                                    "designerId": "8f682078-fdbd-492d-bb87-756748d92ada"
+                                    "designerId": "153bae44-323e-4dfc-be80-123c121d6a9c"
                                 },
                                 {
                                     "type": "Ext.toolbar.Separator",
@@ -216,7 +217,7 @@
                                         "layout|flex": null
                                     },
                                     "name": "MySeparator51",
-                                    "designerId": "7e06a618-85f3-4d10-936b-2330604da60f"
+                                    "designerId": "7be11a8d-a2ae-44b5-b317-88cfd033d9da"
                                 },
                                 {
                                     "type": "linkedinstance",
@@ -228,8 +229,8 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter19",
-                                    "designerId": "2fae70be-eb75-4432-8b9e-f69f8ff60559",
+                                    "name": "filter20",
+                                    "designerId": "0e5af1bc-5906-4735-b81f-3b01e4e89676",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
                             ]
@@ -243,12 +244,12 @@
                             "codeClass": null,
                             "userConfig": {
                                 "dataIndex": "string",
-                                "flex": null,
-                                "text": "Store Name",
+                                "flex": 1,
+                                "text": "Fuel Type Code",
                                 "width": 82
                             },
                             "name": "MyColumn148",
-                            "designerId": "6de3f7f9-185e-4db5-9c3b-53afbe310368"
+                            "designerId": "b27e3761-3eff-460d-8987-32b380e1bc66"
                         },
                         {
                             "type": "Ext.grid.column.Column",
@@ -259,12 +260,12 @@
                             "codeClass": null,
                             "userConfig": {
                                 "dataIndex": "string",
-                                "flex": null,
-                                "text": "Fuel Tank No.",
-                                "width": 81
+                                "flex": 2,
+                                "text": "Description",
+                                "width": null
                             },
-                            "name": "MyColumn149",
-                            "designerId": "77a64ef7-7ac4-4833-9267-18371f2e1a6b"
+                            "name": "MyColumn150",
+                            "designerId": "7a0642e4-b9c4-416d-bbc2-d2982cfcfe59"
                         },
                         {
                             "type": "Ext.grid.column.Column",
@@ -276,83 +277,11 @@
                             "userConfig": {
                                 "dataIndex": "string",
                                 "flex": 1,
-                                "text": "Description",
-                                "width": null
+                                "text": "Equivalance Value",
+                                "width": 81
                             },
-                            "name": "MyColumn150",
-                            "designerId": "ea107ecd-8954-46da-a254-55209a2e5e5c"
-                        },
-                        {
-                            "type": "Ext.grid.column.Number",
-                            "reference": {
-                                "name": "columns",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "text": "Tank Capacity",
-                                "width": 85
-                            },
-                            "name": "MyNumberColumn18",
-                            "designerId": "a9f4fbef-6ee1-4c92-8243-1b7da089805a"
-                        },
-                        {
-                            "type": "Ext.grid.column.Number",
-                            "reference": {
-                                "name": "columns",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "text": "Current Volume",
-                                "width": 92
-                            },
-                            "name": "MyNumberColumn19",
-                            "designerId": "72ae9ebb-2fca-44c3-89ac-c3906ffe5a07"
-                        },
-                        {
-                            "type": "Ext.grid.column.Date",
-                            "reference": {
-                                "name": "columns",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "text": "Last Update",
-                                "width": 78
-                            },
-                            "name": "MyDateColumn4",
-                            "designerId": "6788e7e2-2bfa-4711-a81d-c944912d20e8"
-                        },
-                        {
-                            "type": "Ext.grid.column.Number",
-                            "reference": {
-                                "name": "columns",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "text": "Last Update Shift",
-                                "width": 96
-                            },
-                            "name": "MyNumberColumn20",
-                            "designerId": "e5772008-d248-45b0-bbf8-b5704ffce5a0"
-                        },
-                        {
-                            "type": "Ext.grid.column.Column",
-                            "reference": {
-                                "name": "columns",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "dataIndex": "string",
-                                "flex": null,
-                                "text": "Tax Department No.",
-                                "width": 108
-                            },
-                            "name": "MyColumn151",
-                            "designerId": "2ca31ce0-8d7b-4956-8e68-045ae54f4629"
+                            "name": "MyColumn149",
+                            "designerId": "a608f03e-f5bd-4427-9e83-1f877f653dfd"
                         },
                         {
                             "type": "Ext.grid.View",
@@ -365,7 +294,7 @@
                                 "itemId": "grvFuelTank"
                             },
                             "name": "MyGridView41",
-                            "designerId": "656b6d89-a6a2-4826-9dfb-26a7399222d9"
+                            "designerId": "2b3d27e1-c73d-46f5-b629-886b3ea26ba1"
                         },
                         {
                             "type": "Ext.selection.CheckboxModel",
@@ -375,7 +304,7 @@
                             },
                             "codeClass": "Ext.selection.CheckboxModel",
                             "name": "MyCheckboxSelectionModel31",
-                            "designerId": "7c1dedc1-0bfc-4d73-b76e-5f511b00c0df"
+                            "designerId": "60350eac-002a-415d-8c20-3888ed476e80"
                         }
                     ]
                 },
@@ -390,8 +319,8 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbar",
-                    "designerId": "f1d262d7-d497-4c2d-84fb-fd762dfd64d2",
+                    "name": "statusbar1",
+                    "designerId": "99386690-7688-4b71-bfb9-0d5559b4cdad",
                     "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
                 }
             ]

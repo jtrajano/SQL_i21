@@ -10,7 +10,12 @@
         "views": [
             "Statusbar1",
             "StatusbarPaging1",
-            "WorkCenterAdd"
+            "WorkCenterAdd",
+            "FuelCategory",
+            "FuelCode",
+            "ProcessCode",
+            "FeedStockCode",
+            "FeedStockUom"
         ]
     },
     "name": "Application",

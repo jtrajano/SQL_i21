@@ -2605,7 +2605,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "fieldLabel": "Tax Id Password",
+                                                        "fieldLabel": "Tax ID Password",
                                                         "itemId": "txtTaxIdPassword",
                                                         "labelWidth": 220,
                                                         "layout|flex": 1
