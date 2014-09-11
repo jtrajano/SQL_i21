@@ -707,6 +707,8 @@
     <Build Include="dbo\User Defined Types\ItemCostingTableType.sql" />
     <Build Include="dbo\Tables\tblICInventoryTransactionType.sql" />
     <None Include="Scripts\Post-Deployment\IC\1_InventoryTransactionTypes.sql" />
+    <Build Include="dbo\Tables\tblICInventoryTransactionFIFO.sql" />
+    <Build Include="dbo\Tables\tblICInventoryTransactionLIFO.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
