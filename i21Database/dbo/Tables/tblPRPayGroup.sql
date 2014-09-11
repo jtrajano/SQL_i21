@@ -3,7 +3,7 @@
 	[intPayGroupId] INT NOT NULL IDENTITY, 
     [strPayGroup] NVARCHAR(50) NOT NULL, 
     [strDescription] NVARCHAR(50) NULL, 
-    [strPayPeriod] NVARCHAR(50) NOT NULL, 
+    [strPayPeriod] NVARCHAR(50) NOT NULL DEFAULT ('Bi-Weekly'), 
 	[ysnActive] BIT NOT NULL DEFAULT ((1)), 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((1)), 

@@ -1,77 +1,47 @@
 ﻿CREATE TABLE [dbo].[tblPREmployee](
-	[intEmployeeId] [int] NOT NULL IDENTITY,
+	[intEntityId] [int] NOT NULL,
+	[intEmployeeId] [int] NOT NULL IDENTITY (1, 1),
 	[strEmployeeId] [nvarchar](50) NOT NULL,
-	[strCompany] [nvarchar](100) NULL,
-	[strPhone] [nvarchar](50) NULL,
-	[strEmail] [nvarchar](75) NULL,
-	[strType] [nvarchar](50) NULL,
-	[strTitle] [nvarchar](50) NULL,
-	[strSalutation] [nvarchar](50) NULL,
 	[strFirstName] [nvarchar](50) NULL,
 	[strMiddleName] [nvarchar](50) NULL,
 	[strLastName] [nvarchar](50) NULL,
-	[strAddress] [nvarchar](MAX) NULL,
-	[strZip] [nvarchar](15) NULL,
-	[strCity] [nvarchar](50) NULL,
-	[strState] [nvarchar](50) NULL,
-	[strCountry] [nvarchar](50) NULL,
+	[strNameSuffix] [nvarchar](50) NULL,
+	[intSupervisorId] [int] NULL,
+	[ysnActive] [bit] NOT NULL DEFAULT ((1)),
+	[dtmDateHired] [datetime] NULL,
+	[dtmBirthDate] [datetime] NULL,
+	[strGender] [nvarchar](15) NULL,
+	[strMaritalStatus] [nvarchar](50) NULL,
+	[strSpouse] [nvarchar](50) NULL,
+	[strWorkPhone] [nvarchar](50) NULL,
+	[intEthnicOriginId] [int] NULL,
+	[intRaceId] [int] NULL,
+	[intEEOCCode] [int] NULL,
 	[strSocialSecurity] [nvarchar](15) NULL,
 	[ysn1099Employee] [bit] NULL,
-	[strWorkPhone] [nvarchar](50) NULL,
-	[strAltPhone] [nvarchar](50) NULL,
-	[strOtherPhone] [nvarchar](50) NULL,
-	[strMobile] [nvarchar](50) NULL,
-	[strEmail2] [nvarchar](100) NULL,
-	[strWebSite] [nvarchar](500) NULL,
-	[strSupervisor] [nvarchar](50) NULL,
-	[strDepartment] [nvarchar](50) NULL,
-	[ysnActive] [bit] NOT NULL DEFAULT ((1)),
-	[imgPhoto] [image] NULL,
+	[dtmTerminated] [datetime] NULL,
+	[strTerminatedReason] [nvarchar](100) NULL,
 	[strEmergencyContact] [nvarchar](25) NULL,
 	[strEmergencyRelation] [nvarchar](25) NULL,
 	[strEmergencyPhone] [nvarchar](25) NULL,
 	[strEmergencyPhone2] [nvarchar](25) NULL,
-
-	[strGender] [nvarchar](15) NULL,
-	[strNickName] [nvarchar](50) NULL,
-	[dtmDateHired] [datetime] NULL,
-	[dtmBirthDate] [datetime] NULL ,
-	[strMaritalStatus] [nvarchar](50) NULL,
-	[strSpouse] [nvarchar](50) NULL,
-	[intEthnicOriginId] [int] NULL,
-	[intDivisionId] [int] NULL,
-	[strTerritory] [nvarchar](50) NULL,
-	[strEducation] [nvarchar](50) NULL,
-	[strDegree] [nvarchar](50) NULL,
-	[strAltContact] [nvarchar](50) NULL,
-	[dtmTerminated] [datetime] NULL,
-	[strTerminatedReason] [nvarchar](100) NULL,
-	[dtmDateEntered] [datetime] NOT NULL DEFAULT (getdate()),
-	[dtmLastModified] [datetime] NULL DEFAULT (getdate()),
-
 	[strPayPeriod] [nvarchar](50) NULL DEFAULT ('Bi-Weekly'),
-	[intCurrencyId] int NULL,
 	[intPayGroupId] int NULL,
-	[ysnDirectDeposit] [bit] NOT NULL DEFAULT ((0)),
-
-	[dtmLastRaise] [datetime] NULL DEFAULT (getdate()),
-	[dtmLastReview] [datetime] NULL DEFAULT (getdate()),
-	[dtmLastPaid] [datetime] NULL,
-
-	[intTaxGroupId] [int] NULL,
-	[intEarningGroupId] [int] NULL,
-	[intDeductionGroupId] [int] NULL,
-	[intTimeOffGroupId] [int] NULL,
-	
+	[dtmReviewDate] [datetime] NULL DEFAULT (getdate()),
+	[dtmNextReview] [datetime] NULL DEFAULT (getdate()),
 	[ysnStatutoryEmployee] [bit] NOT NULL DEFAULT ((0)),
 	[ysnRetirementPlan] [bit] NOT NULL DEFAULT ((0)),
 	[ysnThirdPartySickPay] [bit] NOT NULL DEFAULT ((0)),
-
+	[ysnDirectDeposit] [bit] NOT NULL DEFAULT ((0)),
+	[dtmDateEntered] [datetime] NOT NULL DEFAULT (getdate()),
+	[dtmLastModified] [datetime] NULL DEFAULT (getdate()),
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
-    CONSTRAINT [PK_tblPREmployee] PRIMARY KEY ([intEmployeeId]), 
+	CONSTRAINT [PK_tblPREmployee] PRIMARY KEY ([intEntityId]),
+    CONSTRAINT [UK_tblPREmployee] UNIQUE ([intEmployeeId]), 
     CONSTRAINT [AK_tblPREmployee_strEmployeeId] UNIQUE ([strEmployeeId])
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+) ON [PRIMARY]
 GO
+
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity Field',
     @level0type = N'SCHEMA',
@@ -89,60 +59,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPREmployee',
     @level2type = N'COLUMN',
     @level2name = N'strEmployeeId'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Company',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'strCompany'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Phone',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'strPhone'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Email',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'strEmail'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Employee Type',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'strType'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Title',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'strTitle'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Salutation',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'strSalutation'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'First Name',
@@ -172,51 +88,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strLastName'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Address',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'strAddress'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Zip Code',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'strZip'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'City',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'strCity'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'State',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'strState'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Country',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'strCountry'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Social Security',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
@@ -244,69 +115,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strWorkPhone'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Alternate Phone',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'strAltPhone'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Other Phone',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'strOtherPhone'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Mobile Number',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'strMobile'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Alternate Email',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'strEmail2'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Website',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'strWebSite'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Supervisor',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'strSupervisor'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Department',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'strDepartment'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Active',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
@@ -314,15 +122,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPREmployee',
     @level2type = N'COLUMN',
     @level2name = N'ysnActive'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Photo',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'imgPhoto'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Emergency Contact',
@@ -370,15 +169,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strGender'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Nick Name',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'strNickName'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Date Hired',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
@@ -422,51 +212,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPREmployee',
     @level2type = N'COLUMN',
     @level2name = N'intEthnicOriginId'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Division Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'intDivisionId'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Territory',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'strTerritory'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Education Attained',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'strEducation'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Degree Attained',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'strDegree'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Alternate Contact',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'strAltContact'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Date Terminated',
@@ -514,15 +259,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strPayPeriod'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Currency Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'intCurrencyId'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Pay Group Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
@@ -541,67 +277,76 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'ysnDirectDeposit'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Date Last Raised',
+    @value = N'Concurrency Field',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployee',
     @level2type = N'COLUMN',
-    @level2name = N'dtmLastRaise'
+    @level2name = N'intConcurrencyId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Date Last Reviewed',
+    @value = N'Name Suffix',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployee',
     @level2type = N'COLUMN',
-    @level2name = N'dtmLastReview'
+    @level2name = N'strNameSuffix'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Date Last Paid',
+    @value = N'Supervisor Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployee',
     @level2type = N'COLUMN',
-    @level2name = N'dtmLastPaid'
+    @level2name = N'intSupervisorId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Tac Group Id',
+    @value = N'Race',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployee',
     @level2type = N'COLUMN',
-    @level2name = N'intTaxGroupId'
+    @level2name = N'intRaceId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Earning Group Id',
+    @value = N'EEOC Code',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployee',
     @level2type = N'COLUMN',
-    @level2name = N'intEarningGroupId'
+    @level2name = N'intEEOCCode'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Deduction Group Id',
+    @value = N'Review Date',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployee',
     @level2type = N'COLUMN',
-    @level2name = N'intDeductionGroupId'
+    @level2name = N'dtmReviewDate'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Time Off Group Id',
+    @value = N'Next Review Date',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployee',
     @level2type = N'COLUMN',
-    @level2name = N'intTimeOffGroupId'
+    @level2name = N'dtmNextReview'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Entity Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPREmployee',
+    @level2type = N'COLUMN',
+    @level2name = N'intEntityId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Statutory Employee',
@@ -629,12 +374,3 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPREmployee',
     @level2type = N'COLUMN',
     @level2name = N'ysnThirdPartySickPay'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Concurrency Field',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'intConcurrencyId'

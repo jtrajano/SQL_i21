@@ -3,23 +3,23 @@
 	[intEmployeeId] INT NOT NULL,
 	[intTypeTaxId] INT NOT NULL,
 	[strCalculationType] [nvarchar](50) NULL,
-	[dblAmount] [numeric](18, 6) NULL DEFAULT ((0)),
-	[dblPercent] [numeric](18, 6) NULL DEFAULT ((0)),
-	[dblLimit] [numeric](18, 6) NULL DEFAULT ((0)),
-	[intTypeTaxStateId] INT NULL,
-	[intTypeTaxCountyId] INT NULL,
-	[intAccountId] INT NULL,
-	[dblExtraWithholding] [numeric](18, 6) NULL DEFAULT ((0)),
 	[strFilingStatus] [nvarchar](25) NULL,
+	[intTypeTaxStateId] INT NULL,
+	[intTypeTaxLocalId] INT NULL,
+	[dblAmount] [numeric](18, 6) NULL DEFAULT ((0)),
+	[dblExtraWithholding] [numeric](18, 6) NULL DEFAULT ((0)),
+	[dblLimit] [numeric](18, 6) NULL DEFAULT ((0)),
+	[intAccountId] INT NULL,
+	[intExpenseAccountId] INT NULL,
 	[intAllowance] [int] NULL DEFAULT ((0)),
+	[strPaidBy] [nvarchar](10) NULL,
 	[strVal1] [nvarchar](5) NULL,
 	[strVal2] [nvarchar](5) NULL,
 	[strVal3] [nvarchar](5) NULL,
 	[strVal4] [nvarchar](5) NULL,
-	[ysnActive] [bit] NULL DEFAULT ((1)),
-	[strType] [nvarchar](10) NULL,
-	[intExpenseAccountId] INT NULL,
-	[strPaidBy] [nvarchar](10) NULL,
+	[strVal5] [nvarchar](5) NULL,
+	[strVal6] [nvarchar](5) NULL,
+	[ysnDefault] [bit] NULL DEFAULT ((1)),
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblPREmployeeTax] PRIMARY KEY ([intEmployeeTaxId]), 
@@ -77,14 +77,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'dblAmount'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Percent',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployeeTax',
-    @level2type = N'COLUMN',
-    @level2name = N'dblPercent'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Limit',
@@ -105,16 +98,16 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intTypeTaxStateId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Tax Type County Id',
+    @value = N'Tax Type Locality Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployeeTax',
     @level2type = N'COLUMN',
-    @level2name = N'intTypeTaxCountyId'
+    @level2name = 'intTypeTaxLocalId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Account Id',
+    @value = N'Liability Account',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -141,7 +134,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strFilingStatus'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Allowance',
+    @value = N'Federal Allowances',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -186,25 +179,18 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strVal4'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Active',
+    @value = N'Default',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployeeTax',
     @level2type = N'COLUMN',
-    @level2name = N'ysnActive'
+    @level2name = 'ysnDefault'
+GO
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Type',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployeeTax',
-    @level2type = N'COLUMN',
-    @level2name = N'strType'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Expense Account Id',
+    @value = N'Expense Account',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -238,3 +224,21 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPREmployeeTax',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Holder for extra value 5',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPREmployeeTax',
+    @level2type = N'COLUMN',
+    @level2name = N'strVal5'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Holder for extra value 6',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPREmployeeTax',
+    @level2type = N'COLUMN',
+    @level2name = N'strVal6'
