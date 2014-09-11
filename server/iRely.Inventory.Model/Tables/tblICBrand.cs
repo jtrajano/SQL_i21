@@ -11,8 +11,8 @@ namespace iRely.Inventory.Model
     public class tblICBrand : BaseEntity
     {
         public int intBrandId { get; set; }
-        public int strBrand { get; set; }
-        public int strDescription { get; set; }
+        public string strBrand { get; set; }
+        public string strDescription { get; set; }
         public int intSort { get; set; }
     }
 }

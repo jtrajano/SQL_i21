@@ -18,5 +18,8 @@ namespace iRely.Inventory.Model
         public bool ysnAllowPurchase { get; set; }
         public bool ysnAllowSale { get; set; }
         public int intSort { get; set; }
+
+        public tblICCommodity tblICCommodity { get; set; }
+        public tblICUnitMeasure tblICUnitMeasure { get; set; }
     }
 }

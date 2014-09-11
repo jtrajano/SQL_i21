@@ -63,6 +63,30 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnScaled).HasColumnName("ysnScaled");
             this.Property(t => t.ysnSellable).HasColumnName("ysnSellable");
             this.Property(t => t.ysnYieldAdjustment).HasColumnName("ysnYieldAdjustment");
+
+            this.HasMany(p => p.tblICCategoryAccounts)
+                .WithRequired(p => p.tblICCategory)
+                .HasForeignKey(p => p.intCategoryId);
+            this.HasMany(p => p.tblICCategoryStores)
+                .WithRequired(p => p.tblICCategory)
+                .HasForeignKey(p => p.intCategoryId);
+            this.HasMany(p => p.tblICCategoryVendors)
+                .WithRequired(p => p.tblICCategory)
+                .HasForeignKey(p => p.intCategoryId);
+
+            this.HasOptional(p => p.tblICCatalog)
+                .WithMany(p => p.tblICCategories)
+                .HasForeignKey(p => p.intCatalogGroupId);
+            this.HasOptional(p => p.tblICClass)
+                .WithMany(p => p.tblICCategories)
+                .HasForeignKey(p => p.intCatalogGroupId);
+            this.HasOptional(p => p.tblICFamily)
+                .WithMany(p => p.tblICCategories)
+                .HasForeignKey(p => p.intCatalogGroupId);
+            this.HasOptional(p => p.tblICUnitMeasure)
+                .WithMany(p => p.tblICCategories)
+                .HasForeignKey(p => p.intCatalogGroupId);
+                
         }
     }
 }

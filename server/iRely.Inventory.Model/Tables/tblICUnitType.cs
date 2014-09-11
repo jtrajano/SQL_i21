@@ -11,9 +11,9 @@ namespace iRely.Inventory.Model
     public class tblICUnitType : BaseEntity
     {
         public int intUnitTypeId { get; set; }
-        public int strUnitType { get; set; }
-        public int strDescription { get; set; }
-        public int strInternalCode { get; set; }
+        public string strUnitType { get; set; }
+        public string strDescription { get; set; }
+        public string strInternalCode { get; set; }
         public int intCapacityUnitMeasureId { get; set; }
         public double dblMaxWeight { get; set; }
         public bool ysnAllowPick { get; set; }

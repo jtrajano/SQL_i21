@@ -11,8 +11,8 @@ namespace iRely.Inventory.Model
     public class tblICRinProcess : BaseEntity
     {
         public int intRinProcessId { get; set; }
-        public int strRinProcessCode { get; set; }
-        public int strDescription { get; set; }
+        public string strRinProcessCode { get; set; }
+        public string strDescription { get; set; }
         public int intSort { get; set; }
     }
 }

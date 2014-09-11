@@ -12,8 +12,10 @@ namespace iRely.Inventory.Model
     {
         public int intCatalogId { get; set; }
         public int intParentCatalogId { get; set; }
-        public int strCatalogName { get; set; }
-        public int strDescription { get; set; }
+        public string strCatalogName { get; set; }
+        public string strDescription { get; set; }
         public int intSort { get; set; }
+
+        public ICollection<tblICCategory> tblICCategories { get; set; }
     }
 }

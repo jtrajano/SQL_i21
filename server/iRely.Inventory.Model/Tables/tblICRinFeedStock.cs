@@ -11,8 +11,8 @@ namespace iRely.Inventory.Model
     public class tblICRinFeedStock : BaseEntity
     {
         public int intRinFeedStockId { get; set; }
-        public int strRinFeedStockCode { get; set; }
-        public int strDescription { get; set; }
+        public string strRinFeedStockCode { get; set; }
+        public string strDescription { get; set; }
         public int intSort { get; set; }
     }
 }

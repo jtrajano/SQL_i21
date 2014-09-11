@@ -28,5 +28,7 @@ namespace iRely.Inventory.Model
         public double dblLowGrossMarginAlert { get; set; }
         public double dblHighGrossMarginAlert { get; set; }
         public DateTime dtmLastInventoryLevelEntry { get; set; }
+
+        public tblICCategory tblICCategory { get; set; }
     }
 }

@@ -20,6 +20,12 @@ namespace iRely.Inventory.Model
             Database.SetInitializer<InventoryEntities>(null);
         }
 
+        public InventoryEntities()
+            : base(GetConnectionString())
+        {
+            this.Configuration.ProxyCreationEnabled = false;
+        }
+
         #region Function
         /// <summary>
         /// 
@@ -74,10 +80,7 @@ namespace iRely.Inventory.Model
         }
         #endregion
 
-        public InventoryEntities() : base(GetConnectionString())
-        {
-            this.Configuration.ProxyCreationEnabled = false;
-        }
+        
 
         public DbSet<tblICBrand> tblICBrands { get; set; }
         public DbSet<tblICCatalog> tblICCatalogs { get; set; }

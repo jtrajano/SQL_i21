@@ -11,18 +11,25 @@ namespace iRely.Inventory.Model
 {
     public class tblICCategory : BaseEntity
     {
+        public tblICCategory()
+        {
+            this.tblICCategoryAccounts = new List<tblICCategoryAccount>();
+            this.tblICCategoryStores = new List<tblICCategoryStore>();
+            this.tblICCategoryVendors = new List<tblICCategoryVendor>();
+        }
+
         public int intCategoryId { get; set; }
-        public int strCategoryCode { get; set; }
-        public int strDescription { get; set; }
-        public int strLineBusiness { get; set; }
+        public string strCategoryCode { get; set; }
+        public string strDescription { get; set; }
+        public string strLineBusiness { get; set; }
         public int intCatalogGroupId { get; set; }
-        public int strCostingMethod { get; set; }
-        public int strInventoryTracking { get; set; }
+        public string strCostingMethod { get; set; }
+        public string strInventoryTracking { get; set; }
         public double dblStandardQty { get; set; }
         public int intUOMId { get; set; }
-        public int strGLDivisionNumber { get; set; }
+        public string strGLDivisionNumber { get; set; }
         public bool ysnSalesAnalysisByTon { get; set; }
-        public int strMaterialFee { get; set; }
+        public string strMaterialFee { get; set; }
         public int intMaterialItemId { get; set; }
         public bool ysnAutoCalculateFreight { get; set; }
         public int intFreightItemId { get; set; }
@@ -42,16 +49,16 @@ namespace iRely.Inventory.Model
         public bool ysnIdRequiredLiquor { get; set; }
         public bool ysnIdRequiredCigarette { get; set; }
         public int intMinimumAge { get; set; }
-        public int strERPItemClass { get; set; }
+        public string strERPItemClass { get; set; }
         public double dblfeTime { get; set; }
         public double dblBOMItemShrinkage { get; set; }
         public double dblBOMItemUpperTolerance { get; set; }
         public double dblBOMItemLowerTolerance { get; set; }
         public bool ysnScaled { get; set; }
         public bool ysnOutputItemMandatory { get; set; }
-        public int strConsumptionMethod { get; set; }
-        public int strBOMItemType { get; set; }
-        public int strShortName { get; set; }
+        public string strConsumptionMethod { get; set; }
+        public string strBOMItemType { get; set; }
+        public string strShortName { get; set; }
         public byte[] imgReceiptImage { get; set; }
         public byte[] imgWIPImage { get; set; }
         public byte[] imgFGImage { get; set; }
@@ -59,8 +66,21 @@ namespace iRely.Inventory.Model
         public double dblLaborCost { get; set; }
         public double dblOverHead { get; set; }
         public double dblPercentage { get; set; }
-        public int strCostDistributionMethod { get; set; }
+        public string strCostDistributionMethod { get; set; }
         public bool ysnSellable { get; set; }
         public bool ysnYieldAdjustment { get; set; }
+
+        public ICollection<tblICCategoryAccount> tblICCategoryAccounts { get; set; }
+        public ICollection<tblICCategoryStore> tblICCategoryStores { get; set; }
+        public ICollection<tblICCategoryVendor> tblICCategoryVendors { get; set; }
+
+        public tblICCatalog tblICCatalog { get; set; }
+        public tblICUnitMeasure tblICUnitMeasure { get; set; }
+        public tblICItem MaterialItem { get; set; }
+        public tblICItem FreightItem { get; set; }
+        public tblICFamily tblICFamily { get; set; }
+        public tblICClass tblICClass { get; set; }
+        
+
     }
 }

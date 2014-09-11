@@ -13,7 +13,9 @@ namespace iRely.Inventory.Model
         public int intCommodityGroupId { get; set; }
         public int intCommodityId { get; set; }
         public int intParentGroupId { get; set; }
-        public int strDescription { get; set; }
+        public string strDescription { get; set; }
         public int intSort { get; set; }
+
+        public tblICCommodity tblICCommodity { get; set; }
     }
 }

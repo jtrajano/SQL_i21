@@ -11,9 +11,12 @@ namespace iRely.Inventory.Model
     public class tblICUnitMeasure : BaseEntity
     {
         public int intUnitMeasureId { get; set; }
-        public int strUnitMeasure { get; set; }
-        public int strSymbol { get; set; }
-        public int strUnitType { get; set; }
+        public string strUnitMeasure { get; set; }
+        public string strSymbol { get; set; }
+        public string strUnitType { get; set; }
         public bool ysnDefault { get; set; }
+
+        public ICollection<tblICCategory> tblICCategories { get; set; }
+        public ICollection<tblICCommodityUnitMeasure> tblICCommodityUnitMeasures { get; set; }
     }
 }
