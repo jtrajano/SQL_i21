@@ -28,13 +28,13 @@ namespace iRely.Inventory.Model
 
             this.HasOptional(p => p.tblICFamily)
                 .WithMany(p => p.tblICCategoryVendors)
-                .HasForeignKey(p => p.intCategoryVendorId);
+                .HasForeignKey(p => p.intFamilyId);
             this.HasOptional(p => p.OrderClass)
                 .WithMany(p => p.VendorOrders)
-                .HasForeignKey(p => p.intCategoryVendorId);
+                .HasForeignKey(p => p.intOrderClassId);
             this.HasOptional(p => p.SellClass)
                 .WithMany(p => p.VendorSells)
-                .HasForeignKey(p => p.intCategoryVendorId);
+                .HasForeignKey(p => p.intSellClassId);
         }
     }
 }

@@ -22,17 +22,17 @@ namespace iRely.Inventory.Model
         public string strCategoryCode { get; set; }
         public string strDescription { get; set; }
         public string strLineBusiness { get; set; }
-        public int intCatalogGroupId { get; set; }
+        public int? intCatalogGroupId { get; set; }
         public string strCostingMethod { get; set; }
         public string strInventoryTracking { get; set; }
         public double dblStandardQty { get; set; }
-        public int intUOMId { get; set; }
+        public int? intUOMId { get; set; }
         public string strGLDivisionNumber { get; set; }
         public bool ysnSalesAnalysisByTon { get; set; }
         public string strMaterialFee { get; set; }
-        public int intMaterialItemId { get; set; }
+        public int? intMaterialItemId { get; set; }
         public bool ysnAutoCalculateFreight { get; set; }
-        public int intFreightItemId { get; set; }
+        public int? intFreightItemId { get; set; }
         public bool ysnNonRetailUseDepartment { get; set; }
         public bool ysnReportNetGross { get; set; }
         public bool ysnDepartmentPumps { get; set; }
@@ -40,8 +40,8 @@ namespace iRely.Inventory.Model
         public bool ysnDeleteRegister { get; set; }
         public bool ysnDepartmentKeyTaxed { get; set; }
         public int intProductCodeId { get; set; }
-        public int intFamilyId { get; set; }
-        public int intClassId { get; set; }
+        public int? intFamilyId { get; set; }
+        public int? intClassId { get; set; }
         public bool ysnFoodStampable { get; set; }
         public bool ysnReturnable { get; set; }
         public bool ysnSaleable { get; set; }

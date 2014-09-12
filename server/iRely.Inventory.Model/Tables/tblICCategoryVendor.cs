@@ -19,9 +19,9 @@ namespace iRely.Inventory.Model
         public bool ysnUpdateExistingRecords { get; set; }
         public bool ysnAddNewRecords { get; set; }
         public bool ysnUpdatePrice { get; set; }
-        public int intFamilyId { get; set; }
-        public int intSellClassId { get; set; }
-        public int intOrderClassId { get; set; }
+        public int? intFamilyId { get; set; }
+        public int? intSellClassId { get; set; }
+        public int? intOrderClassId { get; set; }
         public string strComments { get; set; }
 
         public tblICCategory tblICCategory { get; set; }
