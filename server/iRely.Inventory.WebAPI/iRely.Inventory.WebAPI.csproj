@@ -39,6 +39,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\resources\references\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
     <Reference Include="IdeaBlade.Core">
       <HintPath>..\..\..\resources\references\IdeaBlade.Core.dll</HintPath>
     </Reference>
@@ -275,7 +279,7 @@
         <WebProjectProperties>
           <UseIIS>True</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>0</DevelopmentServerPort>
+          <DevelopmentServerPort>59393</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>http://localhost:51448/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>

@@ -22,7 +22,7 @@ namespace iRely.Inventory.Model
         public int intStatusId { get; set; }
         public string strModelNo { get; set; }
         public int intCostingMethodId { get; set; }
-        public int intCategoryId { get; set; }
+        public int? intCategoryId { get; set; }
         public int intPatronageId { get; set; }
         public int intTaxClassId { get; set; }
         public bool ysnStockedItem { get; set; }

@@ -3,28 +3,25 @@ Ext.define('Inventory.view.override.ItemViewController', {
 
     config: {
         searchConfig: {
-            title:  'Search Custom Field',
-            type: 'GlobalComponentEngine.CustomField',
+            title:  'Search Item',
+            type: 'Inventory.Item',
             api: {
-                read: '../GlobalComponentEngine/api/CustomField/GetCustomFields'
+                read: '../Inventory/api/Item/GetItems'
             },
             columns: [
-                {dataIndex: 'intCustomFieldId',text: "Custom Field ID", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
-                {dataIndex: 'strScreen', text: 'Screen', flex: 1,  dataType: 'string'},
-                {dataIndex: 'strModule', text: 'Module', flex: 1,  dataType: 'string'},
-                {dataIndex: 'strTabName',text: 'Tab Name', flex: 1,  dataType: 'string'},
-                {dataIndex: 'strDescription', text: 'Description', flex: 2,  dataType: 'string'}
+                {dataIndex: 'intItemId',text: "Item Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
+                {dataIndex: 'strItemNo', text: 'Item No', flex: 1,  dataType: 'string'},
+                {dataIndex: 'strDescription', text: 'Description', flex: 1,  dataType: 'string'},
+                {dataIndex: 'strModelNo',text: 'Model No', flex: 1,  dataType: 'string'}
             ]
         },
         binding: {
-            cboScreenName: {
-                value: '{current.strScreen}',
-                store: '{screens}',
-                readOnly: '{current.ysnBuild}'
-            },
-            cboLayout: '{current.strLayout}',
-            txtModule: '{current.strModule}',
-            txtTabName: '{current.strTabName}',
+//            cboScreenName: {
+//                value: '{current.strScreen}',
+//                store: '{screens}',
+//                readOnly: '{current.ysnBuild}'
+//            },
+            txtItemNo: '{current.strItemNo}',
             txtDescription: '{current.strDescription}'
         }
     },

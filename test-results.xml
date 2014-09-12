@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <testsuites>
-  <testsuite name="PhantomJS 1.9.7 (Windows 8)" package="Cash Management Unit Test Results" timestamp="2014-09-11T10:19:45" id="0" hostname="Whizz">
+  <testsuite name="PhantomJS 1.9.7 (Windows 8)" package="Cash Management Unit Test Results" timestamp="2014-09-12T03:45:42" id="0" hostname="Whizz">
     <properties>
       <property name="browser.fullName" value="Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/534.34 (KHTML, like Gecko) PhantomJS/1.9.7 Safari/534.34"/>
     </properties>
   </testsuite>
-  <testsuite name="PhantomJS 1.9.7 (Windows 8)" package="Cash Management Unit Test Results" timestamp="2014-09-11T10:19:46" id="0" hostname="Whizz" tests="5" errors="0" failures="0" time="0.002">
+  <testsuite name="PhantomJS 1.9.7 (Windows 8)" package="Cash Management Unit Test Results" timestamp="2014-09-12T03:45:42" id="0" hostname="Whizz" tests="5" errors="0" failures="0" time="0.001">
     <properties>
       <property name="browser.fullName" value="Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/534.34 (KHTML, like Gecko) PhantomJS/1.9.7 Safari/534.34"/>
     </properties>
@@ -13,7 +13,7 @@
     <testcase name="View Controller exists" time="0" classname="Cash Management Unit Test Results PhantomJS 1.9.7 (Windows 8).Item View Controller"/>
     <testcase name="has a show function" time="0" classname="Cash Management Unit Test Results PhantomJS 1.9.7 (Windows 8).Item View Controller Standard Methods"/>
     <testcase name="has a setupContext function" time="0" classname="Cash Management Unit Test Results PhantomJS 1.9.7 (Windows 8).Item View Controller Standard Methods"/>
-    <testcase name="has a setupContext function" time="0.001" classname="Cash Management Unit Test Results PhantomJS 1.9.7 (Windows 8).Item View Controller Standard Methods"/>
+    <testcase name="has a setupContext function" time="0" classname="Cash Management Unit Test Results PhantomJS 1.9.7 (Windows 8).Item View Controller Standard Methods"/>
     <system-out><![CDATA[
 ]]></system-out>
     <system-err/>
