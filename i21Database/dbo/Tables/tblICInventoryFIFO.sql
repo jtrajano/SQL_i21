@@ -1,4 +1,9 @@
-﻿CREATE TABLE [dbo].[tblICInventoryFIFO]
+﻿/*
+	Tracks all stocks in a FIFO manner. 
+	Records must be maintained in this table even if the costing method for an item is not FIFO.
+*/
+
+CREATE TABLE [dbo].[tblICInventoryFIFO]
 (
 	[intInventoryFIFOId] INT NOT NULL IDENTITY, 
     [intItemId] INT NOT NULL, 

@@ -1,4 +1,10 @@
-﻿CREATE TABLE [dbo].[tblICInventoryTransaction]
+﻿/*
+	In VisionCore, we call this table tblGLVoucher. This table will be used to hold the all detail of an items related to the posted transaction. 
+	It will include the stock quantity, cost, and sales prices. It is very relevant to the items costing method and valuation. 
+	Records from this table will be used to generate the GL entries and later on for the inventory valuation report. 
+*/
+
+CREATE TABLE [dbo].[tblICInventoryTransaction]
 (
 	[intInventoryTransactionId] INT NOT NULL  IDENTITY, 
 	[intItemId] INT NOT NULL,

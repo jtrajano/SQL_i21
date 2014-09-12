@@ -1,4 +1,9 @@
-﻿CREATE TABLE [dbo].[tblICInventoryTransactionLIFO]
+﻿/*
+	This table will track all the ins and outs of an item as if it is working in a LIFO manner. 
+	It physically arranges all the records in a LIFO (descending) order. 
+*/
+
+CREATE TABLE [dbo].[tblICInventoryTransactionLIFO]
 (
 	[intInventoryTransactionLIFOId] INT NOT NULL  IDENTITY, 
 	[intItemId] INT NOT NULL,

@@ -1,4 +1,9 @@
-﻿CREATE TABLE [dbo].[tblICInventoryTransactionFIFO]
+﻿/*
+	This table will track all the ins and outs of an item as if it is working in a FIFO manner. 
+	It physically arranges all the records in a FIFO (ascending) order. 
+*/
+
+CREATE TABLE [dbo].[tblICInventoryTransactionFIFO]
 (
 	[intInventoryTransactionFIFOId] INT NOT NULL  IDENTITY, 
 	[intItemId] INT NOT NULL,

@@ -1,4 +1,8 @@
-﻿CREATE TABLE [dbo].[tblICInventoryStockSummary]
+﻿/*
+	This table summarizes the total stocks (for both ins and outs) of item per location-store. 
+*/
+
+CREATE TABLE [dbo].[tblICInventoryStockSummary]
 (
 	[intInventoryStockSummaryId] INT NOT NULL IDENTITY, 
     [intItemId] INT NOT NULL, 

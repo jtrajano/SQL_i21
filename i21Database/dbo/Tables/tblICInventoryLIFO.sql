@@ -1,4 +1,9 @@
-﻿CREATE TABLE [dbo].[tblICInventoryLIFO]
+﻿/*
+	Tracks all stocks in a LIFO manner. 
+	Records must be maintained in this table even if the costing method for an item is not LIFO.
+*/
+
+CREATE TABLE [dbo].[tblICInventoryLIFO]
 (
 	[intInventoryLIFOId] INT NOT NULL IDENTITY, 
     [intItemId] INT NOT NULL, 
