@@ -16,7 +16,8 @@ CREATE TABLE [dbo].[tblICInventoryTransaction]
 	[dblSalesPrice] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 	[intCurrencyId] INT NULL,
 	[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL,
-    [intSourceTransactionId] INT NOT NULL, 
+    [intTransactionId] INT NOT NULL, 
+	[strTransactionId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[intTransactionTypeId] INT NOT NULL, 
 	[intCostingId] INT NULL,
     [intLotId] INT NULL, 
@@ -41,3 +42,11 @@ CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_intItemId]
 GO
 CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_intItemLocationStoreId]
     ON [dbo].[tblICInventoryTransaction]([intItemLocationStoreId] ASC);
+
+GO
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_intTransactionId]
+    ON [dbo].[tblICInventoryTransaction]([intTransactionId] ASC);
+
+GO
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_strTransactionId]
+	ON [dbo].[tblICInventoryTransaction]([strTransactionId] ASC);

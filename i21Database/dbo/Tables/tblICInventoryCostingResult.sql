@@ -23,7 +23,7 @@ CREATE TABLE [dbo].[tblICInventoryCostingResult]
     [intUserId] INT NULL, -- The user who is doing the post/unpost. 
     [intEntityId] INT NULL, -- The entity id related to the transaction. 
     [dtmCreated] DATETIME NOT NULL, -- The system date when the record is being posted/unposted. 
-    CONSTRAINT [PK_tblICInventoryCostingResult] PRIMARY KEY ([intResultId])
+    CONSTRAINT [PK_tblICInventoryCostingResult] PRIMARY KEY NONCLUSTERED ([intResultId])
 )
 GO
 
