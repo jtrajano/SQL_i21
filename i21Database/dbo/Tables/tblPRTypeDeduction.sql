@@ -7,7 +7,6 @@
 	[strDeductFrom] [nvarchar](50) NULL,
 	[strCalculationType] [nvarchar](50) NULL,
 	[dblAmount] [numeric](18, 6) NULL DEFAULT ((0)),
-	[dblPercent] [numeric](18, 6) NULL DEFAULT ((0)),
 	[dblLimit] [numeric](18, 6) NULL DEFAULT ((0)),
 	[strPaidBy] [nvarchar](50) NULL DEFAULT ('Employee'),
 	[ysnCreatePayable] [bit] NULL DEFAULT ((0)),
@@ -90,14 +89,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'dblAmount'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Percent',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPRTypeDeduction',
-    @level2type = N'COLUMN',
-    @level2name = N'dblPercent'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Limit',
