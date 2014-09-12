@@ -1,7 +1,13 @@
-﻿CREATE TABLE [dbo].[tblICInventoryFIFO]
+﻿/*
+	Tracks all stocks in a FIFO manner. 
+	Records must be maintained in this table even if the costing method for an item is not FIFO.
+*/
+
+CREATE TABLE [dbo].[tblICInventoryFIFO]
 (
 	[intInventoryFIFOId] INT NOT NULL IDENTITY, 
     [intItemId] INT NOT NULL, 
+	[intItemLocationStoreId] INT NOT NULL,
     [dtmDate] DATETIME NOT NULL, 
     [dblStockIn] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [dblStockOut] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
@@ -14,7 +20,7 @@
 GO
 
 CREATE CLUSTERED INDEX [IDX_tblICInventoryFIFO]
-    ON [dbo].[tblICInventoryFIFO]([dtmDate] ASC, [intItemId] ASC, [intInventoryFIFOId] ASC);
+    ON [dbo].[tblICInventoryFIFO]([dtmDate] ASC, [intItemId] ASC, [intItemLocationStoreId] ASC, [intInventoryFIFOId] ASC);
 GO
 
 CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFO_intItemId]

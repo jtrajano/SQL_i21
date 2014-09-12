@@ -1,7 +1,13 @@
-﻿CREATE TABLE [dbo].[tblICInventoryLIFO]
+﻿/*
+	Tracks all stocks in a LIFO manner. 
+	Records must be maintained in this table even if the costing method for an item is not LIFO.
+*/
+
+CREATE TABLE [dbo].[tblICInventoryLIFO]
 (
 	[intInventoryLIFOId] INT NOT NULL IDENTITY, 
     [intItemId] INT NOT NULL, 
+	[intItemLocationStoreId] INT NOT NULL,
     [dtmDate] DATETIME NOT NULL, 
     [dblStockIn] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [dblStockOut] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
@@ -14,7 +20,7 @@
 GO
 
 CREATE CLUSTERED INDEX [IDX_tblICInventoryLIFO]
-    ON [dbo].[tblICInventoryLIFO]([dtmDate] DESC, [intItemId] ASC, [intInventoryLIFOId] DESC);
+    ON [dbo].[tblICInventoryLIFO]([dtmDate] DESC, [intItemId] ASC, [intItemLocationStoreId] ASC, [intInventoryLIFOId] DESC);
 GO
 
 CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFO_intItemId]
