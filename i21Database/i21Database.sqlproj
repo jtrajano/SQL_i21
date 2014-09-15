@@ -716,6 +716,7 @@
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\2_ReportDeleteOldData.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\3_ReportEnableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\4_ReportData.sql" />
+    <Build Include="dbo\Tables\tblICInventoryCostingBucket.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -1,6 +1,7 @@
 ﻿/*
-	This table will track all the ins and outs of an item as if it is working in a FIFO manner. 
-	It physically arranges all the records in a FIFO (ascending) order. 
+	The purpose of this table is keep track of all inbound and outbound flow of items with each having its own separate records. 
+	So an inbound will have its own record and the outbound will also have its own. The intCostingId field will be the link back to the tblICInventoryFIFO table. 
+	When an outbound transaction is un-posted, we will use the record in this table to update the appropriate record in tblICInventoryFIFO.
 */
 
 CREATE TABLE [dbo].[tblICInventoryTransactionFIFO]
