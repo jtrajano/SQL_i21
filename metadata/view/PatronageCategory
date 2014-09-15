@@ -7,11 +7,6 @@
     "codeClass": null,
     "userConfig": {
         "collapsible": true,
-        "controller": [
-            "{",
-            "        type: 'patronagecategory'",
-            "    }"
-        ],
         "defaultFocus": null,
         "designer|userAlias": "patronagecategory",
         "designer|userClassName": "PatronageCategory",

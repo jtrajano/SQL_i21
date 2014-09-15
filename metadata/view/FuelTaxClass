@@ -7,11 +7,6 @@
     "codeClass": null,
     "userConfig": {
         "collapsible": true,
-        "controller": [
-            "{",
-            "        type: 'fueltaxclass'",
-            "    }"
-        ],
         "defaultFocus": null,
         "designer|userAlias": "fueltaxclass",
         "designer|userClassName": "FuelTaxClass",

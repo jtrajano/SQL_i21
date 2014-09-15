@@ -7,11 +7,6 @@
     "codeClass": null,
     "userConfig": {
         "collapsible": true,
-        "controller": [
-            "{",
-            "        type: 'categorystore'",
-            "    }"
-        ],
         "defaultFocus": null,
         "designer|userAlias": "categorystore",
         "designer|userClassName": "CategoryStore",

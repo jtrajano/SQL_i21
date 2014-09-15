@@ -7,11 +7,6 @@
     "codeClass": null,
     "userConfig": {
         "collapsible": true,
-        "controller": [
-            "{",
-            "        type: 'fueltank'",
-            "    }"
-        ],
         "defaultFocus": null,
         "designer|userAlias": "fueltank",
         "designer|userClassName": "FuelTank",
