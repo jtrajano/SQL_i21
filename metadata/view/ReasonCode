@@ -7,11 +7,6 @@
     "codeClass": null,
     "userConfig": {
         "collapsible": true,
-        "controller": [
-            "{",
-            "        type: 'reasoncode'",
-            "    }"
-        ],
         "defaultFocus": null,
         "designer|userAlias": "reasoncode",
         "designer|userClassName": "ReasonCode",

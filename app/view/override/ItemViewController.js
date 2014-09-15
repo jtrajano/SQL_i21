@@ -6,7 +6,7 @@ Ext.define('Inventory.view.override.ItemViewController', {
             title:  'Search Item',
             type: 'Inventory.Item',
             api: {
-                read: '../Inventory/api/Item/GetItems'
+                read: '../Inventory/api/Item/SearchItems'
             },
             columns: [
                 {dataIndex: 'intItemId',text: "Item Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},

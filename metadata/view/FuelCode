@@ -7,11 +7,6 @@
     "codeClass": null,
     "userConfig": {
         "collapsible": true,
-        "controller": [
-            "{",
-            "        type: 'fuelcode'",
-            "    }"
-        ],
         "defaultFocus": null,
         "designer|userAlias": "fuelcode",
         "designer|userClassName": "FuelCode",
