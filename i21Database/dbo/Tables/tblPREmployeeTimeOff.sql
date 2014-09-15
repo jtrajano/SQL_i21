@@ -9,7 +9,6 @@
 	[dblHoursAccrued] [numeric](18, 6) NULL DEFAULT ((0)),
 	[dblHoursUsed] [numeric](18, 6) NULL DEFAULT ((0)),
 	[dblCarryOver] [numeric](18, 6) NULL DEFAULT ((0)),
-	[ysnDefault] [bit] NULL DEFAULT ((1)),
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblPREmployeeTimeOff] PRIMARY KEY ([intEmployeeTimeOffId]), 
@@ -111,14 +110,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'dblCarryOver'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Default',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployeeTimeOff',
-    @level2type = N'COLUMN',
-    @level2name = 'ysnDefault'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Sort Field',
