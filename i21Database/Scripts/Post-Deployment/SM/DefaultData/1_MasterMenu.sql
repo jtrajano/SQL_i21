@@ -598,15 +598,15 @@ GO
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inventory Transfer' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivityId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('Inventory Transfer', 'Inventory', @InventoryActivityId, 'Inventory Transfer', 'Screen', 'ic/inventorytransfer', 'small-screen', 1, 1, 0, 1, 2, 0)
+	VALUES ('Inventory Transfer', 'Inventory', @InventoryActivityId, 'Inventory Transfer', 'Screen', 'ic/inventoryTransfer', 'small-screen', 1, 1, 0, 1, 2, 0)
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inventory Adjustment' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivityId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('Inventory Adjustment', 'Inventory', @InventoryActivityId, 'Inventory Adjustment', 'Screen', 'ic/inventoryadjustment', 'small-screen', 1, 1, 0, 1, 3, 0)
+	VALUES ('Inventory Adjustment', 'Inventory', @InventoryActivityId, 'Inventory Adjustment', 'Screen', 'ic/inventoryAdjustment', 'small-screen', 1, 1, 0, 1, 3, 0)
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Physical Count' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivityId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('Physical Count', 'Inventory', @InventoryActivityId, 'Physical Count', 'Screen', 'ic/physicalcount', 'small-screen', 1, 1, 0, 1, 4, 0)
+	VALUES ('Physical Count', 'Inventory', @InventoryActivityId, 'Physical Count', 'Screen', 'ic/physicalCount', 'small-screen', 1, 1, 0, 1, 4, 0)
 
 
 	/* --------------------------------------- */
@@ -647,27 +647,27 @@ GO
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fuel Category' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('Fuel Category', 'Inventory', @InventoryRINId, 'Fuel Category', 'Screen', 'ic/fuelcategory', 'small-screen', 1, 1, 0, 1, 1, 0)
+	VALUES ('Fuel Category', 'Inventory', @InventoryRINId, 'Fuel Category', 'Screen', 'ic/fuelCategory', 'small-screen', 1, 1, 0, 1, 1, 0)
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fuel Code' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('Fuel Code', 'Inventory', @InventoryRINId, 'Fuel Code', 'Screen', 'ic/fuelcode', 'small-screen', 1, 1, 0, 1, 2, 0)
+	VALUES ('Fuel Code', 'Inventory', @InventoryRINId, 'Fuel Code', 'Screen', 'ic/fuelCode', 'small-screen', 1, 1, 0, 1, 2, 0)
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Process Code' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('Process Code', 'Inventory', @InventoryRINId, 'Process Code', 'Screen', 'ic/processcode', 'small-screen', 1, 1, 0, 1, 3, 0)
+	VALUES ('Process Code', 'Inventory', @InventoryRINId, 'Process Code', 'Screen', 'ic/processCode', 'small-screen', 1, 1, 0, 1, 3, 0)
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Feed Stock Code' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('Feed Stock Code', 'Inventory', @InventoryRINId, 'Feed Stock Code', 'Screen', 'ic/feedstockcode', 'small-screen', 1, 1, 0, 1, 4, 0)
+	VALUES ('Feed Stock Code', 'Inventory', @InventoryRINId, 'Feed Stock Code', 'Screen', 'ic/feedStockCode', 'small-screen', 1, 1, 0, 1, 4, 0)
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Feed Stock UOM' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('Feed Stock UOM', 'Inventory', @InventoryRINId, 'Feed Stock UOM', 'Screen', 'ic/feedstockuom', 'small-screen', 1, 1, 0, 1, 5, 0)
+	VALUES ('Feed Stock UOM', 'Inventory', @InventoryRINId, 'Feed Stock UOM', 'Screen', 'ic/feedStockUOM', 'small-screen', 1, 1, 0, 1, 5, 0)
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fuel Type' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('Fuel Type', 'Inventory', @InventoryRINId, 'Fuel Type', 'Screen', 'ic/fueltype', 'small-screen', 1, 1, 0, 1, 6, 0)
+	VALUES ('Fuel Type', 'Inventory', @InventoryRINId, 'Fuel Type', 'Screen', 'ic/fuelType', 'small-screen', 1, 1, 0, 1, 6, 0)
 	/* -------------------------------- */
 	/* ---- End Inventory RIN Menus --- */
 	/* -------------------------------- */
@@ -675,15 +675,15 @@ GO
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fuel Tax Class' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('Fuel Tax Class', 'Inventory', @InventoryMaintenanceId, 'Fuel Tax Class', 'Screen', 'ic/fueltaxclass', 'small-screen', 1, 1, 0, 1, 6, 0)
+	VALUES ('Fuel Tax Class', 'Inventory', @InventoryMaintenanceId, 'Fuel Tax Class', 'Screen', 'ic/fuelTaxClass', 'small-screen', 1, 1, 0, 1, 6, 0)
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inventory Tag' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('Inventory Tag', 'Inventory', @InventoryMaintenanceId, 'Inventory Tag', 'Screen', 'ic/inventorytag', 'small-screen', 1, 1, 0, 1, 7, 0)
+	VALUES ('Inventory Tag', 'Inventory', @InventoryMaintenanceId, 'Inventory Tag', 'Screen', 'ic/inventoryTag', 'small-screen', 1, 1, 0, 1, 7, 0)
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Patronage Category' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('Patronage Category', 'Inventory', @InventoryMaintenanceId, 'Patronage Category', 'Screen', 'ic/patronagecategory', 'small-screen', 1, 1, 0, 1, 8, 0)
+	VALUES ('Patronage Category', 'Inventory', @InventoryMaintenanceId, 'Patronage Category', 'Screen', 'ic/patronageCategory', 'small-screen', 1, 1, 0, 1, 8, 0)
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Manufacturer' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
@@ -691,19 +691,19 @@ GO
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reason Codes' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('Reason Codes', 'Inventory', @InventoryMaintenanceId, 'Reason Codes', 'Screen', 'ic/reasoncode', 'small-screen', 1, 1, 0, 1, 10, 0)
+	VALUES ('Reason Codes', 'Inventory', @InventoryMaintenanceId, 'Reason Codes', 'Screen', 'ic/reasonCode', 'small-screen', 1, 1, 0, 1, 10, 0)
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Factory Unit Type' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('Factory Unit Type', 'Inventory', @InventoryMaintenanceId, 'Factory Unit Type', 'Screen', 'ic/factoryunittype', 'small-screen', 1, 1, 0, 1, 11, 0)
+	VALUES ('Factory Unit Type', 'Inventory', @InventoryMaintenanceId, 'Factory Unit Type', 'Screen', 'ic/factoryUnitType', 'small-screen', 1, 1, 0, 1, 11, 0)
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Factory Unit' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('Factory Unit', 'Inventory', @InventoryMaintenanceId, 'Factory Unit', 'Screen', 'ic/factoryunit', 'small-screen', 1, 1, 0, 1, 12, 0)
+	VALUES ('Factory Unit', 'Inventory', @InventoryMaintenanceId, 'Factory Unit', 'Screen', 'ic/factoryUnit', 'small-screen', 1, 1, 0, 1, 12, 0)
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Item Substitution' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('Item Substitution', 'Inventory', @InventoryMaintenanceId, 'Item Substitution', 'Screen', 'ic/itemsubstitution', 'small-screen', 1, 1, 0, 1, 13, 0)
+	VALUES ('Item Substitution', 'Inventory', @InventoryMaintenanceId, 'Item Substitution', 'Screen', 'ic/itemSubstitution', 'small-screen', 1, 1, 0, 1, 13, 0)
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Warehouse' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
@@ -711,11 +711,11 @@ GO
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Certification Programs' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('Certification Programs', 'Inventory', @InventoryMaintenanceId, 'Certification Programs', 'Screen', 'ic/certificationprogram', 'small-screen', 1, 1, 0, 1, 15, 0)
+	VALUES ('Certification Programs', 'Inventory', @InventoryMaintenanceId, 'Certification Programs', 'Screen', 'ic/certificationProgram', 'small-screen', 1, 1, 0, 1, 15, 0)
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Contract Document' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('Contract Document', 'Inventory', @InventoryMaintenanceId, 'Contract Document', 'Screen', 'ic/contractdocument', 'small-screen', 1, 1, 0, 1, 16, 0)
+	VALUES ('Contract Document', 'Inventory', @InventoryMaintenanceId, 'Contract Document', 'Screen', 'ic/contractDocument', 'small-screen', 1, 1, 0, 1, 16, 0)
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Recipe' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
@@ -723,31 +723,31 @@ GO
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'QA List' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('QA List', 'Inventory', @InventoryMaintenanceId, 'QA List', 'Screen', 'ic/qalist', 'small-screen', 1, 1, 0, 1, 18, 0)
+	VALUES ('QA List', 'Inventory', @InventoryMaintenanceId, 'QA List', 'Screen', 'ic/qAList', 'small-screen', 1, 1, 0, 1, 18, 0)
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'QA Properties' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('QA Properties', 'Inventory', @InventoryMaintenanceId, 'QA Properties', 'Screen', 'ic/qaproperty', 'small-screen', 1, 1, 0, 1, 19, 0)
+	VALUES ('QA Properties', 'Inventory', @InventoryMaintenanceId, 'QA Properties', 'Screen', 'ic/qAProperty', 'small-screen', 1, 1, 0, 1, 19, 0)
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Lot Status' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('Lot Status', 'Inventory', @InventoryMaintenanceId, 'Lot Status', 'Screen', 'ic/lotstatus', 'small-screen', 1, 1, 0, 1, 20, 0)
+	VALUES ('Lot Status', 'Inventory', @InventoryMaintenanceId, 'Lot Status', 'Screen', 'ic/lotStatus', 'small-screen', 1, 1, 0, 1, 20, 0)
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sample Type' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('Sample Type', 'Inventory', @InventoryMaintenanceId, 'Sample Type', 'Screen', 'ic/sampletype', 'small-screen', 1, 1, 0, 1, 21, 0)
+	VALUES ('Sample Type', 'Inventory', @InventoryMaintenanceId, 'Sample Type', 'Screen', 'ic/sampleType', 'small-screen', 1, 1, 0, 1, 21, 0)
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'QA Test' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('QA Test', 'Inventory', @InventoryMaintenanceId, 'QA Test', 'Screen', 'ic/qatest', 'small-screen', 1, 1, 0, 1, 22, 0)
+	VALUES ('QA Test', 'Inventory', @InventoryMaintenanceId, 'QA Test', 'Screen', 'ic/qATest', 'small-screen', 1, 1, 0, 1, 22, 0)
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quality Template' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('Quality Template', 'Inventory', @InventoryMaintenanceId, 'Quality Template', 'Screen', 'ic/qualitytemplate', 'small-screen', 1, 1, 0, 1, 23, 0)
+	VALUES ('Quality Template', 'Inventory', @InventoryMaintenanceId, 'Quality Template', 'Screen', 'ic/qualityTemplate', 'small-screen', 1, 1, 0, 1, 23, 0)
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Pack Type' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('Pack Type', 'Inventory', @InventoryMaintenanceId, 'Pack Type', 'Screen', 'ic/packtype', 'small-screen', 1, 1, 0, 1, 24, 0)
+	VALUES ('Pack Type', 'Inventory', @InventoryMaintenanceId, 'Pack Type', 'Screen', 'ic/packType', 'small-screen', 1, 1, 0, 1, 24, 0)
 	/* ---------------------------------------- */
 	/* -- End of Inventory Maintenance Menus -- */
 	/* ---------------------------------------- */
