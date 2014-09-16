@@ -10,6 +10,11 @@
     [dtmLastUpdated]          DATETIME        DEFAULT 0 NULL,
     [intClockID]              INT             DEFAULT 0 NOT NULL,
     CONSTRAINT [PK_tblTMDDReading] PRIMARY KEY CLUSTERED ([intDegreeDayReadingID] ASC),
+	CONSTRAINT [UQ_tblTMDegreeDayReading] UNIQUE NONCLUSTERED 
+	(
+		[intClockID] ASC,
+		[dtmDate] ASC
+	),
     CONSTRAINT [FK_tblTMDDReading_tblTMClock] FOREIGN KEY ([intClockID]) REFERENCES [dbo].[tblTMClock] ([intClockID]) ON DELETE CASCADE
 );
 

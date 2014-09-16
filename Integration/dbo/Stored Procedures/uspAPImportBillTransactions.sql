@@ -17,6 +17,10 @@ BEGIN
 	AS
 	BEGIN
 
+	--TODO Add Validation
+	--1. All account that will use in importing should exists in tblAGLAccount
+	--2. Validate Balance after importing
+
 	--CREATE TEMP TABLE TO BYPASS EXECUTING FIXING STARTING NUMBERS
 	SELECT @@ROWCOUNT AS TestColumn INTO #tblTempAPByPassFixStartingNumber
 
@@ -40,7 +44,7 @@ BEGIN
 	--Check if there is check book that was not exists on tblCMBankAccount
 	IF EXISTS(SELECT 1 FROM apchkmst A 
 				LEFT JOIN tblCMBankAccount B
-					ON A.apchk_cbk_no COLLATE Latin1_General_CI_AS = B.strCbkNo COLLATE Latin1_General_CI_AS
+					ON A.apchk_cbk_no = B.strCbkNo COLLATE Latin1_General_CS_AS
 				WHERE B.strCbkNo IS NULL)
 	BEGIN
 		RAISERROR(''There is a check book number that was not imported.'', 16, 1);
@@ -106,7 +110,7 @@ BEGIN
 			[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
 			[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation
 												WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor
-													WHERE strVendorId COLLATE Latin1_General_CI_AS = A.aptrx_vnd_no COLLATE Latin1_General_CI_AS)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
+													WHERE strVendorId COLLATE Latin1_General_CS_AS = A.aptrx_vnd_no)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
 			[intTaxId] 			=	NULL,
 			[dtmDate] 				=	CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 			[dtmBillDate] 			=	CASE WHEN ISDATE(A.aptrx_sys_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
@@ -129,7 +133,7 @@ BEGIN
 			LEFT JOIN apcbkmst B
 				ON A.aptrx_cbk_no = B.apcbk_no
 			INNER JOIN tblAPVendor D
-				ON A.aptrx_vnd_no COLLATE Latin1_General_CI_AS = D.strVendorId COLLATE Latin1_General_CI_AS
+				ON A.aptrx_vnd_no = D.strVendorId COLLATE Latin1_General_CS_AS
 			WHERE A.aptrx_trans_type IN (''I'',''C'',''A'')
 
 
@@ -142,7 +146,7 @@ BEGIN
 			[strVendorOrderNumber] 	=	A.apivc_ivc_no,
 			[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation 
 												WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
-													WHERE strVendorId COLLATE Latin1_General_CI_AS = A.apivc_vnd_no COLLATE Latin1_General_CI_AS)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
+													WHERE strVendorId COLLATE Latin1_General_CS_AS = A.apivc_vnd_no)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
 			[intTaxId] 			=	NULL,
 			[dtmDate] 				=	CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 			[dtmBillDate] 			=	CASE WHEN ISDATE(A.apivc_ivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_ivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
@@ -154,7 +158,7 @@ BEGIN
 												CASE WHEN A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'' THEN A.apivc_orig_amt * -1
 														ELSE A.apivc_orig_amt END
 											END,
-			[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CI_AS = RTRIM(A.apivc_user_id) COLLATE Latin1_General_CI_AS),@UserId),
+			[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CS_AS = RTRIM(A.apivc_user_id)),@UserId),
 			[ysnPosted]				=	1,
 			[ysnPaid]				=	CASE WHEN A.apivc_status_ind = ''P'' THEN 1 ELSE 0 END,
             [intTransactionType]	=	CASE WHEN A.apivc_trans_type = ''I'' THEN 1
@@ -168,7 +172,7 @@ BEGIN
 			LEFT JOIN apcbkmst B
 				ON A.apivc_cbk_no = B.apcbk_no
 			INNER JOIN tblAPVendor D
-				ON A.apivc_vnd_no COLLATE Latin1_General_CI_AS = D.strVendorId COLLATE Latin1_General_CI_AS
+				ON A.apivc_vnd_no = D.strVendorId COLLATE Latin1_General_CS_AS
 			WHERE A.apivc_trans_type IN (''I'',''C'',''A'')
 				
 		SELECT @ImportedRecords = @@ROWCOUNT
@@ -188,10 +192,21 @@ BEGIN
 		FROM tblAPBill A
 			INNER JOIN tblAPVendor B
 				ON A.intVendorId = B.intVendorId
-			INNER JOIN apeglmst C
-				ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = C.apegl_ivc_no COLLATE Latin1_General_CI_AS
-				AND B.strVendorId COLLATE Latin1_General_CI_AS = C.apegl_vnd_no COLLATE Latin1_General_CI_AS
-		UNION
+			INNER JOIN (aptrxmst C2 INNER JOIN apeglmst C 
+							ON C2.aptrx_ivc_no = C.apegl_ivc_no 
+							AND C2.aptrx_vnd_no = C.apegl_vnd_no
+							AND C2.aptrx_cbk_no = C.apegl_cbk_no
+							AND C2.aptrx_trans_type = C.apegl_trx_ind)
+				ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C2.aptrx_ivc_no
+				AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.aptrx_vnd_no
+			ORDER BY C.apegl_dist_no
+		
+		INSERT INTO tblAPBillDetail(
+			[intBillId],
+			[strDescription],
+			[intAccountId],
+			[dblTotal]
+		)
 		SELECT 
 			A.intBillId,
 			A.strDescription,
@@ -200,10 +215,14 @@ BEGIN
 			FROM tblAPBill A
 			INNER JOIN tblAPVendor B
 				ON A.intVendorId = B.intVendorId
-			INNER JOIN aphglmst C
-				ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = C.aphgl_ivc_no COLLATE Latin1_General_CI_AS
-				AND B.strVendorId COLLATE Latin1_General_CI_AS = C.aphgl_vnd_no COLLATE Latin1_General_CI_AS
-
+			INNER JOIN (apivcmst C2 INNER JOIN aphglmst C 
+						ON C2.apivc_ivc_no = C.aphgl_ivc_no 
+						AND C2.apivc_vnd_no = C.aphgl_vnd_no
+						AND C2.apivc_cbk_no = C.aphgl_cbk_no
+						AND C2.apivc_trans_type = C.aphgl_trx_ind)
+				ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C2.apivc_ivc_no
+				AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.apivc_vnd_no
+				ORDER BY C.aphgl_dist_no
 		--Create Bill Batch transaction
 		--SELECT @totalBills = COUNT(*) FROM @InsertedData
 
@@ -254,8 +273,8 @@ BEGIN
 			AND A.apchk_cbk_no = B.apivc_cbk_no
 		AND A.apchk_trx_ind <> ''O''
 			INNER JOIN (tblAPBill C INNER JOIN tblAPVendor D ON C.intVendorId = D.intVendorId)
-				ON B.apivc_ivc_no COLLATE Latin1_General_CI_AS = C.strVendorOrderNumber COLLATE Latin1_General_CI_AS
-				AND B.apivc_vnd_no COLLATE Latin1_General_CI_AS = D.strVendorId COLLATE Latin1_General_CI_AS
+				ON B.apivc_ivc_no = C.strVendorOrderNumber COLLATE Latin1_General_CS_AS
+				AND B.apivc_vnd_no = D.strVendorId COLLATE Latin1_General_CS_AS
 			--ORDER BY A.apchk_rev_dt, A.apchk_cbk_no, A.apchk_chk_no
 		)
 		SELECT
@@ -298,9 +317,9 @@ BEGIN
 				@billIds = A.BillIds
 			FROM #tmpBillsPayment A
 				INNER JOIN tblAPVendor B
-					ON A.apchk_vnd_no COLLATE Latin1_General_CI_AS = B.strVendorId COLLATE Latin1_General_CI_AS
+					ON A.apchk_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
 				INNER JOIN tblCMBankAccount C
-					ON A.apchk_cbk_no COLLATE Latin1_General_CI_AS = C.strCbkNo COLLATE Latin1_General_CI_AS
+					ON A.apchk_cbk_no = C.strCbkNo COLLATE Latin1_General_CS_AS
 
 			EXEC uspAPCreatePayment @userId = @UserId,
 					@bankAccount = @bankAccount,
@@ -405,7 +424,7 @@ BEGIN
 			[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
 			[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation
 												WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor
-													WHERE strVendorId COLLATE Latin1_General_CI_AS = A.aptrx_vnd_no COLLATE Latin1_General_CI_AS)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
+													WHERE strVendorId COLLATE Latin1_General_CS_AS = A.aptrx_vnd_no)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
 			[intTaxId] 			=	NULL,
 			[dtmDate] 				=	CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 			[dtmBillDate] 			=	CASE WHEN ISDATE(A.aptrx_sys_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
@@ -414,7 +433,7 @@ BEGIN
 			[strDescription] 		=	A.aptrx_comment,
 			[dblTotal] 				=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
 			[dblAmountDue]			=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
-			[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CI_AS = RTRIM(A.aptrx_user_id) COLLATE Latin1_General_CI_AS),@UserId),
+			[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CS_AS = RTRIM(A.aptrx_user_id)),@UserId),
 			[ysnPosted]				=	0,
 			[ysnPaid] 				=	0,
 			[intTransactionType]	=	CASE WHEN A.aptrx_trans_type = ''I'' THEN 1
@@ -428,7 +447,7 @@ BEGIN
 			LEFT JOIN apcbkmst B
 				ON A.aptrx_cbk_no = B.apcbk_no
 			INNER JOIN tblAPVendor D
-				ON A.aptrx_vnd_no COLLATE Latin1_General_CI_AS = D.strVendorId COLLATE Latin1_General_CI_AS
+				ON A.aptrx_vnd_no = D.strVendorId COLLATE Latin1_General_CS_AS
             LEFT JOIN tblAPaptrxmst C
                 ON A.aptrx_ivc_no = C.aptrx_ivc_no
 		WHERE CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
@@ -445,7 +464,7 @@ BEGIN
 --			[strVendorOrderNumber] 	=	A.apivc_ivc_no,
 --			[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation
 --												WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor
---													WHERE strVendorId COLLATE Latin1_General_CI_AS = A.apivc_vnd_no COLLATE Latin1_General_CI_AS)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
+--													WHERE strVendorId COLLATE Latin1_General_CS_AS = A.apivc_vnd_no COLLATE Latin1_General_CS_AS)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
 --			[intTaxId] 			=	NULL,
 --			[dtmDate] 				=	CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 --			[dtmBillDate] 			=	CASE WHEN ISDATE(A.apivc_ivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_ivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
@@ -456,7 +475,7 @@ BEGIN
 --			[dblAmountDue]			=	CASE WHEN A.apivc_status_ind = ''P'' THEN 0 ELSE
 --										(CASE WHEN A.apivc_trans_type = ''C'' THEN (A.apivc_orig_amt * -1) ELSE A.apivc_orig_amt END)
 --										END,
---			[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CI_AS = RTRIM(A.apivc_user_id) COLLATE Latin1_General_CI_AS),@UserId),
+--			[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CS_AS = RTRIM(A.apivc_user_id) COLLATE Latin1_General_CS_AS),@UserId),
 --			[ysnPosted]				=	1,
 --			[ysnPaid]				=	CASE WHEN A.apivc_status_ind = ''P'' THEN 1 ELSE 0 END,
 --			[intTransactionType]	=	(CASE WHEN A.apivc_trans_type = ''C'' THEN 3 ELSE 1 END),
@@ -466,10 +485,10 @@ BEGIN
 --			LEFT JOIN apcbkmst B
 --				ON A.apivc_cbk_no = B.apcbk_no
 --			INNER JOIN tblAPVendor D
---				ON A.apivc_vnd_no COLLATE Latin1_General_CI_AS = D.strVendorId COLLATE Latin1_General_CI_AS
+--				ON A.apivc_vnd_no COLLATE Latin1_General_CS_AS = D.strVendorId COLLATE Latin1_General_CS_AS
 --			LEFT JOIN tblAPBill E
 --				ON D.intVendorId  = E.intVendorId
---				AND A.apivc_ivc_no COLLATE Latin1_General_CI_AS = E.strVendorOrderNumber COLLATE Latin1_General_CI_AS
+--				AND A.apivc_ivc_no COLLATE Latin1_General_CS_AS = E.strVendorOrderNumber COLLATE Latin1_General_CS_AS
 --
 --		WHERE CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
 --			 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
@@ -493,9 +512,14 @@ BEGIN
 			FROM tblAPBill A
 				INNER JOIN tblAPVendor B
 					ON A.intVendorId = B.intVendorId
-				INNER JOIN apeglmst C
-					ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = C.apegl_ivc_no COLLATE Latin1_General_CI_AS
-					AND B.strVendorId COLLATE Latin1_General_CI_AS = C.apegl_vnd_no COLLATE Latin1_General_CI_AS
+				INNER JOIN (aptrxmst C2 INNER JOIN apeglmst C 
+							ON C2.aptrx_ivc_no = C.apegl_ivc_no 
+							AND C2.aptrx_vnd_no = C.apegl_vnd_no
+							AND C2.aptrx_cbk_no = C.apegl_cbk_no
+							AND C2.aptrx_trans_type = C.apegl_trx_ind)
+				ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C2.aptrx_ivc_no
+				AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.aptrx_vnd_no
+				ORDER BY C.apegl_dist_no
 		--UNION
 		--SELECT 
 		--	A.intBillId,
@@ -504,7 +528,7 @@ BEGIN
 		--	C.aphgl_gl_amt
 		--	FROM tblAPBill A
 		--	INNER JOIN aphglmst C
-		--		ON A.strVendorOrderNumber COLLATE Latin1_General_CI_AS = C.aphgl_ivc_no COLLATE Latin1_General_CI_AS
+		--		ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C.aphgl_ivc_no COLLATE Latin1_General_CS_AS
 				
 		----Create Bill Batch transaction
 		--INSERT INTO tblAPBillBatch(intAccountId, ysnPosted, dblTotal, intEntityId)

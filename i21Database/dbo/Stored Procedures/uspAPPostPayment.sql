@@ -213,7 +213,7 @@ BEGIN
 				A.intPaymentId
 			FROM tblAPPayment A 
 				INNER JOIN tblCMBankTransaction B ON A.strPaymentRecordNum = B.strTransactionId
-			WHERE B.ysnClr = 1
+			WHERE B.ysnClr = 1 AND intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		--CM Voiding Validation
 		INSERT INTO #tmpPayableInvalidData
@@ -320,7 +320,7 @@ BEGIN
 			,[dblDebitUnit]			= CASE WHEN @post = 1 THEN ISNULL(A.[dblAmountPaid], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0) ELSE 0 END
 			,[dblCreditUnit]		= CASE WHEN @post = 1 THEN ISNULL(A.[dblAmountPaid], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0) ELSE 0 END
 			,A.[dtmDatePaid]
-			,0
+			,CASE WHEN @post = 1 THEN 0 ELSE 1 END
 			,1
 			,[dblExchangeRate]		= 1
 			,[intUserId]			= @userId
@@ -354,7 +354,7 @@ BEGIN
 			,[dblDebitUnit]			= CASE WHEN @post = 1 THEN ISNULL(A.dblWithheld, 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0) ELSE 0 END
 			,[dblCreditUnit]		= CASE WHEN @post = 1 THEN ISNULL(A.dblWithheld, 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0) ELSE 0 END
 			,A.[dtmDatePaid]
-			,0
+			,CASE WHEN @post = 1 THEN 0 ELSE 1 END
 			,1
 			,[dblExchangeRate]		= 1
 			,[intUserId]			= @userId
@@ -385,7 +385,7 @@ BEGIN
 			,[dblDebitUnit]			= CASE WHEN @post = 1 THEN SUM(ISNULL(B.dblDiscount, 0))  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @DiscountAccount), 0) ELSE 0 END
 			,[dblCreditUnit]		= CASE WHEN @post = 1 THEN SUM(ISNULL(B.dblDiscount, 0)) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @DiscountAccount), 0) ELSE 0 END
 			,A.[dtmDatePaid]
-			,0
+			,CASE WHEN @post = 1 THEN 0 ELSE 1 END
 			,1
 			,[dblExchangeRate]		= 1
 			,[intUserId]			= @userId
@@ -435,7 +435,7 @@ BEGIN
 												ELSE B.dblPayment END) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = B.[intAccountId]), 0)
 										  ELSE 0 END
 				,A.[dtmDatePaid]
-				,0
+				,CASE WHEN @post = 1 THEN 0 ELSE 1 END
 				,1
 				,[dblExchangeRate]		= 1
 				,[intUserId]			= @userId
@@ -602,10 +602,12 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 		
 		--Unposting Process
 		UPDATE tblAPPaymentDetail
-			SET tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount + B.dblPayment ELSE B.dblPayment END)
+		SET tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount + C.dblAmountDue + B.dblPayment ELSE (C.dblAmountDue + B.dblPayment) END)
 		FROM tblAPPayment A
 			LEFT JOIN tblAPPaymentDetail B
 				ON A.intPaymentId = B.intPaymentId
+			LEFT JOIN tblAPBill C
+				ON B.intBillId = C.intBillId
 		WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
@@ -626,6 +628,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 		FROM tblAPPayment A
 			INNER JOIN tblGLDetail B
 				ON A.strPaymentRecordNum = B.strTransactionId
+		WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		-- Creating the temp table:
 		DECLARE @isSuccessful BIT
@@ -680,7 +683,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 		WHERE	intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		UPDATE tblAPPaymentDetail
-			SET tblAPPaymentDetail.dblAmountDue = (B.dblTotal) - (B.dblPayment + B.dblDiscount)
+			SET tblAPPaymentDetail.dblAmountDue = (B.dblAmountDue) - (B.dblPayment + B.dblDiscount)
 		FROM tblAPPayment A
 			LEFT JOIN tblAPPaymentDetail B
 				ON A.intPaymentId = B.intPaymentId
@@ -1106,9 +1109,9 @@ Post_Cleanup:
 	IF(ISNULL(@recap,0) = 0)
 	BEGIN
 		--DELETE PAYMENT DETAIL WITH PAYMENT AMOUNT
-		DELETE FROM tblAPPaymentDetail
-		WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-		AND dblPayment = 0
+		--DELETE FROM tblAPPaymentDetail
+		--WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		--AND dblPayment = 0
 
 		--IF(@post = 1)
 		--BEGIN
@@ -1125,7 +1128,7 @@ Post_Cleanup:
 		--	--INNER JOIN #tmpPayablePostData B ON A.intTransactionId = B.intPaymentId 
 
 		--END
-
+		SET @success = 1
 	END
 
 Post_Exit:
