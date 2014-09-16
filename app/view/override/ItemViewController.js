@@ -35,7 +35,6 @@ Ext.define('Inventory.view.override.ItemViewController', {
             window : win,
             store  : store,
             createRecord : me.createRecord,
-            paging: win.down('pagingtoolbar'),
             binding: me.config.binding
 //            details: [{
 //                key: 'tblSMCustomFieldDetails',
