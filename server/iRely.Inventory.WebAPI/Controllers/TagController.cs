@@ -16,25 +16,25 @@ using iRely.Inventory.BRL;
 
 namespace iRely.Invetory.WebAPI.Controllers
 {
-    public class ItemController : ApiController
+    public class TagController : ApiController
     {
-        private Item _ItemBRL = new Item();
+        private Tag _TagBRL = new Tag();
 
-        public HttpResponseMessage SearchItems(int page, int start, int limit, string columns = "", string sort = "", string filter = "")
+        public HttpResponseMessage SearchTags(int page, int start, int limit, string columns = "", string sort = "", string filter = "")
         {
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
-            var predicate = ExpressionBuilder.True<tblICItem>();
+            var predicate = ExpressionBuilder.True<tblICTag>();
             var selector = ExpressionBuilder.GetSelector(columns);
 
             var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts);
 
             if (searchFilters != null)
-                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICItem>(searchFilters);
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICTag>(searchFilters);
 
-            var data = _ItemBRL.GetSearchQuery(page, start, limit, selector, sortSelector, predicate);
+            var data = _TagBRL.GetSearchQuery(page, start, limit, selector, sortSelector, predicate);
 
-            var total = _ItemBRL.GetCount(predicate);
+            var total = _TagBRL.GetCount(predicate);
             return Request.CreateResponse(HttpStatusCode.OK, new
             {
                 data = data,
@@ -43,21 +43,21 @@ namespace iRely.Invetory.WebAPI.Controllers
         }
 
         [HttpGet]
-        [ActionName("GetItems")]
-        public HttpResponseMessage GetItems(int start = 0, int limit = 1, int page = 0, string sort = "", string filter = "")
+        [ActionName("GetTags")]
+        public HttpResponseMessage GetTags(int start = 0, int limit = 1, int page = 0, string sort = "", string filter = "")
         {
             filter = string.IsNullOrEmpty(filter) ? "" : filter;
 
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
-            var predicate = ExpressionBuilder.True<tblICItem>();
-            var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intItemId", "DESC");
+            var predicate = ExpressionBuilder.True<tblICTag>();
+            var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intTagId", "DESC");
 
             if (searchFilters != null)
-                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICItem>(searchFilters, true);
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICTag>(searchFilters, true);
 
-            var total = _ItemBRL.GetCount(predicate);
-            var data = _ItemBRL.GetItems(page, start, page == 0 ? total : limit, sortSelector, predicate);
+            var total = _TagBRL.GetCount(predicate);
+            var data = _TagBRL.GetTags(page, start, page == 0 ? total : limit, sortSelector, predicate);
 
             return Request.CreateResponse(HttpStatusCode.OK, new
             {
@@ -67,17 +67,17 @@ namespace iRely.Invetory.WebAPI.Controllers
         }
 
         [HttpPost]
-        public HttpResponseMessage PostItems(IEnumerable<tblICItem> items, bool continueOnConflict = false)
+        public HttpResponseMessage PostTags(IEnumerable<tblICTag> tags, bool continueOnConflict = false)
         {
-            foreach (var item in items)
-                _ItemBRL.AddItem(item);
+            foreach (var tag in tags)
+                _TagBRL.AddTag(tag);
 
-            var result = _ItemBRL.Save(continueOnConflict);
-            _ItemBRL.Dispose();
+            var result = _TagBRL.Save(continueOnConflict);
+            _TagBRL.Dispose();
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
-                data = items,
+                data = tags,
                 success = !result.HasError,
                 message = new
                 {
@@ -89,18 +89,19 @@ namespace iRely.Invetory.WebAPI.Controllers
         }
 
         [AcceptVerbs("POST", "PUT")]
+        [HttpPost]
         [HttpPut]
-        public HttpResponseMessage PutItems(IEnumerable<tblICItem> items, bool continueOnConflict = false)
+        public HttpResponseMessage PutTags(IEnumerable<tblICTag> tags, bool continueOnConflict = false)
         {
-            foreach (var item in items)
-                _ItemBRL.UpdateItem(item);
+            foreach (var tag in tags)
+                _TagBRL.UpdateTag(tag);
 
-            var result = _ItemBRL.Save(continueOnConflict);
-            _ItemBRL.Dispose();
+            var result = _TagBRL.Save(continueOnConflict);
+            _TagBRL.Dispose();
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
-                data = items,
+                data = tags,
                 success = !result.HasError,
                 message = new
                 {
@@ -112,18 +113,19 @@ namespace iRely.Invetory.WebAPI.Controllers
         }
 
         [AcceptVerbs("POST", "DELETE")]
+        [HttpPost]
         [HttpDelete]
-        public HttpResponseMessage DeleteItems(IEnumerable<tblICItem> items, bool continueOnConflict = false)
+        public HttpResponseMessage DeleteTags(IEnumerable<tblICTag> tags, bool continueOnConflict = false)
         {
-            foreach (var item in items)
-                _ItemBRL.DeleteItem(item);
+            foreach (var tag in tags)
+                _TagBRL.DeleteTag(tag);
 
-            var result = _ItemBRL.Save(continueOnConflict);
-            _ItemBRL.Dispose();
+            var result = _TagBRL.Save(continueOnConflict);
+            _TagBRL.Dispose();
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
-                data = items,
+                data = tags,
                 success = !result.HasError,
                 message = new
                 {
