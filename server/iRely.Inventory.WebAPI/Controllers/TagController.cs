@@ -88,8 +88,6 @@ namespace iRely.Invetory.WebAPI.Controllers
             });
         }
 
-        [AcceptVerbs("POST", "PUT")]
-        [HttpPost]
         [HttpPut]
         public HttpResponseMessage PutTags(IEnumerable<tblICTag> tags, bool continueOnConflict = false)
         {
