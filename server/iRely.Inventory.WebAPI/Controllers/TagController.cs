@@ -110,8 +110,6 @@ namespace iRely.Invetory.WebAPI.Controllers
             });
         }
 
-        [AcceptVerbs("POST", "DELETE")]
-        [HttpPost]
         [HttpDelete]
         public HttpResponseMessage DeleteTags(IEnumerable<tblICTag> tags, bool continueOnConflict = false)
         {
