@@ -16,13 +16,24 @@ Ext.define('Inventory.view.override.ItemViewController', {
             ]
         },
         binding: {
-//            cboScreenName: {
-//                value: '{current.strScreen}',
-//                store: '{screens}',
-//                readOnly: '{current.ysnBuild}'
-//            },
             txtItemNo: '{current.strItemNo}',
-            txtDescription: '{current.strDescription}'
+            txtDescription: '{current.strDescription}',
+            txtModelNo: '{current.strModelNo}',
+            cboType: {
+                value: '{current.strType}',
+                store: '{ItemTypes}'
+            },
+            cboManufacturer: '{current.intManufacturerId}',
+            cboBrand: '{current.intBrandId}',
+            cboStatus: {
+                value: '{current.strStatus}',
+                store: '{ItemStatuses}'
+            },
+            cboLotTracking: {
+                value: '{current.strLotTracking}',
+                store: '{LotTrackings}'
+            },
+            cboTracking: '{current.intTrackingId}'
         }
     },
 
@@ -54,6 +65,9 @@ Ext.define('Inventory.view.override.ItemViewController', {
 //            }]
         });
 
+        var cboType = win.down('#cboType');
+        cboType.setBind('');
+
         return win.context;
     },
 
@@ -66,7 +80,7 @@ Ext.define('Inventory.view.override.ItemViewController', {
         if (config) {
             win.show();
 
-            Ext.require('Inventory.store.Item', function() {
+//            Ext.require('Inventory.store.Item', function() {
                 var context = me.setupContext( {window : win} );
 
                 if (config.action === 'new') {
@@ -85,7 +99,7 @@ Ext.define('Inventory.view.override.ItemViewController', {
                         filters: config.filter
                     });
                 }
-            });
+//            });
         }
     }
 

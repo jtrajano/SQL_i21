@@ -4950,14 +4950,17 @@
         }
     },
     "tabState": {
-        "openTabs": []
+        "openTabs": [
+            "d7ef9c4d-9fa7-40a9-ac40-8922ff13c54c",
+            "b320bf44-45ff-473f-94a9-356ec5e70c21"
+        ]
     },
     "canvasState": {
         "topInstance": null
     },
     "inspectorState": {
-        "topInstance": null,
-        "selectedInstance": null
+        "topInstance": "abc8e5bd-9f19-4822-8f07-d500a821f35d",
+        "selectedInstance": "abc8e5bd-9f19-4822-8f07-d500a821f35d"
     },
     "editMode": "code",
     "userSettings": {
