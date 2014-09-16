@@ -31,26 +31,29 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework">
-      <HintPath>..\..\..\resources\references\EntityFramework.dll</HintPath>
+      <HintPath>..\packages\EntityFramework.6.1.1\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework.Extended">
-      <HintPath>..\..\..\resources\references\EntityFramework.Extended.dll</HintPath>
+      <HintPath>..\..\..\i21_resources\references\EntityFramework.Extended.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer">
+      <HintPath>..\packages\EntityFramework.6.1.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
     <Reference Include="IdeaBlade.Core">
-      <HintPath>..\..\..\resources\references\IdeaBlade.Core.dll</HintPath>
+      <HintPath>..\..\..\i21_resources\references\IdeaBlade.Core.dll</HintPath>
     </Reference>
     <Reference Include="IdeaBlade.EntityModel">
-      <HintPath>..\..\..\resources\references\IdeaBlade.EntityModel.dll</HintPath>
+      <HintPath>..\..\..\i21_resources\references\IdeaBlade.EntityModel.dll</HintPath>
     </Reference>
     <Reference Include="IdeaBlade.Linq">
-      <HintPath>..\..\..\resources\references\IdeaBlade.Linq.dll</HintPath>
+      <HintPath>..\..\..\i21_resources\references\IdeaBlade.Linq.dll</HintPath>
     </Reference>
     <Reference Include="iRely.Common">
-      <HintPath>..\..\..\resources\references\iRely.Common.dll</HintPath>
+      <HintPath>..\..\..\i21_resources\references\iRely.Common.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Data.Entity" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -58,7 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Category.cs" />
+    <Compile Include="Tag.cs" />
     <Compile Include="Item.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -67,6 +70,10 @@
       <Project>{6e9bbe31-e2dd-4a82-8519-29afc4615179}</Project>
       <Name>iRely.Inventory.Model</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
