@@ -15,9 +15,5 @@
 
 Ext.define('Inventory.view.CategoryViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.category',
-
-    requires: [
-        'Inventory.view.override.CategoryViewController'
-    ]
+    alias: 'controller.category'
 });

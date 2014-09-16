@@ -2714,7 +2714,7 @@ Ext.define('Inventory.view.Item', {
                         ],
                         dockedItems: [
                             {
-                                xtype: 'ipagingstatusbar',
+                                xtype: 'statusbarpaging',
                                 itemId: 'tlbStatusbarPaging',
                                 flex: 1,
                                 dock: 'bottom'

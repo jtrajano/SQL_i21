@@ -16,24 +16,13 @@ Ext.define('Inventory.view.override.ItemViewController', {
             ]
         },
         binding: {
+//            cboScreenName: {
+//                value: '{current.strScreen}',
+//                store: '{screens}',
+//                readOnly: '{current.ysnBuild}'
+//            },
             txtItemNo: '{current.strItemNo}',
-            txtDescription: '{current.strDescription}',
-            txtModelNo: '{current.strModelNo}',
-            cboType: {
-                value: '{current.strType}',
-                store: '{ItemTypes}'
-            },
-            cboManufacturer: '{current.intManufacturerId}',
-            cboBrand: '{current.intBrandId}',
-            cboStatus: {
-                value: '{current.strStatus}',
-                store: '{ItemStatuses}'
-            },
-            cboLotTracking: {
-                value: '{current.strLotTracking}',
-                store: '{LotTrackings}'
-            },
-            cboTracking: '{current.intTrackingId}'
+            txtDescription: '{current.strDescription}'
         }
     },
 
@@ -42,7 +31,7 @@ Ext.define('Inventory.view.override.ItemViewController', {
             win = options.window,
             store = Ext.create('Inventory.store.Item', { pageSize: 1 });
 
-        win.context = Ext.create('iRely.Engine', {
+        win.context = Ext.create('iRely.Framework', {
             window : win,
             store  : store,
             createRecord : me.createRecord,
@@ -65,9 +54,6 @@ Ext.define('Inventory.view.override.ItemViewController', {
 //            }]
         });
 
-        var cboType = win.down('#cboType');
-        cboType.setBind('');
-
         return win.context;
     },
 
@@ -80,26 +66,24 @@ Ext.define('Inventory.view.override.ItemViewController', {
         if (config) {
             win.show();
 
-//            Ext.require('Inventory.store.Item', function() {
-                var context = me.setupContext( {window : win} );
+            var context = me.setupContext(win);
 
-                if (config.action === 'new') {
-                    context.data.addRecord();
-                } else {
-                    if (config.id) {
-                        config.filter = [{
-                            column: 'intCustomFieldId',
-                            value: config.id
-                        }];
-                    }
+            if (config.action === 'new') {
+                context.data.addRecord();
+            } else {
+                if (config.id) {
+                    config.filter = [{
+                        column: 'intCustomFieldId',
+                        value: config.id
+                    }];
+                }
 //                if (config.param) {
 //                    console.log(config.param);
 //                }
-                    context.data.load({
-                        filters: config.filter
-                    });
-                }
-//            });
+                context.data.load({
+                    filters: config.filter
+                });
+            }
         }
     }
 
