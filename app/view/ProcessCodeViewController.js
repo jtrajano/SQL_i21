@@ -15,5 +15,9 @@
 
 Ext.define('Inventory.view.ProcessCodeViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.processcode'
+    alias: 'controller.processcode',
+
+    requires: [
+        'Inventory.view.override.ProcessCodeViewController'
+    ]
 });

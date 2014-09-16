@@ -8,7 +8,7 @@ describe("Item View Controller", function() {
     var view;
 
     beforeEach(function() {
-        view = Ext.create('Inventory.view.Item');
+        view = Ext.create('Inventory.view.Item', { controller : 'item' });
         controller = view.getController();
     });
 

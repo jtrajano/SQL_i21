@@ -20,17 +20,17 @@ namespace iRely.Inventory.Model
             Database.SetInitializer<InventoryEntities>(null);
         }
 
-        //public InventoryEntities()
-        //    : base(GetConnectionString())
-        //{
-        //    this.Configuration.ProxyCreationEnabled = false;
-        //}
-
         public InventoryEntities()
-            : base("Name=InventoryEntities")
+            : base(GetConnectionString())
         {
             this.Configuration.ProxyCreationEnabled = false;
         }
+
+        //public InventoryEntities()
+        //    : base("Name=InventoryEntities")
+        //{
+        //    this.Configuration.ProxyCreationEnabled = false;
+        //}
 
         #region Function
         /// <summary>

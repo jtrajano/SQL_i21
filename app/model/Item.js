@@ -36,11 +36,11 @@ Ext.define('Inventory.model.Item', {
         { name: 'ysnRestrictedChemical', type: 'boolean'},
         { name: 'ysnTMTankRequired', type: 'boolean'},
         { name: 'ysnTMAvailable', type: 'boolean'},
-        { name: 'dblTMPercentFull', type: 'double'},
+        { name: 'dblTMPercentFull', type: 'float'},
         { name: 'strRINFuelInspectFee', type: 'string'},
         { name: 'strRINRequired', type: 'string'},
         { name: 'intRINFuelType', type: 'int'},
-        { name: 'dblRINDenaturantPercentage', type: 'double'},
+        { name: 'dblRINDenaturantPercentage', type: 'float'},
         { name: 'ysnFeedTonnageTax', type: 'boolean'},
         { name: 'strFeedLotTracking', type: 'string'},
         { name: 'ysnFeedLoadTracking', type: 'boolean'},
@@ -56,7 +56,7 @@ Ext.define('Inventory.model.Item', {
         { name: 'ysnMaterialFee', type: 'boolean'},
         { name: 'ysnAutoCalculateFreight', type: 'boolean'},
         { name: 'intFreightMethodId', type: 'int'},
-        { name: 'dblFreightRate', type: 'double'},
+        { name: 'dblFreightRate', type: 'float'},
         { name: 'intFreightVendorId', type: 'int'}
     ],
 

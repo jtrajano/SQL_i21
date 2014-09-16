@@ -6569,6 +6569,7 @@
                     },
                     "codeClass": null,
                     "userConfig": {
+                        "designer|createAlias": "ipagingstatusbar",
                         "designer|displayName": "",
                         "dock": "bottom",
                         "itemId": "tlbStatusbarPaging",
