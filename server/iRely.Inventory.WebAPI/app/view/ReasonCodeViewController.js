@@ -15,5 +15,9 @@
 
 Ext.define('Inventory.view.ReasonCodeViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.reasoncode'
+    alias: 'controller.reasoncode',
+
+    requires: [
+        'Inventory.view.override.ReasonCodeViewController'
+    ]
 });

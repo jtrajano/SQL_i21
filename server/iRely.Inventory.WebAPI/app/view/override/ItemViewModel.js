@@ -49,45 +49,6 @@ Ext.define('Inventory.view.override.ItemViewModel', {
                     name: 'strType'
                 }
             ]
-        },
-        ItemStatuses: {
-            data: [
-                {
-                    strStatus: 'Active'
-                },
-                {
-                    strStatus: 'Phased Out'
-                },
-                {
-                    strStatus: 'Discontinued'
-                }
-            ],
-            fields: [
-                {
-                    name: 'strStatus'
-                }
-            ]
-        },
-        LotTrackings: {
-            data: [
-                {
-                    strLotTracking: 'Yes'
-                },
-                {
-                    strLotTracking: 'No'
-                },
-                {
-                    strLotTracking: 'Serial Number'
-                },
-                {
-                    strLotTracking: 'Bulk'
-                }
-            ],
-            fields: [
-                {
-                    name: 'strLotTracking'
-                }
-            ]
         }
     }
 });

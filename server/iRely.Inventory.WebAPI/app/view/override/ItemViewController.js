@@ -25,14 +25,8 @@ Ext.define('Inventory.view.override.ItemViewController', {
             },
             cboManufacturer: '{current.intManufacturerId}',
             cboBrand: '{current.intBrandId}',
-            cboStatus: {
-                value: '{current.strStatus}',
-                store: '{ItemStatuses}'
-            },
-            cboLotTracking: {
-                value: '{current.strLotTracking}',
-                store: '{LotTrackings}'
-            },
+            cboStatus: '{current.strStatus}',
+            cboLotTracking: '{current.strLotTracking}',
             cboTracking: '{current.intTrackingId}'
         }
     },
