@@ -88,7 +88,6 @@ namespace iRely.Invetory.WebAPI.Controllers
             });
         }
 
-        [AcceptVerbs("POST", "PUT")]
         [HttpPut]
         public HttpResponseMessage PutItems(IEnumerable<tblICItem> items, bool continueOnConflict = false)
         {
@@ -111,7 +110,6 @@ namespace iRely.Invetory.WebAPI.Controllers
             });
         }
 
-        [AcceptVerbs("POST", "DELETE")]
         [HttpDelete]
         public HttpResponseMessage DeleteItems(IEnumerable<tblICItem> items, bool continueOnConflict = false)
         {

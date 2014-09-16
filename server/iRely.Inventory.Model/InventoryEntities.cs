@@ -15,15 +15,21 @@ namespace iRely.Inventory.Model
 {
     public partial class InventoryEntities : DbContext
     {
-        static InventoryEntities()
+        public InventoryEntities(bool basicAuthorization)
+            : base(GetConnectionString())
+        { 
+
+        }
+
+        public InventoryEntities(string connectionString)
+            : base(connectionString)
         {
-            Database.SetInitializer<InventoryEntities>(null);
+
         }
 
         public InventoryEntities()
-            : base(GetConnectionString())
         {
-            this.Configuration.ProxyCreationEnabled = false;
+
         }
 
         //public InventoryEntities()
@@ -57,7 +63,7 @@ namespace iRely.Inventory.Model
                 var appPath = HttpContext.Current.Request.ApplicationPath;
                 var rootPath = appPath.Substring(0, appPath.LastIndexOf("/"));
 
-                var serverUrl = string.Format("{0}://localhost/{1}", HttpContext.Current.Request.Url.Scheme, rootPath);
+                var serverUrl = string.Format("{0}://{1}/{2}", HttpContext.Current.Request.Url.Scheme, HttpContext.Current.Request.Url.Host, rootPath);
                 var actionUrl = string.Format("{0}/SystemManager/api/CompanyConfiguration/GetCompanyConnection?CompanyName={1}", serverUrl, company);
 
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(actionUrl);
@@ -76,7 +82,10 @@ namespace iRely.Inventory.Model
                     return "";
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public static string GetConnectionString()
         {
             var token = System.Web.HttpContext.Current.Request.Headers["Authorization"];
@@ -85,8 +94,6 @@ namespace iRely.Inventory.Model
             return cs;
         }
         #endregion
-
-        
 
         public DbSet<tblICBrand> tblICBrands { get; set; }
         public DbSet<tblICCatalog> tblICCatalogs { get; set; }
