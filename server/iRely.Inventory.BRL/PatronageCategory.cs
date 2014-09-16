@@ -23,6 +23,7 @@ namespace iRely.Inventory.BRL
         public IQueryable<tblICPatronageCategory> GetSearchQuery()
         {
             return _db.GetQuery<tblICPatronageCategory>();
+
         }
 
         public object GetSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<tblICPatronageCategory, bool>> predicate)

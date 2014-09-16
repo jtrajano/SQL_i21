@@ -185,28 +185,35 @@ Ext.define('Inventory.view.PatronageCategory', {
                                     }
                                 ],
                                 columns: [
+
+                                    {
+                                        dataIndex: 'intPatronageCategoryId',
+                                        text: 'PatronageCategory Id',
+                                        hidden: true,
+                                        flex: 1
+                                    },
                                     {
                                         xtype: 'gridcolumn',
-                                        dataIndex: 'string',
+                                        dataIndex: 'strCategoryCode',
                                         text: 'Category Code',
                                         flex: 1
                                     },
                                     {
                                         xtype: 'gridcolumn',
-                                        dataIndex: 'string',
+                                        dataIndex: 'strDescription',
                                         text: 'Description',
                                         flex: 2
                                     },
                                     {
                                         xtype: 'gridcolumn',
                                         width: 82,
-                                        dataIndex: 'string',
+                                        dataIndex: 'strPurchaseSale',
                                         text: 'Purchase/Sale'
                                     },
                                     {
                                         xtype: 'gridcolumn',
                                         width: 75,
-                                        dataIndex: 'string',
+                                        dataIndex: 'strUnitAmount',
                                         text: 'Unit/Amount'
                                     }
                                 ],
