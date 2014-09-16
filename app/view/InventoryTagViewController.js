@@ -15,5 +15,9 @@
 
 Ext.define('Inventory.view.InventoryTagViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.inventorytag'
+    alias: 'controller.inventorytag',
+
+    requires: [
+        'Inventory.view.override.InventoryTagViewController'
+    ]
 });

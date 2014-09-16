@@ -20,13 +20,13 @@ Ext.define('Inventory.store.Item', {
                 type: 'rest',
                 api: {
                     read: '../Inventory/api/Item/GetItems',
-                    update: '../Inventory/api/Item/PutItem',
-                    create: '../Inventory/api/Item/PostItem',
-                    destroy: '../Inventory/api/Item/DeleteItem'
+                    update: '../Inventory/api/Item/PutItems',
+                    create: '../Inventory/api/Item/PostItems',
+                    destroy: '../Inventory/api/Item/DeleteItems'
                 },
                 reader: {
                     type: 'json',
-                    root: 'data',
+                    rootProperty: 'data',
                     messageProperty: 'message'
                 },
                 writer: {

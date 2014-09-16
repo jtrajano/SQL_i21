@@ -20,6 +20,8 @@ var InventoryFiles = [
     {pattern: 'app/view/*ViewModel.js', watched: false},
     {pattern: 'app/view/*ViewModel1.js', watched: false},
     {pattern: 'app/view/*.js', watched: false},
+    {pattern: 'app/model/*.js', watched: false},
+    {pattern: 'app/store/*.js', watched: false},
 
     // Load the test/app.js (similar to how we call it in SM's app.js)
     {pattern: 'test/app.js', watched: false},

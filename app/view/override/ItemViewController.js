@@ -31,10 +31,11 @@ Ext.define('Inventory.view.override.ItemViewController', {
             win = options.window,
             store = Ext.create('Inventory.store.Item', { pageSize: 1 });
 
-        win.context = Ext.create('iRely.Framework', {
+        win.context = Ext.create('iRely.Engine', {
             window : win,
             store  : store,
             createRecord : me.createRecord,
+            paging: win.down('pagingtoolbar'),
             binding: me.config.binding
 //            details: [{
 //                key: 'tblSMCustomFieldDetails',
@@ -66,24 +67,26 @@ Ext.define('Inventory.view.override.ItemViewController', {
         if (config) {
             win.show();
 
-            var context = me.setupContext(win);
+            Ext.require('Inventory.store.Item', function() {
+                var context = me.setupContext( {window : win} );
 
-            if (config.action === 'new') {
-                context.data.addRecord();
-            } else {
-                if (config.id) {
-                    config.filter = [{
-                        column: 'intCustomFieldId',
-                        value: config.id
-                    }];
-                }
+                if (config.action === 'new') {
+                    context.data.addRecord();
+                } else {
+                    if (config.id) {
+                        config.filter = [{
+                            column: 'intCustomFieldId',
+                            value: config.id
+                        }];
+                    }
 //                if (config.param) {
 //                    console.log(config.param);
 //                }
-                context.data.load({
-                    filters: config.filter
-                });
-            }
+                    context.data.load({
+                        filters: config.filter
+                    });
+                }
+            });
         }
     }
 

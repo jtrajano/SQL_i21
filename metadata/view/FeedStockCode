@@ -229,7 +229,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter34",
+                                    "name": "filter28",
                                     "designerId": "f64a174d-8111-4c4b-a2cd-c9db23158faf",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -303,7 +303,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbar4",
+                    "name": "statusbar",
                     "designerId": "f64f9f87-389a-41a8-b7e6-d9fe91720b28",
                     "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
                 }
