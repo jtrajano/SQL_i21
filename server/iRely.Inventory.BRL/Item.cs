@@ -58,11 +58,12 @@ namespace iRely.Inventory.BRL
         {
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICItem>()
-                      .Where(w => query.Where(predicate).Any(a => a.intItemId == w.intItemId)) //Filter the Main DataSource Based on Search Query
-                      .OrderBySelector(sortSelector)
-                      .Skip(start)
-                      .Take(limit)
-                      .AsNoTracking();
+                    .Include(p => p.tblICItemUOMs)
+                    .Where(w => query.Where(predicate).Any(a => a.intItemId == w.intItemId)) //Filter the Main DataSource Based on Search Query
+                    .OrderBySelector(sortSelector)
+                    .Skip(start)
+                    .Take(limit)
+                    .AsNoTracking();
         }
 
         public void AddItem(tblICItem item)

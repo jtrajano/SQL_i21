@@ -5,6 +5,7 @@ Ext.define('Inventory.model.Item', {
     extend: 'iRely.BaseEntity',
 
     requires: [
+        'Inventory.model.ItemUOM',
         'Ext.data.Field'
     ],
 
@@ -23,19 +24,19 @@ Ext.define('Inventory.model.Item', {
         { name: 'strLotTracking', type: 'string'}
     ],
 
-//    hasMany: {
-//        model: 'GlobalComponentEngine.model.CustomFieldDetail',
-//        name: 'tblSMCustomFieldDetails',
-//        foreignKey: 'intCustomFieldId',
-//        primaryKey: 'intCustomFieldId',
-//        storeConfig: {
-//            sortOnLoad: true,
-//            sorters: {
-//                direction: 'ASC',
-//                property: 'intSort'
-//            }
-//        }
-//    },
+    hasMany: {
+        model: 'Inventory.model.ItemUOM',
+        name: 'tblICItemUOMs',
+        foreignKey: 'intItemId',
+        primaryKey: 'intItemId',
+        storeConfig: {
+            sortOnLoad: true,
+            sorters: {
+                direction: 'ASC',
+                property: 'intSort'
+            }
+        }
+    },
 
     validations: [
         {type: 'presence', field: 'strItemNo'}

@@ -35,7 +35,16 @@ Ext.define('Inventory.view.override.ItemViewController', {
             },
             cboTracking: '{current.intTrackingId}',
             //UOM Grid Columns
-            col
+            colDetailUnitMeasure: 'intUnitMeasureId',
+            colDetailUnitQty: 'dblUnitQty',
+            colDetailSellQty: 'dblSellQty',
+            colDetailWeight: 'dblWeight',
+            colDetailDescription: 'strDescription',
+            colDetailLength: 'dblLength',
+            colDetailWidth: 'dblWidth',
+            colDetailHeight: 'dblHeight',
+            colDetailVolume: 'dblVolume',
+            colDetailMaxQty: 'dblMaxQty'
         }
     },
 
@@ -48,15 +57,12 @@ Ext.define('Inventory.view.override.ItemViewController', {
             window : win,
             store  : store,
             createRecord : me.createRecord,
-            binding: me.config.binding
-//            details: [{
-//                key: 'tblSMCustomFieldDetails',
-//                component: Ext.create('iRely.grid.Manager', {
-//                    grid: win.down('#grdCustomFields'),
-//                    deleteButton : win.down('#btnDeleteDetail'),
-//                    createRecord : me.createDetailRecord,
-//                    deleteRecord : me.deleteDetailRecord
-//                }),
+            binding: me.config.binding,
+            details: [{
+                key: 'tblICItemUOMs',
+                component: Ext.create('iRely.grid.Manager', {
+                    grid: win.down('#grdUnitOfMeasure')
+                })
 //                details: [{
 //                    key: 'tblSMCustomFieldValues',
 //                    component: Ext.create('iRely.grid.Manager', {
@@ -64,12 +70,17 @@ Ext.define('Inventory.view.override.ItemViewController', {
 //                        deleteButton : win.down('#btnDeleteValue')
 //                    })
 //                }]
-//            }]
+            }]
         });
 
 //        var cboType = win.down('#cboType');
-//        cboType.displayField = 'strType';
-//        cboType.valueField = 'strType';
+//        cboType.forceSelection = true;
+//
+//        var cboStatus = win.down('#cboStatus');
+//        cboStatus.forceSelection = true;
+//
+//        var cboLotTracking = win.down('#cboLotTracking');
+//        cboLotTracking.forceSelection = true;
 
         return win.context;
     },

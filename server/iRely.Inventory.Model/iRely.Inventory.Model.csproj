@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="InventoryEntities.cs" />
+    <Compile Include="Mappings\tblICItemUOMMap.cs" />
     <Compile Include="Mappings\tblICBrandMap.cs" />
     <Compile Include="Mappings\tblICCatalogMap.cs" />
     <Compile Include="Mappings\tblICCategoryAccountMap.cs" />

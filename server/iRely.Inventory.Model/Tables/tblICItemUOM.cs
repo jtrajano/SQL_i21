@@ -10,15 +10,20 @@ namespace iRely.Inventory.Model
 {
     public class tblICItemUOM : BaseEntity
     {
+        public int intItemUOMId { get; set; }
         public int intItemId { get; set; }
-        public string strItemNo { get; set; }
-        public string strType { get; set; }
+        public int intUnitMeasureId { get; set; }
+        public double dblUnitQty { get; set; }
+        public double dblSellQty { get; set; }
+        public double dblWeight { get; set; }
         public string strDescription { get; set; }
-        public int intManufacturerId { get; set; }
-        public int intBrandId { get; set; }
-        public string strStatus { get; set; }
-        public string strModelNo { get; set; }
-        public int intTrackingId { get; set; }
-        public string strLotTracking { get; set; }
+        public double dblLength { get; set; }
+        public double dblWidth { get; set; }
+        public double dblHeight { get; set; }
+        public double dblVolume { get; set; }
+        public double dblMaxQty { get; set; }
+
+        public tblICItem tblICItem { get; set; }
+        public tblICUnitMeasure tblICUnitMeasure { get; set; }
     }
 }

@@ -10,6 +10,11 @@ namespace iRely.Inventory.Model
 {
     public class tblICItem : BaseEntity
     {
+        public tblICItem()
+        {
+            this.tblICItemUOMs = new List<tblICItemUOM>();
+        }
+
         public int intItemId { get; set; }
         public string strItemNo { get; set; }
         public string strType { get; set; }
@@ -20,6 +25,8 @@ namespace iRely.Inventory.Model
         public string strModelNo { get; set; }
         public int? intTrackingId { get; set; }
         public string strLotTracking { get; set; }
+
+        public ICollection<tblICItemUOM> tblICItemUOMs { get; set; }
 
         //public int intItemId { get; set; }
         //public string strItemNo { get; set; }

@@ -22,6 +22,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strModelNo).HasColumnName("strModelNo");
             this.Property(t => t.strStatus).HasColumnName("strStatus");
             this.Property(t => t.strType).HasColumnName("strType");
+
+            this.HasMany(p => p.tblICItemUOMs)
+                .WithRequired(p => p.tblICItem)
+                .HasForeignKey(p => p.intItemId);
         }
     }
 }
