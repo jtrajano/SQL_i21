@@ -33,7 +33,9 @@ Ext.define('Inventory.view.override.ItemViewController', {
                 value: '{current.strLotTracking}',
                 store: '{LotTrackings}'
             },
-            cboTracking: '{current.intTrackingId}'
+            cboTracking: '{current.intTrackingId}',
+            //UOM Grid Columns
+            col
         }
     },
 
@@ -65,8 +67,9 @@ Ext.define('Inventory.view.override.ItemViewController', {
 //            }]
         });
 
-        var cboType = win.down('#cboType');
-        cboType.setBind('');
+//        var cboType = win.down('#cboType');
+//        cboType.displayField = 'strType';
+//        cboType.valueField = 'strType';
 
         return win.context;
     },

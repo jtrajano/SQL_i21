@@ -20,6 +20,7 @@ namespace iRely.Invetory.WebAPI.Controllers
     {
         private Item _ItemBRL = new Item();
 
+        [HttpGet]
         public HttpResponseMessage SearchItems(int page, int start, int limit, string columns = "", string sort = "", string filter = "")
         {
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);

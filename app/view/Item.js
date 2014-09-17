@@ -225,7 +225,9 @@ Ext.define('Inventory.view.Item', {
                                                                         margin: '0 1 0 5',
                                                                         width: 170,
                                                                         fieldLabel: 'Type',
-                                                                        labelWidth: 40
+                                                                        labelWidth: 40,
+                                                                        displayField: 'strType',
+                                                                        valueField: 'strType'
                                                                     }
                                                                 ]
                                                             },

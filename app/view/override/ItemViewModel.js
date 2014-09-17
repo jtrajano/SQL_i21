@@ -3,6 +3,7 @@ Ext.define('Inventory.view.override.ItemViewModel', {
 
     stores: {
         ItemTypes: {
+            autoLoad: true,
             data: [
                 {
                     strType: 'Assembly'
@@ -51,6 +52,7 @@ Ext.define('Inventory.view.override.ItemViewModel', {
             ]
         },
         ItemStatuses: {
+            autoLoad: true,
             data: [
                 {
                     strStatus: 'Active'
@@ -69,6 +71,7 @@ Ext.define('Inventory.view.override.ItemViewModel', {
             ]
         },
         LotTrackings: {
+            autoLoad: true,
             data: [
                 {
                     strLotTracking: 'Yes'
