@@ -8,7 +8,7 @@ print('/*******************  BEGIN Populate Inventory Transaction Types ********
 INSERT INTO dbo.[tblICInventoryTransactionType] (
 	[intTransactionTypeId],
 	[strName]
-)ment
+)
 SELECT 
 	[intTransactionTypeId] = 1,
 	[strName] = 'Inventory Adjustment'

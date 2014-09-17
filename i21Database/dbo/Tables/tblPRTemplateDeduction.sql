@@ -9,7 +9,7 @@
 	[dtmBeginDate] [datetime] NULL,
 	[dtmEndDate] [datetime] NULL,
 	[intAccountId] INT NULL,
-	[strPaidBy] [nvarchar](50) NOT NULL DEFAULT ('Employee'),
+	[strPaidBy] [nvarchar](15) NOT NULL DEFAULT ('Employee'),
 	[ysnDefault] [bit] NOT NULL DEFAULT ((1)), 
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NULL DEFAULT ((1)),

@@ -718,6 +718,8 @@
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\4_ReportData.sql" />
     <Build Include="dbo\Tables\tblICInventoryCostingBucket.sql" />
     <Build Include="dbo\Tables\tblPREEOCCode.sql" />
+    <Build Include="dbo\Tables\tblPRPaycheckDeductionTax.sql" />
+    <Build Include="dbo\Tables\tblPRPaycheckEarningTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
