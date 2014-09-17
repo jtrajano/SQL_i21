@@ -29,5 +29,6 @@ CREATE TABLE [dbo].[tblICInventoryCostingBucket]
     [dblExchangeRate] NUMERIC(18, 6) NOT NULL DEFAULT 1, 
 	[intCurrencyId] INT NULL ,
     [intCostType] INT NOT NULL, 
+	[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
     CONSTRAINT [PK_tblICInventoryCostingBucket] PRIMARY KEY ([intCostingBucketId]) 
 )
