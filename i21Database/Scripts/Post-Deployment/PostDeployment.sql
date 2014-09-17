@@ -82,5 +82,8 @@ print 'BEGIN POST DEPLOYMENT'
 -- Version Update
 :r .\VersionUpdate.sql
 
+--Help Desk
+:R .\HD\DefaultData\1_StatusData.sql
+
 
 print 'END POST DEPLOYMENT'

@@ -119,6 +119,7 @@
     <Folder Include="Scripts\Post-Deployment\GL\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\Optional Run" />
     <Folder Include="Scripts\Post-Deployment\Optional Run\1_SM" />
+    <Folder Include="Scripts\Post-Deployment\Reports" />
     <Folder Include="Scripts\Post-Deployment\SM" />
     <Folder Include="Scripts\Post-Deployment\SM\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\TM" />
@@ -132,8 +133,8 @@
     <Folder Include="Scripts\Post-Deployment\AP" />
     <Folder Include="Scripts\Post-Deployment\CM\Reports" />
     <Folder Include="Scripts\Post-Deployment\CM\Reports\SubReports" />
-    <Folder Include="Scripts\Post-Deployment\IC" />
-    <Folder Include="Scripts\Post-Deployment\Optional Run\Reports" />
+    <Folder Include="Scripts\Post-Deployment\HD" />
+    <Folder Include="Scripts\Post-Deployment\HD\DefaultData" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -334,12 +335,8 @@
     <Build Include="dbo\Stored Procedures\uspCMApplyCheckChangeBankReconciliation.sql" />
     <Build Include="dbo\Stored Procedures\uspCMApplyCheckChangeForCheckPrint.sql" />
     <Build Include="dbo\Stored Procedures\uspCMApplyCheckChangeForPrintFail.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMBookGLEntries.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
-    <Build Include="dbo\Stored Procedures\uspCMCheckPrint_QueuePrintJobs.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
+    <Build Include="dbo\Stored Procedures\uspCMBookGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMCheckPrint_QueuePrintJobs.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCheckPrint_ValidatePrintJobs.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCommitPrintCheckVerification.sql" />
     <Build Include="dbo\Stored Procedures\uspCMGenerateCheckNumbers.sql" />
@@ -359,34 +356,27 @@
     <Build Include="dbo\Stored Procedures\uspCMPostMiscChecks.sql" />
     <Build Include="dbo\Stored Procedures\uspCMPostMessages.sql" />
     <Build Include="dbo\Stored Procedures\uspCMPostRecap.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMReconcileBankRecords.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
-    <Build Include="dbo\Stored Procedures\uspCMReverseGLEntries.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
+    <Build Include="dbo\Stored Procedures\uspCMReconcileBankRecords.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMReverseGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspGLAccountClone.sql" />
     <Build Include="dbo\Stored Procedures\uspGLAccountOriginSync.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildAccountTemporary.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildOriginAccount.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLBuildTempCOASegment.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
+    <Build Include="dbo\Stored Procedures\uspGLBuildTempCOASegment.sql" />
     <Build Include="dbo\Stored Procedures\uspGLImportOriginCOA.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournal.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
+    <Build Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournal.sql" />
     <Build Include="dbo\Stored Procedures\uspGLPostFiscalYear.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBill.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBillBatch.sql" />
-    <Build Include="dbo\Stored Procedures\uspRMInsertDynamicParameterFields.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
+    <Build Include="dbo\Stored Procedures\uspRMInsertDynamicParameterFields.sql" />
     <Build Include="dbo\User Defined Types\RecapTableType.sql" />
     <None Include="Script.PreDeployment1.sql" />
     <None Include="Script.PostDeployment1.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\1_SM\1_ZipCodeData.sql" />
+    <None Include="Scripts\Post-Deployment\Reports\1_ReportDisableConstraints.sql" />
+    <None Include="Scripts\Post-Deployment\Reports\2_ReportDeleteOldData.sql" />
+    <None Include="Scripts\Post-Deployment\Reports\3_ReportEnableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\1_MasterMenu.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\2_UserRole.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\3_Currency.sql" />
@@ -394,6 +384,7 @@
     <None Include="Scripts\Post-Deployment\SM\DefaultData\5_CompanySetup.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\6_Preferences.sql" />
     <None Include="Scripts\Post-Deployment\TM\1_OriginIndexing.sql" />
+    <None Include="Scripts\Post-Deployment\Reports\4_ReportData.sql" />
     <Build Include="dbo\Tables\tblGLPostRecap.sql" />
     <Build Include="dbo\Tables\tblGLPostResult.sql" />
     <Build Include="dbo\Stored Procedures\uspGLPostJournal.sql" />
@@ -513,16 +504,12 @@
     <Build Include="dbo\Tables\tblARCustomerBuyback.sql" />
     <Build Include="dbo\Tables\tblARCustomer.sql" />
     <Build Include="dbo\Tables\tblARAccountStatus.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMBuildCustomTable.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
+    <Build Include="dbo\Stored Procedures\uspSMBuildCustomTable.sql" />
     <Build Include="dbo\Functions\fnGetUserDefaultLocation.sql" />
     <Build Include="dbo\Tables\tblCPPreference.sql" />
     <Build Include="dbo\Tables\tblHDUpload.sql" />
     <Build Include="dbo\Tables\tblARInvoice.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPPostPayment.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
+    <Build Include="dbo\Stored Procedures\uspAPPostPayment.sql" />
     <Build Include="dbo\Tables\tblSMUserSecurityMenuFavorite.sql" />
     <Build Include="dbo\Views\vyuHDUserDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSMResetOriginMenus.sql" />
@@ -559,9 +546,7 @@
     <Build Include="dbo\Functions\fnGetEntityIdFromUser.sql" />
     <Build Include="dbo\Stored Procedures\uspSMMigrateUserEntity.sql" />
     <Build Include="dbo\Stored Procedures\uspSMMigrateCurrency.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMMigrateTransactionUser.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
+    <Build Include="dbo\Stored Procedures\uspSMMigrateTransactionUser.sql" />
     <Build Include="dbo\Tables\tblHDTicketJIRAIssue.sql" />
     <Build Include="dbo\Stored Procedures\uspCMImportValidations.sql" />
     <Build Include="dbo\Tables\tblFREmailFinancial.sql" />
@@ -569,9 +554,7 @@
     <Build Include="dbo\Tables\tblFRMappingDetail.sql" />
     <Build Include="dbo\Views\vyuAPBill.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRecreateCOASegmentMapping.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMBankTransactionReversal.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
+    <Build Include="dbo\Stored Procedures\uspCMBankTransactionReversal.sql" />
     <Build Include="dbo\Functions\fnGetBankTransactionReversalErrors.sql" />
     <Build Include="dbo\Stored Procedures\uspGLFixStartingNumbers.sql" />
     <Build Include="dbo\Tables\tblSMSearchFilter.sql" />
@@ -636,90 +619,6 @@
     <Build Include="dbo\Tables\tblRMDefaultFilter.sql" />
     <Build Include="dbo\Tables\tblRMDefaultOption.sql" />
     <Build Include="dbo\Tables\tblRMDefaultSort.sql" />
-    <Build Include="dbo\Tables\tblPRRace.sql" />
-    <Build Include="dbo\Tables\tblPRTemplate.sql" />
-    <Build Include="dbo\Tables\tblPRTemplateEarning.sql" />
-    <Build Include="dbo\Tables\tblPRTemplateEarningTax.sql" />
-    <Build Include="dbo\Tables\tblPRTemplateDeduction.sql" />
-    <Build Include="dbo\Tables\tblPRTemplateDeductionTax.sql" />
-    <Build Include="dbo\Tables\tblPRTemplateTimeOff.sql" />
-    <Build Include="dbo\Tables\tblPRTemplateTax.sql" />
-    <Build Include="dbo\Tables\tblPRTypeEarning.sql" />
-    <Build Include="dbo\Tables\tblPRTypeEarningTax.sql" />
-    <Build Include="dbo\Tables\tblPRTypeDeduction.sql" />
-    <Build Include="dbo\Tables\tblPRTypeDeductionTax.sql" />
-    <Build Include="dbo\Tables\tblPRTypeTimeOff.sql" />
-    <Build Include="dbo\Tables\tblPRTypeTax.sql" />
-    <Build Include="dbo\Tables\tblPRTypeTaxLocal.sql" />
-    <Build Include="dbo\Tables\tblPRTypeTaxState.sql" />
-    <Build Include="dbo\Tables\tblPREmployee.sql" />
-    <Build Include="dbo\Tables\tblPREmployeeDeduction.sql" />
-    <Build Include="dbo\Tables\tblPREmployeeEarning.sql" />
-    <Build Include="dbo\Tables\tblPREmployeePaycheckRegister.sql" />
-    <Build Include="dbo\Tables\tblPREmployeeTax.sql" />
-    <Build Include="dbo\Tables\tblPREmployeeTimeOff.sql" />
-    <Build Include="dbo\Tables\tblPREthnicOrigin.sql" />
-    <Build Include="dbo\Tables\tblPRPaycheck.sql" />
-    <Build Include="dbo\Tables\tblPRPaycheckDeduction.sql" />
-    <Build Include="dbo\Tables\tblPRPaycheckEarning.sql" />
-    <Build Include="dbo\Tables\tblPRPaycheckTax.sql" />
-    <Build Include="dbo\Tables\tblPRPayGroup.sql" />
-    <Build Include="dbo\Tables\tblPRTaxAgency.sql" />
-    <Build Include="dbo\Views\vyuCMBankAccount.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPCreatePaymentFromOriginBill.sql" />
-    <Build Include="dbo\Tables\tblICBrand.sql" />
-    <Build Include="dbo\Tables\tblICCatalog.sql" />
-    <Build Include="dbo\Tables\tblICCategory.sql" />
-    <Build Include="dbo\Tables\tblICCategoryAccount.sql" />
-    <Build Include="dbo\Tables\tblICCategoryStore.sql" />
-    <Build Include="dbo\Tables\tblICCategoryVendor.sql" />
-    <Build Include="dbo\Tables\tblICClass.sql" />
-    <Build Include="dbo\Tables\tblICCommodity.sql" />
-    <Build Include="dbo\Tables\tblICCommodityGroup.sql" />
-    <Build Include="dbo\Tables\tblICCommodityUnitMeasure.sql" />
-    <Build Include="dbo\Tables\tblICFamily.sql" />
-    <Build Include="dbo\Tables\tblICFuelType.sql" />
-    <Build Include="dbo\Tables\tblICManufacturer.sql" />
-    <Build Include="dbo\Tables\tblICPatronageCategory.sql" />
-    <Build Include="dbo\Tables\tblICReasonCode.sql" />
-    <Build Include="dbo\Tables\tblICReasonCodeWorkCenter.sql" />
-    <Build Include="dbo\Tables\tblICRinFeedStock.sql" />
-    <Build Include="dbo\Tables\tblICRinFeedStockUOM.sql" />
-    <Build Include="dbo\Tables\tblICRinFuel.sql" />
-    <Build Include="dbo\Tables\tblICRinFuelType.sql" />
-    <Build Include="dbo\Tables\tblICRinProcess.sql" />
-    <Build Include="dbo\Tables\tblICTag.sql" />
-    <Build Include="dbo\Tables\tblICUnitMeasure.sql" />
-    <Build Include="dbo\Tables\tblICUnitType.sql" />
-    <Build Include="dbo\Functions\fnGetItemCostingMethod.sql" />
-    <Build Include="dbo\Tables\tblICInventoryTransaction.sql" />
-    <Build Include="dbo\Tables\tblICInventoryStockSummary.sql" />
-    <Build Include="dbo\Tables\tblICInventoryFIFO.sql" />
-    <Build Include="dbo\Tables\tblICInventoryLIFO.sql" />
-    <Build Include="dbo\Tables\tblICItemLocationStore.sql" />
-    <Build Include="dbo\Stored Procedures\uspICItemCosting.sql" />
-    <Build Include="dbo\User Defined Types\ItemCostingTableType.sql" />
-    <Build Include="dbo\Tables\tblICInventoryTransactionType.sql" />
-    <None Include="Scripts\Post-Deployment\IC\1_InventoryTransactionTypes.sql" />
-    <Build Include="dbo\Tables\tblPREmployeeDeductionTax.sql" />
-    <Build Include="dbo\Tables\tblPREmployeeEarningTax.sql" />
-    <Build Include="dbo\Tables\tblICInventoryTransactionFIFO.sql" />
-    <Build Include="dbo\Tables\tblICInventoryTransactionLIFO.sql" />
-    <Build Include="dbo\Stored Procedures\uspICItemCostingPostValidation.sql" />
-    <Build Include="dbo\Stored Procedures\uspICItemCostingUnPostValidation.sql" />
-    <Build Include="dbo\Tables\tblICInventoryCostingResult.sql" />
-    <Build Include="dbo\Stored Procedures\uspICItemCostingIns.sql" />
-    <Build Include="dbo\Stored Procedures\uspICItemCostingOuts.sql" />
-    <Build Include="dbo\Stored Procedures\uspICItemCostingReversal.sql" />
-    <Build Include="dbo\Stored Procedures\uspICItemCostingErrorHandler.sql" />
-    <None Include="Scripts\Post-Deployment\Optional Run\Reports\1_ReportDisableConstraints.sql" />
-    <None Include="Scripts\Post-Deployment\Optional Run\Reports\2_ReportDeleteOldData.sql" />
-    <None Include="Scripts\Post-Deployment\Optional Run\Reports\3_ReportEnableConstraints.sql" />
-    <None Include="Scripts\Post-Deployment\Optional Run\Reports\4_ReportData.sql" />
-    <Build Include="dbo\Tables\tblICInventoryCostingBucket.sql" />
-    <Build Include="dbo\Tables\tblPREEOCCode.sql" />
-    <Build Include="dbo\Tables\tblPRPaycheckDeductionTax.sql" />
-    <Build Include="dbo\Tables\tblPRPaycheckEarningTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -739,5 +638,8 @@
       <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
       <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
     </ArtifactReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\HD\DefaultData\1_StatusData.sql" />
   </ItemGroup>
 </Project>
