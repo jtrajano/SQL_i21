@@ -133,6 +133,8 @@
     <Folder Include="Scripts\Post-Deployment\AP" />
     <Folder Include="Scripts\Post-Deployment\CM\Reports" />
     <Folder Include="Scripts\Post-Deployment\CM\Reports\SubReports" />
+    <Folder Include="Scripts\Post-Deployment\HD" />
+    <Folder Include="Scripts\Post-Deployment\HD\DefaultData" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -636,5 +638,8 @@
       <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
       <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
     </ArtifactReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\HD\DefaultData\1_StatusData.sql" />
   </ItemGroup>
 </Project>
