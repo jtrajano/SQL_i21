@@ -20,15 +20,15 @@ Ext.define('Inventory.view.PatronageCategory', {
     requires: [
         'Inventory.view.PatronageCategoryViewModel',
         'Inventory.view.Filter',
-        'Inventory.view.StatusbarPaging',
+        'Inventory.view.Statusbar',
         'Ext.form.Panel',
+        'Ext.toolbar.Toolbar',
         'Ext.button.Button',
         'Ext.toolbar.Separator',
         'Ext.grid.Panel',
         'Ext.grid.column.Column',
         'Ext.grid.View',
-        'Ext.selection.CheckboxModel',
-        'Ext.toolbar.Paging'
+        'Ext.selection.CheckboxModel'
     ],
 
     viewModel: {
@@ -147,8 +147,7 @@ Ext.define('Inventory.view.PatronageCategory', {
                                 ]
                             },
                             {
-                                xtype: 'ipagingstatusbar',
-                                itemId: 'pagingtoolbar',
+                                xtype: 'statusbar',
                                 flex: 1,
                                 dock: 'bottom'
                             }
