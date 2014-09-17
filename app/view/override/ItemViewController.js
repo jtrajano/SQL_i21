@@ -101,8 +101,8 @@ Ext.define('Inventory.view.override.ItemViewController', {
                     context.data.addRecord();
                 } else {
                     if (config.id) {
-                        config.filter = [{
-                            column: 'intCustomFieldId',
+                        config.filters = [{
+                            column: 'intItemId',
                             value: config.id
                         }];
                     }
@@ -110,7 +110,7 @@ Ext.define('Inventory.view.override.ItemViewController', {
 //                    console.log(config.param);
 //                }
                     context.data.load({
-                        filters: config.filter
+                        filters: config.filters
                     });
                 }
 //            });
