@@ -260,19 +260,63 @@ Ext.define('Inventory.view.Item', {
                                                                 },
                                                                 items: [
                                                                     {
-                                                                        xtype: 'combobox',
+                                                                        xtype: 'gridcombobox',
                                                                         flex: 1.4,
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intManufacturerId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Manufacturer ID',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strManufacturer',
+                                                                                dataType: 'string',
+                                                                                text: 'Manufacturer',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strContact',
+                                                                                dataType: 'string',
+                                                                                text: 'Contact',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
                                                                         itemId: 'cboManufacturer',
                                                                         fieldLabel: 'Manufacturer',
-                                                                        labelWidth: 80
+                                                                        labelWidth: 80,
+                                                                        displayField: 'strManufacturer',
+                                                                        valueField: 'intManufacturerId'
                                                                     },
                                                                     {
-                                                                        xtype: 'combobox',
+                                                                        xtype: 'gridcombobox',
                                                                         flex: 1,
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intBrandId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Brand ID',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strBrand',
+                                                                                dataType: 'string',
+                                                                                text: 'Brand',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Description',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
                                                                         itemId: 'cboBrand',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'Brand',
-                                                                        labelWidth: 50
+                                                                        labelWidth: 50,
+                                                                        displayField: 'strBrand',
+                                                                        valueField: 'intBrandId'
                                                                     }
                                                                 ]
                                                             },

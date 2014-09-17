@@ -474,13 +474,48 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intManufacturerId',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'Manufacturer ID',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strManufacturer',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Manufacturer',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strContact',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Contact',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t}",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strManufacturer",
                                                                 "fieldLabel": "Manufacturer",
                                                                 "itemId": "cboManufacturer",
                                                                 "labelWidth": 80,
-                                                                "layout|flex": 1.4
+                                                                "layout|flex": 1.4,
+                                                                "valueField": "intManufacturerId"
                                                             },
                                                             "name": "MyComboBox3",
-                                                            "designerId": "34f0af06-4236-4a61-b532-dbe6d49190d5"
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "34f0af06-4236-4a61-b532-dbe6d49190d5",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         },
                                                         {
                                                             "type": "Ext.form.field.ComboBox",
@@ -490,15 +525,50 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intBrandId',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'Brand ID',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strBrand',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Brand',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strDescription',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Description',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t}",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strBrand",
                                                                 "fieldLabel": "Brand",
                                                                 "itemId": "cboBrand",
                                                                 "labelWidth": 50,
                                                                 "layout|flex": 1,
                                                                 "layout|margins": null,
-                                                                "margin": "0 0 0 5"
+                                                                "margin": "0 0 0 5",
+                                                                "valueField": "intBrandId"
                                                             },
                                                             "name": "MyComboBox4",
-                                                            "designerId": "a8637949-68fc-45cd-9d4d-cc92e49d1022"
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "a8637949-68fc-45cd-9d4d-cc92e49d1022",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         }
                                                     ]
                                                 },
