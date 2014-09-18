@@ -20,15 +20,17 @@ Ext.define('Inventory.view.PatronageCategory', {
     requires: [
         'Inventory.view.PatronageCategoryViewModel',
         'Inventory.view.Filter',
-        'Inventory.view.StatusbarPaging',
+        'Inventory.view.Statusbar',
         'Ext.form.Panel',
+        'Ext.toolbar.Toolbar',
         'Ext.button.Button',
         'Ext.toolbar.Separator',
         'Ext.grid.Panel',
         'Ext.grid.column.Column',
+        'Ext.form.field.ComboBox',
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
-        'Ext.toolbar.Paging'
+        'Ext.grid.plugin.CellEditing'
     ],
 
     viewModel: {
@@ -44,6 +46,13 @@ Ext.define('Inventory.view.PatronageCategory', {
     iconCls: 'small-icon-i21',
     title: 'Patronage Category',
     maximizable: true,
+
+    dockedItems: [
+        {
+            xtype: 'istatusbar',
+            dock: 'bottom'
+        }
+    ],
 
     initConfig: function(instanceConfig) {
         var me = this,
@@ -78,45 +87,12 @@ Ext.define('Inventory.view.PatronageCategory', {
                                         xtype: 'button',
                                         tabIndex: -1,
                                         height: 57,
-                                        itemId: 'btnNew',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-new',
-                                        scale: 'large',
-                                        text: 'New'
-                                    },
-                                    {
-                                        xtype: 'button',
-                                        tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnSave',
                                         width: 45,
                                         iconAlign: 'top',
                                         iconCls: 'large-save',
                                         scale: 'large',
                                         text: 'Save'
-                                    },
-                                    {
-                                        xtype: 'button',
-                                        tabIndex: -1,
-                                        height: 57,
-                                        itemId: 'btnSearch',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-search',
-                                        scale: 'large',
-                                        text: 'Search'
-                                    },
-                                    {
-                                        xtype: 'button',
-                                        tabIndex: -1,
-                                        height: 57,
-                                        itemId: 'btnDelete',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-delete',
-                                        scale: 'large',
-                                        text: 'Delete'
                                     },
                                     {
                                         xtype: 'button',
@@ -145,12 +121,6 @@ Ext.define('Inventory.view.PatronageCategory', {
                                         text: 'Close'
                                     }
                                 ]
-                            },
-                            {
-                                xtype: 'ipagingstatusbar',
-                                itemId: 'pagingtoolbar',
-                                flex: 1,
-                                dock: 'bottom'
                             }
                         ],
                         items: [
@@ -179,42 +149,61 @@ Ext.define('Inventory.view.PatronageCategory', {
                                                 xtype: 'tbseparator'
                                             },
                                             {
-                                                xtype: 'filter'
+                                                xtype: 'filtergrid'
                                             }
                                         ]
                                     }
                                 ],
                                 columns: [
-
-                                    {
-                                        dataIndex: 'intPatronageCategoryId',
-                                        text: 'PatronageCategory Id',
-                                        hidden: true,
-                                        flex: 1
-                                    },
                                     {
                                         xtype: 'gridcolumn',
-                                        dataIndex: 'strCategoryCode',
+                                        itemId: 'colCategoryCode',
+                                        dataIndex: 'string',
                                         text: 'Category Code',
-                                        flex: 1
+                                        flex: 1,
+                                        editor: {
+                                            xtype: 'textfield'
+                                        }
                                     },
                                     {
                                         xtype: 'gridcolumn',
-                                        dataIndex: 'strDescription',
+                                        itemId: 'colDescription',
+                                        dataIndex: 'string',
                                         text: 'Description',
-                                        flex: 2
+                                        flex: 2,
+                                        editor: {
+                                            xtype: 'textfield'
+                                        }
                                     },
                                     {
                                         xtype: 'gridcolumn',
+                                        itemId: 'colPurchaseSale',
                                         width: 82,
-                                        dataIndex: 'strPurchaseSale',
-                                        text: 'Purchase/Sale'
+                                        dataIndex: 'string',
+                                        text: 'Purchase/Sale',
+                                        editor: {
+                                            xtype: 'combobox',
+                                            displayField: 'strPurchaseSale',
+                                            valueField: 'strPurchaseSale',
+                                            bind: {
+                                                store: '{PurchaseSales}'
+                                            }
+                                        }
                                     },
                                     {
                                         xtype: 'gridcolumn',
+                                        itemId: 'colUnitAmount',
                                         width: 75,
-                                        dataIndex: 'strUnitAmount',
-                                        text: 'Unit/Amount'
+                                        dataIndex: 'string',
+                                        text: 'Unit/Amount',
+                                        editor: {
+                                            xtype: 'combobox',
+                                            displayField: 'strUnitAmount',
+                                            valueField: 'strUnitAmount',
+                                            bind: {
+                                                store: '{UnitAmount}'
+                                            }
+                                        }
                                     }
                                 ],
                                 viewConfig: {
@@ -222,7 +211,14 @@ Ext.define('Inventory.view.PatronageCategory', {
                                 },
                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                     selType: 'checkboxmodel'
-                                })
+                                }),
+                                plugins: [
+                                    {
+                                        ptype: 'cellediting',
+                                        pluginId: 'idPatronageCategory',
+                                        clicksToEdit: 1
+                                    }
+                                ]
                             }
                         ]
                     }
