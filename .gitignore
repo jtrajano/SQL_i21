@@ -101,3 +101,11 @@ UpgradeLog*.htm
 *.vspx
 *.vssscc
 server/iRely.Inventory.WebAPI/app/
+server/iRely.Inventory.WebAPI/metadata/
+server/iRely.Inventory.WebAPI/test/
+server/iRely.Inventory.WebAPI/test-results.xml
+server/iRely.Inventory.WebAPI/.architect
+server/iRely.Inventory.WebAPI/.gitignore
+server/iRely.Inventory.WebAPI/Inventory.xds
+server/iRely.Inventory.WebAPI/app.js
+server/iRely.Inventory.WebAPI/karma.conf.js
