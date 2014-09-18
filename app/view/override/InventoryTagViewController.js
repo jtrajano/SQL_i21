@@ -24,6 +24,7 @@ Ext.define('Inventory.view.override.InventoryTagViewController', {
     },
 
     setupContext : function(options){
+        "use strict";
         var me = this,
             win = options.window,
             store = Ext.create('Inventory.store.InventoryTag', { pageSize: 1 });

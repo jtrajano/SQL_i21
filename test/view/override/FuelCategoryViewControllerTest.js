@@ -1,14 +1,14 @@
 /**
- * Created by LZabala on 9/11/2014.
+ * Created by marahman on 9/18/2014.
  */
-describe("Inventory Tag View Controller", function() {
+describe("Fuel Category View Controller", function() {
     "use strict";
 
     var controller;
     var view;
 
     beforeEach(function() {
-        view = Ext.create('Inventory.view.InventoryTag', { controller : 'inventorytag' });
+        view = Ext.create('Inventory.view.FuelCategory', { controller : 'fuelcategory' });
         controller = view.getController();
     });
 

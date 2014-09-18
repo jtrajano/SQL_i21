@@ -1,7 +1,7 @@
 /**
  * Created by marahman on 18-09-2014.
  */
-Ext.define('Inventory.store.RinFuelType', {
+Ext.define('Inventory.store.FuelCategory', {
     extend: 'Ext.data.Store',
 
     requires: [
@@ -13,7 +13,7 @@ Ext.define('Inventory.store.RinFuelType', {
         cfg = cfg || {};
         me.callParent([Ext.apply({
             model: 'Inventory.model.FuelCategory',
-            storeId: 'RinFuelType',
+            storeId: 'FuelCategory',
             pageSize: 50,
             batchActions: true,
             proxy: {
