@@ -15,10 +15,6 @@
 
 Ext.define('Inventory.view.PatronageCategoryViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.patronagecategory',
-
-    requires: [
-        'Inventory.view.override.PatronageCategoryViewModel'
-    ]
+    alias: 'viewmodel.patronagecategory'
 
 });
