@@ -371,6 +371,32 @@ Ext.define('Inventory.view.Item', {
                                                 itemId: 'grdUnitOfMeasure',
                                                 title: 'Unit of Measure',
                                                 forceFit: true,
+                                                dockedItems: [
+                                                    {
+                                                        xtype: 'toolbar',
+                                                        dock: 'top',
+                                                        itemId: 'tlbGridOptions',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            padding: '0 0 0 1'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnDeleteUom',
+                                                                iconCls: 'small-delete',
+                                                                text: 'Delete'
+                                                            },
+                                                            {
+                                                                xtype: 'tbseparator'
+                                                            },
+                                                            {
+                                                                xtype: 'filter'
+                                                            }
+                                                        ]
+                                                    }
+                                                ],
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
@@ -2689,6 +2715,11 @@ Ext.define('Inventory.view.Item', {
                                                         xtype: 'combobox',
                                                         itemId: 'cboCommodity',
                                                         fieldLabel: 'Commodity'
+                                                    },
+                                                    {
+                                                        xtype: 'combobox',
+                                                        itemId: 'cboHierarchy',
+                                                        fieldLabel: 'Hierarchy'
                                                     },
                                                     {
                                                         xtype: 'textfield',

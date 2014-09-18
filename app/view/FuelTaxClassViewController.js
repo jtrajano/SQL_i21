@@ -15,9 +15,5 @@
 
 Ext.define('Inventory.view.FuelTaxClassViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.fueltaxclass',
-
-    requires: [
-        'Inventory.view.override.FuelTaxClassViewController'
-    ]
+    alias: 'controller.fueltaxclass'
 });
