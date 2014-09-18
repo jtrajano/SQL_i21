@@ -15,5 +15,9 @@
 
 Ext.define('Inventory.view.ManufacturerViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.manufacturer'
+    alias: 'controller.manufacturer',
+
+    requires: [
+        'Inventory.view.override.ManufacturerViewController'
+    ]
 });

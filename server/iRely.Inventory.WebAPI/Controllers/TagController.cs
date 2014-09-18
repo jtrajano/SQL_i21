@@ -20,6 +20,7 @@ namespace iRely.Invetory.WebAPI.Controllers
     {
         private Tag _TagBRL = new Tag();
 
+        [HttpGet]
         public HttpResponseMessage SearchTags(int page, int start, int limit, string columns = "", string sort = "", string filter = "")
         {
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);

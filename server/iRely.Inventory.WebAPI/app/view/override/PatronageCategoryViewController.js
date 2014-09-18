@@ -2,20 +2,13 @@ Ext.define('Inventory.view.override.PatronageCategoryViewController', {
     override: 'Inventory.view.PatronageCategoryViewController',
 
     config: {
-       /* searchConfig: {
-            title:  'Search Patronage Category',
-            type: 'Inventory.PatronageCategory',
-            api: {
-                read: '../Inventory/api/PatronageCategory/SearchPatronageCategories'
-            },
-            columns: [
-                {dataIndex: 'intPatronageCategoryId',text: "PatronageCategory Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
-                {dataIndex: 'strCategoryCode', text: 'Category Code', flex: 1,  dataType: 'string'},
-                {dataIndex: 'strDescription', text: 'Description', flex: 1,  dataType: 'string'},
-                {dataIndex: 'strPurchaseSale',text: 'Purchase/Sale', flex: 1,  dataType: 'string'},
-                {dataIndex: 'strUnitAmount',text: 'Unit/Amount', flex: 1,  dataType: 'string'}
-            ]
-        }*/
+       binding:
+       {
+           colCategoryCode : 'strCategoryCode',
+           colDescription :  'strDescription',
+           colPurchaseSale : 'strPurchaseSale',
+           colUnitAmount :   'strUnitAmount'
+        }
     },
 
     setupContext : function(options){
@@ -24,9 +17,9 @@ Ext.define('Inventory.view.override.PatronageCategoryViewController', {
             store = Ext.create('Inventory.store.PatronageCategory', { pageSize: 1 });
 
         win.context = Ext.create('iRely.Engine', {
+            binding: me.config.binding,
             window : win,
             store  : store,
-           paging : win.down('pagingtoolbar'),
             singleGridMgr: Ext.create('iRely.grid.Manager', {
                 grid:  win.down('#grdPatronageCategory'),
                 deleteButton: win.down('#btnDeletePatronage')
@@ -57,7 +50,7 @@ Ext.define('Inventory.view.override.PatronageCategoryViewController', {
                         }];
                     }
                     context.data.load({
-                        filters: config.filter
+                        filters: config.filters
                     });
                 }
 

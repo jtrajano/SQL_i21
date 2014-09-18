@@ -88,6 +88,7 @@ namespace iRely.Invetory.WebAPI.Controllers
             });
         }
 
+        [AcceptVerbs("POST", "PUT")]
         [HttpPut]
         public HttpResponseMessage PutPatronageCategories(IEnumerable<tblICPatronageCategory> PatronageCategories, bool continueOnConflict = false)
         {

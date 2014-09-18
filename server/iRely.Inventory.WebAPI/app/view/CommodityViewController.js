@@ -15,5 +15,9 @@
 
 Ext.define('Inventory.view.CommodityViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.commodity'
+    alias: 'controller.commodity',
+
+    requires: [
+        'Inventory.view.override.CommodityViewController'
+    ]
 });

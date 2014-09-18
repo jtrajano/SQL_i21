@@ -16,13 +16,37 @@ Ext.define('Inventory.view.override.ItemViewController', {
             ]
         },
         binding: {
-//            cboScreenName: {
-//                value: '{current.strScreen}',
-//                store: '{screens}',
-//                readOnly: '{current.ysnBuild}'
-//            },
             txtItemNo: '{current.strItemNo}',
-            txtDescription: '{current.strDescription}'
+            txtDescription: '{current.strDescription}',
+            txtModelNo: '{current.strModelNo}',
+            cboType: {
+                value: '{current.strType}',
+                store: '{ItemTypes}'
+            },
+            cboManufacturer: {
+                value: '{current.intManufacturerId}'
+            },
+            cboBrand: '{current.intBrandId}',
+            cboStatus: {
+                value: '{current.strStatus}',
+                store: '{ItemStatuses}'
+            },
+            cboLotTracking: {
+                value: '{current.strLotTracking}',
+                store: '{LotTrackings}'
+            },
+            cboTracking: '{current.intTrackingId}',
+            //UOM Grid Columns
+            colDetailUnitMeasure: 'intUnitMeasureId',
+            colDetailUnitQty: 'dblUnitQty',
+            colDetailSellQty: 'dblSellQty',
+            colDetailWeight: 'dblWeight',
+            colDetailDescription: 'strDescription',
+            colDetailLength: 'dblLength',
+            colDetailWidth: 'dblWidth',
+            colDetailHeight: 'dblHeight',
+            colDetailVolume: 'dblVolume',
+            colDetailMaxQty: 'dblMaxQty'
         }
     },
 
@@ -35,15 +59,12 @@ Ext.define('Inventory.view.override.ItemViewController', {
             window : win,
             store  : store,
             createRecord : me.createRecord,
-            binding: me.config.binding
-//            details: [{
-//                key: 'tblSMCustomFieldDetails',
-//                component: Ext.create('iRely.grid.Manager', {
-//                    grid: win.down('#grdCustomFields'),
-//                    deleteButton : win.down('#btnDeleteDetail'),
-//                    createRecord : me.createDetailRecord,
-//                    deleteRecord : me.deleteDetailRecord
-//                }),
+            binding: me.config.binding,
+            details: [{
+                key: 'tblICItemUOMs',
+                component: Ext.create('iRely.grid.Manager', {
+                    grid: win.down('#grdUnitOfMeasure')
+                })
 //                details: [{
 //                    key: 'tblSMCustomFieldValues',
 //                    component: Ext.create('iRely.grid.Manager', {
@@ -51,8 +72,30 @@ Ext.define('Inventory.view.override.ItemViewController', {
 //                        deleteButton : win.down('#btnDeleteValue')
 //                    })
 //                }]
-//            }]
+            }]
         });
+
+//        var cboType = win.down('#cboType');
+//        cboType.forceSelection = true;
+//
+//        var cboStatus = win.down('#cboStatus');
+//        cboStatus.forceSelection = true;
+//
+//        var cboLotTracking = win.down('#cboLotTracking');
+//        cboLotTracking.forceSelection = true;
+
+
+//        var storeManufacturer = win.getViewModel().storeInfo.Manufacturer;
+//        var cboManufacturer = win.down('#cboManufacturer');
+//        cboManufacturer.store = storeManufacturer;
+
+//        var storeManufacturer = Ext.create('Inventory.store.Manufacturer');
+//        var cboManufacturer = win.down('#cboManufacturer');
+//        cboManufacturer.store = storeManufacturer;
+//
+//        var storeLot = Ext.create('Inventory.store.Category');
+//        var cboLot = win.down('#cboLot');
+//        cboLot.store = storeLot;
 
         return win.context;
     },
@@ -66,15 +109,15 @@ Ext.define('Inventory.view.override.ItemViewController', {
         if (config) {
             win.show();
 
-            Ext.require('Inventory.store.Item', function() {
+//            Ext.require('Inventory.store.Item', function() {
                 var context = me.setupContext( {window : win} );
 
                 if (config.action === 'new') {
                     context.data.addRecord();
                 } else {
                     if (config.id) {
-                        config.filter = [{
-                            column: 'intCustomFieldId',
+                        config.filters = [{
+                            column: 'intItemId',
                             value: config.id
                         }];
                     }
@@ -82,10 +125,10 @@ Ext.define('Inventory.view.override.ItemViewController', {
 //                    console.log(config.param);
 //                }
                     context.data.load({
-                        filters: config.filter
+                        filters: config.filters
                     });
                 }
-            });
+//            });
         }
     }
 

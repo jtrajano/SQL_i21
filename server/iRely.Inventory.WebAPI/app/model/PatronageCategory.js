@@ -20,7 +20,7 @@ Ext.define('Inventory.model.PatronageCategory', {
         { name: 'intSort', type: 'int'}
 
     ],
-    validations: [
+    validators: [
         {type: 'presence', field: 'strCategoryCode'}
     ]
 });

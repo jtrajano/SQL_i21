@@ -15,5 +15,9 @@
 
 Ext.define('Inventory.view.FeedStockUomViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.feedstockuom'
+    alias: 'controller.feedstockuom',
+
+    requires: [
+        'Inventory.view.override.FeedStockUomViewController'
+    ]
 });
