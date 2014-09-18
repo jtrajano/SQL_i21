@@ -15,9 +15,5 @@
 
 Ext.define('Inventory.view.PatronageCategoryViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.patronagecategory',
-
-    requires: [
-        'Inventory.view.override.PatronageCategoryViewController'
-    ]
+    alias: 'controller.patronagecategory'
 });

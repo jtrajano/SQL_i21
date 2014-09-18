@@ -1,0 +1,14 @@
+{
+    "type": "Ext.app.ViewController",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "factoryunittype",
+        "designer|userClassName": "FactoryUnitTypeViewController"
+    },
+    "name": "FuelTaxClassViewController1",
+    "designerId": "fb0ab8c7-2150-45c4-8d33-785d989a836f"
+}

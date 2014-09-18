@@ -89,7 +89,6 @@ namespace iRely.Invetory.WebAPI.Controllers
         }
 
         [AcceptVerbs("POST", "PUT")]
-        [HttpPost]
         [HttpPut]
         public HttpResponseMessage PutPatronageCategories(IEnumerable<tblICPatronageCategory> PatronageCategories, bool continueOnConflict = false)
         {
@@ -112,8 +111,7 @@ namespace iRely.Invetory.WebAPI.Controllers
             });
         }
 
-        [AcceptVerbs("POST", "DELETE")]
-        [HttpPost]
+       
         [HttpDelete]
         public HttpResponseMessage DeletePatronageCategories(IEnumerable<tblICPatronageCategory> PatronageCategories, bool continueOnConflict = false)
         {

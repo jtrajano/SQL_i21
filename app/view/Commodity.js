@@ -211,9 +211,9 @@ Ext.define('Inventory.view.Commodity', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'checkboxfield',
-                                                                        itemId: 'chkExchangeTraded',
+                                                                        itemId: 'chkFxExposure',
                                                                         width: 280,
-                                                                        fieldLabel: 'Exchange Traded',
+                                                                        fieldLabel: 'FX Exposure',
                                                                         labelWidth: 140
                                                                     },
                                                                     {

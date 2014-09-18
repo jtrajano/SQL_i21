@@ -2,6 +2,25 @@ Ext.define('Inventory.view.override.ItemViewModel', {
     override: 'Inventory.view.ItemViewModel',
 
     stores: {
+        Manufacturer: {
+            autoLoad: true,
+            data: [
+                {
+                    strManufacturer: 'Active'
+                },
+                {
+                    strManufacturer: 'Phased Out'
+                },
+                {
+                    strManufacturer: 'Discontinued'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strManufacturer'
+                }
+            ]
+        },
         ItemTypes: {
             autoLoad: true,
             data: [
