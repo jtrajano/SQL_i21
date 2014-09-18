@@ -17,7 +17,8 @@
             "FeedStockCode",
             "FeedStockUom",
             "ManufacturingCell",
-            "FactoryUnitType"
+            "FactoryUnitType",
+            "ItemSubstitution"
         ]
     },
     "name": "Application",
