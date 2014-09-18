@@ -1,0 +1,542 @@
+{
+    "type": "Ext.window.Window",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "collapsible": true,
+        "defaultFocus": null,
+        "designer|userAlias": "factoryunittype",
+        "designer|userClassName": "FactoryUnitType",
+        "height": 380,
+        "hidden": false,
+        "icon": null,
+        "iconCls": "small-icon-i21",
+        "layout": "fit",
+        "maximizable": true,
+        "minHeight": null,
+        "minWidth": null,
+        "minimizable": null,
+        "reference": null,
+        "title": "Factory Unit Type",
+        "width": 622
+    },
+    "name": "FuelTaxClass1",
+    "designerId": "0238f216-c40b-4ac3-973a-d7678b8cdfd2",
+    "viewControllerInstanceId": "fb0ab8c7-2150-45c4-8d33-785d989a836f",
+    "viewModelInstanceId": "f8e95d35-f1e3-4831-b722-f0df9e8b99bf",
+    "cn": [
+        {
+            "type": "Ext.form.Panel",
+            "reference": {
+                "name": "items",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "autoShow": true,
+                "bodyBorder": false,
+                "bodyPadding": 10,
+                "container|align": "stretch",
+                "dock": null,
+                "frame": null,
+                "header": false,
+                "height": 350,
+                "itemId": "frmFactoryUnitType",
+                "layout": "hbox",
+                "margin": -1,
+                "title": null,
+                "trackResetOnLoad": true,
+                "url": null,
+                "width": 450
+            },
+            "name": "MyForm8",
+            "designerId": "c91b9f00-3f07-47ce-bbfc-5f710ea077fd",
+            "cn": [
+                {
+                    "type": "Ext.toolbar.Toolbar",
+                    "reference": {
+                        "name": "dockedItems",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|padding": "0 0 0 1",
+                        "designer|displayName": "toolbar",
+                        "dock": "top",
+                        "width": 588
+                    },
+                    "name": "MyToolbar36",
+                    "designerId": "3989060d-dd2a-4e90-83b4-3c285cfc3ad9",
+                    "cn": [
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-new",
+                                "itemId": "btnNew",
+                                "layout|flex": null,
+                                "layout|margins": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "New",
+                                "width": 45
+                            },
+                            "name": "MyButton99",
+                            "designerId": "82b1593f-25c2-4f9c-b63b-b6909c4584b0"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-save",
+                                "itemId": "btnSave",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Save",
+                                "width": 45
+                            },
+                            "name": "MyButton100",
+                            "designerId": "cac8c2f3-03e5-4f71-8c11-c5ba887a2335"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-search",
+                                "itemId": "btnSearch",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Search",
+                                "width": 45
+                            },
+                            "name": "MyButton101",
+                            "designerId": "f6509521-d99d-4527-8db2-77e51794f888"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-delete",
+                                "itemId": "btnDelete",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Delete",
+                                "width": 45
+                            },
+                            "name": "MyButton102",
+                            "designerId": "7ef14052-5294-451c-a626-f8b5478a61ff"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-undo",
+                                "itemId": "btnUndo",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Undo",
+                                "width": 45
+                            },
+                            "name": "MyButton103",
+                            "designerId": "77e99837-b5aa-47bd-942f-1d6354a19640"
+                        },
+                        {
+                            "type": "Ext.toolbar.Separator",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": "separator",
+                                "height": 30,
+                                "layout|flex": null
+                            },
+                            "name": "MySeparator37",
+                            "designerId": "a03f1399-79a2-41f2-a7d4-7ad254fb3bb2"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-close",
+                                "itemId": "btnClose",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Close",
+                                "width": 45
+                            },
+                            "name": "MyButton104",
+                            "designerId": "b5730a56-9311-4767-a2ab-1d5dd2ee4e3c"
+                        }
+                    ]
+                },
+                {
+                    "type": "linkedinstance",
+                    "reference": {
+                        "name": "dockedItems",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "afterPageText": null,
+                        "designer|createAlias": "ipagingstatusbar",
+                        "designer|displayName": "",
+                        "dock": "bottom",
+                        "itemId": "pagingtoolbar",
+                        "layout|flex": 1,
+                        "store": null
+                    },
+                    "name": "statusbarpaging6",
+                    "designerId": "1d4ebb2b-904c-462e-8f22-e82f1e2a5bad",
+                    "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
+                },
+                {
+                    "type": "Ext.panel.Panel",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "bodyPadding": 10,
+                        "container|align": "stretch",
+                        "itemId": "pnlDetail",
+                        "layout": "vbox",
+                        "layout|flex": 1,
+                        "margin": "0 5 0 0",
+                        "title": "Details"
+                    },
+                    "name": "MyPanel38",
+                    "designerId": "cf677e40-edb9-4a95-be0f-9ea48c074f00",
+                    "cn": [
+                        {
+                            "type": "Ext.form.field.Text",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Name",
+                                "itemId": "txtName",
+                                "labelWidth": 90,
+                                "layout|flex": null,
+                                "layout|margins": null,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null
+                            },
+                            "name": "MyTextField71",
+                            "designerId": "0f38f7b6-c26b-4ccc-9be4-6efd727d3f21"
+                        },
+                        {
+                            "type": "Ext.form.field.Text",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Description",
+                                "itemId": "txtDescription",
+                                "labelWidth": 90,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null
+                            },
+                            "name": "MyTextField12",
+                            "designerId": "fe9e8551-2f46-4335-9a59-a4bdb2867986"
+                        },
+                        {
+                            "type": "Ext.form.field.ComboBox",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Internal Code",
+                                "itemId": "cboInternalCode",
+                                "labelWidth": 90,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null
+                            },
+                            "name": "MyComboBox20",
+                            "designerId": "813a56ea-07c5-405d-945b-4034997a9c48"
+                        },
+                        {
+                            "type": "Ext.form.field.ComboBox",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Capacity UOM",
+                                "itemId": "cboCapacityUom",
+                                "labelWidth": 90,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null
+                            },
+                            "name": "MyComboBox22",
+                            "designerId": "6e50db5e-ebd6-40ef-b482-2a3ddec30654"
+                        },
+                        {
+                            "type": "Ext.form.field.Text",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Max. Weight",
+                                "itemId": "txtMaxWeight",
+                                "labelWidth": 90,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null
+                            },
+                            "name": "MyTextField42",
+                            "designerId": "54740918-b7e0-42b5-9769-080b6b4cc452"
+                        },
+                        {
+                            "type": "Ext.form.field.Checkbox",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "boxLabel": null,
+                                "fieldLabel": "Allows Picking",
+                                "itemId": "chkAllowsPicking",
+                                "labelWidth": 90,
+                                "layout|flex": null
+                            },
+                            "name": "MyCheckbox19",
+                            "designerId": "db7af232-9920-4242-b341-d5b97e546a07"
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.panel.Panel",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "bodyPadding": 10,
+                        "container|align": "stretch",
+                        "itemId": "pnlDimension",
+                        "layout": "vbox",
+                        "layout|flex": 1,
+                        "margin": "0 0 0 5",
+                        "title": "Dimensions"
+                    },
+                    "name": "MyPanel39",
+                    "designerId": "edcdc982-3f8c-4b0c-b5d2-576984e52d81",
+                    "cn": [
+                        {
+                            "type": "Ext.form.field.ComboBox",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Dimension UOM",
+                                "itemId": "cboDimensionUom",
+                                "labelWidth": 90,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null
+                            },
+                            "name": "MyComboBox14",
+                            "designerId": "68adf49c-c45b-44ad-87cb-fc75aee83e17"
+                        },
+                        {
+                            "type": "Ext.form.field.Text",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Height",
+                                "itemId": "txtHeight",
+                                "labelWidth": 90,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null
+                            },
+                            "name": "MyTextField44",
+                            "designerId": "ce5f5cce-2e63-48d0-b2ee-475f8ff5a104"
+                        },
+                        {
+                            "type": "Ext.form.field.Text",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Depth",
+                                "itemId": "txtDepth",
+                                "labelWidth": 90,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null
+                            },
+                            "name": "MyTextField45",
+                            "designerId": "2508f9de-8291-4f5e-998a-0a7175b83784"
+                        },
+                        {
+                            "type": "Ext.form.field.Text",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Width",
+                                "itemId": "txtWidth",
+                                "labelWidth": 90,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null
+                            },
+                            "name": "MyTextField46",
+                            "designerId": "a585c399-9be1-43fd-b5a1-257b076e25e4"
+                        },
+                        {
+                            "type": "Ext.form.field.Text",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Pallet Stack",
+                                "itemId": "txtPalletStack",
+                                "labelWidth": 90,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null
+                            },
+                            "name": "MyTextField47",
+                            "designerId": "a8908981-3386-4308-a19a-90546aa1dc80"
+                        },
+                        {
+                            "type": "Ext.form.field.Text",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Pallet Columns",
+                                "itemId": "txtPalletColumns",
+                                "labelWidth": 90,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null
+                            },
+                            "name": "MyTextField48",
+                            "designerId": "0dc143a1-a3ea-4846-9bb4-d5da08bb1c80"
+                        },
+                        {
+                            "type": "Ext.form.field.Text",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Pallet Rows",
+                                "itemId": "txtPalletRows",
+                                "labelWidth": 90,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null
+                            },
+                            "name": "MyTextField49",
+                            "designerId": "fe36d9ba-c1f7-489c-8827-ef98dfe048f1"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
