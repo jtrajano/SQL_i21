@@ -100,3 +100,4 @@ UpgradeLog*.htm
 *.vsp
 *.vspx
 *.vssscc
+server/iRely.Inventory.WebAPI/app/
