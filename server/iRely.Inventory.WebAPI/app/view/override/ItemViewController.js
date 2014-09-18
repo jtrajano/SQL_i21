@@ -23,7 +23,9 @@ Ext.define('Inventory.view.override.ItemViewController', {
                 value: '{current.strType}',
                 store: '{ItemTypes}'
             },
-            cboManufacturer: '{current.intManufacturerId}',
+            cboManufacturer: {
+                value: '{current.intManufacturerId}'
+            },
             cboBrand: '{current.intBrandId}',
             cboStatus: {
                 value: '{current.strStatus}',
@@ -81,6 +83,19 @@ Ext.define('Inventory.view.override.ItemViewController', {
 //
 //        var cboLotTracking = win.down('#cboLotTracking');
 //        cboLotTracking.forceSelection = true;
+
+
+//        var storeManufacturer = win.getViewModel().storeInfo.Manufacturer;
+//        var cboManufacturer = win.down('#cboManufacturer');
+//        cboManufacturer.store = storeManufacturer;
+
+//        var storeManufacturer = Ext.create('Inventory.store.Manufacturer');
+//        var cboManufacturer = win.down('#cboManufacturer');
+//        cboManufacturer.store = storeManufacturer;
+//
+//        var storeLot = Ext.create('Inventory.store.Category');
+//        var cboLot = win.down('#cboLot');
+//        cboLot.store = storeLot;
 
         return win.context;
     },
