@@ -13,7 +13,7 @@ namespace iRely.Inventory.Model
         public int intRinFuelTypeId { get; set; }
         public string strRinFuelTypeCode { get; set; }
         public string strDescription { get; set; }
-        public double dblEquivalenceValue { get; set; }
+        public Nullable<decimal> dblEquivalenceValue { get; set; }
         public int intSort { get; set; }
     }
 }

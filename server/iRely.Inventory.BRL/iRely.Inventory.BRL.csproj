@@ -61,6 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="RinFuelType.cs" />
     <Compile Include="Tag.cs" />
     <Compile Include="Item.cs" />
     <Compile Include="PatronageCategory.cs" />
