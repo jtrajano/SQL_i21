@@ -15,14 +15,17 @@ namespace iRely.Inventory.Model
         public string strDescription { get; set; }
         public string strInternalCode { get; set; }
         public int intCapacityUnitMeasureId { get; set; }
-        public double dblMaxWeight { get; set; }
+        public decimal? dblMaxWeight { get; set; }
         public bool ysnAllowPick { get; set; }
         public int intDimensionUnitMeasureId { get; set; }
-        public double dblHeight { get; set; }
-        public double dblDepth { get; set; }
-        public double dblWidth { get; set; }
-        public int intPalletStack { get; set; }
-        public int intPalletColumn { get; set; }
-        public int intPalletRow { get; set; }
+        public decimal? dblHeight { get; set; }
+        public decimal? dblDepth { get; set; }
+        public decimal? dblWidth { get; set; }
+        public int? intPalletStack { get; set; }
+        public int? intPalletColumn { get; set; }
+        public int? intPalletRow { get; set; }
+
+        public tblICUnitMeasure CapacityUnitMeasures { get; set; }
+        public tblICUnitMeasure DimensionUnitMeasures { get; set; }
     }
 }
