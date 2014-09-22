@@ -18,5 +18,8 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICCategory> tblICCategories { get; set; }
         public ICollection<tblICCommodityUnitMeasure> tblICCommodityUnitMeasures { get; set; }
+        public ICollection<tblICItemUOM> tblICItemUOMs { get; set; }
+        public ICollection<tblICUnitType> CapacityUnitTypes { get; set; }
+        public ICollection<tblICUnitType> DimensionUnitTypes { get; set; }
     }
 }

@@ -37,6 +37,19 @@ Ext.define('Inventory.model.Item', {
             }
         }
     },
+    hasMany: {
+        model: 'Inventory.model.ItemLocationStore',
+        name: 'tblICItemLocationStores',
+        foreignKey: 'intItemId',
+        primaryKey: 'intItemId',
+        storeConfig: {
+            sortOnLoad: true,
+            sorters: {
+                direction: 'ASC',
+                property: 'intSort'
+            }
+        }
+    },
 
     validations: [
         {type: 'presence', field: 'strItemNo'}

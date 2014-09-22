@@ -44,7 +44,15 @@ Ext.define('Inventory.view.override.ItemViewController', {
             colDetailWidth: 'dblWidth',
             colDetailHeight: 'dblHeight',
             colDetailVolume: 'dblVolume',
-            colDetailMaxQty: 'dblMaxQty'
+            colDetailMaxQty: 'dblMaxQty',
+            //Location Store Grid Columns
+            colLocStoreLocation: 'intLocationId',
+            colLocStoreStore: 'intStoreId',
+            colLocStorePOSDescription: 'strPOSDescription',
+            colLocStoreCategory: 'intCategoryId',
+            colLocStoreVendor: 'intVendorId',
+            colLocStoreCostingMethod: 'strCostingMethod',
+            colLocStoreUOM: 'intDefaultUOMId'
         }
     },
 
@@ -63,13 +71,13 @@ Ext.define('Inventory.view.override.ItemViewController', {
                 component: Ext.create('iRely.grid.Manager', {
                     grid: win.down('#grdUnitOfMeasure')
                 })
-//                details: [{
-//                    key: 'tblSMCustomFieldValues',
-//                    component: Ext.create('iRely.grid.Manager', {
-//                        grid: win.down('#grdValue'),
-//                        deleteButton : win.down('#btnDeleteValue')
-//                    })
-//                }]
+            },
+            {
+                key: 'tblSMCustomFieldValues',
+                component: Ext.create('iRely.grid.Manager', {
+                    grid: win.down('#grdValue'),
+                    deleteButton : win.down('#btnDeleteValue')
+                })
             }]
         });
 

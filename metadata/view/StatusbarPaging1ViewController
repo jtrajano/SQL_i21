@@ -6,8 +6,8 @@
     },
     "codeClass": null,
     "userConfig": {
-        "designer|userAlias": "statusbarpaging",
-        "designer|userClassName": "StatusbarPagingViewController"
+        "designer|userAlias": "statusbarpaging1",
+        "designer|userClassName": "StatusbarPaging1ViewController"
     },
     "designerId": "2190b325-7007-4076-a27d-8dae415962fc"
 }

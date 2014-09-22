@@ -243,7 +243,11 @@
                         "layout|flex": 1,
                         "store": null
                     },
+<<<<<<< HEAD
                     "name": "statusbarpaging1",
+=======
+                    "name": "statusbarpaging5",
+>>>>>>> 26eefa1615eba9221a23775d813b02de33b8f80e
                     "designerId": "1d4ebb2b-904c-462e-8f22-e82f1e2a5bad",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 },

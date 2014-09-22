@@ -16,26 +16,26 @@ using iRely.Inventory.BRL;
 
 namespace iRely.Invetory.WebAPI.Controllers
 {
-    public class ItemController : ApiController
+    public class RinProcessController : ApiController
     {
-        private Item _ItemBRL = new Item();
+        private RinProcess _RinProcessBRL = new RinProcess();
 
         [HttpGet]
-        public HttpResponseMessage SearchItems(int page, int start, int limit, string columns = "", string sort = "", string filter = "")
+        public HttpResponseMessage SearchRinProcesses(int page, int start, int limit, string columns = "", string sort = "", string filter = "")
         {
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
-            var predicate = ExpressionBuilder.True<ItemVM>();
+            var predicate = ExpressionBuilder.True<tblICRinProcess>();
             var selector = ExpressionBuilder.GetSelector(columns);
 
             var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts);
 
             if (searchFilters != null)
-                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<ItemVM>(searchFilters);
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICRinProcess>(searchFilters);
 
-            var data = _ItemBRL.GetSearchQuery(page, start, limit, selector, sortSelector, predicate);
+            var data = _RinProcessBRL.GetSearchQuery(page, start, limit, selector, sortSelector, predicate);
 
-            var total = _ItemBRL.GetCount(predicate);
+            var total = _RinProcessBRL.GetCount(predicate);
             return Request.CreateResponse(HttpStatusCode.OK, new
             {
                 data = data,
@@ -44,21 +44,21 @@ namespace iRely.Invetory.WebAPI.Controllers
         }
 
         [HttpGet]
-        [ActionName("GetItems")]
-        public HttpResponseMessage GetItems(int start = 0, int limit = 1, int page = 0, string sort = "", string filter = "")
+        [ActionName("GetRinProcesses")]
+        public HttpResponseMessage GetRinProcesses(int start = 0, int limit = 1, int page = 0, string sort = "", string filter = "")
         {
             filter = string.IsNullOrEmpty(filter) ? "" : filter;
 
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
-            var predicate = ExpressionBuilder.True<ItemVM>();
-            var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intItemId", "DESC");
+            var predicate = ExpressionBuilder.True<tblICRinProcess>();
+            var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intRinProcessId", "DESC");
 
             if (searchFilters != null)
-                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<ItemVM>(searchFilters, true);
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICRinProcess>(searchFilters, true);
 
-            var total = _ItemBRL.GetCount(predicate);
-            var data = _ItemBRL.GetItems(page, start, page == 0 ? total : limit, sortSelector, predicate);
+            var total = _RinProcessBRL.GetCount(predicate);
+            var data = _RinProcessBRL.GetRinProcesses(page, start, page == 0 ? total : limit, sortSelector, predicate);
 
             return Request.CreateResponse(HttpStatusCode.OK, new
             {
@@ -68,17 +68,17 @@ namespace iRely.Invetory.WebAPI.Controllers
         }
 
         [HttpPost]
-        public HttpResponseMessage PostItems(IEnumerable<tblICItem> items, bool continueOnConflict = false)
+        public HttpResponseMessage PostRinProcesses(IEnumerable<tblICRinProcess> RinProcesses, bool continueOnConflict = false)
         {
-            foreach (var item in items)
-                _ItemBRL.AddItem(item);
+            foreach (var RinProcess in RinProcesses)
+                _RinProcessBRL.AddRinProcess(RinProcess);
 
-            var result = _ItemBRL.Save(continueOnConflict);
-            _ItemBRL.Dispose();
+            var result = _RinProcessBRL.Save(continueOnConflict);
+            _RinProcessBRL.Dispose();
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
-                data = items,
+                data = RinProcesses,
                 success = !result.HasError,
                 message = new
                 {
@@ -90,17 +90,17 @@ namespace iRely.Invetory.WebAPI.Controllers
         }
 
         [HttpPut]
-        public HttpResponseMessage PutItems(IEnumerable<tblICItem> items, bool continueOnConflict = false)
+        public HttpResponseMessage PutRinProcesses(IEnumerable<tblICRinProcess> RinProcesses, bool continueOnConflict = false)
         {
-            foreach (var item in items)
-                _ItemBRL.UpdateItem(item);
+            foreach (var RinProcess in RinProcesses)
+                _RinProcessBRL.UpdateRinProcess(RinProcess);
 
-            var result = _ItemBRL.Save(continueOnConflict);
-            _ItemBRL.Dispose();
+            var result = _RinProcessBRL.Save(continueOnConflict);
+            _RinProcessBRL.Dispose();
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
-                data = items,
+                data = RinProcesses,
                 success = !result.HasError,
                 message = new
                 {
@@ -112,17 +112,17 @@ namespace iRely.Invetory.WebAPI.Controllers
         }
 
         [HttpDelete]
-        public HttpResponseMessage DeleteItems(IEnumerable<tblICItem> items, bool continueOnConflict = false)
+        public HttpResponseMessage DeleteRinProcesses(IEnumerable<tblICRinProcess> RinProcesses, bool continueOnConflict = false)
         {
-            foreach (var item in items)
-                _ItemBRL.DeleteItem(item);
+            foreach (var RinProcess in RinProcesses)
+                _RinProcessBRL.DeleteRinProcess(RinProcess);
 
-            var result = _ItemBRL.Save(continueOnConflict);
-            _ItemBRL.Dispose();
+            var result = _RinProcessBRL.Save(continueOnConflict);
+            _RinProcessBRL.Dispose();
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
-                data = items,
+                data = RinProcesses,
                 success = !result.HasError,
                 message = new
                 {

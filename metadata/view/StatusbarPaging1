@@ -8,8 +8,8 @@
     "userConfig": {
         "border": null,
         "container|padding": "0 0 0 1",
-        "designer|userAlias": "statusbarpaging",
-        "designer|userClassName": "StatusbarPaging",
+        "designer|userAlias": "statusbarpaging1",
+        "designer|userClassName": "StatusbarPaging1",
         "floating": null,
         "frame": null,
         "inputItemWidth": 60,

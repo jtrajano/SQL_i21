@@ -26,6 +26,13 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strInternalCode).HasColumnName("strInternalCode");
             this.Property(t => t.strUnitType).HasColumnName("strUnitType");
             this.Property(t => t.ysnAllowPick).HasColumnName("ysnAllowPick");
+
+            this.HasRequired(p => p.CapacityUnitMeasures)
+                .WithMany(p => p.CapacityUnitTypes)
+                .HasForeignKey(p => p.intCapacityUnitMeasureId);
+            this.HasRequired(p => p.DimensionUnitMeasures)
+                .WithMany(p => p.DimensionUnitTypes)
+                .HasForeignKey(p => p.intDimensionUnitMeasureId);
         }
     }
 }

@@ -15,5 +15,9 @@
 
 Ext.define('Inventory.view.FuelCodeViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.fuelcode'
+    alias: 'controller.fuelcode',
+
+    requires: [
+        'Inventory.view.override.FuelCodeViewController'
+    ]
 });

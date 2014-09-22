@@ -27,8 +27,10 @@ Ext.define('Inventory.view.FuelCode', {
         'Ext.toolbar.Separator',
         'Ext.grid.Panel',
         'Ext.grid.column.Column',
+        'Ext.form.field.Text',
         'Ext.grid.View',
-        'Ext.selection.CheckboxModel'
+        'Ext.selection.CheckboxModel',
+        'Ext.grid.plugin.CellEditing'
     ],
 
     viewModel: {
@@ -112,7 +114,7 @@ Ext.define('Inventory.view.FuelCode', {
                                 ]
                             },
                             {
-                                xtype: 'statusbar',
+                                xtype: 'istatusbar',
                                 flex: 1,
                                 dock: 'bottom'
                             }
@@ -143,7 +145,7 @@ Ext.define('Inventory.view.FuelCode', {
                                                 xtype: 'tbseparator'
                                             },
                                             {
-                                                xtype: 'filter'
+                                                xtype: 'filtergrid'
                                             }
                                         ]
                                     }
@@ -151,16 +153,24 @@ Ext.define('Inventory.view.FuelCode', {
                                 columns: [
                                     {
                                         xtype: 'gridcolumn',
+                                        itemId: 'colFuelCode',
                                         width: 82,
                                         dataIndex: 'string',
                                         text: 'Fuel Code',
-                                        flex: 1
+                                        flex: 1,
+                                        editor: {
+                                            xtype: 'textfield'
+                                        }
                                     },
                                     {
                                         xtype: 'gridcolumn',
+                                        itemId: 'colDescription',
                                         dataIndex: 'string',
                                         text: 'Description',
-                                        flex: 2
+                                        flex: 2,
+                                        editor: {
+                                            xtype: 'textfield'
+                                        }
                                     }
                                 ],
                                 viewConfig: {
@@ -168,7 +178,14 @@ Ext.define('Inventory.view.FuelCode', {
                                 },
                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                     selType: 'checkboxmodel'
-                                })
+                                }),
+                                plugins: [
+                                    {
+                                        ptype: 'cellediting',
+                                        pluginId: 'FuelCodePlugin',
+                                        clicksToEdit: 1
+                                    }
+                                ]
                             }
                         ]
                     }

@@ -1,0 +1,14 @@
+{
+    "type": "Ext.app.ViewModel",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "factoryunit",
+        "designer|userClassName": "FactoryUnitViewModel"
+    },
+    "name": "FuelTaxClassViewModel2",
+    "designerId": "e78124b2-bf6f-4cc2-8808-b574443ebe6d"
+}

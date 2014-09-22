@@ -114,7 +114,7 @@ Ext.define('Inventory.view.FuelCategory', {
                                 ]
                             },
                             {
-                                xtype: 'statusbar',
+                                xtype: 'istatusbar',
                                 flex: 1,
                                 dock: 'bottom'
                             }

@@ -108,6 +108,8 @@ namespace iRely.Inventory.Model
         public DbSet<tblICFamily> tblICFamilies { get; set; }
         public DbSet<tblICFuelType> tblICFuelTypes { get; set; }
         public DbSet<tblICItem> tblICItems { get; set; }
+        public DbSet<tblICItemUOM> tblICItemUOMs { get; set; }
+        public DbSet<tblICItemLocationStore> tblICItemLocationStores { get; set; }
         public DbSet<tblICManufacturer> tblICManufacturers { get; set; }
         public DbSet<tblICPatronageCategory> tblICPatronageCategories { get; set; }
         public DbSet<tblICReasonCode> tblICReasonCodes { get; set; }
@@ -136,6 +138,8 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICFamilyMap());
             modelBuilder.Configurations.Add(new tblICFuelTypeMap());
             modelBuilder.Configurations.Add(new tblICItemMap());
+            modelBuilder.Configurations.Add(new tblICItemUOMMap());
+            modelBuilder.Configurations.Add(new tblICItemLocationStoreMap());
             modelBuilder.Configurations.Add(new tblICManufacturerMap());
             modelBuilder.Configurations.Add(new tblICPatronageCategoryMap());
             modelBuilder.Configurations.Add(new tblICReasonCodeMap());

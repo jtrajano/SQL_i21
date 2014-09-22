@@ -18,7 +18,8 @@
             "FeedStockUom",
             "ManufacturingCell",
             "FactoryUnitType",
-            "ItemSubstitution"
+            "ItemSubstitution",
+            "FactoryUnit"
         ]
     },
     "name": "Application",

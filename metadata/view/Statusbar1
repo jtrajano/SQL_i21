@@ -7,8 +7,8 @@
     "codeClass": null,
     "userConfig": {
         "container|padding": "0 0 0 1",
-        "designer|userAlias": "statusbar",
-        "designer|userClassName": "Statusbar",
+        "designer|userAlias": "statusbar1",
+        "designer|userClassName": "Statusbar1",
         "itemId": "tlbStatusbar",
         "width": 1265
     },

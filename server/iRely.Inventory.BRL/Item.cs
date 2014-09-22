@@ -21,12 +21,24 @@ namespace iRely.Inventory.BRL
             _db = new Repository(new Inventory.Model.InventoryEntities());
         }
 
-        public IQueryable<tblICItem> GetSearchQuery()
+        public IQueryable<ItemVM> GetSearchQuery()
         {
-            return _db.GetQuery<tblICItem>();
+            return _db.GetQuery<tblICItem>()
+                .Select(p => new ItemVM { 
+                    intItemId = p.intItemId,
+                    strItemNo = p.strItemNo,
+                    strType = p.strType,
+                    strDescription = p.strDescription,
+                    intManufacturerId = p.intManufacturerId,
+                    intBrandId = p.intBrandId,
+                    strStatus = p.strStatus,
+                    strModelNo = p.strModelNo,
+                    intTrackingId = p.intTrackingId,
+                    strLotTracking = p.strLotTracking
+                });
         }
 
-        public object GetSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<tblICItem, bool>> predicate)
+        public object GetSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<ItemVM, bool>> predicate)
         {
             return GetSearchQuery()
                 .Where(predicate)
@@ -37,20 +49,22 @@ namespace iRely.Inventory.BRL
                 .AsNoTracking();
         }
 
-        public int GetCount(Expression<Func<tblICItem, bool>> predicate)
+        public int GetCount(Expression<Func<ItemVM, bool>> predicate)
         {
             return GetSearchQuery().Where(predicate).Count();
         }
 
-        public IQueryable<tblICItem> GetItems(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<tblICItem, bool>> predicate)
+        public IQueryable<tblICItem> GetItems(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<ItemVM, bool>> predicate)
         {
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICItem>()
-                      .Where(w => query.Where(predicate).Any(a => a.intItemId == w.intItemId)) //Filter the Main DataSource Based on Search Query
-                      .OrderBySelector(sortSelector)
-                      .Skip(start)
-                      .Take(limit)
-                      .AsNoTracking();
+                    .Include(p => p.tblICItemUOMs)
+                    .Include(p => p.tblICItemLocationStores)
+                    .Where(w => query.Where(predicate).Any(a => a.intItemId == w.intItemId)) //Filter the Main DataSource Based on Search Query
+                    .OrderBySelector(sortSelector)
+                    .Skip(start)
+                    .Take(limit)
+                    .AsNoTracking();
         }
 
         public void AddItem(tblICItem item)
