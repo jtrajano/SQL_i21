@@ -27,8 +27,10 @@ Ext.define('Inventory.view.ProcessCode', {
         'Ext.toolbar.Separator',
         'Ext.grid.Panel',
         'Ext.grid.column.Column',
+        'Ext.form.field.Text',
         'Ext.grid.View',
-        'Ext.selection.CheckboxModel'
+        'Ext.selection.CheckboxModel',
+        'Ext.grid.plugin.CellEditing'
     ],
 
     viewModel: {
@@ -112,7 +114,7 @@ Ext.define('Inventory.view.ProcessCode', {
                                 ]
                             },
                             {
-                                xtype: 'statusbar',
+                                xtype: 'istatusbar',
                                 flex: 1,
                                 dock: 'bottom'
                             }
@@ -143,7 +145,7 @@ Ext.define('Inventory.view.ProcessCode', {
                                                 xtype: 'tbseparator'
                                             },
                                             {
-                                                xtype: 'filter'
+                                                xtype: 'filtergrid'
                                             }
                                         ]
                                     }
@@ -151,16 +153,24 @@ Ext.define('Inventory.view.ProcessCode', {
                                 columns: [
                                     {
                                         xtype: 'gridcolumn',
+                                        itemId: 'colProcessCode',
                                         width: 82,
                                         dataIndex: 'string',
                                         text: 'Process Code',
-                                        flex: 1
+                                        flex: 1,
+                                        editor: {
+                                            xtype: 'textfield'
+                                        }
                                     },
                                     {
                                         xtype: 'gridcolumn',
+                                        itemId: 'colDescription',
                                         dataIndex: 'string',
                                         text: 'Description',
-                                        flex: 2
+                                        flex: 2,
+                                        editor: {
+                                            xtype: 'textfield'
+                                        }
                                     }
                                 ],
                                 viewConfig: {
@@ -168,7 +178,14 @@ Ext.define('Inventory.view.ProcessCode', {
                                 },
                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                     selType: 'checkboxmodel'
-                                })
+                                }),
+                                plugins: [
+                                    {
+                                        ptype: 'cellediting',
+                                        pluginId: 'ProcessCodePlugin',
+                                        clicksToEdit: 1
+                                    }
+                                ]
                             }
                         ]
                     }
