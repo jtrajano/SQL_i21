@@ -31,7 +31,6 @@ CREATE TABLE [dbo].[tblICInventoryTransaction]
 	[intTransactionTypeId] INT NOT NULL, 
 	[intCostingId] INT NULL,
     [intLotId] INT NULL, 
-	[intCostingBucketId] INT NULL,
     [dtmCreated] DATETIME NULL, 
     [intCreatedUserId] INT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 

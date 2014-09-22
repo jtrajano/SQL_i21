@@ -25,10 +25,15 @@ CREATE TABLE [dbo].[tblICInventoryCostingBucket]
     [intItemLocationStoreId] INT NOT NULL, 
     [dtmDate] INT NOT NULL, 
     [intGLAccountId] INT NOT NULL, 
-    [dblUnitCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+	[dblUnitQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+	[dblUOMQty] NUMERIC(18, 6) NOT NULL DEFAULT 1, 
+    [dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [dblExchangeRate] NUMERIC(18, 6) NOT NULL DEFAULT 1, 
 	[intCurrencyId] INT NULL ,
     [intCostType] INT NOT NULL, 
 	[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [intInventoryTransactionId] INT NOT NULL, 
+    [intTransactionId] INT NOT NULL, 
+    [strTransactionId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
     CONSTRAINT [PK_tblICInventoryCostingBucket] PRIMARY KEY ([intCostingBucketId]) 
 )

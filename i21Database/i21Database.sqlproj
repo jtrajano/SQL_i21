@@ -720,6 +720,7 @@
     <Build Include="dbo\Tables\tblPREEOCCode.sql" />
     <Build Include="dbo\Tables\tblPRPaycheckDeductionTax.sql" />
     <Build Include="dbo\Tables\tblPRPaycheckEarningTax.sql" />
+    <Build Include="dbo\Tables\tblICInventoryAveCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
