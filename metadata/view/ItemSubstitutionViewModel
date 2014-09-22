@@ -1,0 +1,14 @@
+{
+    "type": "Ext.app.ViewModel",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "itemsubstitution",
+        "designer|userClassName": "ItemSubstitutionViewModel"
+    },
+    "name": "FuelTaxClassViewModel1",
+    "designerId": "c18355f3-a777-48dc-b22f-22e16cf54fbf"
+}

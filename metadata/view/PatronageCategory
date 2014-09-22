@@ -226,9 +226,10 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "designer|createAlias": "filtergrid",
                                         "layout|flex": null
                                     },
-                                    "name": "filter",
+                                    "name": "filter16",
                                     "designerId": "a18798ff-eca4-42bf-a94e-9881fa91b221",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }

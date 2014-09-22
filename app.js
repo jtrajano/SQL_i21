@@ -30,7 +30,9 @@ Ext.application({
         'FeedStockCode',
         'FeedStockUom',
         'ManufacturingCell',
-        'FactoryUnitType'
+        'FactoryUnitType',
+        'ItemSubstitution',
+        'FactoryUnit'
     ],
     name: 'Inventory',
 
