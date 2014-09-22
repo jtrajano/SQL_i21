@@ -25,7 +25,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
             this.Property(t => t.strDescription).HasColumnName("strDescription");
 
-            this.HasRequired(p => p.tblICItem)
+            this.HasRequired(p => p.tblICUnitMeasure)
                 .WithMany(p => p.tblICItemUOMs)
                 .HasForeignKey(p => p.intUnitMeasureId);
         }
