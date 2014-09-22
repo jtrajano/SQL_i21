@@ -20,17 +20,18 @@ namespace iRely.Invetory.WebAPI.Controllers
     {
         private Item _ItemBRL = new Item();
 
+        [HttpGet]
         public HttpResponseMessage SearchItems(int page, int start, int limit, string columns = "", string sort = "", string filter = "")
         {
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
-            var predicate = ExpressionBuilder.True<tblICItem>();
+            var predicate = ExpressionBuilder.True<ItemVM>();
             var selector = ExpressionBuilder.GetSelector(columns);
 
             var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts);
 
             if (searchFilters != null)
-                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICItem>(searchFilters);
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<ItemVM>(searchFilters);
 
             var data = _ItemBRL.GetSearchQuery(page, start, limit, selector, sortSelector, predicate);
 
@@ -50,11 +51,11 @@ namespace iRely.Invetory.WebAPI.Controllers
 
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
-            var predicate = ExpressionBuilder.True<tblICItem>();
+            var predicate = ExpressionBuilder.True<ItemVM>();
             var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intItemId", "DESC");
 
             if (searchFilters != null)
-                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICItem>(searchFilters, true);
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<ItemVM>(searchFilters, true);
 
             var total = _ItemBRL.GetCount(predicate);
             var data = _ItemBRL.GetItems(page, start, page == 0 ? total : limit, sortSelector, predicate);

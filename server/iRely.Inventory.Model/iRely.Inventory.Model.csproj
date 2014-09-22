@@ -54,6 +54,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="InventoryEntities.cs" />
+    <Compile Include="Mappings\tblICItemLocationStoreMap.cs" />
+    <Compile Include="Mappings\tblICItemUOMMap.cs" />
     <Compile Include="Mappings\tblICBrandMap.cs" />
     <Compile Include="Mappings\tblICCatalogMap.cs" />
     <Compile Include="Mappings\tblICCategoryAccountMap.cs" />
@@ -80,6 +82,8 @@
     <Compile Include="Mappings\tblICUnitMeasureMap.cs" />
     <Compile Include="Mappings\tblICUnitTypeMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tables\tblICItemLocationStore.cs" />
+    <Compile Include="Tables\tblICItemUOM.cs" />
     <Compile Include="Tables\tblICBrand.cs" />
     <Compile Include="Tables\tblICCatalog.cs" />
     <Compile Include="Tables\tblICCategory.cs" />
