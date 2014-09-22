@@ -16,26 +16,25 @@ using iRely.Inventory.BRL;
 
 namespace iRely.Invetory.WebAPI.Controllers
 {
-    public class ItemController : ApiController
+    public class UnitTypeController : ApiController
     {
-        private Item _ItemBRL = new Item();
+        private UnitType _UnitTypeBRL = new UnitType();
 
-        [HttpGet]
-        public HttpResponseMessage SearchItems(int page, int start, int limit, string columns = "", string sort = "", string filter = "")
+        public HttpResponseMessage SearchUnitTypes(int page, int start, int limit, string columns = "", string sort = "", string filter = "")
         {
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
-            var predicate = ExpressionBuilder.True<ItemVM>();
+            var predicate = ExpressionBuilder.True<tblICUnitType>();
             var selector = ExpressionBuilder.GetSelector(columns);
 
             var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts);
 
             if (searchFilters != null)
-                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<ItemVM>(searchFilters);
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICUnitType>(searchFilters);
 
-            var data = _ItemBRL.GetSearchQuery(page, start, limit, selector, sortSelector, predicate);
+            var data = _UnitTypeBRL.GetSearchQuery(page, start, limit, selector, sortSelector, predicate);
 
-            var total = _ItemBRL.GetCount(predicate);
+            var total = _UnitTypeBRL.GetCount(predicate);
             return Request.CreateResponse(HttpStatusCode.OK, new
             {
                 data = data,
@@ -44,21 +43,21 @@ namespace iRely.Invetory.WebAPI.Controllers
         }
 
         [HttpGet]
-        [ActionName("GetItems")]
-        public HttpResponseMessage GetItems(int start = 0, int limit = 1, int page = 0, string sort = "", string filter = "")
+        [ActionName("GetUnitTypes")]
+        public HttpResponseMessage GetUnitTypes(int start = 0, int limit = 1, int page = 0, string sort = "", string filter = "")
         {
             filter = string.IsNullOrEmpty(filter) ? "" : filter;
 
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
-            var predicate = ExpressionBuilder.True<ItemVM>();
-            var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intItemId", "DESC");
+            var predicate = ExpressionBuilder.True<tblICUnitType>();
+            var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intUnitTypeId", "DESC");
 
             if (searchFilters != null)
-                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<ItemVM>(searchFilters, true);
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICUnitType>(searchFilters, true);
 
-            var total = _ItemBRL.GetCount(predicate);
-            var data = _ItemBRL.GetItems(page, start, page == 0 ? total : limit, sortSelector, predicate);
+            var total = _UnitTypeBRL.GetCount(predicate);
+            var data = _UnitTypeBRL.GetUnitTypes(page, start, page == 0 ? total : limit, sortSelector, predicate);
 
             return Request.CreateResponse(HttpStatusCode.OK, new
             {
@@ -68,17 +67,17 @@ namespace iRely.Invetory.WebAPI.Controllers
         }
 
         [HttpPost]
-        public HttpResponseMessage PostItems(IEnumerable<tblICItem> items, bool continueOnConflict = false)
+        public HttpResponseMessage PostUnitTypes(IEnumerable<tblICUnitType> UnitTypes, bool continueOnConflict = false)
         {
-            foreach (var item in items)
-                _ItemBRL.AddItem(item);
+            foreach (var UnitType in UnitTypes)
+                _UnitTypeBRL.AddUnitType(UnitType);
 
-            var result = _ItemBRL.Save(continueOnConflict);
-            _ItemBRL.Dispose();
+            var result = _UnitTypeBRL.Save(continueOnConflict);
+            _UnitTypeBRL.Dispose();
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
-                data = items,
+                data = UnitTypes,
                 success = !result.HasError,
                 message = new
                 {
@@ -89,18 +88,19 @@ namespace iRely.Invetory.WebAPI.Controllers
             });
         }
 
+        [AcceptVerbs("POST", "PUT")]
         [HttpPut]
-        public HttpResponseMessage PutItems(IEnumerable<tblICItem> items, bool continueOnConflict = false)
+        public HttpResponseMessage PutUnitTypes(IEnumerable<tblICUnitType> UnitTypes, bool continueOnConflict = false)
         {
-            foreach (var item in items)
-                _ItemBRL.UpdateItem(item);
+            foreach (var UnitType in UnitTypes)
+                _UnitTypeBRL.UpdateUnitType(UnitType);
 
-            var result = _ItemBRL.Save(continueOnConflict);
-            _ItemBRL.Dispose();
+            var result = _UnitTypeBRL.Save(continueOnConflict);
+            _UnitTypeBRL.Dispose();
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
-                data = items,
+                data = UnitTypes,
                 success = !result.HasError,
                 message = new
                 {
@@ -110,19 +110,20 @@ namespace iRely.Invetory.WebAPI.Controllers
                 }
             });
         }
+
 
         [HttpDelete]
-        public HttpResponseMessage DeleteItems(IEnumerable<tblICItem> items, bool continueOnConflict = false)
+        public HttpResponseMessage DeleteUnitTypes(IEnumerable<tblICUnitType> UnitTypes, bool continueOnConflict = false)
         {
-            foreach (var item in items)
-                _ItemBRL.DeleteItem(item);
+            foreach (var UnitType in UnitTypes)
+                _UnitTypeBRL.DeleteUnitType(UnitType);
 
-            var result = _ItemBRL.Save(continueOnConflict);
-            _ItemBRL.Dispose();
+            var result = _UnitTypeBRL.Save(continueOnConflict);
+            _UnitTypeBRL.Dispose();
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
-                data = items,
+                data = UnitTypes,
                 success = !result.HasError,
                 message = new
                 {
