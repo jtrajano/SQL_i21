@@ -1,7 +1,16 @@
 ﻿/*
-	In VisionCore, we call this table tblGLVoucher. This table will be used to hold the all detail of an items related to the posted transaction. 
+	In VisionCore, we called this table as tblGLVoucher. This table will be used to hold all the details of an item related to the posted transaction. 
 	It will include the stock quantity, cost, and sales prices. It is very relevant to the items costing method and valuation. 
 	Records from this table will be used to generate the GL entries and later on for the inventory valuation report. 
+
+	All inbound stock records can have related record/s in tblICInventoryCostingBucket. Additional records in the costing bucket may be added to 
+	track accrual of the cost. 
+
+	Accrual of the cost means additional cost are added to an item after it has been received. Cost used during receiving may be an estimate cost (usually the last cost of the item). 
+	This is common as when the final bill is received from the Vendor, only when the final cost is determined. These additional cost can be freight charges, duties, foreign exchange rates, levies, taxes, and/or other kinds of costs. 
+	Such costs need to be considered and must make-up the cost of the item. 
+
+	Outbound (sold) items before the final cost is determined are recomputed to include the accrued costs. 
 */
 
 CREATE TABLE [dbo].[tblICInventoryTransaction]
@@ -18,9 +27,11 @@ CREATE TABLE [dbo].[tblICInventoryTransaction]
 	[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL,
     [intTransactionId] INT NOT NULL, 
 	[strTransactionId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
+	[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[intTransactionTypeId] INT NOT NULL, 
 	[intCostingId] INT NULL,
     [intLotId] INT NULL, 
+	[intCostingBucketId] INT NULL,
     [dtmCreated] DATETIME NULL, 
     [intCreatedUserId] INT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 

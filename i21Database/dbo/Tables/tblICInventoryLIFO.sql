@@ -1,5 +1,5 @@
 ﻿/*
-	Tracks all stocks in a LIFO manner. 
+	Tracks all stocks in a LIFO manner. Records are physically arranged in a LIFO manner using a CLUSTERED index. 
 	Records must be maintained in this table even if the costing method for an item is not LIFO.
 */
 

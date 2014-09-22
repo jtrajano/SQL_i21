@@ -1,6 +1,6 @@
 ﻿/*
 	This table will hold the validation result of post or unpost process. 
-	Data on this table will be shown in a grid so that the user will know why the post or unpost failed. 
+	Data on this table will be shown in a grid so that the user will know why a batch (post or unpost) failed. 
 */
 CREATE TABLE [dbo].[tblICInventoryCostingResult]
 (

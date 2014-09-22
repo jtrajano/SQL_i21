@@ -1,8 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblPRTypeTaxState](
 	[intTypeTaxStateId] [int] NOT NULL IDENTITY,
 	[strState] [nvarchar](50) NOT NULL,
-	[strCode] [nvarchar](10) NOT NULL,
-	[intSort] [int] NULL,
+	[strCode] [nvarchar](10) NULL,
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblPRTypeTaxState] PRIMARY KEY ([intTypeTaxStateId]),
 ) ON [PRIMARY]
@@ -47,11 +46,3 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Sort Field',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPRTypeTaxState',
-    @level2type = N'COLUMN',
-    @level2name = N'intSort'
