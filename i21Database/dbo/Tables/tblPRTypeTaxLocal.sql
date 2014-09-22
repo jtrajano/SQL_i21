@@ -5,7 +5,6 @@
 	[strLocalType] NVARCHAR(20) NULL, 
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblPRTypeTaxLocal] PRIMARY KEY ([intTypeTaxLocalId]), 
-    CONSTRAINT [AK_tblPRTypeTaxLocal_strLocal] UNIQUE ([strLocalName]),
 	CONSTRAINT [FK_tblPRTypeTaxLocal_tblPRTypeTaxState] FOREIGN KEY ([intTypeTaxStateId]) REFERENCES [tblPRTypeTaxState]([intTypeTaxStateId])
 ) ON [PRIMARY]
 GO

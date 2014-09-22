@@ -6,8 +6,10 @@ CREATE FUNCTION [dbo].[fnGetItemCostingMethod](
 RETURNS INT
 AS
 BEGIN 
-	DECLARE @intCostingMethodId AS INT 
-	SELECT @intCostingMethodId = intCostingMethodId FROM tblICItem
+	--Removed routine, costing method which used to be Item Level configuration is now location level config..
+	--DECLARE @intCostingMethodId AS INT 
+	--SELECT @intCostingMethodId = intCostingMethodId FROM tblICItem
 
-	RETURN @intCostingMethodId
+	--RETURN @intCostingMethodId
+	RETURN 0
 END 
