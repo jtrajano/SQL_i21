@@ -18,7 +18,7 @@ Ext.define('Inventory.view.StatusbarPaging1', {
     alias: 'widget.statusbarpaging1',
 
     requires: [
-        'Inventory.view.StatusbarPagingViewModel1',
+        'Inventory.view.StatusbarPaging1ViewModel',
         'Ext.button.Button',
         'Ext.toolbar.Separator',
         'Ext.form.Label',

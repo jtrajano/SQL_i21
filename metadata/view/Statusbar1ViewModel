@@ -6,8 +6,8 @@
     },
     "codeClass": null,
     "userConfig": {
-        "designer|userAlias": "statusbar",
-        "designer|userClassName": "StatusbarViewModel"
+        "designer|userAlias": "statusbar1",
+        "designer|userClassName": "Statusbar1ViewModel"
     },
     "designerId": "9deb4207-ea3f-4190-9004-286365ed2f9e"
 }

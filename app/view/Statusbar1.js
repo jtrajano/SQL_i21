@@ -18,7 +18,7 @@ Ext.define('Inventory.view.Statusbar1', {
     alias: 'widget.statusbar1',
 
     requires: [
-        'Inventory.view.StatusbarViewModel1',
+        'Inventory.view.Statusbar1ViewModel',
         'Ext.button.Button',
         'Ext.toolbar.Separator',
         'Ext.form.Label',

@@ -6,8 +6,8 @@
     },
     "codeClass": null,
     "userConfig": {
-        "designer|userAlias": "filter",
-        "designer|userClassName": "FilterViewController"
+        "designer|userAlias": "statusbar1",
+        "designer|userClassName": "Statusbar1ViewController"
     },
-    "designerId": "cf83061c-88e3-47e2-95ea-40fd51bd0738"
+    "designerId": "d8838c0e-afff-4c7a-90a9-6dfc5a0b5f4b"
 }
