@@ -717,6 +717,7 @@
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\3_ReportEnableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\4_ReportData.sql" />
     <Build Include="dbo\Tables\tblPREEOCCode.sql" />
+    <Build Include="dbo\Tables\tblICItemUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -736,5 +737,8 @@
       <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
       <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
     </ArtifactReference>
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="i21Database.refactorlog" />
   </ItemGroup>
 </Project>
