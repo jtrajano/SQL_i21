@@ -705,6 +705,7 @@
     <Build Include="dbo\Tables\tblPREEOCCode.sql" />
     <Build Include="dbo\Tables\tblPRPaycheckDeductionTax.sql" />
     <Build Include="dbo\Tables\tblPRPaycheckEarningTax.sql" />
+    <Build Include="dbo\Tables\tblICItemUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
