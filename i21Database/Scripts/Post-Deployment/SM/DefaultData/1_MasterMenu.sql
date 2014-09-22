@@ -477,7 +477,7 @@ GO
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Feed Stock UOM' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('Feed Stock UOM', 'Inventory', @InventoryRINId, 'Feed Stock UOM', 'Screen', 'ic/feedStockUOM', 'small-screen', 1, 1, 0, 1, 5, 0)
+	VALUES ('Feed Stock UOM', 'Inventory', @InventoryRINId, 'Feed Stock UOM', 'Screen', 'ic/feedStockUom', 'small-screen', 1, 1, 0, 1, 5, 0)
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fuel Type' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId)
 	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
