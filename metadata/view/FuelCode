@@ -227,9 +227,10 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "designer|createAlias": "filtergrid",
                                         "layout|flex": null
                                     },
-                                    "name": "filter17",
+                                    "name": "filter6",
                                     "designerId": "61e773ac-4bff-4999-a668-e9f78440d8d3",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -245,11 +246,24 @@
                             "userConfig": {
                                 "dataIndex": "string",
                                 "flex": 1,
+                                "itemId": "colFuelCode",
                                 "text": "Fuel Code",
                                 "width": 82
                             },
                             "name": "MyColumn148",
-                            "designerId": "cfdc73ff-accc-408d-84e0-2848ab0daa5f"
+                            "designerId": "cfdc73ff-accc-408d-84e0-2848ab0daa5f",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "editor",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "name": "MyTextField",
+                                    "designerId": "4c951857-cfa2-4345-9d05-3f223224fd12"
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.grid.column.Column",
@@ -261,11 +275,24 @@
                             "userConfig": {
                                 "dataIndex": "string",
                                 "flex": 2,
+                                "itemId": "colDescription",
                                 "text": "Description",
                                 "width": null
                             },
                             "name": "MyColumn150",
-                            "designerId": "76d47cee-9a26-496b-ac8b-83093130281f"
+                            "designerId": "76d47cee-9a26-496b-ac8b-83093130281f",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "editor",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "name": "MyTextField1",
+                                    "designerId": "e6c2a86c-974b-4853-a901-1739e57bed10"
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.grid.View",
@@ -289,6 +316,20 @@
                             "codeClass": "Ext.selection.CheckboxModel",
                             "name": "MyCheckboxSelectionModel31",
                             "designerId": "5b1b6c7c-d087-4171-8560-5e6c701baa10"
+                        },
+                        {
+                            "type": "Ext.grid.plugin.CellEditing",
+                            "reference": {
+                                "name": "plugins",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "clicksToEdit": 1,
+                                "pluginId": "FuelCodePlugin"
+                            },
+                            "name": "MyCellEditingPlugin",
+                            "designerId": "38c8ea34-2903-479a-9563-04782f221538"
                         }
                     ]
                 },
@@ -300,10 +341,11 @@
                     },
                     "codeClass": null,
                     "userConfig": {
+                        "designer|createAlias": "istatusbar",
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbar1",
+                    "name": "statusbar4",
                     "designerId": "ef28f14e-7bcb-44c6-bf1c-5e92a18d8ca2",
                     "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
                 }

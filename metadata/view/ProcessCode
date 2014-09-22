@@ -227,9 +227,10 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "designer|createAlias": "filtergrid",
                                         "layout|flex": null
                                     },
-                                    "name": "filter34",
+                                    "name": "filter5",
                                     "designerId": "62fe770e-9a2e-449c-93e7-c21e9da1ab2d",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -245,11 +246,24 @@
                             "userConfig": {
                                 "dataIndex": "string",
                                 "flex": 1,
+                                "itemId": "colProcessCode",
                                 "text": "Process Code",
                                 "width": 82
                             },
                             "name": "MyColumn148",
-                            "designerId": "972f8f00-0d88-4374-bded-3704487da437"
+                            "designerId": "972f8f00-0d88-4374-bded-3704487da437",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "editor",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "name": "MyTextField2",
+                                    "designerId": "ac34a4c6-2946-4455-80c9-a7ad7309df68"
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.grid.column.Column",
@@ -261,11 +275,24 @@
                             "userConfig": {
                                 "dataIndex": "string",
                                 "flex": 2,
+                                "itemId": "colDescription",
                                 "text": "Description",
                                 "width": null
                             },
                             "name": "MyColumn150",
-                            "designerId": "e0f30c0e-702f-43a4-83ce-938de9a32147"
+                            "designerId": "e0f30c0e-702f-43a4-83ce-938de9a32147",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "editor",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "name": "MyTextField3",
+                                    "designerId": "f071a2be-4116-48fe-89dc-69ec38420e62"
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.grid.View",
@@ -289,6 +316,20 @@
                             "codeClass": "Ext.selection.CheckboxModel",
                             "name": "MyCheckboxSelectionModel31",
                             "designerId": "176d8b08-dc2e-40b4-8eb6-c08779e54935"
+                        },
+                        {
+                            "type": "Ext.grid.plugin.CellEditing",
+                            "reference": {
+                                "name": "plugins",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "clicksToEdit": 1,
+                                "pluginId": "ProcessCodePlugin"
+                            },
+                            "name": "MyCellEditingPlugin1",
+                            "designerId": "877a999d-a870-46d1-82bc-34476008812d"
                         }
                     ]
                 },
@@ -300,10 +341,11 @@
                     },
                     "codeClass": null,
                     "userConfig": {
+                        "designer|createAlias": "istatusbar",
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbar5",
+                    "name": "statusbar3",
                     "designerId": "490aa307-4a73-4d29-baa8-de21b2fcd5c1",
                     "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
                 }

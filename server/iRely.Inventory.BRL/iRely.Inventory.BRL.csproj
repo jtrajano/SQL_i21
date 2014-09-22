@@ -61,6 +61,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="RinProcess.cs" />
+    <Compile Include="RinFuel.cs" />
     <Compile Include="RinFuelType.cs" />
     <Compile Include="Tag.cs" />
     <Compile Include="Item.cs" />
