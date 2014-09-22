@@ -174,7 +174,9 @@ Ext.define('Inventory.view.FactoryUnitType', {
                             xtype: 'combobox',
                             itemId: 'cboInternalCode',
                             fieldLabel: 'Internal Code',
-                            labelWidth: 90
+                            labelWidth: 90,
+                            displayField: 'strInternalCode',
+                            valueField: 'strInternalCode'
                         },
                         {
                             xtype: 'combobox',

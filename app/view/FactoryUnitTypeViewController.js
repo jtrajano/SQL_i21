@@ -15,5 +15,9 @@
 
 Ext.define('Inventory.view.FactoryUnitTypeViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.factoryunittype'
+    alias: 'controller.factoryunittype',
+
+    requires: [
+        'Inventory.view.override.FactoryUnitTypeViewController'
+    ]
 });

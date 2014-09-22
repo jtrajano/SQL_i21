@@ -15,6 +15,10 @@
 
 Ext.define('Inventory.view.FactoryUnitTypeViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.factoryunittype'
+    alias: 'viewmodel.factoryunittype',
+
+    requires: [
+        'Inventory.view.override.FactoryUnitTypeViewModel'
+    ]
 
 });
