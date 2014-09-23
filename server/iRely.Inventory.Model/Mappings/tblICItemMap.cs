@@ -29,6 +29,12 @@ namespace iRely.Inventory.Model
             this.HasMany(p => p.tblICItemLocationStores)
                 .WithRequired(p => p.tblICItem)
                 .HasForeignKey(p => p.intItemId);
+            this.HasOptional(p => p.tblICItemSales)
+                .WithRequired(p => p.tblICItem)
+                .WillCascadeOnDelete();
+            this.HasOptional(p => p.tblICItemPOS)
+                .WithRequired(p => p.tblICItem)
+                .WillCascadeOnDelete();
         }
     }
 }

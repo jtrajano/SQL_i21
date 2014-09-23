@@ -19,8 +19,7 @@ Ext.define('Inventory.view.FuelCode', {
 
     requires: [
         'Inventory.view.FuelCodeViewModel',
-        'Inventory.view.Filter',
-        'Inventory.view.Statusbar',
+        'Inventory.view.Statusbar1',
         'Ext.form.Panel',
         'Ext.toolbar.Toolbar',
         'Ext.button.Button',
@@ -143,9 +142,6 @@ Ext.define('Inventory.view.FuelCode', {
                                             },
                                             {
                                                 xtype: 'tbseparator'
-                                            },
-                                            {
-                                                xtype: 'filtergrid'
                                             }
                                         ]
                                     }

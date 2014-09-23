@@ -19,16 +19,17 @@ Ext.define('Inventory.view.FeedStockUom', {
 
     requires: [
         'Inventory.view.FeedStockUomViewModel',
-        'Inventory.view.Filter',
-        'Inventory.view.Statusbar',
+        'Inventory.view.Statusbar1',
         'Ext.form.Panel',
         'Ext.toolbar.Toolbar',
         'Ext.button.Button',
         'Ext.toolbar.Separator',
         'Ext.grid.Panel',
         'Ext.grid.column.Column',
+        'Ext.form.field.Text',
         'Ext.grid.View',
-        'Ext.selection.CheckboxModel'
+        'Ext.selection.CheckboxModel',
+        'Ext.grid.plugin.CellEditing'
     ],
 
     viewModel: {
@@ -112,7 +113,7 @@ Ext.define('Inventory.view.FeedStockUom', {
                                 ]
                             },
                             {
-                                xtype: 'statusbar',
+                                xtype: 'istatusbar',
                                 flex: 1,
                                 dock: 'bottom'
                             }
@@ -141,9 +142,6 @@ Ext.define('Inventory.view.FeedStockUom', {
                                             },
                                             {
                                                 xtype: 'tbseparator'
-                                            },
-                                            {
-                                                xtype: 'filter'
                                             }
                                         ]
                                     }
@@ -151,16 +149,24 @@ Ext.define('Inventory.view.FeedStockUom', {
                                 columns: [
                                     {
                                         xtype: 'gridcolumn',
+                                        itemId: 'colUOM',
                                         width: 82,
                                         dataIndex: 'string',
                                         text: 'UOM',
-                                        flex: 1
+                                        flex: 1,
+                                        editor: {
+                                            xtype: 'textfield'
+                                        }
                                     },
                                     {
                                         xtype: 'gridcolumn',
+                                        itemId: 'colUOMCode',
                                         dataIndex: 'string',
                                         text: 'UOM Code',
-                                        flex: 2
+                                        flex: 2,
+                                        editor: {
+                                            xtype: 'textfield'
+                                        }
                                     }
                                 ],
                                 viewConfig: {
@@ -168,7 +174,14 @@ Ext.define('Inventory.view.FeedStockUom', {
                                 },
                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                     selType: 'checkboxmodel'
-                                })
+                                }),
+                                plugins: [
+                                    {
+                                        ptype: 'cellediting',
+                                        pluginId: 'FeedStockUOMplugin',
+                                        clicksToEdit: 1
+                                    }
+                                ]
                             }
                         ]
                     }

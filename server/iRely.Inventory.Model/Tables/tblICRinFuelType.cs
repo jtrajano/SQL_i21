@@ -15,5 +15,7 @@ namespace iRely.Inventory.Model
         public string strDescription { get; set; }
         public Nullable<decimal> dblEquivalenceValue { get; set; }
         public int intSort { get; set; }
+
+        public ICollection<tblICFuelType> RinFuelTypes { get; set; }
     }
 }
