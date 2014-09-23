@@ -366,7 +366,7 @@ BEGIN
 			,[strTransactionForm]	= @SCREEN_NAME
 			,[strTransactionType]	= @TRAN_TYPE
 		FROM	[dbo].tblAPPayment A INNER JOIN [dbo].tblGLAccount GLAccnt
-					ON A.intBankAccountId = GLAccnt.intAccountId
+					ON A.intAccountId = GLAccnt.intAccountId
 				INNER JOIN tblAPVendor B
 					ON A.intVendorId = B.intVendorId AND B.ysnWithholding = 1
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
