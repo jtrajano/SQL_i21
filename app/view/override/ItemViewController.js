@@ -16,6 +16,9 @@ Ext.define('Inventory.view.override.ItemViewController', {
             ]
         },
         binding: {
+            //-----------//
+            //Details Tab//
+            //-----------//
             txtItemNo: '{current.strItemNo}',
             txtDescription: '{current.strDescription}',
             txtModelNo: '{current.strModelNo}',
@@ -45,14 +48,81 @@ Ext.define('Inventory.view.override.ItemViewController', {
             colDetailHeight: 'dblHeight',
             colDetailVolume: 'dblVolume',
             colDetailMaxQty: 'dblMaxQty',
-            //Location Store Grid Columns
+
+            //----------//
+            //Setup Tab//
+            //----------//
+
+            //------------------//
+            //Location Store Tab//
+            //------------------//
             colLocStoreLocation: 'intLocationId',
             colLocStoreStore: 'intStoreId',
             colLocStorePOSDescription: 'strPOSDescription',
             colLocStoreCategory: 'intCategoryId',
             colLocStoreVendor: 'intVendorId',
             colLocStoreCostingMethod: 'strCostingMethod',
-            colLocStoreUOM: 'intDefaultUOMId'
+            colLocStoreUOM: 'intDefaultUOMId',
+
+            //---------//
+            //Sales Tab//
+            //---------//
+            cboPatronage: '',
+            cboTaxClass: '',
+            chkStockedItem: '',
+            chkDyedFuel: '',
+            cboBarcodePrint: '',
+            chkMsdsRequired: '',
+            txtEpaNumber: '',
+            chkInboundTax: '',
+            chkOutboundTax: '',
+            chkRestrictedChemical: '',
+            chkTankRequired: '',
+            chkAvailableForTm: '',
+            chkDefaultPercentFull: '',
+            cboFuelInspectionFee: '',
+            cboRinRequired: '',
+            cboRinFuelType: '',
+            txtPercentDenaturant: '',
+            chkTonnageTax: '',
+            chkLoadTracking: '',
+            txtMixOrder: '',
+            chkHandAddIngredients: '',
+            cboMedicationTag: '',
+            cboIngredientTag: '',
+            txtVolumeRebateGroup: '',
+            cboPhysicalItem: '',
+            chkExtendOnPickTicket: '',
+            chkExportEdi: '',
+            chkHazardMaterial: '',
+            chkMaterialFee: '',
+
+            //-------//
+            //POS Tab//
+            //-------//
+            txtOrderUpcNo: '',
+            cboCaseUom: '',
+            txtNacsCategory: '',
+            cboWicCode: '',
+            cboAgCategory: '',
+            chkReceiptCommentReq: '',
+            cboCountCode: '',
+            chkLandedCost: '',
+            txtLeadTime: '',
+            chkTaxable: '',
+            txtKeywords: '',
+            txtCaseQty: '',
+            dtmDateShip: '',
+            txtTaxExempt: '',
+            chkDropShip: '',
+            chkCommissionable: '',
+            cboSpecialCommission: '',
+
+            colPOSCategoryName: '',
+
+            colPOSSLAContract: '',
+            colPOSSLAPrice: '',
+            colPOSSLAWarranty: ''
         }
     },
 
