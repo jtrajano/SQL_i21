@@ -218,20 +218,6 @@
                                     },
                                     "name": "MySeparator51",
                                     "designerId": "0ed20b71-1e53-4a19-9b87-10d078bb7791"
-                                },
-                                {
-                                    "type": "linkedinstance",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "layout|flex": null
-                                    },
-                                    "name": "filter19",
-                                    "designerId": "b9f1bdf5-3570-45cd-9dd4-3002f469b7f9",
-                                    "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
                             ]
                         },
@@ -245,11 +231,24 @@
                             "userConfig": {
                                 "dataIndex": "string",
                                 "flex": 1,
+                                "itemId": "colUOM",
                                 "text": "UOM",
                                 "width": 82
                             },
                             "name": "MyColumn148",
-                            "designerId": "efcf1de1-930f-469c-a781-93ea77b6eed6"
+                            "designerId": "efcf1de1-930f-469c-a781-93ea77b6eed6",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "editor",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "name": "MyTextField2",
+                                    "designerId": "f1284d37-17ef-4c0c-858f-e61fc8b8df61"
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.grid.column.Column",
@@ -261,11 +260,24 @@
                             "userConfig": {
                                 "dataIndex": "string",
                                 "flex": 2,
+                                "itemId": "colUOMCode",
                                 "text": "UOM Code",
                                 "width": null
                             },
                             "name": "MyColumn150",
-                            "designerId": "2e2687e1-bcf1-415e-84f7-058f8d270758"
+                            "designerId": "2e2687e1-bcf1-415e-84f7-058f8d270758",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "editor",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "name": "MyTextField3",
+                                    "designerId": "70046ebb-dbf5-4e54-a5b4-b7f66ce32ccb"
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.grid.View",
@@ -289,6 +301,20 @@
                             "codeClass": "Ext.selection.CheckboxModel",
                             "name": "MyCheckboxSelectionModel31",
                             "designerId": "6329fbdd-f24a-435c-8ff6-a83d439d965e"
+                        },
+                        {
+                            "type": "Ext.grid.plugin.CellEditing",
+                            "reference": {
+                                "name": "plugins",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "clicksToEdit": 1,
+                                "pluginId": "FeedStockUOMplugin"
+                            },
+                            "name": "MyCellEditingPlugin1",
+                            "designerId": "3f956817-439b-43f2-8359-a85a20932fe7"
                         }
                     ]
                 },
@@ -300,10 +326,11 @@
                     },
                     "codeClass": null,
                     "userConfig": {
+                        "designer|createAlias": "istatusbar",
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbar2",
+                    "name": "statusbar118",
                     "designerId": "752d19ef-a5ad-4e5e-bd7f-570ccfbfd417",
                     "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
                 }

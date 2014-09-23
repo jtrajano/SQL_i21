@@ -255,6 +255,23 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "columns": [
+                                    "[",
+                                    "{",
+                                    "dataIndex: 'intRinFuelTypeId',",
+                                    "dataType: 'int',",
+                                    "text: 'RinFuelTypeID',",
+                                    "hidden: true",
+                                    "},",
+                                    "                                {",
+                                    "                                    dataIndex: 'strRinFuelTypeCode',",
+                                    "                                    dataType: 'string',",
+                                    "                                    text: 'RinFuelTypeID',",
+                                    "                                    flex: 1",
+                                    "                                }",
+                                    "]"
+                                ],
+                                "designer|createAlias": "gridcombobox",
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Fuel Type",
@@ -273,7 +290,14 @@
                             "configAlternates": {
                                 "columns": "array"
                             },
-                            "designerId": "a5e5c5b5-8952-48dd-b15e-a4148ba0371a"
+                            "designerId": "a5e5c5b5-8952-48dd-b15e-a4148ba0371a",
+                            "customConfigs": [
+                                {
+                                    "group": "(Custom Properties)",
+                                    "name": "columns",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.form.field.ComboBox",
@@ -283,6 +307,7 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "designer|createAlias": "gridcombobox",
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Feed Stock",
@@ -386,6 +411,7 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "designer|createAlias": "gridcombobox",
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Fuel Code",
@@ -411,6 +437,7 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "designer|createAlias": "gridcombobox",
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Process Code",
@@ -436,6 +463,7 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "designer|createAlias": "gridcombobox",
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Feed Stock UOM",
@@ -555,7 +583,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging7",
+                    "name": "statusbarpaging11",
                     "designerId": "ef7cd9cb-b7a1-4f5a-a180-5e26b5c5119a",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

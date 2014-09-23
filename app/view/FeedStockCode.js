@@ -19,16 +19,17 @@ Ext.define('Inventory.view.FeedStockCode', {
 
     requires: [
         'Inventory.view.FeedStockCodeViewModel',
-        'Inventory.view.Filter',
-        'Inventory.view.Statusbar',
+        'Inventory.view.Statusbar1',
         'Ext.form.Panel',
+        'Ext.grid.Panel',
         'Ext.toolbar.Toolbar',
         'Ext.button.Button',
         'Ext.toolbar.Separator',
-        'Ext.grid.Panel',
         'Ext.grid.column.Column',
+        'Ext.form.field.Text',
         'Ext.grid.View',
-        'Ext.selection.CheckboxModel'
+        'Ext.selection.CheckboxModel',
+        'Ext.grid.plugin.CellEditing'
     ],
 
     viewModel: {
@@ -62,7 +63,78 @@ Ext.define('Inventory.view.FeedStockCode', {
                             type: 'vbox',
                             align: 'stretch'
                         },
+                        items: [
+                            {
+                                xtype: 'gridpanel',
+                                flex: 1,
+                                itemId: 'grdFeedStockCode',
+                                dockedItems: [
+                                    {
+                                        xtype: 'toolbar',
+                                        dock: 'top',
+                                        itemId: 'tlbGridOptions',
+                                        layout: {
+                                            type: 'hbox',
+                                            padding: '0 0 0 1'
+                                        },
+                                        items: [
+                                            {
+                                                xtype: 'button',
+                                                tabIndex: -1,
+                                                itemId: 'btnDeleteFeedStockCode',
+                                                iconCls: 'small-delete',
+                                                text: 'Delete'
+                                            },
+                                            {
+                                                xtype: 'tbseparator'
+                                            }
+                                        ]
+                                    }
+                                ],
+                                columns: [
+                                    {
+                                        xtype: 'gridcolumn',
+                                        itemId: 'colFeedStockCode',
+                                        width: 82,
+                                        dataIndex: 'string',
+                                        text: 'Feed Stock Code',
+                                        flex: 1,
+                                        editor: {
+                                            xtype: 'textfield'
+                                        }
+                                    },
+                                    {
+                                        xtype: 'gridcolumn',
+                                        itemId: 'colDescription',
+                                        dataIndex: 'string',
+                                        text: 'Description',
+                                        flex: 2,
+                                        editor: {
+                                            xtype: 'textfield'
+                                        }
+                                    }
+                                ],
+                                viewConfig: {
+                                    itemId: 'grvFeedStockCode'
+                                },
+                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                    selType: 'checkboxmodel'
+                                }),
+                                plugins: [
+                                    {
+                                        ptype: 'cellediting',
+                                        pluginId: 'FeedStockCodeplugin',
+                                        clicksToEdit: 1
+                                    }
+                                ]
+                            }
+                        ],
                         dockedItems: [
+                            {
+                                xtype: 'istatusbar',
+                                flex: 1,
+                                dock: 'bottom'
+                            },
                             {
                                 xtype: 'toolbar',
                                 dock: 'top',
@@ -110,65 +182,6 @@ Ext.define('Inventory.view.FeedStockCode', {
                                         text: 'Close'
                                     }
                                 ]
-                            },
-                            {
-                                xtype: 'statusbar',
-                                flex: 1,
-                                dock: 'bottom'
-                            }
-                        ],
-                        items: [
-                            {
-                                xtype: 'gridpanel',
-                                flex: 1,
-                                itemId: 'grdFeedStockCode',
-                                dockedItems: [
-                                    {
-                                        xtype: 'toolbar',
-                                        dock: 'top',
-                                        itemId: 'tlbGridOptions',
-                                        layout: {
-                                            type: 'hbox',
-                                            padding: '0 0 0 1'
-                                        },
-                                        items: [
-                                            {
-                                                xtype: 'button',
-                                                tabIndex: -1,
-                                                itemId: 'btnDeleteFeedStockCode',
-                                                iconCls: 'small-delete',
-                                                text: 'Delete'
-                                            },
-                                            {
-                                                xtype: 'tbseparator'
-                                            },
-                                            {
-                                                xtype: 'filter'
-                                            }
-                                        ]
-                                    }
-                                ],
-                                columns: [
-                                    {
-                                        xtype: 'gridcolumn',
-                                        width: 82,
-                                        dataIndex: 'string',
-                                        text: 'Feed Stock Code',
-                                        flex: 1
-                                    },
-                                    {
-                                        xtype: 'gridcolumn',
-                                        dataIndex: 'string',
-                                        text: 'Description',
-                                        flex: 2
-                                    }
-                                ],
-                                viewConfig: {
-                                    itemId: 'grvFeedStockCode'
-                                },
-                                selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                    selType: 'checkboxmodel'
-                                })
                             }
                         ]
                     }

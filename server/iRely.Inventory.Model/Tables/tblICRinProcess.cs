@@ -14,5 +14,7 @@ namespace iRely.Inventory.Model
         public string strRinProcessCode { get; set; }
         public string strDescription { get; set; }
         public int intSort { get; set; }
+
+        public ICollection<tblICFuelType> RinProcesses { get; set; }
     }
 }

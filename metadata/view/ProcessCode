@@ -218,21 +218,6 @@
                                     },
                                     "name": "MySeparator51",
                                     "designerId": "2d0344b0-712f-4d2b-ae9d-368fb66f4da6"
-                                },
-                                {
-                                    "type": "linkedinstance",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "designer|createAlias": "filtergrid",
-                                        "layout|flex": null
-                                    },
-                                    "name": "filter5",
-                                    "designerId": "62fe770e-9a2e-449c-93e7-c21e9da1ab2d",
-                                    "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
                             ]
                         },
@@ -345,7 +330,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbar3",
+                    "name": "statusbar116",
                     "designerId": "490aa307-4a73-4d29-baa8-de21b2fcd5c1",
                     "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
                 }
