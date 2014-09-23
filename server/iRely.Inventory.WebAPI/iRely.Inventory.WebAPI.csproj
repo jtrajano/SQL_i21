@@ -146,6 +146,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ItemController.cs" />
     <Compile Include="Controllers\PatronageCategoryController.cs" />
+    <Compile Include="Controllers\UnitMeasureController.cs" />
     <Compile Include="Controllers\UnitTypeController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Global.asax.cs">
