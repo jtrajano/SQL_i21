@@ -60,6 +60,8 @@ namespace iRely.Inventory.BRL
             return _db.GetQuery<tblICItem>()
                     .Include(p => p.tblICItemUOMs)
                     .Include(p => p.tblICItemLocationStores)
+                    .Include(p => p.tblICItemSales)
+                    .Include(p => p.tblICItemPOS)
                     .Where(w => query.Where(predicate).Any(a => a.intItemId == w.intItemId)) //Filter the Main DataSource Based on Search Query
                     .OrderBySelector(sortSelector)
                     .Skip(start)

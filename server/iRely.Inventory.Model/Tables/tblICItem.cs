@@ -14,6 +14,8 @@ namespace iRely.Inventory.Model
         {
             this.tblICItemUOMs = new List<tblICItemUOM>();
             this.tblICItemLocationStores = new List<tblICItemLocationStore>();
+            this.tblICItemSales = new tblICItemSales();
+            this.tblICItemPOS = new tblICItemPOS();
         }
 
         public int intItemId { get; set; }
@@ -29,6 +31,8 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICItemUOM> tblICItemUOMs { get; set; }
         public ICollection<tblICItemLocationStore> tblICItemLocationStores { get; set; }
+        public tblICItemPOS tblICItemPOS { get; set; }
+        public tblICItemSales tblICItemSales { get; set; }
 
         //public int intItemId { get; set; }
         //public string strItemNo { get; set; }
