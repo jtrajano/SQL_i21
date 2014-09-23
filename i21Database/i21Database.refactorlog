@@ -175,4 +175,53 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intItemId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="b86a0128-f615-4c0b-abf8-343ffd3de6f4" ChangeDateTime="09/23/2014 01:20:41">
+    <Property Name="ElementName" Value="[dbo].[tblICItemPOS].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemPOS]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intItemId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="55df5250-cc91-4d2f-9020-a6b99f2cc38f" ChangeDateTime="09/23/2014 01:33:02">
+    <Property Name="ElementName" Value="[dbo].[tblICItemPOS].[intOrderCaseUOM]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemPOS]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCaseUOM" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b9f2f818-8df8-4a01-8a46-0810dbd4ce22" ChangeDateTime="09/23/2014 01:35:14">
+    <Property Name="ElementName" Value="[dbo].[tblICItemPOS].[strSpecialCommision]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemPOS]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strSpecialCommission" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="096066fa-19c4-4c08-b153-acb971bdfc7d" ChangeDateTime="09/23/2014 01:38:19">
+    <Property Name="ElementName" Value="[dbo].[tblICItemPOSCategory].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemPOSCategory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intItemId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ce9cd1b0-28cf-49b9-8aaa-5d590809cd87" ChangeDateTime="09/23/2014 01:39:09">
+    <Property Name="ElementName" Value="[dbo].[tblICItemPOSCategory].[intItemId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemPOSCategory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intItemPOSCategoryId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="fe138327-9048-45ba-8652-c1a404a272ac" ChangeDateTime="09/23/2014 01:47:10">
+    <Property Name="ElementName" Value="[dbo].[tblICItemPOSSLA].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemPOSSLA]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intItemPOSSLAId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="343c6196-069f-439b-b911-39cc0374b67e" ChangeDateTime="09/23/2014 01:47:59">
+    <Property Name="ElementName" Value="[dbo].[tblICItemPOSSLA].[strSLA]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemPOSSLA]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strSLAContract" />
+  </Operation>
 </Operations>
