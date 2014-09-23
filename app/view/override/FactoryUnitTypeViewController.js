@@ -22,17 +22,15 @@ Ext.define('Inventory.view.override.FactoryUnitTypeViewController', {
                 store: '{internalCodes}'
             },
             cboCapacityUom: {
-                value: '{current.intCapacityUnitMeasureId}'
-//                ,
-//                store: '{}'
+                value: '{current.intCapacityUnitMeasureId}',
+                store: '{UnitMeasure}'
             },
 
             txtMaxWeight : '{current.dblMaxWeight}',
             chkAllowsPicking : '{current.ysnAllowPick}',
             cboDimensionUom : {
-                value: '{current.intDimensionUnitMeasureId}'
-//                ,
-//                store : '{}'
+                value: '{current.intDimensionUnitMeasureId}',
+                store: '{UnitMeasure}'
             },
             txtHeight : '{current.dblHeight}',
             txtDepth : '{current.dblDepth}',
