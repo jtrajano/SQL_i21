@@ -19,9 +19,20 @@ namespace iRely.Inventory.Model
         public int intRinFuelId { get; set; }
         public int intRinProcessId { get; set; }
         public int intRinFeedStockUOMId { get; set; }
-        public double dblFeedStockFactor { get; set; }
+        public decimal? dblFeedStockFactor { get; set; }
         public bool ysnRenewableBiomass { get; set; }
-        public double dblPercentDenaturant { get; set; }
+        public decimal? dblPercentDenaturant { get; set; }
         public bool ysnDeductDenaturant { get; set; }
+
+        public tblICRinFuelType RinFuelType { get; set; }
+        public tblICRinFeedStock RinFeedStock { get; set; }
+        public tblICRinFuel RinFuel { get; set; }
+        public tblICRinFeedStockUOM RinFeedStockUOM { get; set; }
+        public tblICRinProcess RinProcess { get; set; }
+    }
+
+    public class FuelTypeVM
+    {
+        public string strRinFuelTypeCode { get; set; }
     }
 }

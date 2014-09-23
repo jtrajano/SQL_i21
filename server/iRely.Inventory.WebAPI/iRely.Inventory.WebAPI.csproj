@@ -136,6 +136,9 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\FuelTypeController.cs" />
+    <Compile Include="Controllers\RinFeedStockUOMController.cs" />
+    <Compile Include="Controllers\RinFeedStockController.cs" />
     <Compile Include="Controllers\RinProcessController.cs" />
     <Compile Include="Controllers\RinFuelController.cs" />
     <Compile Include="Controllers\RinFuelTypeController.cs" />

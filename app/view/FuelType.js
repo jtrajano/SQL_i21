@@ -19,7 +19,7 @@ Ext.define('Inventory.view.FuelType', {
 
     requires: [
         'Inventory.view.FuelTypeViewModel',
-        'Inventory.view.StatusbarPaging',
+        'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
         'Ext.button.Button',
         'Ext.toolbar.Separator',
@@ -160,13 +160,27 @@ Ext.define('Inventory.view.FuelType', {
                     },
                     items: [
                         {
-                            xtype: 'combobox',
+                            xtype: 'gridcombobox',
+                            columns: [
+                                {
+                                    dataIndex: 'intRinFuelTypeId',
+                                    dataType: 'int',
+                                    text: 'RinFuelTypeID',
+                                    hidden: true
+                                },
+                                {
+                                    dataIndex: 'strRinFuelTypeCode',
+                                    dataType: 'string',
+                                    text: 'RinFuelTypeID',
+                                    flex: 1
+                                }
+                            ],
                             itemId: 'cboFuelType',
                             fieldLabel: 'Fuel Type',
                             labelWidth: 165
                         },
                         {
-                            xtype: 'combobox',
+                            xtype: 'gridcombobox',
                             itemId: 'cboFeedStock',
                             fieldLabel: 'Feed Stock',
                             labelWidth: 165
@@ -191,21 +205,21 @@ Ext.define('Inventory.view.FuelType', {
                             labelWidth: 165
                         },
                         {
-                            xtype: 'combobox',
+                            xtype: 'gridcombobox',
                             itemId: 'cboFuelCode',
                             width: 170,
                             fieldLabel: 'Fuel Code',
                             labelWidth: 165
                         },
                         {
-                            xtype: 'combobox',
+                            xtype: 'gridcombobox',
                             itemId: 'cboProcessCode',
                             width: 170,
                             fieldLabel: 'Process Code',
                             labelWidth: 165
                         },
                         {
-                            xtype: 'combobox',
+                            xtype: 'gridcombobox',
                             itemId: 'cboFeedStockUom',
                             width: 170,
                             fieldLabel: 'Feed Stock UOM',

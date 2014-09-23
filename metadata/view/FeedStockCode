@@ -56,6 +56,183 @@
             "designerId": "efa59818-45f3-4493-97ea-0a03c9255635",
             "cn": [
                 {
+                    "type": "Ext.grid.Panel",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "itemId": "grdFeedStockCode",
+                        "layout|flex": 1,
+                        "title": null
+                    },
+                    "name": "MyGridPanel41",
+                    "designerId": "8a6264ca-1916-4e8d-9509-f46b5eb8cb95",
+                    "cn": [
+                        {
+                            "type": "Ext.toolbar.Toolbar",
+                            "reference": {
+                                "name": "dockedItems",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|padding": "0 0 0 1",
+                                "dock": "top",
+                                "itemId": "tlbGridOptions"
+                            },
+                            "name": "MyToolbar51",
+                            "designerId": "80232d31-a8c7-4ca2-90a8-eb4f7805093d",
+                            "cn": [
+                                {
+                                    "type": "Ext.button.Button",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "icon": null,
+                                        "iconCls": "small-delete",
+                                        "itemId": "btnDeleteFeedStockCode",
+                                        "layout|flex": null,
+                                        "tabIndex": -1,
+                                        "text": "Delete"
+                                    },
+                                    "name": "MyButton163",
+                                    "designerId": "86e1ef5a-1ad0-4a3e-a004-68808f684929"
+                                },
+                                {
+                                    "type": "Ext.toolbar.Separator",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "designer|displayName": "separator",
+                                        "layout|flex": null
+                                    },
+                                    "name": "MySeparator51",
+                                    "designerId": "200da2ad-2885-47bd-b385-afdf08b62f95"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.grid.column.Column",
+                            "reference": {
+                                "name": "columns",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "dataIndex": "string",
+                                "flex": 1,
+                                "itemId": "colFeedStockCode",
+                                "text": "Feed Stock Code",
+                                "width": 82
+                            },
+                            "name": "MyColumn148",
+                            "designerId": "f6afcd22-bd82-4d28-80da-347eccff9e7f",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "editor",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "name": "MyTextField",
+                                    "designerId": "ee5046e0-d0d1-4267-844b-45eb7ab8981c"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.grid.column.Column",
+                            "reference": {
+                                "name": "columns",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "dataIndex": "string",
+                                "flex": 2,
+                                "itemId": "colDescription",
+                                "text": "Description",
+                                "width": null
+                            },
+                            "name": "MyColumn150",
+                            "designerId": "6f6b7f72-0d7a-4323-9860-843823837e68",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "editor",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "name": "MyTextField1",
+                                    "designerId": "d01cc86c-2c28-4903-a262-2966d30ec548"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.grid.View",
+                            "reference": {
+                                "name": "viewConfig",
+                                "type": "object"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "itemId": "grvFeedStockCode"
+                            },
+                            "name": "MyGridView41",
+                            "designerId": "97440763-0b73-4ab7-978d-cb21d6643238"
+                        },
+                        {
+                            "type": "Ext.selection.CheckboxModel",
+                            "reference": {
+                                "name": "selModel",
+                                "type": "object"
+                            },
+                            "codeClass": "Ext.selection.CheckboxModel",
+                            "name": "MyCheckboxSelectionModel31",
+                            "designerId": "070a9ab4-14cd-4fbf-bb53-a8b06229996a"
+                        },
+                        {
+                            "type": "Ext.grid.plugin.CellEditing",
+                            "reference": {
+                                "name": "plugins",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "clicksToEdit": 1,
+                                "pluginId": "FeedStockCodeplugin"
+                            },
+                            "name": "MyCellEditingPlugin",
+                            "designerId": "25a62e8c-5937-423b-abb8-c7a5f629e063"
+                        }
+                    ]
+                },
+                {
+                    "type": "linkedinstance",
+                    "reference": {
+                        "name": "dockedItems",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "designer|createAlias": "istatusbar",
+                        "dock": "bottom",
+                        "layout|flex": 1
+                    },
+                    "name": "statusbar117",
+                    "designerId": "f64f9f87-389a-41a8-b7e6-d9fe91720b28",
+                    "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
+                },
+                {
                     "type": "Ext.toolbar.Toolbar",
                     "reference": {
                         "name": "dockedItems",
@@ -156,156 +333,6 @@
                             "designerId": "5f5bb7fa-f21a-4cb8-aa7e-3dc0a3eabb3e"
                         }
                     ]
-                },
-                {
-                    "type": "Ext.grid.Panel",
-                    "reference": {
-                        "name": "items",
-                        "type": "array"
-                    },
-                    "codeClass": null,
-                    "userConfig": {
-                        "itemId": "grdFeedStockCode",
-                        "layout|flex": 1,
-                        "title": null
-                    },
-                    "name": "MyGridPanel41",
-                    "designerId": "8a6264ca-1916-4e8d-9509-f46b5eb8cb95",
-                    "cn": [
-                        {
-                            "type": "Ext.toolbar.Toolbar",
-                            "reference": {
-                                "name": "dockedItems",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "container|padding": "0 0 0 1",
-                                "dock": "top",
-                                "itemId": "tlbGridOptions"
-                            },
-                            "name": "MyToolbar51",
-                            "designerId": "80232d31-a8c7-4ca2-90a8-eb4f7805093d",
-                            "cn": [
-                                {
-                                    "type": "Ext.button.Button",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "icon": null,
-                                        "iconCls": "small-delete",
-                                        "itemId": "btnDeleteFeedStockCode",
-                                        "layout|flex": null,
-                                        "tabIndex": -1,
-                                        "text": "Delete"
-                                    },
-                                    "name": "MyButton163",
-                                    "designerId": "86e1ef5a-1ad0-4a3e-a004-68808f684929"
-                                },
-                                {
-                                    "type": "Ext.toolbar.Separator",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "designer|displayName": "separator",
-                                        "layout|flex": null
-                                    },
-                                    "name": "MySeparator51",
-                                    "designerId": "200da2ad-2885-47bd-b385-afdf08b62f95"
-                                },
-                                {
-                                    "type": "linkedinstance",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "layout|flex": null
-                                    },
-                                    "name": "filter18",
-                                    "designerId": "f64a174d-8111-4c4b-a2cd-c9db23158faf",
-                                    "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
-                                }
-                            ]
-                        },
-                        {
-                            "type": "Ext.grid.column.Column",
-                            "reference": {
-                                "name": "columns",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "dataIndex": "string",
-                                "flex": 1,
-                                "text": "Feed Stock Code",
-                                "width": 82
-                            },
-                            "name": "MyColumn148",
-                            "designerId": "f6afcd22-bd82-4d28-80da-347eccff9e7f"
-                        },
-                        {
-                            "type": "Ext.grid.column.Column",
-                            "reference": {
-                                "name": "columns",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "dataIndex": "string",
-                                "flex": 2,
-                                "text": "Description",
-                                "width": null
-                            },
-                            "name": "MyColumn150",
-                            "designerId": "6f6b7f72-0d7a-4323-9860-843823837e68"
-                        },
-                        {
-                            "type": "Ext.grid.View",
-                            "reference": {
-                                "name": "viewConfig",
-                                "type": "object"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "itemId": "grvFeedStockCode"
-                            },
-                            "name": "MyGridView41",
-                            "designerId": "97440763-0b73-4ab7-978d-cb21d6643238"
-                        },
-                        {
-                            "type": "Ext.selection.CheckboxModel",
-                            "reference": {
-                                "name": "selModel",
-                                "type": "object"
-                            },
-                            "codeClass": "Ext.selection.CheckboxModel",
-                            "name": "MyCheckboxSelectionModel31",
-                            "designerId": "070a9ab4-14cd-4fbf-bb53-a8b06229996a"
-                        }
-                    ]
-                },
-                {
-                    "type": "linkedinstance",
-                    "reference": {
-                        "name": "dockedItems",
-                        "type": "array"
-                    },
-                    "codeClass": null,
-                    "userConfig": {
-                        "dock": "bottom",
-                        "layout|flex": 1
-                    },
-                    "name": "statusbar1",
-                    "designerId": "f64f9f87-389a-41a8-b7e6-d9fe91720b28",
-                    "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
                 }
             ]
         }
