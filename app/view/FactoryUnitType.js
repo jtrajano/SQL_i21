@@ -19,7 +19,7 @@ Ext.define('Inventory.view.FactoryUnitType', {
 
     requires: [
         'Inventory.view.FactoryUnitTypeViewModel',
-        'Inventory.view.StatusbarPaging',
+        'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
         'Ext.button.Button',
         'Ext.toolbar.Separator',
@@ -174,13 +174,31 @@ Ext.define('Inventory.view.FactoryUnitType', {
                             xtype: 'combobox',
                             itemId: 'cboInternalCode',
                             fieldLabel: 'Internal Code',
-                            labelWidth: 90
+                            labelWidth: 90,
+                            displayField: 'strInternalCode',
+                            valueField: 'strInternalCode'
                         },
                         {
-                            xtype: 'combobox',
+                            xtype: 'gridcombobox',
+                            columns: [
+                                {
+                                    dataIndex: 'intUnitMeasureId',
+                                    dataType: 'numeric',
+                                    text: 'Unit Measure ID',
+                                    hidden: true
+                                },
+                                {
+                                    dataIndex: 'strUnitMeasure',
+                                    dataType: 'string',
+                                    text: 'Capacity',
+                                    flex: 1
+                                }
+                            ],
                             itemId: 'cboCapacityUom',
                             fieldLabel: 'Capacity UOM',
-                            labelWidth: 90
+                            labelWidth: 90,
+                            displayField: 'strUnitMeasure',
+                            valueField: 'intUnitMeasureId'
                         },
                         {
                             xtype: 'textfield',
@@ -209,10 +227,26 @@ Ext.define('Inventory.view.FactoryUnitType', {
                     },
                     items: [
                         {
-                            xtype: 'combobox',
+                            xtype: 'gridcombobox',
+                            columns: [
+                                {
+                                    dataIndex: 'intUnitMeasureId',
+                                    dataType: 'numeric',
+                                    text: 'Unit Measure ID',
+                                    hidden: true
+                                },
+                                {
+                                    dataIndex: 'strUnitMeasure',
+                                    dataType: 'string',
+                                    text: 'Dimension',
+                                    flex: 1
+                                }
+                            ],
                             itemId: 'cboDimensionUom',
                             fieldLabel: 'Dimension UOM',
-                            labelWidth: 90
+                            labelWidth: 90,
+                            displayField: 'strUnitMeasure',
+                            valueField: 'intUnitMeasureId'
                         },
                         {
                             xtype: 'textfield',

@@ -243,7 +243,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging5",
+                    "name": "statusbarpaging1",
                     "designerId": "1d4ebb2b-904c-462e-8f22-e82f1e2a5bad",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 },
@@ -314,13 +314,15 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "displayField": "strInternalCode",
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Internal Code",
                                 "itemId": "cboInternalCode",
                                 "labelWidth": 90,
                                 "maxLength": null,
                                 "name": null,
-                                "tabIndex": null
+                                "tabIndex": null,
+                                "valueField": "strInternalCode"
                             },
                             "name": "MyComboBox20",
                             "designerId": "813a56ea-07c5-405d-945b-4034997a9c48"
@@ -333,16 +335,43 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "columns": [
+                                    "[{                                                                                dataIndex: 'intUnitMeasureId',",
+                                    "dataType: 'numeric',",
+                                    "text: 'Unit Measure ID',",
+                                    "hidden: true",
+                                    "},",
+                                    "{",
+                                    "dataIndex: 'strUnitMeasure',",
+                                    "dataType: 'string',",
+                                    "text: 'Capacity',",
+                                    "flex: 1",
+                                    "}",
+                                    "]"
+                                ],
+                                "designer|createAlias": "gridcombobox",
+                                "displayField": "strUnitMeasure",
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Capacity UOM",
                                 "itemId": "cboCapacityUom",
                                 "labelWidth": 90,
                                 "maxLength": null,
                                 "name": null,
-                                "tabIndex": null
+                                "tabIndex": null,
+                                "valueField": "intUnitMeasureId"
                             },
                             "name": "MyComboBox22",
-                            "designerId": "6e50db5e-ebd6-40ef-b482-2a3ddec30654"
+                            "configAlternates": {
+                                "columns": "array"
+                            },
+                            "designerId": "6e50db5e-ebd6-40ef-b482-2a3ddec30654",
+                            "customConfigs": [
+                                {
+                                    "group": "(Custom Properties)",
+                                    "name": "columns",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.form.field.Text",
@@ -409,16 +438,45 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "columns": [
+                                    "[",
+                                    "{",
+                                    "dataIndex: 'intUnitMeasureId',",
+                                    "dataType: 'numeric',",
+                                    "text: 'Unit Measure ID',",
+                                    "hidden: true",
+                                    "},",
+                                    "{",
+                                    "dataIndex: 'strUnitMeasure',",
+                                    "dataType: 'string',",
+                                    "text: 'Dimension',",
+                                    "flex: 1",
+                                    "}",
+                                    "]"
+                                ],
+                                "designer|createAlias": "gridcombobox",
+                                "displayField": "strUnitMeasure",
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Dimension UOM",
                                 "itemId": "cboDimensionUom",
                                 "labelWidth": 90,
                                 "maxLength": null,
                                 "name": null,
-                                "tabIndex": null
+                                "tabIndex": null,
+                                "valueField": "intUnitMeasureId"
                             },
                             "name": "MyComboBox14",
-                            "designerId": "68adf49c-c45b-44ad-87cb-fc75aee83e17"
+                            "configAlternates": {
+                                "columns": "array"
+                            },
+                            "designerId": "68adf49c-c45b-44ad-87cb-fc75aee83e17",
+                            "customConfigs": [
+                                {
+                                    "group": "(Custom Properties)",
+                                    "name": "columns",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.form.field.Text",
