@@ -1,6 +1,10 @@
 Ext.define('Inventory.view.override.FactoryUnitTypeViewModel', {
     override: 'Inventory.view.FactoryUnitTypeViewModel',
 
+    requires: [
+        'Inventory.store.UnitMeasure'
+    ],
+
     stores: {
         internalCodes: {
             data: [

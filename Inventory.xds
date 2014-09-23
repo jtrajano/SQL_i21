@@ -2,7 +2,7 @@
     "name": "Inventory",
     "settings": {
         "cmd": {
-            "license": "",
+            "license": "commercial",
             "cmdVersion": "",
             "frameworkVersion": ""
         },
@@ -32,6 +32,7 @@
     "framework": "ext50",
     "viewOrderMap": {
         "view": [
+            "0238f216-c40b-4ac3-973a-d7678b8cdfd2",
             "34637c7f-7957-483e-ac17-7684a7e7de3d",
             "1ce04bda-5824-4e13-b083-14c556cbf61a",
             "6285c4d9-7aed-4586-9945-1e0cfe0cd00f",
@@ -59,7 +60,6 @@
             "3b7bc41a-75d8-4e76-9e5c-c7a291d6e1be",
             "af43af41-ae3a-4659-bd76-e0a2c57eaced",
             "4e1bd5c5-3b88-43fa-81e7-038bb77f7192",
-            "0238f216-c40b-4ac3-973a-d7678b8cdfd2",
             "812d3d44-d181-456e-b873-4116c76eda67",
             "fc1a597a-48be-45d3-9d1c-e325c5a5ce41",
             "d55cecac-0f56-47d4-a630-50b94482506b",
