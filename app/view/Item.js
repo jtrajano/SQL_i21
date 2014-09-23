@@ -821,7 +821,7 @@ Ext.define('Inventory.view.Item', {
                                                                             },
                                                                             {
                                                                                 xtype: 'textfield',
-                                                                                itemId: 'txtMinOrder',
+                                                                                itemId: 'txtMixOrder',
                                                                                 fieldLabel: 'Mix Order',
                                                                                 labelWidth: 125
                                                                             },
@@ -1171,6 +1171,7 @@ Ext.define('Inventory.view.Item', {
                                                                         columns: [
                                                                             {
                                                                                 xtype: 'gridcolumn',
+                                                                                itemId: 'colPOSCategoryName',
                                                                                 dataIndex: 'string',
                                                                                 text: 'Category Name',
                                                                                 flex: 1
@@ -1231,17 +1232,20 @@ Ext.define('Inventory.view.Item', {
                                                                         columns: [
                                                                             {
                                                                                 xtype: 'gridcolumn',
+                                                                                itemId: 'colPOSSLAContract',
                                                                                 dataIndex: 'string',
                                                                                 text: 'SLA Contract',
                                                                                 flex: 1
                                                                             },
                                                                             {
                                                                                 xtype: 'numbercolumn',
+                                                                                itemId: 'colPOSSLAPrice',
                                                                                 dataIndex: 'number',
                                                                                 text: 'Contract Price'
                                                                             },
                                                                             {
                                                                                 xtype: 'checkcolumn',
+                                                                                itemId: 'colPOSSLAWarranty',
                                                                                 width: 112,
                                                                                 text: 'Service & Warranty'
                                                                             }
