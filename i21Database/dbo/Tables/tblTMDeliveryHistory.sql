@@ -26,7 +26,9 @@
     [dtmLastUpdated]                        DATETIME        DEFAULT 0 NULL,
     [intSiteID]                             INT             DEFAULT 0 NULL,
     [strSalesPersonID]                      NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT 0 NULL,
-    [dbltmpExtendedAmount]                  NUMERIC (18, 6) NULL,
+    [dblExtendedAmount]                  NUMERIC (18, 6) NOT NULL DEFAULT 0,
+    [ysnForReview] BIT NOT NULL DEFAULT 0, 
+    [dtmMarkForReviewDate] DATETIME NULL, 
     CONSTRAINT [PK_tblTMDeliveryHistory] PRIMARY KEY CLUSTERED ([intDeliveryHistoryID] ASC),
     CONSTRAINT [FK_tblTMDeliveryHistory_tblTMSite] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID])
 );
