@@ -216,4 +216,48 @@ PRINT N'END Update of data in tblTMWorkToDoItem check duplicates'
 GO
 
 
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblTMDeliveryHistory]') AND type in (N'U')) 
+BEGIN
+	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'dblExtendedAmount' AND OBJECT_ID = OBJECT_ID(N'tblTMDeliveryHistory')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'dbltmpExtendedAmount' AND OBJECT_ID = OBJECT_ID(N'tblTMDeliveryHistory'))
+    BEGIN
+        EXEC sp_rename 'tblTMDeliveryHistory.dbltmpExtendedAmount', 'dblExtendedAmount' , 'COLUMN'
+    END
+END
+GO
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblTMDeliveryHistoryDetail]') AND type in (N'U')) 
+BEGIN
+	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'dblExtendedAmount' AND OBJECT_ID = OBJECT_ID(N'tblTMDeliveryHistoryDetail')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'dbltmpExtendedAmount' AND OBJECT_ID = OBJECT_ID(N'tblTMDeliveryHistoryDetail'))
+    BEGIN
+        EXEC sp_rename 'tblTMDeliveryHistoryDetail.dbltmpExtendedAmount', 'dblExtendedAmount' , 'COLUMN'
+    END
+END
+GO
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblTMDeliveryHistory]') AND type in (N'U') 
+   AND EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'dblExtendedAmount' AND OBJECT_ID = OBJECT_ID(N'tblTMDeliveryHistory'))
+   ) 
+BEGIN
+		EXEC('
+			UPDATE tblTMDeliveryHistory
+			SET dblExtendedAmount = 0
+			WHERE dblExtendedAmount IS NULL
+		')
+END
+GO
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblTMDeliveryHistoryDetail]') AND type in (N'U') 
+   AND EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'dblExtendedAmount' AND OBJECT_ID = OBJECT_ID(N'tblTMDeliveryHistoryDetail'))
+   ) 
+BEGIN
+		EXEC('
+			UPDATE tblTMDeliveryHistoryDetail
+			SET dblExtendedAmount = 0
+			WHERE dblExtendedAmount IS NULL
+		')
+END
+GO
+
+
+
 

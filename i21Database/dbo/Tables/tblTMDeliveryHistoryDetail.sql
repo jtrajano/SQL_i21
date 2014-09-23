@@ -6,7 +6,7 @@
     [intDeliveryHistoryID]       INT             NOT NULL,
     [intConcurrencyId]           INT             DEFAULT 1 NOT NULL,
     [dblPercentAfterDelivery]    DECIMAL (18, 6) DEFAULT 0 NOT NULL,
-    [dbltmpExtendedAmount]       NUMERIC (18, 6) NULL,
+    [dblExtendedAmount]       NUMERIC (18, 6) NOT NULL DEFAULT 0,
     CONSTRAINT [PK_tblTMDeliveryHistoryDetail] PRIMARY KEY CLUSTERED ([intDeliveryHistoryDetailID] ASC),
     CONSTRAINT [FK_tblTMDeliveryHistoryDetail_tblTMDeliveryHistory] FOREIGN KEY ([intDeliveryHistoryID]) REFERENCES [dbo].[tblTMDeliveryHistory] ([intDeliveryHistoryID])
 );
