@@ -145,7 +145,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 		,vwsls_textmsg_email = CAST(ptsls_textmsg_email AS CHAR(50))  
 		,vwsls_dispatch_email = CAST(ptsls_dispatch_email AS CHAR(4))  
 		,vwsls_user_id   = CAST(NULL AS CHAR(16))  
-		,vwsls_user_rev_dt  = 0  
+		,vwsls_user_rev_dt  = 0   
 		,A4GLIdentity  = CAST(A4GLIdentity   AS INT)
 		FROM ptslsmst
 		')
