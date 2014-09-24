@@ -4,7 +4,7 @@
 	[intCategoryId] INT NOT NULL, 
     [intLocationId] INT NULL, 
     [intStoreId] INT NULL, 
-	[strAccountDescription] NVARCHAR(50) NULL,
+	[strAccountDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [intAccountId] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICCategoryAccount] PRIMARY KEY ([intCategoryAccountId]), 

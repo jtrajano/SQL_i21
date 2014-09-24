@@ -1,9 +1,9 @@
 ﻿CREATE TABLE [dbo].[tblICUnitType]
 (
 	[intUnitTypeId] INT NOT NULL IDENTITY, 
-    [strUnitType] NVARCHAR(50) NULL, 
-    [strDescription] NVARCHAR(50) NULL, 
-    [strInternalCode] NVARCHAR(50) NULL, 
+    [strUnitType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strInternalCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intCapacityUnitMeasureId] INT NOT NULL, 
     [dblMaxWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [ysnAllowPick] BIT NULL, 

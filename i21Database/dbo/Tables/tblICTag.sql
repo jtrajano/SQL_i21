@@ -1,9 +1,9 @@
 ﻿CREATE TABLE [dbo].[tblICTag]
 (
 	[intTagId] INT NOT NULL  IDENTITY, 
-    [strTagNumber] NVARCHAR(50) NOT NULL, 
-    [strDescription] NVARCHAR(50) NULL, 
-    [strMessage] NVARCHAR(MAX) NULL, 
+    [strTagNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strMessage] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 	[ysnHazMat] BIT NULL DEFAULT ((0)), 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICTag] PRIMARY KEY ([intTagId]), 

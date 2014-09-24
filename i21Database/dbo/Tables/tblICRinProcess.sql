@@ -1,8 +1,8 @@
 ﻿CREATE TABLE [dbo].[tblICRinProcess]
 (
 	[intRinProcessId] INT NOT NULL IDENTITY, 
-    [strRinProcessCode] NVARCHAR(50) NOT NULL, 
-    [strDescription] NVARCHAR(50) NULL, 
+    [strRinProcessCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICRinProcess] PRIMARY KEY ([intRinProcessId]), 

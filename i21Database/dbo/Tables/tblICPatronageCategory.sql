@@ -1,10 +1,10 @@
 ﻿CREATE TABLE [dbo].[tblICPatronageCategory]
 (
 	[intPatronageCategoryId] INT NOT NULL IDENTITY , 
-    [strCategoryCode] NVARCHAR(50) NOT NULL, 
-    [strDescription] NVARCHAR(50) NULL, 
-    [strPurchaseSale] NVARCHAR(50) NULL, 
-    [strUnitAmount] NVARCHAR(50) NULL, 
+    [strCategoryCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strPurchaseSale] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strUnitAmount] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[intSort] INT NULL DEFAULT ((0)),
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICPatronageCategory] PRIMARY KEY ([intPatronageCategoryId]), 

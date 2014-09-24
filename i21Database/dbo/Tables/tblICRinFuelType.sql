@@ -1,8 +1,8 @@
 ﻿CREATE TABLE [dbo].[tblICRinFuelType]
 (
 	[intRinFuelTypeId] INT NOT NULL IDENTITY, 
-    [strRinFuelTypeCode] NVARCHAR(50) NOT NULL, 
-    [strDescription] NVARCHAR(50) NULL, 
+    [strRinFuelTypeCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strDescription] NVARCHAR(50)COLLATE Latin1_General_CI_AS  NULL, 
     [dblEquivalenceValue] NUMERIC(18, 6) NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL, 

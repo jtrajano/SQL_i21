@@ -1,8 +1,8 @@
 ﻿CREATE TABLE [dbo].[tblICFamily]
 (
 	[intFamilyId] INT NOT NULL  IDENTITY, 
-    [strFamily] NVARCHAR(50) NOT NULL, 
-    [strDesciption] NVARCHAR(50) NULL, 
+    [strFamily] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strDesciption] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICFamily] PRIMARY KEY ([intFamilyId]), 

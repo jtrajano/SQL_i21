@@ -6,7 +6,7 @@
     [dblUnitQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblSellQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-	[strDescription] NVARCHAR(50) NULL, 
+	[strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[dblLength] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblWidth] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblHeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 

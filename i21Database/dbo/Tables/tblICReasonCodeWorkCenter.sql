@@ -2,7 +2,7 @@
 (
 	[intReasonCodeWorkCenterId] INT NOT NULL IDENTITY, 
     [intReasonCodeId] INT NOT NULL, 
-    [strWorkCenterId] NVARCHAR(50) NOT NULL, 
+    [strWorkCenterId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intSort] INT NULL DEFAULT ((0)), 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICReasonCodeWorkCenter] PRIMARY KEY ([intReasonCodeWorkCenterId]), 

@@ -1,9 +1,9 @@
 ﻿CREATE TABLE [dbo].[tblICUnitMeasure]
 (
 	[intUnitMeasureId] INT NOT NULL IDENTITY, 
-    [strUnitMeasure] NVARCHAR(50) NULL, 
-    [strSymbol] NVARCHAR(50) NULL, 
-    [strUnitType] NVARCHAR(50) NULL, 
+    [strUnitMeasure] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strSymbol] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strUnitType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [ysnDefault] BIT NULL DEFAULT ((0)), 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICUnitMeasure] PRIMARY KEY ([intUnitMeasureId]) 
