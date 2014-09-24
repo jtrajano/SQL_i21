@@ -9,6 +9,7 @@ Ext.define('Inventory.model.Item', {
         'Inventory.model.ItemLocationStore',
         'Inventory.model.ItemPOS',
         'Inventory.model.ItemSales',
+        'Inventory.model.ItemManufacturing',
         'Ext.data.Field'
     ],
 
@@ -71,6 +72,20 @@ Ext.define('Inventory.model.Item', {
     hasOne: {
         model: 'Inventory.model.ItemSales',
         name: 'tblICItemSales',
+        foreignKey: 'intItemId',
+        primaryKey: 'intItemId',
+        storeConfig: {
+            sortOnLoad: true,
+            sorters: {
+                direction: 'ASC',
+                property: 'intSort'
+            }
+        }
+    },
+
+    hasOne: {
+        model: 'Inventory.model.ItemManufacturing',
+        name: 'tblICItemManufacturings',
         foreignKey: 'intItemId',
         primaryKey: 'intItemId',
         storeConfig: {

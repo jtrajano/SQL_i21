@@ -122,7 +122,12 @@ Ext.define('Inventory.view.override.ItemViewController', {
 
             colPOSSLAContract: '',
             colPOSSLAPrice: '',
-            colPOSSLAWarranty: ''
+            colPOSSLAWarranty: '',
+
+            //-----------------//
+            //Manufacturing Tab//
+            //-----------------//
+            
         }
     },
 
