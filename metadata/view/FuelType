@@ -273,6 +273,7 @@
                                 ],
                                 "designer|createAlias": "gridcombobox",
                                 "designer|displayName": null,
+                                "displayField": "strRinFuelTypeCode",
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Fuel Type",
                                 "itemId": "cboFuelType",
@@ -284,6 +285,7 @@
                                 "maxLength": null,
                                 "name": null,
                                 "tabIndex": null,
+                                "valueField": "intRinFuelTypeId",
                                 "width": null
                             },
                             "name": "MyComboBox63",
@@ -309,6 +311,7 @@
                             "userConfig": {
                                 "designer|createAlias": "gridcombobox",
                                 "designer|displayName": null,
+                                "displayField": "strRinFeedStockCode",
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Feed Stock",
                                 "itemId": "cboFeedStock",
@@ -320,6 +323,7 @@
                                 "maxLength": null,
                                 "name": null,
                                 "tabIndex": null,
+                                "valueField": "intRinFeedStockId",
                                 "width": null
                             },
                             "name": "MyComboBox64",
@@ -413,6 +417,7 @@
                             "userConfig": {
                                 "designer|createAlias": "gridcombobox",
                                 "designer|displayName": null,
+                                "displayField": "strRinFuelCode",
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Fuel Code",
                                 "itemId": "cboFuelCode",
@@ -424,6 +429,7 @@
                                 "maxLength": null,
                                 "name": null,
                                 "tabIndex": null,
+                                "valueField": "intRinFuelId",
                                 "width": 170
                             },
                             "name": "MyComboBox66",
@@ -439,6 +445,7 @@
                             "userConfig": {
                                 "designer|createAlias": "gridcombobox",
                                 "designer|displayName": null,
+                                "displayField": "strRinProcessCode",
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Process Code",
                                 "itemId": "cboProcessCode",
@@ -450,6 +457,7 @@
                                 "maxLength": null,
                                 "name": null,
                                 "tabIndex": null,
+                                "valueField": "intRinProcessId",
                                 "width": 170
                             },
                             "name": "MyComboBox67",
@@ -465,6 +473,7 @@
                             "userConfig": {
                                 "designer|createAlias": "gridcombobox",
                                 "designer|displayName": null,
+                                "displayField": "strRinFeedStockUOM",
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Feed Stock UOM",
                                 "itemId": "cboFeedStockUom",
@@ -476,6 +485,7 @@
                                 "maxLength": null,
                                 "name": null,
                                 "tabIndex": null,
+                                "valueField": "intRinFeedStockUOMId",
                                 "width": 170
                             },
                             "name": "MyComboBox68",

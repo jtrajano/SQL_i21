@@ -177,13 +177,17 @@ Ext.define('Inventory.view.FuelType', {
                             ],
                             itemId: 'cboFuelType',
                             fieldLabel: 'Fuel Type',
-                            labelWidth: 165
+                            labelWidth: 165,
+                            displayField: 'strRinFuelTypeCode',
+                            valueField: 'intRinFuelTypeId'
                         },
                         {
                             xtype: 'gridcombobox',
                             itemId: 'cboFeedStock',
                             fieldLabel: 'Feed Stock',
-                            labelWidth: 165
+                            labelWidth: 165,
+                            displayField: 'strRinFeedStockCode',
+                            valueField: 'intRinFeedStockId'
                         },
                         {
                             xtype: 'textfield',
@@ -209,21 +213,27 @@ Ext.define('Inventory.view.FuelType', {
                             itemId: 'cboFuelCode',
                             width: 170,
                             fieldLabel: 'Fuel Code',
-                            labelWidth: 165
+                            labelWidth: 165,
+                            displayField: 'strRinFuelCode',
+                            valueField: 'intRinFuelId'
                         },
                         {
                             xtype: 'gridcombobox',
                             itemId: 'cboProcessCode',
                             width: 170,
                             fieldLabel: 'Process Code',
-                            labelWidth: 165
+                            labelWidth: 165,
+                            displayField: 'strRinProcessCode',
+                            valueField: 'intRinProcessId'
                         },
                         {
                             xtype: 'gridcombobox',
                             itemId: 'cboFeedStockUom',
                             width: 170,
                             fieldLabel: 'Feed Stock UOM',
-                            labelWidth: 165
+                            labelWidth: 165,
+                            displayField: 'strRinFeedStockUOM',
+                            valueField: 'intRinFeedStockUOMId'
                         },
                         {
                             xtype: 'textfield',

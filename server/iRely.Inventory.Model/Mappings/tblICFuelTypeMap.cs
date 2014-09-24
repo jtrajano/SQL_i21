@@ -25,26 +25,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intRinProcessId).HasColumnName("intRinProcessId");
             this.Property(t => t.ysnDeductDenaturant).HasColumnName("ysnDeductDenaturant");
             this.Property(t => t.ysnRenewableBiomass).HasColumnName("ysnRenewableBiomass");
-
-            this.HasRequired(p => p.RinFuel)
-                .WithMany(p => p.RinFuels)
-                .HasForeignKey(p => p.intRinFuelId);
-
-            this.HasRequired(p => p.RinFuelType)
-                .WithMany(p => p.RinFuelTypes)
-                .HasForeignKey(p => p.intRinFuelTypeId);
-
-            this.HasRequired(p => p.RinProcess)
-                .WithMany(p => p.RinProcesses)
-                .HasForeignKey(p => p.intRinProcessId);
-
-            this.HasRequired(p => p.RinFeedStock)
-                .WithMany(p => p.RinFeedStocks)
-                .HasForeignKey(p => p.intRinFeedStockId);
-
-            this.HasRequired(p => p.RinFeedStockUOM)
-                .WithMany(p => p.RinFeedStockUOMs)
-                .HasForeignKey(p => p.intRinFeedStockUOMId);
         }
     }
 }

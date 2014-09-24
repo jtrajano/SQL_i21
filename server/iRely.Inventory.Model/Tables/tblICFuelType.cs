@@ -33,6 +33,11 @@ namespace iRely.Inventory.Model
 
     public class FuelTypeVM
     {
-        public string strRinFuelTypeCode { get; set; }
+        public int intFuelTypeId { get; set; }
+        public string strRinFuelTypeCodeId { get; set; }
+        public string strRinFeedStockId { get; set; }
+        public string strRinFuelId { get; set; }
+        public string strRinProcessId { get; set; }
+        public string strRinFeedStockUOMId { get; set; }
     }
 }

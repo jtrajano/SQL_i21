@@ -23,7 +23,13 @@ Ext.define('Inventory.model.FuelType', {
         { name: 'dblFeedStockFactor', type: 'float'},
         { name: 'dblPercentDenaturant', type: 'float'},
         { name: 'ysnRenewableBiomass', type: 'boolean'},
-        { name: 'ysnDeductDenaturant', type: 'boolean'}
+        { name: 'ysnDeductDenaturant', type: 'boolean'},
+
+        {name: 'strRinFuelTypeCodeId', type: 'string'},
+        {name: 'strRinFeedStockId', type: 'string'},
+        {name: 'strRinFuelId', type: 'string'},
+        {name: 'strRinProcessId', type: 'string'},
+        {name: 'strRinFeedStockUOMId', type: 'string'}
     ],
 
     validations: [

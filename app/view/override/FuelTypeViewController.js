@@ -10,8 +10,11 @@ Ext.define('Inventory.view.override.FuelTypeViewController', {
             },
             columns: [
                 {dataIndex: 'intFuelTypeId',text: "Fuel Type", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
-                {dataIndex: 'strRinFuelTypeCode', text: 'Rin Fuel Type', flex: 1,  dataType: 'numeric'},
-                {dataIndex: 'intRinFeedStockId', text: 'Rin Feed Stock', flex: 1,  dataType: 'numeric'}
+                {dataIndex: 'strRinFuelTypeCodeId', text: 'Fuel Type', flex: 1,  dataType: 'string'},
+                {dataIndex: 'strRinFeedStockId', text: 'Feed Stock', flex: 1,  dataType: 'string'},
+                {dataIndex: 'strRinFuelId', text: 'Fuel Code', flex: 1,  dataType: 'string'},
+                {dataIndex: 'strRinProcessId', text: 'Process Code', flex: 1,  dataType: 'string'},
+                {dataIndex: 'strRinFeedStockUOMId', text: 'Feed Stock UOM', flex: 1,  dataType: 'string'}
             ]
         },
         binding: {

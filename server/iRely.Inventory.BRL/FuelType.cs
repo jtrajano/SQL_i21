@@ -21,12 +21,21 @@ namespace iRely.Inventory.BRL
             _db = new Repository(new Inventory.Model.InventoryEntities());
         }
 
-        public IQueryable<tblICFuelType> GetSearchQuery()
+        public IQueryable<FuelTypeVM> GetSearchQuery()
         {
-            return _db.GetQuery<tblICFuelType>();
+            return _db.GetQuery<tblICFuelType>()
+                .Select(p => new FuelTypeVM
+                {
+                    intFuelTypeId = p.intFuelTypeId,
+                    strRinFuelTypeCodeId = p.RinFuelType.strRinFuelTypeCode,
+                    strRinFeedStockId = p.RinFeedStock.strRinFeedStockCode,
+                    strRinFuelId = p.RinFuel.strRinFuelCode,
+                    strRinProcessId = p.RinProcess.strRinProcessCode,
+                    strRinFeedStockUOMId = p.RinFeedStockUOM.strRinFeedStockUOMCode
+                });
         }
 
-        public object GetSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<tblICFuelType, bool>> predicate)
+        public object GetSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<FuelTypeVM, bool>> predicate)
         {
             return GetSearchQuery()
                 .Where(predicate)
@@ -37,12 +46,12 @@ namespace iRely.Inventory.BRL
                 .AsNoTracking();
         }
 
-        public int GetCount(Expression<Func<tblICFuelType, bool>> predicate)
+        public int GetCount(Expression<Func<FuelTypeVM, bool>> predicate)
         {
             return GetSearchQuery().Where(predicate).Count();
         }
 
-        public IQueryable<tblICFuelType> GetFuelTypes(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<tblICFuelType, bool>> predicate)
+        public IQueryable<tblICFuelType> GetFuelTypes(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<FuelTypeVM, bool>> predicate)
         {
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICFuelType>()

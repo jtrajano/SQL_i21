@@ -25,13 +25,13 @@ namespace iRely.Invetory.WebAPI.Controllers
         {
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
-            var predicate = ExpressionBuilder.True<tblICFuelType>();
+            var predicate = ExpressionBuilder.True<FuelTypeVM>();
             var selector = ExpressionBuilder.GetSelector(columns);
 
             var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts);
 
             if (searchFilters != null)
-                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICFuelType>(searchFilters);
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<FuelTypeVM>(searchFilters);
 
             var data = _FuelTypeBRL.GetSearchQuery(page, start, limit, selector, sortSelector, predicate);
 
@@ -51,11 +51,11 @@ namespace iRely.Invetory.WebAPI.Controllers
 
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
-            var predicate = ExpressionBuilder.True<tblICFuelType>();
+            var predicate = ExpressionBuilder.True<FuelTypeVM>();
             var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intFuelTypeId", "DESC");
 
             if (searchFilters != null)
-                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICFuelType>(searchFilters, true);
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<FuelTypeVM>(searchFilters, true);
 
             var total = _FuelTypeBRL.GetCount(predicate);
             var data = _FuelTypeBRL.GetFuelTypes(page, start, page == 0 ? total : limit, sortSelector, predicate);
