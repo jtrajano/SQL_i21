@@ -21,6 +21,7 @@
 			,ysni21User = 1
 			,imgPhoto = null
 			,intConcurrencyId = 1
+			,strFullName2 = us.strFullName
 		from
 			tblSMUserSecurity us,
 			tblSMUserRole ur
@@ -50,6 +51,7 @@
 			,ysni21User = 0
 			,imgPhoto = en.imgPhoto
 			,intConcurrencyId = 1
+			,strFullName2 = en.strName
 		from
 			tblEntityContact ec
 			left outer join tblARCustomer cus on cus.intCustomerId = (select top 1 et.intCustomerId from tblARCustomerToContact et where et.intContactId = ec.intContactId)
