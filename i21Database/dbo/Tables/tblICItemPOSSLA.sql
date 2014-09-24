@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblICItemPOSSLA]
 (
-	[intItemPOSSLAId] INT NOT NULL , 
+	[intItemPOSSLAId] INT NOT NULL IDENTITY , 
     [intItemId] INT NOT NULL, 
     [strSLAContract] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [dblContractPrice] NUMERIC(18, 6) NULL, 

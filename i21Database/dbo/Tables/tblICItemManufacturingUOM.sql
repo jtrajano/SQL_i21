@@ -1,13 +1,13 @@
-﻿CREATE TABLE [dbo].[tblICItemPOSCategory]
+﻿CREATE TABLE [dbo].[tblICItemManufacturingUOM]
 (
-	[intItemPOSCategoryId] INT NOT NULL IDENTITY , 
+	[intItemManufacturingUOMId] INT NOT NULL IDENTITY , 
     [intItemId] INT NOT NULL, 
-    [intCategoryId] INT NOT NULL, 
+    [intUnitMeasureId] INT NOT NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
-    CONSTRAINT [PK_tblICItemPOSCategory] PRIMARY KEY ([intItemPOSCategoryId]), 
-    CONSTRAINT [FK_tblICItemPOSCategory_tblICItemPOS] FOREIGN KEY ([intItemId]) REFERENCES [tblICItemPOS]([intItemId]), 
-    CONSTRAINT [FK_tblICItemPOSCategory_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId])
+    CONSTRAINT [PK_tblICItemManufacturingUOM] PRIMARY KEY ([intItemManufacturingUOMId]), 
+    CONSTRAINT [FK_tblICItemManufacturingUOM_tblICItemManufacturing] FOREIGN KEY ([intItemId]) REFERENCES [tblICItemManufacturing]([intItemId]) ON DELETE CASCADE, 
+    CONSTRAINT [FK_tblICItemManufacturingUOM_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
 )
 
 GO
@@ -16,34 +16,34 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemPOSCategory',
+    @level1name = N'tblICItemManufacturingUOM',
     @level2type = N'COLUMN',
-    @level2name = N'intItemPOSCategoryId'
+    @level2name = N'intItemManufacturingUOMId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Item Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemPOSCategory',
+    @level1name = N'tblICItemManufacturingUOM',
     @level2type = N'COLUMN',
     @level2name = N'intItemId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Category Id',
+    @value = N'Unit Measure Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemPOSCategory',
+    @level1name = N'tblICItemManufacturingUOM',
     @level2type = N'COLUMN',
-    @level2name = N'intCategoryId'
+    @level2name = N'intUnitMeasureId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Sort Field',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemPOSCategory',
+    @level1name = N'tblICItemManufacturingUOM',
     @level2type = N'COLUMN',
     @level2name = N'intSort'
 GO
@@ -52,6 +52,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemPOSCategory',
+    @level1name = N'tblICItemManufacturingUOM',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
