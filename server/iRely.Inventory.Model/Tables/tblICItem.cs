@@ -16,6 +16,7 @@ namespace iRely.Inventory.Model
             this.tblICItemLocationStores = new List<tblICItemLocationStore>();
             this.tblICItemSales = new tblICItemSales();
             this.tblICItemPOS = new tblICItemPOS();
+            this.tblICItemManufacturing = new tblICItemManufacturing();
         }
 
         public int intItemId { get; set; }

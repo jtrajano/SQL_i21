@@ -127,7 +127,36 @@ Ext.define('Inventory.view.override.ItemViewController', {
             //-----------------//
             //Manufacturing Tab//
             //-----------------//
-            
+            chkRequireApproval: '{current.tblICItemManufacturing.ysnRequireCustomerApproval}',
+            cboAssociatedRecipe: '{current.tblICItemManufacturing.intRecipeId}',
+            chkSanitizationRequired: '{current.tblICItemManufacturing.ysnSanitationRequired}',
+            txtLifeTime: '{current.tblICItemManufacturing.intLifeTime}',
+            cboLifetimeType: '{current.tblICItemManufacturing.strLifeTimeType}',
+            txtReceiveLife: '{current.tblICItemManufacturing.intReceiveLife}',
+            txtGTIN: '{current.tblICItemManufacturing.strGTIN}',
+            cboRotationType: '{current.tblICItemManufacturing.strRotationType}',
+            cboNFMC: '{current.tblICItemManufacturing.intNMFCId}',
+            chkStrictFIFO: '{current.tblICItemManufacturing.ysnStrictFIFO}',
+            txtHeight: '{current.tblICItemManufacturing.dblHeight}',
+            txtWidth: '{current.tblICItemManufacturing.dblWidth}',
+            txtDepth: '{current.tblICItemManufacturing.dblDepth}',
+            cboDimensionUOM: '{current.tblICItemManufacturing.intDimensionUOMId}',
+            cboWeightUOM: '{current.tblICItemManufacturing.intWeightUOMId}',
+            txtWeight: '{current.tblICItemManufacturing.dblWeight}',
+            txtMaterialPack: '{current.tblICItemManufacturing.intMaterialPackTypeId}',
+            txtMaterialSizeCode: '{current.tblICItemManufacturing.strMaterialSizeCode}',
+            txtInnerUnits: '{current.tblICItemManufacturing.intInnerUnits}',
+            txtLayersPerPallet: '{current.tblICItemManufacturing.intLayerPerPallet}',
+            txtUnitsPerLayer: '{current.tblICItemManufacturing.intUnitPerLayer}',
+            txtStandardPalletRatio: '{current.tblICItemManufacturing.dblStandardPalletRatio}',
+            txtMask1: '{current.tblICItemManufacturing.strMask1}',
+            txtMask2: '{current.tblICItemManufacturing.strMask2}',
+            txtMask3: '{current.tblICItemManufacturing.strMask3}',
+
+            colManufacturingUOM: ''
+
+
+
         }
     },
 

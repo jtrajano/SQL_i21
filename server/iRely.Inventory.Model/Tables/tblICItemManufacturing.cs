@@ -32,6 +32,7 @@ namespace iRely.Inventory.Model
         public double dblDepth { get; set; }
         public int intWeightUOMId { get; set; }
         public double dblWeight { get; set; }
+        public int intMaterialPackTypeId { get; set; }
         public string strMaterialSizeCode { get; set; }
         public int intInnerUnits { get; set; }
         public int intLayerPerPallet { get; set; }

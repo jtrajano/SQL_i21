@@ -31,7 +31,6 @@ Ext.define('Inventory.model.ItemPOS', {
         { name: 'ysnDropShip', type: 'boolean'},
         { name: 'ysnCommisionable', type: 'boolean'},
         { name: 'strSpecialCommission', type: 'string'},
-        { name: 'intConcurrencyId', type: 'int'},
     ],
 
     hasMany: {

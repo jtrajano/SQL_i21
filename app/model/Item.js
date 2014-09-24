@@ -85,7 +85,7 @@ Ext.define('Inventory.model.Item', {
 
     hasOne: {
         model: 'Inventory.model.ItemManufacturing',
-        name: 'tblICItemManufacturings',
+        name: 'tblICItemManufacturing',
         foreignKey: 'intItemId',
         primaryKey: 'intItemId',
         storeConfig: {

@@ -29,6 +29,7 @@ Ext.define('Inventory.model.ItemManufacturing', {
         { name: 'dblDepth', type: 'float'},
         { name: 'intWeightUOMId', type: 'int'},
         { name: 'dblWeight', type: 'float'},
+        { name: 'intMaterialPackTypeId', type: 'int'},
         { name: 'strMaterialSizeCode', type: 'string'},
         { name: 'intInnerUnits', type: 'int'},
         { name: 'intLayerPerPallet', type: 'int'},
@@ -36,7 +37,7 @@ Ext.define('Inventory.model.ItemManufacturing', {
         { name: 'dblStandardPalletRatio', type: 'float'},
         { name: 'strMask1', type: 'string'},
         { name: 'strMask2', type: 'string'},
-        { name: 'strMask3', type: 'string'}
+        { name: 'strMask3', type: 'string'},
     ],
 
     hasMany: {

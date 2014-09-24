@@ -1221,7 +1221,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter13",
+                                                                    "name": "filter1",
                                                                     "designerId": "cbd9067a-ce03-4810-b0cb-7bd07d00d877",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2599,7 +2599,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter14",
+                                                                            "name": "filter11",
                                                                             "designerId": "2857c700-ed36-43f0-8ef5-f340b95fdfba",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -2754,7 +2754,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter15",
+                                                                            "name": "filter12",
                                                                             "designerId": "f74d03b6-8d20-468c-ab10-a1782ac46fa4",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -2907,6 +2907,7 @@
                                                                     "userConfig": {
                                                                         "boxLabel": null,
                                                                         "fieldLabel": "Require Approval",
+                                                                        "itemId": "chkRequireApproval",
                                                                         "labelWidth": 125,
                                                                         "layout|flex": null
                                                                     },
@@ -2922,7 +2923,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldLabel": "Associated Recipe",
-                                                                        "itemId": "cboFamily1",
+                                                                        "itemId": "cboAssociatedRecipe",
                                                                         "labelWidth": 125,
                                                                         "layout|flex": null
                                                                     },
@@ -2939,6 +2940,7 @@
                                                                     "userConfig": {
                                                                         "boxLabel": null,
                                                                         "fieldLabel": "Sanitization Required",
+                                                                        "itemId": "chkSanitizationRequired",
                                                                         "labelWidth": 125,
                                                                         "layout|flex": null
                                                                     },
@@ -2994,7 +2996,7 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "fieldLabel": "Life Time",
-                                                                                "itemId": "txtCaseUom1",
+                                                                                "itemId": "txtLifeTime",
                                                                                 "labelWidth": 125,
                                                                                 "layout|flex": 2
                                                                             },
@@ -3010,7 +3012,7 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "fieldLabel": null,
-                                                                                "itemId": "cboFamily",
+                                                                                "itemId": "cboLifetimeType",
                                                                                 "labelWidth": 125,
                                                                                 "layout|flex": 1,
                                                                                 "layout|margins": null,
@@ -3030,7 +3032,7 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldLabel": "Receive Life",
-                                                                        "itemId": "txtCaseUom",
+                                                                        "itemId": "txtReceiveLife",
                                                                         "labelWidth": 125,
                                                                         "layout|flex": null
                                                                     },
@@ -3099,7 +3101,7 @@
                                                                                     "userConfig": {
                                                                                         "layout|flex": null
                                                                                     },
-                                                                                    "name": "filter16",
+                                                                                    "name": "filter13",
                                                                                     "designerId": "3fdba5e7-278e-4e6b-ad42-9ec658e4c660",
                                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                                 }
@@ -3115,6 +3117,7 @@
                                                                             "userConfig": {
                                                                                 "dataIndex": "string",
                                                                                 "flex": 1,
+                                                                                "itemId": "colManufacturingUOM",
                                                                                 "text": "Unit of Measure",
                                                                                 "width": null
                                                                             },
@@ -3206,7 +3209,7 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "fieldLabel": "GTIN",
-                                                                                "itemId": "txtCaseUom12",
+                                                                                "itemId": "txtGTIN",
                                                                                 "labelWidth": 125,
                                                                                 "layout|flex": null
                                                                             },
@@ -3222,7 +3225,7 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "fieldLabel": "Rotation Type",
-                                                                                "itemId": "cboFamily2",
+                                                                                "itemId": "cboRotationType",
                                                                                 "labelWidth": 125,
                                                                                 "layout|flex": null
                                                                             },
@@ -3256,7 +3259,7 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "NMFC",
-                                                                                        "itemId": "cboFamily1",
+                                                                                        "itemId": "cboNFMC",
                                                                                         "labelWidth": 125,
                                                                                         "layout|flex": 1
                                                                                     },
@@ -3273,6 +3276,7 @@
                                                                                     "userConfig": {
                                                                                         "boxLabel": null,
                                                                                         "fieldLabel": "Strict FIFO",
+                                                                                        "itemId": "chkStrictFIFO",
                                                                                         "labelWidth": 63,
                                                                                         "layout|flex": null,
                                                                                         "layout|margins": null,
@@ -3309,7 +3313,7 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "Height",
-                                                                                        "itemId": "txtCaseUom1",
+                                                                                        "itemId": "txtHeight",
                                                                                         "labelWidth": 125,
                                                                                         "layout|flex": 1.9
                                                                                     },
@@ -3325,7 +3329,7 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "Width",
-                                                                                        "itemId": "txtCaseUom2",
+                                                                                        "itemId": "txtWidth",
                                                                                         "labelWidth": 40,
                                                                                         "layout|flex": 1,
                                                                                         "layout|margins": null,
@@ -3343,7 +3347,7 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "Depth",
-                                                                                        "itemId": "txtCaseUom3",
+                                                                                        "itemId": "txtDepth",
                                                                                         "labelWidth": 40,
                                                                                         "layout|flex": 1,
                                                                                         "layout|margins": null
@@ -3380,7 +3384,7 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "Dimension UOM",
-                                                                                        "itemId": "cboFamily",
+                                                                                        "itemId": "cboDimensionUOM",
                                                                                         "labelWidth": 125,
                                                                                         "layout|flex": 1.4
                                                                                     },
@@ -3396,7 +3400,7 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "Weight UOM",
-                                                                                        "itemId": "cboFamily1",
+                                                                                        "itemId": "cboWeightUOM",
                                                                                         "labelWidth": 87,
                                                                                         "layout|flex": 1,
                                                                                         "layout|margins": null,
@@ -3433,7 +3437,7 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "Weight",
-                                                                                        "itemId": "txtCaseUom1",
+                                                                                        "itemId": "txtWeight",
                                                                                         "labelWidth": 125,
                                                                                         "layout|flex": 1.4
                                                                                     },
@@ -3449,7 +3453,7 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "Material Pack",
-                                                                                        "itemId": "txtCaseUom2",
+                                                                                        "itemId": "txtMaterialPack",
                                                                                         "labelWidth": 87,
                                                                                         "layout|flex": 1,
                                                                                         "layout|margins": null,
@@ -3486,7 +3490,7 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "Material Size Code",
-                                                                                        "itemId": "txtCaseUom1",
+                                                                                        "itemId": "txtMaterialSizeCode",
                                                                                         "labelWidth": 125,
                                                                                         "layout|flex": 1.4
                                                                                     },
@@ -3502,7 +3506,7 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "Inner Units",
-                                                                                        "itemId": "txtCaseUom2",
+                                                                                        "itemId": "txtInnerUnits",
                                                                                         "labelWidth": 87,
                                                                                         "layout|flex": 1,
                                                                                         "layout|margins": null,
@@ -3540,7 +3544,7 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "Layers per Pallet",
-                                                                                        "itemId": "txtCaseUom3",
+                                                                                        "itemId": "txtLayersPerPallet",
                                                                                         "labelWidth": 125,
                                                                                         "layout|flex": 1.4
                                                                                     },
@@ -3556,7 +3560,7 @@
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
                                                                                         "fieldLabel": "Units per Layer",
-                                                                                        "itemId": "txtCaseUom4",
+                                                                                        "itemId": "txtUnitsPerLayer",
                                                                                         "labelWidth": 87,
                                                                                         "layout|flex": 1,
                                                                                         "layout|margins": null,
@@ -3576,7 +3580,7 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "fieldLabel": "Std. Pallet Ratio (%)",
-                                                                                "itemId": "txtCaseUom5",
+                                                                                "itemId": "txtStandardPalletRatio",
                                                                                 "labelWidth": 125,
                                                                                 "layout|flex": null
                                                                             },
@@ -3736,7 +3740,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter17",
+                                                                    "name": "filter14",
                                                                     "designerId": "87274c48-fa61-4ab3-acd1-2696486c13a3",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3915,7 +3919,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter18",
+                                                                    "name": "filter15",
                                                                     "designerId": "f11b92d2-d17f-4030-af6e-5449c5557e10",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -4114,7 +4118,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter19",
+                                                                    "name": "filter16",
                                                                     "designerId": "317ae54f-a81d-4657-8d0b-3edd670adaca",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -4355,7 +4359,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter110",
+                                                                    "name": "filter17",
                                                                     "designerId": "1de0066e-eb37-44ae-af83-adcc5f465797",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -4646,7 +4650,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter111",
+                                                                            "name": "filter18",
                                                                             "designerId": "102ea262-7cce-4c88-bd43-2f80cfa1e9a8",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -4768,7 +4772,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter112",
+                                                                            "name": "filter19",
                                                                             "designerId": "437f9756-d7eb-404d-89dd-762a18b9132c",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -4958,7 +4962,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter113",
+                                                    "name": "filter110",
                                                     "designerId": "efa99b46-2432-478a-97f2-c35eb7b7ed7c",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -5237,7 +5241,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter114",
+                                                                    "name": "filter111",
                                                                     "designerId": "8c12842b-2ead-456f-b4dc-8a0da80ee35f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -5573,7 +5577,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter115",
+                                                                    "name": "filter112",
                                                                     "designerId": "df49b4ec-5d3e-4ec5-8704-5a1a7a595dd1",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -5922,7 +5926,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter116",
+                                                                    "name": "filter113",
                                                                     "designerId": "1359797a-01d3-4908-862b-ecee335db0ef",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -6253,7 +6257,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter117",
+                                                                    "name": "filter114",
                                                                     "designerId": "9949aed9-86f7-4f15-aac6-afedae027c18",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -6660,7 +6664,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter118",
+                                                    "name": "filter115",
                                                     "designerId": "ab092e2c-0602-4213-baf5-e07813015a04",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
