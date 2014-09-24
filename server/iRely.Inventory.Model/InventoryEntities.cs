@@ -114,6 +114,8 @@ namespace iRely.Inventory.Model
         public DbSet<tblICItemPOS> tblICItemPOSs { get; set; }
         public DbSet<tblICItemPOSCategory> tblICItemPOSCategories { get; set; }
         public DbSet<tblICItemPOSSLA> tblICItemPOSSLAs { get; set; }
+        public DbSet<tblICItemManufacturing> tblICItemManufacturings { get; set; }
+        public DbSet<tblICItemManufacturingUOM> tblICItemManufacturingUOMs { get; set; }
         public DbSet<tblICManufacturer> tblICManufacturers { get; set; }
         public DbSet<tblICPatronageCategory> tblICPatronageCategories { get; set; }
         public DbSet<tblICReasonCode> tblICReasonCodes { get; set; }
@@ -148,6 +150,8 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICItemPOSMap());
             modelBuilder.Configurations.Add(new tblICItemPOSCategoryMap());
             modelBuilder.Configurations.Add(new tblICItemPOSSLAMap());
+            modelBuilder.Configurations.Add(new tblICItemManufacturingMap());
+            modelBuilder.Configurations.Add(new tblICItemManufacturingUOMMap());
             modelBuilder.Configurations.Add(new tblICManufacturerMap());
             modelBuilder.Configurations.Add(new tblICPatronageCategoryMap());
             modelBuilder.Configurations.Add(new tblICReasonCodeMap());

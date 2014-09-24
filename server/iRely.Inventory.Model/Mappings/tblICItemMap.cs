@@ -35,6 +35,9 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblICItemPOS)
                 .WithRequired(p => p.tblICItem)
                 .WillCascadeOnDelete();
+            this.HasOptional(p => p.tblICItemManufacturing)
+                .WithRequired(p => p.tblICItem)
+                .WillCascadeOnDelete();
         }
     }
 }
