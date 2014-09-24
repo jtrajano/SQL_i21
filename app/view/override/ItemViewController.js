@@ -67,56 +67,56 @@ Ext.define('Inventory.view.override.ItemViewController', {
             //---------//
             //Sales Tab//
             //---------//
-            cboPatronage: '',
-            cboTaxClass: '',
-            chkStockedItem: '',
-            chkDyedFuel: '',
-            cboBarcodePrint: '',
-            chkMsdsRequired: '',
-            txtEpaNumber: '',
-            chkInboundTax: '',
-            chkOutboundTax: '',
-            chkRestrictedChemical: '',
-            chkTankRequired: '',
-            chkAvailableForTm: '',
-            chkDefaultPercentFull: '',
-            cboFuelInspectionFee: '',
-            cboRinRequired: '',
-            cboRinFuelType: '',
-            txtPercentDenaturant: '',
-            chkTonnageTax: '',
-            chkLoadTracking: '',
-            txtMixOrder: '',
-            chkHandAddIngredients: '',
-            cboMedicationTag: '',
-            cboIngredientTag: '',
-            txtVolumeRebateGroup: '',
-            cboPhysicalItem: '',
-            chkExtendOnPickTicket: '',
-            chkExportEdi: '',
-            chkHazardMaterial: '',
-            chkMaterialFee: '',
+            cboPatronage: '{current.tblICItemSales.intPatronageCategoryId}',
+            cboTaxClass: '{current.tblICItemSales.intTaxClassId}',
+            chkStockedItem: '{current.tblICItemSales.ysnStockedItem}',
+            chkDyedFuel: '{current.tblICItemSales.ysnDyedFuel}',
+            cboBarcodePrint: '{current.tblICItemSales.strBarcodePrint}',
+            chkMsdsRequired: '{current.tblICItemSales.ysnMSDSRequired}',
+            txtEpaNumber: '{current.tblICItemSales.strEPANumber}',
+            chkInboundTax: '{current.tblICItemSales.ysnInboundTax}',
+            chkOutboundTax: '{current.tblICItemSales.ysnOutboundTax}',
+            chkRestrictedChemical: '{current.tblICItemSales.ysnRestrictedChemical}',
+            chkTankRequired: '{current.tblICItemSales.ysnTankRequired}',
+            chkAvailableForTm: '{current.tblICItemSales.ysnAvailableTM}',
+            chkDefaultPercentFull: '{current.tblICItemSales.dblDefaultFull}',
+            cboFuelInspectionFee: '{current.tblICItemSales.strFuelInspectFee}',
+            cboRinRequired: '{current.tblICItemSales.strRINRequired}',
+            cboRinFuelType: '{current.tblICItemSales.intRINFuelTypeId}',
+            txtPercentDenaturant: '{current.tblICItemSales.dblDenaturantPercent}',
+            chkTonnageTax: '{current.tblICItemSales.ysnTonnageTax}',
+            chkLoadTracking: '{current.tblICItemSales.ysnLoadTracking}',
+            txtMixOrder: '{current.tblICItemSales.dblMixOrder}',
+            chkHandAddIngredients: '{current.tblICItemSales.ysnHandAddIngredient}',
+            cboMedicationTag: '{current.tblICItemSales.intMedicationTag}',
+            cboIngredientTag: '{current.tblICItemSales.intIngredientTag}',
+            txtVolumeRebateGroup: '{current.tblICItemSales.strVolumeRebateGroup}',
+            cboPhysicalItem: '{current.tblICItemSales.intPhysicalItem}',
+            chkExtendOnPickTicket: '{current.tblICItemSales.ysnExtendPickTicket}',
+            chkExportEdi: '{current.tblICItemSales.ysnExportEDI}',
+            chkHazardMaterial: '{current.tblICItemSales.ysnHazardMaterial}',
+            chkMaterialFee: '{current.tblICItemSales.ysnMaterialFee}',
 
             //-------//
             //POS Tab//
             //-------//
-            txtOrderUpcNo: '',
-            cboCaseUom: '',
-            txtNacsCategory: '',
-            cboWicCode: '',
-            cboAgCategory: '',
-            chkReceiptCommentReq: '',
-            cboCountCode: '',
-            chkLandedCost: '',
-            txtLeadTime: '',
-            chkTaxable: '',
-            txtKeywords: '',
-            txtCaseQty: '',
-            dtmDateShip: '',
-            txtTaxExempt: '',
-            chkDropShip: '',
-            chkCommissionable: '',
-            cboSpecialCommission: '',
+            txtOrderUpcNo: '{current.tblICItemPOS.strUPCNo}',
+            cboCaseUom: '{current.tblICItemPOS.intCaseUOM}',
+            txtNacsCategory: '{current.tblICItemPOS.strNACSCategory}',
+            cboWicCode: '{current.tblICItemPOS.strWICCode}',
+            cboAgCategory: '{current.tblICItemPOS.intAGCategory}',
+            chkReceiptCommentReq: '{current.tblICItemPOS.ysnReceiptCommentRequired}',
+            cboCountCode: '{current.tblICItemPOS.strCountCode}',
+            chkLandedCost: '{current.tblICItemPOS.ysnLandedCost}',
+            txtLeadTime: '{current.tblICItemPOS.strLeadTime}',
+            chkTaxable: '{current.tblICItemPOS.ysnTaxable}',
+            txtKeywords: '{current.tblICItemPOS.strKeywords}',
+            txtCaseQty: '{current.tblICItemPOS.dblCaseQty}',
+            dtmDateShip: '{current.tblICItemPOS.dtmDateShip}',
+            txtTaxExempt: '{current.tblICItemPOS.dblTaxExempt}',
+            chkDropShip: '{current.tblICItemPOS.ysnDropShip}',
+            chkCommissionable: '{current.tblICItemPOS.ysnCommisionable}',
+            cboSpecialCommission: '{current.tblICItemPOS.strSpecialCommission}',
 
             colPOSCategoryName: '',
 
@@ -136,19 +136,38 @@ Ext.define('Inventory.view.override.ItemViewController', {
             store  : store,
             createRecord : me.createRecord,
             binding: me.config.binding,
-            details: [{
-                key: 'tblICItemUOMs',
-                component: Ext.create('iRely.grid.Manager', {
-                    grid: win.down('#grdUnitOfMeasure')
-                })
-            },
-            {
-                key: 'tblSMCustomFieldValues',
-                component: Ext.create('iRely.grid.Manager', {
-                    grid: win.down('#grdValue'),
-                    deleteButton : win.down('#btnDeleteValue')
-                })
-            }]
+            details: [
+                {
+                    key: 'tblICItemUOMs',
+                    component: Ext.create('iRely.grid.Manager', {
+                        grid: win.down('#grdUnitOfMeasure')
+                    })
+                },
+                {
+                    key: 'tblICItemLocationStores',
+                    component: Ext.create('iRely.grid.Manager', {
+                        grid: win.down('#grdLocationStore'),
+                        deleteButton : win.down('#btnDeleteLocation')
+                    })
+                }
+//                ,
+//                {
+//                    key: 'tblICItemPOS',
+//                    component: Ext.create('iRely.grid.Manager', {
+//                        grid: win.down('#grdLocationStore'),
+//                        deleteButton : win.down('#btnDeleteLocation')
+//                    })
+//                }
+//                ,
+//                {
+//                    key: 'tblICItemSales',
+//                    component: Ext.create('iRely.grid.Manager', {
+//                        grid: win.down('#grdLocationStore'),
+//                        deleteButton : win.down('#btnDeleteLocation')
+//                    })
+//                }
+
+            ]
         });
 
 //        var cboType = win.down('#cboType');
