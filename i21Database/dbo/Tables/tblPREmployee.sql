@@ -38,7 +38,12 @@
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
 	CONSTRAINT [PK_tblPREmployee] PRIMARY KEY ([intEntityId]),
     CONSTRAINT [UK_tblPREmployee] UNIQUE ([intEmployeeId]), 
-    CONSTRAINT [AK_tblPREmployee_strEmployeeId] UNIQUE ([strEmployeeId])
+    CONSTRAINT [AK_tblPREmployee_strEmployeeId] UNIQUE ([strEmployeeId]),
+	CONSTRAINT [FK_tblPREmployee_tblPREmployee] FOREIGN KEY ([intSupervisorId]) REFERENCES [tblPREmployee]([intEmployeeId]),
+	CONSTRAINT [FK_tblPREmployee_tblPRPayGroup] FOREIGN KEY ([intPayGroupId]) REFERENCES [tblPRPayGroup]([intPayGroupId]),
+	CONSTRAINT [FK_tblPREmployee_tblPREthnicOrigin] FOREIGN KEY ([intEthnicOriginId]) REFERENCES [tblPREthnicOrigin]([intEthnicOriginId]),
+	CONSTRAINT [FK_tblPREmployee_tblPRRace] FOREIGN KEY ([intRaceId]) REFERENCES [tblPRRace]([intRaceId]),
+	CONSTRAINT [FK_tblPREmployee_tblPREEOCCode] FOREIGN KEY ([intEEOCCode]) REFERENCES [tblPREEOCCode]([intEEOCCodeId])
 ) ON [PRIMARY]
 GO
 

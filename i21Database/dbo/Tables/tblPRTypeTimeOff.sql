@@ -2,14 +2,11 @@
 	[intTypeTimeOffId] INT NOT NULL,
 	[strTimeOff] nvarchar(30) NOT NULL,
 	[strDescription] NVARCHAR(50) NULL, 
-	[intAccountId] INT NULL,
-	[dtmEligible] [datetime] NULL DEFAULT (getdate()),
-	[dblHoursPerYear] [numeric](18, 6) NULL DEFAULT ((0)),
-	[dblHoursPerPeriod] [numeric](18, 6) NULL DEFAULT ((0)),
-	[dblHoursAccrued] [numeric](18, 6) NULL DEFAULT ((0)),
-	[dblHoursUsed] [numeric](18, 6) NULL DEFAULT ((0)),
-	[dblHoursCarriedOver] [numeric](18, 6) NULL DEFAULT ((0)),
-	[intSort] [int] NULL,
+	[dblAccrualRate] [numeric](18, 6) NULL DEFAULT ((0)),
+	[dblPerPeriod] [numeric](18, 6) NULL DEFAULT ((0)),
+	[strAccrualPeriod] NVARCHAR(30) NULL DEFAULT ((0)),
+	[strAwardPeriod] NVARCHAR(30) NULL DEFAULT ((0)),
+	[dblMaxCarryover] [numeric](18, 6) NULL DEFAULT ((0)),
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblPRTypeTimeOff] PRIMARY KEY ([intTypeTimeOffId])
 	)
@@ -28,7 +25,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intTypeTimeOffId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Time-Off Type Name',
+    @value = N'Time Off Type ID',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -36,79 +33,58 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = 'strTimeOff'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Account Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPRTypeTimeOff',
-    @level2type = N'COLUMN',
-    @level2name = N'intAccountId'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Date Eligible',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPRTypeTimeOff',
-    @level2type = N'COLUMN',
-    @level2name = N'dtmEligible'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Hours Per Year',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPRTypeTimeOff',
-    @level2type = N'COLUMN',
-    @level2name = N'dblHoursPerYear'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Hours Per Period',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPRTypeTimeOff',
-    @level2type = N'COLUMN',
-    @level2name = N'dblHoursPerPeriod'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Hours Accrued',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPRTypeTimeOff',
-    @level2type = N'COLUMN',
-    @level2name = N'dblHoursAccrued'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Hours Used',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPRTypeTimeOff',
-    @level2type = N'COLUMN',
-    @level2name = N'dblHoursUsed'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Hours Carried Over',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPRTypeTimeOff',
-    @level2type = N'COLUMN',
-    @level2name = 'dblHoursCarriedOver'
+
 GO
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Sort Field',
+    @value = N'Accrual Rate',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblPRTypeTimeOff',
     @level2type = N'COLUMN',
-    @level2name = N'intSort'
+    @level2name = 'dblAccrualRate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Per Period',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTypeTimeOff',
+    @level2type = N'COLUMN',
+    @level2name = 'dblPerPeriod'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Accrual Period',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTypeTimeOff',
+    @level2type = N'COLUMN',
+    @level2name = 'strAccrualPeriod'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Award Period',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTypeTimeOff',
+    @level2type = N'COLUMN',
+    @level2name = 'strAwardPeriod'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Max Carryover',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTypeTimeOff',
+    @level2type = N'COLUMN',
+    @level2name = 'dblMaxCarryover'
+GO
+
+GO
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Concurrency Field',

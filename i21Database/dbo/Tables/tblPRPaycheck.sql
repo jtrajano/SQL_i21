@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblPRPaycheck](
 	[intPaycheckId] [int] NOT NULL IDENTITY,
 	[strPaycheckId] [nvarchar](20) NOT NULL,
-	[intEmployeeId] [nvarchar](40) NOT NULL,
+	[intEmployeeId] INT NOT NULL,
 	[dtmPayDate] [datetime] NOT NULL,
 	[strPayPeriod] [nvarchar](15) NULL,
 	[dtmDateFrom] [datetime] NOT NULL,
@@ -21,8 +21,9 @@
 	[ysnDirectDeposit] [bit] NOT NULL,
 	[dtmCreated] [datetime] NOT NULL,
 	[intConcurrencyId] [int] NULL,
- CONSTRAINT [PK_tblPRPaycheck] PRIMARY KEY CLUSTERED 
-([intPaycheckId])WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+ CONSTRAINT [PK_tblPRPaycheck] PRIMARY KEY CLUSTERED ([intPaycheckId]) WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY],
+ CONSTRAINT [FK_tblPRPaycheck_tblPREmployee] FOREIGN KEY ([intEmployeeId]) REFERENCES [tblPREmployee]([intEmployeeId]),
+ CONSTRAINT [FK_tblPRPaycheck_tblCMBankAccount] FOREIGN KEY ([intBankAccountId]) REFERENCES [tblCMBankAccount]([intBankAccountId])
 ) ON [PRIMARY]
 GO
 /****** Object:  Default [DF__tblPRPayc__ysnGL__3D195C48]    Script Date: 08/14/2014 10:50:11 ******/
