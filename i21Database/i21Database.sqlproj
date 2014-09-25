@@ -640,7 +640,6 @@
     <Build Include="dbo\Tables\tblPREmployee.sql" />
     <Build Include="dbo\Tables\tblPREmployeeDeduction.sql" />
     <Build Include="dbo\Tables\tblPREmployeeEarning.sql" />
-    <Build Include="dbo\Tables\tblPREmployeePaycheckRegister.sql" />
     <Build Include="dbo\Tables\tblPREmployeeTax.sql" />
     <Build Include="dbo\Tables\tblPREmployeeTimeOff.sql" />
     <Build Include="dbo\Tables\tblPREthnicOrigin.sql" />
@@ -735,8 +734,5 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\HD\DefaultData\1_StatusData.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <RefactorLog Include="i21Database.refactorlog" />
   </ItemGroup>
 </Project>

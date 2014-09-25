@@ -4,7 +4,6 @@
     [strPayGroup] NVARCHAR(50) NOT NULL, 
     [strDescription] NVARCHAR(50) NULL, 
     [strPayPeriod] NVARCHAR(50) NOT NULL DEFAULT ('Bi-Weekly'), 
-	[ysnActive] BIT NOT NULL DEFAULT ((1)), 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblPRPayGroup] PRIMARY KEY ([intPayGroupId]), 
@@ -48,14 +47,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'strPayPeriod'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Active',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPRPayGroup',
-    @level2type = N'COLUMN',
-    @level2name = N'ysnActive'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Sort Field',

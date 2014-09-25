@@ -25,6 +25,8 @@
     CONSTRAINT [PK_tblPREmployeeTax] PRIMARY KEY ([intEmployeeTaxId]), 
     CONSTRAINT [FK_tblPREmployeeTax_tblPREmployee] FOREIGN KEY ([intEmployeeId]) REFERENCES [tblPREmployee]([intEmployeeId]), 
     CONSTRAINT [FK_tblPREmployeeTax_tblPRTypeTax] FOREIGN KEY ([intTypeTaxId]) REFERENCES [tblPRTypeTax]([intTypeTaxId]),
+	CONSTRAINT [FK_tblPREmployeeTax_tblGLAccount_Liability] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
+	CONSTRAINT [FK_tblPREmployeeTax_tblGLAccount_Expense] FOREIGN KEY ([intExpenseAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
 ) ON [PRIMARY]
 GO
 
