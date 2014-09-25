@@ -713,6 +713,12 @@
     <Build Include="dbo\Tables\tblICItemPOSSLA.sql" />
     <Build Include="dbo\Tables\tblICItemManufacturing.sql" />
     <Build Include="dbo\Tables\tblICItemManufacturingUOM.sql" />
+    <Build Include="dbo\Tables\tblICItemUPC.sql" />
+    <Build Include="dbo\Tables\tblICItemCustomerXref.sql" />
+    <Build Include="dbo\Tables\tblICItemVendorXref.sql" />
+    <Build Include="dbo\Tables\tblICItemContract.sql" />
+    <Build Include="dbo\Tables\tblICItemDocument.sql" />
+    <Build Include="dbo\Tables\tblICItemCertification.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
