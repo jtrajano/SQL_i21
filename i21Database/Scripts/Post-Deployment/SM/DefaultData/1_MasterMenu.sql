@@ -580,4 +580,88 @@ GO
 	--/* -------------------------------- */
 	--/* -- End Inventory Reports Menu -- */
 	--/* -------------------------------- */
+
+GO
+
+	/* --- Payroll Module Menu --- */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Payroll' AND strModuleName = 'Payroll' AND intParentMenuID = 0)
+	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Payroll', 'Payroll', 0, 'Payroll', 'Folder', '', 'small-folder', 1, 1, 0, 0, null, 0
+
+	GO
+
+	DECLARE @PayrollModuleId INT
+	SELECT @PayrollModuleId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Payroll' AND strModuleName = 'Payroll' AND intParentMenuID = 0
+
+		-- Payroll / Activities
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollModuleId)
+		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Activities', 'Payroll', @PayrollModuleId, 'Payroll Activities Screens', 'Folder', '', 'small-folder', 1, 1, 0, 0, 1, 0
+
+		-- Payroll / Maintenance
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollModuleId)
+		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Maintenance', 'Payroll', @PayrollModuleId, 'Payroll Maintenance Screens', 'Folder', '', 'small-folder', 1, 1, 0, 0, 2, 0
+
+		-- Payroll Reports
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollModuleId)
+		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Reports', 'Payroll', @PayrollModuleId, 'Payroll Reports', 'Folder', '', 'small-folder', 1, 1, 0, 0, 3, 0
+
+		GO
+
+		DECLARE @PayrollModuleId INT
+		DECLARE @PayrollActivityId INT
+		DECLARE @PayrollMaintenanceId INT
+
+		SELECT @PayrollModuleId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Payroll' AND strModuleName = 'Payroll' AND intParentMenuID = 0
+		SELECT @PayrollActivityId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollModuleId
+		SELECT @PayrollMaintenanceId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollModuleId
+
+			-- Payroll / Activities / Paychecks
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Paychecks' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollActivityId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Paychecks', 'Payroll', @PayrollActivityId, 'Paychecks', 'Screen', 'pr/paycheck', 'small-screen', 1, 1, 0, 1, 1, 0
+
+			-- Payroll / Activities / Process Pay Groups
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Process Pay Groups' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollActivityId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Process Pay Groups', 'Payroll', @PayrollActivityId, 'Process Pay Groups', 'Screen', '', 'small-screen', 1, 1, 0, 1, 2, 0		
+
+			-- Payroll / Maintenance / Payroll Types
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Payroll Types' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollModuleId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Payroll Types', 'Payroll', @PayrollMaintenanceId, 'Payroll Types', 'Folder', '', 'small-folder', 1, 1, 0, 0, 1, 0
+
+			-- Payroll / Maintenance / Employees
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Employees' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Employees', 'Payroll', @PayrollMaintenanceId, 'Employees', 'Screen', '', 'small-screen', 1, 1, 0, 1, 2, 0
+
+			-- Payroll / Maintenance / Employee Pay Groups
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Employee Templates' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Employee Templates', 'Payroll', @PayrollMaintenanceId, 'Employee Templates', 'Screen', '', 'small-screen', 1, 1, 0, 1, 3, 0
+
+			-- Payroll / Maintenance / Employee Templates
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Employee Templates' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Employee Templates', 'Payroll', @PayrollMaintenanceId, 'Employee Templates', 'Screen', '', 'small-screen', 1, 1, 0, 1, 4, 0
+
+			GO
+
+			DECLARE @PayrollModuleId INT
+			DECLARE @PayrollMaintenanceId INT
+			DECLARE @PayrollTypesId INT
+	
+			SELECT @PayrollModuleId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Payroll' AND strModuleName = 'Payroll' AND intParentMenuID = 0
+			SELECT @PayrollMaintenanceId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollModuleId
+			SELECT @PayrollTypesId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Payroll Types' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceId
+
+				-- Payroll / Maintenance / Payroll Types / Tax Types
+				IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tax Types' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollTypesId)
+				INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Tax Types', 'Payroll', @PayrollTypesId, 'Tax Types', 'Screen', '', 'small-screen', 1, 1, 0, 1, 1, 0
+
+				-- Payroll / Maintenance / Payroll Types / Earning Types
+				IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Earning Types' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollTypesId)
+				INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Earning Types', 'Payroll', @PayrollTypesId, 'Earning Types', 'Screen', '', 'small-screen', 1, 1, 0, 1, 2, 0
+
+				-- Payroll / Maintenance / Payroll Types / Deduction Types
+				IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Deduction Types' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollTypesId)
+				INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Deduction Types', 'Payroll', @PayrollTypesId, 'Deduction Types', 'Screen', '', 'small-screen', 1, 1, 0, 1, 3, 0
+
+				-- Payroll / Maintenance / Payroll Types / Time Off Types
+				IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Time Off Types' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollTypesId)
+				INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Time Off Types', 'Payroll', @PayrollTypesId, 'Time Off Types', 'Screen', '', 'small-screen', 1, 1, 0, 1, 4, 0
+
 GO
