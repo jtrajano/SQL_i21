@@ -40,7 +40,7 @@ EXEC(
 				agsls_state = SUBSTRING(S.strState,1,2),
 				agsls_country = (CASE WHEN LEN(S.strCountry) = 3 THEN S.strCountry ELSE '''' END),
 				agsls_phone = SUBSTRING(S.strPhone,1,15),
-				agsls_dispatch_email = CASE WHEN S.strType = ''Email'' THEN ''Y'' ELSE ''N'' END,
+				agsls_dispatch_email = CASE WHEN S.strType = ''Email'' THEN ''E'' WHEN S.strType = ''Text'' THEN ''T'' WHEN S.strType = ''Both'' THEN ''B'' ELSE ''N'' END,
 				agsls_textmsg_email = SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEntity E
 				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntityId
@@ -75,7 +75,7 @@ EXEC(
 				SUBSTRING(S.strState,1,2),
 				(CASE WHEN LEN(S.strCountry) = 3 THEN S.strCountry ELSE '''' END),
 				SUBSTRING(S.strPhone,1,15),
-				CASE WHEN S.strType = ''Email'' THEN ''Y'' ELSE ''N'' END,
+				CASE WHEN S.strType = ''Email'' THEN ''E'' WHEN S.strType = ''Text'' THEN ''T'' WHEN S.strType = ''Both'' THEN ''B'' ELSE ''N'' END,
 				SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEntity E
 				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntityId
@@ -135,7 +135,7 @@ EXEC(
 				@strState = agsls_state,
 				@strCountry = agsls_country,
 				@strPhone = agsls_phone,
-				@strDispatchNotification = CASE WHEN agsls_dispatch_email = ''Y'' THEN ''Email'' ELSE ''Phone'' END,
+				@strDispatchNotification = CASE WHEN agsls_dispatch_email = ''E'' THEN ''Email'' WHEN agsls_dispatch_email = ''T'' THEN ''Text'' WHEN agsls_dispatch_email = ''B'' THEN ''Both'' ELSE '''' END,
 				@strTextMessage = agsls_textmsg_email
 			FROM agslsmst
 			WHERE agsls_slsmn_id = @originSalespersonId
@@ -340,7 +340,7 @@ EXEC(
 				@strState = ptsls_state,
 				@strCountry = (SELECT strCurrency FROM tblSMPreferences A INNER JOIN tblSMCurrency B ON A.strValue = B.intCurrencyID WHERE strPreference = ''defaultCurrency''),
 				@strPhone = ptsls_phone,
-				@strDispatchNotification = CASE WHEN ptsls_dispatch_email = ''Y'' THEN ''Email'' ELSE ''Phone'' END,
+				@strDispatchNotification = CASE WHEN ptsls_dispatch_email = ''Y'' THEN ''Email'' ELSE '''' END,
 				@strTextMessage = ptsls_textmsg_email
 			FROM ptslsmst
 			WHERE ptsls_slsmn_id = @originSalespersonId
