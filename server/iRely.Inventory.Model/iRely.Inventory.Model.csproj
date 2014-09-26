@@ -54,6 +54,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="InventoryEntities.cs" />
+    <Compile Include="Mappings\tblICDocumentMap.cs" />
+    <Compile Include="Mappings\tblICCertificationMap.cs" />
+    <Compile Include="Mappings\tblICItemVendorXrefMap.cs" />
+    <Compile Include="Mappings\tblICItemContractDocumentMap.cs" />
+    <Compile Include="Mappings\tblICItemContractMap.cs" />
+    <Compile Include="Mappings\tblICItemCustomerXrefMap.cs" />
+    <Compile Include="Mappings\tblICItemCertificationMap.cs" />
+    <Compile Include="Mappings\tblICItemUPCMap.cs" />
     <Compile Include="Mappings\tblICItemManufacturingMap.cs" />
     <Compile Include="Mappings\tblICItemPOSMap.cs" />
     <Compile Include="Mappings\tblICItemSalesMap.cs" />
@@ -85,6 +93,13 @@
     <Compile Include="Mappings\tblICUnitMeasureMap.cs" />
     <Compile Include="Mappings\tblICUnitTypeMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tables\tblICDocument.cs" />
+    <Compile Include="Tables\tblICCertification.cs" />
+    <Compile Include="Tables\tblICItemCertification.cs" />
+    <Compile Include="Tables\tblICItemContractDocument.cs" />
+    <Compile Include="Tables\tblICItemContract.cs" />
+    <Compile Include="Tables\tblICItemVendorXref.cs" />
+    <Compile Include="Tables\tblICItemCustomerXref.cs" />
     <Compile Include="Tables\tblICItemManufacturing.cs" />
     <Compile Include="Tables\tblICItemPOS.cs" />
     <Compile Include="Tables\tblICItemSales.cs" />
@@ -103,6 +118,7 @@
     <Compile Include="Tables\tblICFamily.cs" />
     <Compile Include="Tables\tblICFuelType.cs" />
     <Compile Include="Tables\tblICItem.cs" />
+    <Compile Include="Tables\tblICItemUPC.cs" />
     <Compile Include="Tables\tblICManufacturer.cs" />
     <Compile Include="Tables\tblICPatronageCategory.cs" />
     <Compile Include="Tables\tblICReasonCode.cs" />

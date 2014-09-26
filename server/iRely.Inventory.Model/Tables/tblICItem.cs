@@ -17,6 +17,11 @@ namespace iRely.Inventory.Model
             this.tblICItemSales = new tblICItemSales();
             this.tblICItemPOS = new tblICItemPOS();
             this.tblICItemManufacturing = new tblICItemManufacturing();
+            this.tblICItemUPCs = new List<tblICItemUPC>();
+            this.tblICItemVendorXrefs = new List<tblICItemVendorXref>();
+            this.tblICItemCustomerXrefs = new List<tblICItemCustomerXref>();
+            this.tblICItemContracts = new List<tblICItemContract>();
+            this.tblICItemCertifications = new List<tblICItemCertification>();
         }
 
         public int intItemId { get; set; }
@@ -35,6 +40,13 @@ namespace iRely.Inventory.Model
         public tblICItemPOS tblICItemPOS { get; set; }
         public tblICItemSales tblICItemSales { get; set; }
         public tblICItemManufacturing tblICItemManufacturing { get; set; }
+
+        public ICollection<tblICItemUPC> tblICItemUPCs { get; set; }
+        public ICollection<tblICItemVendorXref> tblICItemVendorXrefs { get; set; }
+        public ICollection<tblICItemCustomerXref> tblICItemCustomerXrefs { get; set; }
+        public ICollection<tblICItemContract> tblICItemContracts { get; set; }
+        public ICollection<tblICItemCertification> tblICItemCertifications { get; set; }
+
     }
 
     public class ItemVM : BaseEntity

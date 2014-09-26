@@ -38,6 +38,21 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblICItemManufacturing)
                 .WithRequired(p => p.tblICItem)
                 .WillCascadeOnDelete();
+            this.HasMany(p => p.tblICItemCertifications)
+                .WithRequired(p => p.tblICItem)
+                .HasForeignKey(p => p.intItemId);
+            this.HasMany(p => p.tblICItemContracts)
+                .WithRequired(p => p.tblICItem)
+                .HasForeignKey(p => p.intItemId);
+            this.HasMany(p => p.tblICItemCustomerXrefs)
+                .WithRequired(p => p.tblICItem)
+                .HasForeignKey(p => p.intItemId);
+            this.HasMany(p => p.tblICItemVendorXrefs)
+                .WithRequired(p => p.tblICItem)
+                .HasForeignKey(p => p.intItemId);
+            this.HasMany(p => p.tblICItemUPCs)
+                .WithRequired(p => p.tblICItem)
+                .HasForeignKey(p => p.intItemId);
         }
     }
 }
