@@ -343,4 +343,46 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intItemCertificationId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="451164a4-70ab-46d2-8ad6-a2ba7a8f89b4" ChangeDateTime="09/25/2014 06:55:22">
+    <Property Name="ElementName" Value="[dbo].[tblICItemDocument].[intItemDocumentId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemDocument]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intItemContractDocumentId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="cfbfd1b6-4ad0-449b-830c-623a7babed6f" ChangeDateTime="09/25/2014 06:55:54">
+    <Property Name="ElementName" Value="[dbo].[tblICItemContractDocument].[intItemId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemContractDocument]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intItemContractId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="f2e8106d-306e-476f-95f6-53e3c09fd305" ChangeDateTime="09/25/2014 06:56:33">
+    <Property Name="ElementName" Value="[dbo].[FK_tblICItemContractDocument_tblICItem]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemContractDocument]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblICItemContractDocument_tblICItemContract]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9a789038-6e47-4e30-832e-93b4f0203247" ChangeDateTime="09/25/2014 09:33:16">
+    <Property Name="ElementName" Value="[dbo].[tblICDocument].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICDocument]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDocumentId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="1b12f5cd-44c1-4adb-92a3-002b71dce0ac" ChangeDateTime="09/25/2014 09:38:33">
+    <Property Name="ElementName" Value="[dbo].[tblICCertification].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCertification]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCertificationId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="dcb645d9-065b-48bb-9fe9-dcbf183d900b" ChangeDateTime="09/25/2014 10:13:31">
+    <Property Name="ElementName" Value="[dbo].[tblICCertificationCommodity].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCertificationCommodity]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCertificationCommodityId" />
+  </Operation>
 </Operations>

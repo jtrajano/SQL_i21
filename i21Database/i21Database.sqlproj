@@ -716,8 +716,11 @@
     <Build Include="dbo\Tables\tblICItemCustomerXref.sql" />
     <Build Include="dbo\Tables\tblICItemVendorXref.sql" />
     <Build Include="dbo\Tables\tblICItemContract.sql" />
-    <Build Include="dbo\Tables\tblICItemDocument.sql" />
+    <Build Include="dbo\Tables\tblICItemContractDocument.sql" />
     <Build Include="dbo\Tables\tblICItemCertification.sql" />
+    <Build Include="dbo\Tables\tblICDocument.sql" />
+    <Build Include="dbo\Tables\tblICCertification.sql" />
+    <Build Include="dbo\Tables\tblICCertificationCommodity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -740,5 +743,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\HD\DefaultData\1_StatusData.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="i21Database.refactorlog" />
   </ItemGroup>
 </Project>

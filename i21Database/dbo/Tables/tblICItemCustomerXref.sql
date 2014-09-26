@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblICItemXref]
+﻿CREATE TABLE [dbo].[tblICItemCustomerXref]
 (
 	[intItemCustomerXrefId] INT NOT NULL IDENTITY , 
     [intItemId] INT NOT NULL, 
@@ -10,8 +10,8 @@
     [strPickTicketNotes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
-    CONSTRAINT [PK_tblICItemXref] PRIMARY KEY ([intItemCustomerXrefId]), 
-    CONSTRAINT [FK_tblICItemXref_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE
+    CONSTRAINT [PK_tblICItemCustomerXref] PRIMARY KEY ([intItemCustomerXrefId]), 
+    CONSTRAINT [FK_tblICItemCustomerXref_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE
 )
 
 GO
@@ -20,7 +20,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemXref',
+    @level1name = N'tblICItemCustomerXref',
     @level2type = N'COLUMN',
     @level2name = N'intItemCustomerXrefId'
 GO
@@ -29,7 +29,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemXref',
+    @level1name = N'tblICItemCustomerXref',
     @level2type = N'COLUMN',
     @level2name = N'intItemId'
 GO
@@ -38,7 +38,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemXref',
+    @level1name = N'tblICItemCustomerXref',
     @level2type = N'COLUMN',
     @level2name = N'intLocationId'
 GO
@@ -47,7 +47,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemXref',
+    @level1name = N'tblICItemCustomerXref',
     @level2type = N'COLUMN',
     @level2name = N'strStoreName'
 GO
@@ -56,7 +56,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemXref',
+    @level1name = N'tblICItemCustomerXref',
     @level2type = N'COLUMN',
     @level2name = N'intCustomerId'
 GO
@@ -65,7 +65,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemXref',
+    @level1name = N'tblICItemCustomerXref',
     @level2type = N'COLUMN',
     @level2name = N'strCustomerProduct'
 GO
@@ -74,7 +74,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemXref',
+    @level1name = N'tblICItemCustomerXref',
     @level2type = N'COLUMN',
     @level2name = N'strProductDescription'
 GO
@@ -83,7 +83,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemXref',
+    @level1name = N'tblICItemCustomerXref',
     @level2type = N'COLUMN',
     @level2name = N'strPickTicketNotes'
 GO
@@ -92,7 +92,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemXref',
+    @level1name = N'tblICItemCustomerXref',
     @level2type = N'COLUMN',
     @level2name = N'intSort'
 GO
@@ -101,6 +101,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemXref',
+    @level1name = N'tblICItemCustomerXref',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'

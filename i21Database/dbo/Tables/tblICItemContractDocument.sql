@@ -1,12 +1,12 @@
-﻿CREATE TABLE [dbo].[tblICItemDocument]
+﻿CREATE TABLE [dbo].[tblICItemContractDocument]
 (
-	[intItemDocumentId] INT NOT NULL IDENTITY , 
-    [intItemId] INT NOT NULL, 
+	[intItemContractDocumentId] INT NOT NULL IDENTITY , 
+    [intItemContractId] INT NOT NULL, 
     [intDocumentId] INT NOT NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
-    CONSTRAINT [PK_tblICItemDocument] PRIMARY KEY ([intItemDocumentId]), 
-    CONSTRAINT [FK_tblICItemDocument_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE
+    CONSTRAINT [PK_tblICItemContractDocument] PRIMARY KEY ([intItemContractDocumentId]), 
+    CONSTRAINT [FK_tblICItemContractDocument_tblICItemContract] FOREIGN KEY ([intItemContractId]) REFERENCES [tblICItemContract]([intItemContractId]) ON DELETE CASCADE
 )
 
 GO
@@ -15,25 +15,25 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemDocument',
+    @level1name = N'tblICItemContractDocument',
     @level2type = N'COLUMN',
-    @level2name = N'intItemDocumentId'
+    @level2name = 'intItemContractDocumentId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Item Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemDocument',
+    @level1name = N'tblICItemContractDocument',
     @level2type = N'COLUMN',
-    @level2name = N'intItemId'
+    @level2name = N'intItemContractId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Document Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemDocument',
+    @level1name = N'tblICItemContractDocument',
     @level2type = N'COLUMN',
     @level2name = N'intDocumentId'
 GO
@@ -42,7 +42,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemDocument',
+    @level1name = N'tblICItemContractDocument',
     @level2type = N'COLUMN',
     @level2name = N'intSort'
 GO
@@ -51,6 +51,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemDocument',
+    @level1name = N'tblICItemContractDocument',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
