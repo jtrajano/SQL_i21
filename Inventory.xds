@@ -3,8 +3,8 @@
     "settings": {
         "cmd": {
             "license": "commercial",
-            "cmdVersion": "",
-            "frameworkVersion": ""
+            "cmdVersion": "5.0.3.276",
+            "frameworkVersion": "5.0.1.1189"
         },
         "canvasControls": {
             "viewportSize": {
@@ -26,12 +26,15 @@
         "displayfield-ExtBox1-1274-inputEl": "Not Installed"
     },
     "xdsVersion": "3.1.0",
-    "xdsBuild": 1851,
+    "xdsBuild": 1903,
     "schemaVersion": 1,
     "upgradeVersion": 300000000007,
     "framework": "ext50",
     "viewOrderMap": {
         "view": [
+            "b6b8ef41-1eb1-4854-99ef-98f5a7167844",
+            "4e81f799-6980-4efd-a2ee-8e17055d2f96",
+            "a35270da-22af-41fa-b006-dae28ad44b5e",
             "0238f216-c40b-4ac3-973a-d7678b8cdfd2",
             "34637c7f-7957-483e-ac17-7684a7e7de3d",
             "1ce04bda-5824-4e13-b083-14c556cbf61a",

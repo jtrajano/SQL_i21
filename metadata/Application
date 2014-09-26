@@ -19,7 +19,8 @@
             "ManufacturingCell",
             "FactoryUnitType",
             "ItemSubstitution",
-            "FactoryUnit"
+            "FactoryUnit",
+            "InventoryReceipt"
         ]
     },
     "name": "Application",

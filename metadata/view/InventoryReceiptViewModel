@@ -1,0 +1,14 @@
+{
+    "type": "Ext.app.ViewModel",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "inventoryreceipt",
+        "designer|userClassName": "InventoryReceiptViewModel"
+    },
+    "name": "PurchaseOrderViewModel1",
+    "designerId": "4e81f799-6980-4efd-a2ee-8e17055d2f96"
+}
