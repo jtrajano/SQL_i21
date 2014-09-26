@@ -10,14 +10,14 @@
       ,pro.strProduct
       ,mo.strModule
       ,ver.strVersionNo
-      ,strCreateBy = (select top 1 strUserName from tblEntityCredential where intEntityId = tic.intCreatedUserEntityId)
+      ,strCreateBy = (select top 1 strName from tblEntity where intEntityId = tic.intCreatedUserEntityId)
       ,tic.dtmCreated
       ,tic.dtmLastModified
       ,strCustomer = tic.strCustomerNumber
-      ,strAssignedTo = (select top 1 strUserName from tblEntityCredential where intEntityId = tic.intAssignedToEntity)
+      ,strAssignedTo = (select top 1 strName from tblEntity where intEntityId = tic.intAssignedToEntity)
       ,tic.intConcurrencyId
 	  ,intAssignToEntity = tic.intAssignedToEntity
-	  ,strContactName = (select top 1 strUserName from tblEntityCredential where intEntityId = tic.intCustomerContactId)
+	  ,strContactName = (select top 1 strName from tblEntity where intEntityId = tic.intCustomerContactId)
 	  ,tic.intCustomerContactId
   from
       tblHDTicket tic
