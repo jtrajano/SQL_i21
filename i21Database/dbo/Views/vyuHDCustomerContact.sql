@@ -12,6 +12,8 @@
 		,el.strLocationName
 		,ec.strTimezone
 		,intConcurrencyId = 1
+		,intTicketProductId = (select top 1 intProductId from tblARCustomerProductVersion where intCustomerId = c.intCustomerId)
+		,intVersionId = (select top 1 intVersionId from tblARCustomerProductVersion where intCustomerId = c.intCustomerId)
 	  from
 		tblEntityContact ec
 		inner join tblARCustomerToContact etc on etc.intContactId = ec.intContactId
