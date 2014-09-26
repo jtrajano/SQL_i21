@@ -22,9 +22,12 @@ GO
 			,vwcnt_alt_cnt_no=agcnt_alt_cnt_no
 			,vwcnt_amt_orig=agcnt_amt_orig
 			,vwcnt_amt_bal=agcnt_amt_bal
-			,vwcnt_due_rev_dt= CONVERT(DATETIME, SUBSTRING(CAST(agcnt_due_rev_dt AS NVARCHAR(8)),1,4) + ''/'' 
+			,vwcnt_due_rev_dt= (CASE WHEN agcnt_due_rev_dt = 0 THEN NULL 
+								ELSE
+									CONVERT(DATETIME, SUBSTRING(CAST(agcnt_due_rev_dt AS NVARCHAR(8)),1,4) + ''/'' 
 											+ SUBSTRING(CAST(agcnt_due_rev_dt AS NVARCHAR(8)),5,2) + ''/'' 
 											+  SUBSTRING(CAST(agcnt_due_rev_dt AS NVARCHAR(8)),7,2), 101) -- yyy/mm/dd
+								END)
 			,vwcnt_hdr_comments=agcnt_hdr_comments
 			,vwcnt_un_orig=agcnt_un_orig
 			,vwcnt_un_bal=agcnt_un_bal
@@ -61,9 +64,12 @@ BEGIN
 			,vwcnt_alt_cnt_no=CAST(ptcnt_alt_cnt_no AS CHAR(8)) 
 			,vwcnt_amt_orig=ptcnt_amt_orig
 			,vwcnt_amt_bal=ptcnt_amt_bal
-			,vwcnt_due_rev_dt= CONVERT(DATETIME, SUBSTRING(CAST(ptcnt_due_rev_dt AS NVARCHAR(8)),1,4) + ''/'' 
+			,vwcnt_due_rev_dt= (CASE WHEN ptcnt_due_rev_dt = 0 THEN NULL 
+								ELSE
+									CONVERT(DATETIME, SUBSTRING(CAST(ptcnt_due_rev_dt AS NVARCHAR(8)),1,4) + ''/'' 
 											+ SUBSTRING(CAST(ptcnt_due_rev_dt AS NVARCHAR(8)),5,2) + ''/'' 
 											+  SUBSTRING(CAST(ptcnt_due_rev_dt AS NVARCHAR(8)),7,2), 101) -- yyy/mm/dd
+								END)
 			,vwcnt_hdr_comments=ptcnt_hdr_comments
 			,vwcnt_un_orig=ptcnt_un_orig
 			,vwcnt_un_bal=ptcnt_un_bal
