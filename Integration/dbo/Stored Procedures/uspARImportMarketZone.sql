@@ -28,7 +28,7 @@ GO
 		BEGIN
 			UPDATE gamktmst
 				SET 
-				gamkt_key = MktZone.strMarketZoneCode,
+				gamkt_key = SUBSTRING(MktZone.strMarketZoneCode,1,3),
 				gamkt_desc = SUBSTRING(MktZone.strDescription,1,20)
 			FROM tblARMarketZone MktZone
 				WHERE strMarketZoneCode = @MarketZoneCode AND gamkt_key = @MarketZoneCode
@@ -40,7 +40,7 @@ GO
 				gamkt_desc
 			)
 			SELECT 
-				strMarketZoneCode,
+				SUBSTRING(MktZone.strMarketZoneCode,1,3),
 				SUBSTRING(strDescription,1,20)
 			FROM tblARMarketZone
 			WHERE strMarketZoneCode = @MarketZoneCode
