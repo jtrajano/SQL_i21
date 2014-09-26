@@ -11,7 +11,9 @@
     [strLotTracking] NVARCHAR(50) NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 
-    CONSTRAINT [PK_tblICItem] PRIMARY KEY ([intItemId])
+    CONSTRAINT [PK_tblICItem] PRIMARY KEY ([intItemId]), 
+    CONSTRAINT [FK_tblICItem_tblICManufacturer] FOREIGN KEY ([intManufacturerId]) REFERENCES [tblICManufacturer]([intManufacturerId]), 
+    CONSTRAINT [FK_tblICItem_tblICCategory] FOREIGN KEY ([intTrackingId]) REFERENCES [tblICCategory]([intCategoryId])
 );
 GO
 

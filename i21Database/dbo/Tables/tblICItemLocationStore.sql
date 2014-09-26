@@ -57,6 +57,8 @@
 	CONSTRAINT [FK_tblICItemLocationStore_tblICUnitMeasure_Default] FOREIGN KEY ([intDefaultUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 	CONSTRAINT [FK_tblICItemLocationStore_tblICUnitMeasure_Issue] FOREIGN KEY ([intIssueUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 	CONSTRAINT [FK_tblICItemLocationStore_tblICUnitMeasure_Receive] FOREIGN KEY ([intDefaultUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
-    CONSTRAINT [PK_tblICItemLocationStore] PRIMARY KEY ([intItemLocationStoreId]),
-
+    CONSTRAINT [PK_tblICItemLocationStore] PRIMARY KEY ([intItemLocationStoreId]), 
+    CONSTRAINT [FK_tblICItemLocationStore_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intVendorId]), 
+    CONSTRAINT [FK_tblICItemLocationStore_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]),
+	CONSTRAINT [FK_tblICItemLocationStore_tblAPVendorFreight] FOREIGN KEY ([intFreightVendorId]) REFERENCES [tblAPVendor]([intVendorId])
 )

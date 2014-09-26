@@ -33,8 +33,8 @@
     [intPatronageCategoryDirectId] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICCommodity] PRIMARY KEY ([intCommodityId]), 
-    CONSTRAINT [FK_tblICCommodity_tblICPatronageCategory1] FOREIGN KEY ([intPatronageCategoryId]) REFERENCES [tblICPatronageCategory]([intPatronageCategoryId]),
-	CONSTRAINT [FK_tblICCommodity_tblICPatronageCategory2] FOREIGN KEY ([intPatronageCategoryDirectId]) REFERENCES [tblICPatronageCategory]([intPatronageCategoryId]) 
+    CONSTRAINT [FK_tblICCommodity_tblICPatronageCategory] FOREIGN KEY ([intPatronageCategoryId]) REFERENCES [tblICPatronageCategory]([intPatronageCategoryId]),
+	CONSTRAINT [FK_tblICCommodity_tblICPatronageCategoryDirect] FOREIGN KEY ([intPatronageCategoryDirectId]) REFERENCES [tblICPatronageCategory]([intPatronageCategoryId]) 
 )
 
 GO

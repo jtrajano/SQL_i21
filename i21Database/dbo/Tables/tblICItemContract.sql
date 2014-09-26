@@ -15,7 +15,9 @@
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICItemContract] PRIMARY KEY ([intItemContractId]), 
-    CONSTRAINT [FK_tblICItemContract_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE
+    CONSTRAINT [FK_tblICItemContract_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
+    CONSTRAINT [FK_tblICItemContract_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
+    CONSTRAINT [FK_tblICItemContract_tblSMCountry] FOREIGN KEY ([intCountryId]) REFERENCES [tblSMCountry]([intCountryID])
 )
 
 GO

@@ -6,7 +6,8 @@
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICItemCertification] PRIMARY KEY ([intItemCertificationId]), 
-    CONSTRAINT [FK_tblICItemCertification_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE
+    CONSTRAINT [FK_tblICItemCertification_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
+    CONSTRAINT [FK_tblICItemCertification_tblICCertification] FOREIGN KEY ([intCertificationId]) REFERENCES [tblICCertification]([intCertificationId])
 )
 
 GO

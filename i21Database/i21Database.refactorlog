@@ -385,4 +385,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intCertificationCommodityId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="56935c5a-05f9-4209-b872-6028526e6d62" ChangeDateTime="09/26/2014 01:53:15">
+    <Property Name="ElementName" Value="[dbo].[FK_tblICCommodity_tblICPatronageCategory1]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCommodity]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblICCommodity_tblICPatronageCategory]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e0741ff8-f468-4817-9685-356fbc0d0f1a" ChangeDateTime="09/26/2014 01:56:52">
+    <Property Name="ElementName" Value="[dbo].[FK_tblICCommodity_tblICPatronageCategory2]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCommodity]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblICCommodity_tblICPatronageCategoryDirect]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c990241b-fb08-4357-9e3d-945f31ae9d7c" ChangeDateTime="09/26/2014 02:34:07">
+    <Property Name="ElementName" Value="[dbo].[FK_tblICUnitType_tblICUnitMeasure1]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICUnitType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblICUnitType_tblICUnitMeasureCapacity]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="df8748f5-604a-49c6-8873-6756ca8e820d" ChangeDateTime="09/26/2014 02:34:43">
+    <Property Name="ElementName" Value="[dbo].[FK_tblICUnitType_tblICUnitMeasure2]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICUnitType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblICUnitType_tblICUnitMeasureDimension]" />
+  </Operation>
 </Operations>

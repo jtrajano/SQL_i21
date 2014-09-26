@@ -8,7 +8,8 @@
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICItemUPC] PRIMARY KEY ([intItemUPCId]), 
-    CONSTRAINT [FK_tblICItemUPC_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE
+    CONSTRAINT [FK_tblICItemUPC_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
+    CONSTRAINT [FK_tblICItemUPC_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
 )
 
 GO

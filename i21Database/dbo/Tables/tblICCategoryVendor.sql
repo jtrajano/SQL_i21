@@ -15,10 +15,8 @@
     [strComments] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICCategoryVendor] PRIMARY KEY ([intCategoryVendorId]), 
-    CONSTRAINT [FK_tblICCategoryVendor_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]),
-	CONSTRAINT [FK_tblICCategoryVendor_tblICFamily] FOREIGN KEY ([intFamilyId]) REFERENCES [tblICFamily]([intFamilyId]),
-	CONSTRAINT [FK_tblICCategoryVendor_tblICClass1] FOREIGN KEY ([intSellClassId]) REFERENCES [tblICClass]([intClassId]),
-	CONSTRAINT [FK_tblICCategoryVendor_tblICClass2] FOREIGN KEY ([intOrderClassId]) REFERENCES [tblICClass]([intClassId])
+    CONSTRAINT [FK_tblICCategoryVendor_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]), 
+    CONSTRAINT [FK_tblICCategoryVendor_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intVendorId])
 )
 
 GO

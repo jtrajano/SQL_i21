@@ -54,7 +54,12 @@
     [ysnYieldAdjustment] BIT NULL DEFAULT ((0)), 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICCategory] PRIMARY KEY ([intCategoryId]), 
-    CONSTRAINT [AK_tblICCategory_strCategoryCode] UNIQUE ([strCategoryCode]) 
+    CONSTRAINT [AK_tblICCategory_strCategoryCode] UNIQUE ([strCategoryCode]), 
+    CONSTRAINT [FK_tblICCategory_tblICCatalog] FOREIGN KEY ([intCatalogGroupId]) REFERENCES [tblICCatalog]([intCatalogId]),
+	CONSTRAINT [FK_tblICCategory_tblICUnitMeasure] FOREIGN KEY ([intUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+	CONSTRAINT [FK_tblICCategory_MaterialItem] FOREIGN KEY ([intMaterialItemId]) REFERENCES [tblICItem]([intItemId]),
+	CONSTRAINT [FK_tblICCategory_FreightItem] FOREIGN KEY ([intFreightItemId]) REFERENCES [tblICItem]([intItemId])
+	
 )
 
 GO

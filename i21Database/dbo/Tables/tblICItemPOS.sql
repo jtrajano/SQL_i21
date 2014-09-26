@@ -20,7 +20,9 @@
     [strSpecialCommission] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICItemPOS] PRIMARY KEY ([intItemId]), 
-    CONSTRAINT [FK_tblICItemPOS_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) 
+    CONSTRAINT [FK_tblICItemPOS_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
+    CONSTRAINT [FK_tblICItemPOS_CaseUOM] FOREIGN KEY ([intCaseUOM]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
+    CONSTRAINT [FK_tblICItemPOS_tblICCategory] FOREIGN KEY ([intAGCategory]) REFERENCES [tblICCategory]([intCategoryId]) 
 )
 
 GO

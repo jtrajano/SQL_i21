@@ -9,7 +9,11 @@
     [dtmDateEffective] DATETIME NOT NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
-    CONSTRAINT [PK_tblICCertificationCommodity] PRIMARY KEY ([intCertificationCommodityId]) 
+    CONSTRAINT [PK_tblICCertificationCommodity] PRIMARY KEY ([intCertificationCommodityId]), 
+    CONSTRAINT [FK_tblICCertificationCommodity_tblICCertification] FOREIGN KEY ([intCertificationId]) REFERENCES [tblICCertification]([intCertificationId]), 
+    CONSTRAINT [FK_tblICCertificationCommodity_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]), 
+    CONSTRAINT [FK_tblICCertificationCommodity_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]), 
+    CONSTRAINT [FK_tblICCertificationCommodity_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]) 
 )
 
 GO
