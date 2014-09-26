@@ -1,4 +1,4 @@
-describe("Item View Controller", function() {
+describe("Patronage  Category View Controller", function() {
     "use strict";
 
     var controller;
