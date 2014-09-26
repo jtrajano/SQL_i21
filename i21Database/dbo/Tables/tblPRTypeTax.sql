@@ -12,7 +12,6 @@
 	[intExpenseAccountId] INT NULL,
 	[intTaxAgencyId] INT NULL,
 	[strCheckLiteral] [nvarchar](50) NOT NULL,
-	[ysnCreatePayable] [bit]  NOT NULL DEFAULT ((0)),
 	[intVendorId] INT NULL,
 	[intSort] INT NULL,
 	[intConcurrencyId] INT NULL DEFAULT ((1)), 
@@ -158,14 +157,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Create Payable',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPRTypeTax',
-    @level2type = N'COLUMN',
-    @level2name = N'ysnCreatePayable'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Vendor Id',
