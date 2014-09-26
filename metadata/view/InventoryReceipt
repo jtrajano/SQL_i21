@@ -465,9 +465,9 @@
                                         "layout": "hbox",
                                         "layout|flex": null,
                                         "layout|margins": null,
-                                        "margin": "0 0 10 0"
+                                        "margin": "0 0 15 0"
                                     },
-                                    "name": "MyContainer4",
+                                    "name": "MyContainer",
                                     "designerId": "60b5f727-88c1-4ab4-89bf-3404e8c4ec57",
                                     "cn": [
                                         {
@@ -620,7 +620,7 @@
                                                 "labelWidth": 80,
                                                 "layout|flex": 1,
                                                 "layout|margins": null,
-                                                "margin": "0 5",
+                                                "margin": null,
                                                 "name": null,
                                                 "readOnly": null,
                                                 "width": null
@@ -637,13 +637,13 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "displayField": null,
-                                                "fieldLabel": "Warehouse/Store",
+                                                "fieldLabel": "Warehouse",
                                                 "itemId": "cboWarehouse",
                                                 "labelAlign": "top",
                                                 "labelWidth": 105,
                                                 "layout|flex": 1,
                                                 "layout|margins": null,
-                                                "margin": null,
+                                                "margin": "0 5",
                                                 "name": null,
                                                 "queryMode": null,
                                                 "readOnly": null,
@@ -668,7 +668,7 @@
                                                 "labelAlign": "top",
                                                 "labelWidth": 105,
                                                 "layout|flex": null,
-                                                "margin": "0 0 0 5",
+                                                "margin": null,
                                                 "name": null,
                                                 "readOnly": true,
                                                 "width": 100
@@ -1121,7 +1121,7 @@
                                         "designer|createAlias": "advancefiltergrid",
                                         "dock": null,
                                         "itemId": "grdInventoryReceipt",
-                                        "layout|flex": 1,
+                                        "layout|flex": 1.2,
                                         "layout|margins": null,
                                         "margin": "7 0 0 0",
                                         "title": null
@@ -1498,7 +1498,7 @@
                                         "layout|flex": 1,
                                         "layout|margins": null,
                                         "margin": "7 0 0 0",
-                                        "title": "Lot Tracking"
+                                        "title": null
                                     },
                                     "name": "MyGridPanel",
                                     "designerId": "1e1463bb-0e43-4e6d-bc4b-57e5f4481d42",
@@ -1519,6 +1519,35 @@
                                             "designerId": "4d98d874-488b-4be8-a49b-d49331403ac4",
                                             "cn": [
                                                 {
+                                                    "type": "Ext.form.Label",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "layout|flex": null,
+                                                        "margin": "0 7 0 5",
+                                                        "text": "Lot Tracking"
+                                                    },
+                                                    "name": "MyLabel2",
+                                                    "designerId": "fe86f567-023a-44c6-a4c2-c748f9cd937d"
+                                                },
+                                                {
+                                                    "type": "Ext.toolbar.Separator",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "designer|displayName": "separator",
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MySeparator1",
+                                                    "designerId": "b271bcbe-2681-41fc-8199-de44c2dc25c8"
+                                                },
+                                                {
                                                     "type": "Ext.button.Button",
                                                     "reference": {
                                                         "name": "items",
@@ -1530,6 +1559,7 @@
                                                         "iconCls": "small-edit",
                                                         "itemId": "btnEditInventoryReceipt",
                                                         "layout|flex": null,
+                                                        "margin": "0 0 0 5",
                                                         "tabIndex": -1,
                                                         "text": "Edit"
                                                     },
@@ -2237,6 +2267,20 @@
                             ]
                         }
                     ]
+                },
+                {
+                    "type": "linkedinstance",
+                    "reference": {
+                        "name": "dockedItems",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "dock": "bottom"
+                    },
+                    "name": "statusbarpaging1",
+                    "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
+                    "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
             ]
         }

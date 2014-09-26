@@ -20,8 +20,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
     requires: [
         'Inventory.view.InventoryReceiptViewModel',
         'Inventory.view.Filter',
+        'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
-        'Ext.toolbar.Toolbar',
         'Ext.toolbar.Separator',
         'Ext.tab.Panel',
         'Ext.tab.Tab',
@@ -31,7 +31,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
         'Ext.selection.CheckboxModel',
         'Ext.grid.column.Number',
         'Ext.grid.plugin.CellEditing',
-        'Ext.grid.View'
+        'Ext.grid.View',
+        'Ext.form.Label',
+        'Ext.toolbar.Paging'
     ],
 
     viewModel: {
@@ -226,6 +228,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                         text: 'Close'
                                     }
                                 ]
+                            },
+                            {
+                                xtype: 'statusbarpaging1',
+                                dock: 'bottom'
                             }
                         ],
                         items: [
@@ -246,7 +252,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                         items: [
                                             {
                                                 xtype: 'container',
-                                                margin: '0 0 10 0',
+                                                margin: '0 0 15 0',
                                                 layout: {
                                                     type: 'hbox',
                                                     align: 'stretch'
@@ -307,7 +313,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         xtype: 'combobox',
                                                         flex: 1,
                                                         itemId: 'cboLocation',
-                                                        margin: '0 5',
                                                         fieldLabel: 'Location',
                                                         labelAlign: 'top',
                                                         labelWidth: 80
@@ -316,14 +321,14 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         xtype: 'combobox',
                                                         flex: 1,
                                                         itemId: 'cboWarehouse',
-                                                        fieldLabel: 'Warehouse/Store',
+                                                        margin: '0 5',
+                                                        fieldLabel: 'Warehouse',
                                                         labelAlign: 'top',
                                                         labelWidth: 105
                                                     },
                                                     {
                                                         xtype: 'textfield',
                                                         itemId: 'txtReceiptNumber',
-                                                        margin: '0 0 0 5',
                                                         width: 100,
                                                         fieldLabel: 'Receipt No',
                                                         labelAlign: 'top',
@@ -466,7 +471,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                             },
                                             {
                                                 xtype: 'advancefiltergrid',
-                                                flex: 1,
+                                                flex: 1.2,
                                                 itemId: 'grdInventoryReceipt',
                                                 margin: '7 0 0 0',
                                                 dockedItems: [
@@ -608,7 +613,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                 flex: 1,
                                                 itemId: 'grdLotTracking',
                                                 margin: '7 0 0 0',
-                                                title: 'Lot Tracking',
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
@@ -620,9 +624,18 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         },
                                                         items: [
                                                             {
+                                                                xtype: 'label',
+                                                                margin: '0 7 0 5',
+                                                                text: 'Lot Tracking'
+                                                            },
+                                                            {
+                                                                xtype: 'tbseparator'
+                                                            },
+                                                            {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
                                                                 itemId: 'btnEditInventoryReceipt',
+                                                                margin: '0 0 0 5',
                                                                 iconCls: 'small-edit',
                                                                 text: 'Edit'
                                                             },
