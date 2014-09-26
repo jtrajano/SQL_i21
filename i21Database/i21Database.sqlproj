@@ -619,6 +619,7 @@
     <Build Include="dbo\Tables\tblRMDefaultFilter.sql" />
     <Build Include="dbo\Tables\tblRMDefaultOption.sql" />
     <Build Include="dbo\Tables\tblRMDefaultSort.sql" />
+    <Build Include="dbo\Tables\tblARCustomerProductVersion.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
