@@ -12,6 +12,8 @@
 		,el.strLocationName
 		,ec.strTimezone
 		,intConcurrencyId = 1
+		,intTicketProductId = null
+		,intVersionId = null
 	  from
 		tblEntityContact ec
 		inner join tblARCustomerToContact etc on etc.intContactId = ec.intContactId
