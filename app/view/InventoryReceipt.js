@@ -31,8 +31,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
         'Ext.selection.CheckboxModel',
         'Ext.grid.column.Number',
         'Ext.grid.plugin.CellEditing',
-        'Ext.grid.View',
-        'Ext.form.field.Number'
+        'Ext.grid.View'
     ],
 
     viewModel: {
@@ -247,7 +246,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                         items: [
                                             {
                                                 xtype: 'container',
-                                                margin: '0 0 5 0',
+                                                margin: '0 0 10 0',
                                                 layout: {
                                                     type: 'hbox',
                                                     align: 'stretch'
@@ -256,33 +255,49 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     {
                                                         xtype: 'combobox',
                                                         flex: 1,
-                                                        itemId: 'cboVendorId',
-                                                        fieldLabel: 'Vendor ID',
-                                                        labelAlign: 'top',
-                                                        labelWidth: 80,
-                                                        displayField: 'strVendorId'
-                                                    },
-                                                    {
-                                                        xtype: 'textfield',
-                                                        flex: 1,
-                                                        itemId: 'txtPurchaseOrderNo',
-                                                        margin: '0 5',
-                                                        fieldLabel: 'Receipt No',
-                                                        labelAlign: 'top',
-                                                        labelWidth: 105,
-                                                        readOnly: true
-                                                    },
-                                                    {
-                                                        xtype: 'datefield',
-                                                        itemId: 'dtmDate',
-                                                        width: 100,
-                                                        fieldLabel: 'Date',
+                                                        itemId: 'cboReceiptAgainst',
+                                                        fieldLabel: 'Receipt Against',
                                                         labelAlign: 'top',
                                                         labelWidth: 80
                                                     },
                                                     {
                                                         xtype: 'combobox',
+                                                        flex: 1,
+                                                        itemId: 'cboReferenceNumber',
+                                                        margin: '0 5',
+                                                        fieldLabel: 'Reference No',
+                                                        labelAlign: 'top',
+                                                        labelWidth: 80
+                                                    },
+                                                    {
+                                                        xtype: 'combobox',
+                                                        flex: 1,
+                                                        itemId: 'cboVendorID',
+                                                        fieldLabel: 'Vendor ID',
+                                                        labelAlign: 'top',
+                                                        labelWidth: 80
+                                                    },
+                                                    {
+                                                        xtype: 'textfield',
+                                                        flex: 1,
+                                                        itemId: 'txtVendorName',
+                                                        margin: '0 5',
+                                                        fieldLabel: 'Vendor Name',
+                                                        labelAlign: 'top',
+                                                        labelWidth: 80
+                                                    },
+                                                    {
+                                                        xtype: 'datefield',
+                                                        itemId: 'dtmReceiptDate',
+                                                        width: 80,
+                                                        fieldLabel: 'Receipt Date',
+                                                        labelAlign: 'top',
+                                                        labelWidth: 75
+                                                    },
+                                                    {
+                                                        xtype: 'combobox',
                                                         itemId: 'cboCurrency',
+                                                        margin: '0 5',
                                                         width: 60,
                                                         fieldLabel: 'Currency',
                                                         labelAlign: 'top',
@@ -291,16 +306,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     {
                                                         xtype: 'combobox',
                                                         flex: 1,
-                                                        itemId: 'cboOrderStatus',
-                                                        margin: '0 5',
-                                                        fieldLabel: 'Store ID',
-                                                        labelAlign: 'top',
-                                                        labelWidth: 80
-                                                    },
-                                                    {
-                                                        xtype: 'combobox',
-                                                        flex: 1,
-                                                        itemId: 'cboOrderStatus1',
+                                                        itemId: 'cboLocation',
                                                         margin: '0 5',
                                                         fieldLabel: 'Location',
                                                         labelAlign: 'top',
@@ -309,10 +315,20 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     {
                                                         xtype: 'combobox',
                                                         flex: 1,
-                                                        itemId: 'cboTransactionType',
-                                                        fieldLabel: 'Warehouse',
+                                                        itemId: 'cboWarehouse',
+                                                        fieldLabel: 'Warehouse/Store',
                                                         labelAlign: 'top',
                                                         labelWidth: 105
+                                                    },
+                                                    {
+                                                        xtype: 'textfield',
+                                                        itemId: 'txtReceiptNumber',
+                                                        margin: '0 0 0 5',
+                                                        width: 100,
+                                                        fieldLabel: 'Receipt No',
+                                                        labelAlign: 'top',
+                                                        labelWidth: 105,
+                                                        readOnly: true
                                                     }
                                                 ]
                                             },
@@ -334,25 +350,19 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         items: [
                                                             {
                                                                 xtype: 'textfield',
-                                                                itemId: 'txtOrderedBy',
+                                                                itemId: 'txtBlanketReleaseNumber',
                                                                 fieldLabel: 'Blanket Release No',
                                                                 labelWidth: 110
                                                             },
                                                             {
                                                                 xtype: 'textfield',
-                                                                itemId: 'cboApprovedBy',
-                                                                fieldLabel: 'Storage Bin',
-                                                                labelWidth: 110
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtLocation',
+                                                                itemId: 'txtVendorRefNumber',
                                                                 fieldLabel: 'Vendor Ref No',
                                                                 labelWidth: 110
                                                             },
                                                             {
                                                                 xtype: 'textfield',
-                                                                itemId: 'txtOrderNo',
+                                                                itemId: 'txtBillOfLadingNumber',
                                                                 fieldLabel: 'Bill of Lading No',
                                                                 labelWidth: 110
                                                             }
@@ -369,28 +379,22 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         items: [
                                                             {
                                                                 xtype: 'textfield',
-                                                                itemId: 'cboApAccount',
-                                                                fieldLabel: 'Receipt Sequence No',
-                                                                labelWidth: 125
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtFob1',
+                                                                itemId: 'txtProductOrigin',
                                                                 width: 200,
                                                                 fieldLabel: 'Product Origin',
-                                                                labelWidth: 125
+                                                                labelWidth: 105
                                                             },
                                                             {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtLocation1',
+                                                                xtype: 'combobox',
+                                                                itemId: 'cboReceiver',
                                                                 fieldLabel: 'Receiver',
-                                                                labelWidth: 125
+                                                                labelWidth: 105
                                                             },
                                                             {
                                                                 xtype: 'textfield',
-                                                                itemId: 'txtOrderNo1',
+                                                                itemId: 'txtVessel',
                                                                 fieldLabel: 'Vessel',
-                                                                labelWidth: 125
+                                                                labelWidth: 105
                                                             }
                                                         ]
                                                     },
@@ -405,26 +409,20 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         items: [
                                                             {
                                                                 xtype: 'combobox',
-                                                                itemId: 'cboApAccount',
+                                                                itemId: 'cboFreightTerms',
                                                                 fieldLabel: 'Freight Terms',
                                                                 labelWidth: 110
                                                             },
                                                             {
                                                                 xtype: 'textfield',
-                                                                itemId: 'txtFob',
+                                                                itemId: 'txtFobPoint',
                                                                 fieldLabel: 'FOB Point',
                                                                 labelWidth: 110
                                                             },
                                                             {
                                                                 xtype: 'textfield',
-                                                                itemId: 'txtFob1',
+                                                                itemId: 'txtDeliveryPoint',
                                                                 fieldLabel: 'Delivery Point',
-                                                                labelWidth: 110
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtFob2',
-                                                                fieldLabel: 'Allocate Freight',
                                                                 labelWidth: 110
                                                             }
                                                         ]
@@ -440,13 +438,19 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         items: [
                                                             {
                                                                 xtype: 'textfield',
-                                                                itemId: 'txtFob3',
+                                                                itemId: 'txtAllocateFreight',
+                                                                fieldLabel: 'Allocate Freight',
+                                                                labelWidth: 110
+                                                            },
+                                                            {
+                                                                xtype: 'textfield',
+                                                                itemId: 'txtFreightBilledBy',
                                                                 fieldLabel: 'Freight Billed By',
                                                                 labelWidth: 110
                                                             },
                                                             {
                                                                 xtype: 'textfield',
-                                                                itemId: 'txtFob4',
+                                                                itemId: 'txtShiftNumber',
                                                                 fieldLabel: 'Shift Number',
                                                                 labelWidth: 110
                                                             }
@@ -456,6 +460,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                             },
                                             {
                                                 xtype: 'textfield',
+                                                itemId: 'txtNotes',
                                                 fieldLabel: 'Notes',
                                                 labelWidth: 110
                                             },
@@ -503,8 +508,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'strItemNo',
                                                         width: 100,
+                                                        dataIndex: 'strItemNo',
                                                         text: 'Item No.'
                                                     },
                                                     {
@@ -523,10 +528,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
-                                                        dataIndex: 'dblQtyOrdered',
                                                         itemId: 'colQtyOrdered',
                                                         width: 80,
                                                         align: 'right',
+                                                        dataIndex: 'dblQtyOrdered',
                                                         text: 'Ordered',
                                                         format: '0,000.##'
                                                     },
@@ -599,195 +604,190 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                 }
                                             },
                                             {
-                                                xtype: 'container',
-                                                height: 88,
-                                                margin: '5 0 0 0',
-                                                layout: {
-                                                    type: 'hbox',
-                                                    align: 'stretch',
-                                                    pack: 'end'
-                                                },
-                                                items: [
+                                                xtype: 'advancefiltergrid',
+                                                flex: 1,
+                                                itemId: 'grdLotTracking',
+                                                margin: '7 0 0 0',
+                                                title: 'Lot Tracking',
+                                                dockedItems: [
                                                     {
-                                                        xtype: 'container',
-                                                        flex: 3,
+                                                        xtype: 'toolbar',
+                                                        dock: 'top',
+                                                        itemId: 'tlbToolbarGrid',
                                                         layout: {
-                                                            type: 'vbox',
-                                                            align: 'stretch'
+                                                            type: 'hbox',
+                                                            padding: '0 0 0 1'
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtItemDescription',
-                                                                fieldLabel: 'Item',
-                                                                labelWidth: 70
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnEditInventoryReceipt',
+                                                                iconCls: 'small-edit',
+                                                                text: 'Edit'
                                                             },
                                                             {
-                                                                xtype: 'container',
-                                                                height: 64,
-                                                                margin: '-6 0 0 0',
-                                                                layout: {
-                                                                    type: 'hbox',
-                                                                    align: 'stretch'
-                                                                },
-                                                                items: [
-                                                                    {
-                                                                        xtype: 'container',
-                                                                        flex: 1,
-                                                                        layout: {
-                                                                            type: 'vbox',
-                                                                            align: 'stretch'
-                                                                        },
-                                                                        items: [
-                                                                            {
-                                                                                xtype: 'numberfield',
-                                                                                flex: 1,
-                                                                                itemId: 'txtInStock',
-                                                                                fieldLabel: 'In Stock',
-                                                                                labelWidth: 70,
-                                                                                hideTrigger: true
-                                                                            },
-                                                                            {
-                                                                                xtype: 'numberfield',
-                                                                                flex: 1,
-                                                                                itemId: 'txtCommitted',
-                                                                                fieldLabel: 'Committed',
-                                                                                labelWidth: 70,
-                                                                                hideTrigger: true
-                                                                            },
-                                                                            {
-                                                                                xtype: 'numberfield',
-                                                                                flex: 1,
-                                                                                itemId: 'txtAllocated',
-                                                                                fieldLabel: 'Allocated',
-                                                                                labelWidth: 70,
-                                                                                hideTrigger: true
-                                                                            }
-                                                                        ]
-                                                                    },
-                                                                    {
-                                                                        xtype: 'container',
-                                                                        flex: 1,
-                                                                        margin: '0 5',
-                                                                        layout: {
-                                                                            type: 'vbox',
-                                                                            align: 'stretch'
-                                                                        },
-                                                                        items: [
-                                                                            {
-                                                                                xtype: 'numberfield',
-                                                                                flex: 1,
-                                                                                itemId: 'txtAvailable',
-                                                                                fieldLabel: 'Available',
-                                                                                labelWidth: 85,
-                                                                                hideTrigger: true
-                                                                            },
-                                                                            {
-                                                                                xtype: 'numberfield',
-                                                                                flex: 1,
-                                                                                itemId: 'txtBackOrder',
-                                                                                fieldLabel: 'Back Order',
-                                                                                labelWidth: 85,
-                                                                                hideTrigger: true
-                                                                            },
-                                                                            {
-                                                                                xtype: 'numberfield',
-                                                                                flex: 1,
-                                                                                itemId: 'txtOnOrder',
-                                                                                fieldLabel: 'On Order (PO)',
-                                                                                labelWidth: 85,
-                                                                                hideTrigger: true
-                                                                            }
-                                                                        ]
-                                                                    },
-                                                                    {
-                                                                        xtype: 'container',
-                                                                        flex: 1,
-                                                                        layout: {
-                                                                            type: 'vbox',
-                                                                            align: 'stretch'
-                                                                        },
-                                                                        items: [
-                                                                            {
-                                                                                xtype: 'numberfield',
-                                                                                flex: 1,
-                                                                                itemId: 'txtWeight',
-                                                                                fieldLabel: 'Weight',
-                                                                                labelWidth: 70,
-                                                                                hideTrigger: true
-                                                                            },
-                                                                            {
-                                                                                xtype: 'numberfield',
-                                                                                flex: 1,
-                                                                                itemId: 'txtVolume',
-                                                                                fieldLabel: 'Volume',
-                                                                                labelWidth: 70,
-                                                                                hideTrigger: true
-                                                                            },
-                                                                            {
-                                                                                xtype: 'numberfield',
-                                                                                flex: 1,
-                                                                                itemId: 'txtLocation',
-                                                                                fieldLabel: 'Location',
-                                                                                labelWidth: 70,
-                                                                                hideTrigger: true
-                                                                            }
-                                                                        ]
-                                                                    }
-                                                                ]
-                                                            }
-                                                        ]
-                                                    },
-                                                    {
-                                                        xtype: 'container',
-                                                        flex: 1,
-                                                        layout: {
-                                                            type: 'vbox',
-                                                            align: 'stretch'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'container',
-                                                        flex: 1.2,
-                                                        layout: {
-                                                            type: 'vbox',
-                                                            align: 'stretch'
-                                                        },
-                                                        items: [
-                                                            {
-                                                                xtype: 'numberfield',
-                                                                itemId: 'txtSubtotal',
-                                                                fieldLabel: 'Subtotal',
-                                                                labelWidth: 80,
-                                                                hideTrigger: true
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnDeleteInventoryReceipt',
+                                                                iconCls: 'small-delete',
+                                                                text: 'Delete'
                                                             },
                                                             {
-                                                                xtype: 'numberfield',
-                                                                itemId: 'txtShipping',
-                                                                margin: '-6 0 0 0',
-                                                                fieldLabel: 'Shipping',
-                                                                labelWidth: 80,
-                                                                hideTrigger: true
+                                                                xtype: 'tbseparator'
                                                             },
                                                             {
-                                                                xtype: 'numberfield',
-                                                                itemId: 'txtTax',
-                                                                margin: '-1 0 0 0',
-                                                                fieldLabel: 'Tax',
-                                                                labelWidth: 80,
-                                                                hideTrigger: true
-                                                            },
-                                                            {
-                                                                xtype: 'numberfield',
-                                                                itemId: 'txtTotal',
-                                                                margin: '-1 0 0 0',
-                                                                fieldLabel: 'Total',
-                                                                labelWidth: 80,
-                                                                hideTrigger: true
+                                                                xtype: 'filter'
                                                             }
                                                         ]
                                                     }
-                                                ]
+                                                ],
+                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                    selType: 'checkboxmodel'
+                                                }),
+                                                columns: [
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 100,
+                                                        dataIndex: 'strItemNo',
+                                                        text: 'Item No.'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 175,
+                                                        dataIndex: 'strDescription',
+                                                        text: 'Parent Lot ID'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colItemNo2',
+                                                        width: 100,
+                                                        dataIndex: 'strDescription',
+                                                        text: 'Lot ID'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colItemNo5',
+                                                        width: 100,
+                                                        dataIndex: 'strDescription',
+                                                        text: 'Container No'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colQtyOrdered',
+                                                        width: 80,
+                                                        align: 'right',
+                                                        dataIndex: 'dblQtyOrdered',
+                                                        text: 'Quantity',
+                                                        format: '0,000.##'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colItemNo6',
+                                                        width: 75,
+                                                        dataIndex: 'strDescription',
+                                                        text: 'UOM'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colQtyOrdered1',
+                                                        width: 105,
+                                                        align: 'right',
+                                                        dataIndex: 'dblQtyOrdered',
+                                                        text: 'No. of Units',
+                                                        format: '0,000.##'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colQtyOrdered2',
+                                                        width: 81,
+                                                        align: 'right',
+                                                        dataIndex: 'dblQtyOrdered',
+                                                        text: 'Unit UOM',
+                                                        format: '0,000.##'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colQtyOrdered6',
+                                                        width: 81,
+                                                        align: 'right',
+                                                        dataIndex: 'dblQtyOrdered',
+                                                        text: 'Units/Pallet',
+                                                        format: '0,000.##'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colQtyOrdered7',
+                                                        width: 81,
+                                                        align: 'right',
+                                                        dataIndex: 'dblQtyOrdered',
+                                                        text: 'Gross Weight',
+                                                        format: '0,000.##'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colQtyOrdered8',
+                                                        width: 81,
+                                                        align: 'right',
+                                                        dataIndex: 'dblQtyOrdered',
+                                                        text: 'Tare Weight',
+                                                        format: '0,000.##'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colQtyOrdered9',
+                                                        width: 81,
+                                                        align: 'right',
+                                                        dataIndex: 'dblQtyOrdered',
+                                                        text: 'Net Weight',
+                                                        format: '0,000.##'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colQtyOrdered10',
+                                                        width: 81,
+                                                        align: 'right',
+                                                        dataIndex: 'dblQtyOrdered',
+                                                        text: 'Wt. per Unit UOM',
+                                                        format: '0,000.##'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colQtyOrdered11',
+                                                        width: 81,
+                                                        align: 'right',
+                                                        dataIndex: 'dblQtyOrdered',
+                                                        text: 'Stated Gross Per Unit',
+                                                        format: '0,000.##'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colQtyOrdered12',
+                                                        width: 81,
+                                                        align: 'right',
+                                                        dataIndex: 'dblQtyOrdered',
+                                                        text: 'Stated Tare Per Unit',
+                                                        format: '0,000.##'
+                                                    }
+                                                ],
+                                                plugins: [
+                                                    Ext.create('Ext.grid.plugin.CellEditing', {
+                                                        clicksToEdit: 1
+                                                    })
+                                                ],
+                                                viewConfig: {
+                                                    itemId: 'grvLotTracking'
+                                                }
                                             }
                                         ]
                                     },
