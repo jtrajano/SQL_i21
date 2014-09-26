@@ -40,7 +40,7 @@ GO
 				gamkt_desc
 			)
 			SELECT 
-				SUBSTRING(MktZone.strMarketZoneCode,1,3),
+				SUBSTRING(strMarketZoneCode,1,3),
 				SUBSTRING(strDescription,1,20)
 			FROM tblARMarketZone
 			WHERE strMarketZoneCode = @MarketZoneCode
