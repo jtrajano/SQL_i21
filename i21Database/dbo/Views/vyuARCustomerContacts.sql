@@ -11,7 +11,8 @@ E.strLocationName,
 D.strPhone, 
 D.strTimezone, 
 D.strTitle, 
-C.ysnPortalAccess
+C.ysnPortalAccess,
+CAST((CASE WHEN A.intDefaultContactId = C.intARCustomerToContactId THEN 'true' ELSE 'false' END) as bit) as ysnDefaultContact
 FROM dbo.tblARCustomer AS A INNER JOIN
 	dbo.tblEntity AS B ON A.intEntityId = B.intEntityId INNER JOIN
 	dbo.tblARCustomerToContact AS C ON A.intCustomerId = C.intCustomerId INNER JOIN
