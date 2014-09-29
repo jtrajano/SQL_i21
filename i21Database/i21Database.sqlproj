@@ -721,6 +721,7 @@
     <Build Include="dbo\Tables\tblICDocument.sql" />
     <Build Include="dbo\Tables\tblICCertification.sql" />
     <Build Include="dbo\Tables\tblICCertificationCommodity.sql" />
+    <Build Include="dbo\Tables\tblARCustomerProductVersion.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
