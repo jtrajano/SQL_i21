@@ -23,7 +23,7 @@ Ext.define('Inventory.model.Certification', {
         model: 'Inventory.model.CertificationCommodity',
         name: 'tblICCertificationCommodities',
         foreignKey: 'intCertificationId',
-        primaryKey: 'intCertificationId',
+        primaryKey: 'intItemId',
         storeConfig: {
             sortOnLoad: true,
             sorters: {

@@ -41,6 +41,7 @@ Ext.define('Inventory.model.Item', {
             }
         }
     },
+
     hasMany: {
         model: 'Inventory.model.ItemLocationStore',
         name: 'tblICItemLocationStores',
@@ -86,6 +87,76 @@ Ext.define('Inventory.model.Item', {
     hasOne: {
         model: 'Inventory.model.ItemManufacturing',
         name: 'tblICItemManufacturing',
+        foreignKey: 'intItemId',
+        primaryKey: 'intItemId',
+        storeConfig: {
+            sortOnLoad: true,
+            sorters: {
+                direction: 'ASC',
+                property: 'intSort'
+            }
+        }
+    },
+
+    hasMany: {
+        model: 'Inventory.model.ItemUPC',
+        name: 'tblICItemUPCs',
+        foreignKey: 'intItemId',
+        primaryKey: 'intItemId',
+        storeConfig: {
+            sortOnLoad: true,
+            sorters: {
+                direction: 'ASC',
+                property: 'intSort'
+            }
+        }
+    },
+
+    hasMany: {
+        model: 'Inventory.model.ItemVendorXref',
+        name: 'tblICItemVendorXrefs',
+        foreignKey: 'intItemId',
+        primaryKey: 'intItemId',
+        storeConfig: {
+            sortOnLoad: true,
+            sorters: {
+                direction: 'ASC',
+                property: 'intSort'
+            }
+        }
+    },
+
+    hasMany: {
+        model: 'Inventory.model.ItemCustomerXref',
+        name: 'tblICItemCustomerXrefs',
+        foreignKey: 'intItemId',
+        primaryKey: 'intItemId',
+        storeConfig: {
+            sortOnLoad: true,
+            sorters: {
+                direction: 'ASC',
+                property: 'intSort'
+            }
+        }
+    },
+
+    hasMany: {
+        model: 'Inventory.model.ItemContract',
+        name: 'tblICItemContracts',
+        foreignKey: 'intItemId',
+        primaryKey: 'intItemId',
+        storeConfig: {
+            sortOnLoad: true,
+            sorters: {
+                direction: 'ASC',
+                property: 'intSort'
+            }
+        }
+    },
+
+    hasMany: {
+        model: 'Inventory.model.ItemCertification',
+        name: 'tblICItemCertifications',
         foreignKey: 'intItemId',
         primaryKey: 'intItemId',
         storeConfig: {

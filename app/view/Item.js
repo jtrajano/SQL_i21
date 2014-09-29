@@ -19,7 +19,7 @@ Ext.define('Inventory.view.Item', {
 
     requires: [
         'Inventory.view.ItemViewModel',
-        'Inventory.view.Filter1',
+        'Inventory.view.Filter',
         'Inventory.view.StatusbarPaging1',
         'Ext.toolbar.Separator',
         'Ext.form.Panel',
@@ -583,7 +583,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'tbseparator'
                                                                             },
                                                                             {
-                                                                                xtype: 'filter1'
+                                                                                xtype: 'filter'
                                                                             }
                                                                         ]
                                                                     }
@@ -1163,7 +1163,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         xtype: 'tbseparator'
                                                                                     },
                                                                                     {
-                                                                                        xtype: 'filter1'
+                                                                                        xtype: 'filter'
                                                                                     }
                                                                                 ]
                                                                             }
@@ -1224,7 +1224,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         xtype: 'tbseparator'
                                                                                     },
                                                                                     {
-                                                                                        xtype: 'filter1'
+                                                                                        xtype: 'filter'
                                                                                     }
                                                                                 ]
                                                                             }
@@ -1373,7 +1373,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         },
                                                                                         items: [
                                                                                             {
-                                                                                                xtype: 'filter1'
+                                                                                                xtype: 'filter'
                                                                                             }
                                                                                         ]
                                                                                     }
@@ -1631,7 +1631,7 @@ Ext.define('Inventory.view.Item', {
                                                         items: [
                                                             {
                                                                 xtype: 'advancefiltergrid',
-                                                                itemId: 'grvUPC',
+                                                                itemId: 'grdUPC',
                                                                 margin: -1,
                                                                 dockedItems: [
                                                                     {
@@ -1654,7 +1654,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'tbseparator'
                                                                             },
                                                                             {
-                                                                                xtype: 'filter1'
+                                                                                xtype: 'filter'
                                                                             }
                                                                         ]
                                                                     }
@@ -1662,6 +1662,7 @@ Ext.define('Inventory.view.Item', {
                                                                 columns: [
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colUPCUnitMeasure',
                                                                         width: 215,
                                                                         dataIndex: 'string',
                                                                         text: 'Unit of Measure',
@@ -1669,12 +1670,14 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colUPCUnitQty',
                                                                         dataIndex: 'string',
                                                                         text: 'Unit Qty',
                                                                         flex: 1
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colUPCCode',
                                                                         dataIndex: 'string',
                                                                         text: 'UPC Code',
                                                                         flex: 2
@@ -1724,7 +1727,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'tbseparator'
                                                                             },
                                                                             {
-                                                                                xtype: 'filter1'
+                                                                                xtype: 'filter'
                                                                             }
                                                                         ]
                                                                     }
@@ -1732,6 +1735,7 @@ Ext.define('Inventory.view.Item', {
                                                                 columns: [
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colCustomerXrefLocation',
                                                                         width: 215,
                                                                         dataIndex: 'string',
                                                                         text: 'Location',
@@ -1739,6 +1743,7 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colCustomerXrefStore',
                                                                         width: 215,
                                                                         dataIndex: 'string',
                                                                         text: 'Store',
@@ -1746,6 +1751,7 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colCustomerXrefCustomer',
                                                                         width: 215,
                                                                         dataIndex: 'string',
                                                                         text: 'Customer',
@@ -1753,18 +1759,21 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colCustomerXrefProduct',
                                                                         dataIndex: 'string',
                                                                         text: 'Customer Product',
                                                                         flex: 1
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colCustomerXrefDescription',
                                                                         dataIndex: 'string',
                                                                         text: 'Product Description',
                                                                         flex: 2
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colCustomerXrefPickTicketNotes',
                                                                         dataIndex: 'string',
                                                                         text: 'Pick Ticket Notes',
                                                                         flex: 2
@@ -1804,7 +1813,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'tbseparator'
                                                                             },
                                                                             {
-                                                                                xtype: 'filter1'
+                                                                                xtype: 'filter'
                                                                             }
                                                                         ]
                                                                     }
@@ -1812,6 +1821,7 @@ Ext.define('Inventory.view.Item', {
                                                                 columns: [
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colVendorXrefLocation',
                                                                         width: 215,
                                                                         dataIndex: 'string',
                                                                         text: 'Location',
@@ -1819,6 +1829,7 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colVendorXrefStore',
                                                                         width: 215,
                                                                         dataIndex: 'string',
                                                                         text: 'Store',
@@ -1826,6 +1837,7 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colVendorXrefVendor',
                                                                         width: 215,
                                                                         dataIndex: 'string',
                                                                         text: 'Vendor',
@@ -1833,24 +1845,28 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colVendorXrefProduct',
                                                                         dataIndex: 'string',
                                                                         text: 'Vendor Product',
                                                                         flex: 1
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colVendorXrefDescription',
                                                                         dataIndex: 'string',
                                                                         text: 'Product Description',
                                                                         flex: 2
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colVendorXrefConversionFactor',
                                                                         dataIndex: 'string',
                                                                         text: 'Conversion Factor',
                                                                         flex: 1
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colVendorXrefUnitMeasure',
                                                                         dataIndex: 'string',
                                                                         text: 'UOM',
                                                                         flex: 1
@@ -1900,7 +1916,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'tbseparator'
                                                                             },
                                                                             {
-                                                                                xtype: 'filter1'
+                                                                                xtype: 'filter'
                                                                             }
                                                                         ]
                                                                     }
@@ -1908,6 +1924,7 @@ Ext.define('Inventory.view.Item', {
                                                                 columns: [
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colContractLocation',
                                                                         width: 215,
                                                                         dataIndex: 'string',
                                                                         text: 'Location',
@@ -1915,6 +1932,7 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colContractStore',
                                                                         width: 215,
                                                                         dataIndex: 'string',
                                                                         text: 'Store',
@@ -1922,6 +1940,7 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colContractItemName',
                                                                         width: 215,
                                                                         dataIndex: 'string',
                                                                         text: 'Contract Item Name',
@@ -1929,48 +1948,56 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colContractCommodity',
                                                                         dataIndex: 'string',
                                                                         text: 'Commodity',
                                                                         flex: 1
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colContractOrigin',
                                                                         dataIndex: 'string',
                                                                         text: 'Origin',
                                                                         flex: 1
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colContractGrade',
                                                                         dataIndex: 'string',
                                                                         text: 'Grade',
                                                                         flex: 1
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colContractGradeType',
                                                                         dataIndex: 'string',
                                                                         text: 'Grade Type',
                                                                         flex: 1
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colContractGarden',
                                                                         dataIndex: 'string',
                                                                         text: 'Garden',
                                                                         flex: 1
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colContractYield',
                                                                         dataIndex: 'string',
                                                                         text: 'Yield %',
                                                                         flex: 1
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colContractTolerance',
                                                                         dataIndex: 'string',
                                                                         text: 'Tolerance %',
                                                                         flex: 1
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colContractFranchise',
                                                                         dataIndex: 'string',
                                                                         text: 'Franchise %',
                                                                         flex: 1
@@ -2019,7 +2046,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         xtype: 'tbseparator'
                                                                                     },
                                                                                     {
-                                                                                        xtype: 'filter1'
+                                                                                        xtype: 'filter'
                                                                                     }
                                                                                 ]
                                                                             }
@@ -2027,6 +2054,7 @@ Ext.define('Inventory.view.Item', {
                                                                         columns: [
                                                                             {
                                                                                 xtype: 'gridcolumn',
+                                                                                itemId: 'colDocument',
                                                                                 width: 215,
                                                                                 dataIndex: 'string',
                                                                                 text: 'Document',
@@ -2067,7 +2095,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         xtype: 'tbseparator'
                                                                                     },
                                                                                     {
-                                                                                        xtype: 'filter1'
+                                                                                        xtype: 'filter'
                                                                                     }
                                                                                 ]
                                                                             }
@@ -2075,6 +2103,7 @@ Ext.define('Inventory.view.Item', {
                                                                         columns: [
                                                                             {
                                                                                 xtype: 'gridcolumn',
+                                                                                itemId: 'colCertification',
                                                                                 width: 215,
                                                                                 dataIndex: 'string',
                                                                                 text: 'Certification',
@@ -2144,7 +2173,7 @@ Ext.define('Inventory.view.Item', {
                                                                 xtype: 'tbseparator'
                                                             },
                                                             {
-                                                                xtype: 'filter1'
+                                                                xtype: 'filter'
                                                             }
                                                         ]
                                                     }
@@ -2247,7 +2276,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'tbseparator'
                                                                             },
                                                                             {
-                                                                                xtype: 'filter1'
+                                                                                xtype: 'filter'
                                                                             }
                                                                         ]
                                                                     }
@@ -2376,7 +2405,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'tbseparator'
                                                                             },
                                                                             {
-                                                                                xtype: 'filter1'
+                                                                                xtype: 'filter'
                                                                             }
                                                                         ]
                                                                     }
@@ -2503,7 +2532,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'tbseparator'
                                                                             },
                                                                             {
-                                                                                xtype: 'filter1'
+                                                                                xtype: 'filter'
                                                                             }
                                                                         ]
                                                                     }
@@ -2626,7 +2655,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'tbseparator'
                                                                             },
                                                                             {
-                                                                                xtype: 'filter1'
+                                                                                xtype: 'filter'
                                                                             }
                                                                         ]
                                                                     }
@@ -2780,7 +2809,7 @@ Ext.define('Inventory.view.Item', {
                                                                 xtype: 'tbseparator'
                                                             },
                                                             {
-                                                                xtype: 'filter1'
+                                                                xtype: 'filter'
                                                             }
                                                         ]
                                                     }

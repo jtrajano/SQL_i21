@@ -153,9 +153,42 @@ Ext.define('Inventory.view.override.ItemViewController', {
             txtMask2: '{current.tblICItemManufacturing.strMask2}',
             txtMask3: '{current.tblICItemManufacturing.strMask3}',
 
-            colManufacturingUOM: ''
+            colManufacturingUOM: 'intUnitMeasureId',
 
+            colUPCUnitMeasure: 'intUnitMeasureId',
+            colUPCUnitQty: 'dblUnitQty',
+            colUPCCode: 'strUPCCode',
 
+            colCustomerXrefLocation: 'intLocationId',
+            colCustomerXrefStore: 'strStoreName',
+            colCustomerXrefCustomer: 'intCustomerId',
+            colCustomerXrefProduct: 'strCustomerProduct',
+            colCustomerXrefDescription: 'strProductDescription',
+            colCustomerXrefPickTicketNotes: 'strPickTicketNotes',
+
+            colVendorXrefLocation: 'intLocationId',
+            colVendorXrefStore: 'strStoreName',
+            colVendorXrefVendor: 'intVendorId',
+            colVendorXrefProduct: 'strVendorProduct',
+            colVendorXrefDescription: 'strProductDescription',
+            colVendorXrefConversionFactor: 'dblConversionFactor',
+            colVendorXrefUnitMeasure: 'intUnitMeasureId',
+
+            colContractLocation: 'intLocationId',
+            colContractStore: 'strStoreName',
+            colContractItemName: 'strContractItemName',
+            colContractCommodity: '',
+            colContractOrigin: 'intCountryId',
+            colContractGrade: 'strGrade',
+            colContractGarden: 'strGarden',
+            colContractGradeType: 'strGradeType',
+            colContractYield: 'dblYieldPercent',
+            colContractTolerance: 'dblTolerancePercent',
+            colContractFranchise: 'dblFranchisePercent',
+
+            colDocument: 'intDocumentId',
+
+            colCertification: 'intCertificationId'
 
         }
     },

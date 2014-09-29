@@ -1221,7 +1221,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter1",
+                                                                    "name": "filter2",
                                                                     "designerId": "cbd9067a-ce03-4810-b0cb-7bd07d00d877",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2599,7 +2599,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter11",
+                                                                            "name": "filter3",
                                                                             "designerId": "2857c700-ed36-43f0-8ef5-f340b95fdfba",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -2754,7 +2754,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter12",
+                                                                            "name": "filter4",
                                                                             "designerId": "f74d03b6-8d20-468c-ab10-a1782ac46fa4",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -3101,7 +3101,7 @@
                                                                                     "userConfig": {
                                                                                         "layout|flex": null
                                                                                     },
-                                                                                    "name": "filter13",
+                                                                                    "name": "filter5",
                                                                                     "designerId": "3fdba5e7-278e-4e6b-ad42-9ec658e4c660",
                                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                                 }
@@ -3676,7 +3676,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "designer|createAlias": "advancefiltergrid",
-                                                        "itemId": "grvUPC",
+                                                        "itemId": "grdUPC",
                                                         "margin": -1,
                                                         "title": null
                                                     },
@@ -3740,7 +3740,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter14",
+                                                                    "name": "filter6",
                                                                     "designerId": "87274c48-fa61-4ab3-acd1-2696486c13a3",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3756,6 +3756,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1.5,
+                                                                "itemId": "colUPCUnitMeasure",
                                                                 "text": "Unit of Measure",
                                                                 "width": 215
                                                             },
@@ -3772,6 +3773,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1,
+                                                                "itemId": "colUPCUnitQty",
                                                                 "text": "Unit Qty"
                                                             },
                                                             "name": "MyColumn10",
@@ -3787,6 +3789,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 2,
+                                                                "itemId": "colUPCCode",
                                                                 "text": "UPC Code"
                                                             },
                                                             "name": "MyColumn11",
@@ -3919,7 +3922,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter15",
+                                                                    "name": "filter7",
                                                                     "designerId": "f11b92d2-d17f-4030-af6e-5449c5557e10",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3935,6 +3938,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1.5,
+                                                                "itemId": "colCustomerXrefLocation",
                                                                 "text": "Location",
                                                                 "width": 215
                                                             },
@@ -3951,6 +3955,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1.5,
+                                                                "itemId": "colCustomerXrefStore",
                                                                 "text": "Store",
                                                                 "width": 215
                                                             },
@@ -3967,6 +3972,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1.5,
+                                                                "itemId": "colCustomerXrefCustomer",
                                                                 "text": "Customer",
                                                                 "width": 215
                                                             },
@@ -3983,6 +3989,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1,
+                                                                "itemId": "colCustomerXrefProduct",
                                                                 "text": "Customer Product"
                                                             },
                                                             "name": "MyColumn13",
@@ -3998,6 +4005,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 2,
+                                                                "itemId": "colCustomerXrefDescription",
                                                                 "text": "Product Description"
                                                             },
                                                             "name": "MyColumn14",
@@ -4013,6 +4021,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 2,
+                                                                "itemId": "colCustomerXrefPickTicketNotes",
                                                                 "text": "Pick Ticket Notes"
                                                             },
                                                             "name": "MyColumn15",
@@ -4118,7 +4127,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter16",
+                                                                    "name": "filter8",
                                                                     "designerId": "317ae54f-a81d-4657-8d0b-3edd670adaca",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -4134,6 +4143,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1.5,
+                                                                "itemId": "colVendorXrefLocation",
                                                                 "text": "Location",
                                                                 "width": 215
                                                             },
@@ -4150,6 +4160,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1.5,
+                                                                "itemId": "colVendorXrefStore",
                                                                 "text": "Store",
                                                                 "width": 215
                                                             },
@@ -4166,6 +4177,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1.5,
+                                                                "itemId": "colVendorXrefVendor",
                                                                 "text": "Vendor",
                                                                 "width": 215
                                                             },
@@ -4182,6 +4194,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1,
+                                                                "itemId": "colVendorXrefProduct",
                                                                 "text": "Vendor Product"
                                                             },
                                                             "name": "MyColumn17",
@@ -4197,6 +4210,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 2,
+                                                                "itemId": "colVendorXrefDescription",
                                                                 "text": "Product Description"
                                                             },
                                                             "name": "MyColumn18",
@@ -4212,6 +4226,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1,
+                                                                "itemId": "colVendorXrefConversionFactor",
                                                                 "text": "Conversion Factor"
                                                             },
                                                             "name": "MyColumn19",
@@ -4227,6 +4242,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1,
+                                                                "itemId": "colVendorXrefUnitMeasure",
                                                                 "text": "UOM"
                                                             },
                                                             "name": "MyColumn20",
@@ -4359,7 +4375,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter17",
+                                                                    "name": "filter9",
                                                                     "designerId": "1de0066e-eb37-44ae-af83-adcc5f465797",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -4375,6 +4391,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1.5,
+                                                                "itemId": "colContractLocation",
                                                                 "text": "Location",
                                                                 "width": 215
                                                             },
@@ -4391,6 +4408,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1.5,
+                                                                "itemId": "colContractStore",
                                                                 "text": "Store",
                                                                 "width": 215
                                                             },
@@ -4407,6 +4425,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1.5,
+                                                                "itemId": "colContractItemName",
                                                                 "text": "Contract Item Name",
                                                                 "width": 215
                                                             },
@@ -4423,6 +4442,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1,
+                                                                "itemId": "colContractCommodity",
                                                                 "text": "Commodity"
                                                             },
                                                             "name": "MyColumn13",
@@ -4438,6 +4458,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1,
+                                                                "itemId": "colContractOrigin",
                                                                 "text": "Origin"
                                                             },
                                                             "name": "MyColumn14",
@@ -4453,6 +4474,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1,
+                                                                "itemId": "colContractGrade",
                                                                 "text": "Grade"
                                                             },
                                                             "name": "MyColumn15",
@@ -4468,6 +4490,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1,
+                                                                "itemId": "colContractGradeType",
                                                                 "text": "Grade Type"
                                                             },
                                                             "name": "MyColumn68",
@@ -4483,6 +4506,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1,
+                                                                "itemId": "colContractGarden",
                                                                 "text": "Garden"
                                                             },
                                                             "name": "MyColumn69",
@@ -4498,6 +4522,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1,
+                                                                "itemId": "colContractYield",
                                                                 "text": "Yield %"
                                                             },
                                                             "name": "MyColumn75",
@@ -4513,6 +4538,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1,
+                                                                "itemId": "colContractTolerance",
                                                                 "text": "Tolerance %"
                                                             },
                                                             "name": "MyColumn76",
@@ -4528,6 +4554,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1,
+                                                                "itemId": "colContractFranchise",
                                                                 "text": "Franchise %"
                                                             },
                                                             "name": "MyColumn77",
@@ -4650,7 +4677,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter18",
+                                                                            "name": "filter10",
                                                                             "designerId": "102ea262-7cce-4c88-bd43-2f80cfa1e9a8",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -4666,6 +4693,7 @@
                                                                     "userConfig": {
                                                                         "dataIndex": "string",
                                                                         "flex": 1.5,
+                                                                        "itemId": "colDocument",
                                                                         "text": "Document",
                                                                         "width": 215
                                                                     },
@@ -4772,7 +4800,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter19",
+                                                                            "name": "filter11",
                                                                             "designerId": "437f9756-d7eb-404d-89dd-762a18b9132c",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -4788,6 +4816,7 @@
                                                                     "userConfig": {
                                                                         "dataIndex": "string",
                                                                         "flex": 1.5,
+                                                                        "itemId": "colCertification",
                                                                         "text": "Certification",
                                                                         "width": 215
                                                                     },
@@ -4962,7 +4991,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter110",
+                                                    "name": "filter12",
                                                     "designerId": "efa99b46-2432-478a-97f2-c35eb7b7ed7c",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -5241,7 +5270,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter111",
+                                                                    "name": "filter13",
                                                                     "designerId": "8c12842b-2ead-456f-b4dc-8a0da80ee35f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -5577,7 +5606,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter112",
+                                                                    "name": "filter14",
                                                                     "designerId": "df49b4ec-5d3e-4ec5-8704-5a1a7a595dd1",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -5926,7 +5955,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter113",
+                                                                    "name": "filter15",
                                                                     "designerId": "1359797a-01d3-4908-862b-ecee335db0ef",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -6257,7 +6286,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter114",
+                                                                    "name": "filter16",
                                                                     "designerId": "9949aed9-86f7-4f15-aac6-afedae027c18",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -6664,7 +6693,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter115",
+                                                    "name": "filter17",
                                                     "designerId": "ab092e2c-0602-4213-baf5-e07813015a04",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -6846,7 +6875,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging12",
                     "designerId": "64f13019-953f-46dc-920e-9a395d3cb3c9",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
