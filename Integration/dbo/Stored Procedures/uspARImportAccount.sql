@@ -25,14 +25,14 @@ GO
 	IF(@Update = 1 AND @AccountCode IS NOT NULL) 
 	BEGIN
 		--UPDATE IF EXIST IN THE ORIGIN
-		IF(EXISTS(SELECT 1 FROM ssascmst WHERE ssasc_code = @AccountCode))
+		IF(EXISTS(SELECT 1 FROM ssascmst WHERE ssasc_code = UPPER(@AccountCode)))
 		BEGIN
 			UPDATE ssascmst
 				SET 
-				ssasc_code = Accnt.strAccountStatusCode,
+				ssasc_code = UPPER(Accnt.strAccountStatusCode),
 				ssasc_desc = SUBSTRING(Accnt.strDescription,0,15)
 			FROM tblARAccountStatus Accnt
-				WHERE strAccountStatusCode = @AccountCode AND ssasc_code = @AccountCode
+				WHERE strAccountStatusCode = @AccountCode AND ssasc_code = UPPER(@AccountCode)
 		END
 		--INSERT IF NOT EXIST IN THE ORIGIN
 		ELSE
@@ -41,7 +41,7 @@ GO
 				ssasc_desc
 			)
 			SELECT 
-				strAccountStatusCode,
+				UPPER(strAccountStatusCode),
 				SUBSTRING(strDescription,0,15)
 			FROM tblARAccountStatus
 			WHERE strAccountStatusCode = @AccountCode
@@ -71,7 +71,7 @@ GO
 			FROM ssascmst
 		LEFT JOIN tblARAccountStatus
 			ON ssascmst.ssasc_code COLLATE Latin1_General_CI_AS = tblARAccountStatus.strAccountStatusCode COLLATE Latin1_General_CI_AS
-		WHERE tblARAccountStatus.strAccountStatusCode IS NULL
+		WHERE tblARAccountStatus.strAccountStatusCode IS NULL AND ssascmst.ssasc_code = UPPER(ssascmst.ssasc_code) COLLATE Latin1_General_CS_AS
 		ORDER BY ssascmst.ssasc_code
 
 		WHILE (EXISTS(SELECT 1 FROM #tmpssascmst))
