@@ -16,7 +16,7 @@
     [strInventoryGroup] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [ysnCountedDaily] BIT NULL DEFAULT ((0)), 
 	[intSort] INT NULL, 
-    [intConcurrencyField] INT NULL DEFAULT ((0)), 
+    [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICItemStock] PRIMARY KEY ([intItemStockId]), 
     CONSTRAINT [FK_tblICItemStock_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
     CONSTRAINT [FK_tblICItemStock_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
@@ -175,4 +175,4 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblICItemStock',
     @level2type = N'COLUMN',
-    @level2name = N'intConcurrencyField'
+    @level2name = 'intConcurrencyId'
