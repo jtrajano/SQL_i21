@@ -10,14 +10,14 @@
         "defaultFocus": null,
         "designer|userAlias": "itempricing",
         "designer|userClassName": "ItemPricing",
-        "height": 390,
+        "height": 315,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
         "layout": "fit",
-        "maxHeight": 390,
+        "maxHeight": 315,
         "maximizable": true,
-        "minHeight": null,
+        "minHeight": 315,
         "minWidth": 650,
         "minimizable": null,
         "reference": null,
@@ -284,13 +284,13 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "fieldLabel": "Store Name",
-                                        "itemId": "txtStoreName",
+                                        "fieldLabel": "Sale Price",
+                                        "itemId": "txtRetailPrice",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
-                                    "name": "MyTextField40",
-                                    "designerId": "688219b0-f594-4341-b02c-e2749adff01f"
+                                    "name": "MyTextField41",
+                                    "designerId": "887aa2b4-9b87-46bf-9231-4f1bcfaec4ab"
                                 },
                                 {
                                     "type": "Ext.form.field.Text",
@@ -301,12 +301,12 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Retail Price",
-                                        "itemId": "txtRetailPrice",
+                                        "itemId": "txtRetailPrice1",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
-                                    "name": "MyTextField41",
-                                    "designerId": "887aa2b4-9b87-46bf-9231-4f1bcfaec4ab"
+                                    "name": "MyTextField40",
+                                    "designerId": "bf066783-a6e9-4703-aab2-50678d949c4c"
                                 },
                                 {
                                     "type": "Ext.form.field.Text",
@@ -355,54 +355,6 @@
                                     },
                                     "name": "MyTextField44",
                                     "designerId": "a662b97c-8638-443d-b1e8-3b7ffd88cf0c"
-                                },
-                                {
-                                    "type": "Ext.form.field.Text",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "fieldLabel": "Commission Rate",
-                                        "itemId": "txtCommissionRate",
-                                        "labelWidth": 110,
-                                        "layout|flex": null
-                                    },
-                                    "name": "MyTextField45",
-                                    "designerId": "d35a2d36-bf32-4cae-b9b2-81c5a90feabf"
-                                },
-                                {
-                                    "type": "Ext.form.field.Text",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "fieldLabel": "Discount Code",
-                                        "itemId": "txtDiscountCode",
-                                        "labelWidth": 110,
-                                        "layout|flex": null
-                                    },
-                                    "name": "MyTextField46",
-                                    "designerId": "e6376841-b6f6-466a-baa1-1e9a31f7e7c6"
-                                },
-                                {
-                                    "type": "Ext.form.field.Text",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "fieldLabel": "Min Override",
-                                        "itemId": "txtMinOverride",
-                                        "labelWidth": 110,
-                                        "layout|flex": null
-                                    },
-                                    "name": "MyTextField47",
-                                    "designerId": "27e43c2a-888b-4426-affb-8e4fa6fe7e51"
                                 }
                             ]
                         },
@@ -464,13 +416,13 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "fieldLabel": "Average Cost",
-                                        "itemId": "txtAverageCost",
+                                        "fieldLabel": "Standard Cost",
+                                        "itemId": "txtStandardCost",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
-                                    "name": "MyTextField49",
-                                    "designerId": "9c7aa544-87b2-4f8e-950a-b9c7f291d7f5"
+                                    "name": "MyTextField50",
+                                    "designerId": "da85e908-4dbe-460a-9736-911b711029b3"
                                 },
                                 {
                                     "type": "Ext.form.field.Text",
@@ -480,13 +432,13 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "fieldLabel": "Standard Cost",
-                                        "itemId": "txtStandardCost",
+                                        "fieldLabel": "Average Cost",
+                                        "itemId": "txtAverageCost",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
-                                    "name": "MyTextField50",
-                                    "designerId": "da85e908-4dbe-460a-9736-911b711029b3"
+                                    "name": "MyTextField49",
+                                    "designerId": "9c7aa544-87b2-4f8e-950a-b9c7f291d7f5"
                                 },
                                 {
                                     "type": "Ext.form.field.Text",
@@ -505,68 +457,20 @@
                                     "designerId": "65129da8-fe40-45a9-b634-58915ede5a85"
                                 },
                                 {
-                                    "type": "Ext.form.field.Text",
+                                    "type": "Ext.form.field.Checkbox",
                                     "reference": {
                                         "name": "items",
                                         "type": "array"
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "fieldLabel": "Default Sales Tax",
-                                        "itemId": "txtDefaultSalesTax",
+                                        "boxLabel": null,
+                                        "fieldLabel": "Active",
                                         "labelWidth": 110,
-                                        "layout|flex": null
+                                        "layout|flex": 1
                                     },
-                                    "name": "MyTextField52",
-                                    "designerId": "c05b8d56-0ef2-4775-aca0-66151c537c64"
-                                },
-                                {
-                                    "type": "Ext.form.field.Text",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "fieldLabel": "Commission Units",
-                                        "itemId": "txtCommissionUnits",
-                                        "labelWidth": 110,
-                                        "layout|flex": null
-                                    },
-                                    "name": "MyTextField53",
-                                    "designerId": "74ea5405-c2ea-4645-8ad2-66db71b1675c"
-                                },
-                                {
-                                    "type": "Ext.form.field.Text",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "fieldLabel": "Discount Rate",
-                                        "itemId": "txtDiscountRate",
-                                        "labelWidth": 110,
-                                        "layout|flex": null
-                                    },
-                                    "name": "MyTextField54",
-                                    "designerId": "1523889a-708f-4fbf-ac2e-661c6a84f193"
-                                },
-                                {
-                                    "type": "Ext.form.field.Text",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "fieldLabel": "Max Override",
-                                        "itemId": "txtMaxOverride",
-                                        "labelWidth": 110,
-                                        "layout|flex": null
-                                    },
-                                    "name": "MyTextField55",
-                                    "designerId": "a3af28dc-2218-4dc5-9237-9c3517bbadd0"
+                                    "name": "MyCheckbox43",
+                                    "designerId": "9ddb9802-6c5b-42f7-82cf-6994b6331357"
                                 }
                             ]
                         }
@@ -588,7 +492,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging9",
+                    "name": "statusbarpaging1",
                     "designerId": "ee98d62c-330d-4829-b90b-22407d93d85f",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

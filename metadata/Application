@@ -19,7 +19,7 @@
             "ManufacturingCell",
             "FactoryUnitType",
             "ItemSubstitution",
-            "FactoryUnit",
+            "StorageUnit",
             "InventoryReceipt"
         ]
     },

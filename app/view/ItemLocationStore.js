@@ -19,7 +19,7 @@ Ext.define('Inventory.view.ItemLocationStore', {
 
     requires: [
         'Inventory.view.ItemLocationStoreViewModel',
-        'Inventory.view.StatusbarPaging',
+        'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
         'Ext.button.Button',
         'Ext.toolbar.Separator',
@@ -32,9 +32,8 @@ Ext.define('Inventory.view.ItemLocationStore', {
     viewModel: {
         type: 'itemlocationstore'
     },
-    height: 660,
+    height: 684,
     hidden: false,
-    maxHeight: 660,
     minHeight: 660,
     minWidth: 995,
     width: 995,
@@ -266,6 +265,12 @@ Ext.define('Inventory.view.ItemLocationStore', {
                                     xtype: 'combobox',
                                     itemId: 'cboClass',
                                     fieldLabel: 'Class',
+                                    labelWidth: 105
+                                },
+                                {
+                                    xtype: 'combobox',
+                                    itemId: 'cboProductCode',
+                                    fieldLabel: 'Product Code',
                                     labelWidth: 105
                                 },
                                 {
