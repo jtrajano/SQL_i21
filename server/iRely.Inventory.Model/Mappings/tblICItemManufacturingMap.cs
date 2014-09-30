@@ -8,7 +8,7 @@ namespace iRely.Inventory.Model
         public tblICItemManufacturingMap()
         {
             // Primary Key
-            this.HasKey(t => t.intItemId);
+            this.HasKey(t => t.intItemManufacturingId);
 
             // Table & Column Mappings
             this.ToTable("tblICItemManufacturing");
@@ -20,6 +20,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intDimensionUOMId).HasColumnName("intDimensionUOMId");
             this.Property(t => t.intInnerUnits).HasColumnName("intInnerUnits");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.intItemManufacturingId).HasColumnName("intItemManufacturingId");
             this.Property(t => t.intLayerPerPallet).HasColumnName("intLayerPerPallet");
             this.Property(t => t.intLifeTime).HasColumnName("intLifeTime");
             this.Property(t => t.intMaterialPackTypeId).HasColumnName("intMaterialPackTypeId");
@@ -41,7 +42,7 @@ namespace iRely.Inventory.Model
 
             this.HasMany(p => p.tblICItemManufacturingUOMs)
                 .WithRequired(p => p.tblICItemManufacturing)
-                .HasForeignKey(p => p.intItemId);
+                .HasForeignKey(p => p.intItemManufacturingId);
 
         }
     }
@@ -55,7 +56,7 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICItemManufacturingUOM");
-            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.intItemManufacturingId).HasColumnName("intItemManufacturingId");
             this.Property(t => t.intItemManufacturingUOMId).HasColumnName("intItemManufacturingUOMId");
             this.Property(t => t.intSort).HasColumnName("intSort");
             this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");

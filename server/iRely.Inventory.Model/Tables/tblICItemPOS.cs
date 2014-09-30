@@ -10,6 +10,13 @@ namespace iRely.Inventory.Model
 {
     public class tblICItemPOS : BaseEntity
     {
+        public tblICItemPOS()
+        {
+            this.tblICItemPOSCategories = new List<tblICItemPOSCategory>();
+            this.tblICItemPOSSLAs = new List<tblICItemPOSSLA>();
+        }
+
+        public int intItemPOSId { get; set; }
         public int intItemId { get; set; }
         public string strUPCNo { get; set; }
         public int intCaseUOM { get; set; }
@@ -37,7 +44,7 @@ namespace iRely.Inventory.Model
     public class tblICItemPOSCategory : BaseEntity
     {
         public int intItemPOSCategoryId { get; set; }
-        public int intItemId { get; set; }
+        public int intItemPOSId { get; set; }
         public int intCategoryId { get; set; }
         public int intSort { get; set; }
 
@@ -47,7 +54,7 @@ namespace iRely.Inventory.Model
     public class tblICItemPOSSLA : BaseEntity
     {
         public int intItemPOSSLAId { get; set; }
-        public int intItemId { get; set; }
+        public int intItemPOSId { get; set; }
         public string strSLAContract { get; set; }
         public double dblContractPrice { get; set; }
         public bool ysnServiceWarranty { get; set; }

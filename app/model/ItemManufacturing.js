@@ -9,9 +9,10 @@ Ext.define('Inventory.model.ItemManufacturing', {
         'Ext.data.Field'
     ],
 
-    idProperty: 'intItemId',
+    idProperty: 'intItemManufacturingId',
 
     fields: [
+        { name: 'intItemManufacturingId', type: 'int'},
         { name: 'intItemId', type: 'int'},
         { name: 'ysnRequireCustomerApproval', type: 'boolean'},
         { name: 'intRecipeId', type: 'int'},
@@ -43,8 +44,8 @@ Ext.define('Inventory.model.ItemManufacturing', {
     hasMany: {
         model: 'Inventory.model.ItemManufacturingUOM',
         name: 'tblICItemManufacturingUOMs',
-        foreignKey: 'intItemId',
-        primaryKey: 'intItemId',
+        foreignKey: 'intItemManufacturingId',
+        primaryKey: 'intItemManufacturingId',
         storeConfig: {
             sortOnLoad: true,
             sorters: {

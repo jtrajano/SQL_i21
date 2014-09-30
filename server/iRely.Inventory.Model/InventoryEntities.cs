@@ -97,20 +97,40 @@ namespace iRely.Inventory.Model
 
         public DbSet<tblICBrand> tblICBrands { get; set; }
         public DbSet<tblICCatalog> tblICCatalogs { get; set; }
-        public DbSet<tblICItemUOM> tblICItemUOMs { get; set; }
         public DbSet<tblICCategory> tblICCategorys { get; set; }
         public DbSet<tblICCategoryAccount> tblICCategoryAccounts { get; set; }
-        public DbSet<tblICItemCustomerXref> tblICItemCustomerXrefs { get; set; }
         public DbSet<tblICCategoryStore> tblICCategoryStores { get; set; }
         public DbSet<tblICCategoryVendor> tblICCategoryVendors { get; set; }
+        public DbSet<tblICCertification> tblICCertifications { get; set; }
+        public DbSet<tblICCertificationCommodity> tblICCertificationCommoditys { get; set; }
         public DbSet<tblICClass> tblICClasss { get; set; }
-        public DbSet<tblICItemPOS> tblICItemPOSs { get; set; }
         public DbSet<tblICCommodity> tblICCommoditys { get; set; }
         public DbSet<tblICCommodityGroup> tblICCommodityGroups { get; set; }
-        public DbSet<tblICItemSales> tblICItemSaless { get; set; }
         public DbSet<tblICCommodityUnitMeasure> tblICCommodityUnitMeasures { get; set; }
+        public DbSet<tblICDocument> tblICDocuments { get; set; }
         public DbSet<tblICFamily> tblICFamilys { get; set; }
         public DbSet<tblICFuelType> tblICFuelTypes { get; set; }
+        public DbSet<tblICItem> tblICItems { get; set; }
+        public DbSet<tblICItemAccount> tblICItemAccounts { get; set; }
+        public DbSet<tblICItemCertification> tblICItemCertifications { get; set; }
+        public DbSet<tblICItemContract> tblICItemContracts { get; set; }
+        public DbSet<tblICItemContractDocument> tblICItemContractDocuments { get; set; }
+        public DbSet<tblICItemCustomerXref> tblICItemCustomerXrefs { get; set; }
+        public DbSet<tblICItemLocationStore> tblICItemLocationStores { get; set; }
+        public DbSet<tblICItemManufacturing> tblICItemManufacturings { get; set; }
+        public DbSet<tblICItemManufacturingUOM> tblICItemManufacturingUOMs { get; set; }
+        public DbSet<tblICItemNote> tblICItemNotes { get; set; }
+        public DbSet<tblICItemPOS> tblICItemPOSs { get; set; }
+        public DbSet<tblICItemPOSCategory> tblICItemPOSCategorys { get; set; }
+        public DbSet<tblICItemPOSSLA> tblICItemPOSSLAs { get; set; }
+        public DbSet<tblICItemPricing> tblICItemPricings { get; set; }
+        public DbSet<tblICItemPricingLevel> tblICItemPricingLevels { get; set; }
+        public DbSet<tblICItemSales> tblICItemSaless { get; set; }
+        public DbSet<tblICItemSpecialPricing> tblICItemSpecialPricings { get; set; }
+        public DbSet<tblICItemStock> tblICItemStocks { get; set; }
+        public DbSet<tblICItemUOM> tblICItemUOMs { get; set; }
+        public DbSet<tblICItemUPC> tblICItemUPCs { get; set; }
+        public DbSet<tblICItemVendorXref> tblICItemVendorXrefs { get; set; }
         public DbSet<tblICManufacturer> tblICManufacturers { get; set; }
         public DbSet<tblICPatronageCategory> tblICPatronageCategorys { get; set; }
         public DbSet<tblICReasonCode> tblICReasonCodes { get; set; }
@@ -118,46 +138,51 @@ namespace iRely.Inventory.Model
         public DbSet<tblICRinFeedStock> tblICRinFeedStocks { get; set; }
         public DbSet<tblICRinFeedStockUOM> tblICRinFeedStockUOMs { get; set; }
         public DbSet<tblICRinFuel> tblICRinFuels { get; set; }
-        public DbSet<tblICItem> tblICItems { get; set; }
         public DbSet<tblICRinFuelType> tblICRinFuelTypes { get; set; }
-        public DbSet<tblICItemContractDocument> tblICItemContractDocuments { get; set; }
-        public DbSet<tblICItemManufacturingUOM> tblICItemManufacturingUOMs { get; set; }
         public DbSet<tblICRinProcess> tblICRinProcesss { get; set; }
-        public DbSet<tblICItemPOSCategory> tblICItemPOSCategorys { get; set; }
         public DbSet<tblICTag> tblICTags { get; set; }
-        public DbSet<tblICItemPOSSLA> tblICItemPOSSLAs { get; set; }
         public DbSet<tblICUnitMeasure> tblICUnitMeasures { get; set; }
-        public DbSet<tblICItemCertification> tblICItemCertifications { get; set; }
-        public DbSet<tblICItemContract> tblICItemContracts { get; set; }
-        public DbSet<tblICItemUPC> tblICItemUPCs { get; set; }
-        public DbSet<tblICItemVendorXref> tblICItemVendorXrefs { get; set; }
-        public DbSet<tblICItemManufacturing> tblICItemManufacturings { get; set; }
         public DbSet<tblICUnitType> tblICUnitTypes { get; set; }
-        public DbSet<tblICItemLocationStore> tblICItemLocationStores { get; set; }
-
-        public DbSet<tblICCertification> tblICCertifications { get; set; }
-        public DbSet<tblICCertificationCommodity> tblICCertificationCommodities { get; set; }
-        public DbSet<tblICDocument> tblICDocuments { get; set; }
         
         
         protected override void OnModelCreating(DbModelBuilder modelBuilder) 
         {
             modelBuilder.Configurations.Add(new tblICBrandMap());
             modelBuilder.Configurations.Add(new tblICCatalogMap());
-            modelBuilder.Configurations.Add(new tblICItemUOMMap());
             modelBuilder.Configurations.Add(new tblICCategoryMap());
             modelBuilder.Configurations.Add(new tblICCategoryAccountMap());
-            modelBuilder.Configurations.Add(new tblICItemCustomerXrefMap());
             modelBuilder.Configurations.Add(new tblICCategoryStoreMap());
             modelBuilder.Configurations.Add(new tblICCategoryVendorMap());
+            modelBuilder.Configurations.Add(new tblICCertificationMap());
+            modelBuilder.Configurations.Add(new tblICCertificationCommodityMap());
             modelBuilder.Configurations.Add(new tblICClassMap());
-            modelBuilder.Configurations.Add(new tblICItemPOSMap());
             modelBuilder.Configurations.Add(new tblICCommodityMap());
             modelBuilder.Configurations.Add(new tblICCommodityGroupMap());
-            modelBuilder.Configurations.Add(new tblICItemSalesMap());
             modelBuilder.Configurations.Add(new tblICCommodityUnitMeasureMap());
+            modelBuilder.Configurations.Add(new tblICDocumentMap());
             modelBuilder.Configurations.Add(new tblICFamilyMap());
             modelBuilder.Configurations.Add(new tblICFuelTypeMap());
+            modelBuilder.Configurations.Add(new tblICItemMap());
+            modelBuilder.Configurations.Add(new tblICItemAccountMap());
+            modelBuilder.Configurations.Add(new tblICItemCertificationMap());
+            modelBuilder.Configurations.Add(new tblICItemContractMap());
+            modelBuilder.Configurations.Add(new tblICItemContractDocumentMap());
+            modelBuilder.Configurations.Add(new tblICItemCustomerXrefMap());
+            modelBuilder.Configurations.Add(new tblICItemLocationStoreMap());
+            modelBuilder.Configurations.Add(new tblICItemManufacturingMap());
+            modelBuilder.Configurations.Add(new tblICItemManufacturingUOMMap());
+            modelBuilder.Configurations.Add(new tblICItemNoteMap());
+            modelBuilder.Configurations.Add(new tblICItemPOSMap());
+            modelBuilder.Configurations.Add(new tblICItemPOSCategoryMap());
+            modelBuilder.Configurations.Add(new tblICItemPOSSLAMap());
+            modelBuilder.Configurations.Add(new tblICItemPricingMap());
+            modelBuilder.Configurations.Add(new tblICItemPricingLevelMap());
+            modelBuilder.Configurations.Add(new tblICItemSalesMap());
+            modelBuilder.Configurations.Add(new tblICItemSpecialPricingMap());
+            modelBuilder.Configurations.Add(new tblICItemStockMap());
+            modelBuilder.Configurations.Add(new tblICItemUOMMap());
+            modelBuilder.Configurations.Add(new tblICItemUPCMap());
+            modelBuilder.Configurations.Add(new tblICItemVendorXrefMap());
             modelBuilder.Configurations.Add(new tblICManufacturerMap());
             modelBuilder.Configurations.Add(new tblICPatronageCategoryMap());
             modelBuilder.Configurations.Add(new tblICReasonCodeMap());
@@ -165,26 +190,11 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICRinFeedStockMap());
             modelBuilder.Configurations.Add(new tblICRinFeedStockUOMMap());
             modelBuilder.Configurations.Add(new tblICRinFuelMap());
-            modelBuilder.Configurations.Add(new tblICItemMap());
             modelBuilder.Configurations.Add(new tblICRinFuelTypeMap());
-            modelBuilder.Configurations.Add(new tblICItemContractDocumentMap());
-            modelBuilder.Configurations.Add(new tblICItemManufacturingUOMMap());
             modelBuilder.Configurations.Add(new tblICRinProcessMap());
-            modelBuilder.Configurations.Add(new tblICItemPOSCategoryMap());
             modelBuilder.Configurations.Add(new tblICTagMap());
-            modelBuilder.Configurations.Add(new tblICItemPOSSLAMap());
             modelBuilder.Configurations.Add(new tblICUnitMeasureMap());
-            modelBuilder.Configurations.Add(new tblICItemCertificationMap());
-            modelBuilder.Configurations.Add(new tblICItemContractMap());
-            modelBuilder.Configurations.Add(new tblICItemUPCMap());
-            modelBuilder.Configurations.Add(new tblICItemVendorXrefMap());
-            modelBuilder.Configurations.Add(new tblICItemManufacturingMap());
             modelBuilder.Configurations.Add(new tblICUnitTypeMap());
-            modelBuilder.Configurations.Add(new tblICItemLocationStoreMap());
-
-            modelBuilder.Configurations.Add(new tblICCertificationMap());
-            modelBuilder.Configurations.Add(new tblICCertificationCommodityMap());
-            modelBuilder.Configurations.Add(new tblICDocumentMap());
         }
     }
 }

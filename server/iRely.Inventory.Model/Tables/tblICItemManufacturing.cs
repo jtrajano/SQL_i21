@@ -15,6 +15,7 @@ namespace iRely.Inventory.Model
             this.tblICItemManufacturingUOMs = new List<tblICItemManufacturingUOM>();
         }
 
+        public int intItemManufacturingId { get; set; }
         public int intItemId { get; set; }
         public bool ysnRequireCustomerApproval { get; set; }
         public int intRecipeId { get; set; }
@@ -49,7 +50,7 @@ namespace iRely.Inventory.Model
     public class tblICItemManufacturingUOM : BaseEntity
     {
         public int intItemManufacturingUOMId { get; set; }
-        public int intItemId { get; set; }
+        public int intItemManufacturingId { get; set; }
         public int intUnitMeasureId { get; set; }
         public int intSort { get; set; }
 

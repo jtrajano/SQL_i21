@@ -5,6 +5,7 @@ Ext.define('Inventory.model.Certification', {
     extend: 'iRely.BaseEntity',
 
     requires: [
+        'Inventory.model.CertificationCommodity',
         'Ext.data.Field'
     ],
 

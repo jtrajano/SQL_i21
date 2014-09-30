@@ -10,6 +10,7 @@ namespace iRely.Inventory.Model
 {
     public class tblICItemSales : BaseEntity
     {
+        public int intItemSalesId { get; set; }
         public int intItemId { get; set; }
         public int intPatronageCategoryId { get; set; }
         public int intTaxClassId { get; set; }

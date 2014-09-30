@@ -53,6 +53,25 @@ namespace iRely.Inventory.Model
             this.HasMany(p => p.tblICItemUPCs)
                 .WithRequired(p => p.tblICItem)
                 .HasForeignKey(p => p.intItemId);
+
+            this.HasMany(p => p.tblICItemPricings)
+                .WithRequired(p => p.tblICItem)
+                .HasForeignKey(p => p.intItemId);
+            this.HasMany(p => p.tblICItemPricingLevels)
+                .WithRequired(p => p.tblICItem)
+                .HasForeignKey(p => p.intItemId);
+            this.HasMany(p => p.tblICItemSpecialPricings)
+                .WithRequired(p => p.tblICItem)
+                .HasForeignKey(p => p.intItemId);
+            this.HasMany(p => p.tblICItemStocks)
+                .WithRequired(p => p.tblICItem)
+                .HasForeignKey(p => p.intItemId);
+            this.HasMany(p => p.tblICItemAccounts)
+                .WithRequired(p => p.tblICItem)
+                .HasForeignKey(p => p.intItemId);
+            this.HasMany(p => p.tblICItemNotes)
+                .WithRequired(p => p.tblICItem)
+                .HasForeignKey(p => p.intItemId);
         }
     }
 }

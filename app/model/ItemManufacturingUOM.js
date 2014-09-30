@@ -12,8 +12,8 @@ Ext.define('Inventory.model.ItemManufacturingUOM', {
 
     fields: [
         { name: 'intItemManufacturingUOMId', type: 'int'},
-        { name: 'intItemId', type: 'int'},
+        { name: 'intItemManufacturingId', type: 'int'},
         { name: 'intUnitMeasureId', type: 'int'},
-        { name: 'intSort', type: 'int'}
+        { name: 'intSort', type: 'int'},
     ]
 });

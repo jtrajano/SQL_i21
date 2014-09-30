@@ -69,6 +69,12 @@ namespace iRely.Inventory.BRL
                     .Include(p => p.tblICItemVendorXrefs)
                     .Include("tblICItemContracts.tblICItemContractDocuments.tblICDocument")
                     .Include("tblICItemCertifications.tblICCertification")
+                    .Include(p => p.tblICItemPricings)
+                    .Include(p => p.tblICItemPricingLevels)
+                    .Include(p => p.tblICItemSpecialPricings)
+                    .Include(p => p.tblICItemStocks)
+                    .Include(p => p.tblICItemAccounts)
+                    .Include(p => p.tblICItemNotes)
                     .Where(w => query.Where(predicate).Any(a => a.intItemId == w.intItemId)) //Filter the Main DataSource Based on Search Query
                     .OrderBySelector(sortSelector)
                     .Skip(start)

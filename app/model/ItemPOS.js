@@ -10,9 +10,10 @@ Ext.define('Inventory.model.ItemPOS', {
         'Ext.data.Field'
     ],
 
-    idProperty: 'intItemId',
+    idProperty: 'intItemPOSId',
 
     fields: [
+        { name: 'intItemPOSId', type: 'int'},
         { name: 'intItemId', type: 'int'},
         { name: 'strUPCNo', type: 'string'},
         { name: 'intCaseUOM', type: 'int'},
@@ -36,8 +37,8 @@ Ext.define('Inventory.model.ItemPOS', {
     hasMany: {
         model: 'Inventory.model.ItemPOSCategory',
         name: 'tblICItemPOSCategories',
-        foreignKey: 'intItemId',
-        primaryKey: 'intItemId',
+        foreignKey: 'intItemPOSId',
+        primaryKey: 'intItemPOSId',
         storeConfig: {
             sortOnLoad: true,
             sorters: {
@@ -50,8 +51,8 @@ Ext.define('Inventory.model.ItemPOS', {
     hasMany: {
         model: 'Inventory.model.ItemPOSSLA',
         name: 'tblICItemPOSSLAs',
-        foreignKey: 'intItemId',
-        primaryKey: 'intItemId',
+        foreignKey: 'intItemPOSId',
+        primaryKey: 'intItemPOSId',
         storeConfig: {
             sortOnLoad: true,
             sorters: {

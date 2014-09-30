@@ -22,6 +22,12 @@ namespace iRely.Inventory.Model
             this.tblICItemCustomerXrefs = new List<tblICItemCustomerXref>();
             this.tblICItemContracts = new List<tblICItemContract>();
             this.tblICItemCertifications = new List<tblICItemCertification>();
+            this.tblICItemPricings = new List<tblICItemPricing>();
+            this.tblICItemPricingLevels = new List<tblICItemPricingLevel>();
+            this.tblICItemSpecialPricings = new List<tblICItemSpecialPricing>();
+            this.tblICItemStocks = new List<tblICItemStock>();
+            this.tblICItemAccounts = new List<tblICItemAccount>();
+            this.tblICItemNotes = new List<tblICItemNote>();
         }
 
         public int intItemId { get; set; }
@@ -46,6 +52,12 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemCustomerXref> tblICItemCustomerXrefs { get; set; }
         public ICollection<tblICItemContract> tblICItemContracts { get; set; }
         public ICollection<tblICItemCertification> tblICItemCertifications { get; set; }
+        public ICollection<tblICItemPricing> tblICItemPricings { get; set; }
+        public ICollection<tblICItemPricingLevel> tblICItemPricingLevels { get; set; }
+        public ICollection<tblICItemSpecialPricing> tblICItemSpecialPricings { get; set; }
+        public ICollection<tblICItemStock> tblICItemStocks { get; set; }
+        public ICollection<tblICItemAccount> tblICItemAccounts { get; set; }
+        public ICollection<tblICItemNote> tblICItemNotes { get; set; }
 
     }
 

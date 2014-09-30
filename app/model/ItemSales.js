@@ -8,9 +8,10 @@ Ext.define('Inventory.model.ItemSales', {
         'Ext.data.Field'
     ],
 
-    idProperty: 'intItemId',
+    idProperty: 'intItemSalesId',
 
     fields: [
+        { name: 'intItemSalesId', type: 'int'},
         { name: 'intItemId', type: 'int'},
         { name: 'intPatronageCategoryId', type: 'int'},
         { name: 'intTaxClassId', type: 'int'},
@@ -41,6 +42,5 @@ Ext.define('Inventory.model.ItemSales', {
         { name: 'ysnExportEDI', type: 'boolean'},
         { name: 'ysnHazardMaterial', type: 'boolean'},
         { name: 'ysnMaterialFee', type: 'boolean'},
-        { name: 'intConcurrencyId', type: 'int'},
     ]
 });

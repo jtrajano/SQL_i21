@@ -12,9 +12,8 @@ Ext.define('Inventory.model.ItemPOSCategory', {
 
     fields: [
         { name: 'intItemPOSCategoryId', type: 'int'},
-        { name: 'intItemId', type: 'int'},
+        { name: 'intItemPOSId', type: 'int'},
         { name: 'intCategoryId', type: 'int'},
-        { name: 'intSort', type: 'int'},
-        { name: 'intConcurrencyId', type: 'int'},
+        { name: 'intSort', type: 'int'}
     ]
 });

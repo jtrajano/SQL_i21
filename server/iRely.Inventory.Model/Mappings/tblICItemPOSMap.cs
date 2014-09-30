@@ -8,7 +8,7 @@ namespace iRely.Inventory.Model
         public tblICItemPOSMap()
         {
             // Primary Key
-            this.HasKey(t => t.intItemId);
+            this.HasKey(t => t.intItemPOSId);
 
             // Table & Column Mappings
             this.ToTable("tblICItemPOS");
@@ -18,6 +18,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intAGCategory).HasColumnName("intAGCategory");
             this.Property(t => t.intCaseUOM).HasColumnName("intCaseUOM");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.intItemPOSId).HasColumnName("intItemPOSId");
             this.Property(t => t.strCountCode).HasColumnName("strCountCode");
             this.Property(t => t.strKeywords).HasColumnName("strKeywords");
             this.Property(t => t.strLeadTime).HasColumnName("strLeadTime");
@@ -33,10 +34,10 @@ namespace iRely.Inventory.Model
 
             this.HasMany(p => p.tblICItemPOSCategories)
                 .WithRequired(p => p.tblICItemPOS)
-                .HasForeignKey(p => p.intItemId);
+                .HasForeignKey(p => p.intItemPOSId);
             this.HasMany(p => p.tblICItemPOSSLAs)
                 .WithRequired(p => p.tblICItemPOS)
-                .HasForeignKey(p => p.intItemId);
+                .HasForeignKey(p => p.intItemPOSId);
         }
     }
 
@@ -50,8 +51,8 @@ namespace iRely.Inventory.Model
             // Table & Column Mappings
             this.ToTable("tblICItemPOSCategory");
             this.Property(t => t.intCategoryId).HasColumnName("intCategoryId");
-            this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.intItemPOSCategoryId).HasColumnName("intItemPOSCategoryId");
+            this.Property(t => t.intItemPOSId).HasColumnName("intItemPOSId");
             this.Property(t => t.intSort).HasColumnName("intSort");
         }
     }
@@ -66,7 +67,7 @@ namespace iRely.Inventory.Model
             // Table & Column Mappings
             this.ToTable("tblICItemPOSSLA");
             this.Property(t => t.dblContractPrice).HasColumnName("dblContractPrice");
-            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.intItemPOSId).HasColumnName("intItemPOSId");
             this.Property(t => t.intItemPOSSLAId).HasColumnName("intItemPOSSLAId");
             this.Property(t => t.strSLAContract).HasColumnName("strSLAContract");
             this.Property(t => t.ysnServiceWarranty).HasColumnName("ysnServiceWarranty");

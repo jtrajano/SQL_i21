@@ -12,10 +12,9 @@ Ext.define('Inventory.model.ItemPOSSLA', {
 
     fields: [
         { name: 'intItemPOSSLAId', type: 'int'},
-        { name: 'intItemId', type: 'int'},
+        { name: 'intItemPOSId', type: 'int'},
         { name: 'strSLAContract', type: 'string'},
         { name: 'dblContractPrice', type: 'float'},
-        { name: 'ysnServiceWarranty', type: 'boolean'},
-        { name: 'intConcurrencyId', type: 'int'},
+        { name: 'ysnServiceWarranty', type: 'boolean'}
     ]
 });

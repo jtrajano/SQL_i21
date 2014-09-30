@@ -9,19 +9,37 @@ var InventoryFiles = [
     // Load the Inventory dependencies
 
     {pattern: 'app/view/FilterViewModel.js', watched: false},
-    {pattern: 'app/view/StatusBarViewModel.js', watched: false},
-    {pattern: 'app/view/StatusBarPagingViewModel.js', watched: false},
+    {pattern: 'app/view/StatusBar1ViewModel.js', watched: false},
+    {pattern: 'app/view/StatusBarViewModel1.js', watched: false},
+    {pattern: 'app/view/StatusBarPagingViewModel1.js', watched: false},
     {pattern: 'app/view/Filter.js', watched: false},
-    {pattern: 'app/view/StatusBar.js', watched: false},
-    {pattern: 'app/view/StatusBarPaging.js', watched: false},
+    {pattern: 'app/view/StatusBar1.js', watched: false},
+    {pattern: 'app/view/StatusBarPaging1.js', watched: false},
 
+    {pattern: 'app/model/CertificationCommodity.js', watched: false},
+    {pattern: 'app/model/Certification.js', watched: false},
+    {pattern: 'app/model/Document.js', watched: false},
+    {pattern: 'app/model/ItemCertification.js', watched: false},
+    {pattern: 'app/model/ItemContractDocument.js', watched: false},
+    {pattern: 'app/model/ItemContract.js', watched: false},
+    {pattern: 'app/model/ItemUOM.js', watched: false},
+    {pattern: 'app/model/ItemManufacturingUOM.js', watched: false},
+    {pattern: 'app/model/ItemManufacturing.js', watched: false},
+    {pattern: 'app/model/ItemPOSSLA.js', watched: false},
+    {pattern: 'app/model/ItemPOSCategory.js', watched: false},
+    {pattern: 'app/model/ItemLocationStore.js', watched: false},
+    {pattern: 'app/model/ItemPOS.js', watched: false},
+    {pattern: 'app/model/ItemSales.js', watched: false},
+
+
+    {pattern: 'app/model/*.js', watched: false},
+    {pattern: 'app/store/*.js', watched: false},
     {pattern: 'app/view/override/*ViewModel.js', watched: false},
     {pattern: 'app/view/override/*.js', watched: false},
     {pattern: 'app/view/*ViewModel.js', watched: false},
     {pattern: 'app/view/*ViewModel1.js', watched: false},
     {pattern: 'app/view/*.js', watched: false},
-    {pattern: 'app/model/*.js', watched: false},
-    {pattern: 'app/store/*.js', watched: false},
+
 
     // Load the test/app.js (similar to how we call it in SM's app.js)
     {pattern: 'test/app.js', watched: false},
