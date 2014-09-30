@@ -6,8 +6,8 @@
     },
     "codeClass": null,
     "userConfig": {
-        "designer|userAlias": "factoryunit",
-        "designer|userClassName": "FactoryUnitViewController"
+        "designer|userAlias": "storageunit",
+        "designer|userClassName": "StorageUnitViewController"
     },
     "name": "FuelTaxClassViewController2",
     "designerId": "fa8b1930-4496-4c91-99b2-ba538c8b93c3"

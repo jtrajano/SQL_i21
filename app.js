@@ -32,7 +32,7 @@ Ext.application({
         'ManufacturingCell',
         'FactoryUnitType',
         'ItemSubstitution',
-        'FactoryUnit',
+        'StorageUnit',
         'InventoryReceipt'
     ],
     name: 'Inventory',
