@@ -26,7 +26,7 @@ namespace iRely.Inventory.Model
         public string strInventoryGroup { get; set; }
         public bool ysnCountedDaily { get; set; }
         public int intSort { get; set; }
-        public int intConcurrencyField { get; set; }
+        public int intConcurrencyId { get; set; }
 
         public tblICItem tblICItem { get; set; }
     }
