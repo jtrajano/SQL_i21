@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblICItemSales]
 (
+	[intItemSalesId] INT NOT NULL IDENTITY, 
 	[intItemId] INT NOT NULL, 
     [intPatronageCategoryId] INT NULL, 
     [intTaxClassId] INT NULL, 
@@ -31,12 +32,13 @@
     [ysnHazardMaterial] BIT NULL DEFAULT ((0)), 
     [ysnMaterialFee] BIT NULL DEFAULT ((0)), 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
-    CONSTRAINT [PK_tblICItemSales] PRIMARY KEY ([intItemId]), 
+    CONSTRAINT [PK_tblICItemSales] PRIMARY KEY ([intItemSalesId]), 
     CONSTRAINT [FK_tblICItemSales_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
     CONSTRAINT [FK_tblICItemSales_tblICPatronageCategory] FOREIGN KEY ([intPatronageCategoryId]) REFERENCES [tblICPatronageCategory]([intPatronageCategoryId]), 
     CONSTRAINT [FK_tblICItemSales_tblICRinFuelType] FOREIGN KEY ([intRINFuelTypeId]) REFERENCES [tblICRinFuelType]([intRinFuelTypeId]), 
     CONSTRAINT [FK_tblICItemSales_MedicationTag] FOREIGN KEY ([intMedicationTag]) REFERENCES [tblICTag]([intTagId]),
-	CONSTRAINT [FK_tblICItemSales_IngredientTag] FOREIGN KEY ([intIngredientTag]) REFERENCES [tblICTag]([intTagId])  
+	CONSTRAINT [FK_tblICItemSales_IngredientTag] FOREIGN KEY ([intIngredientTag]) REFERENCES [tblICTag]([intTagId]), 
+    CONSTRAINT [AK_tblICItemSales_intItemId] UNIQUE ([intItemId])  
 )
 
 GO

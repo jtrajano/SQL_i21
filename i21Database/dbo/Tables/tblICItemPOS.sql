@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblICItemPOS]
 (
+	[intItemPOSId] INT NOT NULL IDENTITY, 
 	[intItemId] INT NOT NULL, 
     [strUPCNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intCaseUOM] INT NULL, 
@@ -19,10 +20,11 @@
     [ysnCommisionable] BIT NOT NULL DEFAULT ((0)), 
     [strSpecialCommission] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
-    CONSTRAINT [PK_tblICItemPOS] PRIMARY KEY ([intItemId]), 
+    CONSTRAINT [PK_tblICItemPOS] PRIMARY KEY ([intItemPOSId]), 
     CONSTRAINT [FK_tblICItemPOS_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
     CONSTRAINT [FK_tblICItemPOS_CaseUOM] FOREIGN KEY ([intCaseUOM]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
-    CONSTRAINT [FK_tblICItemPOS_tblICCategory] FOREIGN KEY ([intAGCategory]) REFERENCES [tblICCategory]([intCategoryId]) 
+    CONSTRAINT [FK_tblICItemPOS_tblICCategory] FOREIGN KEY ([intAGCategory]) REFERENCES [tblICCategory]([intCategoryId]), 
+    CONSTRAINT [AK_tblICItemPOS_intItemId] UNIQUE ([intItemId]) 
 )
 
 GO

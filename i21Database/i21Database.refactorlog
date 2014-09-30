@@ -497,4 +497,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intProfitCenterId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="e9b0a3d0-fc0e-4517-8763-abd9125a474d" ChangeDateTime="09/30/2014 05:28:06">
+    <Property Name="ElementName" Value="[dbo].[tblICItemNote].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemNote]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intItemNoteId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="345d0af6-cebc-4adf-a343-cc1b5fb86087" ChangeDateTime="09/30/2014 07:07:05">
+    <Property Name="ElementName" Value="[dbo].[tblICItemManufacturingUOM].[intItemId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemManufacturingUOM]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intItemManufacturingId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b25df0e7-70f0-406a-ae51-7e115547f929" ChangeDateTime="09/30/2014 07:32:25">
+    <Property Name="ElementName" Value="[dbo].[tblICItemPOSCategory].[intItemId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemPOSCategory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intItemPOSId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b0916037-3de0-4601-8fa1-c7a8d9ed8e07" ChangeDateTime="09/30/2014 07:32:41">
+    <Property Name="ElementName" Value="[dbo].[tblICItemPOSSLA].[intItemId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemPOSSLA]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intItemPOSId" />
+  </Operation>
 </Operations>

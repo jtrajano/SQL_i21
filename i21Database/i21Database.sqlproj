@@ -373,8 +373,6 @@
     <Build Include="dbo\Stored Procedures\uspAPPostBillBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspRMInsertDynamicParameterFields.sql" />
     <Build Include="dbo\User Defined Types\RecapTableType.sql" />
-    <None Include="Script.PreDeployment1.sql" />
-    <None Include="Script.PostDeployment1.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\1_SM\1_ZipCodeData.sql" />
     <None Include="Scripts\Post-Deployment\Reports\1_ReportDisableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Reports\2_ReportDeleteOldData.sql" />
@@ -600,7 +598,6 @@
     <Build Include="dbo\Views\vyuFRMColumnDescription.sql" />
     <Build Include="dbo\Stored Procedures\uspFRMColumnDescription.sql" />
     <None Include="i21Database.publish.xml" />
-    <None Include="i1410AG.local.publish.xml" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\7_EULA.sql" />
     <None Include="Scripts\Post-Deployment\SM\SMDataMigrations.sql" />
     <None Include="Scripts\Post-Deployment\AR\EntityTableDataFix.sql" />
@@ -608,7 +605,6 @@
     <None Include="Scripts\Post-Deployment\GL\GLEntryDataFix.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\1_PreferenceCompany.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\2_EventType.sql" />
-    <None Include="i1420AG.local.publish.xml" />
     <None Include="Scripts\Post-Deployment\CM\3_PopulateSourceSystemData.sql" />
     <Build Include="dbo\Views\vyuCPContactMenu.sql" />
     <Build Include="dbo\Views\vyuARCustomerContacts.sql" />
@@ -727,6 +723,7 @@
     <Build Include="dbo\Tables\tblICItemStock.sql" />
     <Build Include="dbo\Tables\tblICItemAccount.sql" />
     <Build Include="dbo\Tables\tblARCustomerProductVersion.sql" />
+    <Build Include="dbo\Tables\tblICItemNote.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

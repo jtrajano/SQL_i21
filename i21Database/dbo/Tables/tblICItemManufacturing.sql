@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblICItemManufacturing]
 (
+	[intItemManufacturingId] INT NOT NULL IDENTITY, 
 	[intItemId] INT NOT NULL, 
     [ysnRequireCustomerApproval] BIT NULL DEFAULT ((0)), 
     [intRecipeId] INT NULL, 
@@ -27,11 +28,12 @@
 	[strMask2] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[strMask3] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
-    CONSTRAINT [PK_tblICItemManufacturing] PRIMARY KEY ([intItemId]), 
-    CONSTRAINT [FK_tblICItemManufacturing_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
+    CONSTRAINT [PK_tblICItemManufacturing] PRIMARY KEY ([intItemManufacturingId]), 
+    CONSTRAINT [FK_tblICItemManufacturing_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblICItemManufacturing_DimensionUOM] FOREIGN KEY ([intDimensionUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
     CONSTRAINT [FK_tblICItemManufacturing_WeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
-    CONSTRAINT [FK_tblICItemManufacturing_MaterialPackType] FOREIGN KEY ([intMaterialPackTypeId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
+    CONSTRAINT [FK_tblICItemManufacturing_MaterialPackType] FOREIGN KEY ([intMaterialPackTypeId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
+    CONSTRAINT [AK_tblICItemManufacturing_intItemId] UNIQUE ([intItemId])
 
 )
 
