@@ -726,6 +726,7 @@
     <Build Include="dbo\Tables\tblICItemSpecialPricing.sql" />
     <Build Include="dbo\Tables\tblICItemStock.sql" />
     <Build Include="dbo\Tables\tblICItemAccount.sql" />
+    <Build Include="dbo\Tables\tblARCustomerProductVersion.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
