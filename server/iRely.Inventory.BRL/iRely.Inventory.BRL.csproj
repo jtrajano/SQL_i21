@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FuelType.cs" />
+    <Compile Include="Manufacturer.cs" />
     <Compile Include="RinFeedStockUOM.cs" />
     <Compile Include="RinFeedStock.cs" />
     <Compile Include="RinProcess.cs" />
