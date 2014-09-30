@@ -1221,7 +1221,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter2",
+                                                                    "name": "filter",
                                                                     "designerId": "cbd9067a-ce03-4810-b0cb-7bd07d00d877",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2563,7 +2563,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter3",
+                                                                            "name": "filter1",
                                                                             "designerId": "2857c700-ed36-43f0-8ef5-f340b95fdfba",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -2718,7 +2718,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter4",
+                                                                            "name": "filter2",
                                                                             "designerId": "f74d03b6-8d20-468c-ab10-a1782ac46fa4",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -3065,7 +3065,7 @@
                                                                                     "userConfig": {
                                                                                         "layout|flex": null
                                                                                     },
-                                                                                    "name": "filter5",
+                                                                                    "name": "filter3",
                                                                                     "designerId": "3fdba5e7-278e-4e6b-ad42-9ec658e4c660",
                                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                                 }
@@ -3704,7 +3704,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter6",
+                                                                    "name": "filter4",
                                                                     "designerId": "87274c48-fa61-4ab3-acd1-2696486c13a3",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3886,7 +3886,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter7",
+                                                                    "name": "filter5",
                                                                     "designerId": "f11b92d2-d17f-4030-af6e-5449c5557e10",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -4091,7 +4091,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter8",
+                                                                    "name": "filter6",
                                                                     "designerId": "317ae54f-a81d-4657-8d0b-3edd670adaca",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -4339,7 +4339,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter9",
+                                                                    "name": "filter7",
                                                                     "designerId": "1de0066e-eb37-44ae-af83-adcc5f465797",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -4641,7 +4641,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter10",
+                                                                            "name": "filter8",
                                                                             "designerId": "102ea262-7cce-4c88-bd43-2f80cfa1e9a8",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -4764,7 +4764,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter11",
+                                                                            "name": "filter9",
                                                                             "designerId": "437f9756-d7eb-404d-89dd-762a18b9132c",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -4955,7 +4955,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter12",
+                                                    "name": "filter10",
                                                     "designerId": "efa99b46-2432-478a-97f2-c35eb7b7ed7c",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4970,8 +4970,9 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "string",
-                                                "flex": 1,
-                                                "text": "Location"
+                                                "flex": null,
+                                                "text": "Location",
+                                                "width": 116
                                             },
                                             "name": "MyColumn21",
                                             "designerId": "99b8c407-e755-4e9c-b3f2-7ace0b0a7f46"
@@ -4985,24 +4986,9 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "string",
-                                                "flex": 1,
-                                                "text": "Store"
-                                            },
-                                            "name": "MyColumn22",
-                                            "designerId": "e04954ee-67a7-4426-9550-d02ac191571f"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "string",
                                                 "flex": null,
-                                                "text": "Pricing Method",
-                                                "width": 100
+                                                "text": "Sale Price",
+                                                "width": 80
                                             },
                                             "name": "MyColumn23",
                                             "designerId": "faded271-3d4a-4a2a-8c32-b6083c9eb19d"
@@ -5018,7 +5004,7 @@
                                                 "dataIndex": "string",
                                                 "flex": null,
                                                 "text": "Retail Price",
-                                                "width": 85
+                                                "width": 80
                                             },
                                             "name": "MyColumn24",
                                             "designerId": "b6cd64ea-8606-4ed5-9754-dd37cd0bb41b"
@@ -5034,7 +5020,7 @@
                                                 "dataIndex": "string",
                                                 "flex": null,
                                                 "text": "Wholesale Price",
-                                                "width": 85
+                                                "width": 90
                                             },
                                             "name": "MyColumn25",
                                             "designerId": "c578ac2b-1167-4ccc-8d10-645416fac096"
@@ -5049,8 +5035,24 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": null,
+                                                "text": "Large Volume Price",
+                                                "width": 110
+                                            },
+                                            "name": "MyColumn22",
+                                            "designerId": "ee7faf06-b546-4888-beb6-6eae38e50e4f"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "string",
+                                                "flex": null,
                                                 "text": "MSRP",
-                                                "width": 85
+                                                "width": 80
                                             },
                                             "name": "MyColumn26",
                                             "designerId": "ff739ab3-f97e-4f1c-bba1-7bd6d5a79dd1"
@@ -5065,11 +5067,43 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": null,
-                                                "text": "Last Cost",
+                                                "text": "Pricing Method",
                                                 "width": 85
+                                            },
+                                            "name": "MyColumn46",
+                                            "designerId": "ad2b887c-ef53-46e2-ac95-a40fb58c2379"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "string",
+                                                "flex": null,
+                                                "text": "Last Cost",
+                                                "width": 80
                                             },
                                             "name": "MyColumn27",
                                             "designerId": "832578c0-2da9-4d30-acb4-c5f12f799379"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "string",
+                                                "flex": null,
+                                                "text": "Standard Cost",
+                                                "width": 85
+                                            },
+                                            "name": "MyColumn29",
+                                            "designerId": "62726e98-d1ed-4332-9cc6-5c5426e83c0f"
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -5097,11 +5131,25 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": null,
-                                                "text": "Standard Cost",
+                                                "text": "End of Month Cost",
                                                 "width": 85
                                             },
-                                            "name": "MyColumn29",
-                                            "designerId": "62726e98-d1ed-4332-9cc6-5c5426e83c0f"
+                                            "name": "MyColumn81",
+                                            "designerId": "fc57ef1c-79f3-4f6d-9cba-6495fca0ecf9"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Check",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "text": "Active",
+                                                "width": 52
+                                            },
+                                            "name": "MyCheck2",
+                                            "designerId": "1b0c6c66-2d59-4c43-bf27-709575f500f6"
                                         },
                                         {
                                             "type": "Ext.grid.View",
@@ -5234,7 +5282,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter13",
+                                                                    "name": "filter11",
                                                                     "designerId": "8c12842b-2ead-456f-b4dc-8a0da80ee35f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -5254,21 +5302,6 @@
                                                             },
                                                             "name": "MyColumn30",
                                                             "designerId": "ed9bcc1e-2662-403b-a1d5-23165adfbc25"
-                                                        },
-                                                        {
-                                                            "type": "Ext.grid.column.Column",
-                                                            "reference": {
-                                                                "name": "columns",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "dataIndex": "strFieldName",
-                                                                "flex": 1,
-                                                                "text": "Store Name"
-                                                            },
-                                                            "name": "MyColumn31",
-                                                            "designerId": "0408a5c9-753d-4f1e-b26e-60f9b7de8543"
                                                         },
                                                         {
                                                             "type": "Ext.grid.column.Column",
@@ -5405,8 +5438,8 @@
                                                             "userConfig": {
                                                                 "dataIndex": "strFieldName",
                                                                 "flex": null,
-                                                                "text": "Commission %",
-                                                                "width": 80
+                                                                "text": "Commission On",
+                                                                "width": 100
                                                             },
                                                             "name": "MyColumn40",
                                                             "designerId": "08a4db79-0aca-42ed-8c29-3cd4f089fd02"
@@ -5421,11 +5454,29 @@
                                                             "userConfig": {
                                                                 "align": "right",
                                                                 "dataIndex": "strFieldName",
-                                                                "flex": 1,
-                                                                "text": "Percent/Amount"
+                                                                "flex": null,
+                                                                "text": "Commision Rate",
+                                                                "width": 104
                                                             },
                                                             "name": "MyColumn41",
                                                             "designerId": "09c5964d-efa0-4ad3-a5bc-37cb88410e9f"
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "align": "right",
+                                                                "dataIndex": "strFieldName",
+                                                                "flex": 1,
+                                                                "text": "Amount",
+                                                                "width": 68
+                                                            },
+                                                            "name": "MyColumn31",
+                                                            "designerId": "ee0d1236-0756-4b87-bf73-51c0a5f28784"
                                                         },
                                                         {
                                                             "type": "Ext.grid.column.Column",
@@ -5442,6 +5493,20 @@
                                                             },
                                                             "name": "MyColumn42",
                                                             "designerId": "1ad0e5a5-0246-44b9-a119-1da2f60a5bf5"
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Check",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "text": "Active",
+                                                                "width": 52
+                                                            },
+                                                            "name": "MyCheck1",
+                                                            "designerId": "76793f7c-5861-4e5e-ac6a-727354dc5c3c"
                                                         },
                                                         {
                                                             "type": "Ext.grid.View",
@@ -5482,7 +5547,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "layout": "fit",
-                                                "title": "Rebate/Discount"
+                                                "title": "Special Pricing"
                                             },
                                             "name": "MyPanel18",
                                             "designerId": "fb4a4076-b20e-419b-b744-c9afddcfe8d5",
@@ -5570,7 +5635,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter14",
+                                                                    "name": "filter12",
                                                                     "designerId": "df49b4ec-5d3e-4ec5-8704-5a1a7a595dd1",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -5585,7 +5650,7 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "dataIndex": "strFieldName",
-                                                                "flex": 1,
+                                                                "flex": null,
                                                                 "text": "Location"
                                                             },
                                                             "name": "MyColumn43",
@@ -5600,42 +5665,12 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "dataIndex": "strFieldName",
-                                                                "flex": 1,
-                                                                "text": "Store Name"
-                                                            },
-                                                            "name": "MyColumn44",
-                                                            "designerId": "76127c93-0506-4672-9ea0-5e59c2abf22a"
-                                                        },
-                                                        {
-                                                            "type": "Ext.grid.column.Column",
-                                                            "reference": {
-                                                                "name": "columns",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "dataIndex": "strFieldName",
                                                                 "flex": null,
-                                                                "text": "Rebate Name",
-                                                                "width": 87
+                                                                "text": "Promotion Type",
+                                                                "width": 101
                                                             },
                                                             "name": "MyColumn45",
                                                             "designerId": "e565ddb7-36a9-4517-b7b0-f3914a945622"
-                                                        },
-                                                        {
-                                                            "type": "Ext.grid.column.Column",
-                                                            "reference": {
-                                                                "name": "columns",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "dataIndex": "strFieldName",
-                                                                "text": "Rebate Type",
-                                                                "width": 76
-                                                            },
-                                                            "name": "MyColumn46",
-                                                            "designerId": "6840248a-d7aa-4271-8086-a76a4cda11ab"
                                                         },
                                                         {
                                                             "type": "Ext.grid.column.Date",
@@ -5674,8 +5709,8 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "dataIndex": "strFieldName",
-                                                                "text": "Through Qty",
-                                                                "width": 74
+                                                                "text": "Unit",
+                                                                "width": 53
                                                             },
                                                             "name": "MyColumn47",
                                                             "designerId": "1707f32d-e588-40fe-8bd9-e69b87ec1479"
@@ -5690,8 +5725,8 @@
                                                             "userConfig": {
                                                                 "dataIndex": "strFieldName",
                                                                 "flex": null,
-                                                                "text": "Through Amount",
-                                                                "width": 93
+                                                                "text": "Quantity",
+                                                                "width": 58
                                                             },
                                                             "name": "MyColumn48",
                                                             "designerId": "c3cc12ee-de55-408a-98f6-b2f5bbb7e3b6"
@@ -5706,7 +5741,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "strFieldName",
                                                                 "flex": null,
-                                                                "text": "Amount/Unit",
+                                                                "text": "Discount By",
                                                                 "width": 74
                                                             },
                                                             "name": "MyColumn49",
@@ -5722,7 +5757,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "strFieldName",
                                                                 "flex": null,
-                                                                "text": "Accumulated Qty",
+                                                                "text": "Discount Rate",
                                                                 "width": 96
                                                             },
                                                             "name": "MyColumn50",
@@ -5738,11 +5773,43 @@
                                                             "userConfig": {
                                                                 "dataIndex": "strFieldName",
                                                                 "flex": null,
-                                                                "text": "Accumulated Amount",
-                                                                "width": 114
+                                                                "text": "Unit Price",
+                                                                "width": 69
                                                             },
                                                             "name": "MyColumn51",
                                                             "designerId": "400139bb-5840-4af2-83e4-147580e8766c"
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "strFieldName",
+                                                                "flex": null,
+                                                                "text": "Accum. Qty",
+                                                                "width": 73
+                                                            },
+                                                            "name": "MyColumn8",
+                                                            "designerId": "bdc963ca-8bfc-49f3-be6b-135f8839963b"
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "strFieldName",
+                                                                "flex": null,
+                                                                "text": "Accum. Amount",
+                                                                "width": 112
+                                                            },
+                                                            "name": "MyColumn44",
+                                                            "designerId": "f7095dbc-cf10-4af9-b697-5c278cd5fe4f"
                                                         },
                                                         {
                                                             "type": "Ext.grid.View",
@@ -5919,7 +5986,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter15",
+                                                                    "name": "filter13",
                                                                     "designerId": "1359797a-01d3-4908-862b-ecee335db0ef",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -6250,7 +6317,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter16",
+                                                                    "name": "filter14",
                                                                     "designerId": "9949aed9-86f7-4f15-aac6-afedae027c18",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -6657,7 +6724,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter17",
+                                                    "name": "filter15",
                                                     "designerId": "ab092e2c-0602-4213-baf5-e07813015a04",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }

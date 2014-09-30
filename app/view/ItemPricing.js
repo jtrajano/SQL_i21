@@ -19,20 +19,22 @@ Ext.define('Inventory.view.ItemPricing', {
 
     requires: [
         'Inventory.view.ItemPricingViewModel',
-        'Inventory.view.StatusbarPaging',
+        'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
         'Ext.button.Button',
         'Ext.toolbar.Separator',
         'Ext.form.field.ComboBox',
+        'Ext.form.field.Checkbox',
         'Ext.toolbar.Paging'
     ],
 
     viewModel: {
         type: 'itempricing'
     },
-    height: 390,
+    height: 315,
     hidden: false,
-    maxHeight: 390,
+    maxHeight: 315,
+    minHeight: 315,
     minWidth: 650,
     width: 650,
     layout: 'fit',
@@ -171,13 +173,13 @@ Ext.define('Inventory.view.ItemPricing', {
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtStoreName',
-                                    fieldLabel: 'Store Name',
+                                    itemId: 'txtRetailPrice',
+                                    fieldLabel: 'Sale Price',
                                     labelWidth: 110
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtRetailPrice',
+                                    itemId: 'txtRetailPrice1',
                                     fieldLabel: 'Retail Price',
                                     labelWidth: 110
                                 },
@@ -197,24 +199,6 @@ Ext.define('Inventory.view.ItemPricing', {
                                     xtype: 'textfield',
                                     itemId: 'txtMsrp',
                                     fieldLabel: 'MSRP',
-                                    labelWidth: 110
-                                },
-                                {
-                                    xtype: 'textfield',
-                                    itemId: 'txtCommissionRate',
-                                    fieldLabel: 'Commission Rate',
-                                    labelWidth: 110
-                                },
-                                {
-                                    xtype: 'textfield',
-                                    itemId: 'txtDiscountCode',
-                                    fieldLabel: 'Discount Code',
-                                    labelWidth: 110
-                                },
-                                {
-                                    xtype: 'textfield',
-                                    itemId: 'txtMinOverride',
-                                    fieldLabel: 'Min Override',
                                     labelWidth: 110
                                 }
                             ]
@@ -242,14 +226,14 @@ Ext.define('Inventory.view.ItemPricing', {
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtAverageCost',
-                                    fieldLabel: 'Average Cost',
+                                    itemId: 'txtStandardCost',
+                                    fieldLabel: 'Standard Cost',
                                     labelWidth: 110
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtStandardCost',
-                                    fieldLabel: 'Standard Cost',
+                                    itemId: 'txtAverageCost',
+                                    fieldLabel: 'Average Cost',
                                     labelWidth: 110
                                 },
                                 {
@@ -259,27 +243,9 @@ Ext.define('Inventory.view.ItemPricing', {
                                     labelWidth: 110
                                 },
                                 {
-                                    xtype: 'textfield',
-                                    itemId: 'txtDefaultSalesTax',
-                                    fieldLabel: 'Default Sales Tax',
-                                    labelWidth: 110
-                                },
-                                {
-                                    xtype: 'textfield',
-                                    itemId: 'txtCommissionUnits',
-                                    fieldLabel: 'Commission Units',
-                                    labelWidth: 110
-                                },
-                                {
-                                    xtype: 'textfield',
-                                    itemId: 'txtDiscountRate',
-                                    fieldLabel: 'Discount Rate',
-                                    labelWidth: 110
-                                },
-                                {
-                                    xtype: 'textfield',
-                                    itemId: 'txtMaxOverride',
-                                    fieldLabel: 'Max Override',
+                                    xtype: 'checkboxfield',
+                                    flex: 1,
+                                    fieldLabel: 'Active',
                                     labelWidth: 110
                                 }
                             ]
