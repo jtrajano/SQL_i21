@@ -2097,56 +2097,20 @@
                                                                     "designerId": "c7516f3f-c657-4737-81ff-ff508caed194"
                                                                 },
                                                                 {
-                                                                    "type": "Ext.container.Container",
+                                                                    "type": "Ext.form.field.ComboBox",
                                                                     "reference": {
                                                                         "name": "items",
                                                                         "type": "array"
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "container|align": "stretch",
-                                                                        "designer|displayName": "container",
-                                                                        "layout": "hbox",
-                                                                        "layout|flex": null,
-                                                                        "margin": "0 0 5 0"
+                                                                        "fieldLabel": "WIC Code",
+                                                                        "itemId": "cboWicCode",
+                                                                        "labelWidth": 130,
+                                                                        "layout|flex": 1
                                                                     },
-                                                                    "name": "MyContainer29",
-                                                                    "designerId": "52adc70b-861e-4470-9bd5-7c41c2b2b0a5",
-                                                                    "cn": [
-                                                                        {
-                                                                            "type": "Ext.form.field.ComboBox",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "fieldLabel": "Product Code",
-                                                                                "itemId": "cboProductCode",
-                                                                                "labelWidth": 130,
-                                                                                "layout|flex": 1.6,
-                                                                                "margin": "0 5 0 0"
-                                                                            },
-                                                                            "name": "MyComboBox24",
-                                                                            "designerId": "567ecaa3-77d0-4409-97d5-f25289641d79"
-                                                                        },
-                                                                        {
-                                                                            "type": "Ext.form.field.ComboBox",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "fieldLabel": "WIC Code",
-                                                                                "itemId": "cboWicCode",
-                                                                                "labelWidth": 60,
-                                                                                "layout|flex": 1
-                                                                            },
-                                                                            "name": "MyComboBox25",
-                                                                            "designerId": "efccb1bf-f068-42c5-a713-08f896d73eea"
-                                                                        }
-                                                                    ]
+                                                                    "name": "MyComboBox25",
+                                                                    "designerId": "efccb1bf-f068-42c5-a713-08f896d73eea"
                                                                 },
                                                                 {
                                                                     "type": "Ext.form.field.ComboBox",
@@ -6875,7 +6839,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging11",
                     "designerId": "64f13019-953f-46dc-920e-9a395d3cb3c9",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

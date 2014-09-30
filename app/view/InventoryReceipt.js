@@ -285,29 +285,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     },
                                                     {
                                                         xtype: 'textfield',
-                                                        flex: 1,
+                                                        flex: 1.2,
                                                         itemId: 'txtVendorName',
                                                         margin: '0 5',
                                                         fieldLabel: 'Vendor Name',
                                                         labelAlign: 'top',
                                                         labelWidth: 80
-                                                    },
-                                                    {
-                                                        xtype: 'datefield',
-                                                        itemId: 'dtmReceiptDate',
-                                                        width: 80,
-                                                        fieldLabel: 'Receipt Date',
-                                                        labelAlign: 'top',
-                                                        labelWidth: 75
-                                                    },
-                                                    {
-                                                        xtype: 'combobox',
-                                                        itemId: 'cboCurrency',
-                                                        margin: '0 5',
-                                                        width: 60,
-                                                        fieldLabel: 'Currency',
-                                                        labelAlign: 'top',
-                                                        labelWidth: 105
                                                     },
                                                     {
                                                         xtype: 'combobox',
@@ -318,17 +301,26 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         labelWidth: 80
                                                     },
                                                     {
-                                                        xtype: 'combobox',
-                                                        flex: 1,
-                                                        itemId: 'cboWarehouse',
+                                                        xtype: 'datefield',
+                                                        itemId: 'dtmReceiptDate',
                                                         margin: '0 5',
-                                                        fieldLabel: 'Warehouse',
+                                                        width: 80,
+                                                        fieldLabel: 'Receipt Date',
+                                                        labelAlign: 'top',
+                                                        labelWidth: 75
+                                                    },
+                                                    {
+                                                        xtype: 'combobox',
+                                                        itemId: 'cboCurrency',
+                                                        width: 60,
+                                                        fieldLabel: 'Currency',
                                                         labelAlign: 'top',
                                                         labelWidth: 105
                                                     },
                                                     {
                                                         xtype: 'textfield',
                                                         itemId: 'txtReceiptNumber',
+                                                        margin: '0 0 0 5',
                                                         width: 100,
                                                         fieldLabel: 'Receipt No',
                                                         labelAlign: 'top',
@@ -390,8 +382,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 labelWidth: 105
                                                             },
                                                             {
-                                                                xtype: 'combobox',
-                                                                itemId: 'cboReceiver',
+                                                                xtype: 'textfield',
+                                                                itemId: 'txtReceiver',
                                                                 fieldLabel: 'Receiver',
                                                                 labelWidth: 105
                                                             },
@@ -442,14 +434,14 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtAllocateFreight',
+                                                                xtype: 'combobox',
+                                                                itemId: 'cboAllocateFreight',
                                                                 fieldLabel: 'Allocate Freight',
                                                                 labelWidth: 110
                                                             },
                                                             {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtFreightBilledBy',
+                                                                xtype: 'combobox',
+                                                                itemId: 'cboFreightBilledBy',
                                                                 fieldLabel: 'Freight Billed By',
                                                                 labelWidth: 110
                                                             },
@@ -526,6 +518,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colItemNo2',
+                                                        width: 90,
+                                                        dataIndex: 'strDescription',
+                                                        text: 'Sublocation'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colItemNo5',
                                                         width: 100,
                                                         dataIndex: 'strDescription',
                                                         text: 'Lot Tracking'

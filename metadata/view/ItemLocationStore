@@ -10,12 +10,12 @@
         "defaultFocus": null,
         "designer|userAlias": "itemlocationstore",
         "designer|userClassName": "ItemLocationStore",
-        "height": 660,
+        "height": 684,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
         "layout": "fit",
-        "maxHeight": 660,
+        "maxHeight": null,
         "maximizable": true,
         "minHeight": 660,
         "minWidth": 995,
@@ -495,6 +495,22 @@
                                     },
                                     "name": "MyComboBox31",
                                     "designerId": "393f1fb5-8d3a-44a9-9ae3-f43280c30685"
+                                },
+                                {
+                                    "type": "Ext.form.field.ComboBox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Product Code",
+                                        "itemId": "cboProductCode",
+                                        "labelWidth": 105,
+                                        "layout|flex": null
+                                    },
+                                    "name": "MyComboBox14",
+                                    "designerId": "4a795ebf-71b9-471a-a2e3-1f837376b0e8"
                                 },
                                 {
                                     "type": "Ext.form.field.ComboBox",
@@ -1134,7 +1150,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging12",
                     "designerId": "3812557b-eaf0-4f41-b444-7da5890f9c89",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

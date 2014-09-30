@@ -555,7 +555,7 @@
                                                 "itemId": "txtVendorName",
                                                 "labelAlign": "top",
                                                 "labelWidth": 80,
-                                                "layout|flex": 1,
+                                                "layout|flex": 1.2,
                                                 "layout|margins": null,
                                                 "margin": "0 5",
                                                 "name": null,
@@ -563,48 +563,6 @@
                                             },
                                             "name": "MyTextField3",
                                             "designerId": "e1e0f2b7-2305-4493-9c56-5eb7b095cb57"
-                                        },
-                                        {
-                                            "type": "Ext.form.field.Date",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "fieldLabel": "Receipt Date",
-                                                "itemId": "dtmReceiptDate",
-                                                "labelAlign": "top",
-                                                "labelWidth": 75,
-                                                "layout|flex": null,
-                                                "name": null,
-                                                "width": 80
-                                            },
-                                            "name": "MyDateField4",
-                                            "designerId": "5acaf3bf-e827-40ab-ba23-e53a81e1b537"
-                                        },
-                                        {
-                                            "type": "Ext.form.field.ComboBox",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "designer|createAlias": null,
-                                                "displayField": null,
-                                                "fieldLabel": "Currency",
-                                                "itemId": "cboCurrency",
-                                                "labelAlign": "top",
-                                                "labelWidth": 105,
-                                                "layout|flex": null,
-                                                "margin": "0 5",
-                                                "name": null,
-                                                "valueField": null,
-                                                "width": 60
-                                            },
-                                            "name": "MyComboBox9",
-                                            "designerId": "b0b229da-0b8f-4aec-89bb-bc3143ac30b1"
                                         },
                                         {
                                             "type": "Ext.form.field.ComboBox",
@@ -629,6 +587,26 @@
                                             "designerId": "038a7242-5956-4d4d-b83d-b71a956cdfb1"
                                         },
                                         {
+                                            "type": "Ext.form.field.Date",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "fieldLabel": "Receipt Date",
+                                                "itemId": "dtmReceiptDate",
+                                                "labelAlign": "top",
+                                                "labelWidth": 75,
+                                                "layout|flex": null,
+                                                "margin": "0 5",
+                                                "name": null,
+                                                "width": 80
+                                            },
+                                            "name": "MyDateField4",
+                                            "designerId": "5acaf3bf-e827-40ab-ba23-e53a81e1b537"
+                                        },
+                                        {
                                             "type": "Ext.form.field.ComboBox",
                                             "reference": {
                                                 "name": "items",
@@ -636,23 +614,20 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "designer|createAlias": null,
                                                 "displayField": null,
-                                                "fieldLabel": "Warehouse",
-                                                "itemId": "cboWarehouse",
+                                                "fieldLabel": "Currency",
+                                                "itemId": "cboCurrency",
                                                 "labelAlign": "top",
                                                 "labelWidth": 105,
-                                                "layout|flex": 1,
-                                                "layout|margins": null,
-                                                "margin": "0 5",
+                                                "layout|flex": null,
+                                                "margin": null,
                                                 "name": null,
-                                                "queryMode": null,
-                                                "readOnly": null,
-                                                "store": null,
                                                 "valueField": null,
-                                                "width": null
+                                                "width": 60
                                             },
-                                            "name": "MyComboBox10",
-                                            "designerId": "1d136533-5868-45d7-bc5c-3470c31f7db6"
+                                            "name": "MyComboBox9",
+                                            "designerId": "b0b229da-0b8f-4aec-89bb-bc3143ac30b1"
                                         },
                                         {
                                             "type": "Ext.form.field.Text",
@@ -668,7 +643,7 @@
                                                 "labelAlign": "top",
                                                 "labelWidth": 105,
                                                 "layout|flex": null,
-                                                "margin": null,
+                                                "margin": "0 0 0 5",
                                                 "name": null,
                                                 "readOnly": true,
                                                 "width": 100
@@ -827,7 +802,7 @@
                                                     ]
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.ComboBox",
+                                                    "type": "Ext.form.field.Text",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
@@ -835,7 +810,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Receiver",
-                                                        "itemId": "cboReceiver",
+                                                        "itemId": "txtReceiver",
                                                         "labelWidth": 105,
                                                         "layout|flex": null,
                                                         "layout|margins": null,
@@ -843,7 +818,7 @@
                                                         "readOnly": null,
                                                         "width": null
                                                     },
-                                                    "name": "MyComboBox5",
+                                                    "name": "MyTextField6",
                                                     "designerId": "d9440ce3-8e07-4197-a08b-74d2b9cccca9"
                                                 },
                                                 {
@@ -995,7 +970,7 @@
                                             "designerId": "880c165c-0c37-4c61-9cf4-e2442b775ca2",
                                             "cn": [
                                                 {
-                                                    "type": "Ext.form.field.Text",
+                                                    "type": "Ext.form.field.ComboBox",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
@@ -1006,14 +981,14 @@
                                                         "designer|createAlias": null,
                                                         "fieldLabel": "Allocate Freight",
                                                         "hideTrigger": null,
-                                                        "itemId": "txtAllocateFreight",
+                                                        "itemId": "cboAllocateFreight",
                                                         "labelWidth": 110,
                                                         "layout|flex": null,
                                                         "layout|margins": null,
                                                         "name": null,
                                                         "width": null
                                                     },
-                                                    "name": "MyTextField6",
+                                                    "name": "MyComboBox1",
                                                     "configAlternates": {
                                                         "alwaysDisplayDecimals": "boolean"
                                                     },
@@ -1027,7 +1002,7 @@
                                                     ]
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.Text",
+                                                    "type": "Ext.form.field.ComboBox",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
@@ -1038,14 +1013,14 @@
                                                         "designer|createAlias": null,
                                                         "fieldLabel": "Freight Billed By",
                                                         "hideTrigger": null,
-                                                        "itemId": "txtFreightBilledBy",
+                                                        "itemId": "cboFreightBilledBy",
                                                         "labelWidth": 110,
                                                         "layout|flex": null,
                                                         "layout|margins": null,
                                                         "name": null,
                                                         "width": null
                                                     },
-                                                    "name": "MyTextField7",
+                                                    "name": "MyComboBox4",
                                                     "configAlternates": {
                                                         "alwaysDisplayDecimals": "boolean"
                                                     },
@@ -1262,11 +1237,27 @@
                                             "userConfig": {
                                                 "dataIndex": "strDescription",
                                                 "itemId": "colItemNo2",
-                                                "text": "Lot Tracking",
-                                                "width": 100
+                                                "text": "Sublocation",
+                                                "width": 90
                                             },
                                             "name": "MyColumn1",
                                             "designerId": "0f567d0c-1633-4ddc-91b4-509cf9ccd1a7"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strDescription",
+                                                "itemId": "colItemNo5",
+                                                "text": "Lot Tracking",
+                                                "width": 100
+                                            },
+                                            "name": "MyColumn7",
+                                            "designerId": "668bcfec-389d-4c2f-b424-0bea283da0f3"
                                         },
                                         {
                                             "type": "Ext.grid.column.Number",

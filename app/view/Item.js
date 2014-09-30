@@ -942,29 +942,11 @@ Ext.define('Inventory.view.Item', {
                                                                                 labelWidth: 130
                                                                             },
                                                                             {
-                                                                                xtype: 'container',
-                                                                                margin: '0 0 5 0',
-                                                                                layout: {
-                                                                                    type: 'hbox',
-                                                                                    align: 'stretch'
-                                                                                },
-                                                                                items: [
-                                                                                    {
-                                                                                        xtype: 'combobox',
-                                                                                        flex: 1.6,
-                                                                                        itemId: 'cboProductCode',
-                                                                                        margin: '0 5 0 0',
-                                                                                        fieldLabel: 'Product Code',
-                                                                                        labelWidth: 130
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'combobox',
-                                                                                        flex: 1,
-                                                                                        itemId: 'cboWicCode',
-                                                                                        fieldLabel: 'WIC Code',
-                                                                                        labelWidth: 60
-                                                                                    }
-                                                                                ]
+                                                                                xtype: 'combobox',
+                                                                                flex: 1,
+                                                                                itemId: 'cboWicCode',
+                                                                                fieldLabel: 'WIC Code',
+                                                                                labelWidth: 130
                                                                             },
                                                                             {
                                                                                 xtype: 'combobox',
