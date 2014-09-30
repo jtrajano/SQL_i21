@@ -7,6 +7,7 @@
 	[dtmReleaseDate] [date] NULL,
 	[ysnSupported] [bit] NULL,
 	[dtmEOLDate] [date] NULL,
+	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	CONSTRAINT [PK_tblHDVersion] PRIMARY KEY CLUSTERED ([intVersionId] ASC),
 	CONSTRAINT [UNQ_tblHDVersion] UNIQUE ([intTicketProductId],[strVersionNo]),
