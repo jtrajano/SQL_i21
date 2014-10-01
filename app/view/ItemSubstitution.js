@@ -20,7 +20,7 @@ Ext.define('Inventory.view.ItemSubstitution', {
     requires: [
         'Inventory.view.ItemSubstitutionViewModel',
         'Inventory.view.Filter',
-        'Inventory.view.StatusbarPaging',
+        'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
         'Ext.button.Button',
         'Ext.toolbar.Separator',

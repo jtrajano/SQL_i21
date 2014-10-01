@@ -20,7 +20,7 @@ Ext.define('Inventory.view.ReasonCode', {
     requires: [
         'Inventory.view.ReasonCodeViewModel',
         'Inventory.view.Filter',
-        'Inventory.view.StatusbarPaging',
+        'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
         'Ext.toolbar.Separator',
         'Ext.tab.Panel',

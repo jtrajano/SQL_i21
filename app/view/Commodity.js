@@ -20,7 +20,7 @@ Ext.define('Inventory.view.Commodity', {
     requires: [
         'Inventory.view.CommodityViewModel',
         'Inventory.view.Filter',
-        'Inventory.view.StatusbarPaging',
+        'Inventory.view.StatusbarPaging1',
         'Ext.toolbar.Separator',
         'Ext.form.Panel',
         'Ext.tab.Panel',
@@ -1410,7 +1410,7 @@ Ext.define('Inventory.view.Commodity', {
                         ],
                         dockedItems: [
                             {
-                                xtype: 'statusbarpaging',
+                                xtype: 'statusbarpaging1',
                                 itemId: 'tlbStatusbarPaging',
                                 flex: 1,
                                 dock: 'bottom'

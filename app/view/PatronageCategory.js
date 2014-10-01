@@ -20,7 +20,7 @@ Ext.define('Inventory.view.PatronageCategory', {
     requires: [
         'Inventory.view.PatronageCategoryViewModel',
         'Inventory.view.Filter',
-        'Inventory.view.Statusbar',
+        'Inventory.view.Statusbar1',
         'Ext.form.Panel',
         'Ext.toolbar.Toolbar',
         'Ext.button.Button',

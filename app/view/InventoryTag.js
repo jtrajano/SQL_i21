@@ -19,7 +19,7 @@ Ext.define('Inventory.view.InventoryTag', {
 
     requires: [
         'Inventory.view.InventoryTagViewModel',
-        'Inventory.view.StatusbarPaging',
+        'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
         'Ext.button.Button',
         'Ext.toolbar.Separator',

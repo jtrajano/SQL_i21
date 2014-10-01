@@ -19,7 +19,7 @@ Ext.define('Inventory.view.CategoryStore', {
 
     requires: [
         'Inventory.view.CategoryStoreViewModel',
-        'Inventory.view.StatusbarPaging',
+        'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
         'Ext.button.Button',
         'Ext.toolbar.Separator',

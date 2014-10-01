@@ -19,7 +19,7 @@ Ext.define('Inventory.view.FuelTank', {
 
     requires: [
         'Inventory.view.Filter',
-        'Inventory.view.Statusbar',
+        'Inventory.view.Statusbar1',
         'Ext.form.Panel',
         'Ext.toolbar.Toolbar',
         'Ext.button.Button',
@@ -109,7 +109,7 @@ Ext.define('Inventory.view.FuelTank', {
                                 ]
                             },
                             {
-                                xtype: 'statusbar',
+                                xtype: 'statusbar1',
                                 flex: 1,
                                 dock: 'bottom'
                             }

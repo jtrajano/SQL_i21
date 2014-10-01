@@ -19,7 +19,7 @@ Ext.define('Inventory.view.SubCategory', {
 
     requires: [
         'Inventory.view.Filter',
-        'Inventory.view.StatusbarPaging',
+        'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
         'Ext.toolbar.Separator',
         'Ext.tab.Panel',

@@ -20,7 +20,7 @@ Ext.define('Inventory.view.WorkCenterAdd', {
     requires: [
         'Inventory.view.WorkCenterAddViewModel',
         'Inventory.view.Filter',
-        'Inventory.view.Statusbar',
+        'Inventory.view.Statusbar1',
         'Ext.form.Panel',
         'Ext.toolbar.Toolbar',
         'Ext.button.Button',
@@ -136,7 +136,7 @@ Ext.define('Inventory.view.WorkCenterAdd', {
     ],
     dockedItems: [
         {
-            xtype: 'statusbar',
+            xtype: 'statusbar1',
             dock: 'bottom'
         }
     ]
