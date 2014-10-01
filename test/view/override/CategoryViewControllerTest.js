@@ -32,7 +32,7 @@ describe("Category View Controller", function() {
         it("has a setupContext function", function() {
             controller.setupContext.should.exist;
         });
-        it("has a setupContext function", function() {
+        it("has a config property", function() {
             controller.config.should.exist;
         });
 

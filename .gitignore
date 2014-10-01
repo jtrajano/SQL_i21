@@ -112,3 +112,4 @@ server/iRely.Inventory.WebAPI/karma.conf.js
 app/view/Filter.js
 app/view/FilterViewController.js
 app/view/FilterViewModel.js
+test-results.xml

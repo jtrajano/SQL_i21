@@ -8,10 +8,14 @@ var InventoryFiles = [
 //
     // Load the Inventory dependencies
 
+    {pattern: '../i21_SystemManager/app/model/Country.js', watched: false},
+    {pattern: '../i21_SystemManager/app/store/Country*.js', watched: false},
+    {pattern: '../i21_SystemManager/app/model/ZipCode.js', watched: false},
+    {pattern: '../i21_SystemManager/app/store/ZipCode*.js', watched: false},
+
     {pattern: 'app/view/FilterViewModel.js', watched: false},
     {pattern: 'app/view/StatusBar1ViewModel.js', watched: false},
-    {pattern: 'app/view/StatusBarViewModel1.js', watched: false},
-    {pattern: 'app/view/StatusBarPagingViewModel1.js', watched: false},
+    {pattern: 'app/view/StatusBarPaging1ViewModel.js', watched: false},
     {pattern: 'app/view/Filter.js', watched: false},
     {pattern: 'app/view/StatusBar1.js', watched: false},
     {pattern: 'app/view/StatusBarPaging1.js', watched: false},
@@ -30,6 +34,9 @@ var InventoryFiles = [
     {pattern: 'app/model/ItemLocationStore.js', watched: false},
     {pattern: 'app/model/ItemPOS.js', watched: false},
     {pattern: 'app/model/ItemSales.js', watched: false},
+    {pattern: 'app/model/ItemUPC.js', watched: false},
+    {pattern: 'app/model/ItemVendorXref.js', watched: false},
+    {pattern: 'app/model/ItemCustomerXref.js', watched: false},
 
 
     {pattern: 'app/model/*.js', watched: false},
@@ -37,7 +44,6 @@ var InventoryFiles = [
     {pattern: 'app/view/override/*ViewModel.js', watched: false},
     {pattern: 'app/view/override/*.js', watched: false},
     {pattern: 'app/view/*ViewModel.js', watched: false},
-    {pattern: 'app/view/*ViewModel1.js', watched: false},
     {pattern: 'app/view/*.js', watched: false},
 
 
