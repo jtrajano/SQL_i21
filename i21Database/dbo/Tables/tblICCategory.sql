@@ -3,7 +3,6 @@
 	[intCategoryId] INT NOT NULL IDENTITY , 
     [strCategoryCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-	[strLineBusiness] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intCatalogGroupId] INT NULL, 
     [strCostingMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strInventoryTracking] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
@@ -90,14 +89,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'strDescription'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Line Of Business',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICCategory',
-    @level2type = N'COLUMN',
-    @level2name = 'strLineBusiness'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Catalog Group Id',
