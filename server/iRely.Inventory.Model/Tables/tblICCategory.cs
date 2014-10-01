@@ -25,7 +25,7 @@ namespace iRely.Inventory.Model
         public int? intCatalogGroupId { get; set; }
         public string strCostingMethod { get; set; }
         public string strInventoryTracking { get; set; }
-        public double dblStandardQty { get; set; }
+        public decimal? dblStandardQty { get; set; }
         public int? intUOMId { get; set; }
         public string strGLDivisionNumber { get; set; }
         public bool ysnSalesAnalysisByTon { get; set; }
@@ -50,10 +50,10 @@ namespace iRely.Inventory.Model
         public bool ysnIdRequiredCigarette { get; set; }
         public int intMinimumAge { get; set; }
         public string strERPItemClass { get; set; }
-        public double dblfeTime { get; set; }
-        public double dblBOMItemShrinkage { get; set; }
-        public double dblBOMItemUpperTolerance { get; set; }
-        public double dblBOMItemLowerTolerance { get; set; }
+        public decimal? dblfeTime { get; set; }
+        public decimal? dblBOMItemShrinkage { get; set; }
+        public decimal? dblBOMItemUpperTolerance { get; set; }
+        public decimal? dblBOMItemLowerTolerance { get; set; }
         public bool ysnScaled { get; set; }
         public bool ysnOutputItemMandatory { get; set; }
         public string strConsumptionMethod { get; set; }
@@ -63,9 +63,9 @@ namespace iRely.Inventory.Model
         public byte[] imgWIPImage { get; set; }
         public byte[] imgFGImage { get; set; }
         public byte[] imgShipImage { get; set; }
-        public double dblLaborCost { get; set; }
-        public double dblOverHead { get; set; }
-        public double dblPercentage { get; set; }
+        public decimal? dblLaborCost { get; set; }
+        public decimal? dblOverHead { get; set; }
+        public decimal? dblPercentage { get; set; }
         public string strCostDistributionMethod { get; set; }
         public bool ysnSellable { get; set; }
         public bool ysnYieldAdjustment { get; set; }
@@ -74,12 +74,10 @@ namespace iRely.Inventory.Model
         public ICollection<tblICCategoryStore> tblICCategoryStores { get; set; }
         public ICollection<tblICCategoryVendor> tblICCategoryVendors { get; set; }
 
-        public tblICCatalog tblICCatalog { get; set; }
-        public tblICUnitMeasure tblICUnitMeasure { get; set; }
-        public tblICItem MaterialItem { get; set; }
-        public tblICItem FreightItem { get; set; }
-        public tblICFamily tblICFamily { get; set; }
-        public tblICClass tblICClass { get; set; }
+        public virtual tblICCatalog tblICCatalog { get; set; }
+        public virtual tblICUnitMeasure tblICUnitMeasure { get; set; }
+        public virtual tblICFamily tblICFamily { get; set; }
+        public virtual tblICClass tblICClass { get; set; }
         
 
     }

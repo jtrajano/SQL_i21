@@ -79,13 +79,13 @@ namespace iRely.Inventory.Model
                 .HasForeignKey(p => p.intCatalogGroupId);
             this.HasOptional(p => p.tblICClass)
                 .WithMany(p => p.tblICCategories)
-                .HasForeignKey(p => p.intCatalogGroupId);
+                .HasForeignKey(p => p.intClassId);
             this.HasOptional(p => p.tblICFamily)
                 .WithMany(p => p.tblICCategories)
-                .HasForeignKey(p => p.intCatalogGroupId);
+                .HasForeignKey(p => p.intFamilyId);
             this.HasOptional(p => p.tblICUnitMeasure)
                 .WithMany(p => p.tblICCategories)
-                .HasForeignKey(p => p.intCatalogGroupId);
+                .HasForeignKey(p => p.intUOMId);
                 
         }
     }
