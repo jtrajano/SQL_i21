@@ -230,7 +230,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                 ]
                             },
                             {
-                                xtype: 'statusbarpaging1',
+                                xtype: 'ipagingstatusbar',
                                 dock: 'bottom'
                             }
                         ],

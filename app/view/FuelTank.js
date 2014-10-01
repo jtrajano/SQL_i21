@@ -35,7 +35,7 @@ Ext.define('Inventory.view.FuelTank', {
     hidden: false,
     minHeight: 500,
     minWidth: 530,
-    width: 875,
+    width: 852,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
@@ -109,7 +109,7 @@ Ext.define('Inventory.view.FuelTank', {
                                 ]
                             },
                             {
-                                xtype: 'statusbar1',
+                                xtype: 'istatusbar',
                                 flex: 1,
                                 dock: 'bottom'
                             }

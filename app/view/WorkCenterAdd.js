@@ -136,7 +136,7 @@ Ext.define('Inventory.view.WorkCenterAdd', {
     ],
     dockedItems: [
         {
-            xtype: 'statusbar1',
+            xtype: 'istatusbar',
             dock: 'bottom'
         }
     ]
