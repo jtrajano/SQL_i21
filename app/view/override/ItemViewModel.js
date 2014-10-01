@@ -96,6 +96,195 @@ Ext.define('Inventory.view.override.ItemViewModel', {
                     name: 'strLotTracking'
                 }
             ]
+        },
+        CostingMethods: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'AVG'
+                },
+                {
+                    strDescription: 'FIFO'
+                },
+                {
+                    strDescription: 'LIFO'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        BarcodePrints: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'UPC'
+                },
+                {
+                    strDescription: 'Item'
+                },
+                {
+                    strDescription: 'None'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        FuelInspectionFees: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Yes (Fuel Item)'
+                },
+                {
+                    strDescription: 'No (Not Fuel Item)'
+                },
+                {
+                    strDescription: 'No (Fuel Item)'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        RinRequires: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'UPC'
+                },
+                {
+                    strDescription: 'Item'
+                },
+                {
+                    strDescription: 'None'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        WICCodes: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Woman'
+                },
+                {
+                    strDescription: 'Infant'
+                },
+                {
+                    strDescription: 'Child'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        RotationTypes: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'FIFO'
+                },
+                {
+                    strDescription: 'LIFO'
+                },
+                {
+                    strDescription: 'NONE'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        PricingMethods: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'None'
+                },
+                {
+                    strDescription: 'Fixed Dollar Amount'
+                },
+                {
+                    strDescription: 'Markup Standard Cost'
+                },
+                {
+                    strDescription: 'Percent of Margin'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        Counteds: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Counted'
+                },
+                {
+                    strDescription: 'Not Counted'
+                },
+                {
+                    strDescription: 'Obsolete'
+                },
+                {
+                    strDescription: 'Blended'
+                },
+                {
+                    strDescription: 'Automatic Blend'
+                },
+                {
+                    strDescription: 'Special Order'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        AccountDescriptions: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Sales'
+                },
+                {
+                    strDescription: 'Purchase'
+                },
+                {
+                    strDescription: 'Variance'
+                },
+                {
+                    strDescription: 'COGS'
+                },
+                {
+                    strDescription: 'Expenses'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
         }
     }
 });
