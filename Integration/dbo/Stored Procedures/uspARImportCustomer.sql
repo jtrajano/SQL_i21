@@ -379,7 +379,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				@ysnVoluntaryCheckoff = CASE WHEN agcus_ckoff_vol_yn = ''Y'' THEN 1 ELSE 0 END ,		
 				@strCheckoffState = agcus_ga_origin_st,			
 				@ysnMarketAgreementSigned = CASE WHEN agcus_mkt_sign_yn = ''Y'' THEN 1 ELSE 0 END ,	
-				@intMarketZoneId = NULL, --agcus_dflt_mkt_zone this should be query to tblARMarketzone,			
+				@intMarketZoneId = (SELECT intMarketZoneId FROM tblARMarketZone WHERE strMarketZoneCode COLLATE Latin1_General_CI_AS = agcus_dflt_mkt_zone COLLATE Latin1_General_CI_AS),			
 				@ysnHoldBatchGrainPayment = CASE WHEN agcus_ga_hold_pay_yn = ''Y'' THEN 1 ELSE 0 END ,	
 				@ysnFederalWithholding = CASE WHEN agcus_ga_wthhld_yn = ''Y'' THEN 1 ELSE 0 END	
 			
