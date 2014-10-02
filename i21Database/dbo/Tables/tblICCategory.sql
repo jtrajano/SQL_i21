@@ -32,7 +32,7 @@
     [ysnIdRequiredCigarette] BIT NULL DEFAULT ((0)), 
     [intMinimumAge] INT NULL DEFAULT ((0)), 
     [strERPItemClass] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [dblfeTime] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+    [dblLifeTime] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblBOMItemShrinkage] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblBOMItemUpperTolerance] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblBOMItemLowerTolerance] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -350,7 +350,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblICCategory',
     @level2type = N'COLUMN',
-    @level2name = N'dblfeTime'
+    @level2name = 'dblLifeTime'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'BOM Item Shrinkage',
