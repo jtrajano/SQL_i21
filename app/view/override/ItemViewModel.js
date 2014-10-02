@@ -158,13 +158,13 @@ Ext.define('Inventory.view.override.ItemViewModel', {
             autoLoad: true,
             data: [
                 {
-                    strDescription: 'UPC'
+                    strDescription: 'No RIN'
                 },
                 {
-                    strDescription: 'Item'
+                    strDescription: 'Resell RIN Only'
                 },
                 {
-                    strDescription: 'None'
+                    strDescription: 'Issued'
                 }
             ],
             fields: [

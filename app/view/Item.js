@@ -679,7 +679,9 @@ Ext.define('Inventory.view.Item', {
                                                                         xtype: 'combobox',
                                                                         itemId: 'cboBarcodePrint',
                                                                         fieldLabel: 'Barcode Print',
-                                                                        labelWidth: 116
+                                                                        labelWidth: 116,
+                                                                        displayField: 'strDescription',
+                                                                        valueField: 'strDescription'
                                                                     },
                                                                     {
                                                                         xtype: 'checkboxfield',
@@ -767,13 +769,17 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'combobox',
                                                                                 itemId: 'cboFuelInspectionFee',
                                                                                 fieldLabel: 'Fuel Inspect Fee',
-                                                                                labelWidth: 125
+                                                                                labelWidth: 125,
+                                                                                displayField: 'strDescription',
+                                                                                valueField: 'strDescription'
                                                                             },
                                                                             {
                                                                                 xtype: 'combobox',
                                                                                 itemId: 'cboRinRequired',
                                                                                 fieldLabel: 'RIN Required',
-                                                                                labelWidth: 125
+                                                                                labelWidth: 125,
+                                                                                displayField: 'strDescription',
+                                                                                valueField: 'strDescription'
                                                                             },
                                                                             {
                                                                                 xtype: 'combobox',
@@ -940,7 +946,9 @@ Ext.define('Inventory.view.Item', {
                                                                                 flex: 1,
                                                                                 itemId: 'cboWicCode',
                                                                                 fieldLabel: 'WIC Code',
-                                                                                labelWidth: 130
+                                                                                labelWidth: 130,
+                                                                                displayField: 'strDescription',
+                                                                                valueField: 'strDescription'
                                                                             },
                                                                             {
                                                                                 xtype: 'combobox',
@@ -1410,7 +1418,9 @@ Ext.define('Inventory.view.Item', {
                                                                                         xtype: 'combobox',
                                                                                         itemId: 'cboRotationType',
                                                                                         fieldLabel: 'Rotation Type',
-                                                                                        labelWidth: 125
+                                                                                        labelWidth: 125,
+                                                                                        displayField: 'strDescription',
+                                                                                        valueField: 'strDescription'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'container',
