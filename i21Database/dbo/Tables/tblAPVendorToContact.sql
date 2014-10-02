@@ -5,7 +5,7 @@
     [intEntityLocationId]        INT NULL,
     [intConcurrencyId]     INT DEFAULT ((0)) NOT NULL,
 	CONSTRAINT [PK_tblAPVendorToContact] PRIMARY KEY CLUSTERED ([intVendorToContactId] ASC),
-    CONSTRAINT [FK_tblAPVendorToContact_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [dbo].[tblAPVendor] ([intVendorId]),
+    CONSTRAINT [FK_tblAPVendorToContact_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [dbo].[tblAPVendor] ([intVendorId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblAPVendorToContact_tblEntityContact] FOREIGN KEY ([intContactId]) REFERENCES [dbo].[tblEntityContact] ([intContactId]),
     CONSTRAINT [FK_tblAPVendorToContact_tblEntityLocation] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId])
 );
