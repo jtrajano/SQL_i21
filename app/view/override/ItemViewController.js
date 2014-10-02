@@ -71,7 +71,10 @@ Ext.define('Inventory.view.override.ItemViewController', {
             cboTaxClass: '{current.tblICItemSales.intTaxClassId}',
             chkStockedItem: '{current.tblICItemSales.ysnStockedItem}',
             chkDyedFuel: '{current.tblICItemSales.ysnDyedFuel}',
-            cboBarcodePrint: '{current.tblICItemSales.strBarcodePrint}',
+            cboBarcodePrint: {
+                value: '{current.tblICItemSales.strBarcodePrint}',
+                store: '{BarcodePrints}'
+            },
             chkMsdsRequired: '{current.tblICItemSales.ysnMSDSRequired}',
             txtEpaNumber: '{current.tblICItemSales.strEPANumber}',
             chkInboundTax: '{current.tblICItemSales.ysnInboundTax}',
@@ -80,8 +83,14 @@ Ext.define('Inventory.view.override.ItemViewController', {
             chkTankRequired: '{current.tblICItemSales.ysnTankRequired}',
             chkAvailableForTm: '{current.tblICItemSales.ysnAvailableTM}',
             chkDefaultPercentFull: '{current.tblICItemSales.dblDefaultFull}',
-            cboFuelInspectionFee: '{current.tblICItemSales.strFuelInspectFee}',
-            cboRinRequired: '{current.tblICItemSales.strRINRequired}',
+            cboFuelInspectionFee: {
+                value: '{current.tblICItemSales.strFuelInspectFee}',
+                store: '{FuelInspectionFees}'
+            },
+            cboRinRequired: {
+                value: '{current.tblICItemSales.strRINRequired}',
+                store: '{RinRequires}'
+            },
             cboRinFuelType: '{current.tblICItemSales.intRINFuelTypeId}',
             txtPercentDenaturant: '{current.tblICItemSales.dblDenaturantPercent}',
             chkTonnageTax: '{current.tblICItemSales.ysnTonnageTax}',
@@ -103,7 +112,10 @@ Ext.define('Inventory.view.override.ItemViewController', {
             txtOrderUpcNo: '{current.tblICItemPOS.strUPCNo}',
             cboCaseUom: '{current.tblICItemPOS.intCaseUOM}',
             txtNacsCategory: '{current.tblICItemPOS.strNACSCategory}',
-            cboWicCode: '{current.tblICItemPOS.strWICCode}',
+            cboWicCode: {
+                value: '{current.tblICItemSales.strWICCode}',
+                store: '{WICCodes}'
+            },
             cboAgCategory: '{current.tblICItemPOS.intAGCategory}',
             chkReceiptCommentReq: '{current.tblICItemPOS.ysnReceiptCommentRequired}',
             cboCountCode: '{current.tblICItemPOS.strCountCode}',
@@ -134,7 +146,10 @@ Ext.define('Inventory.view.override.ItemViewController', {
             cboLifetimeType: '{current.tblICItemManufacturing.strLifeTimeType}',
             txtReceiveLife: '{current.tblICItemManufacturing.intReceiveLife}',
             txtGTIN: '{current.tblICItemManufacturing.strGTIN}',
-            cboRotationType: '{current.tblICItemManufacturing.strRotationType}',
+            cboRotationType: {
+                value: '{current.tblICItemSales.strRotationType}',
+                store: '{RotationTypes}'
+            },
             cboNFMC: '{current.tblICItemManufacturing.intNMFCId}',
             chkStrictFIFO: '{current.tblICItemManufacturing.ysnStrictFIFO}',
             txtHeight: '{current.tblICItemManufacturing.dblHeight}',
@@ -216,7 +231,43 @@ Ext.define('Inventory.view.override.ItemViewController', {
                         grid: win.down('#grdLocationStore'),
                         deleteButton : win.down('#btnDeleteLocation')
                     })
+                },
+                {
+                    key: 'tblICItemUPCs',
+                    component: Ext.create('iRely.grid.Manager', {
+                        grid: win.down('#grdUPC'),
+                        deleteButton : win.down('#btnDeleteUPC')
+                    })
+                },
+                {
+                    key: 'tblICItemVendorXrefs',
+                    component: Ext.create('iRely.grid.Manager', {
+                        grid: win.down('#grdVendorXref'),
+                        deleteButton : win.down('#btnDeleteVendorXref')
+                    })
+                },
+                {
+                    key: 'tblICItemCustomerXrefs',
+                    component: Ext.create('iRely.grid.Manager', {
+                        grid: win.down('#grdCustomerXref'),
+                        deleteButton : win.down('#btnDeleteCustomerXref')
+                    })
+                },
+                {
+                    key: 'tblICItemContracts',
+                    component: Ext.create('iRely.grid.Manager', {
+                        grid: win.down('#grdContractItem'),
+                        deleteButton : win.down('#btnDeleteContractItem')
+                    })
+                },
+                {
+                    key: 'tblICItemCertifications',
+                    component: Ext.create('iRely.grid.Manager', {
+                        grid: win.down('#grdCertification'),
+                        deleteButton : win.down('#btnDeleteCertification')
+                    })
                 }
+
 //                ,
 //                {
 //                    key: 'tblICItemPOS',
