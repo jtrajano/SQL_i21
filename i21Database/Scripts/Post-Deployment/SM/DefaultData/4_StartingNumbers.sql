@@ -158,7 +158,7 @@ GO
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 16
 			,[strTransactionType]	= N'Ticket Number'
-			,[strPrefix]			= N''
+			,[strPrefix]			= N'HDTN-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Help Desk'
 			,[ysnEnable]			= 1

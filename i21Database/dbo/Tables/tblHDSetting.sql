@@ -5,7 +5,8 @@
 	[strHelpDeskURL] [nvarchar](255) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strJIRAURL] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
 	[strTimeZone] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
-	[intTicketStatusId] [int]NULL,
+	[intTicketStatusId] [int] NULL,
+	[intTicketTypeId] [int] null,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
  CONSTRAINT [PK_tblHDSettings] PRIMARY KEY CLUSTERED 
 (

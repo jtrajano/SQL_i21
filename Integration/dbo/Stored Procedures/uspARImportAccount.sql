@@ -3,11 +3,7 @@
 IF EXISTS(select top 1 1 from sys.procedures where name = 'uspARImportAccount')
 	DROP PROCEDURE uspARImportAccount
 GO
-
-
---IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()) = 1
---BEGIN
-	EXEC(
+EXEC(
 	'CREATE PROCEDURE uspARImportAccount
 	@AccountCode NVARCHAR(1) = NULL,
 	@Update BIT = 0,
@@ -117,5 +113,3 @@ GO
 		SELECT @Total = COUNT(ssasc_code) from tblARTempAccount
 	END'
 	)
-
---END
