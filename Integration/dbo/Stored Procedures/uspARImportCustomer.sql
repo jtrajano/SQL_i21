@@ -7,12 +7,13 @@ GO
 
 IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()) = 1
 BEGIN
-EXEC('CREATE PROCEDURE uspARImportCustomer
+
+EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 	@CustomerId NVARCHAR(50) = NULL,
 	@Update BIT = 0,
 	@Total INT = 0 OUTPUT
 
-	AS
+	AS 
 
 	--Make first a copy of agcusmst. This will use to track all customer already imported
 	IF(OBJECT_ID(''dbo.tblARTempCustomer'') IS NULL)
@@ -69,9 +70,12 @@ EXEC('CREATE PROCEDURE uspARImportCustomer
 			agcus_ckoff_vol_yn = CASE WHEN Cus.ysnVoluntaryCheckoff = 1 THEN ''Y'' ELSE ''N'' END,
 			agcus_ga_origin_st = SUBSTRING(Cus.strCheckoffState,1,2),
 			agcus_mkt_sign_yn = CASE WHEN Cus.ysnMarketAgreementSigned = 1 THEN ''Y'' ELSE ''N'' END,
-			agcus_dflt_mkt_zone = Cus.intMarketZoneId,
 			agcus_ga_hold_pay_yn = CASE WHEN Cus.ysnHoldBatchGrainPayment = 1 THEN ''Y'' ELSE ''N'' END,
-			agcus_ga_wthhld_yn = CASE WHEN Cus.ysnFederalWithholding = 1 THEN ''Y'' ELSE ''N'' END	
+			agcus_ga_wthhld_yn = CASE WHEN Cus.ysnFederalWithholding = 1 THEN ''Y'' ELSE ''N'' END,
+			agcus_acct_stat_x_1 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = Cus.intAccountStatusId),
+			agcus_slsmn_id		= (SELECT strSalespersonId FROM tblARSalesperson WHERE intSalespersonId = Cus.intSalespersonId),
+			agcus_srvchr_cd		= (SELECT strServiceChargeCode FROM tblARServiceCharge WHERE intServiceChargeId = Cus.intServiceChargeId),
+			agcus_dflt_mkt_zone = (SELECT strMarketZoneCode FROM tblARMarketZone WHERE intMarketZoneId = Cus.intMarketZoneId)	
 		FROM tblEntity Ent
 			INNER JOIN tblARCustomer Cus ON Ent.intEntityId = Cus.intEntityId
 			INNER JOIN tblARCustomerToContact CustToCon ON Cus.intDefaultContactId = CustToCon.intARCustomerToContactId
@@ -123,9 +127,12 @@ EXEC('CREATE PROCEDURE uspARImportCustomer
 			agcus_ckoff_vol_yn,
 			agcus_ga_origin_st,
 			agcus_mkt_sign_yn,
-			agcus_dflt_mkt_zone,
 			agcus_ga_hold_pay_yn ,
-			agcus_ga_wthhld_yn	
+			agcus_ga_wthhld_yn,
+			agcus_acct_stat_x_1,
+			agcus_slsmn_id,		
+			agcus_srvchr_cd,		
+			agcus_dflt_mkt_zone	
 		
 		)
 	
@@ -170,10 +177,13 @@ EXEC('CREATE PROCEDURE uspARImportCustomer
 			(CASE WHEN Cus.ysnCheckoffExempt = 1 THEN ''Y'' ELSE ''N'' END) as ysnCheckoffExempt,			
 			(CASE WHEN Cus.ysnVoluntaryCheckoff = 1 THEN ''Y'' ELSE ''N'' END) as ysnVoluntaryCheckoff,		
 			SUBSTRING(Cus.strCheckoffState,1,2) as strCheckoffState,			
-			(CASE WHEN Cus.ysnMarketAgreementSigned = 1 THEN ''Y'' ELSE ''N'' END) as ysnMarketAgreementSigned,	
-			Cus.intMarketZoneId,			
+			(CASE WHEN Cus.ysnMarketAgreementSigned = 1 THEN ''Y'' ELSE ''N'' END) as ysnMarketAgreementSigned,			
 			(CASE WHEN Cus.ysnHoldBatchGrainPayment = 1 THEN ''Y'' ELSE ''N'' END) as ysnHoldBatchGrainPayment,	
-			(CASE WHEN Cus.ysnFederalWithholding = 1 THEN ''Y'' ELSE ''N'' END) as ysnFederalWithholding
+			(CASE WHEN Cus.ysnFederalWithholding = 1 THEN ''Y'' ELSE ''N'' END) as ysnFederalWithholding,
+			(SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = Cus.intAccountStatusId),
+			(SELECT strSalespersonId FROM tblARSalesperson WHERE intSalespersonId = Cus.intSalespersonId),
+			(SELECT strServiceChargeCode FROM tblARServiceCharge WHERE intServiceChargeId = Cus.intServiceChargeId),
+			(SELECT strMarketZoneCode FROM tblARMarketZone WHERE intMarketZoneId = Cus.intMarketZoneId)
 			FROM tblEntity Ent
 			INNER JOIN tblARCustomer Cus ON Ent.intEntityId = Cus.intEntityId
 			INNER JOIN tblARCustomerToContact CusToCon ON Cus.intDefaultContactId = CusToCon.intARCustomerToContactId
@@ -345,8 +355,8 @@ EXEC('CREATE PROCEDURE uspARImportCustomer
 				@dblCreditLimit			= agcus_cred_limit,					
 				@strTaxNumber			= agcus_tax_exempt,
 				@strCurrency			= agcus_dflt_currency, 				
-				@intAccountStatusId		= NULL, --agcus_acct_stat_x this should be a query to tblARAccountStatus			
-				@intSalespersonId		= NULL, --agcus_slsmn_id this should be a query to tblARSalesperson			
+				@intAccountStatusId		= (SELECT intAccountStatusId FROM tblARAccountStatus WHERE strAccountStatusCode COLLATE Latin1_General_CI_AS = agcus_acct_stat_x_1 COLLATE Latin1_General_CI_AS),			
+				@intSalespersonId		= (SELECT intSalespersonId FROM tblARSalesperson WHERE strSalespersonId COLLATE Latin1_General_CI_AS = agcus_slsmn_id COLLATE Latin1_General_CI_AS),			
     			@strPricing				= NULL, --agcus_prc_lvl					
 				@ysnActive				= CASE WHEN agcus_active_yn = ''Y'' THEN 1 ELSE 0 END,					
 				@ysnPORequired			= CASE WHEN agcus_req_po_yn = ''Y'' THEN 1 ELSE 0 END,									
@@ -356,7 +366,7 @@ EXEC('CREATE PROCEDURE uspARImportCustomer
 				@strTaxAuthority1		= agcus_tax_auth_id1,			
 				@strTaxAuthority2		= agcus_tax_auth_id2,			
 				@ysnPrintPriceOnPrintTicket = CASE WHEN agcus_pic_prc_yn = ''Y'' THEN 1 ELSE 0 END,	
-				@intServiceChargeId		= NULL, --agcus_srvchr_cd this should be a query to tblARServiceCharge			
+				@intServiceChargeId		= (SELECT intServiceChargeId FROM tblARServiceCharge WHERE strServiceChargeCode = agcus_srvchr_cd),			
 				@ysnApplySalesTax		= CASE WHEN agcus_tax_ynp = ''Y'' THEN 1 ELSE 0 END,			
 				@dblBudgetAmountForBudgetBilling = agcus_budget_amt,
 				@strBudgetBillingBeginMonth	= agcus_budget_beg_mm,	
@@ -369,7 +379,7 @@ EXEC('CREATE PROCEDURE uspARImportCustomer
 				@ysnVoluntaryCheckoff = CASE WHEN agcus_ckoff_vol_yn = ''Y'' THEN 1 ELSE 0 END ,		
 				@strCheckoffState = agcus_ga_origin_st,			
 				@ysnMarketAgreementSigned = CASE WHEN agcus_mkt_sign_yn = ''Y'' THEN 1 ELSE 0 END ,	
-				@intMarketZoneId = NULL, --agcus_dflt_mkt_zone this should be query to tblARMarketzone,			
+				@intMarketZoneId = (SELECT intMarketZoneId FROM tblARMarketZone WHERE strMarketZoneCode COLLATE Latin1_General_CI_AS = agcus_dflt_mkt_zone COLLATE Latin1_General_CI_AS),			
 				@ysnHoldBatchGrainPayment = CASE WHEN agcus_ga_hold_pay_yn = ''Y'' THEN 1 ELSE 0 END ,	
 				@ysnFederalWithholding = CASE WHEN agcus_ga_wthhld_yn = ''Y'' THEN 1 ELSE 0 END	
 			
@@ -533,12 +543,13 @@ EXEC('CREATE PROCEDURE uspARImportCustomer
 	IF(@Update = 1 AND @CustomerId IS NULL) 
 	BEGIN
 		SELECT @Total = COUNT(agcus_key) from tblARTempCustomer
-	END')
+	END'
+)
 END
 
 IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1
 BEGIN
-EXEC('CREATE PROCEDURE uspARImportCustomer
+EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 	@CustomerId NVARCHAR(50) = NULL,
 	@Update BIT = 0,
 	@Total INT = 0 OUTPUT
@@ -592,7 +603,10 @@ EXEC('CREATE PROCEDURE uspARImportCustomer
 			ptcus_sales_tax_yn = CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN ''Y'' ELSE ''N'' END,
 			ptcus_budget_amt = Cus.dblBudgetAmountForBudgetBilling,
 			ptcus_budget_beg_mm = SUBSTRING(Cus.strBudgetBillingBeginMonth,1,2),
-			ptcus_budget_end_mm = SUBSTRING(Cus.strBudgetBillingEndMonth,1,2)
+			ptcus_budget_end_mm = SUBSTRING(Cus.strBudgetBillingEndMonth,1,2),
+			ptcus_acct_stat_x_1 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = Cus.intAccountStatusId),
+			ptcus_slsmn_id		= (SELECT strSalespersonId FROM tblARSalesperson WHERE intSalespersonId = Cus.intSalespersonId),
+			ptcus_srv_cd		= (SELECT strServiceChargeCode FROM tblARServiceCharge WHERE intServiceChargeId = Cus.intServiceChargeId)
 			--ptcus_dpa_cnt = Cus.strDPAContract,
 			--ptcus_dpa_rev_dt = CONVERT(int,''20'' + CONVERT(nvarchar,Cus.dtmDPADate,12)),
 			--ptcus_gb_rcpt_no = Cus.strGBReceiptNumber,
@@ -643,7 +657,10 @@ EXEC('CREATE PROCEDURE uspARImportCustomer
 			ptcus_sales_tax_yn,
 			ptcus_budget_amt,
 			ptcus_budget_beg_mm,
-			ptcus_budget_end_mm
+			ptcus_budget_end_mm,
+			ptcus_acct_stat_x_1,
+			ptcus_slsmn_id,		
+			ptcus_srv_cd
 			--agcus_dpa_cnt
 			--agcus_dpa_rev_dt,
 			--agcus_gb_rcpt_no,
@@ -689,7 +706,10 @@ EXEC('CREATE PROCEDURE uspARImportCustomer
 			(CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN ''Y'' ELSE ''N'' END) AS ysnApplyPrepaidTax,
 			Cus.dblBudgetAmountForBudgetBilling,
 			SUBSTRING(Cus.strBudgetBillingBeginMonth,1,2) as strBudgetBillingBeginMonth,
-			SUBSTRING(Cus.strBudgetBillingEndMonth,1,2) as strBudgetBillingEndMonth
+			SUBSTRING(Cus.strBudgetBillingEndMonth,1,2) as strBudgetBillingEndMonth,
+			(SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = Cus.intAccountStatusId),
+			(SELECT strSalespersonId FROM tblARSalesperson WHERE intSalespersonId = Cus.intSalespersonId),
+			(SELECT strServiceChargeCode FROM tblARServiceCharge WHERE intServiceChargeId = Cus.intServiceChargeId)
 			--Cus.strDPAContract,				
 			--CONVERT(int,''20'' + CONVERT(nvarchar,Cus.dtmDPADate,12)),					
 			--Cus.strGBReceiptNumber,			
@@ -868,8 +888,8 @@ EXEC('CREATE PROCEDURE uspARImportCustomer
 				@dblCreditLimit			= ptcus_credit_limit,					
 				@strTaxNumber			= ptcus_sales_tax_id,
 				--@strCurrency			= agcus_dflt_currency, 				
-				@intAccountStatusId		= NULL, --agcus_acct_stat_x this should be a query to tblARAccountStatus			
-				@intSalespersonId		= NULL, --agcus_slsmn_id this should be a query to tblARSalesperson			
+				@intAccountStatusId		= (SELECT intAccountStatusId FROM tblARAccountStatus WHERE strAccountStatusCode COLLATE Latin1_General_CI_AS = ptcus_acct_stat_x_1 COLLATE Latin1_General_CI_AS),			
+				@intSalespersonId		= (SELECT intSalespersonId FROM tblARSalesperson WHERE strSalespersonId COLLATE Latin1_General_CI_AS = ptcus_slsmn_id COLLATE Latin1_General_CI_AS),		
     			@strPricing				= NULL, --agcus_prc_lvl					
 				@ysnActive				= CASE WHEN ptcus_active_yn = ''Y'' THEN 1 ELSE 0 END,					
 				--@ysnPORequired			= CASE WHEN agcus_req_po_yn = ''Y'' THEN 1 ELSE 0 END,									
@@ -879,7 +899,7 @@ EXEC('CREATE PROCEDURE uspARImportCustomer
 				@strTaxAuthority1		= ptcus_local1,			
 				@strTaxAuthority2		= ptcus_local2,			
 				@ysnPrintPriceOnPrintTicket = CASE WHEN ptcus_pic_prc_yn = ''Y'' THEN 1 ELSE 0 END,	
-				@intServiceChargeId		= NULL, --agcus_srvchr_cd this should be a query to tblARServiceCharge			
+				@intServiceChargeId		= (SELECT intServiceChargeId FROM tblARServiceCharge WHERE strServiceChargeCode COLLATE Latin1_General_CI_AS = ptcus_srv_cd COLLATE Latin1_General_CI_AS),			
 				@ysnApplySalesTax		= CASE WHEN ptcus_sales_tax_yn = ''Y'' THEN 1 ELSE 0 END,			
 				@dblBudgetAmountForBudgetBilling = ptcus_budget_amt,
 				@strBudgetBillingBeginMonth	= ptcus_budget_beg_mm,	
@@ -1059,5 +1079,5 @@ EXEC('CREATE PROCEDURE uspARImportCustomer
 	BEGIN
 		SELECT @Total = COUNT(ptcus_cus_no) from tblARTempCustomer
 	END'
-	)
+)
 END

@@ -8,7 +8,7 @@ GO
 IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()) = 1
 BEGIN
 EXEC(
-	'CREATE PROCEDURE uspARImportSalesperson
+	'CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 	@SalespersonId NVARCHAR(3) = NULL,
 	@Update BIT = 0,
 	@Total INT = 0 OUTPUT
@@ -25,26 +25,26 @@ EXEC(
 	IF(@Update = 1 AND @SalespersonId IS NOT NULL) 
 	BEGIN
 		--UPDATE IF EXIST IN THE ORIGIN
-		IF(EXISTS(SELECT 1 FROM agslsmst WHERE agsls_slsmn_id = @SalespersonId))
+		IF(EXISTS(SELECT 1 FROM agslsmst WHERE agsls_slsmn_id = UPPER(@SalespersonId)))
 		BEGIN
 			UPDATE agslsmst
 				SET 
-				agsls_slsmn_id = S.strSalespersonId,
-				agsls_name = E.strName,
+				agsls_slsmn_id = UPPER(S.strSalespersonId),
+				agsls_name = SUBSTRING(E.strName,1,30),
 				agsls_et_driver_yn = CASE WHEN S.strType = ''Driver'' THEN ''Y'' ELSE ''N'' END,
 				agsls_email = E.strEmail,
 				agsls_addr1 = CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(S.strAddress, 0, CHARINDEX(CHAR(10),S.strAddress)) ELSE S.strAddress END,
 				agsls_addr2 = CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(S.strAddress, CHARINDEX(CHAR(10),S.strAddress), LEN(S.strAddress)) ELSE NULL END,
-				agsls_zip = S.strZipCode,
-				agsls_city = S.strCity,
-				agsls_state = S.strState,
-				agsls_country = S.strCountry,
-				agsls_phone = S.strPhone,
-				agsls_dispatch_email = CASE WHEN S.strType = ''Email'' THEN ''Y'' ELSE ''N'' END,
-				agsls_textmsg_email = S.strTextMessage
+				agsls_zip = SUBSTRING(S.strZipCode,1,10),
+				agsls_city = SUBSTRING(S.strCity,1,20),
+				agsls_state = SUBSTRING(S.strState,1,2),
+				agsls_country = (CASE WHEN LEN(S.strCountry) = 3 THEN S.strCountry ELSE '''' END),
+				agsls_phone = SUBSTRING(S.strPhone,1,15),
+				agsls_dispatch_email = CASE WHEN S.strType = ''Email'' THEN ''E'' WHEN S.strType = ''Text'' THEN ''T'' WHEN S.strType = ''Both'' THEN ''B'' ELSE ''N'' END,
+				agsls_textmsg_email = SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEntity E
 				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntityId
-				WHERE S.strSalespersonId = @SalespersonId AND agsls_slsmn_id = @SalespersonId
+				WHERE S.strSalespersonId = @SalespersonId AND agsls_slsmn_id = UPPER(@SalespersonId)
 		END
 		--INSERT IF NOT EXIST IN THE ORIGIN
 		ELSE
@@ -64,19 +64,19 @@ EXEC(
 				agsls_textmsg_email
 			)
 			SELECT 
-				S.strSalespersonId,
-				E.strName,
+				UPPER(S.strSalespersonId),
+				SUBSTRING(E.strName,1,30),
 				CASE WHEN S.strType = ''Driver'' THEN ''Y'' ELSE ''N'' END,
 				E.strEmail,
 				CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(S.strAddress, 0, CHARINDEX(CHAR(10),S.strAddress)) ELSE S.strAddress END,
 				CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(S.strAddress, CHARINDEX(CHAR(10),S.strAddress), LEN(S.strAddress)) ELSE NULL END,
-				S.strZipCode,
-				S.strCity,
-				S.strState,
-				S.strCountry,
-				S.strPhone,
-				CASE WHEN S.strType = ''Email'' THEN ''Y'' ELSE ''N'' END,
-				S.strTextMessage
+				SUBSTRING(S.strZipCode,1,10),
+				SUBSTRING(S.strCity,1,20),
+				SUBSTRING(S.strState,1,2),
+				(CASE WHEN LEN(S.strCountry) = 3 THEN S.strCountry ELSE '''' END),
+				SUBSTRING(S.strPhone,1,15),
+				CASE WHEN S.strType = ''Email'' THEN ''E'' WHEN S.strType = ''Text'' THEN ''T'' WHEN S.strType = ''Both'' THEN ''B'' ELSE ''N'' END,
+				SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEntity E
 				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntityId
 				WHERE S.strSalespersonId = @SalespersonId
@@ -128,14 +128,14 @@ EXEC(
 				@strSalespersonId = agsls_slsmn_id,
 				@strName = agsls_name,
 				@strType = CASE WHEN agsls_et_driver_yn = ''Y'' THEN ''Driver'' ELSE ''Sales Representative'' END,
-				@strEmail = ISNULL(agsls_email,''''),
+				@strEmail = ISNULL(LTRIM(RTRIM(agsls_email)),''''),
 				@strAddress = ISNULL(agsls_addr1,'''') + CHAR(10) + ISNULL(agsls_addr2,''''),
 				@strZipCode = agsls_zip,
 				@strCity = agsls_city,
 				@strState = agsls_state,
 				@strCountry = agsls_country,
 				@strPhone = agsls_phone,
-				@strDispatchNotification = CASE WHEN agsls_dispatch_email = ''Y'' THEN ''Email'' ELSE ''Phone'' END,
+				@strDispatchNotification = CASE WHEN agsls_dispatch_email = ''E'' THEN ''Email'' WHEN agsls_dispatch_email = ''T'' THEN ''Text'' WHEN agsls_dispatch_email = ''B'' THEN ''Both'' ELSE '''' END,
 				@strTextMessage = agsls_textmsg_email
 			FROM agslsmst
 			WHERE agsls_slsmn_id = @originSalespersonId
@@ -155,7 +155,6 @@ EXEC(
 			   ,[strSalespersonId]
 			   ,[strType]
 			   ,[strPhone]
-			   ,[strEmail]
 			   ,[strAddress]
 			   ,[strZipCode]
 			   ,[strCity]
@@ -171,7 +170,6 @@ EXEC(
 				@strSalespersonId,
 				@strType,
 				@strPhone,
-				@strEmail,
 				@strAddress,
 				@strZipCode,
 				@strCity,
@@ -215,7 +213,7 @@ END
 IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1
 BEGIN
 EXEC(
-	'CREATE PROCEDURE uspARImportSalesperson
+	'CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 	@SalespersonId NVARCHAR(3) = NULL,
 	@Update BIT = 0,
 	@Total INT = 0 OUTPUT
@@ -232,26 +230,26 @@ EXEC(
 	IF(@Update = 1 AND @SalespersonId IS NOT NULL) 
 	BEGIN
 		--UPDATE IF EXIST IN THE ORIGIN
-		IF(EXISTS(SELECT 1 FROM ptslsmst WHERE ptsls_slsmn_id = @SalespersonId))
+		IF(EXISTS(SELECT 1 FROM ptslsmst WHERE ptsls_slsmn_id = UPPER(@SalespersonId)))
 		BEGIN
 			UPDATE ptslsmst
 				SET 
-				ptsls_slsmn_id = S.strSalespersonId,
-				ptsls_name = E.strName,
+				ptsls_slsmn_id = UPPER(S.strSalespersonId),
+				ptsls_name = SUBSTRING(E.strName,1,30),
 				ptsls_et_driver_yn = CASE WHEN S.strType = ''Driver'' THEN ''Y'' ELSE ''N'' END,
 				ptsls_email = E.strEmail,
 				ptsls_addr1 = CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(S.strAddress, 0, CHARINDEX(CHAR(10),S.strAddress)) ELSE S.strAddress END,
 				ptsls_addr2 = CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(S.strAddress, CHARINDEX(CHAR(10),S.strAddress), LEN(S.strAddress)) ELSE NULL END,
-				ptsls_zip = S.strZipCode,
-				ptsls_city = S.strCity,
-				ptsls_state = S.strState,
-				--ptsls_country = S.strCountry,
-				ptsls_phone = S.strPhone,
+				ptsls_zip = SUBSTRING(S.strZipCode,1,10),
+				ptsls_city = SUBSTRING(S.strCity,1,20),
+				ptsls_state = SUBSTRING(S.strState,1,2),
+				--ptsls_country = (CASE WHEN LEN(S.strCountry) = 3 THEN S.strCountry ELSE '''' END),
+				ptsls_phone = SUBSTRING(S.strPhone,1,15),
 				ptsls_dispatch_email = CASE WHEN S.strType = ''Email'' THEN ''Y'' ELSE ''N'' END,
-				ptsls_textmsg_email = S.strTextMessage
+				ptsls_textmsg_email = SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEntity E
 				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntityId
-				WHERE S.strSalespersonId = @SalespersonId AND ptsls_slsmn_id = @SalespersonId
+				WHERE S.strSalespersonId = @SalespersonId AND ptsls_slsmn_id = UPPER(@SalespersonId)
 		END
 		--INSERT IF NOT EXIST IN THE ORIGIN
 		ELSE
@@ -271,19 +269,19 @@ EXEC(
 				ptsls_textmsg_email
 			)
 			SELECT 
-				S.strSalespersonId,
-				E.strName,
+				UPPER(S.strSalespersonId),
+				SUBSTRING(E.strName,1,30),
 				CASE WHEN S.strType = ''Driver'' THEN ''Y'' ELSE ''N'' END,
 				E.strEmail,
 				CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(S.strAddress, 0, CHARINDEX(CHAR(10),S.strAddress)) ELSE S.strAddress END,
 				CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(S.strAddress, CHARINDEX(CHAR(10),S.strAddress), LEN(S.strAddress)) ELSE NULL END,
-				S.strZipCode,
-				S.strCity,
-				S.strState,
+				SUBSTRING(S.strZipCode,1,10),
+				SUBSTRING(S.strCity,1,20),
+				SUBSTRING(S.strState,1,2),
 				--S.strCountry,
-				S.strPhone,
+				SUBSTRING(S.strPhone,1,15),
 				CASE WHEN S.strType = ''Email'' THEN ''Y'' ELSE ''N'' END,
-				S.strTextMessage
+				SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEntity E
 				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntityId
 				WHERE S.strSalespersonId = @SalespersonId
@@ -335,14 +333,14 @@ EXEC(
 				@strSalespersonId = ptsls_slsmn_id,
 				@strName = ptsls_name,
 				@strType = CASE WHEN ptsls_et_driver_yn = ''Y'' THEN ''Driver'' ELSE ''Sales Representative'' END,
-				@strEmail = ISNULL(ptsls_email,''''),
+				@strEmail = ISNULL(LTRIM(RTRIM(ptsls_email)),''''),
 				@strAddress = ISNULL(ptsls_addr1,'''') + CHAR(10) + ISNULL(ptsls_addr2,''''),
 				@strZipCode = ptsls_zip,
 				@strCity = ptsls_city,
 				@strState = ptsls_state,
 				@strCountry = (SELECT strCurrency FROM tblSMPreferences A INNER JOIN tblSMCurrency B ON A.strValue = B.intCurrencyID WHERE strPreference = ''defaultCurrency''),
 				@strPhone = ptsls_phone,
-				@strDispatchNotification = CASE WHEN ptsls_dispatch_email = ''Y'' THEN ''Email'' ELSE ''Phone'' END,
+				@strDispatchNotification = CASE WHEN ptsls_dispatch_email = ''Y'' THEN ''Email'' ELSE '''' END,
 				@strTextMessage = ptsls_textmsg_email
 			FROM ptslsmst
 			WHERE ptsls_slsmn_id = @originSalespersonId
@@ -362,7 +360,6 @@ EXEC(
 			   ,[strSalespersonId]
 			   ,[strType]
 			   ,[strPhone]
-			   ,[strEmail]
 			   ,[strAddress]
 			   ,[strZipCode]
 			   ,[strCity]
@@ -378,7 +375,6 @@ EXEC(
 				@strSalespersonId,
 				@strType,
 				@strPhone,
-				@strEmail,
 				@strAddress,
 				@strZipCode,
 				@strCity,

@@ -5,6 +5,9 @@
     [strStartZip]          NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [strEndZip]            NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]     INT            NOT NULL,
-    CONSTRAINT [PK_tblARTerritoryDetail] PRIMARY KEY CLUSTERED ([intTerritoryDetailId] ASC)
+    CONSTRAINT [PK_tblARTerritoryDetail_intTerritoryDetailId] PRIMARY KEY CLUSTERED ([intTerritoryDetailId] ASC),
+    CONSTRAINT [FK_tblARTerritoryDetail_tblARTerritory_intTerritoryId] FOREIGN KEY ([intTerritoryId]) REFERENCES [dbo].[tblARTerritory] ([intTerritoryId]) ON DELETE CASCADE
 );
+
+
 

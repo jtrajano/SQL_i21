@@ -3,7 +3,8 @@
 	[intCommodityId] INT NOT NULL IDENTITY, 
     [strCommodityCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [intDecimalDPR] INT NULL DEFAULT ((2)), 
+    [ysnExchangeTraded] BIT NULL DEFAULT ((0)), 
+	[intDecimalDPR] INT NULL DEFAULT ((2)), 
     [dblConsolidateFactor] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [ysnFXExposure] BIT NULL, 
     [dblPriceCheckMin] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -307,3 +308,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICCommodity',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Exchange Traded',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICCommodity',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnExchangeTraded'
