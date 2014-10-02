@@ -15,6 +15,10 @@
 
 Ext.define('Inventory.view.CommodityViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.commodity'
+    alias: 'viewmodel.commodity',
+
+    requires: [
+        'Inventory.view.override.CommodityViewModel'
+    ]
 
 });
