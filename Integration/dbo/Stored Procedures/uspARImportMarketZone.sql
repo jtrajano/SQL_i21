@@ -21,14 +21,14 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportMarketZone]
 	IF(@Update = 1 AND @MarketZoneCode IS NOT NULL) 
 	BEGIN
 		--UPDATE IF EXIST IN THE ORIGIN
-		IF(EXISTS(SELECT 1 FROM gamktmst WHERE gamkt_key = SUBSTRING(@MarketZoneCode,1,3)))
+		IF(EXISTS(SELECT 1 FROM gamktmst WHERE gamkt_key = UPPER(SUBSTRING(@MarketZoneCode,1,3))))
 		BEGIN
 			UPDATE gamktmst
 				SET 
-				gamkt_key = SUBSTRING(MktZone.strMarketZoneCode,1,3),
+				gamkt_key = UPPER(SUBSTRING(MktZone.strMarketZoneCode,1,3)),
 				gamkt_desc = SUBSTRING(MktZone.strDescription,1,20)
 			FROM tblARMarketZone MktZone
-				WHERE strMarketZoneCode = @MarketZoneCode AND gamkt_key = SUBSTRING(@MarketZoneCode,1,3)
+				WHERE strMarketZoneCode = @MarketZoneCode AND gamkt_key = UPPER(SUBSTRING(@MarketZoneCode,1,3))
 		END
 		--INSERT IF NOT EXIST IN THE ORIGIN
 		ELSE
@@ -37,7 +37,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportMarketZone]
 				gamkt_desc
 			)
 			SELECT 
-				SUBSTRING(strMarketZoneCode,1,3),
+				UPPER(SUBSTRING(strMarketZoneCode,1,3)),
 				SUBSTRING(strDescription,1,20)
 			FROM tblARMarketZone
 			WHERE strMarketZoneCode = @MarketZoneCode

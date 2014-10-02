@@ -25,11 +25,11 @@ EXEC(
 	IF(@Update = 1 AND @SalespersonId IS NOT NULL) 
 	BEGIN
 		--UPDATE IF EXIST IN THE ORIGIN
-		IF(EXISTS(SELECT 1 FROM agslsmst WHERE agsls_slsmn_id = @SalespersonId))
+		IF(EXISTS(SELECT 1 FROM agslsmst WHERE agsls_slsmn_id = UPPER(@SalespersonId)))
 		BEGIN
 			UPDATE agslsmst
 				SET 
-				agsls_slsmn_id = S.strSalespersonId,
+				agsls_slsmn_id = UPPER(S.strSalespersonId),
 				agsls_name = SUBSTRING(E.strName,1,30),
 				agsls_et_driver_yn = CASE WHEN S.strType = ''Driver'' THEN ''Y'' ELSE ''N'' END,
 				agsls_email = E.strEmail,
@@ -44,7 +44,7 @@ EXEC(
 				agsls_textmsg_email = SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEntity E
 				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntityId
-				WHERE S.strSalespersonId = @SalespersonId AND agsls_slsmn_id = @SalespersonId
+				WHERE S.strSalespersonId = @SalespersonId AND agsls_slsmn_id = UPPER(@SalespersonId)
 		END
 		--INSERT IF NOT EXIST IN THE ORIGIN
 		ELSE
@@ -64,7 +64,7 @@ EXEC(
 				agsls_textmsg_email
 			)
 			SELECT 
-				S.strSalespersonId,
+				UPPER(S.strSalespersonId),
 				SUBSTRING(E.strName,1,30),
 				CASE WHEN S.strType = ''Driver'' THEN ''Y'' ELSE ''N'' END,
 				E.strEmail,
@@ -230,11 +230,11 @@ EXEC(
 	IF(@Update = 1 AND @SalespersonId IS NOT NULL) 
 	BEGIN
 		--UPDATE IF EXIST IN THE ORIGIN
-		IF(EXISTS(SELECT 1 FROM ptslsmst WHERE ptsls_slsmn_id = @SalespersonId))
+		IF(EXISTS(SELECT 1 FROM ptslsmst WHERE ptsls_slsmn_id = UPPER(@SalespersonId)))
 		BEGIN
 			UPDATE ptslsmst
 				SET 
-				ptsls_slsmn_id = S.strSalespersonId,
+				ptsls_slsmn_id = UPPER(S.strSalespersonId),
 				ptsls_name = SUBSTRING(E.strName,1,30),
 				ptsls_et_driver_yn = CASE WHEN S.strType = ''Driver'' THEN ''Y'' ELSE ''N'' END,
 				ptsls_email = E.strEmail,
@@ -249,7 +249,7 @@ EXEC(
 				ptsls_textmsg_email = SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEntity E
 				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntityId
-				WHERE S.strSalespersonId = @SalespersonId AND ptsls_slsmn_id = @SalespersonId
+				WHERE S.strSalespersonId = @SalespersonId AND ptsls_slsmn_id = UPPER(@SalespersonId)
 		END
 		--INSERT IF NOT EXIST IN THE ORIGIN
 		ELSE
@@ -269,7 +269,7 @@ EXEC(
 				ptsls_textmsg_email
 			)
 			SELECT 
-				S.strSalespersonId,
+				UPPER(S.strSalespersonId),
 				SUBSTRING(E.strName,1,30),
 				CASE WHEN S.strType = ''Driver'' THEN ''Y'' ELSE ''N'' END,
 				E.strEmail,
