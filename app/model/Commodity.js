@@ -14,6 +14,7 @@ Ext.define('Inventory.model.Commodity', {
         { name: 'intCommodityId', type: 'int'},
         { name: 'strCommodityCode', type: 'string'},
         { name: 'strDescription', type: 'string'},
+        { name: 'ysnExchangeTraded', type: 'boolean'},
         { name: 'intDecimalDPR', type: 'int'},
         { name: 'dblConsolidateFactor', type: 'float'},
         { name: 'ysnFXExposure', type: 'boolean'},
@@ -39,6 +40,6 @@ Ext.define('Inventory.model.Commodity', {
         { name: 'dblMaxUnder', type: 'float'},
         { name: 'dblMaxOver', type: 'float'},
         { name: 'intPatronageCategoryId', type: 'int'},
-        { name: 'intPatronageCategoryDirectId', type: 'int'}
+        { name: 'intPatronageCategoryDirectId', type: 'int'},
     ]
 });

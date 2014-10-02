@@ -39,6 +39,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strTextSales).HasColumnName("strTextSales");
             this.Property(t => t.ysnAllowLoadContracts).HasColumnName("ysnAllowLoadContracts");
             this.Property(t => t.ysnAllowVariety).HasColumnName("ysnAllowVariety");
+            this.Property(t => t.ysnExchangeTraded).HasColumnName("ysnExchangeTraded");
             this.Property(t => t.ysnFXExposure).HasColumnName("ysnFXExposure");
             this.Property(t => t.ysnRequireLoadNumber).HasColumnName("ysnRequireLoadNumber");
         }

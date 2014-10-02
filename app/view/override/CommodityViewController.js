@@ -15,7 +15,35 @@ Ext.define('Inventory.view.override.CommodityViewController', {
             ]
         },
         binding: {
-
+            txtCommodityCode: '{current.strCommodityCode}',
+            txtDescription: '{current.strDescription}',
+            chkExchangeTraded: '{current.ysnExchangeTraded}',
+            txtDecimalsOnDpr: '{current.intDecimalDPR}',
+            txtConsolidateFactor: '{current.dblConsolidateFactor}',
+            chkFxExposure: '{current.ysnFXExposure}',
+            txtPriceChecksMin: '{current.dblPriceCheckMin}',
+            txtPriceChecksMax: '{current.dblPriceCheckMax}',
+            txtCheckoffTaxDesc: '{current.strCheckoffTaxDesc}',
+            cboCheckoffTaxAllStates: '{current.strCheckoffAllState}',
+            txtInsuranceTaxDesc: '{current.strInsuranceTaxDesc}',
+            cboInsuranceTaxAllStates: '{current.strInsuranceAllState}',
+            dtmCropEndDateCurrent: '{current.dtmCropEndDateCurrent}',
+            dtmCropEndDateNew: '{current.dtmCropEndDateNew}',
+            txtEdiCode: '{current.strEDICode}',
+            txtDefaultScheduleStore: '{current.strScheduleStore}',
+            txtDefaultScheduleDiscount: '{current.strScheduleDiscount}',
+            txtTextPurchase: '{current.strTextPurchase}',
+            txtTextSales: '{current.strTextSales}',
+            txtTextFees: '{current.strTextFees}',
+            txtAgItemNumber: '{current.strAGItemNumber}',
+            cboScaleAutoDistDefault: '{current.strScaleAutoDist}',
+            chkRequireLoadNoAtKiosk: '{current.ysnRequireLoadNumber}',
+            chkAllowVariety: '{current.ysnAllowVariety}',
+            chkAllowLoadContracts: '{current.ysnAllowLoadContracts}',
+            txtMaximumUnder: '{current.dblMaxUnder}',
+            txtMaximumOver: '{current.dblMaxOver}',
+            cboPatronageCategory: '{current.intPatronageCategoryId}',
+            cboPatronageCategoryDirect: '{current.intPatronageCategoryDirectId}'
         }
     },
 
