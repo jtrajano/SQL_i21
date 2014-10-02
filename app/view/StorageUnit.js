@@ -217,8 +217,8 @@ Ext.define('Inventory.view.StorageUnit', {
                                         },
                                         {
                                             xtype: 'textfield',
-                                            itemId: 'txtAsile',
-                                            fieldLabel: 'Asile',
+                                            itemId: 'txtAisle',
+                                            fieldLabel: 'Aisle',
                                             labelWidth: 110
                                         },
                                         {

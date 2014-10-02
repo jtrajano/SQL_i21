@@ -8,19 +8,7 @@
     "userConfig": {
         "name": "Inventory",
         "views": [
-            "Statusbar1",
-            "StatusbarPaging1",
-            "WorkCenterAdd",
-            "FuelCategory",
-            "FuelCode",
-            "ProcessCode",
-            "FeedStockCode",
-            "FeedStockUom",
-            "ManufacturingCell",
-            "FactoryUnitType",
-            "ItemSubstitution",
-            "StorageUnit",
-            "InventoryReceipt"
+            "CertificationProgram"
         ]
     },
     "name": "Application",

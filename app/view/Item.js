@@ -598,12 +598,6 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         dataIndex: 'string',
-                                                                        text: 'Store',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        dataIndex: 'string',
                                                                         text: 'POS Description',
                                                                         flex: 2
                                                                     },
@@ -2550,14 +2544,9 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        dataIndex: 'string',
-                                                                        text: 'Store'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
                                                                         width: 100,
                                                                         dataIndex: 'string',
-                                                                        text: 'Warehouse'
+                                                                        text: 'Sublocation'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
@@ -2675,12 +2664,6 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         dataIndex: 'string',
-                                                                        text: 'Store',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        dataIndex: 'string',
                                                                         text: 'Account Description',
                                                                         flex: 1
                                                                     },
@@ -2694,7 +2677,7 @@ Ext.define('Inventory.view.Item', {
                                                                         xtype: 'gridcolumn',
                                                                         dataIndex: 'string',
                                                                         text: 'Profit Center',
-                                                                        flex: 2
+                                                                        flex: 1
                                                                     }
                                                                 ],
                                                                 viewConfig: {

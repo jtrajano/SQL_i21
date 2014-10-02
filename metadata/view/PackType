@@ -8,24 +8,25 @@
     "userConfig": {
         "collapsible": true,
         "defaultFocus": null,
-        "designer|userAlias": "fueltank",
-        "designer|userClassName": "FuelTank",
-        "height": 621,
+        "designer|userAlias": "packtype",
+        "designer|userClassName": "PackType",
+        "height": 525,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
         "layout": "fit",
         "maximizable": true,
-        "minHeight": 500,
-        "minWidth": 530,
+        "minHeight": 525,
+        "minWidth": 660,
         "minimizable": null,
         "reference": null,
-        "title": "Fuel Tank",
-        "width": 852
+        "title": "Pack Type",
+        "width": 660
     },
-    "designerId": "6285c4d9-7aed-4586-9945-1e0cfe0cd00f",
-    "viewControllerInstanceId": "ccde470c-0c4b-44a6-929d-1762ef5fd35c",
-    "viewModelInstanceId": "55df8b07-ac6a-4fb7-8a78-34fe59ddeed1",
+    "name": "ItemSubstitution1",
+    "designerId": "8317ff11-5ba8-45dc-81e9-bd0baa245b25",
+    "viewControllerInstanceId": "929051d1-eb84-488c-9897-46db8a02d800",
+    "viewModelInstanceId": "6433b229-a40e-4200-b219-0327eb980b46",
     "cn": [
         {
             "type": "Ext.form.Panel",
@@ -36,14 +37,14 @@
             "codeClass": null,
             "userConfig": {
                 "autoShow": true,
-                "bodyBorder": null,
-                "bodyPadding": 5,
+                "bodyBorder": false,
+                "bodyPadding": 10,
                 "container|align": "stretch",
                 "dock": null,
                 "frame": null,
-                "header": null,
+                "header": false,
                 "height": 350,
-                "itemId": "frmFuelTank",
+                "itemId": "frmPackType",
                 "layout": "vbox",
                 "margin": -1,
                 "title": null,
@@ -51,8 +52,8 @@
                 "url": null,
                 "width": 450
             },
-            "name": "MyForm16",
-            "designerId": "7ac5f650-8198-4f3a-8f07-cdab29d4c0f5",
+            "name": "MyForm8",
+            "designerId": "8bd56f25-fbc6-4f93-87b2-92f15c04d20c",
             "cn": [
                 {
                     "type": "Ext.toolbar.Toolbar",
@@ -67,9 +68,32 @@
                         "dock": "top",
                         "width": 588
                     },
-                    "name": "MyToolbar50",
-                    "designerId": "93ebf9e0-06b6-47a2-865e-0103a9903a2b",
+                    "name": "MyToolbar36",
+                    "designerId": "79a7fc49-1d8d-4bce-9753-f87b27d1cc7e",
                     "cn": [
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-new",
+                                "itemId": "btnNew",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "New",
+                                "width": 45
+                            },
+                            "name": "MyButton89",
+                            "designerId": "289b8e68-f3ba-41dd-b9d8-7a0db151f37e"
+                        },
                         {
                             "type": "Ext.button.Button",
                             "reference": {
@@ -90,8 +114,54 @@
                                 "text": "Save",
                                 "width": 45
                             },
-                            "name": "MyButton160",
-                            "designerId": "bb226d27-8348-4b67-a0dd-8a1bef832c70"
+                            "name": "MyButton100",
+                            "designerId": "fe6fe0af-2c3c-456f-9cc2-e7158d3e0a54"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-delete",
+                                "itemId": "btnDelete",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Delete",
+                                "width": 45
+                            },
+                            "name": "MyButton88",
+                            "designerId": "5f1af5e1-2517-4b9d-a3c6-f61cafe80e88"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-search",
+                                "itemId": "btnSearch",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Search",
+                                "width": 45
+                            },
+                            "name": "MyButton101",
+                            "designerId": "dd2e86f6-f3e5-4614-b731-84dff1ea2470"
                         },
                         {
                             "type": "Ext.button.Button",
@@ -113,8 +183,8 @@
                                 "text": "Undo",
                                 "width": 45
                             },
-                            "name": "MyButton161",
-                            "designerId": "5fafd892-cecf-4925-a497-caccce7b5717"
+                            "name": "MyButton103",
+                            "designerId": "8244e01d-b35c-4b0c-a869-74d73fb9b54b"
                         },
                         {
                             "type": "Ext.toolbar.Separator",
@@ -128,8 +198,8 @@
                                 "height": 30,
                                 "layout|flex": null
                             },
-                            "name": "MySeparator50",
-                            "designerId": "f4a1759d-7440-4313-b89d-185f8bcc7649"
+                            "name": "MySeparator37",
+                            "designerId": "999be7a4-1bfc-4256-81f2-e72598481962"
                         },
                         {
                             "type": "Ext.button.Button",
@@ -151,8 +221,87 @@
                                 "text": "Close",
                                 "width": 45
                             },
-                            "name": "MyButton162",
-                            "designerId": "b4fe8b90-31e3-4367-b355-35be274236d1"
+                            "name": "MyButton104",
+                            "designerId": "2f278670-2f1a-407e-9d75-ba1a655d5b9e"
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.container.Container",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "designer|displayName": "container",
+                        "layout": "hbox",
+                        "layout|flex": null,
+                        "layout|margins": null,
+                        "margin": "0 0 10 0"
+                    },
+                    "name": "MyContainer57",
+                    "designerId": "1a85ffd3-e8c4-4078-9850-dcb80b901a4d",
+                    "cn": [
+                        {
+                            "type": "Ext.form.field.Text",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "columns": null,
+                                "designer|createAlias": null,
+                                "fieldLabel": "Pack Type Name",
+                                "itemId": "txtPackTypeName",
+                                "labelWidth": null,
+                                "layout|flex": 1.2,
+                                "name": null
+                            },
+                            "name": "MyTextField69",
+                            "configAlternates": {
+                                "columns": "array"
+                            },
+                            "designerId": "48baa0fd-ba3d-4601-b833-559998ba7135",
+                            "customConfigs": [
+                                {
+                                    "group": "(Custom Properties)",
+                                    "name": "columns",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.form.field.Text",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "columns": null,
+                                "designer|createAlias": null,
+                                "fieldLabel": "Description",
+                                "itemId": "txtDescription",
+                                "labelWidth": 70,
+                                "layout|flex": 2,
+                                "layout|margins": null,
+                                "margin": "0 0 0 5",
+                                "name": null
+                            },
+                            "name": "MyTextField70",
+                            "configAlternates": {
+                                "columns": "array"
+                            },
+                            "designerId": "5bbcb232-82c2-494e-b0e3-3674d55d559b",
+                            "customConfigs": [
+                                {
+                                    "group": "(Custom Properties)",
+                                    "name": "columns",
+                                    "type": "string"
+                                }
+                            ]
                         }
                     ]
                 },
@@ -164,12 +313,12 @@
                     },
                     "codeClass": null,
                     "userConfig": {
-                        "itemId": "grdFuelTank",
+                        "itemId": "grdPackType",
                         "layout|flex": 1,
                         "title": null
                     },
-                    "name": "MyGridPanel41",
-                    "designerId": "112f6a0c-7564-4945-a845-949a86809b62",
+                    "name": "MyGridPanel35",
+                    "designerId": "b245820b-2e42-49dd-9a9b-89c49070e8a0",
                     "cn": [
                         {
                             "type": "Ext.toolbar.Toolbar",
@@ -183,8 +332,8 @@
                                 "dock": "top",
                                 "itemId": "tlbGridOptions"
                             },
-                            "name": "MyToolbar51",
-                            "designerId": "dcd99f50-05d1-4087-a44d-e1b29ec87d55",
+                            "name": "MyToolbar37",
+                            "designerId": "42527655-832c-4ea8-b2cc-6aab6928eabb",
                             "cn": [
                                 {
                                     "type": "Ext.button.Button",
@@ -196,13 +345,13 @@
                                     "userConfig": {
                                         "icon": null,
                                         "iconCls": "small-delete",
-                                        "itemId": "btnDeleteFuelTank",
+                                        "itemId": "btnPackType",
                                         "layout|flex": null,
                                         "tabIndex": -1,
                                         "text": "Delete"
                                     },
-                                    "name": "MyButton163",
-                                    "designerId": "8f682078-fdbd-492d-bb87-756748d92ada"
+                                    "name": "MyButton87",
+                                    "designerId": "fc409aed-634b-4db1-b7dd-f013b3d240cc"
                                 },
                                 {
                                     "type": "Ext.toolbar.Separator",
@@ -215,8 +364,8 @@
                                         "designer|displayName": "separator",
                                         "layout|flex": null
                                     },
-                                    "name": "MySeparator51",
-                                    "designerId": "7e06a618-85f3-4d10-936b-2330604da60f"
+                                    "name": "MySeparator35",
+                                    "designerId": "a4388ea4-8591-445a-8007-06c14985aad6"
                                 },
                                 {
                                     "type": "linkedinstance",
@@ -228,8 +377,8 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter35",
-                                    "designerId": "2fae70be-eb75-4432-8b9e-f69f8ff60559",
+                                    "name": "filter44",
+                                    "designerId": "c39762ed-6d5b-4268-95f3-6514bb2f553b",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
                             ]
@@ -243,28 +392,11 @@
                             "codeClass": null,
                             "userConfig": {
                                 "dataIndex": "string",
-                                "flex": null,
-                                "text": "Store Name",
-                                "width": 82
+                                "flex": 1,
+                                "text": "Source UOM"
                             },
-                            "name": "MyColumn148",
-                            "designerId": "6de3f7f9-185e-4db5-9c3b-53afbe310368"
-                        },
-                        {
-                            "type": "Ext.grid.column.Column",
-                            "reference": {
-                                "name": "columns",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "dataIndex": "string",
-                                "flex": null,
-                                "text": "Fuel Tank No.",
-                                "width": 81
-                            },
-                            "name": "MyColumn149",
-                            "designerId": "77a64ef7-7ac4-4833-9267-18371f2e1a6b"
+                            "name": "MyColumn125",
+                            "designerId": "4f057dd3-2636-4eb7-b83b-1bb26c838817"
                         },
                         {
                             "type": "Ext.grid.column.Column",
@@ -276,11 +408,10 @@
                             "userConfig": {
                                 "dataIndex": "string",
                                 "flex": 1,
-                                "text": "Description",
-                                "width": null
+                                "text": "Target UOM"
                             },
-                            "name": "MyColumn150",
-                            "designerId": "ea107ecd-8954-46da-a254-55209a2e5e5c"
+                            "name": "MyColumn8",
+                            "designerId": "0d5dd984-3193-4024-81e7-d6323d589ee5"
                         },
                         {
                             "type": "Ext.grid.column.Number",
@@ -290,69 +421,11 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "text": "Tank Capacity",
-                                "width": 85
+                                "text": "Conversion Factor",
+                                "width": 125
                             },
-                            "name": "MyNumberColumn18",
-                            "designerId": "a9f4fbef-6ee1-4c92-8243-1b7da089805a"
-                        },
-                        {
-                            "type": "Ext.grid.column.Number",
-                            "reference": {
-                                "name": "columns",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "text": "Current Volume",
-                                "width": 92
-                            },
-                            "name": "MyNumberColumn19",
-                            "designerId": "72ae9ebb-2fca-44c3-89ac-c3906ffe5a07"
-                        },
-                        {
-                            "type": "Ext.grid.column.Date",
-                            "reference": {
-                                "name": "columns",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "text": "Last Update",
-                                "width": 78
-                            },
-                            "name": "MyDateColumn4",
-                            "designerId": "6788e7e2-2bfa-4711-a81d-c944912d20e8"
-                        },
-                        {
-                            "type": "Ext.grid.column.Number",
-                            "reference": {
-                                "name": "columns",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "text": "Last Update Shift",
-                                "width": 96
-                            },
-                            "name": "MyNumberColumn20",
-                            "designerId": "e5772008-d248-45b0-bbf8-b5704ffce5a0"
-                        },
-                        {
-                            "type": "Ext.grid.column.Column",
-                            "reference": {
-                                "name": "columns",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "dataIndex": "string",
-                                "flex": null,
-                                "text": "Tax Department No.",
-                                "width": 108
-                            },
-                            "name": "MyColumn151",
-                            "designerId": "2ca31ce0-8d7b-4956-8e68-045ae54f4629"
+                            "name": "MyNumberColumn15",
+                            "designerId": "013dfa6b-b596-4e30-abb7-9d4003cea8b1"
                         },
                         {
                             "type": "Ext.grid.View",
@@ -362,10 +435,10 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "itemId": "grvFuelTank"
+                                "itemId": "grvPackType"
                             },
-                            "name": "MyGridView41",
-                            "designerId": "656b6d89-a6a2-4826-9dfb-26a7399222d9"
+                            "name": "MyGridView35",
+                            "designerId": "a0bcdcbd-4c24-4738-9648-001b6b306cf2"
                         },
                         {
                             "type": "Ext.selection.CheckboxModel",
@@ -373,9 +446,9 @@
                                 "name": "selModel",
                                 "type": "object"
                             },
-                            "codeClass": "Ext.selection.CheckboxModel",
-                            "name": "MyCheckboxSelectionModel31",
-                            "designerId": "7c1dedc1-0bfc-4d73-b76e-5f511b00c0df"
+                            "codeClass": null,
+                            "name": "MyCheckboxSelectionModel27",
+                            "designerId": "113f2792-8afe-4e33-8382-09c2f6c02f8b"
                         }
                     ]
                 },
@@ -387,13 +460,17 @@
                     },
                     "codeClass": null,
                     "userConfig": {
-                        "designer|createAlias": "istatusbar",
+                        "afterPageText": null,
+                        "designer|createAlias": "ipagingstatusbar",
+                        "designer|displayName": "",
                         "dock": "bottom",
-                        "layout|flex": 1
+                        "itemId": "pagingtoolbar",
+                        "layout|flex": 1,
+                        "store": null
                     },
-                    "name": "statusbar15",
-                    "designerId": "f1d262d7-d497-4c2d-84fb-fd762dfd64d2",
-                    "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
+                    "name": "statusbarpaging121",
+                    "designerId": "d35ca290-fbac-4426-80de-75a0826117ac",
+                    "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
             ]
         }

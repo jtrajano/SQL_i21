@@ -15,10 +15,6 @@
 
 Ext.define('Inventory.view.CategoryViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.category',
-
-    requires: [
-        'Inventory.view.override.CategoryViewModel'
-    ]
+    alias: 'viewmodel.category'
 
 });

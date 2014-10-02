@@ -261,8 +261,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     {
                                                         xtype: 'combobox',
                                                         flex: 1,
-                                                        itemId: 'cboReceiptAgainst',
-                                                        fieldLabel: 'Receipt Against',
+                                                        itemId: 'cboReceiptType',
+                                                        fieldLabel: 'Receipt Type',
                                                         labelAlign: 'top',
                                                         labelWidth: 80
                                                     },
@@ -271,7 +271,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         flex: 1,
                                                         itemId: 'cboReferenceNumber',
                                                         margin: '0 5',
-                                                        fieldLabel: 'Reference No',
+                                                        fieldLabel: 'Source',
                                                         labelAlign: 'top',
                                                         labelWidth: 80
                                                     },

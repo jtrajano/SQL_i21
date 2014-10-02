@@ -229,7 +229,7 @@
                                         "designer|createAlias": "filtergrid",
                                         "layout|flex": null
                                     },
-                                    "name": "filter38",
+                                    "name": "filter29",
                                     "designerId": "a18798ff-eca4-42bf-a94e-9881fa91b221",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -419,7 +419,7 @@
                 "designer|createAlias": "istatusbar",
                 "dock": "bottom"
             },
-            "name": "statusbar16",
+            "name": "statusbar1",
             "designerId": "614aaa3d-e38f-42ea-b1a4-5c42348f61bb",
             "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
         }

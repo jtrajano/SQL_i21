@@ -1,0 +1,14 @@
+{
+    "type": "Ext.app.ViewModel",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "certificationprogram",
+        "designer|userClassName": "CertificationProgramViewModel"
+    },
+    "name": "PackTypeViewModel1",
+    "designerId": "cbe82337-2521-46e4-a7d5-c382d26b82df"
+}

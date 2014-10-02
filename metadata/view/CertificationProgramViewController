@@ -1,0 +1,14 @@
+{
+    "type": "Ext.app.ViewController",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "certificationprogram",
+        "designer|userClassName": "CertificationProgramViewController"
+    },
+    "name": "PackTypeViewController1",
+    "designerId": "1892ed66-707c-43cb-8dd3-ca1bcf066fc9"
+}
