@@ -21,7 +21,6 @@ namespace iRely.Inventory.Model
         public int intCategoryId { get; set; }
         public string strCategoryCode { get; set; }
         public string strDescription { get; set; }
-        public string strLineBusiness { get; set; }
         public int? intCatalogGroupId { get; set; }
         public string strCostingMethod { get; set; }
         public string strInventoryTracking { get; set; }
@@ -36,10 +35,10 @@ namespace iRely.Inventory.Model
         public bool ysnNonRetailUseDepartment { get; set; }
         public bool ysnReportNetGross { get; set; }
         public bool ysnDepartmentPumps { get; set; }
-        public int intConvertPaidOutId { get; set; }
+        public int? intConvertPaidOutId { get; set; }
         public bool ysnDeleteRegister { get; set; }
         public bool ysnDepartmentKeyTaxed { get; set; }
-        public int intProductCodeId { get; set; }
+        public int? intProductCodeId { get; set; }
         public int? intFamilyId { get; set; }
         public int? intClassId { get; set; }
         public bool ysnFoodStampable { get; set; }
@@ -50,7 +49,7 @@ namespace iRely.Inventory.Model
         public bool ysnIdRequiredCigarette { get; set; }
         public int intMinimumAge { get; set; }
         public string strERPItemClass { get; set; }
-        public decimal? dblfeTime { get; set; }
+        public decimal? dblLifeTime { get; set; }
         public decimal? dblBOMItemShrinkage { get; set; }
         public decimal? dblBOMItemUpperTolerance { get; set; }
         public decimal? dblBOMItemLowerTolerance { get; set; }

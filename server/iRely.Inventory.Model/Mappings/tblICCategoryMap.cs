@@ -15,7 +15,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblBOMItemLowerTolerance).HasColumnName("dblBOMItemLowerTolerance");
             this.Property(t => t.dblBOMItemShrinkage).HasColumnName("dblBOMItemShrinkage");
             this.Property(t => t.dblBOMItemUpperTolerance).HasColumnName("dblBOMItemUpperTolerance");
-            this.Property(t => t.dblfeTime).HasColumnName("dblfeTime");
+            this.Property(t => t.dblLifeTime).HasColumnName("dblLifeTime");
             this.Property(t => t.dblLaborCost).HasColumnName("dblLaborCost");
             this.Property(t => t.dblOverHead).HasColumnName("dblOverHead");
             this.Property(t => t.dblPercentage).HasColumnName("dblPercentage");
@@ -43,7 +43,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strERPItemClass).HasColumnName("strERPItemClass");
             this.Property(t => t.strGLDivisionNumber).HasColumnName("strGLDivisionNumber");
             this.Property(t => t.strInventoryTracking).HasColumnName("strInventoryTracking");
-            this.Property(t => t.strLineBusiness).HasColumnName("strLineBusiness");
             this.Property(t => t.strMaterialFee).HasColumnName("strMaterialFee");
             this.Property(t => t.strShortName).HasColumnName("strShortName");
             this.Property(t => t.ysnAutoCalculateFreight).HasColumnName("ysnAutoCalculateFreight");
