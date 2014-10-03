@@ -19,6 +19,8 @@
 	  ,intAssignToEntity = tic.intAssignedToEntity
 	  ,strContactName = (select top 1 strName from tblEntity where intEntityId = tic.intCustomerContactId)
 	  ,tic.intCustomerContactId
+	  ,strDateCreated = convert(nvarchar,tic.dtmCreated, 101)
+	  ,strDateLastModified = convert(nvarchar,tic.dtmLastModified, 101)
   from
       tblHDTicket tic
       left outer join tblHDTicketType typ on typ.intTicketTypeId = tic.intTicketTypeId
