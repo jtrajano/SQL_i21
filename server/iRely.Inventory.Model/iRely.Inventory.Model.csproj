@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="InventoryEntities.cs" />
+    <Compile Include="Mappings\tblICCommodityAccountMap.cs" />
     <Compile Include="Mappings\tblICItemNoteMap.cs" />
     <Compile Include="Mappings\tblICItemAccountMap.cs" />
     <Compile Include="Mappings\tblICItemStockMap.cs" />
@@ -99,6 +100,7 @@
     <Compile Include="Mappings\tblICUnitMeasureMap.cs" />
     <Compile Include="Mappings\tblICUnitTypeMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tables\tblICCommodityAccount.cs" />
     <Compile Include="Tables\tblICItemStock.cs" />
     <Compile Include="Tables\tblICItemNote.cs" />
     <Compile Include="Tables\tblICItemSpecialPricing.cs" />
