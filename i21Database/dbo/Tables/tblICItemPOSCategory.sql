@@ -1,12 +1,12 @@
 ﻿CREATE TABLE [dbo].[tblICItemPOSCategory]
 (
 	[intItemPOSCategoryId] INT NOT NULL IDENTITY , 
-    [intItemPOSId] INT NOT NULL, 
+    [intItemId] INT NOT NULL, 
     [intCategoryId] INT NOT NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICItemPOSCategory] PRIMARY KEY ([intItemPOSCategoryId]), 
-    CONSTRAINT [FK_tblICItemPOSCategory_tblICItemPOS] FOREIGN KEY ([intItemPOSId]) REFERENCES [tblICItemPOS]([intItemPOSId]), 
+    CONSTRAINT [FK_tblICItemPOSCategory_tblICItemPOS] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
     CONSTRAINT [FK_tblICItemPOSCategory_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId])
 )
 
@@ -27,7 +27,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblICItemPOSCategory',
     @level2type = N'COLUMN',
-    @level2name = 'intItemPOSId'
+    @level2name = 'intItemId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Category Id',

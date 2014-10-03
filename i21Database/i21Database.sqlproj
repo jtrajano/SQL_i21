@@ -702,11 +702,8 @@
     <Build Include="dbo\Tables\tblPRPaycheckEarningTax.sql" />
     <Build Include="dbo\Tables\tblICInventoryAveCost.sql" />
     <Build Include="dbo\Tables\tblICItemUOM.sql" />
-    <Build Include="dbo\Tables\tblICItemSales.sql" />
-    <Build Include="dbo\Tables\tblICItemPOS.sql" />
     <Build Include="dbo\Tables\tblICItemPOSCategory.sql" />
     <Build Include="dbo\Tables\tblICItemPOSSLA.sql" />
-    <Build Include="dbo\Tables\tblICItemManufacturing.sql" />
     <Build Include="dbo\Tables\tblICItemManufacturingUOM.sql" />
     <Build Include="dbo\Tables\tblICItemUPC.sql" />
     <Build Include="dbo\Tables\tblICItemCustomerXref.sql" />

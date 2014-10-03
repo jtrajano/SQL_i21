@@ -1,12 +1,12 @@
 ﻿CREATE TABLE [dbo].[tblICItemManufacturingUOM]
 (
 	[intItemManufacturingUOMId] INT NOT NULL IDENTITY , 
-    [intItemManufacturingId] INT NOT NULL, 
+    [intItemId] INT NOT NULL, 
     [intUnitMeasureId] INT NOT NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICItemManufacturingUOM] PRIMARY KEY ([intItemManufacturingUOMId]), 
-    CONSTRAINT [FK_tblICItemManufacturingUOM_tblICItemManufacturing] FOREIGN KEY ([intItemManufacturingId]) REFERENCES [tblICItemManufacturing]([intItemManufacturingId]) ON DELETE CASCADE, 
+    CONSTRAINT [FK_tblICItemManufacturingUOM_tblICItemManufacturing] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblICItemManufacturingUOM_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
 )
 
@@ -27,7 +27,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblICItemManufacturingUOM',
     @level2type = N'COLUMN',
-    @level2name = 'intItemManufacturingId'
+    @level2name = 'intItemId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Unit Measure Id',
