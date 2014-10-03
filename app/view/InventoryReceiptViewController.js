@@ -15,5 +15,9 @@
 
 Ext.define('Inventory.view.InventoryReceiptViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.inventoryreceipt'
+    alias: 'controller.inventoryreceipt',
+
+    requires: [
+        'Inventory.view.override.InventoryReceiptViewController'
+    ]
 });
