@@ -4,7 +4,6 @@ IF EXISTS(select top 1 1 from sys.procedures where name = 'uspARImportSalesperso
 	DROP PROCEDURE uspARImportSalesperson
 GO
 
-
 IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()) = 1
 BEGIN
 EXEC(
@@ -33,8 +32,8 @@ EXEC(
 				agsls_name = SUBSTRING(E.strName,1,30),
 				agsls_et_driver_yn = CASE WHEN S.strType = ''Driver'' THEN ''Y'' ELSE ''N'' END,
 				agsls_email = E.strEmail,
-				agsls_addr1 = CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(S.strAddress, 0, CHARINDEX(CHAR(10),S.strAddress)) ELSE S.strAddress END,
-				agsls_addr2 = CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(S.strAddress, CHARINDEX(CHAR(10),S.strAddress), LEN(S.strAddress)) ELSE NULL END,
+				agsls_addr1 = CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(SUBSTRING(S.strAddress,1,30), 0, CHARINDEX(CHAR(10),S.strAddress)) ELSE SUBSTRING(S.strAddress,1,30) END,
+				agsls_addr2 = CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(SUBSTRING(S.strAddress, CHARINDEX(CHAR(10),S.strAddress) + 1, LEN(S.strAddress)),1,30) ELSE NULL END,
 				agsls_zip = SUBSTRING(S.strZipCode,1,10),
 				agsls_city = SUBSTRING(S.strCity,1,20),
 				agsls_state = SUBSTRING(S.strState,1,2),
@@ -68,8 +67,8 @@ EXEC(
 				SUBSTRING(E.strName,1,30),
 				CASE WHEN S.strType = ''Driver'' THEN ''Y'' ELSE ''N'' END,
 				E.strEmail,
-				CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(S.strAddress, 0, CHARINDEX(CHAR(10),S.strAddress)) ELSE S.strAddress END,
-				CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(S.strAddress, CHARINDEX(CHAR(10),S.strAddress), LEN(S.strAddress)) ELSE NULL END,
+				CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(SUBSTRING(S.strAddress,1,30), 0, CHARINDEX(CHAR(10),S.strAddress)) ELSE SUBSTRING(S.strAddress,1,30) END,
+				CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(SUBSTRING(S.strAddress, CHARINDEX(CHAR(10),S.strAddress) + 1, LEN(S.strAddress)),1,30) ELSE NULL END,
 				SUBSTRING(S.strZipCode,1,10),
 				SUBSTRING(S.strCity,1,20),
 				SUBSTRING(S.strState,1,2),
@@ -238,8 +237,8 @@ EXEC(
 				ptsls_name = SUBSTRING(E.strName,1,30),
 				ptsls_et_driver_yn = CASE WHEN S.strType = ''Driver'' THEN ''Y'' ELSE ''N'' END,
 				ptsls_email = E.strEmail,
-				ptsls_addr1 = CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(S.strAddress, 0, CHARINDEX(CHAR(10),S.strAddress)) ELSE S.strAddress END,
-				ptsls_addr2 = CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(S.strAddress, CHARINDEX(CHAR(10),S.strAddress), LEN(S.strAddress)) ELSE NULL END,
+				ptsls_addr1 = CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(SUBSTRING(S.strAddress,1,30), 0, CHARINDEX(CHAR(10),S.strAddress)) ELSE SUBSTRING(S.strAddress,1,30) END,
+				ptsls_addr2 = CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(SUBSTRING(S.strAddress, CHARINDEX(CHAR(10),S.strAddress) + 1, LEN(S.strAddress)),1,30) ELSE NULL END,
 				ptsls_zip = SUBSTRING(S.strZipCode,1,10),
 				ptsls_city = SUBSTRING(S.strCity,1,20),
 				ptsls_state = SUBSTRING(S.strState,1,2),
@@ -273,8 +272,8 @@ EXEC(
 				SUBSTRING(E.strName,1,30),
 				CASE WHEN S.strType = ''Driver'' THEN ''Y'' ELSE ''N'' END,
 				E.strEmail,
-				CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(S.strAddress, 0, CHARINDEX(CHAR(10),S.strAddress)) ELSE S.strAddress END,
-				CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(S.strAddress, CHARINDEX(CHAR(10),S.strAddress), LEN(S.strAddress)) ELSE NULL END,
+				CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(SUBSTRING(S.strAddress,1,30), 0, CHARINDEX(CHAR(10),S.strAddress)) ELSE SUBSTRING(S.strAddress,1,30) END,
+				CASE WHEN CHARINDEX(CHAR(10), S.strAddress) > 0 THEN SUBSTRING(SUBSTRING(S.strAddress, CHARINDEX(CHAR(10),S.strAddress) + 1, LEN(S.strAddress)),1,30) ELSE NULL END,
 				SUBSTRING(S.strZipCode,1,10),
 				SUBSTRING(S.strCity,1,20),
 				SUBSTRING(S.strState,1,2),

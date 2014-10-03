@@ -35,8 +35,8 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			agcus_comments = SUBSTRING(Ent.strInternalNotes,1,30),
 			agcus_1099_name = SUBSTRING(Ent.str1099Name,1,50),
 			--Location
-			agcus_addr = CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(Loc.strAddress, 0, CHARINDEX(CHAR(10),Loc.strAddress)) ELSE Loc.strAddress END,
-			agcus_addr2 = CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(Loc.strAddress, CHARINDEX(CHAR(10),Loc.strAddress), LEN(Loc.strAddress)) ELSE NULL END,
+			agcus_addr = CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(SUBSTRING(Loc.strAddress,1,30), 0, CHARINDEX(CHAR(10),Loc.strAddress)) ELSE SUBSTRING(Loc.strAddress,1,30) END,
+			agcus_addr2 = CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(SUBSTRING(Loc.strAddress, CHARINDEX(CHAR(10),Loc.strAddress) + 1, LEN(Loc.strAddress)),1,30) ELSE NULL END,
 			agcus_city = SUBSTRING(Loc.strCity,1,20),
 			agcus_state = SUBSTRING(Loc.strState,1,2),
 			agcus_zip = SUBSTRING(Loc.strZipCode,1,10),
@@ -147,8 +147,8 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			SUBSTRING(Con.strPhone,1,15) as strPhone,
 			SUBSTRING(Con.strPhone2,1,15) as strPhone2,
 			--Location
-			(CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(Loc.strAddress, 0, CHARINDEX(CHAR(10),Loc.strAddress)) ELSE Loc.strAddress END) AS strAddress1,
-			(CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(Loc.strAddress, CHARINDEX(CHAR(10),Loc.strAddress), LEN(Loc.strAddress)) ELSE NULL END) AS strAddress2,
+			(CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(SUBSTRING(Loc.strAddress,1,30), 0, CHARINDEX(CHAR(10),Loc.strAddress)) ELSE SUBSTRING(Loc.strAddress,1,30) END) AS strAddress1,
+			(CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(SUBSTRING(Loc.strAddress, CHARINDEX(CHAR(10),Loc.strAddress) + 1, LEN(Loc.strAddress)),1,30) ELSE NULL END) AS strAddress2,
 			SUBSTRING(Loc.strCity,1,20) as strCity,
 			SUBSTRING(Loc.strState,1,2) as strState,
 			SUBSTRING(Loc.strZipCode,1,10) as strZipCode,
@@ -576,8 +576,8 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			ptcus_comment = SUBSTRING(Ent.strInternalNotes,1,30),
 			--ptcus_1099_name = SUBSTRING(Ent.str1099Name,1,50),
 			--Location
-			ptcus_addr = CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(Loc.strAddress, 0, CHARINDEX(CHAR(10),Loc.strAddress)) ELSE Loc.strAddress END,
-			ptcus_addr2 = CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(Loc.strAddress, CHARINDEX(CHAR(10),Loc.strAddress), LEN(Loc.strAddress)) ELSE NULL END,
+			ptcus_addr = CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(SUBSTRING(Loc.strAddress,1,30), 0, CHARINDEX(CHAR(10),Loc.strAddress)) ELSE SUBSTRING(Loc.strAddress,1,30) END,
+			ptcus_addr2 = CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(SUBSTRING(Loc.strAddress, CHARINDEX(CHAR(10),Loc.strAddress) + 1, LEN(Loc.strAddress)),1,30) ELSE NULL END,
 			ptcus_city = SUBSTRING(Loc.strCity,1,20),
 			ptcus_state = SUBSTRING(Loc.strState,1,2),
 			ptcus_zip = SUBSTRING(Loc.strZipCode,1,10),
@@ -685,8 +685,8 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			SUBSTRING(Con.strPhone,1,15) as strPhone,
 			SUBSTRING(Con.strPhone2,1,15) as strPhone2,
 			--Location
-			(CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(Loc.strAddress, 0, CHARINDEX(CHAR(10),Loc.strAddress)) ELSE Loc.strAddress END) AS strAddress1,
-			(CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(Loc.strAddress, CHARINDEX(CHAR(10),Loc.strAddress), LEN(Loc.strAddress)) ELSE NULL END) AS strAddress2,
+			(CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(SUBSTRING(Loc.strAddress,1,30), 0, CHARINDEX(CHAR(10),Loc.strAddress)) ELSE SUBSTRING(Loc.strAddress,1,30) END) AS strAddress1,
+			(CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(SUBSTRING(Loc.strAddress, CHARINDEX(CHAR(10),Loc.strAddress) + 1, LEN(Loc.strAddress)),1,30) ELSE NULL END) AS strAddress2,
 			SUBSTRING(Loc.strCity,1,20) as strCity,
 			SUBSTRING(Loc.strState,1,2) as strState,
 			SUBSTRING(Loc.strZipCode,1,10) as strZipCode,
