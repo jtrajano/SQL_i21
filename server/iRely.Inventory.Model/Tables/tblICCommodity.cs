@@ -21,16 +21,16 @@ namespace iRely.Inventory.Model
         public string strDescription { get; set; }
         public bool ysnExchangeTraded { get; set; }
         public int intDecimalDPR { get; set; }
-        public double dblConsolidateFactor { get; set; }
+        public decimal? dblConsolidateFactor { get; set; }
         public bool ysnFXExposure { get; set; }
-        public double dblPriceCheckMin { get; set; }
-        public double dblPriceCheckMax { get; set; }
+        public decimal? dblPriceCheckMin { get; set; }
+        public decimal? dblPriceCheckMax { get; set; }
         public string strCheckoffTaxDesc { get; set; }
         public string strCheckoffAllState { get; set; }
         public string strInsuranceTaxDesc { get; set; }
         public string strInsuranceAllState { get; set; }
-        public DateTime dtmCropEndDateCurrent { get; set; }
-        public DateTime dtmCropEndDateNew { get; set; }
+        public DateTime? dtmCropEndDateCurrent { get; set; }
+        public DateTime? dtmCropEndDateNew { get; set; }
         public string strEDICode { get; set; }
         public string strScheduleStore { get; set; }
         public string strScheduleDiscount { get; set; }
@@ -42,13 +42,13 @@ namespace iRely.Inventory.Model
         public bool ysnRequireLoadNumber { get; set; }
         public bool ysnAllowVariety { get; set; }
         public bool ysnAllowLoadContracts { get; set; }
-        public double dblMaxUnder { get; set; }
-        public double dblMaxOver { get; set; }
-        public int intPatronageCategoryId { get; set; }
-        public int intPatronageCategoryDirectId { get; set; }
+        public decimal? dblMaxUnder { get; set; }
+        public decimal? dblMaxOver { get; set; }
+        public int? intPatronageCategoryId { get; set; }
+        public int? intPatronageCategoryDirectId { get; set; }
 
-        public tblICPatronageCategory PatronageCategory { get; set; }
-        public tblICPatronageCategory PatronageCategoryDirect { get; set; }
+        public virtual tblICPatronageCategory PatronageCategory { get; set; }
+        public virtual tblICPatronageCategory PatronageCategoryDirect { get; set; }
 
         public ICollection<tblICCommodityGroup> tblICCommodityGroups { get; set; }
         public ICollection<tblICCommodityUnitMeasure> tblICCommodityUnitMeasures { get; set; }

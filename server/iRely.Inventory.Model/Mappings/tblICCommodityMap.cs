@@ -42,6 +42,13 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnExchangeTraded).HasColumnName("ysnExchangeTraded");
             this.Property(t => t.ysnFXExposure).HasColumnName("ysnFXExposure");
             this.Property(t => t.ysnRequireLoadNumber).HasColumnName("ysnRequireLoadNumber");
+
+            this.HasOptional(p => p.PatronageCategory)
+                .WithMany(p => p.tblICCommodities)
+                .HasForeignKey(p => p.intPatronageCategoryId);
+            this.HasOptional(p => p.PatronageCategoryDirect)
+                .WithMany(p => p.tblICCommoditiesDirect)
+                .HasForeignKey(p => p.intPatronageCategoryDirectId);
         }
     }
 }

@@ -5,6 +5,7 @@ Ext.define('Inventory.model.Commodity', {
     extend: 'iRely.BaseEntity',
 
     requires: [
+        'Inventory.model.CommodityUnitMeasure',
         'Ext.data.Field'
     ],
 
@@ -39,7 +40,23 @@ Ext.define('Inventory.model.Commodity', {
         { name: 'ysnAllowLoadContracts', type: 'boolean'},
         { name: 'dblMaxUnder', type: 'float'},
         { name: 'dblMaxOver', type: 'float'},
-        { name: 'intPatronageCategoryId', type: 'int'},
-        { name: 'intPatronageCategoryDirectId', type: 'int'},
+        { name: 'intPatronageCategoryId', type: 'int', allowNull: true},
+        { name: 'intPatronageCategoryDirectId', type: 'int', allowNull: true}
+    ],
+
+    hasMany: [
+        {
+            model: 'Inventory.model.CommodityUnitMeasure',
+            name: 'tblICCommodityUnitMeasures',
+            foreignKey: 'intCommodityId',
+            primaryKey: 'intCommodityId',
+            storeConfig: {
+                sortOnLoad: true,
+                sorters: {
+                    direction: 'ASC',
+                    property: 'intSort'
+                }
+            }
+        }
     ]
 });

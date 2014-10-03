@@ -56,7 +56,16 @@ Ext.define('Inventory.view.override.CommodityViewController', {
         win.context = Ext.create('iRely.Engine', {
             window : win,
             store  : store,
-            binding: me.config.binding
+            binding: me.config.binding,
+            details: [
+                {
+                    key: 'tblICCommodityUnitMeasures',
+                    component: Ext.create('iRely.grid.Manager', {
+                        grid: win.down('#grdUom'),
+                        deleteButton : win.down('#btnDeleteUom')
+                    })
+                }
+            ]
         });
 
         return win.context;

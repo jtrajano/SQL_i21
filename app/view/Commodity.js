@@ -32,6 +32,8 @@ Ext.define('Inventory.view.Commodity', {
         'Ext.grid.Panel',
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
+        'Ext.grid.plugin.CellEditing',
+        'Ext.grid.column.Check',
         'Ext.tree.Panel',
         'Ext.tree.View',
         'Ext.tree.Column',
@@ -574,15 +576,50 @@ Ext.define('Inventory.view.Commodity', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colUOMCode',
                                                         dataIndex: 'strFieldName',
                                                         text: 'UOM',
-                                                        flex: 1
+                                                        flex: 3,
+                                                        editor: {
+                                                            xtype: 'combobox'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colUOMWeightPerPack',
                                                         dataIndex: 'strFieldName',
                                                         text: 'Weight Per Pack',
-                                                        flex: 1
+                                                        flex: 3,
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'checkcolumn',
+                                                        itemId: 'colUOMStockUnit',
+                                                        text: 'Stock Unit',
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'checkboxfield'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'checkcolumn',
+                                                        itemId: 'colUOMAllowPurchase',
+                                                        text: 'Allow Purchase in Stock Unit',
+                                                        flex: 2,
+                                                        editor: {
+                                                            xtype: 'checkboxfield'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'checkcolumn',
+                                                        itemId: 'colUOMAllowSale',
+                                                        text: 'Allow Sale in Stock Unit',
+                                                        flex: 2,
+                                                        editor: {
+                                                            xtype: 'checkboxfield'
+                                                        }
                                                     }
                                                 ],
                                                 viewConfig: {
@@ -591,7 +628,14 @@ Ext.define('Inventory.view.Commodity', {
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel',
                                                     mode: 'SINGLE'
-                                                })
+                                                }),
+                                                plugins: [
+                                                    {
+                                                        ptype: 'cellediting',
+                                                        pluginId: 'cepUOM',
+                                                        clicksToEdit: 1
+                                                    }
+                                                ]
                                             }
                                         ]
                                     },
@@ -1132,50 +1176,82 @@ Ext.define('Inventory.view.Commodity', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colQCGrade',
                                                         dataIndex: 'string',
                                                         text: 'Grade',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colQCDescription',
                                                         dataIndex: 'string',
                                                         text: 'Description',
-                                                        flex: 2
+                                                        flex: 2,
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colQCUnit',
                                                         dataIndex: 'string',
                                                         text: 'Unit',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        itemId: 'colQCMinValue',
                                                         width: 67,
                                                         align: 'right',
-                                                        text: 'Min Value'
+                                                        text: 'Min Value',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        itemId: 'colQCMaxValue',
                                                         width: 72,
                                                         align: 'right',
-                                                        text: 'Max Value'
+                                                        text: 'Max Value',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        itemId: 'colQCDiscountBasis',
                                                         width: 93,
                                                         align: 'right',
-                                                        text: 'Discount Basis'
+                                                        text: 'Discount Basis',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        itemId: 'colQCDiscount',
                                                         width: 70,
                                                         align: 'right',
-                                                        text: 'Discount'
+                                                        text: 'Discount',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colQCPerCurrencyUnit',
                                                         dataIndex: 'string',
-                                                        text: 'Per Currency/Unit'
+                                                        text: 'Per Currency/Unit',
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
                                                     }
                                                 ],
                                                 viewConfig: {
@@ -1183,7 +1259,14 @@ Ext.define('Inventory.view.Commodity', {
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'
-                                                })
+                                                }),
+                                                plugins: [
+                                                    {
+                                                        ptype: 'cellediting',
+                                                        pluginId: 'cepQualitySpecs',
+                                                        clicksToEdit: 1
+                                                    }
+                                                ]
                                             }
                                         ]
                                     },
@@ -1230,39 +1313,63 @@ Ext.define('Inventory.view.Commodity', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colFEFutureExchange',
                                                         dataIndex: 'string',
                                                         text: 'Futures Exchange',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'combobox'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colFEDefault',
                                                         dataIndex: 'string',
                                                         text: 'Default',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colFEHedgedBy',
                                                         dataIndex: 'string',
                                                         text: 'Hedged By',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colFEPriceCurrency',
                                                         dataIndex: 'string',
                                                         text: 'Price Currency',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colFEPriceUOM',
                                                         dataIndex: 'string',
                                                         text: 'Price UOM',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colFEHedgeUOM',
                                                         dataIndex: 'string',
                                                         text: 'Hedge UOM',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'combobox'
+                                                        }
                                                     }
                                                 ],
                                                 viewConfig: {
@@ -1270,7 +1377,14 @@ Ext.define('Inventory.view.Commodity', {
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'
-                                                })
+                                                }),
+                                                plugins: [
+                                                    {
+                                                        ptype: 'cellediting',
+                                                        pluginId: 'cepFuturesExchange',
+                                                        clicksToEdit: 1
+                                                    }
+                                                ]
                                             },
                                             {
                                                 xtype: 'advancefiltergrid',
@@ -1307,29 +1421,49 @@ Ext.define('Inventory.view.Commodity', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colFMFutureExchange',
                                                         dataIndex: 'string',
                                                         text: 'Futures Exchange',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'combobox'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colFMMonthCode',
                                                         dataIndex: 'string',
                                                         text: 'Futures Month Code',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colFMMonthName',
                                                         dataIndex: 'string',
                                                         text: 'Futures Month Name',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'datecolumn',
-                                                        text: 'Start Date'
+                                                        itemId: 'colFMStartDate',
+                                                        text: 'Start Date',
+                                                        editor: {
+                                                            xtype: 'datefield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'datecolumn',
-                                                        text: 'End Date'
+                                                        itemId: 'colFMEndDate',
+                                                        text: 'End Date',
+                                                        editor: {
+                                                            xtype: 'datefield'
+                                                        }
                                                     }
                                                 ],
                                                 viewConfig: {
@@ -1337,7 +1471,13 @@ Ext.define('Inventory.view.Commodity', {
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'
-                                                })
+                                                }),
+                                                plugins: [
+                                                    {
+                                                        ptype: 'cellediting',
+                                                        pluginId: 'cepFuturesMonth'
+                                                    }
+                                                ]
                                             }
                                         ]
                                     },
@@ -1379,21 +1519,33 @@ Ext.define('Inventory.view.Commodity', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colAccountLocation',
                                                         dataIndex: 'string',
                                                         text: 'Location',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'combobox'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colAccountDescription',
                                                         dataIndex: 'string',
                                                         text: 'Account Description',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'combobox'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colAccountId',
                                                         dataIndex: 'string',
                                                         text: 'Account ID',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'combobox'
+                                                        }
                                                     }
                                                 ],
                                                 viewConfig: {
@@ -1401,7 +1553,14 @@ Ext.define('Inventory.view.Commodity', {
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'
-                                                })
+                                                }),
+                                                plugins: [
+                                                    {
+                                                        ptype: 'cellediting',
+                                                        pluginId: 'cepAccounts',
+                                                        clicksToEdit: 1
+                                                    }
+                                                ]
                                             }
                                         ]
                                     }
