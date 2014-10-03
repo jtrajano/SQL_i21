@@ -724,6 +724,7 @@
     <Build Include="dbo\Tables\tblICItemAccount.sql" />
     <Build Include="dbo\Tables\tblARCustomerProductVersion.sql" />
     <Build Include="dbo\Tables\tblICItemNote.sql" />
+    <Build Include="dbo\Tables\tblICCommodityAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

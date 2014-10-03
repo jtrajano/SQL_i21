@@ -525,4 +525,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intItemPOSId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="796dda25-cb18-449c-bcf0-677e100b2783" ChangeDateTime="10/02/2014 07:52:21">
+    <Property Name="ElementName" Value="[dbo].[tblICCategory].[dblfeTime]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCategory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblLifeTime" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="fe7ff0eb-e701-49c3-8830-d3260c070800" ChangeDateTime="10/03/2014 03:05:02">
+    <Property Name="ElementName" Value="[dbo].[tblICCommodityAccount].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCommodityAccount]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCommodityAccountId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="cf51adc9-4d25-411b-a15e-17db041aa424" ChangeDateTime="10/03/2014 03:05:24">
+    <Property Name="ElementName" Value="[dbo].[tblICCommodityAccount].[int]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCommodityAccount]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intLocationId" />
+  </Operation>
 </Operations>
