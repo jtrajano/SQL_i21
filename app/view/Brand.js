@@ -20,15 +20,15 @@ Ext.define('Inventory.view.Brand', {
     requires: [
         'Inventory.view.BrandViewModel',
         'Inventory.view.Filter',
-        'Inventory.view.StatusbarPaging1',
+        'Inventory.view.Statusbar1',
         'Ext.form.Panel',
+        'Ext.toolbar.Toolbar',
         'Ext.button.Button',
         'Ext.toolbar.Separator',
         'Ext.grid.Panel',
         'Ext.grid.column.Column',
         'Ext.grid.View',
-        'Ext.selection.CheckboxModel',
-        'Ext.toolbar.Paging'
+        'Ext.selection.CheckboxModel'
     ],
 
     viewModel: {
@@ -112,8 +112,7 @@ Ext.define('Inventory.view.Brand', {
                                 ]
                             },
                             {
-                                xtype: 'ipagingstatusbar',
-                                itemId: 'pagingtoolbar',
+                                xtype: 'statusbar1',
                                 flex: 1,
                                 dock: 'bottom'
                             }

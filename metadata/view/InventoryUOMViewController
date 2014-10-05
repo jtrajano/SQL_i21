@@ -1,0 +1,14 @@
+{
+    "type": "Ext.app.ViewController",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "inventoryuom",
+        "designer|userClassName": "InventoryUOMViewController"
+    },
+    "name": "BrandViewController1",
+    "designerId": "ca3ef24f-7045-4369-ba38-aff579758f49"
+}

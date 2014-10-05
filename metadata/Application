@@ -14,7 +14,8 @@
             "SampleType",
             "QAList",
             "QATest",
-            "QualityTemplate"
+            "QualityTemplate",
+            "InventoryUOM"
         ]
     },
     "name": "Application",
