@@ -23,9 +23,9 @@ Ext.define('Inventory.view.FactoryUnitType', {
         'Ext.form.Panel',
         'Ext.button.Button',
         'Ext.toolbar.Separator',
-        'Ext.toolbar.Paging',
         'Ext.form.field.ComboBox',
-        'Ext.form.field.Checkbox'
+        'Ext.form.field.Checkbox',
+        'Ext.toolbar.Paging'
     ],
 
     viewModel: {

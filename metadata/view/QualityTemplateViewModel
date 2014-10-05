@@ -1,0 +1,14 @@
+{
+    "type": "Ext.app.ViewModel",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "qualitytemplate",
+        "designer|userClassName": "QualityTemplateViewModel"
+    },
+    "name": "QATestViewModel1",
+    "designerId": "d8f862c7-37ff-475d-a2d4-b7b9608a3ba5"
+}

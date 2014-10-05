@@ -6,8 +6,8 @@
     },
     "codeClass": null,
     "userConfig": {
-        "designer|userAlias": "categorystore",
-        "designer|userClassName": "CategoryStoreViewController"
+        "designer|userAlias": "categorylocation",
+        "designer|userClassName": "CategoryLocationViewController"
     },
     "designerId": "fcc4865f-47cc-46bd-9977-14f56287b66b"
 }

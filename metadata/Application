@@ -8,7 +8,13 @@
     "userConfig": {
         "name": "Inventory",
         "views": [
-            "CertificationProgram"
+            "CertificationProgram",
+            "ContractDocument",
+            "LotStatus",
+            "SampleType",
+            "QAList",
+            "QATest",
+            "QualityTemplate"
         ]
     },
     "name": "Application",

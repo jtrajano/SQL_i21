@@ -345,7 +345,7 @@
                                     "userConfig": {
                                         "icon": null,
                                         "iconCls": "small-delete",
-                                        "itemId": "btnPackType",
+                                        "itemId": "btnDeletePackType",
                                         "layout|flex": null,
                                         "tabIndex": -1,
                                         "text": "Delete"
@@ -377,7 +377,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter44",
+                                    "name": "filter19",
                                     "designerId": "c39762ed-6d5b-4268-95f3-6514bb2f553b",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -468,7 +468,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging121",
+                    "name": "statusbarpaging117",
                     "designerId": "d35ca290-fbac-4426-80de-75a0826117ac",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

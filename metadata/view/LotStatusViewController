@@ -1,0 +1,14 @@
+{
+    "type": "Ext.app.ViewController",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "lotstatus",
+        "designer|userClassName": "LotStatusViewController"
+    },
+    "name": "FeedStockCodeViewController1",
+    "designerId": "d8cc4396-de18-46ac-b52e-9e523d7cdaae"
+}

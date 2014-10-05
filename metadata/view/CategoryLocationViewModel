@@ -6,8 +6,8 @@
     },
     "codeClass": null,
     "userConfig": {
-        "designer|userAlias": "categorystore",
-        "designer|userClassName": "CategoryStoreViewModel"
+        "designer|userAlias": "categorylocation",
+        "designer|userClassName": "CategoryLocationViewModel"
     },
     "designerId": "a02e882a-6dd5-40ab-9771-ed9c2c47c58a"
 }

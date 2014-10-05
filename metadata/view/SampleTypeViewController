@@ -1,0 +1,14 @@
+{
+    "type": "Ext.app.ViewController",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "sampletype",
+        "designer|userClassName": "SampleTypeViewController"
+    },
+    "name": "PackTypeViewController1",
+    "designerId": "622fb974-8035-4862-ae1d-ab5079e9f6dc"
+}

@@ -21,7 +21,13 @@ Ext.Loader.setConfig({
 
 Ext.application({
     views: [
-        'CertificationProgram'
+        'CertificationProgram',
+        'ContractDocument',
+        'LotStatus',
+        'SampleType',
+        'QAList',
+        'QATest',
+        'QualityTemplate'
     ],
     name: 'Inventory',
 

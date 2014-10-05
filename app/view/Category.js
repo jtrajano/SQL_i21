@@ -312,118 +312,17 @@ Ext.define('Inventory.view.Category', {
                                                                 itemId: 'cboFreightItem',
                                                                 fieldLabel: 'Freight Item',
                                                                 labelWidth: 160
-                                                            },
-                                                            {
-                                                                xtype: 'checkboxfield',
-                                                                itemId: 'chkNonRetailUseDepartment',
-                                                                fieldLabel: 'Non Retail Use Department',
-                                                                labelWidth: 160
-                                                            },
-                                                            {
-                                                                xtype: 'checkboxfield',
-                                                                itemId: 'chkReportInNetOrGross',
-                                                                fieldLabel: 'Report in Net or Gross',
-                                                                labelWidth: 160
-                                                            },
-                                                            {
-                                                                xtype: 'checkboxfield',
-                                                                itemId: 'chkDepartmentForPumps',
-                                                                fieldLabel: 'Department for Pumps',
-                                                                labelWidth: 160
-                                                            },
-                                                            {
-                                                                xtype: 'combobox',
-                                                                flex: 1,
-                                                                itemId: 'cboConvertToPaidout',
-                                                                fieldLabel: 'Convert to Paidout',
-                                                                labelWidth: 160
-                                                            },
-                                                            {
-                                                                xtype: 'checkboxfield',
-                                                                itemId: 'chkDeleteFromRegister',
-                                                                fieldLabel: 'Delete from Register',
-                                                                labelWidth: 160
                                                             }
                                                         ]
                                                     },
                                                     {
                                                         xtype: 'container',
-                                                        flex: 1,
-                                                        margin: '0 1 0 5',
+                                                        flex: 1.1,
+                                                        margin: '0 5 0 0 ',
                                                         layout: {
                                                             type: 'vbox',
                                                             align: 'stretch'
-                                                        },
-                                                        items: [
-                                                            {
-                                                                xtype: 'checkboxfield',
-                                                                itemId: 'chkDepartmentKeyTaxed',
-                                                                fieldLabel: 'Department Key Taxed',
-                                                                labelWidth: 175
-                                                            },
-                                                            {
-                                                                xtype: 'combobox',
-                                                                itemId: 'cboDefaultProductCode',
-                                                                fieldLabel: 'Default Product Code',
-                                                                labelWidth: 175
-                                                            },
-                                                            {
-                                                                xtype: 'combobox',
-                                                                itemId: 'cboDefaultFamily',
-                                                                fieldLabel: 'Default Family',
-                                                                labelWidth: 175
-                                                            },
-                                                            {
-                                                                xtype: 'combobox',
-                                                                itemId: 'cboDefaultClass',
-                                                                fieldLabel: 'Default Class',
-                                                                labelWidth: 175
-                                                            },
-                                                            {
-                                                                xtype: 'checkboxfield',
-                                                                itemId: 'chkDefaultFoodStampable',
-                                                                fieldLabel: 'Default Food Stampable',
-                                                                labelWidth: 175
-                                                            },
-                                                            {
-                                                                xtype: 'checkboxfield',
-                                                                itemId: 'chkDefaultReturnable',
-                                                                fieldLabel: 'Default Returnable',
-                                                                labelWidth: 175
-                                                            },
-                                                            {
-                                                                xtype: 'checkboxfield',
-                                                                itemId: 'chkDefaultSaleable',
-                                                                fieldLabel: 'Default Saleable',
-                                                                labelWidth: 175
-                                                            },
-                                                            {
-                                                                xtype: 'checkboxfield',
-                                                                itemId: 'chkDefaultPrepriced',
-                                                                fieldLabel: 'Default Pre-priced',
-                                                                labelWidth: 175
-                                                            },
-                                                            {
-                                                                xtype: 'checkboxfield',
-                                                                itemId: 'chkDefaultIdRequiredLiquor',
-                                                                fieldLabel: 'Default ID Required (liquor)',
-                                                                labelWidth: 175
-                                                            },
-                                                            {
-                                                                xtype: 'checkboxfield',
-                                                                itemId: 'chkDefaultIdRequiredCigarette',
-                                                                fieldLabel: 'Default ID Required (cigarette)',
-                                                                labelWidth: 175
-                                                            },
-                                                            {
-                                                                xtype: 'numberfield',
-                                                                itemId: 'txtDefaultMinimumAge',
-                                                                maxWidth: 225,
-                                                                fieldLabel: 'Default Minimum Age',
-                                                                labelWidth: 175,
-                                                                hideTrigger: true
-                                                            }
-                                                        ]
+                                                        }
                                                     }
                                                 ]
                                             }
@@ -432,7 +331,7 @@ Ext.define('Inventory.view.Category', {
                                     {
                                         xtype: 'panel',
                                         layout: 'fit',
-                                        title: 'Stores',
+                                        title: 'Locations',
                                         items: [
                                             {
                                                 xtype: 'advancefiltergrid',
@@ -482,7 +381,7 @@ Ext.define('Inventory.view.Category', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         dataIndex: 'string',
-                                                        text: 'Store',
+                                                        text: 'Location',
                                                         flex: 1
                                                     },
                                                     {
