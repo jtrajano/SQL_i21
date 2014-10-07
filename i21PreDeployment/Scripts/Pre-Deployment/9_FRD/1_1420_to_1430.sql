@@ -433,6 +433,7 @@ BEGIN
 	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intSegmentFilterGroupId' AND OBJECT_ID = OBJECT_ID(N'tblFRSegmentFilterGroupDetail')) AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intSegmentFilterGroupID' AND OBJECT_ID = OBJECT_ID(N'tblFRSegmentFilterGroupDetail'))
     BEGIN
         EXEC sp_rename 'tblFRSegmentFilterGroupDetail.intSegmentFilterGroupID', 'intSegmentFilterGroupId' , 'COLUMN'
+		EXEC ('DELETE tblFRSegmentFilterGroupDetail WHERE intSegmentFilterGroupId NOT IN (SELECT intSegmentFilterGroupId FROM tblFRSegmentFilterGroup)')
     END
 END
 GO
