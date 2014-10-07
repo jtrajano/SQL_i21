@@ -857,9 +857,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
                                                         itemId: 'colQualityPropertyName',
                                                         width: 82,
+                                                        dataIndex: 'string',
                                                         text: 'Quality Property Name',
                                                         flex: 1
                                                     }
@@ -899,8 +899,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                 },
                                                 items: [
                                                     {
-                                                        xtype: 'textfield',
-                                                        itemId: 'txtCalculationBasis',
+                                                        xtype: 'combobox',
+                                                        itemId: 'cboCalculationBasis',
                                                         fieldLabel: 'Calculation Basis',
                                                         labelWidth: 130
                                                     },
@@ -1087,9 +1087,30 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
-                                                                itemId: 'btnDeletePutAway',
+                                                                itemId: 'btnCreateTasksPutAway',
+                                                                iconCls: 'small-add',
+                                                                text: 'Create Tasks'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnAssignAllPutAway',
+                                                                iconCls: 'small-approved',
+                                                                text: 'Assign All'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnDeleteAllPutAway',
                                                                 iconCls: 'small-delete',
-                                                                text: 'Delete'
+                                                                text: 'Delete All'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnRefreshPutAway',
+                                                                iconCls: 'small-refresh',
+                                                                text: 'Refresh'
                                                             },
                                                             {
                                                                 xtype: 'tbseparator'

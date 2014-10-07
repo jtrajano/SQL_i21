@@ -1179,7 +1179,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter14",
+                                                    "name": "filter2",
                                                     "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1599,7 +1599,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter15",
+                                                    "name": "filter3",
                                                     "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2099,7 +2099,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter26",
+                                                    "name": "filter4",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2215,7 +2215,7 @@
                                     "designerId": "3e018261-75b3-4216-8b85-276ec4c4e7b6",
                                     "cn": [
                                         {
-                                            "type": "Ext.form.field.Text",
+                                            "type": "Ext.form.field.ComboBox",
                                             "reference": {
                                                 "name": "items",
                                                 "type": "array"
@@ -2223,7 +2223,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "fieldLabel": "Calculation Basis",
-                                                "itemId": "txtCalculationBasis",
+                                                "itemId": "cboCalculationBasis",
                                                 "labelWidth": 130,
                                                 "layout|flex": null,
                                                 "layout|margins": null,
@@ -2231,7 +2231,7 @@
                                                 "readOnly": null,
                                                 "width": null
                                             },
-                                            "name": "MyTextField14",
+                                            "name": "MyComboBox5",
                                             "designerId": "4b5ab35f-9076-49a6-bde8-55ad9b3d0a6b"
                                         },
                                         {
@@ -2784,14 +2784,68 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "icon": null,
-                                                        "iconCls": "small-delete",
-                                                        "itemId": "btnDeletePutAway",
+                                                        "iconCls": "small-add",
+                                                        "itemId": "btnCreateTasksPutAway",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
-                                                        "text": "Delete"
+                                                        "text": "Create Tasks"
+                                                    },
+                                                    "name": "MyButton3",
+                                                    "designerId": "4b92a9f4-2f02-470a-a37b-c0d82186f696"
+                                                },
+                                                {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "icon": null,
+                                                        "iconCls": "small-approved",
+                                                        "itemId": "btnAssignAllPutAway",
+                                                        "layout|flex": null,
+                                                        "tabIndex": -1,
+                                                        "text": "Assign All"
+                                                    },
+                                                    "name": "MyButton4",
+                                                    "designerId": "c882f03f-bf28-4982-9329-52c0c1521486"
+                                                },
+                                                {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "icon": null,
+                                                        "iconCls": "small-delete",
+                                                        "itemId": "btnDeleteAllPutAway",
+                                                        "layout|flex": null,
+                                                        "tabIndex": -1,
+                                                        "text": "Delete All"
                                                     },
                                                     "name": "MyButton163",
                                                     "designerId": "51db1990-e6fc-424c-a0f5-49fc1a7e6c86"
+                                                },
+                                                {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "icon": null,
+                                                        "iconCls": "small-refresh",
+                                                        "itemId": "btnRefreshPutAway",
+                                                        "layout|flex": null,
+                                                        "tabIndex": -1,
+                                                        "text": "Refresh"
+                                                    },
+                                                    "name": "MyButton5",
+                                                    "designerId": "8ddfc8e1-48e5-484c-b682-93b7eb6c3d8a"
                                                 },
                                                 {
                                                     "type": "Ext.toolbar.Separator",
@@ -2817,7 +2871,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter27",
+                                                    "name": "filter5",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3358,7 +3412,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter28",
+                                                    "name": "filter6",
                                                     "designerId": "4228a31b-bb4e-45e0-9af0-fd9778808126",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3545,7 +3599,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging110",
+                    "name": "statusbarpaging1",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

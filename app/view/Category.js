@@ -188,51 +188,87 @@ Ext.define('Inventory.view.Category', {
                                                                 xtype: 'textfield',
                                                                 itemId: 'txtCategoryCode',
                                                                 fieldLabel: 'Category Code',
-                                                                labelWidth: 110
+                                                                labelWidth: 130
                                                             },
                                                             {
                                                                 xtype: 'textfield',
                                                                 itemId: 'txtDescription',
                                                                 fieldLabel: 'Description',
-                                                                labelWidth: 110
+                                                                labelWidth: 130
                                                             },
                                                             {
                                                                 xtype: 'combobox',
                                                                 itemId: 'cboLineOfBusiness',
                                                                 fieldLabel: 'Line of Business',
-                                                                labelWidth: 110
+                                                                labelWidth: 130
                                                             },
                                                             {
                                                                 xtype: 'combobox',
                                                                 itemId: 'cboCatalogGroup',
                                                                 fieldLabel: 'Catalog Group',
-                                                                labelWidth: 110
+                                                                labelWidth: 130
                                                             },
                                                             {
                                                                 xtype: 'combobox',
                                                                 itemId: 'cboCostingMethod',
                                                                 fieldLabel: 'Costing Method',
-                                                                labelWidth: 110
+                                                                labelWidth: 130
                                                             },
                                                             {
                                                                 xtype: 'combobox',
                                                                 itemId: 'cboInventoryTracking',
                                                                 fieldLabel: 'Inventory Tracking',
-                                                                labelWidth: 110
+                                                                labelWidth: 130
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
                                                                 itemId: 'txtStandardQty',
                                                                 maxWidth: 225,
                                                                 fieldLabel: 'Standard Qty',
-                                                                labelWidth: 110,
+                                                                labelWidth: 130,
                                                                 hideTrigger: true
                                                             },
                                                             {
                                                                 xtype: 'combobox',
                                                                 itemId: 'cboStandardUom',
                                                                 fieldLabel: 'Standard UOM',
-                                                                labelWidth: 110
+                                                                labelWidth: 130
+                                                            },
+                                                            {
+                                                                xtype: 'textfield',
+                                                                itemId: 'txtGlDivisionNumber',
+                                                                fieldLabel: 'GL Division Number',
+                                                                labelWidth: 130
+                                                            },
+                                                            {
+                                                                xtype: 'checkboxfield',
+                                                                itemId: 'chkSalesAnalysisByTon',
+                                                                fieldLabel: 'Sales Analysis by Ton',
+                                                                labelWidth: 130
+                                                            },
+                                                            {
+                                                                xtype: 'combobox',
+                                                                itemId: 'cboMaterialFee',
+                                                                fieldLabel: 'Material Fee',
+                                                                labelWidth: 130
+                                                            },
+                                                            {
+                                                                xtype: 'combobox',
+                                                                itemId: 'cboMaterialItem',
+                                                                fieldLabel: 'Material Item',
+                                                                labelWidth: 130
+                                                            },
+                                                            {
+                                                                xtype: 'checkboxfield',
+                                                                itemId: 'chkAutoCalculateFreight',
+                                                                fieldLabel: 'Auto Calculate Freight',
+                                                                labelWidth: 130
+                                                            },
+                                                            {
+                                                                xtype: 'combobox',
+                                                                itemId: 'cboFreightItem',
+                                                                fieldLabel: 'Freight Item',
+                                                                labelWidth: 130
                                                             }
                                                         ]
                                                     },
@@ -240,85 +276,6 @@ Ext.define('Inventory.view.Category', {
                                                         xtype: 'container',
                                                         flex: 1,
                                                         margin: '0 1 0 5',
-                                                        layout: {
-                                                            type: 'vbox',
-                                                            align: 'stretch'
-                                                        }
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        xtype: 'panel',
-                                        bodyPadding: 10,
-                                        title: 'Setup',
-                                        layout: {
-                                            type: 'vbox',
-                                            align: 'stretch'
-                                        },
-                                        items: [
-                                            {
-                                                xtype: 'container',
-                                                layout: {
-                                                    type: 'hbox',
-                                                    align: 'stretch'
-                                                },
-                                                items: [
-                                                    {
-                                                        xtype: 'container',
-                                                        flex: 1.1,
-                                                        margin: '0 5 0 0 ',
-                                                        layout: {
-                                                            type: 'vbox',
-                                                            align: 'stretch'
-                                                        },
-                                                        items: [
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtGlDivisionNumber',
-                                                                fieldLabel: 'GL Division Number',
-                                                                labelWidth: 160
-                                                            },
-                                                            {
-                                                                xtype: 'checkboxfield',
-                                                                itemId: 'chkSalesAnalysisByTon',
-                                                                fieldLabel: 'Sales Analysis by Ton',
-                                                                labelWidth: 160
-                                                            },
-                                                            {
-                                                                xtype: 'combobox',
-                                                                flex: 1,
-                                                                itemId: 'cboMaterialFee',
-                                                                fieldLabel: 'Material Fee',
-                                                                labelWidth: 160
-                                                            },
-                                                            {
-                                                                xtype: 'combobox',
-                                                                flex: 1,
-                                                                itemId: 'cboMaterialItem',
-                                                                fieldLabel: 'Material Item',
-                                                                labelWidth: 160
-                                                            },
-                                                            {
-                                                                xtype: 'checkboxfield',
-                                                                itemId: 'chkAutoCalculateFreight',
-                                                                fieldLabel: 'Auto Calculate Freight',
-                                                                labelWidth: 160
-                                                            },
-                                                            {
-                                                                xtype: 'combobox',
-                                                                flex: 1,
-                                                                itemId: 'cboFreightItem',
-                                                                fieldLabel: 'Freight Item',
-                                                                labelWidth: 160
-                                                            }
-                                                        ]
-                                                    },
-                                                    {
-                                                        xtype: 'container',
-                                                        flex: 1.1,
-                                                        margin: '0 5 0 0 ',
                                                         layout: {
                                                             type: 'vbox',
                                                             align: 'stretch'

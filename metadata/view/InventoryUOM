@@ -269,7 +269,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter1",
+                                                    "name": "filter",
                                                     "designerId": "b44ce8b3-0c22-493c-af61-c115c3230c23",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -459,7 +459,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter2",
+                                                    "name": "filter1",
                                                     "designerId": "f6d3603a-325f-4715-8aae-53dd182f6038",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }

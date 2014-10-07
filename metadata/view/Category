@@ -312,7 +312,7 @@
                                                     "userConfig": {
                                                         "fieldLabel": "Category Code",
                                                         "itemId": "txtCategoryCode",
-                                                        "labelWidth": 110,
+                                                        "labelWidth": 130,
                                                         "layout|flex": null
                                                     },
                                                     "name": "MyTextField62",
@@ -328,7 +328,7 @@
                                                     "userConfig": {
                                                         "fieldLabel": "Description",
                                                         "itemId": "txtDescription",
-                                                        "labelWidth": 110,
+                                                        "labelWidth": 130,
                                                         "layout|flex": null
                                                     },
                                                     "name": "MyTextField32",
@@ -344,7 +344,7 @@
                                                     "userConfig": {
                                                         "fieldLabel": "Line of Business",
                                                         "itemId": "cboLineOfBusiness",
-                                                        "labelWidth": 110,
+                                                        "labelWidth": 130,
                                                         "layout|flex": null,
                                                         "layout|margins": null
                                                     },
@@ -361,7 +361,7 @@
                                                     "userConfig": {
                                                         "fieldLabel": "Catalog Group",
                                                         "itemId": "cboCatalogGroup",
-                                                        "labelWidth": 110,
+                                                        "labelWidth": 130,
                                                         "layout|flex": null,
                                                         "layout|margins": null
                                                     },
@@ -378,7 +378,7 @@
                                                     "userConfig": {
                                                         "fieldLabel": "Costing Method",
                                                         "itemId": "cboCostingMethod",
-                                                        "labelWidth": 110,
+                                                        "labelWidth": 130,
                                                         "layout|flex": null,
                                                         "layout|margins": null
                                                     },
@@ -395,7 +395,7 @@
                                                     "userConfig": {
                                                         "fieldLabel": "Inventory Tracking",
                                                         "itemId": "cboInventoryTracking",
-                                                        "labelWidth": 110,
+                                                        "labelWidth": 130,
                                                         "layout|flex": null,
                                                         "layout|margins": null
                                                     },
@@ -413,7 +413,7 @@
                                                         "fieldLabel": "Standard Qty",
                                                         "hideTrigger": true,
                                                         "itemId": "txtStandardQty",
-                                                        "labelWidth": 110,
+                                                        "labelWidth": 130,
                                                         "layout|flex": null,
                                                         "maxWidth": 225
                                                     },
@@ -430,12 +430,113 @@
                                                     "userConfig": {
                                                         "fieldLabel": "Standard UOM",
                                                         "itemId": "cboStandardUom",
-                                                        "labelWidth": 110,
+                                                        "labelWidth": 130,
                                                         "layout|flex": null,
                                                         "layout|margins": null
                                                     },
                                                     "name": "MyComboBox48",
                                                     "designerId": "abaef6be-bb9b-4e0b-9874-8e76a298c4ea"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "GL Division Number",
+                                                        "itemId": "txtGlDivisionNumber",
+                                                        "labelWidth": 130,
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyTextField62",
+                                                    "designerId": "8fcd142f-a646-4459-9fe4-fe0f9932df87"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Sales Analysis by Ton",
+                                                        "itemId": "chkSalesAnalysisByTon",
+                                                        "labelWidth": 130,
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyCheckbox43",
+                                                    "designerId": "4b49a370-474e-49f5-9267-283a0eb444dd"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Material Fee",
+                                                        "itemId": "cboMaterialFee",
+                                                        "labelWidth": 130,
+                                                        "layout|flex": null,
+                                                        "layout|margins": null
+                                                    },
+                                                    "name": "MyComboBox56",
+                                                    "designerId": "95d7f6e1-a269-455e-9f5f-492111d427eb"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Material Item",
+                                                        "itemId": "cboMaterialItem",
+                                                        "labelWidth": 130,
+                                                        "layout|flex": null,
+                                                        "layout|margins": null
+                                                    },
+                                                    "name": "MyComboBox57",
+                                                    "designerId": "8d9a2d7b-337a-4da1-b75d-f2d4b95799c3"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Auto Calculate Freight",
+                                                        "itemId": "chkAutoCalculateFreight",
+                                                        "labelWidth": 130,
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyCheckbox44",
+                                                    "designerId": "e177899a-17be-402e-9ced-031bd237fd17"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Freight Item",
+                                                        "itemId": "cboFreightItem",
+                                                        "labelWidth": 130,
+                                                        "layout|flex": null,
+                                                        "layout|margins": null
+                                                    },
+                                                    "name": "MyComboBox58",
+                                                    "designerId": "c9d92bba-f833-4bcd-980c-50b84b0be7d6"
                                                 }
                                             ]
                                         },
@@ -456,191 +557,6 @@
                                             },
                                             "name": "MyContainer48",
                                             "designerId": "e6cdf274-a2f6-4656-bdd9-1f2a668dcb18"
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "type": "Ext.panel.Panel",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "bodyPadding": 10,
-                                "container|align": "stretch",
-                                "layout": "vbox",
-                                "title": "Setup"
-                            },
-                            "name": "MyPanel25",
-                            "designerId": "66c94ac1-0cb1-4a12-a565-65cf546efa38",
-                            "cn": [
-                                {
-                                    "type": "Ext.tab.Tab",
-                                    "reference": {
-                                        "name": "tabConfig",
-                                        "type": "object"
-                                    },
-                                    "codeClass": null,
-                                    "name": "TabConfig24",
-                                    "designerId": "73ce6cd4-32bf-4561-b67e-b6c1692340d7"
-                                },
-                                {
-                                    "type": "Ext.container.Container",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "container|align": "stretch",
-                                        "designer|displayName": "container",
-                                        "layout": "hbox",
-                                        "layout|flex": null
-                                    },
-                                    "name": "MyContainer46",
-                                    "designerId": "450ff9f1-94f1-4ab9-a50d-f2f69dcd239c",
-                                    "cn": [
-                                        {
-                                            "type": "Ext.container.Container",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "container|align": "stretch",
-                                                "designer|displayName": "container",
-                                                "layout": "vbox",
-                                                "layout|flex": 1.1,
-                                                "layout|margins": null,
-                                                "margin": "0 5 0 0 "
-                                            },
-                                            "name": "MyContainer47",
-                                            "designerId": "5e6e8c2e-5644-4814-a28f-31d1fe1e206a",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "GL Division Number",
-                                                        "itemId": "txtGlDivisionNumber",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "MyTextField62",
-                                                    "designerId": "8fcd142f-a646-4459-9fe4-fe0f9932df87"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Checkbox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "boxLabel": null,
-                                                        "fieldLabel": "Sales Analysis by Ton",
-                                                        "itemId": "chkSalesAnalysisByTon",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "MyCheckbox43",
-                                                    "designerId": "4b49a370-474e-49f5-9267-283a0eb444dd"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.ComboBox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Material Fee",
-                                                        "itemId": "cboMaterialFee",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": 1,
-                                                        "layout|margins": null
-                                                    },
-                                                    "name": "MyComboBox56",
-                                                    "designerId": "95d7f6e1-a269-455e-9f5f-492111d427eb"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.ComboBox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Material Item",
-                                                        "itemId": "cboMaterialItem",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": 1,
-                                                        "layout|margins": null
-                                                    },
-                                                    "name": "MyComboBox57",
-                                                    "designerId": "8d9a2d7b-337a-4da1-b75d-f2d4b95799c3"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Checkbox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "boxLabel": null,
-                                                        "fieldLabel": "Auto Calculate Freight",
-                                                        "itemId": "chkAutoCalculateFreight",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "MyCheckbox44",
-                                                    "designerId": "e177899a-17be-402e-9ced-031bd237fd17"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.ComboBox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Freight Item",
-                                                        "itemId": "cboFreightItem",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": 1,
-                                                        "layout|margins": null
-                                                    },
-                                                    "name": "MyComboBox58",
-                                                    "designerId": "c9d92bba-f833-4bcd-980c-50b84b0be7d6"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.container.Container",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "container|align": "stretch",
-                                                "designer|displayName": "container",
-                                                "layout": "vbox",
-                                                "layout|flex": 1.1,
-                                                "layout|margins": null,
-                                                "margin": "0 5 0 0 "
-                                            },
-                                            "name": "MyContainer",
-                                            "designerId": "9fc68357-8b4b-4a8d-b59a-17ec3bc797a8"
                                         }
                                     ]
                                 }
@@ -779,7 +695,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter1",
+                                                    "name": "filter7",
                                                     "designerId": "9be921ca-705f-47f3-98b7-abf79fa0ae14",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -985,7 +901,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter2",
+                                                    "name": "filter8",
                                                     "designerId": "336cd22c-55d7-4f75-bd45-20820dfc01b5",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1161,7 +1077,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter3",
+                                                    "name": "filter9",
                                                     "designerId": "1f016d2c-d6a9-4998-be84-a17777e4dd56",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1455,7 +1371,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter4",
+                                                    "name": "filter10",
                                                     "designerId": "0763d06c-c630-47e6-91f4-89ddac6c34ff",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
