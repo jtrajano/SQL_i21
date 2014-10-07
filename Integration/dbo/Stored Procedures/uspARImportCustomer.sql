@@ -7,12 +7,13 @@ GO
 
 IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()) = 1
 BEGIN
-EXEC('CREATE PROCEDURE uspARImportCustomer
+
+EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 	@CustomerId NVARCHAR(50) = NULL,
 	@Update BIT = 0,
 	@Total INT = 0 OUTPUT
 
-	AS
+	AS 
 
 	--Make first a copy of agcusmst. This will use to track all customer already imported
 	IF(OBJECT_ID(''dbo.tblARTempCustomer'') IS NULL)
@@ -34,8 +35,8 @@ EXEC('CREATE PROCEDURE uspARImportCustomer
 			agcus_comments = SUBSTRING(Ent.strInternalNotes,1,30),
 			agcus_1099_name = SUBSTRING(Ent.str1099Name,1,50),
 			--Location
-			agcus_addr = CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(Loc.strAddress, 0, CHARINDEX(CHAR(10),Loc.strAddress)) ELSE Loc.strAddress END,
-			agcus_addr2 = CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(Loc.strAddress, CHARINDEX(CHAR(10),Loc.strAddress), LEN(Loc.strAddress)) ELSE NULL END,
+			agcus_addr = CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(SUBSTRING(Loc.strAddress,1,30), 0, CHARINDEX(CHAR(10),Loc.strAddress)) ELSE SUBSTRING(Loc.strAddress,1,30) END,
+			agcus_addr2 = CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(SUBSTRING(Loc.strAddress, CHARINDEX(CHAR(10),Loc.strAddress) + 1, LEN(Loc.strAddress)),1,30) ELSE NULL END,
 			agcus_city = SUBSTRING(Loc.strCity,1,20),
 			agcus_state = SUBSTRING(Loc.strState,1,2),
 			agcus_zip = SUBSTRING(Loc.strZipCode,1,10),
@@ -146,8 +147,8 @@ EXEC('CREATE PROCEDURE uspARImportCustomer
 			SUBSTRING(Con.strPhone,1,15) as strPhone,
 			SUBSTRING(Con.strPhone2,1,15) as strPhone2,
 			--Location
-			(CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(Loc.strAddress, 0, CHARINDEX(CHAR(10),Loc.strAddress)) ELSE Loc.strAddress END) AS strAddress1,
-			(CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(Loc.strAddress, CHARINDEX(CHAR(10),Loc.strAddress), LEN(Loc.strAddress)) ELSE NULL END) AS strAddress2,
+			(CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(SUBSTRING(Loc.strAddress,1,30), 0, CHARINDEX(CHAR(10),Loc.strAddress)) ELSE SUBSTRING(Loc.strAddress,1,30) END) AS strAddress1,
+			(CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(SUBSTRING(Loc.strAddress, CHARINDEX(CHAR(10),Loc.strAddress) + 1, LEN(Loc.strAddress)),1,30) ELSE NULL END) AS strAddress2,
 			SUBSTRING(Loc.strCity,1,20) as strCity,
 			SUBSTRING(Loc.strState,1,2) as strState,
 			SUBSTRING(Loc.strZipCode,1,10) as strZipCode,
@@ -378,7 +379,7 @@ EXEC('CREATE PROCEDURE uspARImportCustomer
 				@ysnVoluntaryCheckoff = CASE WHEN agcus_ckoff_vol_yn = ''Y'' THEN 1 ELSE 0 END ,		
 				@strCheckoffState = agcus_ga_origin_st,			
 				@ysnMarketAgreementSigned = CASE WHEN agcus_mkt_sign_yn = ''Y'' THEN 1 ELSE 0 END ,	
-				@intMarketZoneId = NULL, --agcus_dflt_mkt_zone this should be query to tblARMarketzone,			
+				@intMarketZoneId = (SELECT intMarketZoneId FROM tblARMarketZone WHERE strMarketZoneCode COLLATE Latin1_General_CI_AS = agcus_dflt_mkt_zone COLLATE Latin1_General_CI_AS),			
 				@ysnHoldBatchGrainPayment = CASE WHEN agcus_ga_hold_pay_yn = ''Y'' THEN 1 ELSE 0 END ,	
 				@ysnFederalWithholding = CASE WHEN agcus_ga_wthhld_yn = ''Y'' THEN 1 ELSE 0 END	
 			
@@ -542,12 +543,13 @@ EXEC('CREATE PROCEDURE uspARImportCustomer
 	IF(@Update = 1 AND @CustomerId IS NULL) 
 	BEGIN
 		SELECT @Total = COUNT(agcus_key) from tblARTempCustomer
-	END')
+	END'
+)
 END
 
 IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1
 BEGIN
-EXEC('CREATE PROCEDURE uspARImportCustomer
+EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 	@CustomerId NVARCHAR(50) = NULL,
 	@Update BIT = 0,
 	@Total INT = 0 OUTPUT
@@ -574,8 +576,8 @@ EXEC('CREATE PROCEDURE uspARImportCustomer
 			ptcus_comment = SUBSTRING(Ent.strInternalNotes,1,30),
 			--ptcus_1099_name = SUBSTRING(Ent.str1099Name,1,50),
 			--Location
-			ptcus_addr = CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(Loc.strAddress, 0, CHARINDEX(CHAR(10),Loc.strAddress)) ELSE Loc.strAddress END,
-			ptcus_addr2 = CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(Loc.strAddress, CHARINDEX(CHAR(10),Loc.strAddress), LEN(Loc.strAddress)) ELSE NULL END,
+			ptcus_addr = CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(SUBSTRING(Loc.strAddress,1,30), 0, CHARINDEX(CHAR(10),Loc.strAddress)) ELSE SUBSTRING(Loc.strAddress,1,30) END,
+			ptcus_addr2 = CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(SUBSTRING(Loc.strAddress, CHARINDEX(CHAR(10),Loc.strAddress) + 1, LEN(Loc.strAddress)),1,30) ELSE NULL END,
 			ptcus_city = SUBSTRING(Loc.strCity,1,20),
 			ptcus_state = SUBSTRING(Loc.strState,1,2),
 			ptcus_zip = SUBSTRING(Loc.strZipCode,1,10),
@@ -683,8 +685,8 @@ EXEC('CREATE PROCEDURE uspARImportCustomer
 			SUBSTRING(Con.strPhone,1,15) as strPhone,
 			SUBSTRING(Con.strPhone2,1,15) as strPhone2,
 			--Location
-			(CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(Loc.strAddress, 0, CHARINDEX(CHAR(10),Loc.strAddress)) ELSE Loc.strAddress END) AS strAddress1,
-			(CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(Loc.strAddress, CHARINDEX(CHAR(10),Loc.strAddress), LEN(Loc.strAddress)) ELSE NULL END) AS strAddress2,
+			(CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(SUBSTRING(Loc.strAddress,1,30), 0, CHARINDEX(CHAR(10),Loc.strAddress)) ELSE SUBSTRING(Loc.strAddress,1,30) END) AS strAddress1,
+			(CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(SUBSTRING(Loc.strAddress, CHARINDEX(CHAR(10),Loc.strAddress) + 1, LEN(Loc.strAddress)),1,30) ELSE NULL END) AS strAddress2,
 			SUBSTRING(Loc.strCity,1,20) as strCity,
 			SUBSTRING(Loc.strState,1,2) as strState,
 			SUBSTRING(Loc.strZipCode,1,10) as strZipCode,
@@ -1077,5 +1079,5 @@ EXEC('CREATE PROCEDURE uspARImportCustomer
 	BEGIN
 		SELECT @Total = COUNT(ptcus_cus_no) from tblARTempCustomer
 	END'
-	)
+)
 END
