@@ -23,7 +23,7 @@ FROM tblAPPaymentDetail A
 	INNER JOIN tblAPBill C
 		ON A.intBillId = C.intBillId
 	INNER JOIN tblAPVendor D
-		ON B.intVendorId = D.intEntityId
+		ON B.intVendorId = D.intVendorId
 	INNER JOIN tblEntity E
 		ON D.intEntityId = E.intEntityId
 	INNER JOIN tblGLAccount F
