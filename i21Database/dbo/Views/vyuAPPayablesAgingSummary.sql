@@ -39,7 +39,7 @@ SELECT tblAPPayment.dtmDatePaid AS dtmDate,
 , tblGLAccount.strAccountId
 , strDescription = (Select strDescription From tblGLAccount where strAccountId = tblGLAccount.strAccountId)
 FROM tblAPPaymentDetail   
- LEFT JOIN (tblAPBill LEFT JOIN (tblAPVendor INNER JOIN tblEntity ON tblAPVendor.intEntityId = tblEntity.intEntityId) ON tblAPVendor.intEntityId = tblAPBill.intVendorId) 
+ LEFT JOIN (tblAPBill LEFT JOIN (tblAPVendor INNER JOIN tblEntity ON tblAPVendor.intEntityId = tblEntity.intEntityId) ON tblAPVendor.intVendorId = tblAPBill.intVendorId) 
  ON tblAPBill.intBillId = tblAPPaymentDetail.intBillId 
  INNER JOIN tblGLAccount ON tblAPBill.intAccountId = tblGLAccount.intAccountId  
  LEFT JOIN tblAPPayment   

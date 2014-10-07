@@ -17,7 +17,7 @@ SELECT
 FROM tblAPBill A
 		LEFT JOIN tblAPPaymentDetail B ON A.intBillId = B.intBillId
 		LEFT JOIN tblAPVendor
-			ON tblAPVendor.intEntityId = A.intVendorId
+			ON tblAPVendor.intVendorId = A.intVendorId
 GROUP BY A.intBillId,
 	A.dtmDate,
 	A.dblTotal,
