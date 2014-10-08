@@ -39,7 +39,7 @@ EXEC(
 				agsls_state = SUBSTRING(S.strState,1,2),
 				agsls_country = (CASE WHEN LEN(S.strCountry) = 3 THEN S.strCountry ELSE '''' END),
 				agsls_phone = SUBSTRING(S.strPhone,1,15),
-				agsls_dispatch_email = CASE WHEN S.strType = ''Email'' THEN ''E'' WHEN S.strType = ''Text'' THEN ''T'' WHEN S.strType = ''Both'' THEN ''B'' ELSE ''N'' END,
+				agsls_dispatch_email = CASE WHEN S.strDispatchNotification = ''Email'' THEN ''E'' WHEN S.strDispatchNotification = ''Text'' THEN ''T'' WHEN S.strDispatchNotification = ''Both'' THEN ''B'' ELSE ''N'' END,
 				agsls_textmsg_email = SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEntity E
 				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntityId
@@ -74,7 +74,7 @@ EXEC(
 				SUBSTRING(S.strState,1,2),
 				(CASE WHEN LEN(S.strCountry) = 3 THEN S.strCountry ELSE '''' END),
 				SUBSTRING(S.strPhone,1,15),
-				CASE WHEN S.strType = ''Email'' THEN ''E'' WHEN S.strType = ''Text'' THEN ''T'' WHEN S.strType = ''Both'' THEN ''B'' ELSE ''N'' END,
+				CASE WHEN S.strDispatchNotification = ''Email'' THEN ''E'' WHEN S.strDispatchNotification = ''Text'' THEN ''T'' WHEN S.strDispatchNotification = ''Both'' THEN ''B'' ELSE ''N'' END,
 				SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEntity E
 				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntityId
@@ -244,7 +244,7 @@ EXEC(
 				ptsls_state = SUBSTRING(S.strState,1,2),
 				--ptsls_country = (CASE WHEN LEN(S.strCountry) = 3 THEN S.strCountry ELSE '''' END),
 				ptsls_phone = SUBSTRING(S.strPhone,1,15),
-				ptsls_dispatch_email = CASE WHEN S.strType = ''Email'' THEN ''Y'' ELSE ''N'' END,
+				ptsls_dispatch_email = CASE WHEN S.strDispatchNotification = ''Email'' THEN ''Y'' ELSE ''N'' END,
 				ptsls_textmsg_email = SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEntity E
 				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntityId
@@ -279,7 +279,7 @@ EXEC(
 				SUBSTRING(S.strState,1,2),
 				--S.strCountry,
 				SUBSTRING(S.strPhone,1,15),
-				CASE WHEN S.strType = ''Email'' THEN ''Y'' ELSE ''N'' END,
+				CASE WHEN S.strDispatchNotification = ''Email'' THEN ''Y'' ELSE ''N'' END,
 				SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEntity E
 				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntityId
