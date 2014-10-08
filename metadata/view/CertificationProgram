@@ -479,7 +479,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter2",
+                                    "name": "filter",
                                     "designerId": "264fa430-47fb-419b-9c59-83d13bd35b5f",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -598,7 +598,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging1",
                     "designerId": "24cec6a2-4a25-4a94-b646-9410f4905c67",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

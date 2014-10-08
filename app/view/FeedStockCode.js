@@ -21,10 +21,10 @@ Ext.define('Inventory.view.FeedStockCode', {
         'Inventory.view.FeedStockCodeViewModel',
         'Inventory.view.Statusbar1',
         'Ext.form.Panel',
-        'Ext.grid.Panel',
         'Ext.toolbar.Toolbar',
         'Ext.button.Button',
         'Ext.toolbar.Separator',
+        'Ext.grid.Panel',
         'Ext.grid.column.Column',
         'Ext.form.field.Text',
         'Ext.grid.View',
@@ -63,6 +63,61 @@ Ext.define('Inventory.view.FeedStockCode', {
                             type: 'vbox',
                             align: 'stretch'
                         },
+                        dockedItems: [
+                            {
+                                xtype: 'toolbar',
+                                dock: 'top',
+                                width: 588,
+                                layout: {
+                                    type: 'hbox',
+                                    padding: '0 0 0 1'
+                                },
+                                items: [
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        height: 57,
+                                        itemId: 'btnSave',
+                                        width: 45,
+                                        iconAlign: 'top',
+                                        iconCls: 'large-save',
+                                        scale: 'large',
+                                        text: 'Save'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        height: 57,
+                                        itemId: 'btnUndo',
+                                        width: 45,
+                                        iconAlign: 'top',
+                                        iconCls: 'large-undo',
+                                        scale: 'large',
+                                        text: 'Undo'
+                                    },
+                                    {
+                                        xtype: 'tbseparator',
+                                        height: 30
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        height: 57,
+                                        itemId: 'btnClose',
+                                        width: 45,
+                                        iconAlign: 'top',
+                                        iconCls: 'large-close',
+                                        scale: 'large',
+                                        text: 'Close'
+                                    }
+                                ]
+                            },
+                            {
+                                xtype: 'istatusbar',
+                                flex: 1,
+                                dock: 'bottom'
+                            }
+                        ],
                         items: [
                             {
                                 xtype: 'gridpanel',
@@ -125,61 +180,6 @@ Ext.define('Inventory.view.FeedStockCode', {
                                         ptype: 'cellediting',
                                         pluginId: 'FeedStockCodeplugin',
                                         clicksToEdit: 1
-                                    }
-                                ]
-                            }
-                        ],
-                        dockedItems: [
-                            {
-                                xtype: 'istatusbar',
-                                flex: 1,
-                                dock: 'bottom'
-                            },
-                            {
-                                xtype: 'toolbar',
-                                dock: 'top',
-                                width: 588,
-                                layout: {
-                                    type: 'hbox',
-                                    padding: '0 0 0 1'
-                                },
-                                items: [
-                                    {
-                                        xtype: 'button',
-                                        tabIndex: -1,
-                                        height: 57,
-                                        itemId: 'btnSave',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-save',
-                                        scale: 'large',
-                                        text: 'Save'
-                                    },
-                                    {
-                                        xtype: 'button',
-                                        tabIndex: -1,
-                                        height: 57,
-                                        itemId: 'btnUndo',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-undo',
-                                        scale: 'large',
-                                        text: 'Undo'
-                                    },
-                                    {
-                                        xtype: 'tbseparator',
-                                        height: 30
-                                    },
-                                    {
-                                        xtype: 'button',
-                                        tabIndex: -1,
-                                        height: 57,
-                                        itemId: 'btnClose',
-                                        width: 45,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-close',
-                                        scale: 'large',
-                                        text: 'Close'
                                     }
                                 ]
                             }

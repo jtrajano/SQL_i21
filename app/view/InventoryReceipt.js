@@ -33,6 +33,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.View',
         'Ext.form.Label',
+        'Ext.grid.column.Check',
+        'Ext.form.field.Checkbox',
+        'Ext.form.field.Number',
+        'Ext.grid.column.Date',
         'Ext.toolbar.Paging'
     ],
 
@@ -809,14 +813,65 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                         title: 'Incoming Inspection',
                                         items: [
                                             {
-                                                xtype: 'attachmentgrid',
-                                                itemId: 'grdBillAttachment',
+                                                xtype: 'gridpanel',
+                                                itemId: 'grdIncomingInspection',
                                                 margin: -1,
+                                                dockedItems: [
+                                                    {
+                                                        xtype: 'toolbar',
+                                                        dock: 'top',
+                                                        itemId: 'tlbGridOptions',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            padding: '0 0 0 1'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnSelectAll',
+                                                                iconCls: 'small-select-all',
+                                                                text: 'Select All'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnClearAll',
+                                                                iconCls: 'small-select-none',
+                                                                text: 'Clear All'
+                                                            },
+                                                            {
+                                                                xtype: 'tbseparator'
+                                                            },
+                                                            {
+                                                                xtype: 'filter'
+                                                            }
+                                                        ]
+                                                    }
+                                                ],
                                                 columns: [
                                                     {
+                                                        xtype: 'checkcolumn',
+                                                        width: 65,
+                                                        text: 'Select'
+                                                    },
+                                                    {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colQualityPropertyName',
+                                                        width: 82,
                                                         dataIndex: 'string',
-                                                        text: 'String'
+                                                        text: 'Quality Property Name',
+                                                        flex: 1
+                                                    }
+                                                ],
+                                                viewConfig: {
+                                                    itemId: 'grvIncomingInspection'
+                                                },
+                                                plugins: [
+                                                    {
+                                                        ptype: 'cellediting',
+                                                        pluginId: 'FuelCodePlugin',
+                                                        clicksToEdit: 1
                                                     }
                                                 ]
                                             }
@@ -824,18 +879,366 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                     },
                                     {
                                         xtype: 'panel',
-                                        layout: 'fit',
+                                        bodyPadding: 10,
                                         title: 'Freight & Invoice',
+                                        layout: {
+                                            type: 'hbox',
+                                            align: 'stretch'
+                                        },
                                         items: [
                                             {
-                                                xtype: 'attachmentgrid',
-                                                itemId: 'grdBillAttachment',
+                                                xtype: 'panel',
+                                                flex: 1,
+                                                itemId: 'pnlFreightCalculation',
+                                                margin: '0 5 0 0',
+                                                bodyPadding: 10,
+                                                title: 'Freight Calculation',
+                                                layout: {
+                                                    type: 'vbox',
+                                                    align: 'stretch'
+                                                },
+                                                items: [
+                                                    {
+                                                        xtype: 'combobox',
+                                                        itemId: 'cboCalculationBasis',
+                                                        fieldLabel: 'Calculation Basis',
+                                                        labelWidth: 130
+                                                    },
+                                                    {
+                                                        xtype: 'textfield',
+                                                        itemId: 'txtUnitsWeightMiles',
+                                                        fieldLabel: 'Units / Weight / Miles',
+                                                        labelWidth: 130
+                                                    },
+                                                    {
+                                                        xtype: 'textfield',
+                                                        itemId: 'txtFreightRate',
+                                                        fieldLabel: 'Freight Rate',
+                                                        labelWidth: 130
+                                                    },
+                                                    {
+                                                        xtype: 'textfield',
+                                                        itemId: 'txtFuelSurcharge',
+                                                        fieldLabel: 'Fuel Surcharge %',
+                                                        labelWidth: 130
+                                                    },
+                                                    {
+                                                        xtype: 'textfield',
+                                                        itemId: 'txtCalculatedFreight',
+                                                        fieldLabel: 'Calculated Freight',
+                                                        labelWidth: 130
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                xtype: 'panel',
+                                                flex: 1,
+                                                itemId: 'pnlInvoiceDetail',
+                                                margin: '0 5 0 0',
+                                                bodyPadding: 10,
+                                                title: 'Invoice Detail',
+                                                layout: {
+                                                    type: 'vbox',
+                                                    align: 'stretch'
+                                                },
+                                                items: [
+                                                    {
+                                                        xtype: 'textfield',
+                                                        itemId: 'txtCalculatedAmount',
+                                                        fieldLabel: 'Calculated Amount',
+                                                        labelWidth: 130
+                                                    },
+                                                    {
+                                                        xtype: 'textfield',
+                                                        itemId: 'txtInvoiceAmount',
+                                                        fieldLabel: 'Invoice Amount',
+                                                        labelWidth: 130
+                                                    },
+                                                    {
+                                                        xtype: 'textfield',
+                                                        itemId: 'txtDifference',
+                                                        fieldLabel: 'Difference',
+                                                        labelWidth: 130
+                                                    },
+                                                    {
+                                                        xtype: 'checkboxfield',
+                                                        itemId: 'chkInvoicePaid',
+                                                        fieldLabel: 'Invoice Paid',
+                                                        labelWidth: 130
+                                                    },
+                                                    {
+                                                        xtype: 'textfield',
+                                                        itemId: 'txtCheckNo',
+                                                        fieldLabel: 'Check No',
+                                                        labelWidth: 130
+                                                    },
+                                                    {
+                                                        xtype: 'datefield',
+                                                        itemId: 'txtCheckDate',
+                                                        fieldLabel: 'Check Date',
+                                                        labelWidth: 130
+                                                    },
+                                                    {
+                                                        xtype: 'textfield',
+                                                        itemId: 'txtInvoiceMargin',
+                                                        fieldLabel: 'Invoice Margin %',
+                                                        labelWidth: 130
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                xtype: 'container',
+                                                flex: 1
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        bodyPadding: 10,
+                                        title: 'EDI',
+                                        layout: {
+                                            type: 'hbox',
+                                            align: 'stretch'
+                                        },
+                                        items: [
+                                            {
+                                                xtype: 'container',
+                                                flex: 1,
+                                                margin: '0 5 0 0',
+                                                layout: {
+                                                    type: 'vbox',
+                                                    align: 'stretch'
+                                                },
+                                                items: [
+                                                    {
+                                                        xtype: 'combobox',
+                                                        itemId: 'cboTrailerType',
+                                                        fieldLabel: 'Trailer Type',
+                                                        labelWidth: 145
+                                                    },
+                                                    {
+                                                        xtype: 'datefield',
+                                                        itemId: 'txtTrailerArrivalDate',
+                                                        fieldLabel: 'Trailer Arrival Date',
+                                                        labelWidth: 145
+                                                    },
+                                                    {
+                                                        xtype: 'datefield',
+                                                        itemId: 'txtTrailerArrivalTime',
+                                                        fieldLabel: 'Trailer Arrival Time',
+                                                        labelWidth: 145
+                                                    },
+                                                    {
+                                                        xtype: 'textfield',
+                                                        itemId: 'txtSealNo',
+                                                        fieldLabel: 'Seal No',
+                                                        labelWidth: 145
+                                                    },
+                                                    {
+                                                        xtype: 'combobox',
+                                                        itemId: 'cboSealStatus',
+                                                        fieldLabel: '	Seal Status',
+                                                        labelWidth: 145
+                                                    },
+                                                    {
+                                                        xtype: 'datefield',
+                                                        itemId: 'txtReceiveTime',
+                                                        fieldLabel: 'Receive Time',
+                                                        labelWidth: 145
+                                                    },
+                                                    {
+                                                        xtype: 'numberfield',
+                                                        itemId: 'txtActualTempReading',
+                                                        fieldLabel: 'Actual Temp Reading (F)',
+                                                        labelWidth: 145,
+                                                        hideTrigger: true
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                xtype: 'container',
+                                                flex: 1
+                                            },
+                                            {
+                                                xtype: 'container',
+                                                flex: 1
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        layout: 'fit',
+                                        title: 'Put Away',
+                                        items: [
+                                            {
+                                                xtype: 'gridpanel',
+                                                itemId: 'grdPutAway',
                                                 margin: -1,
+                                                dockedItems: [
+                                                    {
+                                                        xtype: 'toolbar',
+                                                        dock: 'top',
+                                                        itemId: 'tlbGridOptions',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            padding: '0 0 0 1'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnCreateTasksPutAway',
+                                                                iconCls: 'small-add',
+                                                                text: 'Create Tasks'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnAssignAllPutAway',
+                                                                iconCls: 'small-approved',
+                                                                text: 'Assign All'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnDeleteAllPutAway',
+                                                                iconCls: 'small-delete',
+                                                                text: 'Delete All'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnRefreshPutAway',
+                                                                iconCls: 'small-refresh',
+                                                                text: 'Refresh'
+                                                            },
+                                                            {
+                                                                xtype: 'tbseparator'
+                                                            },
+                                                            {
+                                                                xtype: 'filter'
+                                                            }
+                                                        ]
+                                                    }
+                                                ],
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
-                                                        text: 'String'
+                                                        width: 75,
+                                                        text: 'Task Type'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 75,
+                                                        text: 'Task Type'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 75,
+                                                        text: 'Container'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 75,
+                                                        text: 'SKU'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 75,
+                                                        text: 'Lot Code'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 75,
+                                                        text: 'From Unit'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 75,
+                                                        text: 'To Unit'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 75,
+                                                        text: 'State'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 75,
+                                                        text: 'Assigned To'
+                                                    },
+                                                    {
+                                                        xtype: 'datecolumn',
+                                                        width: 85,
+                                                        text: 'Release Date'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        width: 75,
+                                                        text: 'SKY Qty'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 75,
+                                                        text: 'UOM'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 75,
+                                                        text: 'Item Name'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 75,
+                                                        text: 'Description'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 75,
+                                                        text: 'Priority'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 75,
+                                                        text: 'Weight'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 75,
+                                                        text: 'Layer'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 105,
+                                                        text: 'Layers Per Pallet'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 105,
+                                                        text: 'Weight Per Unit'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 125,
+                                                        text: 'Comment'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 70,
+                                                        text: 'Sequence'
+                                                    }
+                                                ],
+                                                viewConfig: {
+                                                    itemId: 'grvPutAway'
+                                                },
+                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                    selType: 'checkboxmodel'
+                                                }),
+                                                plugins: [
+                                                    {
+                                                        ptype: 'cellediting',
+                                                        pluginId: 'FuelCodePlugin',
+                                                        clicksToEdit: 1
                                                     }
                                                 ]
                                             }
@@ -843,18 +1246,115 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                     },
                                     {
                                         xtype: 'panel',
-                                        layout: 'fit',
-                                        title: 'EDI',
+                                        title: 'Tax Detail',
+                                        layout: {
+                                            type: 'vbox',
+                                            align: 'stretch'
+                                        },
                                         items: [
                                             {
-                                                xtype: 'attachmentgrid',
-                                                itemId: 'grdBillAttachment',
+                                                xtype: 'container',
+                                                margin: '10 5',
+                                                layout: {
+                                                    type: 'hbox',
+                                                    align: 'stretch'
+                                                },
+                                                items: [
+                                                    {
+                                                        xtype: 'textfield',
+                                                        flex: 1,
+                                                        fieldLabel: 'Receipt Number',
+                                                        labelWidth: 95
+                                                    },
+                                                    {
+                                                        xtype: 'textfield',
+                                                        flex: 1,
+                                                        margin: '0 5',
+                                                        fieldLabel: 'Item Line No',
+                                                        labelWidth: 80
+                                                    },
+                                                    {
+                                                        xtype: 'textfield',
+                                                        flex: 1,
+                                                        fieldLabel: 'Item ID',
+                                                        labelWidth: 50
+                                                    },
+                                                    {
+                                                        xtype: 'textfield',
+                                                        flex: 1,
+                                                        margin: '0 0 0 5',
+                                                        fieldLabel: 'Total',
+                                                        labelWidth: 40
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                xtype: 'gridpanel',
+                                                flex: 1,
+                                                itemId: 'grdTaxDetail',
                                                 margin: -1,
+                                                dockedItems: [
+                                                    {
+                                                        xtype: 'toolbar',
+                                                        dock: 'top',
+                                                        itemId: 'tlbGridOptions',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            padding: '0 0 0 1'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnDeleteTaxDetail',
+                                                                iconCls: 'small-delete',
+                                                                text: 'Delete'
+                                                            },
+                                                            {
+                                                                xtype: 'tbseparator'
+                                                            },
+                                                            {
+                                                                xtype: 'filter'
+                                                            }
+                                                        ]
+                                                    }
+                                                ],
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
-                                                        text: 'String'
+                                                        width: 75,
+                                                        text: 'Tax Code',
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        xtype: 'checkcolumn',
+                                                        width: 75,
+                                                        text: 'Select'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        width: 75,
+                                                        text: 'Tax Rate',
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        width: 75,
+                                                        text: 'Tax Amount',
+                                                        flex: 1
+                                                    }
+                                                ],
+                                                viewConfig: {
+                                                    itemId: 'grvTaxDetail'
+                                                },
+                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                    selType: 'checkboxmodel'
+                                                }),
+                                                plugins: [
+                                                    {
+                                                        ptype: 'cellediting',
+                                                        pluginId: 'FuelCodePlugin',
+                                                        clicksToEdit: 1
                                                     }
                                                 ]
                                             }

@@ -228,7 +228,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter43",
+                                    "name": "filter",
                                     "designerId": "1c51bbf4-69ba-4770-a731-1f09cb4d80e1",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -313,17 +313,12 @@
                     },
                     "codeClass": null,
                     "userConfig": {
-                        "afterPageText": null,
-                        "designer|createAlias": "ipagingstatusbar",
-                        "designer|displayName": "",
                         "dock": "bottom",
-                        "itemId": "pagingtoolbar",
-                        "layout|flex": 1,
-                        "store": null
+                        "layout|flex": 1
                     },
-                    "name": "statusbarpaging120",
-                    "designerId": "9b0a6e72-56bd-4c64-bfca-064da234da01",
-                    "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
+                    "name": "statusbar11",
+                    "designerId": "aa1b3bed-a24a-490a-84c3-1b5ea5f8a84f",
+                    "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
                 }
             ]
         }

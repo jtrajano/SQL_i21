@@ -1,0 +1,14 @@
+{
+    "type": "Ext.app.ViewModel",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "inventoryuom",
+        "designer|userClassName": "InventoryUOMViewModel"
+    },
+    "name": "BrandViewModel1",
+    "designerId": "92753b21-a73e-4cfb-81ac-dcbe7e1f17f7"
+}

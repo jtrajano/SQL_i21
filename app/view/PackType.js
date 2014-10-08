@@ -190,7 +190,7 @@ Ext.define('Inventory.view.PackType', {
                                 {
                                     xtype: 'button',
                                     tabIndex: -1,
-                                    itemId: 'btnPackType',
+                                    itemId: 'btnDeletePackType',
                                     iconCls: 'small-delete',
                                     text: 'Delete'
                                 },

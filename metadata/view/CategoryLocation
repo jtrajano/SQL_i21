@@ -8,21 +8,21 @@
     "userConfig": {
         "collapsible": true,
         "defaultFocus": null,
-        "designer|userAlias": "categorystore",
-        "designer|userClassName": "CategoryStore",
-        "height": 415,
+        "designer|userAlias": "categorylocation",
+        "designer|userClassName": "CategoryLocation",
+        "height": 575,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
         "layout": "fit",
-        "maxHeight": 415,
+        "maxHeight": 575,
         "maximizable": true,
-        "minHeight": 415,
-        "minWidth": 675,
+        "minHeight": 575,
+        "minWidth": 870,
         "minimizable": null,
         "reference": null,
-        "title": "Category Store",
-        "width": 675
+        "title": "Category Location",
+        "width": 870
     },
     "designerId": "b2711fe3-32fc-4d2e-bf3e-6e6c019c1fea",
     "viewControllerInstanceId": "fcc4865f-47cc-46bd-9977-14f56287b66b",
@@ -44,7 +44,7 @@
                 "frame": null,
                 "header": false,
                 "height": 350,
-                "itemId": "frmCategoryStore",
+                "itemId": "frmCategoryLocation",
                 "layout": "vbox",
                 "margin": -1,
                 "title": null,
@@ -270,8 +270,8 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "fieldLabel": "Store",
-                                        "itemId": "txtStore",
+                                        "fieldLabel": "Location",
+                                        "itemId": "txtLocation",
                                         "labelWidth": 165,
                                         "layout|flex": null,
                                         "maxWidth": null
@@ -422,44 +422,6 @@
                                     "designerId": "feeedac1-3383-476d-8703-4099cabad1ea"
                                 },
                                 {
-                                    "type": "Ext.container.Container",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "container|align": "stretch",
-                                        "designer|displayName": "container",
-                                        "layout": "hbox",
-                                        "layout|flex": null,
-                                        "layout|margins": null,
-                                        "margin": "0 0 5 0"
-                                    },
-                                    "name": "MyContainer51",
-                                    "designerId": "1f66da89-34d1-42a3-b28b-f39bd82feb2b"
-                                }
-                            ]
-                        },
-                        {
-                            "type": "Ext.container.Container",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "container|align": "stretch",
-                                "designer|displayName": "container",
-                                "layout": "vbox",
-                                "layout|flex": 1,
-                                "layout|margins": null,
-                                "margin": "0 1 0 5"
-                            },
-                            "name": "MyContainer52",
-                            "designerId": "9d40e7fc-4854-4bb4-aa41-0e659ef6d592",
-                            "cn": [
-                                {
                                     "type": "Ext.form.field.Number",
                                     "reference": {
                                         "name": "items",
@@ -489,7 +451,7 @@
                                         "fieldLabel": "Target Gross Profit %",
                                         "hideTrigger": true,
                                         "itemId": "txtTargetGrossProfitPercent",
-                                        "labelWidth": 160,
+                                        "labelWidth": 165,
                                         "layout|flex": null,
                                         "maxWidth": null,
                                         "width": null
@@ -508,7 +470,7 @@
                                         "fieldLabel": "Target Inventory at Cost",
                                         "hideTrigger": true,
                                         "itemId": "txtTargetInventoryAtCost",
-                                        "labelWidth": 160,
+                                        "labelWidth": 165,
                                         "layout|flex": null,
                                         "maxWidth": null,
                                         "width": null
@@ -527,7 +489,7 @@
                                         "fieldLabel": "Cost of Inventory at BOM",
                                         "hideTrigger": true,
                                         "itemId": "txtCostOfInventoryAtBom",
-                                        "labelWidth": 160,
+                                        "labelWidth": 165,
                                         "layout|flex": null,
                                         "maxWidth": null,
                                         "width": null
@@ -546,7 +508,7 @@
                                         "fieldLabel": "Low Gross Margin % Alert",
                                         "hideTrigger": true,
                                         "itemId": "txtLowGrossMarginPercentAlert",
-                                        "labelWidth": 160,
+                                        "labelWidth": 165,
                                         "layout|flex": null,
                                         "maxWidth": null,
                                         "width": null
@@ -565,7 +527,7 @@
                                         "fieldLabel": "High Gross Margin % Alert",
                                         "hideTrigger": true,
                                         "itemId": "txtHighGrossMarginPercentAlert",
-                                        "labelWidth": 160,
+                                        "labelWidth": 165,
                                         "layout|flex": null,
                                         "maxWidth": null,
                                         "width": null
@@ -583,12 +545,305 @@
                                     "userConfig": {
                                         "fieldLabel": "Last Inventory Level Entry",
                                         "itemId": "dtmLastInventoryLevelEntry",
-                                        "labelWidth": 160,
+                                        "labelWidth": 165,
                                         "layout|flex": null,
                                         "maxWidth": null
                                     },
                                     "name": "MyDateField2",
                                     "designerId": "b3011212-985e-49d2-9a8a-82d9a26cdaec"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "stretch",
+                                "designer|displayName": "container",
+                                "layout": "vbox",
+                                "layout|flex": 1,
+                                "layout|margins": null,
+                                "margin": "0 1 0 5"
+                            },
+                            "name": "MyContainer48",
+                            "designerId": "d18831be-8171-414c-ba37-ac7a0cc4e013",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Non Retail Use Department",
+                                        "itemId": "chkNonRetailUseDepartment",
+                                        "labelWidth": 175,
+                                        "layout|flex": null
+                                    },
+                                    "name": "MyCheckbox45",
+                                    "designerId": "9ffb9089-fb54-4554-a3da-758b21754736"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Report in Net or Gross",
+                                        "itemId": "chkReportInNetOrGross",
+                                        "labelWidth": 175,
+                                        "layout|flex": null
+                                    },
+                                    "name": "MyCheckbox46",
+                                    "designerId": "1cd13504-7064-4387-b706-55771339a091"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Department for Pumps",
+                                        "itemId": "chkDepartmentForPumps",
+                                        "labelWidth": 175,
+                                        "layout|flex": null
+                                    },
+                                    "name": "MyCheckbox47",
+                                    "designerId": "6f3e05d2-ccb6-4377-8a3d-7ef114406bf0"
+                                },
+                                {
+                                    "type": "Ext.form.field.ComboBox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Convert to Paidout",
+                                        "itemId": "cboConvertToPaidout",
+                                        "labelWidth": 175,
+                                        "layout|flex": 1,
+                                        "layout|margins": null
+                                    },
+                                    "name": "MyComboBox59",
+                                    "designerId": "d91a876a-885f-44c1-9863-84827cabae45"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Delete from Register",
+                                        "itemId": "chkDeleteFromRegister",
+                                        "labelWidth": 175,
+                                        "layout|flex": null
+                                    },
+                                    "name": "MyCheckbox48",
+                                    "designerId": "d4268969-4014-488f-b74e-9e281170afa3"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Department Key Taxed",
+                                        "itemId": "chkDepartmentKeyTaxed",
+                                        "labelWidth": 175,
+                                        "layout|flex": null
+                                    },
+                                    "name": "MyCheckbox49",
+                                    "designerId": "59d4d7ff-ed76-449f-845b-ce907f7c47ac"
+                                },
+                                {
+                                    "type": "Ext.form.field.ComboBox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Default Product Code",
+                                        "itemId": "cboDefaultProductCode",
+                                        "labelWidth": 175,
+                                        "layout|flex": null,
+                                        "layout|margins": null
+                                    },
+                                    "name": "MyComboBox60",
+                                    "designerId": "c11e30ae-8aaa-451f-98e5-9b24f032b53f"
+                                },
+                                {
+                                    "type": "Ext.form.field.ComboBox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Default Family",
+                                        "itemId": "cboDefaultFamily",
+                                        "labelWidth": 175,
+                                        "layout|flex": null,
+                                        "layout|margins": null
+                                    },
+                                    "name": "MyComboBox61",
+                                    "designerId": "57907fa0-2429-466b-9207-b5a9451863c7"
+                                },
+                                {
+                                    "type": "Ext.form.field.ComboBox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Default Class",
+                                        "itemId": "cboDefaultClass",
+                                        "labelWidth": 175,
+                                        "layout|flex": null,
+                                        "layout|margins": null
+                                    },
+                                    "name": "MyComboBox62",
+                                    "designerId": "5fb1ad2d-612d-44d3-b945-55d42380dfcd"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Default Food Stampable",
+                                        "itemId": "chkDefaultFoodStampable",
+                                        "labelWidth": 175,
+                                        "layout|flex": null
+                                    },
+                                    "name": "MyCheckbox50",
+                                    "designerId": "e54d657e-c331-4ccd-9478-9183f3f0b029"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Default Returnable",
+                                        "itemId": "chkDefaultReturnable",
+                                        "labelWidth": 175,
+                                        "layout|flex": null
+                                    },
+                                    "name": "MyCheckbox51",
+                                    "designerId": "315f0303-18ac-4c14-9378-eda317eb80ec"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Default Saleable",
+                                        "itemId": "chkDefaultSaleable",
+                                        "labelWidth": 175,
+                                        "layout|flex": null
+                                    },
+                                    "name": "MyCheckbox52",
+                                    "designerId": "11f51868-1764-451d-a0fe-0ba54dfc61f3"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Default Pre-priced",
+                                        "itemId": "chkDefaultPrepriced",
+                                        "labelWidth": 175,
+                                        "layout|flex": null
+                                    },
+                                    "name": "MyCheckbox53",
+                                    "designerId": "3993ad59-4030-4495-88b6-cc056ef96acd"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Default ID Required (liquor)",
+                                        "itemId": "chkDefaultIdRequiredLiquor",
+                                        "labelWidth": 175,
+                                        "layout|flex": null
+                                    },
+                                    "name": "MyCheckbox54",
+                                    "designerId": "4416cdcb-aab4-4653-a6dc-9a197e1bf2e5"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Default ID Required (cigarette)",
+                                        "itemId": "chkDefaultIdRequiredCigarette",
+                                        "labelWidth": 175,
+                                        "layout|flex": null
+                                    },
+                                    "name": "MyCheckbox55",
+                                    "designerId": "1f97fa6b-906b-4f3c-a8e8-5b5f4aafeaa5"
+                                },
+                                {
+                                    "type": "Ext.form.field.Number",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Default Minimum Age",
+                                        "hideTrigger": true,
+                                        "itemId": "txtDefaultMinimumAge",
+                                        "labelWidth": 175,
+                                        "layout|flex": null,
+                                        "maxWidth": 225
+                                    },
+                                    "name": "MyNumberField9",
+                                    "designerId": "7459d47d-1bc4-42a3-aeb4-088fa4039e93"
                                 }
                             ]
                         }
@@ -610,7 +865,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging119",
+                    "name": "statusbarpaging12",
                     "designerId": "61a83781-4c49-4581-8dd0-248eb965f747",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

@@ -56,6 +56,108 @@
             "designerId": "efa59818-45f3-4493-97ea-0a03c9255635",
             "cn": [
                 {
+                    "type": "Ext.toolbar.Toolbar",
+                    "reference": {
+                        "name": "dockedItems",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|padding": "0 0 0 1",
+                        "designer|displayName": "toolbar",
+                        "dock": "top",
+                        "width": 588
+                    },
+                    "name": "MyToolbar50",
+                    "designerId": "6c986abf-fdd6-4ba9-b813-5f34856488a5",
+                    "cn": [
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-save",
+                                "itemId": "btnSave",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Save",
+                                "width": 45
+                            },
+                            "name": "MyButton160",
+                            "designerId": "0738fcc0-cb64-4add-a5b4-e6549f00cfce"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-undo",
+                                "itemId": "btnUndo",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Undo",
+                                "width": 45
+                            },
+                            "name": "MyButton161",
+                            "designerId": "230bd0ca-dc59-47e4-b24d-6f9dbe9e8c01"
+                        },
+                        {
+                            "type": "Ext.toolbar.Separator",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": "separator",
+                                "height": 30,
+                                "layout|flex": null
+                            },
+                            "name": "MySeparator50",
+                            "designerId": "f77c2c48-ebc7-49af-881a-d930b5ff6222"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-close",
+                                "itemId": "btnClose",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Close",
+                                "width": 45
+                            },
+                            "name": "MyButton162",
+                            "designerId": "5f5bb7fa-f21a-4cb8-aa7e-3dc0a3eabb3e"
+                        }
+                    ]
+                },
+                {
                     "type": "Ext.grid.Panel",
                     "reference": {
                         "name": "items",
@@ -228,111 +330,9 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbar17",
+                    "name": "statusbar1",
                     "designerId": "f64f9f87-389a-41a8-b7e6-d9fe91720b28",
                     "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
-                },
-                {
-                    "type": "Ext.toolbar.Toolbar",
-                    "reference": {
-                        "name": "dockedItems",
-                        "type": "array"
-                    },
-                    "codeClass": null,
-                    "userConfig": {
-                        "container|padding": "0 0 0 1",
-                        "designer|displayName": "toolbar",
-                        "dock": "top",
-                        "width": 588
-                    },
-                    "name": "MyToolbar50",
-                    "designerId": "6c986abf-fdd6-4ba9-b813-5f34856488a5",
-                    "cn": [
-                        {
-                            "type": "Ext.button.Button",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|displayName": null,
-                                "height": 57,
-                                "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-save",
-                                "itemId": "btnSave",
-                                "layout|flex": null,
-                                "scale": "large",
-                                "tabIndex": -1,
-                                "text": "Save",
-                                "width": 45
-                            },
-                            "name": "MyButton160",
-                            "designerId": "0738fcc0-cb64-4add-a5b4-e6549f00cfce"
-                        },
-                        {
-                            "type": "Ext.button.Button",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|displayName": null,
-                                "height": 57,
-                                "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-undo",
-                                "itemId": "btnUndo",
-                                "layout|flex": null,
-                                "scale": "large",
-                                "tabIndex": -1,
-                                "text": "Undo",
-                                "width": 45
-                            },
-                            "name": "MyButton161",
-                            "designerId": "230bd0ca-dc59-47e4-b24d-6f9dbe9e8c01"
-                        },
-                        {
-                            "type": "Ext.toolbar.Separator",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|displayName": "separator",
-                                "height": 30,
-                                "layout|flex": null
-                            },
-                            "name": "MySeparator50",
-                            "designerId": "f77c2c48-ebc7-49af-881a-d930b5ff6222"
-                        },
-                        {
-                            "type": "Ext.button.Button",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|displayName": null,
-                                "height": 57,
-                                "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-close",
-                                "itemId": "btnClose",
-                                "layout|flex": null,
-                                "scale": "large",
-                                "tabIndex": -1,
-                                "text": "Close",
-                                "width": 45
-                            },
-                            "name": "MyButton162",
-                            "designerId": "5f5bb7fa-f21a-4cb8-aa7e-3dc0a3eabb3e"
-                        }
-                    ]
                 }
             ]
         }
