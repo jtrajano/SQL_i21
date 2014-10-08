@@ -17,15 +17,27 @@ Ext.define('Inventory.view.override.CategoryViewController', {
         binding: {
             txtCategoryCode: '{current.strCategoryCode}',
             txtDescription: '{current.strDescription}',
-            cboLineOfBusiness: '{current.strLineBusiness}',
+            cboLineOfBusiness: {
+                value: '{current.strLineBusiness}',
+                store: '{LinesOfBusiness}'
+            },
             cboCatalogGroup: '{current.intCatalogGroupId}',
-            cboCostingMethod: '{current.strCostingMethod}',
+            cboCostingMethod: {
+                value: '{current.strCostingMethod}',
+                store: '{CostingMethods}'
+            },
             cboInventoryTracking: '{current.strInventoryTracking}',
             txtStandardQty: '{current.dblStandardQty}',
-            cboStandardUom: '{current.intUOMId}',
+            cboStandardUom: {
+                value: '{current.intUOMId}',
+                store: '{UnitMeasures}'
+            },
             txtGlDivisionNumber: '{current.strGLDivisionNumber}',
             chkSalesAnalysisByTon: '{current.ysnSalesAnalysisByTon}',
-            cboMaterialFee: '{current.strMaterialFee}',
+            cboMaterialFee: {
+                value: '{current.strMaterialFee}',
+                store: '{MaterialFees}'
+            },
             cboMaterialItem: '{current.intMaterialItemId}',
             chkAutoCalculateFreight: '{current.ysnAutoCalculateFreight}',
             cboFreightItem: '{current.intFreightItemId}',

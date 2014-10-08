@@ -342,11 +342,14 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "displayField": "strDescription",
                                                         "fieldLabel": "Line of Business",
+                                                        "forceSelection": true,
                                                         "itemId": "cboLineOfBusiness",
                                                         "labelWidth": 130,
                                                         "layout|flex": null,
-                                                        "layout|margins": null
+                                                        "layout|margins": null,
+                                                        "valueField": "strDescription"
                                                     },
                                                     "name": "MyComboBox56",
                                                     "designerId": "a52f72ea-715c-4363-9d0b-b602e792186a"
@@ -376,11 +379,14 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "displayField": "strDescription",
                                                         "fieldLabel": "Costing Method",
+                                                        "forceSelection": true,
                                                         "itemId": "cboCostingMethod",
                                                         "labelWidth": 130,
                                                         "layout|flex": null,
-                                                        "layout|margins": null
+                                                        "layout|margins": null,
+                                                        "valueField": "strDescription"
                                                     },
                                                     "name": "MyComboBox46",
                                                     "designerId": "59274c24-26d9-416b-9f19-dc30d33250fa"
@@ -428,14 +434,55 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "                                                                {",
+                                                            "                                                                    dataIndex: 'intUnitMeasureId',",
+                                                            "                                                                    dataType: 'numeric',",
+                                                            "                                                                    text: 'Unit Of Measure ID',",
+                                                            "                                                                    hidden: true",
+                                                            "                                                                },",
+                                                            "                                                                {",
+                                                            "                                                                    dataIndex: 'strUnitMeasure',",
+                                                            "                                                                    dataType: 'string',",
+                                                            "                                                                    text: 'Unit Measure',",
+                                                            "                                                                    flex: 1",
+                                                            "                                                                },",
+                                                            "                                                                {",
+                                                            "                                                                    dataIndex: 'strUnitType',",
+                                                            "                                                                    dataType: 'string',",
+                                                            "                                                                    text: 'Unit Type',",
+                                                            "                                                                    flex: 1",
+                                                            "                                                                },",
+                                                            "                                                                {",
+                                                            "                                                                    dataIndex: 'ysnDefault',",
+                                                            "                                                                    dataType: 'boolean',",
+                                                            "                                                                    text: 'Default',",
+                                                            "                                                                    flex: 1",
+                                                            "                                                                }",
+                                                            "                                                            ]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strUnitMeasure",
                                                         "fieldLabel": "Standard UOM",
                                                         "itemId": "cboStandardUom",
                                                         "labelWidth": 130,
                                                         "layout|flex": null,
-                                                        "layout|margins": null
+                                                        "layout|margins": null,
+                                                        "valueField": "intUnitMeasureId"
                                                     },
                                                     "name": "MyComboBox48",
-                                                    "designerId": "abaef6be-bb9b-4e0b-9874-8e76a298c4ea"
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "abaef6be-bb9b-4e0b-9874-8e76a298c4ea",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 },
                                                 {
                                                     "type": "Ext.form.field.Text",
@@ -478,11 +525,14 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "displayField": "strDescription",
                                                         "fieldLabel": "Material Fee",
+                                                        "forceSelection": true,
                                                         "itemId": "cboMaterialFee",
                                                         "labelWidth": 130,
                                                         "layout|flex": null,
-                                                        "layout|margins": null
+                                                        "layout|margins": null,
+                                                        "valueField": "strDescription"
                                                     },
                                                     "name": "MyComboBox56",
                                                     "designerId": "95d7f6e1-a269-455e-9f5f-492111d427eb"
@@ -695,7 +745,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter",
+                                                    "name": "filter18",
                                                     "designerId": "9be921ca-705f-47f3-98b7-abf79fa0ae14",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -901,7 +951,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter1",
+                                                    "name": "filter19",
                                                     "designerId": "336cd22c-55d7-4f75-bd45-20820dfc01b5",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1077,7 +1127,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter2",
+                                                    "name": "filter20",
                                                     "designerId": "1f016d2c-d6a9-4998-be84-a17777e4dd56",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1371,7 +1421,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter3",
+                                                    "name": "filter21",
                                                     "designerId": "0763d06c-c630-47e6-91f4-89ddac6c34ff",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1870,7 +1920,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging11",
                     "designerId": "0ca3c6d6-785e-4ad8-ac4f-3eaa2d75593b",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
