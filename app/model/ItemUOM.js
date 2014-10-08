@@ -13,7 +13,7 @@ Ext.define('Inventory.model.ItemUOM', {
     fields: [
         { name: 'intItemUOMId', type: 'int'},
         { name: 'intItemId', type: 'int'},
-        { name: 'intUnitMeasureId', type: 'int'},
+        { name: 'intUnitMeasureId', type: 'int', allowNull: true},
         { name: 'dblUnitQty', type: 'float'},
         { name: 'dblSellQty', type: 'float'},
         { name: 'dblWeight', type: 'float'},
