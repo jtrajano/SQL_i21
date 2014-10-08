@@ -35,6 +35,11 @@ var InventoryFiles = [
     {pattern: 'app/model/ItemVendorXref.js', watched: false},
     {pattern: 'app/model/ItemCustomerXref.js', watched: false},
 
+    {pattern: 'app/model/CategoryAccount.js', watched: false},
+    {pattern: 'app/model/CategoryStore.js', watched: false},
+    {pattern: 'app/model/CategoryVendor.js', watched: false},
+    {pattern: 'app/model/CommodityUnitMeasure.js', watched: false},
+
 
     {pattern: 'app/model/*.js', watched: false},
     {pattern: 'app/store/*.js', watched: false},

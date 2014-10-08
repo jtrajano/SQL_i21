@@ -1,14 +1,14 @@
 /**
- * Created by LZabala on 9/10/2014.
+ * Created by LZabala on 10/8/2014.
  */
-describe("Brand View Controller", function() {
+describe("Inventory Receipt View Controller", function() {
     "use strict";
 
     var controller;
     var view;
 
     beforeEach(function() {
-        view = Ext.create('Inventory.view.Brand', { controller : 'brand' });
+        view = Ext.create('Inventory.view.InventoryReceipt', { controller : 'inventoryreceipt' });
         controller = view.getController();
     });
 
