@@ -12,4 +12,4 @@ SELECT
 		LEFT JOIN tblCMBank C
 			ON B.intBankId = C.intBankId
 		LEFT JOIN tblAPVendor D
-			ON A.intVendorId = D.intEntityId
+			ON A.intVendorId = D.intVendorId

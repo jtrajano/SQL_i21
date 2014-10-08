@@ -11,7 +11,7 @@
     [strAppliedPer]          NVARCHAR (10)   COLLATE Latin1_General_CI_AS NULL,
     [ysnAllowCatchUpCharges] BIT             CONSTRAINT [DF__tmp_ms_xx__ysnAl__1EA6F08D] DEFAULT ((0)) NOT NULL,
     [intOriginChargeId]      INT             NULL,
-    [intConcurrencyId]       INT             NOT NULL,
+    [intConcurrencyId]       INT             NOT NULL DEFAULT ((0)),
     CONSTRAINT [PK_tblARServiceCharge] PRIMARY KEY CLUSTERED ([intServiceChargeId] ASC),
     CONSTRAINT [UKstrServiceChargeCode] UNIQUE NONCLUSTERED ([strServiceChargeCode] ASC)
 );
