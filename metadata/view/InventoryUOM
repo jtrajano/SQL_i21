@@ -285,10 +285,23 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
+                                                "itemId": "colUOM",
                                                 "text": "UOM"
                                             },
                                             "name": "MyColumn145",
-                                            "designerId": "3f21f239-ac64-489b-8f3a-d8c39c604750"
+                                            "designerId": "3f21f239-ac64-489b-8f3a-d8c39c604750",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyTextField1",
+                                                    "designerId": "f84d23ab-dde9-4fa3-b4f6-49b20b5e05c3"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -300,11 +313,24 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": null,
+                                                "itemId": "colSymbol",
                                                 "text": "Symbol",
                                                 "width": 64
                                             },
                                             "name": "MyColumn146",
-                                            "designerId": "f2184d69-94d0-4f20-931e-58eb07ffa59b"
+                                            "designerId": "f2184d69-94d0-4f20-931e-58eb07ffa59b",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyTextField",
+                                                    "designerId": "0d391d86-61fa-46fa-b788-667222eeb5bc"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -316,11 +342,35 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
+                                                "itemId": "colUnitType",
                                                 "text": "Unit Type",
                                                 "width": null
                                             },
                                             "name": "MyColumn147",
-                                            "designerId": "a7ddb8d7-09c5-404e-a1e3-aff47b6a4df0"
+                                            "designerId": "a7ddb8d7-09c5-404e-a1e3-aff47b6a4df0",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "displayField": "strDescription",
+                                                        "itemId": "cboUnitType",
+                                                        "store": [
+                                                            "{UnitTypes}"
+                                                        ],
+                                                        "valueField": "strDescription"
+                                                    },
+                                                    "name": "MyComboBox1",
+                                                    "configAlternates": {
+                                                        "store": "binding"
+                                                    },
+                                                    "designerId": "b52bee88-dd3a-4c0b-a184-0c244c5f5428"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.column.Check",
@@ -330,11 +380,24 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "itemId": "colDefault",
                                                 "text": "Default",
                                                 "width": 60
                                             },
                                             "name": "MyCheck",
-                                            "designerId": "fba93320-4e89-4560-9e44-e5ac14936ee5"
+                                            "designerId": "fba93320-4e89-4560-9e44-e5ac14936ee5",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyCheckbox",
+                                                    "designerId": "dacbf92e-7fe6-4c42-ad16-b34273dff44c"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.View",
@@ -358,6 +421,21 @@
                                             "codeClass": "Ext.selection.CheckboxModel",
                                             "name": "MyCheckboxSelectionModel30",
                                             "designerId": "c05795e1-ee3f-4719-b039-fc8a59f50523"
+                                        },
+                                        {
+                                            "type": "Ext.grid.plugin.CellEditing",
+                                            "reference": {
+                                                "name": "plugins",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "clicksToEdit": 1,
+                                                "designer|displayName": "cepUOM",
+                                                "pluginId": "cepUOM"
+                                            },
+                                            "name": "MyCellEditingPlugin",
+                                            "designerId": "8e4fca72-3c39-473c-bcad-74015c5d0c2a"
                                         }
                                     ]
                                 }
@@ -475,6 +553,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
+                                                "itemId": "colConversionUOM",
                                                 "text": "UOM"
                                             },
                                             "name": "MyColumn145",
@@ -490,6 +569,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
+                                                "itemId": "colConversionStockUOM",
                                                 "text": "Stock UOM",
                                                 "width": null
                                             },
@@ -506,6 +586,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": null,
+                                                "itemId": "colConversionToStockUOM",
                                                 "text": "Conversion<br>to Stock UOM",
                                                 "width": 98
                                             },
@@ -522,6 +603,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": null,
+                                                "itemId": "colConversionFromStockUOM",
                                                 "text": "Conversion from<br>Stock UOM",
                                                 "width": 98
                                             },
@@ -565,6 +647,7 @@
                     },
                     "codeClass": null,
                     "userConfig": {
+                        "designer|createAlias": "istatusbar",
                         "dock": "bottom",
                         "layout|flex": 1
                     },

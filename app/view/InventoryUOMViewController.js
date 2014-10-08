@@ -15,5 +15,9 @@
 
 Ext.define('Inventory.view.InventoryUOMViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.inventoryuom'
+    alias: 'controller.inventoryuom',
+
+    requires: [
+        'Inventory.view.override.InventoryUOMViewController'
+    ]
 });

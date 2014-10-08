@@ -27,9 +27,12 @@ Ext.define('Inventory.view.InventoryUOM', {
         'Ext.tab.Panel',
         'Ext.tab.Tab',
         'Ext.grid.Panel',
+        'Ext.form.field.ComboBox',
         'Ext.grid.column.Check',
+        'Ext.form.field.Checkbox',
         'Ext.grid.View',
-        'Ext.selection.CheckboxModel'
+        'Ext.selection.CheckboxModel',
+        'Ext.grid.plugin.CellEditing'
     ],
 
     viewModel: {
@@ -113,7 +116,7 @@ Ext.define('Inventory.view.InventoryUOM', {
                                 ]
                             },
                             {
-                                xtype: 'statusbar1',
+                                xtype: 'istatusbar',
                                 flex: 1,
                                 dock: 'bottom'
                             }
@@ -165,25 +168,47 @@ Ext.define('Inventory.view.InventoryUOM', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         dataIndex: 'string',
+                                                        itemId: 'colUOM',
                                                         text: 'UOM',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colSymbol',
                                                         width: 64,
                                                         dataIndex: 'string',
-                                                        text: 'Symbol'
+                                                        text: 'Symbol',
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colUnitType',
                                                         dataIndex: 'string',
                                                         text: 'Unit Type',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'combobox',
+                                                            itemId: 'cboUnitType',
+                                                            displayField: 'strDescription',
+                                                            valueField: 'strDescription',
+                                                            bind: {
+                                                                store: '{UnitTypes}'
+                                                            }
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',
+                                                        itemId: 'colDefault',
                                                         width: 60,
-                                                        text: 'Default'
+                                                        text: 'Default',
+                                                        editor: {
+                                                            xtype: 'checkboxfield'
+                                                        }
                                                     }
                                                 ],
                                                 viewConfig: {
@@ -191,7 +216,14 @@ Ext.define('Inventory.view.InventoryUOM', {
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'
-                                                })
+                                                }),
+                                                plugins: [
+                                                    {
+                                                        ptype: 'cellediting',
+                                                        pluginId: 'cepUOM',
+                                                        clicksToEdit: 1
+                                                    }
+                                                ]
                                             }
                                         ]
                                     },
@@ -233,24 +265,28 @@ Ext.define('Inventory.view.InventoryUOM', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colConversionUOM',
                                                         dataIndex: 'string',
                                                         text: 'UOM',
                                                         flex: 1
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colConversionStockUOM',
                                                         dataIndex: 'string',
                                                         text: 'Stock UOM',
                                                         flex: 1
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colConversionToStockUOM',
                                                         width: 98,
                                                         dataIndex: 'string',
                                                         text: 'Conversion<br>to Stock UOM'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colConversionFromStockUOM',
                                                         width: 98,
                                                         dataIndex: 'string',
                                                         text: 'Conversion from<br>Stock UOM'
