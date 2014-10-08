@@ -31,25 +31,25 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework">
-      <HintPath>..\packages\EntityFramework.6.1.1\lib\net45\EntityFramework.dll</HintPath>
+      <HintPath>..\..\..\resources\references\EntityFramework.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework.Extended">
-      <HintPath>..\..\..\i21_resources\references\EntityFramework.Extended.dll</HintPath>
+      <HintPath>..\..\..\resources\references\EntityFramework.Extended.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework.SqlServer">
-      <HintPath>..\packages\EntityFramework.6.1.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+      <HintPath>..\..\..\resources\references\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
     <Reference Include="IdeaBlade.Core">
-      <HintPath>..\..\..\i21_resources\references\IdeaBlade.Core.dll</HintPath>
+      <HintPath>..\..\..\resources\references\IdeaBlade.Core.dll</HintPath>
     </Reference>
     <Reference Include="IdeaBlade.EntityModel">
-      <HintPath>..\..\..\i21_resources\references\IdeaBlade.EntityModel.dll</HintPath>
+      <HintPath>..\..\..\resources\references\IdeaBlade.EntityModel.dll</HintPath>
     </Reference>
     <Reference Include="IdeaBlade.Linq">
-      <HintPath>..\..\..\i21_resources\references\IdeaBlade.Linq.dll</HintPath>
+      <HintPath>..\..\..\resources\references\IdeaBlade.Linq.dll</HintPath>
     </Reference>
     <Reference Include="iRely.Common">
-      <HintPath>..\..\..\i21_resources\references\iRely.Common.dll</HintPath>
+      <HintPath>..\..\..\resources\references\iRely.Common.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
