@@ -4,6 +4,7 @@
 
 Ext.define('Inventory.store.PatronageCategory', {
     extend: 'Ext.data.Store',
+    alias: 'store.inventorypatronagecategory',
 
     requires: [
         'Inventory.model.PatronageCategory'

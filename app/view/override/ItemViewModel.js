@@ -3,7 +3,11 @@ Ext.define('Inventory.view.override.ItemViewModel', {
 
     requires: [
         'Inventory.model.ItemUOM',
-        'Inventory.model.ItemLocationStore'
+        'Inventory.model.ItemLocationStore',
+        'Inventory.store.Manufacturer',
+        'Inventory.store.Category',
+        'Inventory.store.PatronageCategory',
+        'Inventory.store.InventoryTag'
     ],
 
     stores: {
@@ -285,6 +289,20 @@ Ext.define('Inventory.view.override.ItemViewModel', {
                     name: 'strDescription'
                 }
             ]
+        },
+
+        Manufacturer: {
+            type: 'inventorymanufacturer'
+        },
+        Category: {
+            type: 'inventorycategory'
+        },
+        PatronageCategory: {
+            type: 'inventorypatronagecategory'
+        },
+        InventoryTag: {
+            type: 'inventorytag'
         }
+
     }
 });

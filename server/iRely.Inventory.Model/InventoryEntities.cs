@@ -117,15 +117,12 @@ namespace iRely.Inventory.Model
         public DbSet<tblICItemContractDocument> tblICItemContractDocuments { get; set; }
         public DbSet<tblICItemCustomerXref> tblICItemCustomerXrefs { get; set; }
         public DbSet<tblICItemLocationStore> tblICItemLocationStores { get; set; }
-        public DbSet<tblICItemManufacturing> tblICItemManufacturings { get; set; }
         public DbSet<tblICItemManufacturingUOM> tblICItemManufacturingUOMs { get; set; }
         public DbSet<tblICItemNote> tblICItemNotes { get; set; }
-        public DbSet<tblICItemPOS> tblICItemPOSs { get; set; }
         public DbSet<tblICItemPOSCategory> tblICItemPOSCategorys { get; set; }
         public DbSet<tblICItemPOSSLA> tblICItemPOSSLAs { get; set; }
         public DbSet<tblICItemPricing> tblICItemPricings { get; set; }
         public DbSet<tblICItemPricingLevel> tblICItemPricingLevels { get; set; }
-        public DbSet<tblICItemSales> tblICItemSaless { get; set; }
         public DbSet<tblICItemSpecialPricing> tblICItemSpecialPricings { get; set; }
         public DbSet<tblICItemStock> tblICItemStocks { get; set; }
         public DbSet<tblICItemUOM> tblICItemUOMs { get; set; }
@@ -169,15 +166,12 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICItemContractDocumentMap());
             modelBuilder.Configurations.Add(new tblICItemCustomerXrefMap());
             modelBuilder.Configurations.Add(new tblICItemLocationStoreMap());
-            modelBuilder.Configurations.Add(new tblICItemManufacturingMap());
             modelBuilder.Configurations.Add(new tblICItemManufacturingUOMMap());
             modelBuilder.Configurations.Add(new tblICItemNoteMap());
-            modelBuilder.Configurations.Add(new tblICItemPOSMap());
             modelBuilder.Configurations.Add(new tblICItemPOSCategoryMap());
             modelBuilder.Configurations.Add(new tblICItemPOSSLAMap());
             modelBuilder.Configurations.Add(new tblICItemPricingMap());
             modelBuilder.Configurations.Add(new tblICItemPricingLevelMap());
-            modelBuilder.Configurations.Add(new tblICItemSalesMap());
             modelBuilder.Configurations.Add(new tblICItemSpecialPricingMap());
             modelBuilder.Configurations.Add(new tblICItemStockMap());
             modelBuilder.Configurations.Add(new tblICItemUOMMap());

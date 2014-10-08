@@ -14,9 +14,9 @@ namespace iRely.Inventory.Model
         {
             this.tblICItemUOMs = new List<tblICItemUOM>();
             this.tblICItemLocationStores = new List<tblICItemLocationStore>();
-            this.tblICItemSales = new tblICItemSales();
-            this.tblICItemPOS = new tblICItemPOS();
-            this.tblICItemManufacturing = new tblICItemManufacturing();
+            this.tblICItemPOSSLAs = new List<tblICItemPOSSLA>();
+            this.tblICItemPOSCategories = new List<tblICItemPOSCategory>();
+            this.tblICItemManufacturingUOMs = new List<tblICItemManufacturingUOM>();
             this.tblICItemUPCs = new List<tblICItemUPC>();
             this.tblICItemVendorXrefs = new List<tblICItemVendorXref>();
             this.tblICItemCustomerXrefs = new List<tblICItemCustomerXref>();
@@ -40,12 +40,84 @@ namespace iRely.Inventory.Model
         public string strModelNo { get; set; }
         public int? intTrackingId { get; set; }
         public string strLotTracking { get; set; }
+        public bool ysnRequireCustomerApproval { get; set; }
+        public int? intRecipeId { get; set; }
+        public bool ysnSanitationRequired { get; set; }
+        public int intLifeTime { get; set; }
+        public string strLifeTimeType { get; set; }
+        public int intReceiveLife { get; set; }
+        public string strGTIN { get; set; }
+        public string strRotationType { get; set; }
+        public int? intNMFCId { get; set; }
+        public bool ysnStrictFIFO { get; set; }
+        public int? intDimensionUOMId { get; set; }
+        public decimal? dblHeight { get; set; }
+        public decimal? dblWidth { get; set; }
+        public decimal? dblDepth { get; set; }
+        public int? intWeightUOMId { get; set; }
+        public decimal? dblWeight { get; set; }
+        public int? intMaterialPackTypeId { get; set; }
+        public string strMaterialSizeCode { get; set; }
+        public int intInnerUnits { get; set; }
+        public int intLayerPerPallet { get; set; }
+        public int intUnitPerLayer { get; set; }
+        public decimal? dblStandardPalletRatio { get; set; }
+        public string strMask1 { get; set; }
+        public string strMask2 { get; set; }
+        public string strMask3 { get; set; }
+        public int? intPatronageCategoryId { get; set; }
+        public int? intTaxClassId { get; set; }
+        public bool ysnStockedItem { get; set; }
+        public bool ysnDyedFuel { get; set; }
+        public string strBarcodePrint { get; set; }
+        public bool ysnMSDSRequired { get; set; }
+        public string strEPANumber { get; set; }
+        public bool ysnInboundTax { get; set; }
+        public bool ysnOutboundTax { get; set; }
+        public bool ysnRestrictedChemical { get; set; }
+        public bool ysnTankRequired { get; set; }
+        public bool ysnAvailableTM { get; set; }
+        public decimal? dblDefaultFull { get; set; }
+        public string strFuelInspectFee { get; set; }
+        public string strRINRequired { get; set; }
+        public int? intRINFuelTypeId { get; set; }
+        public decimal? dblDenaturantPercent { get; set; }
+        public bool ysnTonnageTax { get; set; }
+        public bool ysnLoadTracking { get; set; }
+        public decimal? dblMixOrder { get; set; }
+        public bool ysnHandAddIngredient { get; set; }
+        public int? intMedicationTag { get; set; }
+        public int? intIngredientTag { get; set; }
+        public string strVolumeRebateGroup { get; set; }
+        public int? intPhysicalItem { get; set; }
+        public bool ysnExtendPickTicket { get; set; }
+        public bool ysnExportEDI { get; set; }
+        public bool ysnHazardMaterial { get; set; }
+        public bool ysnMaterialFee { get; set; }
+        public string strUPCNo { get; set; }
+        public int? intCaseUOM { get; set; }
+        public string strNACSCategory { get; set; }
+        public string strWICCode { get; set; }
+        public int? intAGCategory { get; set; }
+        public bool ysnReceiptCommentRequired { get; set; }
+        public string strCountCode { get; set; }
+        public bool ysnLandedCost { get; set; }
+        public string strLeadTime { get; set; }
+        public bool ysnTaxable { get; set; }
+        public string strKeywords { get; set; }
+        public decimal? dblCaseQty { get; set; }
+        public DateTime? dtmDateShip { get; set; }
+        public decimal? dblTaxExempt { get; set; }
+        public bool ysnDropShip { get; set; }
+        public bool ysnCommisionable { get; set; }
+        public string strSpecialCommission { get; set; }
 
         public ICollection<tblICItemUOM> tblICItemUOMs { get; set; }
         public ICollection<tblICItemLocationStore> tblICItemLocationStores { get; set; }
-        public tblICItemPOS tblICItemPOS { get; set; }
-        public tblICItemSales tblICItemSales { get; set; }
-        public tblICItemManufacturing tblICItemManufacturing { get; set; }
+
+        public ICollection<tblICItemPOSSLA> tblICItemPOSSLAs { get; set; }
+        public ICollection<tblICItemPOSCategory> tblICItemPOSCategories { get; set; }
+        public ICollection<tblICItemManufacturingUOM> tblICItemManufacturingUOMs { get; set; }
 
         public ICollection<tblICItemUPC> tblICItemUPCs { get; set; }
         public ICollection<tblICItemVendorXref> tblICItemVendorXrefs { get; set; }

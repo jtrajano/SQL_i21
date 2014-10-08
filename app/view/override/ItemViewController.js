@@ -26,7 +26,10 @@ Ext.define('Inventory.view.override.ItemViewController', {
                 value: '{current.strType}',
                 store: '{ItemTypes}'
             },
-            cboManufacturer: '{current.intManufacturerId}',
+            cboManufacturer: {
+                value: '{current.intManufacturerId}',
+                store: 'Manufacturer'
+            } ,
             cboBrand: '{current.intBrandId}',
             cboStatus: {
                 value: '{current.strStatus}',
@@ -36,7 +39,10 @@ Ext.define('Inventory.view.override.ItemViewController', {
                 value: '{current.strLotTracking}',
                 store: '{LotTrackings}'
             },
-            cboTracking: '{current.intTrackingId}',
+            cboTracking: {
+                value: '{current.intTrackingId}',
+                store: '{Category}'
+            },
             //UOM Grid Columns
             colDetailUnitMeasure: 'intUnitMeasureId',
             colDetailUnitQty: 'dblUnitQty',
@@ -67,68 +73,83 @@ Ext.define('Inventory.view.override.ItemViewController', {
             //---------//
             //Sales Tab//
             //---------//
-            cboPatronage: '{current.tblICItemSales.intPatronageCategoryId}',
-            cboTaxClass: '{current.tblICItemSales.intTaxClassId}',
-            chkStockedItem: '{current.tblICItemSales.ysnStockedItem}',
-            chkDyedFuel: '{current.tblICItemSales.ysnDyedFuel}',
+            cboPatronage: {
+                value: '{current.intPatronageCategoryId}',
+                store: '{PatronageCategory}'
+            },
+//            cboTaxClass: {
+//                value: '{current.intTaxClassId}',
+//                store: '{}'
+//            },
+            chkStockedItem: '{current.ysnStockedItem}',
+            chkDyedFuel: '{current.ysnDyedFuel}',
             cboBarcodePrint: {
-                value: '{current.tblICItemSales.strBarcodePrint}',
+                value: '{current.strBarcodePrint}',
                 store: '{BarcodePrints}'
             },
-            chkMsdsRequired: '{current.tblICItemSales.ysnMSDSRequired}',
-            txtEpaNumber: '{current.tblICItemSales.strEPANumber}',
-            chkInboundTax: '{current.tblICItemSales.ysnInboundTax}',
-            chkOutboundTax: '{current.tblICItemSales.ysnOutboundTax}',
-            chkRestrictedChemical: '{current.tblICItemSales.ysnRestrictedChemical}',
-            chkTankRequired: '{current.tblICItemSales.ysnTankRequired}',
-            chkAvailableForTm: '{current.tblICItemSales.ysnAvailableTM}',
-            chkDefaultPercentFull: '{current.tblICItemSales.dblDefaultFull}',
+            chkMsdsRequired: '{current.ysnMSDSRequired}',
+            txtEpaNumber: '{current.strEPANumber}',
+            chkInboundTax: '{current.ysnInboundTax}',
+            chkOutboundTax: '{current.ysnOutboundTax}',
+            chkRestrictedChemical: '{current.ysnRestrictedChemical}',
+            chkTankRequired: '{current.ysnTankRequired}',
+            chkAvailableForTm: '{current.ysnAvailableTM}',
+            txtDefaultPercentFull: '{current.dblDefaultFull}',
             cboFuelInspectionFee: {
-                value: '{current.tblICItemSales.strFuelInspectFee}',
+                value: '{current.strFuelInspectFee}',
                 store: '{FuelInspectionFees}'
             },
             cboRinRequired: {
-                value: '{current.tblICItemSales.strRINRequired}',
+                value: '{current.strRINRequired}',
                 store: '{RinRequires}'
             },
-            cboRinFuelType: '{current.tblICItemSales.intRINFuelTypeId}',
-            txtPercentDenaturant: '{current.tblICItemSales.dblDenaturantPercent}',
-            chkTonnageTax: '{current.tblICItemSales.ysnTonnageTax}',
-            chkLoadTracking: '{current.tblICItemSales.ysnLoadTracking}',
-            txtMixOrder: '{current.tblICItemSales.dblMixOrder}',
-            chkHandAddIngredients: '{current.tblICItemSales.ysnHandAddIngredient}',
-            cboMedicationTag: '{current.tblICItemSales.intMedicationTag}',
-            cboIngredientTag: '{current.tblICItemSales.intIngredientTag}',
-            txtVolumeRebateGroup: '{current.tblICItemSales.strVolumeRebateGroup}',
-            cboPhysicalItem: '{current.tblICItemSales.intPhysicalItem}',
-            chkExtendOnPickTicket: '{current.tblICItemSales.ysnExtendPickTicket}',
-            chkExportEdi: '{current.tblICItemSales.ysnExportEDI}',
-            chkHazardMaterial: '{current.tblICItemSales.ysnHazardMaterial}',
-            chkMaterialFee: '{current.tblICItemSales.ysnMaterialFee}',
+//            cboRinFuelType: {
+//                value: '{current.intRINFuelTypeId}',
+//                store: '{}'
+//            },
+            txtPercentDenaturant: '{current.dblDenaturantPercent}',
+            chkTonnageTax: '{current.ysnTonnageTax}',
+            chkLoadTracking: '{current.ysnLoadTracking}',
+            txtMixOrder: '{current.dblMixOrder}',
+            chkHandAddIngredients: '{current.ysnHandAddIngredient}',
+            cboMedicationTag: {
+                value: '{current.intMedicationTag}',
+                store: '{InventoryTag}'
+            },
+            cboIngredientTag: {
+                value: '{current.intIngredientTag}',
+                store: '{InventoryTag}'
+            },
+            txtVolumeRebateGroup: '{current.strVolumeRebateGroup}',
+            cboPhysicalItem: '{current.intPhysicalItem}',
+            chkExtendOnPickTicket: '{current.ysnExtendPickTicket}',
+            chkExportEdi: '{current.ysnExportEDI}',
+            chkHazardMaterial: '{current.ysnHazardMaterial}',
+            chkMaterialFee: '{current.ysnMaterialFee}',
 
             //-------//
             //POS Tab//
             //-------//
-            txtOrderUpcNo: '{current.tblICItemPOS.strUPCNo}',
-            cboCaseUom: '{current.tblICItemPOS.intCaseUOM}',
-            txtNacsCategory: '{current.tblICItemPOS.strNACSCategory}',
+            txtOrderUpcNo: '{current.strUPCNo}',
+            cboCaseUom: '{current.intCaseUOM}',
+            txtNacsCategory: '{current.strNACSCategory}',
             cboWicCode: {
-                value: '{current.tblICItemSales.strWICCode}',
+                value: '{current.strWICCode}',
                 store: '{WICCodes}'
             },
-            cboAgCategory: '{current.tblICItemPOS.intAGCategory}',
-            chkReceiptCommentReq: '{current.tblICItemPOS.ysnReceiptCommentRequired}',
-            cboCountCode: '{current.tblICItemPOS.strCountCode}',
-            chkLandedCost: '{current.tblICItemPOS.ysnLandedCost}',
-            txtLeadTime: '{current.tblICItemPOS.strLeadTime}',
-            chkTaxable: '{current.tblICItemPOS.ysnTaxable}',
-            txtKeywords: '{current.tblICItemPOS.strKeywords}',
-            txtCaseQty: '{current.tblICItemPOS.dblCaseQty}',
-            dtmDateShip: '{current.tblICItemPOS.dtmDateShip}',
-            txtTaxExempt: '{current.tblICItemPOS.dblTaxExempt}',
-            chkDropShip: '{current.tblICItemPOS.ysnDropShip}',
-            chkCommissionable: '{current.tblICItemPOS.ysnCommisionable}',
-            cboSpecialCommission: '{current.tblICItemPOS.strSpecialCommission}',
+            cboAgCategory: '{current.intAGCategory}',
+            chkReceiptCommentReq: '{current.ysnReceiptCommentRequired}',
+            cboCountCode: '{current.strCountCode}',
+            chkLandedCost: '{current.ysnLandedCost}',
+            txtLeadTime: '{current.strLeadTime}',
+            chkTaxable: '{current.ysnTaxable}',
+            txtKeywords: '{current.strKeywords}',
+            txtCaseQty: '{current.dblCaseQty}',
+            dtmDateShip: '{current.dtmDateShip}',
+            txtTaxExempt: '{current.dblTaxExempt}',
+            chkDropShip: '{current.ysnDropShip}',
+            chkCommissionable: '{current.ysnCommisionable}',
+            cboSpecialCommission: '{current.strSpecialCommission}',
 
             colPOSCategoryName: '',
 
@@ -139,34 +160,34 @@ Ext.define('Inventory.view.override.ItemViewController', {
             //-----------------//
             //Manufacturing Tab//
             //-----------------//
-            chkRequireApproval: '{current.tblICItemManufacturing.ysnRequireCustomerApproval}',
-            cboAssociatedRecipe: '{current.tblICItemManufacturing.intRecipeId}',
-            chkSanitizationRequired: '{current.tblICItemManufacturing.ysnSanitationRequired}',
-            txtLifeTime: '{current.tblICItemManufacturing.intLifeTime}',
-            cboLifetimeType: '{current.tblICItemManufacturing.strLifeTimeType}',
-            txtReceiveLife: '{current.tblICItemManufacturing.intReceiveLife}',
-            txtGTIN: '{current.tblICItemManufacturing.strGTIN}',
+            chkRequireApproval: '{current.ysnRequireCustomerApproval}',
+            cboAssociatedRecipe: '{current.intRecipeId}',
+            chkSanitizationRequired: '{current.ysnSanitationRequired}',
+            txtLifeTime: '{current.intLifeTime}',
+            cboLifetimeType: '{current.strLifeTimeType}',
+            txtReceiveLife: '{current.intReceiveLife}',
+            txtGTIN: '{current.strGTIN}',
             cboRotationType: {
-                value: '{current.tblICItemSales.strRotationType}',
+                value: '{current.strRotationType}',
                 store: '{RotationTypes}'
             },
-            cboNFMC: '{current.tblICItemManufacturing.intNMFCId}',
-            chkStrictFIFO: '{current.tblICItemManufacturing.ysnStrictFIFO}',
-            txtHeight: '{current.tblICItemManufacturing.dblHeight}',
-            txtWidth: '{current.tblICItemManufacturing.dblWidth}',
-            txtDepth: '{current.tblICItemManufacturing.dblDepth}',
-            cboDimensionUOM: '{current.tblICItemManufacturing.intDimensionUOMId}',
-            cboWeightUOM: '{current.tblICItemManufacturing.intWeightUOMId}',
-            txtWeight: '{current.tblICItemManufacturing.dblWeight}',
-            txtMaterialPack: '{current.tblICItemManufacturing.intMaterialPackTypeId}',
-            txtMaterialSizeCode: '{current.tblICItemManufacturing.strMaterialSizeCode}',
-            txtInnerUnits: '{current.tblICItemManufacturing.intInnerUnits}',
-            txtLayersPerPallet: '{current.tblICItemManufacturing.intLayerPerPallet}',
-            txtUnitsPerLayer: '{current.tblICItemManufacturing.intUnitPerLayer}',
-            txtStandardPalletRatio: '{current.tblICItemManufacturing.dblStandardPalletRatio}',
-            txtMask1: '{current.tblICItemManufacturing.strMask1}',
-            txtMask2: '{current.tblICItemManufacturing.strMask2}',
-            txtMask3: '{current.tblICItemManufacturing.strMask3}',
+            cboNFMC: '{current.intNMFCId}',
+            chkStrictFIFO: '{current.ysnStrictFIFO}',
+            txtHeight: '{current.dblHeight}',
+            txtWidth: '{current.dblWidth}',
+            txtDepth: '{current.dblDepth}',
+            cboDimensionUOM: '{current.intDimensionUOMId}',
+            cboWeightUOM: '{current.intWeightUOMId}',
+            txtWeight: '{current.dblWeight}',
+            txtMaterialPack: '{current.intMaterialPackTypeId}',
+            txtMaterialSizeCode: '{current.strMaterialSizeCode}',
+            txtInnerUnits: '{current.intInnerUnits}',
+            txtLayersPerPallet: '{current.intLayerPerPallet}',
+            txtUnitsPerLayer: '{current.intUnitPerLayer}',
+            txtStandardPalletRatio: '{current.dblStandardPalletRatio}',
+            txtMask1: '{current.strMask1}',
+            txtMask2: '{current.strMask2}',
+            txtMask3: '{current.strMask3}',
 
             colManufacturingUOM: 'intUnitMeasureId',
 

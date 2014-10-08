@@ -3,6 +3,7 @@
  */
 Ext.define('Inventory.store.InventoryTag', {
     extend: 'Ext.data.Store',
+    alias: 'store.inventorytag',
 
     requires: [
         'Inventory.model.InventoryTag'

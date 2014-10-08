@@ -69,9 +69,8 @@
     <Compile Include="Mappings\tblICItemCustomerXrefMap.cs" />
     <Compile Include="Mappings\tblICItemCertificationMap.cs" />
     <Compile Include="Mappings\tblICItemUPCMap.cs" />
-    <Compile Include="Mappings\tblICItemManufacturingMap.cs" />
+    <Compile Include="Mappings\tblICItemManufacturingUOMMap.cs" />
     <Compile Include="Mappings\tblICItemPOSMap.cs" />
-    <Compile Include="Mappings\tblICItemSalesMap.cs" />
     <Compile Include="Mappings\tblICItemLocationStoreMap.cs" />
     <Compile Include="Mappings\tblICItemUOMMap.cs" />
     <Compile Include="Mappings\tblICBrandMap.cs" />
@@ -114,9 +113,8 @@
     <Compile Include="Tables\tblICItemContract.cs" />
     <Compile Include="Tables\tblICItemVendorXref.cs" />
     <Compile Include="Tables\tblICItemCustomerXref.cs" />
-    <Compile Include="Tables\tblICItemManufacturing.cs" />
+    <Compile Include="Tables\tblICItemManufacturingUOM.cs" />
     <Compile Include="Tables\tblICItemPOS.cs" />
-    <Compile Include="Tables\tblICItemSales.cs" />
     <Compile Include="Tables\tblICItemLocationStore.cs" />
     <Compile Include="Tables\tblICItemUOM.cs" />
     <Compile Include="Tables\tblICBrand.cs" />
