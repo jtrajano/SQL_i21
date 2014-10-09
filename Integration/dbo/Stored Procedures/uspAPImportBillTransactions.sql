@@ -7,7 +7,7 @@ GO
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN
 		EXEC ('
-		ALTER PROCEDURE [dbo].[uspAPImportBillTransactions]
+		CREATE PROCEDURE [dbo].[uspAPImportBillTransactions]
 			@DateFrom	DATE = NULL,
 			@DateTo	DATE = NULL,
 			@PeriodFrom	INT = NULL,
