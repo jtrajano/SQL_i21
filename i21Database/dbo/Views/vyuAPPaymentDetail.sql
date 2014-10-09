@@ -1,4 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuAPPaymentDetail]
+WITH SCHEMABINDING
 AS 
 SELECT 
 	A.intPaymentDetailId,
@@ -17,16 +18,16 @@ SELECT
 	E.strName,
 	F.strAccountId,
 	G.strTerm
-FROM tblAPPaymentDetail A
-	INNER JOIN tblAPPayment B
+FROM dbo.tblAPPaymentDetail A
+	INNER JOIN dbo.tblAPPayment B
 		ON A.intPaymentId = B.intPaymentId
-	INNER JOIN tblAPBill C
+	INNER JOIN dbo.tblAPBill C
 		ON A.intBillId = C.intBillId
-	INNER JOIN tblAPVendor D
+	INNER JOIN dbo.tblAPVendor D
 		ON B.intVendorId = D.intVendorId
-	INNER JOIN tblEntity E
+	INNER JOIN dbo.tblEntity E
 		ON D.intEntityId = E.intEntityId
-	INNER JOIN tblGLAccount F
+	INNER JOIN dbo.tblGLAccount F
 		ON A.intAccountId = F.intAccountId
-	INNER JOIN tblSMTerm G
+	INNER JOIN dbo.tblSMTerm G
 		ON C.intTermsId = G.intTermID

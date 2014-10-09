@@ -1,4 +1,5 @@
 ﻿CREATE VIEW vyuAPBill
+WITH SCHEMABINDING
 AS
 SELECT
 	A.intBillId,
@@ -11,9 +12,9 @@ SELECT
 	B1.strName,
 	C.strAccountId
 FROM
-	tblAPBill A
+	dbo.tblAPBill A
 	INNER JOIN 
-		(tblAPVendor B INNER JOIN tblEntity B1 ON B.intEntityId = B1.intEntityId)
+		(dbo.tblAPVendor B INNER JOIN dbo.tblEntity B1 ON B.intEntityId = B1.intEntityId)
 	ON A.intVendorId = B.intVendorId
-	INNER JOIN tblGLAccount C
+	INNER JOIN dbo.tblGLAccount C
 		ON A.intAccountId = C.intAccountId

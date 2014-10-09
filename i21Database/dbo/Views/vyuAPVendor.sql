@@ -1,4 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuAPVendor]
+WITH SCHEMABINDING
 	AS 
 SELECT 
 	A.intEntityId,
@@ -46,15 +47,16 @@ SELECT
 	D.strTitle,
 	E.strCurrency
 FROM
-		tblEntity A
-	INNER JOIN tblAPVendor B
+		dbo.tblEntity A
+	INNER JOIN dbo.tblAPVendor B
 		ON A.intEntityId = B.intEntityId
-	INNER JOIN tblEntityLocation C
+	INNER JOIN dbo.tblEntityLocation C
 		ON B.intDefaultLocationId = C.intEntityLocationId
-	INNER JOIN (tblEntityContact D INNER JOIN tblEntity D2 ON D.intEntityId = D2.intEntityId)
+	INNER JOIN (dbo.tblEntityContact D INNER JOIN dbo.tblEntity D2 ON D.intEntityId = D2.intEntityId)
 		ON B.intDefaultContactId = D.intContactId
-	LEFT JOIN tblSMCurrency E
+	LEFT JOIN dbo.tblSMCurrency E
 		ON B.intCurrencyId = E.intCurrencyID
-	LEFT JOIN tblGLAccount F 
+	LEFT JOIN dbo.tblGLAccount F 
 		ON B.intGLAccountExpenseId = F.intAccountId
+	
 	

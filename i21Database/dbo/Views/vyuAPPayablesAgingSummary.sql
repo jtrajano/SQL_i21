@@ -1,5 +1,4 @@
-﻿CREATE VIEW vyuAPPayablesAgingSummary 
-
+﻿WITH SCHEMABINDING
 AS 
 
 SELECT tblAPBill.dtmDate AS dtmDate 
@@ -16,10 +15,10 @@ SELECT tblAPBill.dtmDate AS dtmDate
 , tblAPBill.ysnPosted 
 , tblAPBill.ysnPaid
 , tblGLAccount.strAccountId
-, strDescription = (Select strDescription From tblGLAccount where strAccountId = tblGLAccount.strAccountId) 
-FROM tblAPBill 
-INNER JOIN tblGLAccount ON tblAPBill.intAccountId = tblGLAccount.intAccountId
-LEFT JOIN (tblAPVendor INNER JOIN tblEntity ON tblAPVendor.intEntityId = tblEntity.intEntityId)
+, strDescription = (Select strDescription From dbo.tblGLAccount where strAccountId = tblGLAccount.strAccountId) 
+FROM dbo.tblAPBill 
+INNER JOIN dbo.tblGLAccount ON tblAPBill.intAccountId = tblGLAccount.intAccountId
+LEFT JOIN (dbo.tblAPVendor INNER JOIN dbo.tblEntity ON tblAPVendor.intEntityId = tblEntity.intEntityId)
 	ON tblAPVendor.intEntityId = tblAPBill.intVendorId 
 WHERE tblAPBill.ysnPosted = 1   
 UNION ALL   
@@ -37,12 +36,12 @@ SELECT tblAPPayment.dtmDatePaid AS dtmDate,
 , tblAPBill.ysnPosted 
 , tblAPBill.ysnPaid
 , tblGLAccount.strAccountId
-, strDescription = (Select strDescription From tblGLAccount where strAccountId = tblGLAccount.strAccountId)
-FROM tblAPPaymentDetail   
- LEFT JOIN (tblAPBill LEFT JOIN (tblAPVendor INNER JOIN tblEntity ON tblAPVendor.intEntityId = tblEntity.intEntityId) ON tblAPVendor.intVendorId = tblAPBill.intVendorId) 
+, strDescription = (Select strDescription From dbo.tblGLAccount where strAccountId = tblGLAccount.strAccountId)
+FROM dbo.tblAPPaymentDetail   
+ LEFT JOIN (dbo.tblAPBill LEFT JOIN (dbo.tblAPVendor INNER JOIN dbo.tblEntity ON tblAPVendor.intEntityId = tblEntity.intEntityId) ON tblAPVendor.intVendorId = tblAPBill.intVendorId) 
  ON tblAPBill.intBillId = tblAPPaymentDetail.intBillId 
- INNER JOIN tblGLAccount ON tblAPBill.intAccountId = tblGLAccount.intAccountId  
- LEFT JOIN tblAPPayment   
+ INNER JOIN dbo.tblGLAccount ON tblAPBill.intAccountId = tblGLAccount.intAccountId  
+ LEFT JOIN dbo.tblAPPayment   
  ON tblAPPayment.intPaymentId = tblAPPaymentDetail.intPaymentId   
 WHERE tblAPBill.ysnPosted = 1  
 	AND tblAPPayment.ysnPosted = 1
