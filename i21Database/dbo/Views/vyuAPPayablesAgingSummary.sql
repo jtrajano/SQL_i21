@@ -1,4 +1,5 @@
-﻿WITH SCHEMABINDING
+﻿CREATE VIEW vyuAPPayablesAgingSummary
+WITH SCHEMABINDING
 AS 
 
 SELECT tblAPBill.dtmDate AS dtmDate 
