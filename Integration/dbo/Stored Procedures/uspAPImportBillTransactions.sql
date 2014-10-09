@@ -598,6 +598,49 @@ BEGIN
 		
 			SET @Total = @ImportedRecords;
 		END
+
+		--backup data from aptrxmst on one time synchronization
+			INSERT INTO tblAPaptrxmst
+			SELECT
+				A.[aptrx_vnd_no]       ,
+				A.[aptrx_ivc_no]       ,
+				A.[aptrx_sys_rev_dt]   ,
+				A.[aptrx_sys_time]     ,
+				A.[aptrx_cbk_no]       ,
+				A.[aptrx_chk_no]       ,
+				A.[aptrx_trans_type]   ,
+				A.[aptrx_batch_no]     ,
+				A.[aptrx_pur_ord_no]   ,
+				A.[aptrx_po_rcpt_seq]  ,
+				A.[aptrx_ivc_rev_dt]   ,
+				A.[aptrx_disc_rev_dt]  ,
+				A.[aptrx_due_rev_dt]   ,
+				A.[aptrx_chk_rev_dt]   ,
+				A.[aptrx_gl_rev_dt]    ,
+				A.[aptrx_disc_pct]     ,
+				A.[aptrx_orig_amt]     ,
+				A.[aptrx_disc_amt]     ,
+				A.[aptrx_wthhld_amt]   ,
+				A.[aptrx_net_amt]      ,
+				A.[aptrx_1099_amt]     ,
+				A.[aptrx_comment]      ,
+				A.[aptrx_orig_type]    ,
+				A.[aptrx_name]         ,
+				A.[aptrx_recur_yn]     ,
+				A.[aptrx_currency]     ,
+				A.[aptrx_currency_rt]  ,
+				A.[aptrx_currency_cnt] ,
+				A.[aptrx_user_id]      ,
+				A.[aptrx_user_rev_dt]
+			 FROM aptrxmst A
+			 WHERE CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
+				 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
+				 AND A.aptrx_trans_type IN (''I'',''C'',''A'')
+
+			DELETE FROM aptrxmst
+			WHERE CONVERT(DATE, CAST(aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
+				 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
+				 AND aptrx_trans_type IN (''I'',''C'',''A'')
 	END
 	')
 END
