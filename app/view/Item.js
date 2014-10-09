@@ -353,7 +353,6 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcombobox',
-                                                                        flex: 1,
                                                                         columns: [
                                                                             {
                                                                                 dataIndex: 'intCategoryId',
@@ -374,6 +373,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 flex: 1
                                                                             }
                                                                         ],
+                                                                        flex: 1,
                                                                         itemId: 'cboTracking',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'Tracking',

@@ -28,9 +28,12 @@ Ext.define('Inventory.view.override.ItemViewController', {
             },
             cboManufacturer: {
                 value: '{current.intManufacturerId}',
-                store: 'Manufacturer'
+                store: '{Manufacturer}'
             } ,
-            cboBrand: '{current.intBrandId}',
+            cboBrand: {
+                value: '{current.intBrandId}',
+                store: '{Brand}'
+            },
             cboStatus: {
                 value: '{current.strStatus}',
                 store: '{ItemStatuses}'
@@ -103,10 +106,10 @@ Ext.define('Inventory.view.override.ItemViewController', {
                 value: '{current.strRINRequired}',
                 store: '{RinRequires}'
             },
-//            cboRinFuelType: {
-//                value: '{current.intRINFuelTypeId}',
-//                store: '{}'
-//            },
+            cboRinFuelType: {
+                value: '{current.intRINFuelTypeId}',
+                store: '{FuelCategory}'
+            },
             txtPercentDenaturant: '{current.dblDenaturantPercent}',
             chkTonnageTax: '{current.ysnTonnageTax}',
             chkLoadTracking: '{current.ysnLoadTracking}',
@@ -131,13 +134,19 @@ Ext.define('Inventory.view.override.ItemViewController', {
             //POS Tab//
             //-------//
             txtOrderUpcNo: '{current.strUPCNo}',
-            cboCaseUom: '{current.intCaseUOM}',
+            cboCaseUom: {
+                value: '{current.intCaseUOM}',
+                store: '{UnitMeasure}'
+            },
             txtNacsCategory: '{current.strNACSCategory}',
             cboWicCode: {
                 value: '{current.strWICCode}',
                 store: '{WICCodes}'
             },
-            cboAgCategory: '{current.intAGCategory}',
+            cboAgCategory: {
+                value: '{current.intAGCategory}',
+                store: '{Category}'
+            },
             chkReceiptCommentReq: '{current.ysnReceiptCommentRequired}',
             cboCountCode: '{current.strCountCode}',
             chkLandedCost: '{current.ysnLandedCost}',
@@ -176,8 +185,14 @@ Ext.define('Inventory.view.override.ItemViewController', {
             txtHeight: '{current.dblHeight}',
             txtWidth: '{current.dblWidth}',
             txtDepth: '{current.dblDepth}',
-            cboDimensionUOM: '{current.intDimensionUOMId}',
-            cboWeightUOM: '{current.intWeightUOMId}',
+            cboDimensionUOM: {
+                value: '{current.intDimensionUOMId}',
+                store: '{UnitMeasure}'
+            },
+            cboWeightUOM: {
+                value: '{current.intWeightUOMId}',
+                store: '{UnitMeasure}'
+            },
             txtWeight: '{current.dblWeight}',
             txtMaterialPack: '{current.intMaterialPackTypeId}',
             txtMaterialSizeCode: '{current.strMaterialSizeCode}',

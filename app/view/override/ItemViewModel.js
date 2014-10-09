@@ -9,6 +9,8 @@ Ext.define('Inventory.view.override.ItemViewModel', {
         'Inventory.store.PatronageCategory',
         'Inventory.store.InventoryTag',
         'Inventory.store.UnitMeasure',
+        'Inventory.store.Brand',
+        'Inventory.store.FuelCategory',
     ],
 
     stores: {
@@ -306,6 +308,12 @@ Ext.define('Inventory.view.override.ItemViewModel', {
         },
         UnitMeasure: {
             type: 'inventoryuom'
+        },
+        Brand: {
+            type: 'inventorybrand'
+        },
+        FuelCategory: {
+            type: 'inventoryfuelcategory'
         }
 
     }

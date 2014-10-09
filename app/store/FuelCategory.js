@@ -3,6 +3,7 @@
  */
 Ext.define('Inventory.store.FuelCategory', {
     extend: 'Ext.data.Store',
+    alias: 'store.inventoryfuelcategory',
 
     requires: [
         'Inventory.model.FuelCategory'

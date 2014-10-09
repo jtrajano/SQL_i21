@@ -14,7 +14,7 @@ Ext.define('Inventory.model.Brand', {
         { name: 'intBrandId', type: 'int'},
         { name: 'strBrandCode', type: 'string'},
         { name: 'strBrandName', type: 'string'},
-        { name: 'intManufacturerId', type: 'int'},
+        { name: 'intManufacturerId', type: 'int', allowNull: true},
         { name: 'intSort', type: 'int'}
     ]
 });
