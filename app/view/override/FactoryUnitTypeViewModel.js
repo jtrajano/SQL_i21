@@ -74,6 +74,9 @@ Ext.define('Inventory.view.override.FactoryUnitTypeViewModel', {
                     name: 'strInternalCode'
                 }
             ]
+        },
+        UnitMeasure: {
+            type: 'inventoryuom'
         }
     }
 });
