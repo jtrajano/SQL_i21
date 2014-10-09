@@ -54,7 +54,7 @@ Ext.define('Inventory.view.override.FuelTypeViewController', {
             win = options.window,
             store = Ext.create('Inventory.store.FuelType', { pageSize: 1 });
 
-        win.context = Ext.create('iRely.Engine', {
+        win.context = Ext.create('iRely.mvvm.Engine', {
             window : win,
             store  : store,
             createRecord : me.createRecord,

@@ -85,7 +85,7 @@ Ext.define('Inventory.view.override.CategoryViewController', {
             win = options.window,
             store = Ext.create('Inventory.store.Category', { pageSize: 1 });
 
-        win.context = Ext.create('iRely.Engine', {
+        win.context = Ext.create('iRely.mvvm.Engine', {
             window : win,
             store  : store,
             createRecord : me.createRecord,
@@ -93,21 +93,21 @@ Ext.define('Inventory.view.override.CategoryViewController', {
             details: [
                 {
                     key: 'tblICCategoryAccounts',
-                    component: Ext.create('iRely.grid.Manager', {
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: win.down('#grdGlAccounts'),
                         deleteButton : win.down('#btnDeleteGlAccounts')
                     })
                 },
                 {
                     key: 'tblICCategoryStores',
-                    component: Ext.create('iRely.grid.Manager', {
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: win.down('#grdStore'),
                         deleteButton : win.down('#btnDeleteStore')
                     })
                 },
                 {
                     key: 'tblICCategoryVendors',
-                    component: Ext.create('iRely.grid.Manager', {
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: win.down('#grdVendorCategoryXref'),
                         deleteButton : win.down('#btnDeleteVendorCategoryXref')
                     })

@@ -53,14 +53,14 @@ Ext.define('Inventory.view.override.CommodityViewController', {
             win = options.window,
             store = Ext.create('Inventory.store.Commodity', { pageSize: 1 });
 
-        win.context = Ext.create('iRely.Engine', {
+        win.context = Ext.create('iRely.mvvm.Engine', {
             window : win,
             store  : store,
             binding: me.config.binding,
             details: [
                 {
                     key: 'tblICCommodityUnitMeasures',
-                    component: Ext.create('iRely.grid.Manager', {
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: win.down('#grdUom'),
                         deleteButton : win.down('#btnDeleteUom')
                     })

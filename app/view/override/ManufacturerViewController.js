@@ -44,7 +44,7 @@ Ext.define('Inventory.view.override.ManufacturerViewController', {
             win = options.window,
             store = Ext.create('Inventory.store.Manufacturer', { pageSize: 1 });
 
-        win.context = Ext.create('iRely.Engine', {
+        win.context = Ext.create('iRely.mvvm.Engine', {
             window : win,
             store  : store,
             createRecord : me.createRecord,

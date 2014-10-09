@@ -234,7 +234,7 @@ Ext.define('Inventory.view.override.ItemViewController', {
             win = options.window,
             store = Ext.create('Inventory.store.Item', { pageSize: 1 });
 
-        win.context = Ext.create('iRely.Engine', {
+        win.context = Ext.create('iRely.mvvm.Engine', {
             window : win,
             store  : store,
             createRecord : me.createRecord,
@@ -242,48 +242,48 @@ Ext.define('Inventory.view.override.ItemViewController', {
             details: [
                 {
                     key: 'tblICItemUOMs',
-                    component: Ext.create('iRely.grid.Manager', {
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: win.down('#grdUnitOfMeasure')
                     })
                 },
                 {
                     key: 'tblICItemLocationStores',
-                    component: Ext.create('iRely.grid.Manager', {
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: win.down('#grdLocationStore'),
                         deleteButton : win.down('#btnDeleteLocation')
                     })
                 },
                 {
                     key: 'tblICItemUPCs',
-                    component: Ext.create('iRely.grid.Manager', {
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: win.down('#grdUPC'),
                         deleteButton : win.down('#btnDeleteUPC')
                     })
                 },
                 {
                     key: 'tblICItemVendorXrefs',
-                    component: Ext.create('iRely.grid.Manager', {
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: win.down('#grdVendorXref'),
                         deleteButton : win.down('#btnDeleteVendorXref')
                     })
                 },
                 {
                     key: 'tblICItemCustomerXrefs',
-                    component: Ext.create('iRely.grid.Manager', {
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: win.down('#grdCustomerXref'),
                         deleteButton : win.down('#btnDeleteCustomerXref')
                     })
                 },
                 {
                     key: 'tblICItemContracts',
-                    component: Ext.create('iRely.grid.Manager', {
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: win.down('#grdContractItem'),
                         deleteButton : win.down('#btnDeleteContractItem')
                     })
                 },
                 {
                     key: 'tblICItemCertifications',
-                    component: Ext.create('iRely.grid.Manager', {
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: win.down('#grdCertification'),
                         deleteButton : win.down('#btnDeleteCertification')
                     })
@@ -292,7 +292,7 @@ Ext.define('Inventory.view.override.ItemViewController', {
 //                ,
 //                {
 //                    key: 'tblICItemPOS',
-//                    component: Ext.create('iRely.grid.Manager', {
+//                    component: Ext.create('iRely.mvvm.grid.Manager', {
 //                        grid: win.down('#grdLocationStore'),
 //                        deleteButton : win.down('#btnDeleteLocation')
 //                    })
@@ -300,7 +300,7 @@ Ext.define('Inventory.view.override.ItemViewController', {
 //                ,
 //                {
 //                    key: 'tblICItemSales',
-//                    component: Ext.create('iRely.grid.Manager', {
+//                    component: Ext.create('iRely.mvvm.grid.Manager', {
 //                        grid: win.down('#grdLocationStore'),
 //                        deleteButton : win.down('#btnDeleteLocation')
 //                    })

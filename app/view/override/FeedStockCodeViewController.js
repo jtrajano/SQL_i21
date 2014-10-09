@@ -14,11 +14,11 @@ Ext.define('Inventory.view.override.FeedStockCodeViewController', {
             win = options.window,
             store = Ext.create('Inventory.store.FeedStockCode', { pageSize: 1 });
 
-        win.context = Ext.create('iRely.Engine', {
+        win.context = Ext.create('iRely.mvvm.Engine', {
             binding: me.config.binding,
             window : win,
             store  : store,
-            singleGridMgr: Ext.create('iRely.grid.Manager', {
+            singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
                 grid:  win.down('#grdFeedStockCode'),
                 deleteButton: win.down('#btnDeleteFeedStockCode')
             })
