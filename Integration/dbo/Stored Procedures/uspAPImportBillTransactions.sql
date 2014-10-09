@@ -7,7 +7,7 @@ GO
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN
 		EXEC ('
-		CREATE PROCEDURE [dbo].[uspAPImportBillTransactions]
+		ALTER PROCEDURE [dbo].[uspAPImportBillTransactions]
 			@DateFrom	DATE = NULL,
 			@DateTo	DATE = NULL,
 			@PeriodFrom	INT = NULL,
@@ -527,45 +527,6 @@ BEGIN
 					ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C2.aptrx_ivc_no
 					AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.aptrx_vnd_no
 					ORDER BY C.apegl_dist_no
-			--UNION
-			--SELECT 
-			--	A.intBillId,
-			--	A.strDescription,
-			--	ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.aphgl_gl_acct), 0),
-			--	C.aphgl_gl_amt
-			--	FROM tblAPBill A
-			--	INNER JOIN aphglmst C
-			--		ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C.aphgl_ivc_no COLLATE Latin1_General_CS_AS
-				
-			----Create Bill Batch transaction
-			--INSERT INTO tblAPBillBatch(intAccountId, ysnPosted, dblTotal, intEntityId)
-			--SELECT 
-			--	A.intAccountId,
-			--	@IsPosted,
-			--	A.dblTotal,
-			--	@UserId
-			--	FROM tblAPBill A
-			--	INNER JOIN @InsertedData B
-			--		ON A.intBillId = B.intBillId
-
-			--Add already imported bill
-			--SET IDENTITY_INSERT tblAPTempBill ON
-
-			--INSERT INTO tblAPTempBill([apivc_vnd_no], [apivc_ivc_no])
-			----SELECT
-			----	A.aptrx_vnd_no
-			----	,aptrx_ivc_no
-			----FROM aptrxmst A
-			----INNER JOIN @InsertedData B
-			----	ON A.aptrx_ivc_no = B.strBillId
-			----UNION
-			--SELECT 
-			--	A.apivc_vnd_no
-			--	,apivc_ivc_no
-			--FROM apivcmst A
-			--INNER JOIN @InsertedData B
-			--	ON A.apivc_ivc_no = B.strVendorOrderNumber
-			--SET IDENTITY_INSERT tblAPTempBill OFF
 	
 				--Create Bill Batch transaction
 			SELECT @totalBills = COUNT(*) FROM @InsertedData
@@ -598,6 +559,49 @@ BEGIN
 		
 			SET @Total = @ImportedRecords;
 		END
+
+		--backup data from aptrxmst on one time synchronization
+			INSERT INTO tblAPaptrxmst
+			SELECT
+				A.[aptrx_vnd_no]       ,
+				A.[aptrx_ivc_no]       ,
+				A.[aptrx_sys_rev_dt]   ,
+				A.[aptrx_sys_time]     ,
+				A.[aptrx_cbk_no]       ,
+				A.[aptrx_chk_no]       ,
+				A.[aptrx_trans_type]   ,
+				A.[aptrx_batch_no]     ,
+				A.[aptrx_pur_ord_no]   ,
+				A.[aptrx_po_rcpt_seq]  ,
+				A.[aptrx_ivc_rev_dt]   ,
+				A.[aptrx_disc_rev_dt]  ,
+				A.[aptrx_due_rev_dt]   ,
+				A.[aptrx_chk_rev_dt]   ,
+				A.[aptrx_gl_rev_dt]    ,
+				A.[aptrx_disc_pct]     ,
+				A.[aptrx_orig_amt]     ,
+				A.[aptrx_disc_amt]     ,
+				A.[aptrx_wthhld_amt]   ,
+				A.[aptrx_net_amt]      ,
+				A.[aptrx_1099_amt]     ,
+				A.[aptrx_comment]      ,
+				A.[aptrx_orig_type]    ,
+				A.[aptrx_name]         ,
+				A.[aptrx_recur_yn]     ,
+				A.[aptrx_currency]     ,
+				A.[aptrx_currency_rt]  ,
+				A.[aptrx_currency_cnt] ,
+				A.[aptrx_user_id]      ,
+				A.[aptrx_user_rev_dt]
+			 FROM aptrxmst A
+			 WHERE CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
+				 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
+				 AND A.aptrx_trans_type IN (''I'',''C'',''A'')
+
+			DELETE FROM aptrxmst
+			WHERE CONVERT(DATE, CAST(aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
+				 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
+				 AND aptrx_trans_type IN (''I'',''C'',''A'')
 	END
 	')
 END
