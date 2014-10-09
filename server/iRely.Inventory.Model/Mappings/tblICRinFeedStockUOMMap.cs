@@ -14,8 +14,12 @@ namespace iRely.Inventory.Model
             this.ToTable("tblICRinFeedStockUOM");
             this.Property(t => t.intRinFeedStockUOMId).HasColumnName("intRinFeedStockUOMId");
             this.Property(t => t.intSort).HasColumnName("intSort");
-            this.Property(t => t.strRinFeedStockUOM).HasColumnName("strRinFeedStockUOM");
+            this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
             this.Property(t => t.strRinFeedStockUOMCode).HasColumnName("strRinFeedStockUOMCode");
+
+            this.HasOptional(p => p.tblICUnitMeasure)
+                .WithMany(p => p.tblICRinFeedStockUOMs)
+                .HasForeignKey(p => p.intUnitMeasureId);
         }
     }
 }

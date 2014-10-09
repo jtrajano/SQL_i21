@@ -15,6 +15,10 @@
 
 Ext.define('Inventory.view.FeedStockUomViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.feedstockuom'
+    alias: 'viewmodel.feedstockuom',
+
+    requires: [
+        'Inventory.view.override.FeedStockUomViewModel'
+    ]
 
 });

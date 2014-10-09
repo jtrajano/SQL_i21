@@ -26,7 +26,7 @@ Ext.define('Inventory.view.FeedStockUom', {
         'Ext.toolbar.Separator',
         'Ext.grid.Panel',
         'Ext.grid.column.Column',
-        'Ext.form.field.Text',
+        'Ext.form.field.ComboBox',
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
         'Ext.grid.plugin.CellEditing'
@@ -149,13 +149,44 @@ Ext.define('Inventory.view.FeedStockUom', {
                                 columns: [
                                     {
                                         xtype: 'gridcolumn',
+                                        dataIndex: 'string',
                                         itemId: 'colUOM',
                                         width: 82,
-                                        dataIndex: 'string',
                                         text: 'UOM',
                                         flex: 1,
                                         editor: {
-                                            xtype: 'textfield'
+                                            xtype: 'gridcombobox',
+                                            columns: [
+                                                {
+                                                    dataIndex: 'intUnitMeasureId',
+                                                    dataType: 'numeric',
+                                                    text: 'Unit Of Measure ID',
+                                                    hidden: true
+                                                },
+                                                {
+                                                    dataIndex: 'strUnitMeasure',
+                                                    dataType: 'string',
+                                                    text: 'Unit Measure',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    dataIndex: 'strUnitType',
+                                                    dataType: 'string',
+                                                    text: 'Unit Type',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    dataIndex: 'ysnDefault',
+                                                    dataType: 'boolean',
+                                                    text: 'Default',
+                                                    flex: 1
+                                                }
+                                            ],
+                                            displayField: 'strUnitMeasure',
+                                            valueField: 'intUnitMeasureId',
+                                            bind: {
+                                                store: '{UnitMeasure}'
+                                            }
                                         }
                                     },
                                     {

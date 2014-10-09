@@ -2,7 +2,7 @@ Ext.define('Inventory.view.override.FeedStockUomViewController', {
     override: 'Inventory.view.FeedStockUomViewController',
     config: {
         binding: {
-            colUOM : 'strRinFeedStockUOM',
+            colUOM : 'intUnitMeasureId',
             colUOMCode : 'strRinFeedStockUOMCode'
         }
     },

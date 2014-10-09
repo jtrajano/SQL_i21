@@ -239,14 +239,61 @@
                             "designerId": "efcf1de1-930f-469c-a781-93ea77b6eed6",
                             "cn": [
                                 {
-                                    "type": "Ext.form.field.Text",
+                                    "type": "Ext.form.field.ComboBox",
                                     "reference": {
                                         "name": "editor",
                                         "type": "object"
                                     },
                                     "codeClass": null,
-                                    "name": "MyTextField2",
-                                    "designerId": "f1284d37-17ef-4c0c-858f-e61fc8b8df61"
+                                    "userConfig": {
+                                        "columns": [
+                                            "[",
+                                            "{",
+                                            "dataIndex: 'intUnitMeasureId',",
+                                            "dataType: 'numeric',",
+                                            "text: 'Unit Of Measure ID',",
+                                            "hidden: true",
+                                            "},",
+                                            "{",
+                                            "dataIndex: 'strUnitMeasure',",
+                                            "dataType: 'string',",
+                                            "text: 'Unit Measure',",
+                                            "flex: 1",
+                                            "},",
+                                            "{",
+                                            "dataIndex: 'strUnitType',",
+                                            "dataType: 'string',",
+                                            "text: 'Unit Type',",
+                                            "flex: 1",
+                                            "},",
+                                            "{",
+                                            "dataIndex: 'ysnDefault',",
+                                            "dataType: 'boolean',",
+                                            "text: 'Default',",
+                                            "flex: 1",
+                                            "}",
+                                            "]"
+                                        ],
+                                        "designer|createAlias": "gridcombobox",
+                                        "displayField": "strUnitMeasure",
+                                        "store": [
+                                            "{UnitMeasure}"
+                                        ],
+                                        "valueField": "intUnitMeasureId"
+                                    },
+                                    "name": "MyComboBox20",
+                                    "configAlternates": {
+                                        "store": "binding",
+                                        "columns": "array"
+                                    },
+                                    "designerId": "f1284d37-17ef-4c0c-858f-e61fc8b8df61",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "columns",
+                                            "type": "string"
+                                        }
+                                    ]
                                 }
                             ]
                         },
