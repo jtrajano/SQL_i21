@@ -15,5 +15,9 @@
 
 Ext.define('Inventory.view.ContractDocumentViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.contractdocument'
+    alias: 'controller.contractdocument',
+
+    requires: [
+        'Inventory.view.override.ContractDocumentViewController'
+    ]
 });

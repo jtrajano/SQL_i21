@@ -15,6 +15,10 @@
 
 Ext.define('Inventory.view.ContractDocumentViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.contractdocument'
+    alias: 'viewmodel.contractdocument',
+
+    requires: [
+        'Inventory.view.override.ContractDocumentViewModel'
+    ]
 
 });

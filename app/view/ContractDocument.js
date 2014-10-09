@@ -173,10 +173,38 @@ Ext.define('Inventory.view.ContractDocument', {
                         },
                         {
                             xtype: 'gridcombobox',
+                            columns: [
+                                {
+                                    dataIndex: 'intDocumentId',
+                                    dataType: 'numeric',
+                                    text: 'Document Id',
+                                    hidden: true
+                                },
+                                {
+                                    dataIndex: 'strDocumentName',
+                                    dataType: 'string',
+                                    text: 'Document Name',
+                                    flex: 1
+                                },
+                                {
+                                    dataIndex: 'strDescription',
+                                    dataType: 'string',
+                                    text: 'Description',
+                                    flex: 1
+                                },
+                                {
+                                    dataIndex: 'ysnStandard',
+                                    dataType: 'boolean',
+                                    text: 'Standard',
+                                    flex: 1
+                                }
+                            ],
                             itemId: 'cboCommodity',
                             width: 170,
                             fieldLabel: 'Commodity',
-                            labelWidth: 105
+                            labelWidth: 105,
+                            displayField: 'strDocumentName',
+                            valueField: 'intDocumentId'
                         },
                         {
                             xtype: 'checkboxfield',

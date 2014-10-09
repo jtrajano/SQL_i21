@@ -309,9 +309,37 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "columns": [
+                                    "[",
+                                    "{",
+                                    "dataIndex: 'intDocumentId',",
+                                    "dataType: 'numeric',",
+                                    "text: 'Document Id',",
+                                    "hidden: true",
+                                    "},",
+                                    "{",
+                                    "dataIndex: 'strDocumentName',",
+                                    "dataType: 'string',",
+                                    "text: 'Document Name',",
+                                    "flex: 1",
+                                    "},",
+                                    "{",
+                                    "dataIndex: 'strDescription',",
+                                    "dataType: 'string',",
+                                    "text: 'Description',",
+                                    "flex: 1",
+                                    "},",
+                                    "{",
+                                    "dataIndex: 'ysnStandard',",
+                                    "dataType: 'boolean',",
+                                    "text: 'Standard',",
+                                    "flex: 1",
+                                    "}",
+                                    "]"
+                                ],
                                 "designer|createAlias": "gridcombobox",
                                 "designer|displayName": null,
-                                "displayField": null,
+                                "displayField": "strDocumentName",
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Commodity",
                                 "itemId": "cboCommodity",
@@ -323,11 +351,21 @@
                                 "maxLength": null,
                                 "name": null,
                                 "tabIndex": null,
-                                "valueField": null,
+                                "valueField": "intDocumentId",
                                 "width": 170
                             },
                             "name": "MyComboBox66",
-                            "designerId": "849a6ddf-b4b4-4d01-939e-8d31ed9aa315"
+                            "configAlternates": {
+                                "columns": "array"
+                            },
+                            "designerId": "849a6ddf-b4b4-4d01-939e-8d31ed9aa315",
+                            "customConfigs": [
+                                {
+                                    "group": "(Custom Properties)",
+                                    "name": "columns",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.form.field.Checkbox",
@@ -364,7 +402,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging18",
+                    "name": "statusbarpaging12",
                     "designerId": "402098fb-f9d8-4138-b21f-ad603c46de1f",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
