@@ -21,7 +21,7 @@
 			,ysni21User = 1
 			,imgPhoto = null
 			,intConcurrencyId = 1
-			,strFullName2 = us.strFullName
+			,strFullName2 = (select top 1 strName from tblEntity where intEntityId = us.intEntityId)
 		from
 			tblSMUserSecurity us,
 			tblSMUserRole ur
