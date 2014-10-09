@@ -228,7 +228,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter",
+                                    "name": "filter20",
                                     "designerId": "1c51bbf4-69ba-4770-a731-1f09cb4d80e1",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -244,10 +244,23 @@
                             "userConfig": {
                                 "dataIndex": "string",
                                 "flex": 1,
+                                "itemId": "colBrandCode",
                                 "text": "Brand Code"
                             },
                             "name": "MyColumn145",
-                            "designerId": "13e22819-5112-40a7-b4be-f3af0869edf7"
+                            "designerId": "13e22819-5112-40a7-b4be-f3af0869edf7",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "editor",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "name": "MyTextField13",
+                                    "designerId": "47712dac-4698-42bc-b342-3cf8f2e2cb92"
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.grid.column.Column",
@@ -259,10 +272,23 @@
                             "userConfig": {
                                 "dataIndex": "string",
                                 "flex": 1,
+                                "itemId": "colBrandName",
                                 "text": "Brand Name"
                             },
                             "name": "MyColumn146",
-                            "designerId": "38b83aca-6af7-459b-8328-eac7c8e04b27"
+                            "designerId": "38b83aca-6af7-459b-8328-eac7c8e04b27",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "editor",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "name": "MyTextField14",
+                                    "designerId": "599010eb-bf5f-4df8-b369-68040bb00df3"
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.grid.column.Column",
@@ -274,11 +300,65 @@
                             "userConfig": {
                                 "dataIndex": "string",
                                 "flex": 1,
+                                "itemId": "colManufacturer",
                                 "text": "Manufacturer",
                                 "width": null
                             },
                             "name": "MyColumn147",
-                            "designerId": "c377fb54-8e73-4085-a2e5-dc691fab8769"
+                            "designerId": "c377fb54-8e73-4085-a2e5-dc691fab8769",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.ComboBox",
+                                    "reference": {
+                                        "name": "editor",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "columns": [
+                                            "[",
+                                            "{",
+                                            "dataIndex: 'intManufacturerId',",
+                                            "dataType: 'numeric',",
+                                            "text: 'Manufacturer ID',",
+                                            "hidden: true",
+                                            "},",
+                                            "{",
+                                            "dataIndex: 'strManufacturer',",
+                                            "dataType: 'string',",
+                                            "text: 'Manufacturer',",
+                                            "flex: 1",
+                                            "},",
+                                            "{",
+                                            "dataIndex: 'strContact',",
+                                            "dataType: 'string',",
+                                            "text: 'Contact',",
+                                            "flex: 1",
+                                            "}",
+                                            "]"
+                                        ],
+                                        "designer|createAlias": "gridcombobox",
+                                        "displayField": "strManufacturer",
+                                        "store": [
+                                            "{Manufacturer}"
+                                        ],
+                                        "valueField": "intManufacturerId"
+                                    },
+                                    "name": "MyComboBox14",
+                                    "configAlternates": {
+                                        "columns": "array",
+                                        "store": "binding"
+                                    },
+                                    "designerId": "b5a607dd-72cf-4c61-b5f9-02fee6e3639a",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "columns",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.grid.View",
@@ -302,6 +382,21 @@
                             "codeClass": "Ext.selection.CheckboxModel",
                             "name": "MyCheckboxSelectionModel30",
                             "designerId": "c3645c6b-c07a-44c3-9230-1a87bd081364"
+                        },
+                        {
+                            "type": "Ext.grid.plugin.CellEditing",
+                            "reference": {
+                                "name": "plugins",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "clicksToEdit": 1,
+                                "designer|displayName": "cepBrand",
+                                "pluginId": "cepBrand"
+                            },
+                            "name": "MyCellEditingPlugin2",
+                            "designerId": "201415c9-0e99-46e5-9154-7beb45a3e73c"
                         }
                     ]
                 },
@@ -316,7 +411,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbar11",
+                    "name": "statusbar1",
                     "designerId": "aa1b3bed-a24a-490a-84c3-1b5ea5f8a84f",
                     "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
                 }

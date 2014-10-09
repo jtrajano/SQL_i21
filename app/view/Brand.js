@@ -27,8 +27,10 @@ Ext.define('Inventory.view.Brand', {
         'Ext.toolbar.Separator',
         'Ext.grid.Panel',
         'Ext.grid.column.Column',
+        'Ext.form.field.ComboBox',
         'Ext.grid.View',
-        'Ext.selection.CheckboxModel'
+        'Ext.selection.CheckboxModel',
+        'Ext.grid.plugin.CellEditing'
     ],
 
     viewModel: {
@@ -151,21 +153,58 @@ Ext.define('Inventory.view.Brand', {
                                 columns: [
                                     {
                                         xtype: 'gridcolumn',
+                                        itemId: 'colBrandCode',
                                         dataIndex: 'string',
                                         text: 'Brand Code',
-                                        flex: 1
+                                        flex: 1,
+                                        editor: {
+                                            xtype: 'textfield'
+                                        }
                                     },
                                     {
                                         xtype: 'gridcolumn',
+                                        itemId: 'colBrandName',
                                         dataIndex: 'string',
                                         text: 'Brand Name',
-                                        flex: 1
+                                        flex: 1,
+                                        editor: {
+                                            xtype: 'textfield'
+                                        }
                                     },
                                     {
                                         xtype: 'gridcolumn',
+                                        itemId: 'colManufacturer',
                                         dataIndex: 'string',
                                         text: 'Manufacturer',
-                                        flex: 1
+                                        flex: 1,
+                                        editor: {
+                                            xtype: 'gridcombobox',
+                                            columns: [
+                                                {
+                                                    dataIndex: 'intManufacturerId',
+                                                    dataType: 'numeric',
+                                                    text: 'Manufacturer ID',
+                                                    hidden: true
+                                                },
+                                                {
+                                                    dataIndex: 'strManufacturer',
+                                                    dataType: 'string',
+                                                    text: 'Manufacturer',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    dataIndex: 'strContact',
+                                                    dataType: 'string',
+                                                    text: 'Contact',
+                                                    flex: 1
+                                                }
+                                            ],
+                                            displayField: 'strManufacturer',
+                                            valueField: 'intManufacturerId',
+                                            bind: {
+                                                store: '{Manufacturer}'
+                                            }
+                                        }
                                     }
                                 ],
                                 viewConfig: {
@@ -173,7 +212,14 @@ Ext.define('Inventory.view.Brand', {
                                 },
                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                     selType: 'checkboxmodel'
-                                })
+                                }),
+                                plugins: [
+                                    {
+                                        ptype: 'cellediting',
+                                        pluginId: 'cepBrand',
+                                        clicksToEdit: 1
+                                    }
+                                ]
                             }
                         ]
                     }

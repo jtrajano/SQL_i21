@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="Category.cs" />
     <Compile Include="Commodity.cs" />
+    <Compile Include="Brand.cs" />
     <Compile Include="FuelType.cs" />
     <Compile Include="Manufacturer.cs" />
     <Compile Include="RinFeedStockUOM.cs" />

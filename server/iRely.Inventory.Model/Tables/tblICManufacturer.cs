@@ -23,5 +23,7 @@ namespace iRely.Inventory.Model
         public string strWebsite { get; set; }
         public string strEmail { get; set; }
         public string strNotes { get; set; }
+
+        public ICollection<tblICBrand> tblICBrands { get; set; }
     }
 }
