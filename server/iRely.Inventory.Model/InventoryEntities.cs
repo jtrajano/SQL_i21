@@ -135,6 +135,12 @@ namespace iRely.Inventory.Model
         public DbSet<tblICTag> tblICTags { get; set; }
         public DbSet<tblICUnitMeasure> tblICUnitMeasures { get; set; }
         public DbSet<tblICUnitType> tblICUnitTypes { get; set; }
+
+        public DbSet<tblICInventoryReceipt> tblICInventoryReceipts { get; set; }
+        public DbSet<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
+        public DbSet<tblICInventoryReceiptItemLot> tblICInventoryReceiptItemLots { get; set; }
+        public DbSet<tblICInventoryReceiptItemTax> tblICInventoryReceiptItemTaxes { get; set; }
+        public DbSet<tblICInventoryReceiptInspection> tblICInventoryReceiptInspections { get; set; }
         
         
         protected override void OnModelCreating(DbModelBuilder modelBuilder) 
@@ -184,6 +190,13 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICTagMap());
             modelBuilder.Configurations.Add(new tblICUnitMeasureMap());
             modelBuilder.Configurations.Add(new tblICUnitTypeMap());
+
+            modelBuilder.Configurations.Add(new tblICInventoryReceiptMap());
+            modelBuilder.Configurations.Add(new tblICInventoryReceiptItemMap());
+            modelBuilder.Configurations.Add(new tblICInventoryReceiptItemLotMap());
+            modelBuilder.Configurations.Add(new tblICInventoryReceiptItemTaxMap());
+            modelBuilder.Configurations.Add(new tblICInventoryReceiptInspectionMap());
+
         }
     }
 }

@@ -479,7 +479,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "designer|createAlias": null,
-                                                "displayField": null,
+                                                "displayField": "strDescription",
                                                 "fieldLabel": "Receipt Type",
                                                 "itemId": "cboReceiptType",
                                                 "labelAlign": "top",
@@ -488,7 +488,7 @@
                                                 "layout|margins": null,
                                                 "margin": null,
                                                 "name": null,
-                                                "valueField": null,
+                                                "valueField": "strDescription",
                                                 "width": null
                                             },
                                             "name": "MyComboBox8",
@@ -979,6 +979,7 @@
                                                     "userConfig": {
                                                         "alwaysDisplayDecimals": null,
                                                         "designer|createAlias": null,
+                                                        "displayField": "strDescription",
                                                         "fieldLabel": "Allocate Freight",
                                                         "hideTrigger": null,
                                                         "itemId": "cboAllocateFreight",
@@ -986,6 +987,7 @@
                                                         "layout|flex": null,
                                                         "layout|margins": null,
                                                         "name": null,
+                                                        "valueField": "strDescription",
                                                         "width": null
                                                     },
                                                     "name": "MyComboBox1",
@@ -1011,6 +1013,7 @@
                                                     "userConfig": {
                                                         "alwaysDisplayDecimals": null,
                                                         "designer|createAlias": null,
+                                                        "displayField": "strDescription",
                                                         "fieldLabel": "Freight Billed By",
                                                         "hideTrigger": null,
                                                         "itemId": "cboFreightBilledBy",
@@ -1018,6 +1021,7 @@
                                                         "layout|flex": null,
                                                         "layout|margins": null,
                                                         "name": null,
+                                                        "valueField": "strDescription",
                                                         "width": null
                                                     },
                                                     "name": "MyComboBox4",
@@ -1179,7 +1183,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter2",
+                                                    "name": "filter5",
                                                     "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1599,7 +1603,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter3",
+                                                    "name": "filter6",
                                                     "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2099,7 +2103,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter4",
+                                                    "name": "filter7",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2222,6 +2226,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "displayField": "strDescription",
                                                 "fieldLabel": "Calculation Basis",
                                                 "itemId": "cboCalculationBasis",
                                                 "labelWidth": 130,
@@ -2229,6 +2234,7 @@
                                                 "layout|margins": null,
                                                 "name": null,
                                                 "readOnly": null,
+                                                "valueField": "strDescription",
                                                 "width": null
                                             },
                                             "name": "MyComboBox5",
@@ -2634,6 +2640,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "designer|createAlias": null,
+                                                "displayField": "strDescription",
                                                 "fieldLabel": "\tSeal Status",
                                                 "itemId": "cboSealStatus",
                                                 "labelWidth": 145,
@@ -2641,6 +2648,7 @@
                                                 "layout|margins": null,
                                                 "name": null,
                                                 "readOnly": null,
+                                                "valueField": "strDescription",
                                                 "width": null
                                             },
                                             "name": "MyComboBox13",
@@ -2871,7 +2879,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter5",
+                                                    "name": "filter8",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3284,8 +3292,10 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "fieldLabel": "Receipt Number",
+                                                "itemId": "txtTDReceiptNumber",
                                                 "labelWidth": 95,
-                                                "layout|flex": 1
+                                                "layout|flex": 1,
+                                                "readOnly": true
                                             },
                                             "name": "MyTextField18",
                                             "designerId": "eaf5d3cc-63ee-44b8-ba5c-2a01088eae22"
@@ -3299,9 +3309,11 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "fieldLabel": "Item Line No",
+                                                "itemId": "txtTDLineNo",
                                                 "labelWidth": 80,
                                                 "layout|flex": 1,
-                                                "margin": "0 5"
+                                                "margin": "0 5",
+                                                "readOnly": true
                                             },
                                             "name": "MyTextField19",
                                             "designerId": "d2d912cf-4b98-4e01-b740-af45dc51074c"
@@ -3315,8 +3327,10 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "fieldLabel": "Item ID",
+                                                "itemId": "txtTDItemId",
                                                 "labelWidth": 50,
-                                                "layout|flex": 1
+                                                "layout|flex": 1,
+                                                "readOnly": true
                                             },
                                             "name": "MyTextField20",
                                             "designerId": "36aff5ad-0b40-4e65-a672-00dedbec354f"
@@ -3330,9 +3344,11 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "fieldLabel": "Total",
+                                                "itemId": "txtTDTotal",
                                                 "labelWidth": 40,
                                                 "layout|flex": 1,
-                                                "margin": "0 0 0 5"
+                                                "margin": "0 0 0 5",
+                                                "readOnly": true
                                             },
                                             "name": "MyTextField21",
                                             "designerId": "a565a15d-76b2-4be1-9a93-965d77a311aa"
@@ -3412,7 +3428,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter6",
+                                                    "name": "filter9",
                                                     "designerId": "4228a31b-bb4e-45e0-9af0-fd9778808126",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3599,7 +3615,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging11",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

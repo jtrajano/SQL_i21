@@ -97,7 +97,7 @@ Ext.define('Inventory.model.Item', {
         { name: 'ysnTaxable', type: 'boolean'},
         { name: 'strKeywords', type: 'string'},
         { name: 'dblCaseQty', type: 'float'},
-        { name: 'dtmDateShip', type: 'date'},
+        { name: 'dtmDateShip', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d'},
         { name: 'dblTaxExempt', type: 'float'},
         { name: 'ysnDropShip', type: 'boolean'},
         { name: 'ysnCommisionable', type: 'boolean'},

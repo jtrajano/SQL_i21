@@ -1,29 +1,29 @@
 /**
- * Created by LZabala on 9/11/2014.
+ * Created by LZabala on 10/10/2014.
  */
-Ext.define('Inventory.store.Item', {
+Ext.define('Inventory.store.Receipt', {
     extend: 'Ext.data.Store',
-    alias: 'store.inventoryitem',
+    alias: 'store.inventoryreceipt',
 
     requires: [
-        'Inventory.model.Item'
+        'Inventory.model.Receipt'
     ],
 
     constructor: function(cfg) {
         var me = this;
         cfg = cfg || {};
         me.callParent([Ext.apply({
-            model: 'Inventory.model.Item',
-            storeId: 'Item',
+            model: 'Inventory.model.Receipt',
+            storeId: 'Receipt',
             pageSize: 50,
             batchActions: true,
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Item/GetItems',
-                    update: '../Inventory/api/Item/PutItems',
-                    create: '../Inventory/api/Item/PostItems',
-                    destroy: '../Inventory/api/Item/DeleteItems'
+                    read: '../Inventory/api/Receipt/GetReceipts',
+                    update: '../Inventory/api/Receipt/PutReceipts',
+                    create: '../Inventory/api/Receipt/PostReceipts',
+                    destroy: '../Inventory/api/Receipt/DeleteReceipts'
                 },
                 reader: {
                     type: 'json',

@@ -17,7 +17,7 @@ Ext.define('Inventory.model.CertificationCommodity', {
         { name: 'intCurrencyId', type: 'int'},
         { name: 'dblCertificationPremium', type: 'float'},
         { name: 'intUnitMeasureId', type: 'int'},
-        { name: 'dtmDateEffective', type: 'date'},
+        { name: 'dtmDateEffective', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d'},
         { name: 'intSort', type: 'int'}
     ]
 });

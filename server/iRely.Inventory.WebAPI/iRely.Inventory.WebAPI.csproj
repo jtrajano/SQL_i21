@@ -142,6 +142,7 @@
     <Compile Include="Controllers\DocumentController.cs" />
     <Compile Include="Controllers\FuelTypeController.cs" />
     <Compile Include="Controllers\ManufacturerController.cs" />
+    <Compile Include="Controllers\ReceiptController.cs" />
     <Compile Include="Controllers\RinFeedStockUOMController.cs" />
     <Compile Include="Controllers\RinFeedStockController.cs" />
     <Compile Include="Controllers\RinProcessController.cs" />

@@ -28,6 +28,6 @@ Ext.define('Inventory.model.CategoryStore', {
         { name: 'dblCostInventoryBOM', type: 'float'},
         { name: 'dblLowGrossMarginAlert', type: 'float'},
         { name: 'dblHighGrossMarginAlert', type: 'float'},
-        { name: 'dtmLastInventoryLevelEntry', type: 'date'},
+        { name: 'dtmLastInventoryLevelEntry', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d'},
     ]
 });
