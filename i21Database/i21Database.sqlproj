@@ -726,6 +726,9 @@
     <Build Include="dbo\Tables\tblICInventoryReceiptItem.sql" />
     <Build Include="dbo\Tables\tblPOPurchase.sql" />
     <Build Include="dbo\Tables\tblPOPurchaseDetail.sql" />
+    <Build Include="dbo\Tables\tblICInventoryReceipttemLot.sql" />
+    <Build Include="dbo\Tables\tblICInventoryReceiptInspection.sql" />
+    <Build Include="dbo\Tables\tblICInventoryReceiptItemTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

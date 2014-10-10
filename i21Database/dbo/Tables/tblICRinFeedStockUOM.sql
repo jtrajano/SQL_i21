@@ -1,11 +1,12 @@
 ﻿CREATE TABLE [dbo].[tblICRinFeedStockUOM]
 (
 	[intRinFeedStockUOMId] INT NOT NULL IDENTITY, 
-    [strRinFeedStockUOM] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [intUnitMeasureId] INT NULL, 
     [strRinFeedStockUOMCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
-    CONSTRAINT [PK_tblICRinFeedStockUOM] PRIMARY KEY ([intRinFeedStockUOMId])
+    CONSTRAINT [PK_tblICRinFeedStockUOM] PRIMARY KEY ([intRinFeedStockUOMId]), 
+    CONSTRAINT [FK_tblICRinFeedStockUOM_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
 )
 
 GO
@@ -25,7 +26,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblICRinFeedStockUOM',
     @level2type = N'COLUMN',
-    @level2name = N'strRinFeedStockUOM'
+    @level2name = 'intUnitMeasureId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'RIN Feed Stock Unit of Measure Code',
