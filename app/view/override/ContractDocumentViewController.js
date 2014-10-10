@@ -16,10 +16,13 @@ Ext.define('Inventory.view.override.ContractDocumentViewController', {
             ]
         },
         binding: {
-            txtTagNumber: '{current.strTagNumber}',
+            txtDocumentName: '{current.strDocumentName}',
             txtDescription: '{current.strDescription}',
-            chkHAZMATMessage: '{current.ysnHazMat}',
-            txtMessage: '{current.strMessage}'
+            cboCommodity: {
+                value: '{current.intCommodityId}',
+                store: '{Commodity}'
+            },
+            chkStandard: '{current.ysnStandard}'
         }
     },
 

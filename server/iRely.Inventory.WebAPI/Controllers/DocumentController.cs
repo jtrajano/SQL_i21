@@ -22,7 +22,7 @@ namespace iRely.Invetory.WebAPI.Controllers
         private Document _DocumentBRL = new Document();
 
         [HttpGet]
-        public HttpResponseMessage SearchBrands(int page, int start, int limit, string columns = "", string sort = "", string filter = "")
+        public HttpResponseMessage SearchDocuments(int page, int start, int limit, string columns = "", string sort = "", string filter = "")
         {
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);

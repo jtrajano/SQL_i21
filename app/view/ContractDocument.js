@@ -175,15 +175,15 @@ Ext.define('Inventory.view.ContractDocument', {
                             xtype: 'gridcombobox',
                             columns: [
                                 {
-                                    dataIndex: 'intDocumentId',
+                                    dataIndex: 'intCommodityId',
                                     dataType: 'numeric',
-                                    text: 'Document Id',
+                                    text: 'Commodity Id',
                                     hidden: true
                                 },
                                 {
-                                    dataIndex: 'strDocumentName',
+                                    dataIndex: 'strCommodityCode',
                                     dataType: 'string',
-                                    text: 'Document Name',
+                                    text: 'Commodity Code',
                                     flex: 1
                                 },
                                 {
@@ -191,20 +191,14 @@ Ext.define('Inventory.view.ContractDocument', {
                                     dataType: 'string',
                                     text: 'Description',
                                     flex: 1
-                                },
-                                {
-                                    dataIndex: 'ysnStandard',
-                                    dataType: 'boolean',
-                                    text: 'Standard',
-                                    flex: 1
                                 }
                             ],
                             itemId: 'cboCommodity',
                             width: 170,
                             fieldLabel: 'Commodity',
                             labelWidth: 105,
-                            displayField: 'strDocumentName',
-                            valueField: 'intDocumentId'
+                            displayField: 'strCommodityCode',
+                            valueField: 'intCommodityId'
                         },
                         {
                             xtype: 'checkboxfield',
