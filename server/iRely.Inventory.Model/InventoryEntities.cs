@@ -15,12 +15,6 @@ namespace iRely.Inventory.Model
 {
     public partial class InventoryEntities : DbContext
     {
-        public InventoryEntities(bool basicAuthorization)
-            : base(GetConnectionString())
-        { 
-
-        }
-
         public InventoryEntities(string connectionString)
             : base(connectionString)
         {
@@ -28,6 +22,7 @@ namespace iRely.Inventory.Model
         }
 
         public InventoryEntities()
+            : base(GetConnectionString())
         {
 
         }
