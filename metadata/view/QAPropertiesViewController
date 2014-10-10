@@ -1,0 +1,14 @@
+{
+    "type": "Ext.app.ViewController",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "designer|userAlias": "qaproperties",
+        "designer|userClassName": "QAPropertiesViewController"
+    },
+    "name": "QATestViewController1",
+    "designerId": "a5bf1df4-0eab-425c-8462-a0522e825951"
+}
