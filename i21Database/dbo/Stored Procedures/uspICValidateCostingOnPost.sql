@@ -2,8 +2,8 @@
 	Used to validate the items when doing a post.
 */
 
-CREATE PROCEDURE [dbo].[uspICItemCostingPostValidation]
-	@ItemCosting ItemCostingTableType READONLY
+CREATE PROCEDURE [dbo].[uspICValidateCostingOnPost]
+	@ItemsToValidate ItemCostingTableType READONLY
 AS
 
 SET QUOTED_IDENTIFIER OFF

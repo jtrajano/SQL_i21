@@ -3,7 +3,7 @@
 	The original error information is used to construct the msg_str for RAISERROR. 
 */
 
-CREATE PROCEDURE [dbo].[uspICItemCostingErrorHandler]
+CREATE PROCEDURE [dbo].[uspICFoundCostingErrors]
 AS
 
 	-- Return if there is no error information to retrieve. 
