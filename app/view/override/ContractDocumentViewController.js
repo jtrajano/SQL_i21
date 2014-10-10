@@ -12,7 +12,7 @@ Ext.define('Inventory.view.override.ContractDocumentViewController', {
                 {dataIndex: 'intDocumentId',text: "Document Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
                 {dataIndex: 'strDocumentName', text: 'Document Name', flex: 1,  dataType: 'string'},
                 {dataIndex: 'strDescription', text: 'Description', flex: 1,  dataType: 'string'},
-                {dataIndex: 'ysnStandard',text: 'Standard', flex: 1,  dataType: 'boolean'}
+                {dataIndex: 'ysnStandard',text: 'Standard', flex: 1,  dataType: 'boolean', xtype: 'checkcolumn'}
             ]
         },
         binding: {
