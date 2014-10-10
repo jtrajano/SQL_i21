@@ -2,9 +2,10 @@
 	Used to reverse the stocks from a posted transaction.
 */
 
-CREATE PROCEDURE [dbo].[uspICItemCostingReversal]
-	@intTransactionId INT,
-	@intTransactionTypeId INT
+CREATE PROCEDURE [dbo].[uspICUnpostCosting]
+	@strBatchId AS NVARCHAR(20)
+	,@intTransactionId INT
+	,@intTransactionTypeId INT
 AS
 
 SET QUOTED_IDENTIFIER OFF

@@ -2,7 +2,7 @@
 	Used to validate the items when doing an unpost.
 */
 
-CREATE PROCEDURE [dbo].[uspICItemCostingUnPostValidation]
+CREATE PROCEDURE [dbo].[uspICValidateCostingOnUnpost]
 	@intTransactionId INT,
 	@intTransactionTypeId INT
 AS
