@@ -16,7 +16,7 @@
     [ysnPymtCtrlEFTActive]      BIT            DEFAULT 0 NOT NULL,
     [ysnPymtCtrlHold]           BIT            DEFAULT 0 NOT NULL,
     [ysnWithholding]            BIT            NOT NULL,
-    [dblCreditLimit]            FLOAT (53)     NOT NULL,
+    [dblCreditLimit]            NUMERIC(18, 6)     NOT NULL,
     [intCreatedUserId]          INT            NULL,
     [intLastModifiedUserId]     INT            NULL,
     [dtmLastModified]           DATETIME       NULL,
