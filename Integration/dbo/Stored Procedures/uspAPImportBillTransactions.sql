@@ -448,12 +448,12 @@ BEGIN
 				ON A.aptrx_cbk_no = B.apcbk_no
 			INNER JOIN tblAPVendor D
 				ON A.aptrx_vnd_no = D.strVendorId COLLATE Latin1_General_CS_AS
-            LEFT JOIN tblAPaptrxmst C
-                ON A.aptrx_ivc_no = C.aptrx_ivc_no
+            --LEFT JOIN tblAPaptrxmst C
+            --    ON A.aptrx_ivc_no = C.aptrx_ivc_no
 		WHERE CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
 			 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
 			 AND A.aptrx_trans_type IN (''I'',''C'',''A'')
-			 AND C.aptrx_ivc_no IS NULL
+			 --AND C.aptrx_ivc_no IS NULL
 
 			--Posted
 --		UNION
