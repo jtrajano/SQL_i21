@@ -671,13 +671,12 @@
     <Build Include="dbo\Tables\tblICTag.sql" />
     <Build Include="dbo\Tables\tblICUnitMeasure.sql" />
     <Build Include="dbo\Tables\tblICUnitType.sql" />
-    <Build Include="dbo\Functions\fnGetItemCostingMethod.sql" />
     <Build Include="dbo\Tables\tblICInventoryTransaction.sql" />
     <Build Include="dbo\Tables\tblICInventoryStockSummary.sql" />
     <Build Include="dbo\Tables\tblICInventoryFIFO.sql" />
     <Build Include="dbo\Tables\tblICInventoryLIFO.sql" />
     <Build Include="dbo\Tables\tblICItemLocationStore.sql" />
-    <Build Include="dbo\Stored Procedures\uspICItemCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICProcessCosting.sql" />
     <Build Include="dbo\User Defined Types\ItemCostingTableType.sql" />
     <Build Include="dbo\Tables\tblICInventoryTransactionType.sql" />
     <None Include="Scripts\Post-Deployment\IC\1_InventoryTransactionTypes.sql" />
@@ -685,13 +684,11 @@
     <Build Include="dbo\Tables\tblPREmployeeEarningTax.sql" />
     <Build Include="dbo\Tables\tblICInventoryTransactionFIFO.sql" />
     <Build Include="dbo\Tables\tblICInventoryTransactionLIFO.sql" />
-    <Build Include="dbo\Stored Procedures\uspICItemCostingPostValidation.sql" />
-    <Build Include="dbo\Stored Procedures\uspICItemCostingUnPostValidation.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateCostingOnPost.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateCostingOnUnpost.sql" />
     <Build Include="dbo\Tables\tblICInventoryCostingResult.sql" />
-    <Build Include="dbo\Stored Procedures\uspICItemCostingIns.sql" />
-    <Build Include="dbo\Stored Procedures\uspICItemCostingOuts.sql" />
-    <Build Include="dbo\Stored Procedures\uspICItemCostingReversal.sql" />
-    <Build Include="dbo\Stored Procedures\uspICItemCostingErrorHandler.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFoundCostingErrors.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\1_ReportDisableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\2_ReportDeleteOldData.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\3_ReportEnableConstraints.sql" />
@@ -729,6 +726,10 @@
     <Build Include="dbo\Tables\tblICInventoryReceipttemLot.sql" />
     <Build Include="dbo\Tables\tblICInventoryReceiptInspection.sql" />
     <Build Include="dbo\Tables\tblICInventoryReceiptItemTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCosting.sql" />
+    <Build Include="dbo\Functions\fnGetCostingMethod.sql" />
+    <Build Include="dbo\Functions\fnGetItemGLAccounts.sql" />
+    <Build Include="dbo\Functions\fnGetNegativeInventoryOption.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

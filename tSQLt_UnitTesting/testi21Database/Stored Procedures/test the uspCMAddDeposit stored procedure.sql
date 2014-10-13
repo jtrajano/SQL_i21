@@ -42,8 +42,16 @@ BEGIN
 		@isAddSuccessful = @p7 OUTPUT
 
 	-- Assert
+	CREATE TABLE actual (
+		intBankAccountId INT
+		,dtmDate DATETIME
+		,dblAmount NUMERIC(18,6)
+		,strMemo NVARCHAR(255) COLLATE Latin1_General_CI_AS
+		,intCreatedUserId INT
+	)
+
+	INSERT actual
 	SELECT intBankAccountId, dtmDate, dblAmount, strMemo, intCreatedUserId
-	INTO actual 
 	FROM dbo.tblCMBankTransaction
 
 	CREATE TABLE expected (
@@ -58,17 +66,36 @@ BEGIN
 	 
 	EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 
+	CREATE TABLE actualDetail (
+		[intGLAccountId]	INT              NOT NULL,
+		[dblDebit]			DECIMAL (18, 6)  DEFAULT 0 NOT NULL,
+		[dblCredit]			DECIMAL (18, 6)  DEFAULT 0 NOT NULL
+	)
+
+	INSERT	actualDetail
 	SELECT	intGLAccountId, dblDebit, dblCredit
-	INTO	actualDetail
 	FROM	dbo.tblCMBankTransactionDetail
 
-	CREATE TABLE expectedDetail (
-		[intGLAccountId]         INT              NOT NULL,
-		[dblDebit]                DECIMAL (18, 6)  DEFAULT 0 NOT NULL,
-		[dblCredit]                DECIMAL (18, 6)  DEFAULT 0 NOT NULL
+	CREATE TABLE dbo.expectedDetail (
+		[intGLAccountId]	INT              NOT NULL,
+		[dblDebit]			DECIMAL (18, 6)  DEFAULT 0 NOT NULL,
+		[dblCredit]			DECIMAL (18, 6)  DEFAULT 0 NOT NULL
 	)
 
 	INSERT INTO expectedDetail (intGLAccountId, dblDebit, dblCredit) SELECT @p3, 0, 496.88
 
 	EXEC tSQLt.AssertEqualsTable 'expectedDetail', 'actualDetail';
+
+	-- Clean-up: remove the tables used in the unit test
+	IF OBJECT_ID('actual') IS NOT NULL 
+		DROP TABLE actual
+
+	IF OBJECT_ID('actualDetail') IS NOT NULL 
+		DROP TABLE actualDetail
+
+	IF OBJECT_ID('expected') IS NOT NULL 
+		DROP TABLE dbo.expected
+	
+	IF OBJECT_ID('expectedDetail') IS NOT NULL 
+		DROP TABLE dbo.expectedDetail
 END 
