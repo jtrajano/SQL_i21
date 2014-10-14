@@ -3,6 +3,7 @@
  */
 Ext.define('Inventory.store.ProcessCode', {
     extend: 'Ext.data.Store',
+    alias: 'store.inventoryprocesscode',
 
     requires: [
         'Inventory.model.ProcessCode'

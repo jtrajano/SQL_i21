@@ -17,7 +17,7 @@ Ext.define('Inventory.model.ProcessCode', {
         { name: 'intSort', type: 'int'}
     ],
 
-    validations: [
+    validators: [
         {type: 'presence', field: 'strRinProcessCode'}
     ]
 });
