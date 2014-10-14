@@ -642,5 +642,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\HD\DefaultData\1_StatusData.sql" />
+    <None Include="Scripts\Post-Deployment\HD\HDEntryDataFix.sql" />
   </ItemGroup>
 </Project>

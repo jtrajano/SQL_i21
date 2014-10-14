@@ -81,6 +81,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 --Help Desk
 :R .\HD\DefaultData\1_StatusData.sql
+:R .\HD\HDEntryDataFix.sql
 
 
 print 'END POST DEPLOYMENT'
