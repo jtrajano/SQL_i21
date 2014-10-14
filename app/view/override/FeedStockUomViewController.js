@@ -13,15 +13,21 @@ Ext.define('Inventory.view.override.FeedStockUomViewController', {
             win = options.window,
             store = Ext.create('Inventory.store.FeedStockUom', { pageSize: 1 });
 
+        var grdFeedStockUom = win.down('#grdFeedStockUom');
+
         win.context = Ext.create('iRely.mvvm.Engine', {
             binding: me.config.binding,
             window : win,
             store  : store,
             singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
-                grid:  win.down('#grdFeedStockUom'),
+                grid:  grdFeedStockUom,
                 deleteButton: win.down('#btnDeleteFeedStockUom')
             })
         });
+
+
+        var colUom = grdFeedStockUom.columns[0];
+        colUom.renderer = me.UomRenderer;
 
         return win.context;
     },
@@ -51,6 +57,11 @@ Ext.define('Inventory.view.override.FeedStockUomViewController', {
                 });
             }
         }
+    },
+
+    UomRenderer: function (value, metadata, record) {
+        var strUnitMeasure = record.get('strUnitMeasure');
+        return strUnitMeasure;
     }
 
 });

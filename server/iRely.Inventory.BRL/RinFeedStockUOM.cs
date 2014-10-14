@@ -46,11 +46,12 @@ namespace iRely.Inventory.BRL
         {
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICRinFeedStockUOM>()
-                      .Where(w => query.Where(predicate).Any(a => a.intRinFeedStockUOMId == w.intRinFeedStockUOMId)) //Filter the Main DataSource Based on Search Query
-                      .OrderBySelector(sortSelector)
-                      .Skip(start)
-                      .Take(limit)
-                      .AsNoTracking();
+                    .Include(p => p.tblICUnitMeasure)
+                    .Where(w => query.Where(predicate).Any(a => a.intRinFeedStockUOMId == w.intRinFeedStockUOMId)) //Filter the Main DataSource Based on Search Query
+                    .OrderBySelector(sortSelector)
+                    .Skip(start)
+                    .Take(limit)
+                    .AsNoTracking();
         }
 
         public void AddRinFeedStockUOM(tblICRinFeedStockUOM RinFeedStockUOM)

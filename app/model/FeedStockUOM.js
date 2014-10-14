@@ -15,5 +15,11 @@ Ext.define('Inventory.model.FeedStockUom', {
         { name: 'intUnitMeasureId', type: 'int'},
         { name: 'strRinFeedStockUOMCode', type: 'string'},
         { name: 'intSort', type: 'int'},
+
+        { name: 'strUnitMeasure', type: 'string'}
+    ],
+
+    validators: [
+        {type: 'presence', field: 'intUnitMeasureId'}
     ]
 });

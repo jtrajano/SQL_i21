@@ -29,7 +29,8 @@ Ext.define('Inventory.view.FeedStockUom', {
         'Ext.form.field.ComboBox',
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
-        'Ext.grid.plugin.CellEditing'
+        'Ext.grid.plugin.CellEditing',
+        'Inventory.store.UnitMeasure'
     ],
 
     viewModel: {
@@ -149,9 +150,9 @@ Ext.define('Inventory.view.FeedStockUom', {
                                 columns: [
                                     {
                                         xtype: 'gridcolumn',
-                                        dataIndex: 'string',
                                         itemId: 'colUOM',
                                         width: 82,
+                                        dataIndex: 'string',
                                         text: 'UOM',
                                         flex: 1,
                                         editor: {
@@ -160,7 +161,7 @@ Ext.define('Inventory.view.FeedStockUom', {
                                                 {
                                                     dataIndex: 'intUnitMeasureId',
                                                     dataType: 'numeric',
-                                                    text: 'Unit Of Measure ID',
+                                                    text: 'Unit Of Measure Id',
                                                     hidden: true
                                                 },
                                                 {
@@ -174,19 +175,12 @@ Ext.define('Inventory.view.FeedStockUom', {
                                                     dataType: 'string',
                                                     text: 'Unit Type',
                                                     flex: 1
-                                                },
-                                                {
-                                                    dataIndex: 'ysnDefault',
-                                                    dataType: 'boolean',
-                                                    text: 'Default',
-                                                    flex: 1
                                                 }
                                             ],
+                                            itemId: 'cboUOM',
                                             displayField: 'strUnitMeasure',
-                                            valueField: 'intUnitMeasureId',
-                                            bind: {
-                                                store: '{UnitMeasure}'
-                                            }
+                                            store: 'UnitMeasure',
+                                            valueField: 'intUnitMeasureId'
                                         }
                                     },
                                     {

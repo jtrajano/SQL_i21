@@ -17,7 +17,7 @@ Ext.define('Inventory.model.FeedStockCode', {
         { name: 'intSort', type: 'int'}
     ],
 
-    validations: [
+    validators: [
         {type: 'presence', field: 'strRinFeedStockCode'}
     ]
 });
