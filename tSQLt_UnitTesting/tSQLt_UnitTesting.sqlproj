@@ -200,6 +200,8 @@
     <Build Include="Schema\tSQLt.sql" />
     <Build Include="testi21Database\Functions\test the fnAddZeroPrefixes function.sql" />
     <Build Include="testi21Database\Stored Procedures\test the uspCMAddDeposit stored procedure.sql" />
+    <Build Include="testi21Database\Functions\test the fnGetCostingMethod function.sql" />
+    <Build Include="testi21Database\Functions\test the fnGetItemGLAccounts function.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
