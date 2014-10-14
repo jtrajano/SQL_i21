@@ -17,7 +17,7 @@ Ext.define('Inventory.model.FuelCode', {
         { name: 'intSort', type: 'int'}
     ],
 
-    validations: [
+    validators: [
         {type: 'presence', field: 'strRinFuelCode'}
     ]
 });
