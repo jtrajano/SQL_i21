@@ -13,8 +13,7 @@ Ext.define('Inventory.view.override.FuelTypeViewController', {
                 {dataIndex: 'strRinFuelTypeCodeId', text: 'Fuel Type', flex: 1,  dataType: 'string'},
                 {dataIndex: 'strRinFeedStockId', text: 'Feed Stock', flex: 1,  dataType: 'string'},
                 {dataIndex: 'strRinFuelId', text: 'Fuel Code', flex: 1,  dataType: 'string'},
-                {dataIndex: 'strRinProcessId', text: 'Process Code', flex: 1,  dataType: 'string'},
-                {dataIndex: 'strRinFeedStockUOMId', text: 'Feed Stock UOM', flex: 1,  dataType: 'string'}
+                {dataIndex: 'strRinProcessId', text: 'Process Code', flex: 1,  dataType: 'string'}
             ]
         },
         binding: {

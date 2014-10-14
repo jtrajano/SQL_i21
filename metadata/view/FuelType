@@ -257,18 +257,24 @@
                             "userConfig": {
                                 "columns": [
                                     "[",
-                                    "{",
-                                    "dataIndex: 'intRinFuelTypeId',",
-                                    "dataType: 'int',",
-                                    "text: 'RinFuelTypeID',",
-                                    "hidden: true",
-                                    "},",
-                                    "                                {",
-                                    "                                    dataIndex: 'strRinFuelTypeCode',",
-                                    "                                    dataType: 'string',",
-                                    "                                    text: 'RinFuelTypeID',",
-                                    "                                    flex: 1",
-                                    "                                }",
+                                    "\t{",
+                                    "\t\tdataIndex: 'intRinFuelTypeId',",
+                                    "\t\tdataType: 'int',",
+                                    "\t\ttext: 'Fuel Category Id',",
+                                    "\t\thidden: true",
+                                    "\t},",
+                                    "\t{",
+                                    "\t\tdataIndex: 'strRinFuelTypeCode',",
+                                    "\t\tdataType: 'string',",
+                                    "\t\ttext: 'Fuel Category Id',",
+                                    "\t\tflex: 1",
+                                    "\t},",
+                                    "\t{",
+                                    "\t\tdataIndex: 'strDescription',",
+                                    "\t\tdataType: 'string',",
+                                    "\t\ttext: 'Description',",
+                                    "\t\tflex: 1",
+                                    "\t}",
                                     "]"
                                 ],
                                 "designer|createAlias": "gridcombobox",
@@ -309,6 +315,28 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "columns": [
+                                    "[",
+                                    "\t{",
+                                    "\t\tdataIndex: 'intRinFeedStockId',",
+                                    "\t\tdataType: 'int',",
+                                    "\t\ttext: 'Feed Stock Id',",
+                                    "\t\thidden: true",
+                                    "\t},",
+                                    "\t{",
+                                    "\t\tdataIndex: 'strRinFeedStockCode',",
+                                    "\t\tdataType: 'string',",
+                                    "\t\ttext: 'Feed Stock Id',",
+                                    "\t\tflex: 1",
+                                    "\t},",
+                                    "\t{",
+                                    "\t\tdataIndex: 'strDescription',",
+                                    "\t\tdataType: 'string',",
+                                    "\t\ttext: 'Description',",
+                                    "\t\tflex: 1",
+                                    "\t}",
+                                    "]"
+                                ],
                                 "designer|createAlias": "gridcombobox",
                                 "designer|displayName": null,
                                 "displayField": "strRinFeedStockCode",
@@ -327,7 +355,17 @@
                                 "width": null
                             },
                             "name": "MyComboBox64",
-                            "designerId": "158e82c0-7bdf-4061-b5e5-c9be997929e4"
+                            "configAlternates": {
+                                "columns": "array"
+                            },
+                            "designerId": "158e82c0-7bdf-4061-b5e5-c9be997929e4",
+                            "customConfigs": [
+                                {
+                                    "group": "(Custom Properties)",
+                                    "name": "columns",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.form.field.Text",
@@ -415,6 +453,28 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "columns": [
+                                    "[",
+                                    "\t{",
+                                    "\t\tdataIndex: 'intRinFuelId',",
+                                    "\t\tdataType: 'int',",
+                                    "\t\ttext: 'Feed Code Id',",
+                                    "\t\thidden: true",
+                                    "\t},",
+                                    "\t{",
+                                    "\t\tdataIndex: 'strRinFuelCode',",
+                                    "\t\tdataType: 'string',",
+                                    "\t\ttext: 'Feed Code',",
+                                    "\t\tflex: 1",
+                                    "\t},",
+                                    "\t{",
+                                    "\t\tdataIndex: 'strDescription',",
+                                    "\t\tdataType: 'string',",
+                                    "\t\ttext: 'Description',",
+                                    "\t\tflex: 1",
+                                    "\t}",
+                                    "]"
+                                ],
                                 "designer|createAlias": "gridcombobox",
                                 "designer|displayName": null,
                                 "displayField": "strRinFuelCode",
@@ -433,7 +493,17 @@
                                 "width": 170
                             },
                             "name": "MyComboBox66",
-                            "designerId": "74f69a76-67b8-437d-aec2-c1f740ea3eda"
+                            "configAlternates": {
+                                "columns": "array"
+                            },
+                            "designerId": "74f69a76-67b8-437d-aec2-c1f740ea3eda",
+                            "customConfigs": [
+                                {
+                                    "group": "(Custom Properties)",
+                                    "name": "columns",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.form.field.ComboBox",
@@ -443,6 +513,28 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "columns": [
+                                    "[",
+                                    "\t{",
+                                    "\t\tdataIndex: 'intRinProcessId',",
+                                    "\t\tdataType: 'int',",
+                                    "\t\ttext: 'Process Id',",
+                                    "\t\thidden: true",
+                                    "\t},",
+                                    "\t{",
+                                    "\t\tdataIndex: 'strRinProcessCode',",
+                                    "\t\tdataType: 'string',",
+                                    "\t\ttext: 'Process Id',",
+                                    "\t\tflex: 1",
+                                    "\t},",
+                                    "\t{",
+                                    "\t\tdataIndex: 'strDescription',",
+                                    "\t\tdataType: 'string',",
+                                    "\t\ttext: 'Description',",
+                                    "\t\tflex: 1",
+                                    "\t}",
+                                    "]"
+                                ],
                                 "designer|createAlias": "gridcombobox",
                                 "designer|displayName": null,
                                 "displayField": "strRinProcessCode",
@@ -461,7 +553,17 @@
                                 "width": 170
                             },
                             "name": "MyComboBox67",
-                            "designerId": "a67ee039-a375-44bc-9291-5cfcb0742753"
+                            "configAlternates": {
+                                "columns": "array"
+                            },
+                            "designerId": "a67ee039-a375-44bc-9291-5cfcb0742753",
+                            "customConfigs": [
+                                {
+                                    "group": "(Custom Properties)",
+                                    "name": "columns",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.form.field.ComboBox",
@@ -471,9 +573,37 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "columns": [
+                                    "[",
+                                    "\t{",
+                                    "\t\tdataIndex: 'intRinFeedStockUOMId',",
+                                    "\t\tdataType: 'int',",
+                                    "\t\ttext: 'Feed Stock UOM Id',",
+                                    "\t\thidden: true",
+                                    "\t},",
+                                    "    {",
+                                    "\t\tdataIndex: 'intUnitMeasureId',",
+                                    "\t\tdataType: 'int',",
+                                    "\t\ttext: 'UOM Id',",
+                                    "\t\thidden: true",
+                                    "\t},",
+                                    "\t{",
+                                    "\t\tdataIndex: 'strUnitMeasure',",
+                                    "\t\tdataType: 'string',",
+                                    "\t\ttext: 'Unit Measure Id',",
+                                    "\t\tflex: 1",
+                                    "\t},",
+                                    "\t{",
+                                    "\t\tdataIndex: 'strRinFeedStockUOMCode',",
+                                    "\t\tdataType: 'string',",
+                                    "\t\ttext: 'UOM Code',",
+                                    "\t\tflex: 1",
+                                    "\t}",
+                                    "]"
+                                ],
                                 "designer|createAlias": "gridcombobox",
                                 "designer|displayName": null,
-                                "displayField": "strRinFeedStockUOM",
+                                "displayField": "strUnitMeasure",
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Feed Stock UOM",
                                 "itemId": "cboFeedStockUom",
@@ -489,7 +619,17 @@
                                 "width": 170
                             },
                             "name": "MyComboBox68",
-                            "designerId": "03dc79f4-15f4-4ce2-9001-988db48be2a6"
+                            "configAlternates": {
+                                "columns": "array"
+                            },
+                            "designerId": "03dc79f4-15f4-4ce2-9001-988db48be2a6",
+                            "customConfigs": [
+                                {
+                                    "group": "(Custom Properties)",
+                                    "name": "columns",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.form.field.Text",
@@ -593,7 +733,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging17",
+                    "name": "statusbarpaging11",
                     "designerId": "ef7cd9cb-b7a1-4f5a-a180-5e26b5c5119a",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

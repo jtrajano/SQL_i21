@@ -165,13 +165,19 @@ Ext.define('Inventory.view.FuelType', {
                                 {
                                     dataIndex: 'intRinFuelTypeId',
                                     dataType: 'int',
-                                    text: 'RinFuelTypeID',
+                                    text: 'Fuel Category Id',
                                     hidden: true
                                 },
                                 {
                                     dataIndex: 'strRinFuelTypeCode',
                                     dataType: 'string',
-                                    text: 'RinFuelTypeID',
+                                    text: 'Fuel Category Id',
+                                    flex: 1
+                                },
+                                {
+                                    dataIndex: 'strDescription',
+                                    dataType: 'string',
+                                    text: 'Description',
                                     flex: 1
                                 }
                             ],
@@ -183,6 +189,26 @@ Ext.define('Inventory.view.FuelType', {
                         },
                         {
                             xtype: 'gridcombobox',
+                            columns: [
+                                {
+                                    dataIndex: 'intRinFeedStockId',
+                                    dataType: 'int',
+                                    text: 'Feed Stock Id',
+                                    hidden: true
+                                },
+                                {
+                                    dataIndex: 'strRinFeedStockCode',
+                                    dataType: 'string',
+                                    text: 'Feed Stock Id',
+                                    flex: 1
+                                },
+                                {
+                                    dataIndex: 'strDescription',
+                                    dataType: 'string',
+                                    text: 'Description',
+                                    flex: 1
+                                }
+                            ],
                             itemId: 'cboFeedStock',
                             fieldLabel: 'Feed Stock',
                             labelWidth: 165,
@@ -210,6 +236,26 @@ Ext.define('Inventory.view.FuelType', {
                         },
                         {
                             xtype: 'gridcombobox',
+                            columns: [
+                                {
+                                    dataIndex: 'intRinFuelId',
+                                    dataType: 'int',
+                                    text: 'Feed Code Id',
+                                    hidden: true
+                                },
+                                {
+                                    dataIndex: 'strRinFuelCode',
+                                    dataType: 'string',
+                                    text: 'Feed Code',
+                                    flex: 1
+                                },
+                                {
+                                    dataIndex: 'strDescription',
+                                    dataType: 'string',
+                                    text: 'Description',
+                                    flex: 1
+                                }
+                            ],
                             itemId: 'cboFuelCode',
                             width: 170,
                             fieldLabel: 'Fuel Code',
@@ -219,6 +265,26 @@ Ext.define('Inventory.view.FuelType', {
                         },
                         {
                             xtype: 'gridcombobox',
+                            columns: [
+                                {
+                                    dataIndex: 'intRinProcessId',
+                                    dataType: 'int',
+                                    text: 'Process Id',
+                                    hidden: true
+                                },
+                                {
+                                    dataIndex: 'strRinProcessCode',
+                                    dataType: 'string',
+                                    text: 'Process Id',
+                                    flex: 1
+                                },
+                                {
+                                    dataIndex: 'strDescription',
+                                    dataType: 'string',
+                                    text: 'Description',
+                                    flex: 1
+                                }
+                            ],
                             itemId: 'cboProcessCode',
                             width: 170,
                             fieldLabel: 'Process Code',
@@ -228,11 +294,37 @@ Ext.define('Inventory.view.FuelType', {
                         },
                         {
                             xtype: 'gridcombobox',
+                            columns: [
+                                {
+                                    dataIndex: 'intRinFeedStockUOMId',
+                                    dataType: 'int',
+                                    text: 'Feed Stock UOM Id',
+                                    hidden: true
+                                },
+                                {
+                                    dataIndex: 'intUnitMeasureId',
+                                    dataType: 'int',
+                                    text: 'UOM Id',
+                                    hidden: true
+                                },
+                                {
+                                    dataIndex: 'strUnitMeasure',
+                                    dataType: 'string',
+                                    text: 'Unit Measure Id',
+                                    flex: 1
+                                },
+                                {
+                                    dataIndex: 'strRinFeedStockUOMCode',
+                                    dataType: 'string',
+                                    text: 'UOM Code',
+                                    flex: 1
+                                }
+                            ],
                             itemId: 'cboFeedStockUom',
                             width: 170,
                             fieldLabel: 'Feed Stock UOM',
                             labelWidth: 165,
-                            displayField: 'strRinFeedStockUOM',
+                            displayField: 'strUnitMeasure',
                             valueField: 'intRinFeedStockUOMId'
                         },
                         {

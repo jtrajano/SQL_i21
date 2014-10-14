@@ -30,8 +30,7 @@ namespace iRely.Inventory.BRL
                     strRinFuelTypeCodeId = p.RinFuelType.strRinFuelTypeCode,
                     strRinFeedStockId = p.RinFeedStock.strRinFeedStockCode,
                     strRinFuelId = p.RinFuel.strRinFuelCode,
-                    strRinProcessId = p.RinProcess.strRinProcessCode,
-                    strRinFeedStockUOMId = p.RinFeedStockUOM.strRinFeedStockUOMCode
+                    strRinProcessId = p.RinProcess.strRinProcessCode
                 });
         }
 
