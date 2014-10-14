@@ -4,18 +4,25 @@ CREATE FUNCTION [dbo].[fnGetCostingMethod](
 	@intItemId INT
 	,@intLocationId INT
 )
-RETURNS NVARCHAR(40)
+RETURNS INT
 AS 
 BEGIN 
-	DECLARE @strCostingMethod AS INT
+	DECLARE @costingMethod AS INT
 
-	-- TODO: Change "strCostingMethod" to "intCostingMethod"
-	-- See this comment. http://www.inet.irelyserver.com/display/INV/Location+Tab?focusedCommentId=38209014#comment-38209014
-	SELECT	@strCostingMethod = strCostingMethod
+	-- Get the costing method in the item-location table. 
+	SELECT	@costingMethod = intCostingMethod
 	FROM	tblICItemLocationStore
 	WHERE	intItemId = @intItemId
 			AND intLocationId = @intLocationId
 
-	RETURN @strCostingMethod;
+	-- If costing method is not found at item-Location level, get the costing method in the category level. 
+	IF @costingMethod IS NULL
+	BEGIN 
+		SELECT	@costingMethod = intCostingMethod
+		FROM	tblICCategory
+		WHERE	intCategoryId = (SELECT TOP 1 intTrackingId FROM tblICItem WHERE intItemId = @intItemId)
+	END
+
+	RETURN @costingMethod;	
 END
 GO

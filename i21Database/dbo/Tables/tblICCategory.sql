@@ -4,7 +4,7 @@
     [strCategoryCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intCatalogGroupId] INT NULL, 
-    [strCostingMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [intCostingMethod] INT NOT NULL DEFAULT 1,
     [strInventoryTracking] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [dblStandardQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [intUOMId] INT NULL, 
@@ -107,7 +107,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblICCategory',
     @level2type = N'COLUMN',
-    @level2name = N'strCostingMethod'
+    @level2name = N'intCostingMethod'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Inventory Tracking',

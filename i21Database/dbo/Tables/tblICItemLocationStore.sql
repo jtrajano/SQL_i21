@@ -6,7 +6,7 @@
     [intStoreId] INT NOT NULL, 
     [intVendorId] INT NULL, 
     [strPOSDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
-    [strCostingMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [intCostingMethod] INT NULL, 
     [intCategoryId] INT NULL, 
     [strRow] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strBin] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
