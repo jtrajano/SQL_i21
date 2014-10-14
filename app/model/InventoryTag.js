@@ -18,7 +18,7 @@ Ext.define('Inventory.model.InventoryTag', {
         { name: 'ysnHazMat', type: 'boolean'}
     ],
 
-    validations: [
+    validators: [
         {type: 'presence', field: 'strTagNumber'}
     ]
 });
