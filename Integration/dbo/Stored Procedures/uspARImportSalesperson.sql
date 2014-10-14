@@ -163,7 +163,14 @@ EXEC(
 			   ,[strDispatchNotification]
 			   ,[strTextMessage]
 			   ,[strCommission]
-			   ,[dblPercent])
+			   ,[dblPercent]
+			   ,[strAltEmail]
+			   ,[strAltPhone]
+			   ,[strFax]
+			   ,[strMobile]
+			   ,[strReason]
+			   ,[strSpouse]
+			   ,[strTitle])
 			VALUES
 			   (@EntityId,
 				@strSalespersonId,
@@ -178,7 +185,14 @@ EXEC(
 				@strDispatchNotification,
 				@strTextMessage,
 				''None'',
-				0)
+				0,
+				'''',
+				'''',
+				'''',
+				'''',
+				'''',
+				'''',
+				'''')
 
 			IF(@@ERROR <> 0) 
 			BEGIN
@@ -368,7 +382,14 @@ EXEC(
 			   ,[strDispatchNotification]
 			   ,[strTextMessage]
 			   ,[strCommission]
-			   ,[dblPercent])
+			   ,[dblPercent]
+			   ,[strAltEmail]
+			   ,[strAltPhone]
+			   ,[strFax]
+			   ,[strMobile]
+			   ,[strReason]
+			   ,[strSpouse]
+			   ,[strTitle])
 			VALUES
 			   (@EntityId,
 				@strSalespersonId,
@@ -383,7 +404,14 @@ EXEC(
 				@strDispatchNotification,
 				@strTextMessage,
 				''None'',
-				0)
+				0,
+				'''',
+				'''',
+				'''',
+				'''',
+				'''',
+				'''',
+				'''')
 
 			IF(@@ERROR <> 0) 
 			BEGIN

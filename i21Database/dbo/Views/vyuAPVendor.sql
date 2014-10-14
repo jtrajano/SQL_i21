@@ -45,7 +45,9 @@ SELECT
 	D.strPhone,
 	D.strPhone2,
 	D.strTitle,
-	E.strCurrency
+	E.strCurrency,
+	ysnHasPayables = CAST((CASE WHEN EXISTS(SELECT 1 FROM dbo.tblAPBill G WHERE G.ysnPosted = 1 AND G.ysnPaid = 0 AND G.intVendorId = B.intVendorId) 
+						THEN 1 ELSE 0 END) AS BIT)
 FROM
 		dbo.tblEntity A
 	INNER JOIN dbo.tblAPVendor B
@@ -58,5 +60,3 @@ FROM
 		ON B.intCurrencyId = E.intCurrencyID
 	LEFT JOIN dbo.tblGLAccount F 
 		ON B.intGLAccountExpenseId = F.intAccountId
-	
-	
