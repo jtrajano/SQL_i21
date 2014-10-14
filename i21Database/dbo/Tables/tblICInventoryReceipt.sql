@@ -5,7 +5,7 @@
     [dtmReceiptDate] DATETIME NOT NULL, 
     [intVendorId] INT NOT NULL, 
     [strReceiptType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
-    [intSourceId] INT NOT NULL, 
+    [intSourceId] INT NULL, 
     [intBlanketRelease] INT NULL DEFAULT ((0)), 
     [intLocationId] INT NOT NULL, 
     [intWarehouseId] INT NULL, 
