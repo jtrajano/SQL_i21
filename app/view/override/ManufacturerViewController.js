@@ -22,13 +22,13 @@ Ext.define('Inventory.view.override.ManufacturerViewController', {
             txtAddress: '{current.strAddress}',
             cboZipCode: {
                          value:'{current.strZipCode}',
-                         store:'{ZipCodeBuffered}'
+                         store:'{ZipCode}'
                         },
             txtCity: '{current.strCity}',
             txtState: '{current.strState}',
             cboCountry: {
                 value:'{current.strCountry}',
-                store:'{CountryBuffered}'
+                store:'{Country}'
             },
             txtPhone: '{current.strPhone}',
             txtFax: '{current.strFax}',
@@ -50,6 +50,9 @@ Ext.define('Inventory.view.override.ManufacturerViewController', {
             createRecord : me.createRecord,
             binding: me.config.binding
         });
+
+        var cboZipCode = win.down('#cboZipCode');
+        cboZipCode.on('select', me.onCboZipCodeSelect);
 
         return win.context;
     },
@@ -78,6 +81,20 @@ Ext.define('Inventory.view.override.ManufacturerViewController', {
                     filters: config.filters
                 });
             }
+        }
+    },
+
+    onCboZipCodeSelect: function (combo, records, eOpts) {
+        if (records){
+            var win = combo.up('window');
+            var txtCity = win.down('#txtCity');
+            var txtState = win.down('#txtState');
+            var cboCountry = win.down('#cboCountry');
+
+            var selected = records[0];
+            txtCity.setValue(selected.get('strCity'));
+            txtState.setValue(selected.get('strState'));
+            cboCountry.setValue(selected.get('strCountry'));
         }
     }
 

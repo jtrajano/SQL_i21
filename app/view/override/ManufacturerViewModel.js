@@ -4,7 +4,18 @@
 Ext.define('Inventory.view.override.ManufacturerViewModel', {
     override: 'Inventory.view.ManufacturerViewModel',
 
-    requires:['i21.store.ZipCodeBuffered',
-              'i21.store.CountryBuffered']
+    requires:[
+        'i21.store.ZipCodeBuffered',
+        'i21.store.CountryBuffered'
+    ],
+
+    stores: {
+        ZipCode: {
+            type: 'zipcodebuffered'
+        },
+        Country: {
+            type: 'countrybuffered'
+        }
+    }
 
 });

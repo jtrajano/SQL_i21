@@ -218,11 +218,45 @@ Ext.define('Inventory.view.Manufacturer', {
                             layout: 'hbox',
                             items: [
                                 {
-                                    xtype: 'combobox',
+                                    xtype: 'gridcombobox',
+                                    columns: [
+                                        {
+                                            dataIndex: 'intZipCodeID',
+                                            dataType: 'numeric',
+                                            text: 'Zip Code Id',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strZipCode',
+                                            dataType: 'string',
+                                            text: 'Zip Code',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strState',
+                                            dataType: 'string',
+                                            text: 'State',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strCity',
+                                            dataType: 'string',
+                                            text: 'City',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strCountry',
+                                            dataType: 'string',
+                                            text: 'Country',
+                                            flex: 1
+                                        }
+                                    ],
                                     flex: 1.2,
                                     itemId: 'cboZipCode',
                                     fieldLabel: 'Zip/Postal Code',
-                                    labelWidth: 90
+                                    labelWidth: 90,
+                                    displayField: 'strZipCode',
+                                    valueField: 'strZipCode'
                                 },
                                 {
                                     xtype: 'textfield',
@@ -247,12 +281,28 @@ Ext.define('Inventory.view.Manufacturer', {
                                     labelWidth: 90
                                 },
                                 {
-                                    xtype: 'combobox',
+                                    xtype: 'gridcombobox',
+                                    columns: [
+                                        {
+                                            dataIndex: 'intCountryID',
+                                            dataType: 'numeric',
+                                            text: 'Country Id',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strCountry',
+                                            dataType: 'string',
+                                            text: 'Country',
+                                            flex: 1
+                                        }
+                                    ],
                                     flex: 1,
                                     itemId: 'cboCountry',
                                     margin: '0 0 0 5',
                                     fieldLabel: 'Country',
-                                    labelWidth: 50
+                                    labelWidth: 50,
+                                    displayField: 'strCountry',
+                                    valueField: 'strCountry'
                                 }
                             ]
                         },

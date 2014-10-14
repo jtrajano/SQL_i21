@@ -40,7 +40,7 @@ Ext.define('Inventory.model.Manufacturer', {
 //        }
 //    },
 
-    validations: [
+    validators: [
         {type: 'presence', field: 'strManufacturer'}
     ]
 });
