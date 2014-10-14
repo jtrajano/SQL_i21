@@ -11,6 +11,8 @@ Ext.define('Inventory.view.override.ItemViewModel', {
         'Inventory.store.UnitMeasure',
         'Inventory.store.Brand',
         'Inventory.store.FuelCategory',
+        'AccountsPayable.store.VendorBuffered',
+        'i21.store.CompanyLocation'
     ],
 
     stores: {
@@ -314,6 +316,12 @@ Ext.define('Inventory.view.override.ItemViewModel', {
         },
         FuelCategory: {
             type: 'inventoryfuelcategory'
+        },
+        Vendor: {
+            type: 'vendorbuffered'
+        },
+        Location: {
+            type: 'companylocation'
         }
 
     }

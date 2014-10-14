@@ -124,7 +124,10 @@ Ext.define('Inventory.view.override.ItemViewController', {
                 store: '{InventoryTag}'
             },
             txtVolumeRebateGroup: '{current.strVolumeRebateGroup}',
-            cboPhysicalItem: '{current.intPhysicalItem}',
+            cboPhysicalItem: {
+                value: '{current.intPhysicalItem}',
+                store: '{Item}'
+            },
             chkExtendOnPickTicket: '{current.ysnExtendPickTicket}',
             chkExportEdi: '{current.ysnExportEDI}',
             chkHazardMaterial: '{current.ysnHazardMaterial}',
@@ -148,7 +151,10 @@ Ext.define('Inventory.view.override.ItemViewController', {
                 store: '{Category}'
             },
             chkReceiptCommentReq: '{current.ysnReceiptCommentRequired}',
-            cboCountCode: '{current.strCountCode}',
+            cboCountCode: {
+                value: '{current.strCountCode}',
+                store: '{Counteds}'
+            },
             chkLandedCost: '{current.ysnLandedCost}',
             txtLeadTime: '{current.strLeadTime}',
             chkTaxable: '{current.ysnTaxable}',
