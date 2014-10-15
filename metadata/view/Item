@@ -22,6 +22,9 @@
         "minimizable": null,
         "mixins": null,
         "reference": null,
+        "requires": [
+            "Inventory.store.UnitMeasure"
+        ],
         "title": "Item: 000000015 - Ultralow Sulfur #2 Diesel",
         "width": 950
     },
@@ -719,6 +722,69 @@
                                     "designerId": "df2215b4-b740-46d4-802a-aa7123035bb6",
                                     "cn": [
                                         {
+                                            "type": "Ext.toolbar.Toolbar",
+                                            "reference": {
+                                                "name": "dockedItems",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "container|padding": "0 0 0 1",
+                                                "dock": "top",
+                                                "itemId": "tlbGridOptions"
+                                            },
+                                            "name": "MyToolbar14",
+                                            "designerId": "c6096dd4-b53f-4bdb-8df4-8ac71c08c334",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "icon": null,
+                                                        "iconCls": "small-delete",
+                                                        "itemId": "btnDeleteUom",
+                                                        "layout|flex": null,
+                                                        "tabIndex": -1,
+                                                        "text": "Delete"
+                                                    },
+                                                    "name": "MyButton13",
+                                                    "designerId": "f4c3dd65-9389-4983-bd3c-9fc086898bb0"
+                                                },
+                                                {
+                                                    "type": "Ext.toolbar.Separator",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "designer|displayName": "separator",
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MySeparator4",
+                                                    "designerId": "8020bc4f-c1d1-4be9-baa4-e637b9425cff"
+                                                },
+                                                {
+                                                    "type": "linkedinstance",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "filter16",
+                                                    "designerId": "52f90830-2c84-4dba-9ab6-9ab530dad629",
+                                                    "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
+                                                }
+                                            ]
+                                        },
+                                        {
                                             "type": "Ext.grid.column.Column",
                                             "reference": {
                                                 "name": "columns",
@@ -774,15 +840,12 @@
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strUnitMeasure",
                                                         "itemId": "cboItemUOMUnitMeasure",
-                                                        "store": [
-                                                            "{UnitMeasure}"
-                                                        ],
+                                                        "store": "UnitMeasure",
                                                         "valueField": "intUnitMeaseureId"
                                                     },
                                                     "name": "MyComboBox1",
                                                     "configAlternates": {
-                                                        "columns": "array",
-                                                        "store": "binding"
+                                                        "columns": "array"
                                                     },
                                                     "designerId": "74685e76-b81e-4c9a-83ff-0411b6087c00",
                                                     "customConfigs": [
@@ -7438,7 +7501,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging12",
                     "designerId": "64f13019-953f-46dc-920e-9a395d3cb3c9",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

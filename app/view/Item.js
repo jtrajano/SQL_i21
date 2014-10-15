@@ -37,7 +37,8 @@ Ext.define('Inventory.view.Item', {
         'Ext.form.field.Date',
         'Ext.grid.column.Check',
         'Ext.grid.column.Date',
-        'Ext.toolbar.Paging'
+        'Ext.toolbar.Paging',
+        'Inventory.store.UnitMeasure'
     ],
 
     viewModel: {
@@ -393,6 +394,32 @@ Ext.define('Inventory.view.Item', {
                                                 itemId: 'grdUnitOfMeasure',
                                                 title: 'Unit of Measure',
                                                 forceFit: true,
+                                                dockedItems: [
+                                                    {
+                                                        xtype: 'toolbar',
+                                                        dock: 'top',
+                                                        itemId: 'tlbGridOptions',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            padding: '0 0 0 1'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnDeleteUom',
+                                                                iconCls: 'small-delete',
+                                                                text: 'Delete'
+                                                            },
+                                                            {
+                                                                xtype: 'tbseparator'
+                                                            },
+                                                            {
+                                                                xtype: 'filter'
+                                                            }
+                                                        ]
+                                                    }
+                                                ],
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
@@ -431,10 +458,8 @@ Ext.define('Inventory.view.Item', {
                                                             ],
                                                             itemId: 'cboItemUOMUnitMeasure',
                                                             displayField: 'strUnitMeasure',
-                                                            valueField: 'intUnitMeaseureId',
-                                                            bind: {
-                                                                store: '{UnitMeasure}'
-                                                            }
+                                                            store: 'UnitMeasure',
+                                                            valueField: 'intUnitMeaseureId'
                                                         }
                                                     },
                                                     {
@@ -1726,7 +1751,6 @@ Ext.define('Inventory.view.Item', {
                                                                                         items: [
                                                                                             {
                                                                                                 xtype: 'gridcombobox',
-                                                                                                flex: 1.4,
                                                                                                 columns: [
                                                                                                     {
                                                                                                         dataIndex: 'intUnitMeasureId',
@@ -1753,6 +1777,7 @@ Ext.define('Inventory.view.Item', {
                                                                                                         flex: 1
                                                                                                     }
                                                                                                 ],
+                                                                                                flex: 1.4,
                                                                                                 itemId: 'cboDimensionUOM',
                                                                                                 fieldLabel: 'Dimension UOM',
                                                                                                 labelWidth: 125,
@@ -1761,7 +1786,6 @@ Ext.define('Inventory.view.Item', {
                                                                                             },
                                                                                             {
                                                                                                 xtype: 'gridcombobox',
-                                                                                                flex: 1,
                                                                                                 columns: [
                                                                                                     {
                                                                                                         dataIndex: 'intUnitMeasureId',
@@ -1788,6 +1812,7 @@ Ext.define('Inventory.view.Item', {
                                                                                                         flex: 1
                                                                                                     }
                                                                                                 ],
+                                                                                                flex: 1,
                                                                                                 itemId: 'cboWeightUOM',
                                                                                                 margin: '0 0 0 5',
                                                                                                 fieldLabel: 'Weight UOM',
