@@ -86,7 +86,7 @@ EXEC(
 
 
 	--================================================
-	--     ONE TIME ACCOUNT SYNCHRONIZATION	
+	--     ONE TIME SALESPERSON SYNCHRONIZATION	
 	--================================================
 	IF(@Update = 0 AND @SalespersonId IS NULL) 
 	BEGIN
@@ -175,15 +175,15 @@ EXEC(
 			   (@EntityId,
 				@strSalespersonId,
 				@strType,
-				@strPhone,
-				@strAddress,
-				@strZipCode,
-				@strCity,
-				@strState,
-				@strCountry,
+				ISNULL(@strPhone,''''),
+				ISNULL(@strAddress,''''),
+				ISNULL(@strZipCode,''''),
+				ISNULL(@strCity,''''),
+				ISNULL(@strState,''''),
+				ISNULL(@strCountry,''''),
 				1,
-				@strDispatchNotification,
-				@strTextMessage,
+				ISNULL(@strDispatchNotification,''''),
+				ISNULL(@strTextMessage,''''),
 				''None'',
 				0,
 				'''',
@@ -305,7 +305,7 @@ EXEC(
 
 
 	--================================================
-	--     ONE TIME ACCOUNT SYNCHRONIZATION	
+	--     ONE TIME SALESPERSON SYNCHRONIZATION	
 	--================================================
 	IF(@Update = 0 AND @SalespersonId IS NULL) 
 	BEGIN
@@ -394,15 +394,15 @@ EXEC(
 			   (@EntityId,
 				@strSalespersonId,
 				@strType,
-				@strPhone,
-				@strAddress,
-				@strZipCode,
-				@strCity,
-				@strState,
-				@strCountry,
+				ISNULL(@strPhone,''''),
+				ISNULL(@strAddress,''''),
+				ISNULL(@strZipCode,''''),
+				ISNULL(@strCity,''''),
+				ISNULL(@strState,''''),
+				ISNULL(@strCountry,''''),
 				1,
-				@strDispatchNotification,
-				@strTextMessage,
+				ISNULL(@strDispatchNotification,''''),
+				ISNULL(@strTextMessage,''''),
 				''None'',
 				0,
 				'''',
