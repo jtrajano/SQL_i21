@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,6 +18,28 @@ namespace iRely.Inventory.Model
         public string strUPCCode { get; set; }
         public int intSort { get; set; }
 
+        private string _unitmeasure;
+        [NotMapped]
+        public string strUnitMeasure
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_unitmeasure))
+                    if (tblICUnitMeasure != null)
+                        return tblICUnitMeasure.strUnitMeasure;
+                    else
+                        return null;
+                else
+                    return _unitmeasure;
+            }
+            set
+            {
+                _unitmeasure = value;
+            }
+        }
+
         public tblICItem tblICItem { get; set; }
+        public tblICUnitMeasure tblICUnitMeasure { get; set; }
+
     }
 }

@@ -63,7 +63,7 @@ namespace iRely.Inventory.BRL
                     .Include("tblICItemPOSCategories.tblICCategory")
                     .Include(p => p.tblICItemPOSSLAs)
                     .Include(p => p.tblICItemManufacturingUOMs)
-                    .Include(p => p.tblICItemUPCs)
+                    .Include("tblICItemUPCs.tblICUnitMeasure")
                     .Include(p => p.tblICItemCustomerXrefs)
                     .Include(p => p.tblICItemVendorXrefs)
                     .Include("tblICItemContracts.tblICItemContractDocuments.tblICDocument")

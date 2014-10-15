@@ -255,7 +255,8 @@ Ext.define('Inventory.view.override.ItemViewController', {
             win = options.window,
             store = Ext.create('Inventory.store.Item', { pageSize: 1 });
 
-        var grdCategory = win.down('#grdCategory');
+        var grdCategory = win.down('#grdCategory'),
+            grdUPC = win.down('#grdUPC');
 
         win.context = Ext.create('iRely.mvvm.Engine', {
             window : win,
@@ -279,7 +280,7 @@ Ext.define('Inventory.view.override.ItemViewController', {
                 {
                     key: 'tblICItemUPCs',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
-                        grid: win.down('#grdUPC'),
+                        grid: grdUPC,
                         deleteButton : win.down('#btnDeleteUPC')
                     })
                 },
@@ -340,11 +341,21 @@ Ext.define('Inventory.view.override.ItemViewController', {
         var colCategory = grdCategory.columns[0];
         colCategory.renderer = me.CategoryRenderer;
 
-        var cellEditPlugin = grdCategory.getPlugin('cepPOSCategory');
-        cellEditPlugin.on({
+        var cepPOSCategory = grdCategory.getPlugin('cepPOSCategory');
+        cepPOSCategory.on({
             edit: me.onGridCategoryEdit,
-            scope:me
+            scope: me
         });
+
+        var colUPUom = grdUPC.columns[0];
+        colUPUom.renderer = me.UOMRenderer;
+
+        var cepUPC = grdUPC.getPlugin('cepUPC');
+        cepUPC.on({
+            edit: me.onGridUPCEdit,
+            scope: me
+        });
+
 
         return win.context;
     },
@@ -386,6 +397,11 @@ Ext.define('Inventory.view.override.ItemViewController', {
         return category;
     },
 
+    UOMRenderer: function (value, metadata, record) {
+        var unitmeasure = record.get('strUnitMeasure');
+        return unitmeasure;
+    },
+
     onGridCategoryEdit: function(editor, e, eOpts){
         var me = this;
         var record = e.record
@@ -396,6 +412,20 @@ Ext.define('Inventory.view.override.ItemViewController', {
         var cboCategory = column.getEditor();
         var strCategory = cboCategory.getSelectedRecord().get('strCategoryCode');
         record.set('strCategory', strCategory);
+
+        view.refresh();
+    },
+
+    onGridUPCEdit: function(editor, e, eOpts){
+        var me = this;
+        var record = e.record
+        var column = e.column;
+        var grid = column.up('grid');
+        var view = grid.view;
+
+        var cboUOM = column.getEditor();
+        var strUnitMeasure = cboUOM.getSelectedRecord().get('strUnitMeasure');
+        record.set('strUnitMeasure', strUnitMeasure);
 
         view.refresh();
     }
