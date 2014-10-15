@@ -45,7 +45,8 @@ Ext.define('Inventory.view.override.CategoryViewModel', {
             ],
             fields: [
                 {
-                    name: 'intCostingMethodId'
+                    name: 'intCostingMethodId',
+                    type: 'int'
                 },
                 {
                     name: 'strDescription'
