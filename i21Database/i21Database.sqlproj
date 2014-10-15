@@ -731,6 +731,7 @@
     <Build Include="dbo\Functions\fnGetItemGLAccounts.sql" />
     <Build Include="dbo\Functions\fnGetNegativeInventoryOption.sql" />
     <Build Include="dbo\Tables\tblICLotStatus.sql" />
+    <Build Include="dbo\Views\vyuEntityEFTInformation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
