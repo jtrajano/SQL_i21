@@ -100,6 +100,19 @@ BEGIN
 	IF(ISNULL(@post,0) = 1)
 		BEGIN
 
+			--Make sure it has setup for default withhold account if vendor is set for withholding
+			INSERT INTO #tmpPayableInvalidData
+				SELECT 
+					'There is no account setup for withholding.',
+					'Payable',
+					A.strPaymentRecordNum,
+					@batchId,
+					A.intPaymentId
+				FROM tblAPPayment A 
+				INNER JOIN tblAPVendor B
+					ON A.intVendorId = B.intVendorId AND B.ysnWithholding = 1
+				WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData)
+
 			--Payment without payment on detail
 			INSERT INTO #tmpPayableInvalidData
 				SELECT 
@@ -897,7 +910,7 @@ ELSE
 			,[dblDebitUnit]			= SUM(ISNULL(A.[dblAmountPaid], 0))  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
 			,[dblCreditUnit]		= SUM(ISNULL(A.[dblAmountPaid], 0)) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
 			,A.[dtmDatePaid]
-			,0
+			,CASE WHEN @post = 1 THEN 0 ELSE 1 END
 			,1
 			,[dblExchangeRate]		= 1
 			,[intUserId]			= @userId
@@ -937,7 +950,7 @@ ELSE
 			,[dblDebitUnit]			= ISNULL(A.dblWithheld, 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0)
 			,[dblCreditUnit]		= ISNULL(A.dblWithheld, 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0)
 			,A.[dtmDatePaid]
-			,0
+			,CASE WHEN @post = 1 THEN 0 ELSE 1 END
 			,1
 			,[dblExchangeRate]		= 1
 			,[intUserId]			= @userId
@@ -965,7 +978,7 @@ ELSE
 			,[dblDebitUnit]			= ISNULL(A.dblWithheld, 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @DiscountAccount), 0)
 			,[dblCreditUnit]		= ISNULL(A.dblWithheld, 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @DiscountAccount), 0)
 			,A.[dtmDatePaid]
-			,0
+			,CASE WHEN @post = 1 THEN 0 ELSE 1 END
 			,1
 			,[dblExchangeRate]		= 1
 			,[intUserId]			= @userId
@@ -1014,7 +1027,7 @@ ELSE
 				,[dblDebitUnit]			= ISNULL(A.dblAmountPaid, 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
 				,[dblCreditUnit]		= ISNULL(A.dblAmountPaid, 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
 				,A.[dtmDatePaid]
-				,0
+				,CASE WHEN @post = 1 THEN 0 ELSE 1 END
 				,1
 				,[dblExchangeRate]		= 1
 				,[intUserId]			= @userId
