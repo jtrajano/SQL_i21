@@ -6,8 +6,8 @@
     },
     "codeClass": null,
     "userConfig": {
-        "designer|userAlias": "itemlocationstore",
-        "designer|userClassName": "ItemLocationStoreViewController"
+        "designer|userAlias": "itemlocation",
+        "designer|userClassName": "ItemLocationViewController"
     },
     "designerId": "6b00fa5e-2b9e-47dd-87c3-f4f99a7f19e8"
 }
