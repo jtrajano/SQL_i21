@@ -257,6 +257,7 @@ BEGIN
 		FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
 	)
 	INSERT INTO tblGLDetail (
+			[strTransactionId], 
 			[intTransactionId], 
 			[intAccountId],
 			[strDescription],
@@ -282,6 +283,7 @@ BEGIN
 	OUTPUT INSERTED.dtmDate, INSERTED.intAccountId, INSERTED.dblDebit, INSERTED.dblCredit, INSERTED.dblDebitUnit, INSERTED.dblCreditUnit  INTO #tmpGLDetail
 		--CREDIT
 		SELECT	
+			[strTransactionId] = A.strBillId, 
 			[intTransactionId] = A.intBillId, 
 			[intAccountId] = A.intAccountId,
 			[strDescription] = A.strDescription,
@@ -314,6 +316,7 @@ BEGIN
 		--DEBIT
 		UNION ALL 
 		SELECT	
+			[strTransactionId] = A.strBillId, 
 			[intTransactionId] = A.intBillId, 
 			[intAccountId] = B.intAccountId,
 			[strDescription] = A.strDescription,
@@ -621,7 +624,7 @@ Post_Commit:
 	GOTO Post_Exit
 
 Post_Rollback:
-	ROLLBACK TRANSACTION		            
+	ROLLBACK TRANSACTION	
 	SET @success = 0
 	GOTO Post_Exit
 
