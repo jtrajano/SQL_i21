@@ -31,16 +31,26 @@ Ext.define('Inventory.view.override.CategoryViewModel', {
             autoLoad: true,
             data: [
                 {
+                    intCostingMethodId: '1',
                     strDescription: 'AVG'
-                },{
+                },
+                {
+                    intCostingMethodId: '2',
                     strDescription: 'FIFO'
-                },{
+                },
+                {
+                    intCostingMethodId: '3',
                     strDescription: 'LIFO'
                 }
             ],
-            fields: {
-                name: 'strDescription'
-            }
+            fields: [
+                {
+                    name: 'intCostingMethodId'
+                },
+                {
+                    name: 'strDescription'
+                }
+            ]
         },
         MaterialFees: {
             autoLoad: true,

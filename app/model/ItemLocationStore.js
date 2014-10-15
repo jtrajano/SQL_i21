@@ -17,7 +17,7 @@ Ext.define('Inventory.model.ItemLocationStore', {
         { name: 'intStoreId', type: 'int'},
         { name: 'intVendorId', type: 'int'},
         { name: 'strPOSDescription', type: 'string'},
-        { name: 'strCostingMethod', type: 'string'},
+        { name: 'intCostingMethod', type: 'int'},
         { name: 'intCategoryId', type: 'int'},
         { name: 'strRow', type: 'string'},
         { name: 'strBin', type: 'string'},

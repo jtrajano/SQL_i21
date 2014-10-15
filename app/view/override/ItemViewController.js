@@ -70,7 +70,7 @@ Ext.define('Inventory.view.override.ItemViewController', {
             colLocStorePOSDescription: 'strPOSDescription',
             colLocStoreCategory: 'intCategoryId',
             colLocStoreVendor: 'intVendorId',
-            colLocStoreCostingMethod: 'strCostingMethod',
+            colLocStoreCostingMethod: 'intCostingMethod',
             colLocStoreUOM: 'intDefaultUOMId',
 
             //---------//

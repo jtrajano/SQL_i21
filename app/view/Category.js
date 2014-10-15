@@ -218,7 +218,7 @@ Ext.define('Inventory.view.Category', {
                                                                 labelWidth: 130,
                                                                 displayField: 'strDescription',
                                                                 forceSelection: true,
-                                                                valueField: 'strDescription'
+                                                                valueField: 'intCostingMethodId'
                                                             },
                                                             {
                                                                 xtype: 'combobox',

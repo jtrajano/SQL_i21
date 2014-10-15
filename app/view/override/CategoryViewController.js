@@ -23,7 +23,7 @@ Ext.define('Inventory.view.override.CategoryViewController', {
             },
             cboCatalogGroup: '{current.intCatalogGroupId}',
             cboCostingMethod: {
-                value: '{current.strCostingMethod}',
+                value: '{current.intCostingMethod}',
                 store: '{CostingMethods}'
             },
             cboInventoryTracking: '{current.strInventoryTracking}',

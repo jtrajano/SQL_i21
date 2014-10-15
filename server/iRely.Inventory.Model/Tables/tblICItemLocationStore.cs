@@ -16,7 +16,7 @@ namespace iRely.Inventory.Model
         public int intStoreId { get; set; }
         public int intVendorId { get; set; }
         public string strPOSDescription { get; set; }
-        public string strCostingMethod { get; set; }
+        public int intCostingMethod { get; set; }
         public int intCategoryId { get; set; }
         public string strRow { get; set; }
         public string strBin { get; set; }

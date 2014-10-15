@@ -33,7 +33,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intStoreId).HasColumnName("intStoreId");
             this.Property(t => t.intVendorId).HasColumnName("intVendorId");
             this.Property(t => t.strBin).HasColumnName("strBin");
-            this.Property(t => t.strCostingMethod).HasColumnName("strCostingMethod");
+            this.Property(t => t.intCostingMethod).HasColumnName("intCostingMethod");
             this.Property(t => t.strPassportFuelId1).HasColumnName("strPassportFuelId1");
             this.Property(t => t.strPassportFuelId2).HasColumnName("strPassportFuelId2");
             this.Property(t => t.strPassportFuelId3).HasColumnName("strPassportFuelId3");
