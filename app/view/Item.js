@@ -38,7 +38,8 @@ Ext.define('Inventory.view.Item', {
         'Ext.grid.column.Check',
         'Ext.grid.column.Date',
         'Ext.toolbar.Paging',
-        'Inventory.store.UnitMeasure'
+        'Inventory.store.UnitMeasure',
+        'Inventory.store.Category'
     ],
 
     viewModel: {
@@ -1119,7 +1120,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 labelWidth: 130
                                                                             },
                                                                             {
-                                                                                xtype: 'combobox',
+                                                                                xtype: 'gridcombobox',
                                                                                 columns: [
                                                                                     {
                                                                                         dataIndex: 'intUnitMeasureId',
@@ -1142,7 +1143,9 @@ Ext.define('Inventory.view.Item', {
                                                                                 ],
                                                                                 itemId: 'cboCaseUom',
                                                                                 fieldLabel: 'Case UOM',
-                                                                                labelWidth: 130
+                                                                                labelWidth: 130,
+                                                                                displayField: 'strUnitMeasure',
+                                                                                valueField: 'intUnitMeasureId'
                                                                             },
                                                                             {
                                                                                 xtype: 'textfield',
@@ -1207,7 +1210,9 @@ Ext.define('Inventory.view.Item', {
                                                                                         itemId: 'cboCountCode',
                                                                                         margin: '0 0 0 5',
                                                                                         fieldLabel: 'Count Code',
-                                                                                        labelWidth: 70
+                                                                                        labelWidth: 70,
+                                                                                        displayField: 'strDescription',
+                                                                                        valueField: 'strDescription'
                                                                                     }
                                                                                 ]
                                                                             }
@@ -1319,8 +1324,8 @@ Ext.define('Inventory.view.Item', {
                                                                                 labelWidth: 130
                                                                             },
                                                                             {
-                                                                                xtype: 'combobox',
-                                                                                itemId: 'cboSpecialCommission',
+                                                                                xtype: 'checkboxfield',
+                                                                                itemId: 'chkSpecialCommission',
                                                                                 fieldLabel: 'Special Commission',
                                                                                 labelWidth: 130
                                                                             }
@@ -1353,20 +1358,6 @@ Ext.define('Inventory.view.Item', {
                                                                                     padding: '0 0 0 1'
                                                                                 },
                                                                                 items: [
-                                                                                    {
-                                                                                        xtype: 'button',
-                                                                                        tabIndex: -1,
-                                                                                        itemId: 'btnAddCategories',
-                                                                                        iconCls: 'small-add',
-                                                                                        text: 'Add'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'button',
-                                                                                        tabIndex: -1,
-                                                                                        itemId: 'btnEditCategories',
-                                                                                        iconCls: 'small-edit',
-                                                                                        text: 'Edit'
-                                                                                    },
                                                                                     {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
@@ -1413,6 +1404,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         }
                                                                                     ],
                                                                                     displayField: 'strCategoryCode',
+                                                                                    store: 'Category',
                                                                                     valueField: 'intCategoryId'
                                                                                 }
                                                                             }
@@ -1449,20 +1441,6 @@ Ext.define('Inventory.view.Item', {
                                                                                     {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
-                                                                                        itemId: 'btnAddSLA',
-                                                                                        iconCls: 'small-add',
-                                                                                        text: 'Add'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'button',
-                                                                                        tabIndex: -1,
-                                                                                        itemId: 'btnEditSLA',
-                                                                                        iconCls: 'small-edit',
-                                                                                        text: 'Edit'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'button',
-                                                                                        tabIndex: -1,
                                                                                         itemId: 'btnDeleteSLA',
                                                                                         iconCls: 'small-delete',
                                                                                         text: 'Delete'
@@ -1482,13 +1460,19 @@ Ext.define('Inventory.view.Item', {
                                                                                 itemId: 'colPOSSLAContract',
                                                                                 dataIndex: 'string',
                                                                                 text: 'SLA Contract',
-                                                                                flex: 1
+                                                                                flex: 1,
+                                                                                editor: {
+                                                                                    xtype: 'textfield'
+                                                                                }
                                                                             },
                                                                             {
                                                                                 xtype: 'numbercolumn',
                                                                                 itemId: 'colPOSSLAPrice',
                                                                                 dataIndex: 'number',
-                                                                                text: 'Contract Price'
+                                                                                text: 'Contract Price',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield'
+                                                                                }
                                                                             },
                                                                             {
                                                                                 xtype: 'checkcolumn',
@@ -1502,7 +1486,14 @@ Ext.define('Inventory.view.Item', {
                                                                         },
                                                                         selModel: {
                                                                             selType: 'checkboxmodel'
-                                                                        }
+                                                                        },
+                                                                        plugins: [
+                                                                            {
+                                                                                ptype: 'cellediting',
+                                                                                pluginId: 'cepPOSSLA',
+                                                                                clicksToEdit: 1
+                                                                            }
+                                                                        ]
                                                                     }
                                                                 ]
                                                             }

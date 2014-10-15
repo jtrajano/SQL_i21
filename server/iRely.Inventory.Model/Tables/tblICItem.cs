@@ -50,7 +50,7 @@ namespace iRely.Inventory.Model
         public string strRotationType { get; set; }
         public int? intNMFCId { get; set; }
         public bool ysnStrictFIFO { get; set; }
-        public int? intDimensionUOMId { get; set; }
+        public int intDimensionUOMId { get; set; }
         public decimal? dblHeight { get; set; }
         public decimal? dblWidth { get; set; }
         public decimal? dblDepth { get; set; }
@@ -110,7 +110,7 @@ namespace iRely.Inventory.Model
         public decimal? dblTaxExempt { get; set; }
         public bool ysnDropShip { get; set; }
         public bool ysnCommisionable { get; set; }
-        public string strSpecialCommission { get; set; }
+        public bool ysnSpecialCommission { get; set; }
 
         public ICollection<tblICItemUOM> tblICItemUOMs { get; set; }
         public ICollection<tblICItemLocationStore> tblICItemLocationStores { get; set; }

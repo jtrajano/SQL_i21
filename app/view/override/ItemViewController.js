@@ -124,10 +124,10 @@ Ext.define('Inventory.view.override.ItemViewController', {
                 store: '{InventoryTag}'
             },
             txtVolumeRebateGroup: '{current.strVolumeRebateGroup}',
-            cboPhysicalItem: {
-                value: '{current.intPhysicalItem}',
-                store: '{Item}'
-            },
+//            cboPhysicalItem: {
+//                value: '{current.intPhysicalItem}',
+//                store: '{Item}'
+//            },
             chkExtendOnPickTicket: '{current.ysnExtendPickTicket}',
             chkExportEdi: '{current.ysnExportEDI}',
             chkHazardMaterial: '{current.ysnHazardMaterial}',
@@ -153,7 +153,7 @@ Ext.define('Inventory.view.override.ItemViewController', {
             chkReceiptCommentReq: '{current.ysnReceiptCommentRequired}',
             cboCountCode: {
                 value: '{current.strCountCode}',
-                store: '{Counteds}'
+                store: '{CountCodes}'
             },
             chkLandedCost: '{current.ysnLandedCost}',
             txtLeadTime: '{current.strLeadTime}',
@@ -164,13 +164,13 @@ Ext.define('Inventory.view.override.ItemViewController', {
             txtTaxExempt: '{current.dblTaxExempt}',
             chkDropShip: '{current.ysnDropShip}',
             chkCommissionable: '{current.ysnCommisionable}',
-            cboSpecialCommission: '{current.strSpecialCommission}',
+            chkSpecialCommission: '{current.ysnSpecialCommission}',
 
-            colPOSCategoryName: '',
+            colPOSCategoryName: 'intCategoryId',
 
-            colPOSSLAContract: '',
-            colPOSSLAPrice: '',
-            colPOSSLAWarranty: '',
+            colPOSSLAContract: 'strSLAContract',
+            colPOSSLAPrice: 'dblContractPrice',
+            colPOSSLAWarranty: 'ysnServiceWarranty',
 
             //-----------------//
             //Manufacturing Tab//
@@ -255,6 +255,8 @@ Ext.define('Inventory.view.override.ItemViewController', {
             win = options.window,
             store = Ext.create('Inventory.store.Item', { pageSize: 1 });
 
+        var grdCategory = win.down('#grdCategory');
+
         win.context = Ext.create('iRely.mvvm.Engine', {
             window : win,
             store  : store,
@@ -308,25 +310,21 @@ Ext.define('Inventory.view.override.ItemViewController', {
                         grid: win.down('#grdCertification'),
                         deleteButton : win.down('#btnDeleteCertification')
                     })
+                },
+                {
+                    key: 'tblICItemPOSCategories',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdCategory,
+                        deleteButton : win.down('#btnDeleteCategories')
+                    })
+                },
+                {
+                    key: 'tblICItemPOSSLAs',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: win.down('#grdServiceLevelAgreement'),
+                        deleteButton : win.down('#btnDeleteSLA')
+                    })
                 }
-
-//                ,
-//                {
-//                    key: 'tblICItemPOS',
-//                    component: Ext.create('iRely.mvvm.grid.Manager', {
-//                        grid: win.down('#grdLocationStore'),
-//                        deleteButton : win.down('#btnDeleteLocation')
-//                    })
-//                }
-//                ,
-//                {
-//                    key: 'tblICItemSales',
-//                    component: Ext.create('iRely.mvvm.grid.Manager', {
-//                        grid: win.down('#grdLocationStore'),
-//                        deleteButton : win.down('#btnDeleteLocation')
-//                    })
-//                }
-
             ]
         });
 
@@ -338,6 +336,15 @@ Ext.define('Inventory.view.override.ItemViewController', {
 //
 //        var cboLotTracking = win.down('#cboLotTracking');
 //        cboLotTracking.forceSelection = true;
+
+        var colCategory = grdCategory.columns[0];
+        colCategory.renderer = me.CategoryRenderer;
+
+        var cellEditPlugin = grdCategory.getPlugin('cepPOSCategory');
+        cellEditPlugin.on({
+            edit: me.onGridCategoryEdit,
+            scope:me
+        });
 
         return win.context;
     },
@@ -372,6 +379,25 @@ Ext.define('Inventory.view.override.ItemViewController', {
                 }
 //            });
         }
+    },
+
+    CategoryRenderer: function (value, metadata, record) {
+        var category = record.get('strCategory');
+        return category;
+    },
+
+    onGridCategoryEdit: function(editor, e, eOpts){
+        var me = this;
+        var record = e.record
+        var column = e.column;
+        var grid = column.up('grid');
+        var view = grid.view;
+
+        var cboCategory = column.getEditor();
+        var strCategory = cboCategory.getSelectedRecord().get('strCategoryCode');
+        record.set('strCategory', strCategory);
+
+        view.refresh();
     }
 
 });

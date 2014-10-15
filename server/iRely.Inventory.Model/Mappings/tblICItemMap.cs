@@ -64,7 +64,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strNACSCategory).HasColumnName("strNACSCategory");
             this.Property(t => t.strRINRequired).HasColumnName("strRINRequired");
             this.Property(t => t.strRotationType).HasColumnName("strRotationType");
-            this.Property(t => t.strSpecialCommission).HasColumnName("strSpecialCommission");
+            this.Property(t => t.ysnSpecialCommission).HasColumnName("ysnSpecialCommission");
             this.Property(t => t.strStatus).HasColumnName("strStatus");
             this.Property(t => t.strType).HasColumnName("strType");
             this.Property(t => t.strUPCNo).HasColumnName("strUPCNo");

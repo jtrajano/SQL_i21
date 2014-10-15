@@ -110,16 +110,22 @@ Ext.define('Inventory.view.override.ItemViewModel', {
             autoLoad: true,
             data: [
                 {
+                    intCostingMethodId: '1',
                     strDescription: 'AVG'
                 },
                 {
+                    intCostingMethodId: '2',
                     strDescription: 'FIFO'
                 },
                 {
+                    intCostingMethodId: '3',
                     strDescription: 'LIFO'
                 }
             ],
             fields: [
+                {
+                    name: 'intCostingMethodId'
+                },
                 {
                     name: 'strDescription'
                 }
@@ -287,6 +293,23 @@ Ext.define('Inventory.view.override.ItemViewModel', {
                 },
                 {
                     strDescription: 'Expenses'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        CountCodes: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Item'
+                },{
+                    strDescription: 'Package'
+                },{
+                    strDescription: 'Cases'
                 }
             ],
             fields: [

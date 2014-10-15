@@ -60,7 +60,7 @@ namespace iRely.Inventory.BRL
             return _db.GetQuery<tblICItem>()
                     .Include(p => p.tblICItemUOMs)
                     .Include(p => p.tblICItemLocationStores)
-                    .Include(p => p.tblICItemPOSCategories)
+                    .Include("tblICItemPOSCategories.tblICCategory")
                     .Include(p => p.tblICItemPOSSLAs)
                     .Include(p => p.tblICItemManufacturingUOMs)
                     .Include(p => p.tblICItemUPCs)

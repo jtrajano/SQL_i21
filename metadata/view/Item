@@ -23,7 +23,8 @@
         "mixins": null,
         "reference": null,
         "requires": [
-            "Inventory.store.UnitMeasure"
+            "Inventory.store.UnitMeasure",
+            "Inventory.store.Category"
         ],
         "title": "Item: 000000015 - Ultralow Sulfur #2 Diesel",
         "width": 950
@@ -778,7 +779,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter16",
+                                                    "name": "filter",
                                                     "designerId": "52f90830-2c84-4dba-9ab6-9ab530dad629",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1324,7 +1325,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter",
+                                                                    "name": "filter1",
                                                                     "designerId": "cbd9067a-ce03-4810-b0cb-7bd07d00d877",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2404,10 +2405,13 @@
                                                                             "\t}",
                                                                             "]"
                                                                         ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strUnitMeasure",
                                                                         "fieldLabel": "Case UOM",
                                                                         "itemId": "cboCaseUom",
                                                                         "labelWidth": 130,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "valueField": "intUnitMeasureId"
                                                                     },
                                                                     "name": "MyComboBox21",
                                                                     "configAlternates": {
@@ -2549,11 +2553,13 @@
                                                                             },
                                                                             "codeClass": null,
                                                                             "userConfig": {
+                                                                                "displayField": "strDescription",
                                                                                 "fieldLabel": "Count Code",
                                                                                 "itemId": "cboCountCode",
                                                                                 "labelWidth": 70,
                                                                                 "layout|flex": 1,
-                                                                                "margin": "0 0 0 5"
+                                                                                "margin": "0 0 0 5",
+                                                                                "valueField": "strDescription"
                                                                             },
                                                                             "name": "MyComboBox19",
                                                                             "designerId": "02c4f961-3c5e-494a-b987-38998d0859f8"
@@ -2797,20 +2803,21 @@
                                                                     "designerId": "05d7aaf7-b099-466c-bf9f-5d2ffdf86cb7"
                                                                 },
                                                                 {
-                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "type": "Ext.form.field.Checkbox",
                                                                     "reference": {
                                                                         "name": "items",
                                                                         "type": "array"
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
+                                                                        "boxLabel": null,
                                                                         "fieldLabel": "Special Commission",
-                                                                        "itemId": "cboSpecialCommission",
+                                                                        "itemId": "chkSpecialCommission",
                                                                         "labelWidth": 130,
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "MyComboBox18",
-                                                                    "designerId": "03909eba-b782-4808-a975-09b5c59ef6a9"
+                                                                    "name": "MyCheckbox19",
+                                                                    "designerId": "6d269ed6-1699-4b19-b524-3648328c32e0"
                                                                 }
                                                             ]
                                                         }
@@ -2873,42 +2880,6 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "icon": null,
-                                                                                "iconCls": "small-add",
-                                                                                "itemId": "btnAddCategories",
-                                                                                "layout|flex": null,
-                                                                                "tabIndex": -1,
-                                                                                "text": "Add"
-                                                                            },
-                                                                            "name": "MyButton10",
-                                                                            "designerId": "51190b6e-5b9c-47c0-83be-c2e111255f90"
-                                                                        },
-                                                                        {
-                                                                            "type": "Ext.button.Button",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "icon": null,
-                                                                                "iconCls": "small-edit",
-                                                                                "itemId": "btnEditCategories",
-                                                                                "layout|flex": null,
-                                                                                "tabIndex": -1,
-                                                                                "text": "Edit"
-                                                                            },
-                                                                            "name": "MyButton11",
-                                                                            "designerId": "04d7ccb2-9d7e-48c2-9088-84b18ac95c27"
-                                                                        },
-                                                                        {
-                                                                            "type": "Ext.button.Button",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "icon": null,
                                                                                 "iconCls": "small-delete",
                                                                                 "itemId": "btnDeleteCategories",
                                                                                 "layout|flex": null,
@@ -2942,7 +2913,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter1",
+                                                                            "name": "filter2",
                                                                             "designerId": "2857c700-ed36-43f0-8ef5-f340b95fdfba",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -2996,6 +2967,7 @@
                                                                                 ],
                                                                                 "designer|createAlias": "gridcombobox",
                                                                                 "displayField": "strCategoryCode",
+                                                                                "store": "Category",
                                                                                 "valueField": "intCategoryId"
                                                                             },
                                                                             "name": "MyComboBox14",
@@ -3092,42 +3064,6 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "icon": null,
-                                                                                "iconCls": "small-add",
-                                                                                "itemId": "btnAddSLA",
-                                                                                "layout|flex": null,
-                                                                                "tabIndex": -1,
-                                                                                "text": "Add"
-                                                                            },
-                                                                            "name": "MyButton10",
-                                                                            "designerId": "0b08e02e-36d6-4f8f-8077-1a0ca95e5555"
-                                                                        },
-                                                                        {
-                                                                            "type": "Ext.button.Button",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "icon": null,
-                                                                                "iconCls": "small-edit",
-                                                                                "itemId": "btnEditSLA",
-                                                                                "layout|flex": null,
-                                                                                "tabIndex": -1,
-                                                                                "text": "Edit"
-                                                                            },
-                                                                            "name": "MyButton11",
-                                                                            "designerId": "0fe836fa-9a58-436e-8315-ac83251e951d"
-                                                                        },
-                                                                        {
-                                                                            "type": "Ext.button.Button",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "icon": null,
                                                                                 "iconCls": "small-delete",
                                                                                 "itemId": "btnDeleteSLA",
                                                                                 "layout|flex": null,
@@ -3161,7 +3097,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter2",
+                                                                            "name": "filter3",
                                                                             "designerId": "f74d03b6-8d20-468c-ab10-a1782ac46fa4",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -3181,7 +3117,19 @@
                                                                         "text": "SLA Contract"
                                                                     },
                                                                     "name": "MyColumn78",
-                                                                    "designerId": "9acd313b-4442-46fb-9ed2-4f3671c63881"
+                                                                    "designerId": "9acd313b-4442-46fb-9ed2-4f3671c63881",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Text",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyTextField13",
+                                                                            "designerId": "0f41e80a-5053-4704-aab0-ca183bcf08dc"
+                                                                        }
+                                                                    ]
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.column.Number",
@@ -3196,7 +3144,19 @@
                                                                         "text": "Contract Price"
                                                                     },
                                                                     "name": "MyNumberColumn14",
-                                                                    "designerId": "a23cc652-f896-4f67-85a1-c0ecad49abe7"
+                                                                    "designerId": "a23cc652-f896-4f67-85a1-c0ecad49abe7",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Number",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyNumberField11",
+                                                                            "designerId": "8221f3b7-98b6-45b8-bd30-99d5775e0375"
+                                                                        }
+                                                                    ]
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.column.Check",
@@ -3235,6 +3195,21 @@
                                                                     "codeClass": null,
                                                                     "name": "MyCheckboxSelectionModel10",
                                                                     "designerId": "b2273328-6573-425b-a8a0-340c249b501d"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.grid.plugin.CellEditing",
+                                                                    "reference": {
+                                                                        "name": "plugins",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "clicksToEdit": 1,
+                                                                        "designer|displayName": "cepPOSSLA",
+                                                                        "pluginId": "cepPOSSLA"
+                                                                    },
+                                                                    "name": "MyCellEditingPlugin3",
+                                                                    "designerId": "f6c4800a-8157-452a-a71c-824bb6240b68"
                                                                 }
                                                             ]
                                                         }
@@ -3508,7 +3483,7 @@
                                                                                     "userConfig": {
                                                                                         "layout|flex": null
                                                                                     },
-                                                                                    "name": "filter3",
+                                                                                    "name": "filter4",
                                                                                     "designerId": "3fdba5e7-278e-4e6b-ad42-9ec658e4c660",
                                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                                 }
@@ -4231,7 +4206,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter4",
+                                                                    "name": "filter5",
                                                                     "designerId": "87274c48-fa61-4ab3-acd1-2696486c13a3",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -4511,7 +4486,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter5",
+                                                                    "name": "filter6",
                                                                     "designerId": "f11b92d2-d17f-4030-af6e-5449c5557e10",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -4716,7 +4691,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter6",
+                                                                    "name": "filter7",
                                                                     "designerId": "317ae54f-a81d-4657-8d0b-3edd670adaca",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -4964,7 +4939,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter7",
+                                                                    "name": "filter8",
                                                                     "designerId": "1de0066e-eb37-44ae-af83-adcc5f465797",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -5266,7 +5241,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter8",
+                                                                            "name": "filter9",
                                                                             "designerId": "102ea262-7cce-4c88-bd43-2f80cfa1e9a8",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -5389,7 +5364,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter9",
+                                                                            "name": "filter10",
                                                                             "designerId": "437f9756-d7eb-404d-89dd-762a18b9132c",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -5580,7 +5555,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter10",
+                                                    "name": "filter11",
                                                     "designerId": "efa99b46-2432-478a-97f2-c35eb7b7ed7c",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -5907,7 +5882,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter11",
+                                                                    "name": "filter12",
                                                                     "designerId": "8c12842b-2ead-456f-b4dc-8a0da80ee35f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -6260,7 +6235,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter12",
+                                                                    "name": "filter13",
                                                                     "designerId": "df49b4ec-5d3e-4ec5-8704-5a1a7a595dd1",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -6611,7 +6586,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter13",
+                                                                    "name": "filter14",
                                                                     "designerId": "1359797a-01d3-4908-862b-ecee335db0ef",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -6927,7 +6902,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter14",
+                                                                    "name": "filter15",
                                                                     "designerId": "9949aed9-86f7-4f15-aac6-afedae027c18",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -7319,7 +7294,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter15",
+                                                    "name": "filter16",
                                                     "designerId": "ab092e2c-0602-4213-baf5-e07813015a04",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -7501,7 +7476,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging11",
                     "designerId": "64f13019-953f-46dc-920e-9a395d3cb3c9",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

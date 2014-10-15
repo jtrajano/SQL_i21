@@ -101,7 +101,7 @@ Ext.define('Inventory.model.Item', {
         { name: 'dblTaxExempt', type: 'float'},
         { name: 'ysnDropShip', type: 'boolean'},
         { name: 'ysnCommisionable', type: 'boolean'},
-        { name: 'strSpecialCommission', type: 'string'}
+        { name: 'ysnSpecialCommission', type: 'boolean'}
     ],
 
     hasMany: [{
