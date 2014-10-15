@@ -79,7 +79,7 @@
     [dblTaxExempt] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [ysnDropShip] BIT NOT NULL DEFAULT ((0)), 
     [ysnCommisionable] BIT NOT NULL DEFAULT ((0)), 
-    [strSpecialCommission] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [ysnSpecialCommission] BIT NOT NULL DEFAULT ((0)), 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 
     CONSTRAINT [PK_tblICItem] PRIMARY KEY ([intItemId]), 
@@ -768,4 +768,4 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblICItem',
     @level2type = N'COLUMN',
-    @level2name = N'strSpecialCommission'
+    @level2name = 'ysnSpecialCommission'
