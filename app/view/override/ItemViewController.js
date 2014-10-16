@@ -245,8 +245,11 @@ Ext.define('Inventory.view.override.ItemViewController', {
 
             colDocument: 'intDocumentId',
 
-            colCertification: 'intCertificationId'
+            colCertification: 'intCertificationId',
 
+            colNoteLocation: 'intLocationId',
+            colNoteCommentType: 'strCommentType',
+            colNoteComment: 'strComments'
         }
     },
 
@@ -324,6 +327,13 @@ Ext.define('Inventory.view.override.ItemViewController', {
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: win.down('#grdServiceLevelAgreement'),
                         deleteButton : win.down('#btnDeleteSLA')
+                    })
+                },
+                {
+                    key: 'tblICItemNotes',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: win.down('#grdNotes'),
+                        deleteButton : win.down('#btnDeleteNotes')
                     })
                 }
             ]

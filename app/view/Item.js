@@ -3141,7 +3141,7 @@ Ext.define('Inventory.view.Item', {
                                         items: [
                                             {
                                                 xtype: 'advancefiltergrid',
-                                                itemId: 'grnNotes',
+                                                itemId: 'grdNotes',
                                                 margin: -1,
                                                 dockedItems: [
                                                     {
@@ -3172,27 +3172,63 @@ Ext.define('Inventory.view.Item', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colNoteLocation',
                                                         dataIndex: 'string',
                                                         text: 'Location',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intCompanyLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strLocationName',
+                                                                    dataType: 'string',
+                                                                    text: 'Location Name',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strLocationType',
+                                                                    dataType: 'string',
+                                                                    text: 'Location Type',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboLocation',
+                                                            displayField: 'strLocationName',
+                                                            store: 'CompanyLocation',
+                                                            valueField: 'intCompanyLocationId'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
-                                                        text: 'Store Name',
-                                                        flex: 1
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colNoteCommentType',
                                                         dataIndex: 'string',
                                                         text: 'Comment Type',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'combobox',
+                                                            itemId: 'cboCommentType',
+                                                            displayField: 'strDescription',
+                                                            valueField: 'strDescription',
+                                                            bind: {
+                                                                store: '{CommentTypes}'
+                                                            }
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colNoteComment',
                                                         dataIndex: 'string',
                                                         text: 'Comments',
-                                                        flex: 3
+                                                        flex: 3,
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
                                                     }
                                                 ],
                                                 viewConfig: {
@@ -3200,7 +3236,13 @@ Ext.define('Inventory.view.Item', {
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'
-                                                })
+                                                }),
+                                                plugins: [
+                                                    {
+                                                        ptype: 'cellediting',
+                                                        pluginId: 'cepNotes'
+                                                    }
+                                                ]
                                             }
                                         ]
                                     },

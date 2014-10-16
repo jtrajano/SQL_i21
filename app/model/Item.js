@@ -225,6 +225,18 @@ Ext.define('Inventory.model.Item', {
                     property: 'intSort'
                 }
             }
+        },{
+            model: 'Inventory.model.ItemNote',
+            name: 'tblICItemNotes',
+            foreignKey: 'intItemId',
+            primaryKey: 'intItemId',
+            storeConfig: {
+                sortOnLoad: true,
+                sorters: {
+                    direction: 'ASC',
+                    property: 'intSort'
+                }
+            }
         }
     ],
 

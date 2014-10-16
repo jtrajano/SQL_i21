@@ -7230,7 +7230,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "designer|createAlias": "advancefiltergrid",
-                                        "itemId": "grnNotes",
+                                        "itemId": "grdNotes",
                                         "margin": -1,
                                         "title": null
                                     },
@@ -7310,10 +7310,62 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
+                                                "itemId": "colNoteLocation",
                                                 "text": "Location"
                                             },
                                             "name": "MyColumn63",
-                                            "designerId": "70fef619-a816-4c01-8dd4-081c97143260"
+                                            "designerId": "70fef619-a816-4c01-8dd4-081c97143260",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intCompanyLocationId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Location Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strLocationName',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Location Name',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strLocationType',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Location Type',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strLocationName",
+                                                        "itemId": "cboLocation",
+                                                        "store": "CompanyLocation",
+                                                        "valueField": "intCompanyLocationId"
+                                                    },
+                                                    "name": "MyComboBox18",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "75b331bc-7b35-4c74-a071-d0599085d070",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -7325,25 +7377,34 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
-                                                "text": "Store Name"
-                                            },
-                                            "name": "MyColumn64",
-                                            "designerId": "c0070d8f-7067-4410-83be-a79fa722c437"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "string",
-                                                "flex": 1,
+                                                "itemId": "colNoteCommentType",
                                                 "text": "Comment Type"
                                             },
                                             "name": "MyColumn65",
-                                            "designerId": "9f23ceb5-a40c-4bd6-8554-8b3397b68ffb"
+                                            "designerId": "9f23ceb5-a40c-4bd6-8554-8b3397b68ffb",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "displayField": "strDescription",
+                                                        "itemId": "cboCommentType",
+                                                        "store": [
+                                                            "{CommentTypes}"
+                                                        ],
+                                                        "valueField": "strDescription"
+                                                    },
+                                                    "name": "MyComboBox20",
+                                                    "configAlternates": {
+                                                        "store": "binding"
+                                                    },
+                                                    "designerId": "47a644f9-f738-4571-87af-5f2c1dc8b221"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -7355,10 +7416,23 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 3,
+                                                "itemId": "colNoteComment",
                                                 "text": "Comments"
                                             },
                                             "name": "MyColumn66",
-                                            "designerId": "e7a328d6-0c80-48b6-95a6-16a594430add"
+                                            "designerId": "e7a328d6-0c80-48b6-95a6-16a594430add",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyTextField14",
+                                                    "designerId": "efdda62c-b5c8-473d-9b00-457a5edc7e70"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.View",
@@ -7382,6 +7456,20 @@
                                             "codeClass": "Ext.selection.CheckboxModel",
                                             "name": "MyCheckboxSelectionModel8",
                                             "designerId": "236b9ed3-26d3-426c-9469-ccf27cf7bb2b"
+                                        },
+                                        {
+                                            "type": "Ext.grid.plugin.CellEditing",
+                                            "reference": {
+                                                "name": "plugins",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "designer|displayName": "cepNotes",
+                                                "pluginId": "cepNotes"
+                                            },
+                                            "name": "MyCellEditingPlugin4",
+                                            "designerId": "f924ffdb-f322-4679-9e2e-f08356ad18a8"
                                         }
                                     ]
                                 }

@@ -319,6 +319,24 @@ Ext.define('Inventory.view.override.ItemViewModel', {
                 }
             ]
         },
+        CommentTypes: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Invoice'
+                },{
+                    strDescription: 'Pick Ticket'
+                },{
+                    strDescription: 'Others'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+
 
         Manufacturer: {
             type: 'inventorymanufacturer'
@@ -344,7 +362,7 @@ Ext.define('Inventory.view.override.ItemViewModel', {
         Vendor: {
             type: 'vendorbuffered'
         },
-        Location: {
+        CompanyLocation: {
             type: 'companylocation'
         }
 
