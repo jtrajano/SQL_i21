@@ -6,8 +6,8 @@
     },
     "codeClass": null,
     "userConfig": {
-        "designer|userAlias": "filter",
-        "designer|userClassName": "FilterViewModel"
+        "designer|userAlias": "filter1",
+        "designer|userClassName": "Filter1ViewModel"
     },
     "designerId": "b6915792-f6ed-4975-bb8d-db4c86109a8a"
 }

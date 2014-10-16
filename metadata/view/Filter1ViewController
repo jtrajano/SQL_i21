@@ -6,8 +6,8 @@
     },
     "codeClass": null,
     "userConfig": {
-        "designer|userAlias": "filter",
-        "designer|userClassName": "FilterViewController"
+        "designer|userAlias": "filter1",
+        "designer|userClassName": "Filter1ViewController"
     },
     "designerId": "cf83061c-88e3-47e2-95ea-40fd51bd0738"
 }
