@@ -7388,6 +7388,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "clicksToEdit": 1,
                                                 "designer|displayName": "cepNotes",
                                                 "pluginId": "cepNotes"
                                             },

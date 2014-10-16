@@ -3212,7 +3212,8 @@ Ext.define('Inventory.view.Item', {
                                                 plugins: [
                                                     {
                                                         ptype: 'cellediting',
-                                                        pluginId: 'cepNotes'
+                                                        pluginId: 'cepNotes',
+                                                        clicksToEdit: 1
                                                     }
                                                 ]
                                             }

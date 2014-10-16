@@ -260,7 +260,8 @@ Ext.define('Inventory.view.override.ItemViewController', {
 
         var grdUOM = win.down('#grdUnitOfMeasure'),
             grdCategory = win.down('#grdCategory'),
-            grdUPC = win.down('#grdUPC');
+            grdUPC = win.down('#grdUPC'),
+            grdNotes = win.down('#grdNotes');
 
         win.context = Ext.create('iRely.mvvm.Engine', {
             window : win,
@@ -330,27 +331,16 @@ Ext.define('Inventory.view.override.ItemViewController', {
                         grid: win.down('#grdServiceLevelAgreement'),
                         deleteButton : win.down('#btnDeleteSLA')
                     })
+                },
+                {
+                    key: 'tblICItemNotes',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdNotes,
+                        deleteButton : grdNotes.down('#btnDeleteNotes')
+                    })
                 }
-//                ,
-//                {
-//                    key: 'tblICItemNotes',
-//                    component: Ext.create('iRely.mvvm.grid.Manager', {
-//                        grid: win.down('#grdNotes'),
-//                        deleteButton : win.down('#btnDeleteNotes')
-//                    })
-//                }
             ]
         });
-
-//        var cboType = win.down('#cboType');
-//        cboType.forceSelection = true;
-//
-//        var cboStatus = win.down('#cboStatus');
-//        cboStatus.forceSelection = true;
-//
-//        var cboLotTracking = win.down('#cboLotTracking');
-//        cboLotTracking.forceSelection = true;
-
 
         var colDetailUOM = grdUOM.columns[0];
         colDetailUOM.renderer = me.UOMRenderer;
@@ -379,6 +369,15 @@ Ext.define('Inventory.view.override.ItemViewController', {
             scope: me
         });
 
+        var colNoteLocation = grdNotes.columns[0];
+        colNoteLocation.renderer = me.LocationRenderer;
+
+        var cepNotes = grdNotes.getPlugin('cepNotes');
+        cepNotes.on({
+            edit: me.onGridLocationEdit,
+            scope: me
+        });
+
 
         return win.context;
     },
@@ -392,26 +391,21 @@ Ext.define('Inventory.view.override.ItemViewController', {
         if (config) {
             win.show();
 
-//            Ext.require('Inventory.store.Item', function() {
-                var context = me.setupContext( {window : win} );
+            var context = me.setupContext( {window : win} );
 
-                if (config.action === 'new') {
-                    context.data.addRecord();
-                } else {
-                    if (config.id) {
-                        config.filters = [{
-                            column: 'intItemId',
-                            value: config.id
-                        }];
-                    }
-//                if (config.param) {
-//                    console.log(config.param);
-//                }
-                    context.data.load({
-                        filters: config.filters
-                    });
+            if (config.action === 'new') {
+                context.data.addRecord();
+            } else {
+                if (config.id) {
+                    config.filters = [{
+                        column: 'intItemId',
+                        value: config.id
+                    }];
                 }
-//            });
+                context.data.load({
+                    filters: config.filters
+                });
+            }
         }
     },
 
@@ -425,32 +419,70 @@ Ext.define('Inventory.view.override.ItemViewController', {
         return unitmeasure;
     },
 
+    LocationRenderer: function (value, metadata, record) {
+        var location = record.get('strLocationName');
+        return location;
+    },
+
     onGridCategoryEdit: function(editor, e, eOpts){
         var me = this;
         var record = e.record
         var column = e.column;
+
+        if (column.itemId !== 'colPOSCategoryName')
+            return;
+
         var grid = column.up('grid');
         var view = grid.view;
 
         var cboCategory = column.getEditor();
-        var strCategory = cboCategory.getSelectedRecord().get('strCategoryCode');
-        record.set('strCategory', strCategory);
-
-        view.refresh();
+        if (cboCategory.getSelectedRecord())
+        {
+            var strCategory = cboCategory.getSelectedRecord().get('strCategory');
+            record.set('strCategory', strCategory);
+            view.refresh();
+        }
     },
 
     onGridUOMEdit: function(editor, e, eOpts){
         var me = this;
         var record = e.record
         var column = e.column;
+
+        if (column.itemId !== 'colUPCUnitMeasure' &&
+            column.itemId !== 'colDetailUnitMeasure')
+        return;
+
         var grid = column.up('grid');
         var view = grid.view;
 
         var cboUOM = column.getEditor();
-        var strUnitMeasure = cboUOM.getSelectedRecord().get('strUnitMeasure');
-        record.set('strUnitMeasure', strUnitMeasure);
+        if (cboUOM.getSelectedRecord())
+        {
+            var strUnitMeasure = cboUOM.getSelectedRecord().get('strUnitMeasure');
+            record.set('strUnitMeasure', strUnitMeasure);
+            view.refresh();
+        }
+    },
 
-        view.refresh();
+    onGridLocationEdit: function(editor, e, eOpts){
+        var me = this;
+        var record = e.record
+        var column = e.column;
+
+        if (column.itemId !== 'colNoteLocation')
+            return;
+
+        var grid = column.up('grid');
+        var view = grid.view;
+
+        var cboLocation = column.getEditor();
+        if (cboLocation.getSelectedRecord())
+        {
+            var strLocationName = cboLocation.getSelectedRecord().get('strLocationName');
+            record.set('strLocationName', strLocationName);
+            view.refresh();
+        }
     }
 
 });

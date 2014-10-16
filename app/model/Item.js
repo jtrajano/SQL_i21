@@ -15,6 +15,7 @@ Ext.define('Inventory.model.Item', {
         'Inventory.model.ItemPOSSLA',
         'Inventory.model.ItemPOSCategory',
         'Inventory.model.ItemManufacturingUOM',
+        'Inventory.model.ItemNote',
         'Ext.data.Field'
     ],
 

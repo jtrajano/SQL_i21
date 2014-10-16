@@ -18,6 +18,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intSort).HasColumnName("intSort");
             this.Property(t => t.strComments).HasColumnName("strComments");
             this.Property(t => t.strCommentType).HasColumnName("strCommentType");
+
+            this.HasOptional(p => p.tblSMCompanyLocation)
+                .WithMany(p => p.tblICItemNotes)
+                .HasForeignKey(p => p.intLocationId);
         }
     }
 }
