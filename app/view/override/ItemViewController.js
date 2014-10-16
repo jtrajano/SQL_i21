@@ -258,7 +258,8 @@ Ext.define('Inventory.view.override.ItemViewController', {
             win = options.window,
             store = Ext.create('Inventory.store.Item', { pageSize: 1 });
 
-        var grdCategory = win.down('#grdCategory'),
+        var grdUOM = win.down('#grdUnitOfMeasure'),
+            grdCategory = win.down('#grdCategory'),
             grdUPC = win.down('#grdUPC');
 
         win.context = Ext.create('iRely.mvvm.Engine', {
@@ -270,7 +271,8 @@ Ext.define('Inventory.view.override.ItemViewController', {
                 {
                     key: 'tblICItemUOMs',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
-                        grid: win.down('#grdUnitOfMeasure')
+                        grid: grdUOM,
+                        deleteButton : grdUOM.down('#btnDeleteLocation')
                     })
                 },
                 {
@@ -328,14 +330,15 @@ Ext.define('Inventory.view.override.ItemViewController', {
                         grid: win.down('#grdServiceLevelAgreement'),
                         deleteButton : win.down('#btnDeleteSLA')
                     })
-                },
-                {
-                    key: 'tblICItemNotes',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
-                        grid: win.down('#grdNotes'),
-                        deleteButton : win.down('#btnDeleteNotes')
-                    })
                 }
+//                ,
+//                {
+//                    key: 'tblICItemNotes',
+//                    component: Ext.create('iRely.mvvm.grid.Manager', {
+//                        grid: win.down('#grdNotes'),
+//                        deleteButton : win.down('#btnDeleteNotes')
+//                    })
+//                }
             ]
         });
 
@@ -347,6 +350,16 @@ Ext.define('Inventory.view.override.ItemViewController', {
 //
 //        var cboLotTracking = win.down('#cboLotTracking');
 //        cboLotTracking.forceSelection = true;
+
+
+        var colDetailUOM = grdUOM.columns[0];
+        colDetailUOM.renderer = me.UOMRenderer;
+
+        var cepDetailUOM = grdUOM.getPlugin('cepDetailUOM');
+        cepDetailUOM.on({
+            edit: me.onGridUOMEdit,
+            scope: me
+        });
 
         var colCategory = grdCategory.columns[0];
         colCategory.renderer = me.CategoryRenderer;
@@ -362,7 +375,7 @@ Ext.define('Inventory.view.override.ItemViewController', {
 
         var cepUPC = grdUPC.getPlugin('cepUPC');
         cepUPC.on({
-            edit: me.onGridUPCEdit,
+            edit: me.onGridUOMEdit,
             scope: me
         });
 
@@ -426,7 +439,7 @@ Ext.define('Inventory.view.override.ItemViewController', {
         view.refresh();
     },
 
-    onGridUPCEdit: function(editor, e, eOpts){
+    onGridUOMEdit: function(editor, e, eOpts){
         var me = this;
         var record = e.record
         var column = e.column;

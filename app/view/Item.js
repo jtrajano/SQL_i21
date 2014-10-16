@@ -19,7 +19,7 @@ Ext.define('Inventory.view.Item', {
 
     requires: [
         'Inventory.view.ItemViewModel',
-        'Inventory.view.Filter',
+        'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.toolbar.Separator',
         'Ext.form.Panel',
@@ -416,7 +416,7 @@ Ext.define('Inventory.view.Item', {
                                                                 xtype: 'tbseparator'
                                                             },
                                                             {
-                                                                xtype: 'filter'
+                                                                xtype: 'filter1'
                                                             }
                                                         ]
                                                     }
@@ -426,7 +426,7 @@ Ext.define('Inventory.view.Item', {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colDetailUnitMeasure',
                                                         width: 70,
-                                                        dataIndex: 'string',
+                                                        dataIndex: 'intUnitMeasureId',
                                                         text: 'Unit Measure',
                                                         flex: 1.3,
                                                         editor: {
@@ -460,7 +460,7 @@ Ext.define('Inventory.view.Item', {
                                                             itemId: 'cboItemUOMUnitMeasure',
                                                             displayField: 'strUnitMeasure',
                                                             store: 'UnitMeasure',
-                                                            valueField: 'intUnitMeaseureId'
+                                                            valueField: 'intUnitMeasureId'
                                                         }
                                                     },
                                                     {
@@ -568,7 +568,7 @@ Ext.define('Inventory.view.Item', {
                                                 plugins: [
                                                     {
                                                         ptype: 'cellediting',
-                                                        pluginId: 'cepUOM',
+                                                        pluginId: 'cepDetailUOM',
                                                         clicksToEdit: 1
                                                     }
                                                 ]
@@ -635,7 +635,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'tbseparator'
                                                                             },
                                                                             {
-                                                                                xtype: 'filter'
+                                                                                xtype: 'filter1'
                                                                             }
                                                                         ]
                                                                     }
@@ -717,7 +717,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'tbseparator'
                                                                             },
                                                                             {
-                                                                                xtype: 'filter'
+                                                                                xtype: 'filter1'
                                                                             }
                                                                         ]
                                                                     }
@@ -1440,7 +1440,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         xtype: 'tbseparator'
                                                                                     },
                                                                                     {
-                                                                                        xtype: 'filter'
+                                                                                        xtype: 'filter1'
                                                                                     }
                                                                                 ]
                                                                             }
@@ -1520,7 +1520,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         xtype: 'tbseparator'
                                                                                     },
                                                                                     {
-                                                                                        xtype: 'filter'
+                                                                                        xtype: 'filter1'
                                                                                     }
                                                                                 ]
                                                                             }
@@ -1682,7 +1682,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         },
                                                                                         items: [
                                                                                             {
-                                                                                                xtype: 'filter'
+                                                                                                xtype: 'filter1'
                                                                                             }
                                                                                         ]
                                                                                     }
@@ -2021,7 +2021,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'tbseparator'
                                                                             },
                                                                             {
-                                                                                xtype: 'filter'
+                                                                                xtype: 'filter1'
                                                                             }
                                                                         ]
                                                                     }
@@ -2063,10 +2063,8 @@ Ext.define('Inventory.view.Item', {
                                                                                 }
                                                                             ],
                                                                             displayField: 'strUnitMeasure',
-                                                                            valueField: 'intUnitMeasureId',
-                                                                            bind: {
-                                                                                store: '{UnitMeasure}'
-                                                                            }
+                                                                            store: 'UnitMeasure',
+                                                                            valueField: 'intUnitMeasureId'
                                                                         }
                                                                     },
                                                                     {
@@ -2141,7 +2139,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'tbseparator'
                                                                             },
                                                                             {
-                                                                                xtype: 'filter'
+                                                                                xtype: 'filter1'
                                                                             }
                                                                         ]
                                                                     }
@@ -2227,7 +2225,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'tbseparator'
                                                                             },
                                                                             {
-                                                                                xtype: 'filter'
+                                                                                xtype: 'filter1'
                                                                             }
                                                                         ]
                                                                     }
@@ -2330,7 +2328,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'tbseparator'
                                                                             },
                                                                             {
-                                                                                xtype: 'filter'
+                                                                                xtype: 'filter1'
                                                                             }
                                                                         ]
                                                                     }
@@ -2460,7 +2458,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         xtype: 'tbseparator'
                                                                                     },
                                                                                     {
-                                                                                        xtype: 'filter'
+                                                                                        xtype: 'filter1'
                                                                                     }
                                                                                 ]
                                                                             }
@@ -2509,7 +2507,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         xtype: 'tbseparator'
                                                                                     },
                                                                                     {
-                                                                                        xtype: 'filter'
+                                                                                        xtype: 'filter1'
                                                                                     }
                                                                                 ]
                                                                             }
@@ -2587,7 +2585,7 @@ Ext.define('Inventory.view.Item', {
                                                                 xtype: 'tbseparator'
                                                             },
                                                             {
-                                                                xtype: 'filter'
+                                                                xtype: 'filter1'
                                                             }
                                                         ]
                                                     }
@@ -2707,7 +2705,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'tbseparator'
                                                                             },
                                                                             {
-                                                                                xtype: 'filter'
+                                                                                xtype: 'filter1'
                                                                             }
                                                                         ]
                                                                     }
@@ -2843,7 +2841,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'tbseparator'
                                                                             },
                                                                             {
-                                                                                xtype: 'filter'
+                                                                                xtype: 'filter1'
                                                                             }
                                                                         ]
                                                                     }
@@ -2947,7 +2945,7 @@ Ext.define('Inventory.view.Item', {
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'filter'
+                                                                xtype: 'filter1'
                                                             }
                                                         ]
                                                     }
@@ -3138,7 +3136,7 @@ Ext.define('Inventory.view.Item', {
                                                                 xtype: 'tbseparator'
                                                             },
                                                             {
-                                                                xtype: 'filter'
+                                                                xtype: 'filter1'
                                                             }
                                                         ]
                                                     }
