@@ -8,8 +8,8 @@
     "userConfig": {
         "collapsible": true,
         "defaultFocus": null,
-        "designer|userAlias": "itemlocationstore",
-        "designer|userClassName": "ItemLocationStore",
+        "designer|userAlias": "itemlocation",
+        "designer|userClassName": "ItemLocation",
         "height": 684,
         "hidden": false,
         "icon": null,
@@ -21,7 +21,7 @@
         "minWidth": 995,
         "minimizable": null,
         "reference": null,
-        "title": "Item Location/Store",
+        "title": "Item Location",
         "width": 995
     },
     "designerId": "d57aaaae-c274-4b9e-b068-43fa5c868b63",
@@ -44,7 +44,7 @@
                 "frame": null,
                 "header": false,
                 "height": 350,
-                "itemId": "frmItemLocationStore",
+                "itemId": "frmItemLocation",
                 "layout": "vbox",
                 "margin": -1,
                 "title": null,
@@ -254,10 +254,10 @@
                             "userConfig": {
                                 "fieldLabel": "Location",
                                 "itemId": "cboLocation",
-                                "labelAlign": "top",
+                                "labelAlign": null,
                                 "labelWidth": 105,
                                 "layout|flex": 1.4,
-                                "margin": "0 0 0 110"
+                                "margin": null
                             },
                             "name": "MyComboBox44",
                             "designerId": "01cd1254-c32e-4c52-be00-5a3d2a4642a7"
@@ -270,29 +270,12 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "fieldLabel": "Store",
-                                "itemId": "cboStore",
-                                "labelAlign": "top",
-                                "labelWidth": 40,
-                                "layout|flex": 1,
-                                "margin": "0 5"
-                            },
-                            "name": "MyComboBox45",
-                            "designerId": "1237ec97-9b70-4ee4-b11d-da3d4b528de0"
-                        },
-                        {
-                            "type": "Ext.form.field.ComboBox",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
                                 "fieldLabel": "Vendor",
                                 "itemId": "cboDefaultVendor",
-                                "labelAlign": "top",
+                                "labelAlign": null,
                                 "labelWidth": 50,
-                                "layout|flex": 1
+                                "layout|flex": 1,
+                                "margin": "0 5"
                             },
                             "name": "MyComboBox1",
                             "designerId": "965e5a47-304a-430a-8d97-ed850d3d9227"
@@ -307,10 +290,10 @@
                             "userConfig": {
                                 "fieldLabel": "Costing Method",
                                 "itemId": "cboCostingMethod",
-                                "labelAlign": "top",
+                                "labelAlign": null,
                                 "labelWidth": 95,
                                 "layout|flex": 1,
-                                "margin": "0 0 0 5"
+                                "margin": null
                             },
                             "name": "MyComboBox20",
                             "designerId": "9e6c9559-01c7-4ada-a282-00b519aa1336"
@@ -325,7 +308,7 @@
                             "userConfig": {
                                 "fieldLabel": "Category",
                                 "itemId": "cboCategory",
-                                "labelAlign": "top",
+                                "labelAlign": null,
                                 "labelWidth": 55,
                                 "layout|flex": 1,
                                 "margin": "0 0 0 5"
@@ -343,8 +326,8 @@
                     },
                     "codeClass": null,
                     "userConfig": {
-                        "fieldLabel": "POS Description",
-                        "itemId": "txtPosDescription",
+                        "fieldLabel": "Description",
+                        "itemId": "txtDescription",
                         "labelWidth": 105,
                         "layout|flex": null,
                         "width": null
@@ -1150,7 +1133,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging112",
+                    "name": "statusbarpaging11",
                     "designerId": "3812557b-eaf0-4f41-b444-7da5890f9c89",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

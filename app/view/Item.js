@@ -594,7 +594,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'panel',
                                                         layout: 'fit',
-                                                        title: 'Location/Store',
+                                                        title: 'Location',
                                                         items: [
                                                             {
                                                                 xtype: 'advancefiltergrid',
@@ -679,6 +679,77 @@ Ext.define('Inventory.view.Item', {
                                                                 ],
                                                                 viewConfig: {
                                                                     itemId: 'grvLocationStore'
+                                                                },
+                                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                                    selType: 'checkboxmodel'
+                                                                })
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        xtype: 'panel',
+                                                        layout: 'fit',
+                                                        title: 'GL Accounts',
+                                                        items: [
+                                                            {
+                                                                xtype: 'advancefiltergrid',
+                                                                itemId: 'grdGlAccounts',
+                                                                margin: -1,
+                                                                forceFit: true,
+                                                                dockedItems: [
+                                                                    {
+                                                                        xtype: 'toolbar',
+                                                                        dock: 'top',
+                                                                        itemId: 'tlbGridOptions',
+                                                                        layout: {
+                                                                            type: 'hbox',
+                                                                            padding: '0 0 0 1'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnDeleteGlAccounts',
+                                                                                iconCls: 'small-delete',
+                                                                                text: 'Delete'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'tbseparator'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'filter'
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ],
+                                                                columns: [
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        dataIndex: 'string',
+                                                                        text: 'Location',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        dataIndex: 'string',
+                                                                        text: 'Account Description',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        dataIndex: 'string',
+                                                                        text: 'Account ID',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        dataIndex: 'string',
+                                                                        text: 'Profit Center',
+                                                                        flex: 1
+                                                                    }
+                                                                ],
+                                                                viewConfig: {
+                                                                    itemId: 'grvGlAccounts'
                                                                 },
                                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                                     selType: 'checkboxmodel'
@@ -2859,204 +2930,107 @@ Ext.define('Inventory.view.Item', {
                                     {
                                         xtype: 'panel',
                                         layout: 'fit',
-                                        bodyPadding: 5,
                                         title: 'Stock',
                                         items: [
                                             {
-                                                xtype: 'tabpanel',
-                                                itemId: 'tabStock',
-                                                activeTab: 0,
-                                                plain: true,
-                                                items: [
+                                                xtype: 'advancefiltergrid',
+                                                itemId: 'grdStock',
+                                                margin: -1,
+                                                dockedItems: [
                                                     {
-                                                        xtype: 'panel',
-                                                        layout: 'fit',
-                                                        title: 'Stock',
+                                                        xtype: 'toolbar',
+                                                        dock: 'top',
+                                                        itemId: 'tlbGridOptions',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            padding: '0 0 0 1'
+                                                        },
                                                         items: [
                                                             {
-                                                                xtype: 'advancefiltergrid',
-                                                                itemId: 'grdStock',
-                                                                margin: -1,
-                                                                dockedItems: [
-                                                                    {
-                                                                        xtype: 'toolbar',
-                                                                        dock: 'top',
-                                                                        itemId: 'tlbGridOptions',
-                                                                        layout: {
-                                                                            type: 'hbox',
-                                                                            padding: '0 0 0 1'
-                                                                        },
-                                                                        items: [
-                                                                            {
-                                                                                xtype: 'button',
-                                                                                tabIndex: -1,
-                                                                                itemId: 'btnDeleteStock',
-                                                                                iconCls: 'small-delete',
-                                                                                text: 'Delete'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'tbseparator'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'filter'
-                                                                            }
-                                                                        ]
-                                                                    }
-                                                                ],
-                                                                columns: [
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        dataIndex: 'string',
-                                                                        text: 'Location'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        width: 100,
-                                                                        dataIndex: 'string',
-                                                                        text: 'Sublocation'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        width: 45,
-                                                                        dataIndex: 'string',
-                                                                        text: 'Unit'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'numbercolumn',
-                                                                        width: 70,
-                                                                        align: 'right',
-                                                                        text: 'On Hand'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'numbercolumn',
-                                                                        width: 80,
-                                                                        align: 'right',
-                                                                        text: 'Committed'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'numbercolumn',
-                                                                        width: 70,
-                                                                        align: 'right',
-                                                                        text: 'On Order'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'numbercolumn',
-                                                                        width: 90,
-                                                                        align: 'right',
-                                                                        text: 'Reorder Point'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'numbercolumn',
-                                                                        width: 70,
-                                                                        align: 'right',
-                                                                        text: 'Min Order'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'numbercolumn',
-                                                                        width: 95,
-                                                                        align: 'right',
-                                                                        text: 'Suggested Qty'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        width: 61,
-                                                                        dataIndex: 'string',
-                                                                        text: 'Lead Time'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        width: 58,
-                                                                        dataIndex: 'string',
-                                                                        text: 'Counted'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        width: 100,
-                                                                        dataIndex: 'string',
-                                                                        text: 'Inventory Group'
-                                                                    }
-                                                                ],
-                                                                viewConfig: {
-                                                                    itemId: 'grvStock'
-                                                                },
-                                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                                    selType: 'checkboxmodel'
-                                                                })
-                                                            }
-                                                        ]
-                                                    },
-                                                    {
-                                                        xtype: 'panel',
-                                                        layout: 'fit',
-                                                        title: 'GL Accounts',
-                                                        items: [
-                                                            {
-                                                                xtype: 'advancefiltergrid',
-                                                                itemId: 'grdGlAccounts',
-                                                                margin: -1,
-                                                                forceFit: true,
-                                                                dockedItems: [
-                                                                    {
-                                                                        xtype: 'toolbar',
-                                                                        dock: 'top',
-                                                                        itemId: 'tlbGridOptions',
-                                                                        layout: {
-                                                                            type: 'hbox',
-                                                                            padding: '0 0 0 1'
-                                                                        },
-                                                                        items: [
-                                                                            {
-                                                                                xtype: 'button',
-                                                                                tabIndex: -1,
-                                                                                itemId: 'btnDeleteGlAccounts',
-                                                                                iconCls: 'small-delete',
-                                                                                text: 'Delete'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'tbseparator'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'filter'
-                                                                            }
-                                                                        ]
-                                                                    }
-                                                                ],
-                                                                columns: [
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        dataIndex: 'string',
-                                                                        text: 'Location',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        dataIndex: 'string',
-                                                                        text: 'Account Description',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        dataIndex: 'string',
-                                                                        text: 'Account ID',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        dataIndex: 'string',
-                                                                        text: 'Profit Center',
-                                                                        flex: 1
-                                                                    }
-                                                                ],
-                                                                viewConfig: {
-                                                                    itemId: 'grvGlAccounts'
-                                                                },
-                                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                                    selType: 'checkboxmodel'
-                                                                })
+                                                                xtype: 'filter'
                                                             }
                                                         ]
                                                     }
-                                                ]
+                                                ],
+                                                columns: [
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        dataIndex: 'string',
+                                                        text: 'Location'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 100,
+                                                        dataIndex: 'string',
+                                                        text: 'Sublocation'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 45,
+                                                        dataIndex: 'string',
+                                                        text: 'Unit'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        width: 70,
+                                                        align: 'right',
+                                                        text: 'On Hand'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        width: 80,
+                                                        align: 'right',
+                                                        text: 'Committed'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        width: 70,
+                                                        align: 'right',
+                                                        text: 'On Order'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        width: 90,
+                                                        align: 'right',
+                                                        text: 'Reorder Point'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        width: 70,
+                                                        align: 'right',
+                                                        text: 'Min Order'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        width: 95,
+                                                        align: 'right',
+                                                        text: 'Suggested Qty'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 61,
+                                                        dataIndex: 'string',
+                                                        text: 'Lead Time'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 58,
+                                                        dataIndex: 'string',
+                                                        text: 'Counted'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 100,
+                                                        dataIndex: 'string',
+                                                        text: 'Inventory Group'
+                                                    }
+                                                ],
+                                                viewConfig: {
+                                                    itemId: 'grvStock'
+                                                },
+                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                    selType: 'checkboxmodel'
+                                                })
                                             }
                                         ]
                                     },
