@@ -19,7 +19,7 @@ Ext.define('Inventory.view.QATest', {
 
     requires: [
         'Inventory.view.QATestViewModel',
-        'Inventory.view.Filter',
+        'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
         'Ext.button.Button',
@@ -262,7 +262,7 @@ Ext.define('Inventory.view.QATest', {
                                     xtype: 'tbseparator'
                                 },
                                 {
-                                    xtype: 'filter'
+                                    xtype: 'filter1'
                                 }
                             ]
                         }

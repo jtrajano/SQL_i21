@@ -15,5 +15,9 @@
 
 Ext.define('Inventory.view.FuturesExchangeViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.futuresexchange'
+    alias: 'controller.futuresexchange',
+
+    requires: [
+        'Inventory.view.override.FuturesExchangeViewController'
+    ]
 });

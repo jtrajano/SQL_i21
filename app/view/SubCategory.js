@@ -18,7 +18,7 @@ Ext.define('Inventory.view.SubCategory', {
     alias: 'widget.subcategory',
 
     requires: [
-        'Inventory.view.Filter',
+        'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
         'Ext.toolbar.Separator',
@@ -186,7 +186,7 @@ Ext.define('Inventory.view.SubCategory', {
                                                                 xtype: 'tbseparator'
                                                             },
                                                             {
-                                                                xtype: 'filter'
+                                                                xtype: 'filter1'
                                                             }
                                                         ]
                                                     }
@@ -250,7 +250,7 @@ Ext.define('Inventory.view.SubCategory', {
                                                                 xtype: 'tbseparator'
                                                             },
                                                             {
-                                                                xtype: 'filter'
+                                                                xtype: 'filter1'
                                                             }
                                                         ]
                                                     }
@@ -314,7 +314,7 @@ Ext.define('Inventory.view.SubCategory', {
                                                                 xtype: 'tbseparator'
                                                             },
                                                             {
-                                                                xtype: 'filter'
+                                                                xtype: 'filter1'
                                                             }
                                                         ]
                                                     }

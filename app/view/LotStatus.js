@@ -154,8 +154,8 @@ Ext.define('Inventory.view.LotStatus', {
                                     },
                                     {
                                         xtype: 'gridcolumn',
-                                        dataIndex: 'string',
                                         itemId: 'colDescription',
+                                        dataIndex: 'string',
                                         text: 'Description',
                                         flex: 2
                                     },

@@ -19,7 +19,7 @@ Ext.define('Inventory.view.Category', {
 
     requires: [
         'Inventory.view.CategoryViewModel',
-        'Inventory.view.Filter',
+        'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.toolbar.Separator',
         'Ext.form.Panel',
@@ -366,7 +366,7 @@ Ext.define('Inventory.view.Category', {
                                                                 xtype: 'tbseparator'
                                                             },
                                                             {
-                                                                xtype: 'filter'
+                                                                xtype: 'filter1'
                                                             }
                                                         ]
                                                     }
@@ -442,7 +442,7 @@ Ext.define('Inventory.view.Category', {
                                                                 xtype: 'tbseparator'
                                                             },
                                                             {
-                                                                xtype: 'filter'
+                                                                xtype: 'filter1'
                                                             }
                                                         ]
                                                     }
@@ -506,7 +506,7 @@ Ext.define('Inventory.view.Category', {
                                                                 xtype: 'tbseparator'
                                                             },
                                                             {
-                                                                xtype: 'filter'
+                                                                xtype: 'filter1'
                                                             }
                                                         ]
                                                     }
@@ -609,7 +609,7 @@ Ext.define('Inventory.view.Category', {
                                                                 xtype: 'tbseparator'
                                                             },
                                                             {
-                                                                xtype: 'filter'
+                                                                xtype: 'filter1'
                                                             }
                                                         ]
                                                     }

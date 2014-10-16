@@ -19,7 +19,7 @@ Ext.define('Inventory.view.InventoryUOM', {
 
     requires: [
         'Inventory.view.InventoryUOMViewModel',
-        'Inventory.view.Filter',
+        'Inventory.view.Filter1',
         'Inventory.view.Statusbar1',
         'Ext.form.Panel',
         'Ext.toolbar.Toolbar',
@@ -159,7 +159,7 @@ Ext.define('Inventory.view.InventoryUOM', {
                                                                 xtype: 'tbseparator'
                                                             },
                                                             {
-                                                                xtype: 'filter'
+                                                                xtype: 'filter1'
                                                             }
                                                         ]
                                                     }
@@ -167,8 +167,8 @@ Ext.define('Inventory.view.InventoryUOM', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
                                                         itemId: 'colUOM',
+                                                        dataIndex: 'string',
                                                         text: 'UOM',
                                                         flex: 1,
                                                         editor: {
@@ -257,7 +257,7 @@ Ext.define('Inventory.view.InventoryUOM', {
                                                                 xtype: 'tbseparator'
                                                             },
                                                             {
-                                                                xtype: 'filter'
+                                                                xtype: 'filter1'
                                                             }
                                                         ]
                                                     }

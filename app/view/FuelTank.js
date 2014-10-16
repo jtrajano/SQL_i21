@@ -18,7 +18,7 @@ Ext.define('Inventory.view.FuelTank', {
     alias: 'widget.fueltank',
 
     requires: [
-        'Inventory.view.Filter',
+        'Inventory.view.Filter1',
         'Inventory.view.Statusbar1',
         'Ext.form.Panel',
         'Ext.toolbar.Toolbar',
@@ -140,7 +140,7 @@ Ext.define('Inventory.view.FuelTank', {
                                                 xtype: 'tbseparator'
                                             },
                                             {
-                                                xtype: 'filter'
+                                                xtype: 'filter1'
                                             }
                                         ]
                                     }

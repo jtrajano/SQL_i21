@@ -19,7 +19,7 @@ Ext.define('Inventory.view.ReasonCode', {
 
     requires: [
         'Inventory.view.ReasonCodeViewModel',
-        'Inventory.view.Filter',
+        'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
         'Ext.toolbar.Separator',
@@ -277,7 +277,7 @@ Ext.define('Inventory.view.ReasonCode', {
                                                     xtype: 'tbseparator'
                                                 },
                                                 {
-                                                    xtype: 'filter'
+                                                    xtype: 'filter1'
                                                 }
                                             ]
                                         }

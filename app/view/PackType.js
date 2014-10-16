@@ -19,7 +19,7 @@ Ext.define('Inventory.view.PackType', {
 
     requires: [
         'Inventory.view.PackTypeViewModel',
-        'Inventory.view.Filter',
+        'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
         'Ext.button.Button',
@@ -198,7 +198,7 @@ Ext.define('Inventory.view.PackType', {
                                     xtype: 'tbseparator'
                                 },
                                 {
-                                    xtype: 'filter'
+                                    xtype: 'filter1'
                                 }
                             ]
                         }

@@ -19,7 +19,7 @@ Ext.define('Inventory.view.FuelTaxClass', {
 
     requires: [
         'Inventory.view.FuelTaxClassViewModel',
-        'Inventory.view.Filter',
+        'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
         'Ext.button.Button',
@@ -205,7 +205,7 @@ Ext.define('Inventory.view.FuelTaxClass', {
                                     },
                                     items: [
                                         {
-                                            xtype: 'filter'
+                                            xtype: 'filter1'
                                         }
                                     ]
                                 }

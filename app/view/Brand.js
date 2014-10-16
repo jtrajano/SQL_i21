@@ -19,7 +19,7 @@ Ext.define('Inventory.view.Brand', {
 
     requires: [
         'Inventory.view.BrandViewModel',
-        'Inventory.view.Filter',
+        'Inventory.view.Filter1',
         'Inventory.view.Statusbar1',
         'Ext.form.Panel',
         'Ext.toolbar.Toolbar',
@@ -145,7 +145,7 @@ Ext.define('Inventory.view.Brand', {
                                                 xtype: 'tbseparator'
                                             },
                                             {
-                                                xtype: 'filter'
+                                                xtype: 'filter1'
                                             }
                                         ]
                                     }
