@@ -2,7 +2,8 @@
 CREATE VIEW vyuAPVendorHistory
 AS
 SELECT 
-	strVendorId = tblAPVendor.strVendorId
+	intVendorId = tblAPVendor.intVendorId
+	,strVendorId = tblAPVendor.strVendorId
 	,A.dtmDate
 	,intTransactionId = A.intBillId 
 	,strTransactionType = 'Bill'
@@ -23,6 +24,7 @@ GROUP BY A.intBillId,
 	A.dblTotal,
 	A.dblDiscount,
 	A.dblWithheld,
+	tblAPVendor.intVendorId,
 	tblAPVendor.strVendorId,
     strVendorOrderNumber,
 	A.strBillId,
