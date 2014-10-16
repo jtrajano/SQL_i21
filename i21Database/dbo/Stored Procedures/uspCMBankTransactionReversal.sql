@@ -142,6 +142,7 @@ IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
 */
 UPDATE	tblCMBankTransaction
 SET		ysnCheckVoid = 1
+		,ysnPosted = 0
 		,strReferenceNo = 'Voided' + (CASE WHEN ISNULL(F.strReferenceNo, '') = '' THEN '' ELSE '-' + F.strReferenceNo END)
 		,dtmLastModified = GETDATE()
 		,intLastModifiedUserId = @intUserId
