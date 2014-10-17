@@ -16,7 +16,7 @@
 	[strWorkPhone] [nvarchar](50) NULL,
 	[intEthnicOriginId] [int] NULL,
 	[intRaceId] [int] NULL,
-	[intEEOCCode] [int] NULL,
+	[intEEOCCodeId] [int] NULL,
 	[strSocialSecurity] [nvarchar](15) NULL,
 	[ysn1099Employee] [bit] NULL,
 	[dtmTerminated] [datetime] NULL,
@@ -43,7 +43,7 @@
 	CONSTRAINT [FK_tblPREmployee_tblPRPayGroup] FOREIGN KEY ([intPayGroupId]) REFERENCES [tblPRPayGroup]([intPayGroupId]),
 	CONSTRAINT [FK_tblPREmployee_tblPREthnicOrigin] FOREIGN KEY ([intEthnicOriginId]) REFERENCES [tblPREthnicOrigin]([intEthnicOriginId]),
 	CONSTRAINT [FK_tblPREmployee_tblPRRace] FOREIGN KEY ([intRaceId]) REFERENCES [tblPRRace]([intRaceId]),
-	CONSTRAINT [FK_tblPREmployee_tblPREEOCCode] FOREIGN KEY ([intEEOCCode]) REFERENCES [tblPREEOCCode]([intEEOCCodeId])
+	CONSTRAINT [FK_tblPREmployee_tblPREEOCCode] FOREIGN KEY ([intEEOCCodeId]) REFERENCES [tblPREEOCCode]([intEEOCCodeId])
 ) ON [PRIMARY]
 GO
 
@@ -318,13 +318,13 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intRaceId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'EEOC Code',
+    @value = N'EEOC Code Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployee',
     @level2type = N'COLUMN',
-    @level2name = N'intEEOCCode'
+    @level2name = N'intEEOCCodeId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Review Date',
