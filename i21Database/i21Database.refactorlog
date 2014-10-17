@@ -686,4 +686,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intInventoryReceiptItemTaxId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="5db0b7c8-42bf-43ce-9825-1b582aa36bf3" ChangeDateTime="10/17/2014 02:46:23">
+    <Property Name="ElementName" Value="[dbo].[tblICItemLocation].[strPOSDescription]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemLocation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strDescription" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="49b274f5-09eb-44b1-b5fe-d2d6f5205954" ChangeDateTime="10/17/2014 03:00:26">
+    <Property Name="ElementName" Value="[dbo].[tblICItemLocation].[intItemLocationStoreId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemLocation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intItemLocationId" />
+  </Operation>
 </Operations>
