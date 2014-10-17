@@ -4,39 +4,43 @@ CREATE FUNCTION [dbo].[fnGetItemGLAccounts] (
 	@intItemId INT
 	,@intLocationId INT
 )
-RETURNS @returntable TABLE
-(
-	intGLAccountId int,
-	intGLType int
-)
-AS
-BEGIN
-	DECLARE @InventoryType AS INT = 1
-	DECLARE @COGSType AS INT = 2
-	DECLARE @WriteOffType AS INT = 3
-	DECLARE @RevalueType AS INT = 4
-	DECLARE @AutoNegativeType AS INT = 5
+RETURNS TABLE
+AS 
+RETURN 
+	/*
+		The natural account is retrieved from the item-location level. 
+		Profit centers will provide the segments. 
 
-	-- TODO: Replace it with the correct business rule 
-	-- See: http://www.inet.irelyserver.com/display/INV/Category+%28GL+Accounts%29+tab?focusedCommentId=38209047#comment-38209047
+		Hierarchy:
+		1. Item-location is checked first. 
+		2. If account id is not found in item-location, try the category 
+		3. If account id is not found in category, try the location. 
+	*/
 
-	INSERT INTO @returntable
-	SELECT	TOP 1 
-			intGLAccountId = CAST(NULL AS INT) 
-			,intGLType = @InventoryType 
-	FROM	tblICItemLocationStore
-	WHERE	intItemId = @intItemId
-			AND intLocationId = intLocationId
-			-- TODO: Add in the where clause the filter to know if an account is an inventory account. 
+	SELECT	-- Get the inventory g/l account id
+			intInventoryAccount = 
+				ISNULL(dbo.fnGetGLAccountIdFromItemLocation(@intItemId, @intLocationId, 1),
+					ISNULL(dbo.fnGetGLAccountIdFromCategory(@intItemId, @intLocationId, 1),
+						dbo.fnGetGLAccountIdFromLocation(@intItemId, @intLocationId, 1)))
+			-- Get the COGS g/l account id
+			,intCOGSAccount = 
+				ISNULL(dbo.fnGetGLAccountIdFromItemLocation(@intItemId, @intLocationId, 2),
+					ISNULL(dbo.fnGetGLAccountIdFromCategory(@intItemId, @intLocationId, 2),
+						dbo.fnGetGLAccountIdFromLocation(@intItemId, @intLocationId, 2)))
+			-- Get the Revalue Cost g/l account id
+			,intRevalueCostAccount = 
+				ISNULL(dbo.fnGetGLAccountIdFromItemLocation(@intItemId, @intLocationId, 3),
+					ISNULL(dbo.fnGetGLAccountIdFromCategory(@intItemId, @intLocationId, 3),
+						dbo.fnGetGLAccountIdFromLocation(@intItemId, @intLocationId, 3)))
+			-- Get the Write-Off Cost g/l account id
+			,intWriteOffCostAccount = 
+				ISNULL(dbo.fnGetGLAccountIdFromItemLocation(@intItemId, @intLocationId, 3),
+					ISNULL(dbo.fnGetGLAccountIdFromCategory(@intItemId, @intLocationId, 3),
+						dbo.fnGetGLAccountIdFromLocation(@intItemId, @intLocationId, 3)))
+			-- Get the Auto-negative g/l account  id 
+			,intAutoNegativeAccount = 				
+				ISNULL(dbo.fnGetGLAccountIdFromItemLocation(@intItemId, @intLocationId, 4),
+					ISNULL(dbo.fnGetGLAccountIdFromCategory(@intItemId, @intLocationId, 4),
+						dbo.fnGetGLAccountIdFromLocation(@intItemId, @intLocationId, 4)))
 
-	UNION ALL 
-	SELECT	TOP 1 
-			intGLAccountId = CAST(NULL AS INT) 
-			,intGLType = @COGSType 
-	FROM	tblICItemLocationStore
-	WHERE	intItemId = @intItemId
-			AND intLocationId = intLocationId
-			-- TODO: Add in the where clause the filter to know if an account is a COGS account. 
-	
-	RETURN
-END
+GO

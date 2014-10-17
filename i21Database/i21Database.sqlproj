@@ -733,6 +733,10 @@
     <Build Include="dbo\Tables\tblICLotStatus.sql" />
     <Build Include="dbo\Views\vyuEntityEFTInformation.sql" />
     <Build Include="dbo\Tables\tblSMFreightTerm.sql" />
+    <Build Include="dbo\Functions\fnGetGLAccountIdFromProfitCenter.sql" />
+    <Build Include="dbo\Functions\fnGetGLAccountIdFromCategory.sql" />
+    <Build Include="dbo\Functions\fnGetGLAccountIdFromLocation.sql" />
+    <Build Include="dbo\Functions\fnGetGLAccountIdFromItemLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
