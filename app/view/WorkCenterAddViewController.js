@@ -15,9 +15,5 @@
 
 Ext.define('Inventory.view.WorkCenterAddViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.workcenteradd',
-
-    requires: [
-        'Inventory.view.override.WorkCenterAddViewController'
-    ]
+    alias: 'controller.workcenteradd'
 });

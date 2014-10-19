@@ -388,6 +388,7 @@
                                     "userConfig": {
                                         "enforceMaxLength": null,
                                         "fieldLabel": null,
+                                        "grow": true,
                                         "height": 58,
                                         "hideLabel": true,
                                         "itemId": "txtAddress",
@@ -830,7 +831,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging19",
+                    "name": "statusbarpaging18",
                     "designerId": "13573c95-bb91-42f5-afb7-d6ab535dd852",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

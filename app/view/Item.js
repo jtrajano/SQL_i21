@@ -240,7 +240,8 @@ Ext.define('Inventory.view.Item', {
                                                                 height: 62,
                                                                 itemId: 'txtDescription',
                                                                 fieldLabel: 'Description',
-                                                                labelWidth: 95
+                                                                labelWidth: 95,
+                                                                grow: true
                                                             }
                                                         ]
                                                     },

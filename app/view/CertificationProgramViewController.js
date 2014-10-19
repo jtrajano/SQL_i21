@@ -15,9 +15,5 @@
 
 Ext.define('Inventory.view.CertificationProgramViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.certificationprogram',
-
-    requires: [
-        'Inventory.view.override.CertificationProgramViewController'
-    ]
+    alias: 'controller.certificationprogram'
 });

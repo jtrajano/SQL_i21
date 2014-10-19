@@ -388,6 +388,7 @@
                                     "userConfig": {
                                         "enforceMaxLength": null,
                                         "fieldLabel": null,
+                                        "grow": true,
                                         "height": 58,
                                         "hideLabel": true,
                                         "itemId": "txtAddress",
@@ -870,6 +871,7 @@
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Notes",
+                                "grow": true,
                                 "height": null,
                                 "itemId": "txtNotes",
                                 "labelPad": null,

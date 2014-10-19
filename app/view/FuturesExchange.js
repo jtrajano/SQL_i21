@@ -209,7 +209,8 @@ Ext.define('Inventory.view.FuturesExchange', {
                                     height: 58,
                                     itemId: 'txtAddress',
                                     hideLabel: true,
-                                    labelWidth: 0
+                                    labelWidth: 0,
+                                    grow: true
                                 }
                             ]
                         },
