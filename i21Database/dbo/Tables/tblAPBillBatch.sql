@@ -7,10 +7,10 @@
     [dblTotal]           DECIMAL (18, 2) NOT NULL,
     [intUserId] INT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
-    [intEntityId] INT NOT NULL DEFAULT 0, 
-    CONSTRAINT [PK_dbo.tblAPBillBatches] PRIMARY KEY CLUSTERED ([intBillBatchId] ASC)
+    [intEntityId] INT NULL, 
+    CONSTRAINT [PK_dbo.tblAPBillBatches] PRIMARY KEY CLUSTERED ([intBillBatchId] ASC),
+	CONSTRAINT [FK_dbo.tblAPBillBatch_dbo.tblEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEntity(intEntityId)
 );
-
 
 GO
 CREATE TRIGGER trgBillBatchRecordNumber

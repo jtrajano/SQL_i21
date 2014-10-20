@@ -74,8 +74,8 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\AR\DefaultData\1_CustomerPortalMenu.sql
 
 --Accounts Payable
-:r .\AP\RestoreVendorId.sql
-:r .\AP\FixEntitiesData.sql
+--:r .\AP\RestoreVendorId.sql
+--:r .\AP\FixEntitiesData.sql
 
 -- Inventory 
 :r .\IC\1_InventoryTransactionTypes.sql 
