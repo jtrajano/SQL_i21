@@ -240,8 +240,7 @@ Ext.define('Inventory.view.Item', {
                                                                 height: 62,
                                                                 itemId: 'txtDescription',
                                                                 fieldLabel: 'Description',
-                                                                labelWidth: 95,
-                                                                grow: true
+                                                                labelWidth: 95
                                                             }
                                                         ]
                                                     },
@@ -728,25 +727,37 @@ Ext.define('Inventory.view.Item', {
                                                                         xtype: 'gridcolumn',
                                                                         dataIndex: 'string',
                                                                         text: 'Location',
-                                                                        flex: 1
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         dataIndex: 'string',
                                                                         text: 'Account Description',
-                                                                        flex: 1
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'combobox'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         dataIndex: 'string',
                                                                         text: 'Account ID',
-                                                                        flex: 1
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         dataIndex: 'string',
                                                                         text: 'Profit Center',
-                                                                        flex: 1
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'combobox'
+                                                                        }
                                                                     }
                                                                 ],
                                                                 viewConfig: {
@@ -754,7 +765,14 @@ Ext.define('Inventory.view.Item', {
                                                                 },
                                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                                     selType: 'checkboxmodel'
-                                                                })
+                                                                }),
+                                                                plugins: [
+                                                                    {
+                                                                        ptype: 'cellediting',
+                                                                        pluginId: 'cepAccount',
+                                                                        clicksToEdit: 1
+                                                                    }
+                                                                ]
                                                             }
                                                         ]
                                                     },
@@ -2946,6 +2964,16 @@ Ext.define('Inventory.view.Item', {
                                                         },
                                                         items: [
                                                             {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnDeleteStock',
+                                                                iconCls: 'small-delete',
+                                                                text: 'Delete'
+                                                            },
+                                                            {
+                                                                xtype: 'tbseparator'
+                                                            },
+                                                            {
                                                                 xtype: 'filter1'
                                                             }
                                                         ]
@@ -2955,73 +2983,109 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         dataIndex: 'string',
-                                                        text: 'Location'
+                                                        text: 'Location',
+                                                        editor: {
+                                                            xtype: 'gridcombobox'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        width: 100,
                                                         dataIndex: 'string',
-                                                        text: 'Sublocation'
+                                                        width: 100,
+                                                        text: 'Sublocation',
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         width: 45,
                                                         dataIndex: 'string',
-                                                        text: 'Unit'
+                                                        text: 'Unit',
+                                                        editor: {
+                                                            xtype: 'gridcombobox'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         width: 70,
                                                         align: 'right',
-                                                        text: 'On Hand'
+                                                        text: 'On Hand',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         width: 80,
                                                         align: 'right',
-                                                        text: 'Committed'
+                                                        text: 'Committed',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         width: 70,
                                                         align: 'right',
-                                                        text: 'On Order'
+                                                        text: 'On Order',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         width: 90,
                                                         align: 'right',
-                                                        text: 'Reorder Point'
+                                                        text: 'Reorder Point',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         width: 70,
                                                         align: 'right',
-                                                        text: 'Min Order'
+                                                        text: 'Min Order',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         width: 95,
                                                         align: 'right',
-                                                        text: 'Suggested Qty'
+                                                        text: 'Suggested Qty',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
-                                                        xtype: 'gridcolumn',
+                                                        xtype: 'numbercolumn',
                                                         width: 61,
                                                         dataIndex: 'string',
-                                                        text: 'Lead Time'
+                                                        text: 'Lead Time',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         width: 58,
                                                         dataIndex: 'string',
-                                                        text: 'Counted'
+                                                        text: 'Counted',
+                                                        editor: {
+                                                            xtype: 'combobox'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         width: 100,
                                                         dataIndex: 'string',
-                                                        text: 'Inventory Group'
+                                                        text: 'Inventory Group',
+                                                        editor: {
+                                                            xtype: 'combobox'
+                                                        }
                                                     }
                                                 ],
                                                 viewConfig: {
@@ -3029,7 +3093,14 @@ Ext.define('Inventory.view.Item', {
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'
-                                                })
+                                                }),
+                                                plugins: [
+                                                    {
+                                                        ptype: 'cellediting',
+                                                        pluginId: 'cepStock',
+                                                        clicksToEdit: 1
+                                                    }
+                                                ]
                                             }
                                         ]
                                     },

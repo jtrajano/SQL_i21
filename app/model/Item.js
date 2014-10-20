@@ -15,6 +15,8 @@ Ext.define('Inventory.model.Item', {
         'Inventory.model.ItemPOSSLA',
         'Inventory.model.ItemPOSCategory',
         'Inventory.model.ItemManufacturingUOM',
+        'Inventory.model.ItemAccount',
+        'Inventory.model.ItemStock',
         'Inventory.model.ItemNote',
         'Ext.data.Field'
     ],
@@ -217,6 +219,30 @@ Ext.define('Inventory.model.Item', {
         },{
             model: 'Inventory.model.ItemManufacturingUOM',
             name: 'tblICItemManufacturingUOMs',
+            foreignKey: 'intItemId',
+            primaryKey: 'intItemId',
+            storeConfig: {
+                sortOnLoad: true,
+                sorters: {
+                    direction: 'ASC',
+                    property: 'intSort'
+                }
+            }
+        },{
+            model: 'Inventory.model.ItemAccount',
+            name: 'tblICItemAccounts',
+            foreignKey: 'intItemId',
+            primaryKey: 'intItemId',
+            storeConfig: {
+                sortOnLoad: true,
+                sorters: {
+                    direction: 'ASC',
+                    property: 'intSort'
+                }
+            }
+        },{
+            model: 'Inventory.model.ItemStock',
+            name: 'tblICItemStocks',
             foreignKey: 'intItemId',
             primaryKey: 'intItemId',
             storeConfig: {
