@@ -328,19 +328,13 @@
                                             "dataType: 'string',",
                                             "text: 'Manufacturer',",
                                             "flex: 1",
-                                            "},",
-                                            "{",
-                                            "dataIndex: 'strContact',",
-                                            "dataType: 'string',",
-                                            "text: 'Contact',",
-                                            "flex: 1",
                                             "}",
                                             "]"
                                         ],
                                         "designer|createAlias": "gridcombobox",
                                         "displayField": "strManufacturer",
                                         "store": [
-                                            "{Manufacturer}"
+                                            "{Manufacturers}"
                                         ],
                                         "valueField": "intManufacturerId"
                                     },
@@ -395,8 +389,8 @@
                                 "designer|displayName": "cepBrand",
                                 "pluginId": "cepBrand"
                             },
-                            "name": "MyCellEditingPlugin2",
-                            "designerId": "201415c9-0e99-46e5-9154-7beb45a3e73c"
+                            "name": "MyCellEditingPlugin",
+                            "designerId": "086396da-755f-44ae-a807-8104c75a6d78"
                         }
                     ]
                 },
@@ -408,6 +402,7 @@
                     },
                     "codeClass": null,
                     "userConfig": {
+                        "designer|createAlias": "istatusbar",
                         "dock": "bottom",
                         "layout|flex": 1
                     },

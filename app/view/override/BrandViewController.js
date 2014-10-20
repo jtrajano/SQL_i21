@@ -20,8 +20,8 @@ Ext.define('Inventory.view.override.BrandViewController', {
             window : win,
             store  : store,
             singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
-                grid:  win.down('#grdFuelCode'),
-                deleteButton: win.down('#btnDeleteFuelCode')
+                grid:  win.down('#grdBrand'),
+                deleteButton: win.down('#btnDeleteBrand')
             })
         });
 

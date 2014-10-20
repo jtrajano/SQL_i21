@@ -6,7 +6,7 @@ Ext.define('Inventory.view.override.BrandViewModel', {
     ],
 
     stores: {
-        Manufacturer: {
+        Manufacturers:{
             type: 'inventorymanufacturer'
         }
     }

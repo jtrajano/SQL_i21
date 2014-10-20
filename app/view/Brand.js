@@ -114,7 +114,7 @@ Ext.define('Inventory.view.Brand', {
                                 ]
                             },
                             {
-                                xtype: 'statusbar1',
+                                xtype: 'istatusbar',
                                 flex: 1,
                                 dock: 'bottom'
                             }
@@ -191,18 +191,12 @@ Ext.define('Inventory.view.Brand', {
                                                     dataType: 'string',
                                                     text: 'Manufacturer',
                                                     flex: 1
-                                                },
-                                                {
-                                                    dataIndex: 'strContact',
-                                                    dataType: 'string',
-                                                    text: 'Contact',
-                                                    flex: 1
                                                 }
                                             ],
                                             displayField: 'strManufacturer',
                                             valueField: 'intManufacturerId',
                                             bind: {
-                                                store: '{Manufacturer}'
+                                                store: '{Manufacturers}'
                                             }
                                         }
                                     }
