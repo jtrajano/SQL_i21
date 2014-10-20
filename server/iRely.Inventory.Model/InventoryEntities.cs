@@ -111,7 +111,7 @@ namespace iRely.Inventory.Model
         public DbSet<tblICItemContract> tblICItemContracts { get; set; }
         public DbSet<tblICItemContractDocument> tblICItemContractDocuments { get; set; }
         public DbSet<tblICItemCustomerXref> tblICItemCustomerXrefs { get; set; }
-        public DbSet<tblICItemLocationStore> tblICItemLocationStores { get; set; }
+        public DbSet<tblICItemLocation> tblICItemLocationStores { get; set; }
         public DbSet<tblICItemManufacturingUOM> tblICItemManufacturingUOMs { get; set; }
         public DbSet<tblICItemNote> tblICItemNotes { get; set; }
         public DbSet<tblICItemPOSCategory> tblICItemPOSCategorys { get; set; }
@@ -167,7 +167,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICItemContractMap());
             modelBuilder.Configurations.Add(new tblICItemContractDocumentMap());
             modelBuilder.Configurations.Add(new tblICItemCustomerXrefMap());
-            modelBuilder.Configurations.Add(new tblICItemLocationStoreMap());
+            modelBuilder.Configurations.Add(new tblICItemLocationMap());
             modelBuilder.Configurations.Add(new tblICItemManufacturingUOMMap());
             modelBuilder.Configurations.Add(new tblICItemNoteMap());
             modelBuilder.Configurations.Add(new tblICItemPOSCategoryMap());

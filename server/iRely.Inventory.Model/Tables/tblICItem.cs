@@ -13,7 +13,7 @@ namespace iRely.Inventory.Model
         public tblICItem()
         {
             this.tblICItemUOMs = new List<tblICItemUOM>();
-            this.tblICItemLocationStores = new List<tblICItemLocationStore>();
+            this.tblICItemLocations = new List<tblICItemLocation>();
             this.tblICItemPOSSLAs = new List<tblICItemPOSSLA>();
             this.tblICItemPOSCategories = new List<tblICItemPOSCategory>();
             this.tblICItemManufacturingUOMs = new List<tblICItemManufacturingUOM>();
@@ -113,7 +113,7 @@ namespace iRely.Inventory.Model
         public bool ysnSpecialCommission { get; set; }
 
         public ICollection<tblICItemUOM> tblICItemUOMs { get; set; }
-        public ICollection<tblICItemLocationStore> tblICItemLocationStores { get; set; }
+        public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
 
         public ICollection<tblICItemPOSSLA> tblICItemPOSSLAs { get; set; }
         public ICollection<tblICItemPOSCategory> tblICItemPOSCategories { get; set; }

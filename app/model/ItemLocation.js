@@ -5,6 +5,7 @@ Ext.define('Inventory.model.ItemLocationStore', {
     extend: 'iRely.BaseEntity',
 
     requires: [
+        'Inventory.model.Item',
         'Ext.data.Field'
     ],
 
@@ -12,11 +13,9 @@ Ext.define('Inventory.model.ItemLocationStore', {
 
     fields: [
         { name: 'intItemLocationStoreId', type: 'int'},
-        { name: 'intItemId', type: 'int'},
         { name: 'intLocationId', type: 'int'},
-        { name: 'intStoreId', type: 'int'},
         { name: 'intVendorId', type: 'int'},
-        { name: 'strPOSDescription', type: 'string'},
+        { name: 'strDescription', type: 'string'},
         { name: 'intCostingMethod', type: 'int'},
         { name: 'intCategoryId', type: 'int'},
         { name: 'strRow', type: 'string'},
@@ -26,6 +25,7 @@ Ext.define('Inventory.model.ItemLocationStore', {
         { name: 'intReceiveUOMId', type: 'int'},
         { name: 'intFamilyId', type: 'int'},
         { name: 'intClassId', type: 'int'},
+        { name: 'intProductCodeId', type: 'int'},
         { name: 'intFuelTankId', type: 'int'},
         { name: 'strPassportFuelId1', type: 'string'},
         { name: 'strPassportFuelId2', type: 'string'},
@@ -60,6 +60,7 @@ Ext.define('Inventory.model.ItemLocationStore', {
         { name: 'ysnAutoCalculateFreight', type: 'boolean'},
         { name: 'intFreightMethodId', type: 'int'},
         { name: 'dblFreightRate', type: 'float'},
-        { name: 'intFreightVendorId', type: 'int'}
+        { name: 'intFreightVendorId', type: 'int'},
+        { name: 'intSort', type: 'int'}
     ]
 });

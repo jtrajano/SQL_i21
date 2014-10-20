@@ -858,7 +858,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Vendor Category",
-                                        "itemId": "txtBottleDepositNo1",
+                                        "itemId": "txtVendorCategory",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -875,7 +875,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Count by Serial Number",
-                                        "itemId": "chkLinkedItem1",
+                                        "itemId": "chkCountbySerialNumber",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -891,7 +891,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Serial Number Begin",
-                                        "itemId": "txtBottleDepositNo2",
+                                        "itemId": "txtSerialNumberBegin",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -907,7 +907,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Serial Number End",
-                                        "itemId": "txtBottleDepositNo3",
+                                        "itemId": "txtSerialNumberEnd",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
@@ -1133,7 +1133,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging112",
+                    "name": "statusbarpaging11",
                     "designerId": "3812557b-eaf0-4f41-b444-7da5890f9c89",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

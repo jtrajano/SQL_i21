@@ -259,6 +259,7 @@ Ext.define('Inventory.view.override.ItemViewController', {
             store = Ext.create('Inventory.store.Item', { pageSize: 1 });
 
         var grdUOM = win.down('#grdUnitOfMeasure'),
+            grdLocationStore = win.down('#grdLocationStore'),
             grdCategory = win.down('#grdCategory'),
             grdUPC = win.down('#grdUPC'),
             grdNotes = win.down('#grdNotes');
@@ -279,8 +280,8 @@ Ext.define('Inventory.view.override.ItemViewController', {
                 {
                     key: 'tblICItemLocationStores',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
-                        grid: win.down('#grdLocationStore'),
-                        deleteButton : win.down('#btnDeleteLocation')
+                        grid: grdLocationStore,
+                        deleteButton : grdLocationStore.down('#btnDeleteLocation')
                     })
                 },
                 {
@@ -342,6 +343,12 @@ Ext.define('Inventory.view.override.ItemViewController', {
             ]
         });
 
+        var btnAddLocation = grdLocationStore.down('#btnAddLocation');
+        btnAddLocation.on('click', me.onAddLocationClick);
+        var btnEditLocation = grdLocationStore.down('#btnEditLocation');
+        btnEditLocation.on('click', me.onEditLocationClick);
+
+        // <editor-fold desc="Subscribe to Renderers and Cell Editing Plugins">
         var colDetailUOM = grdUOM.columns[0];
         colDetailUOM.renderer = me.UOMRenderer;
 
@@ -377,6 +384,7 @@ Ext.define('Inventory.view.override.ItemViewController', {
             edit: me.onGridLocationEdit,
             scope: me
         });
+        // </editor-fold>
 
 
         return win.context;
@@ -483,6 +491,25 @@ Ext.define('Inventory.view.override.ItemViewController', {
             record.set('strLocationName', strLocationName);
             view.refresh();
         }
-    }
+    },
 
+    onAddLocationClick: function(button, e, eOpts) {
+        var screenName = 'Inventory.view.ItemLocation';
+        var win = button.up('window');
+
+        Ext.require([
+            screenName,
+            screenName + 'ViewController',
+        ], function() {
+            var screen = screenName.substring(screenName.indexOf('view.') + 5, screenName.length),
+                view = Ext.create(screenName, { controller: screen.toLowerCase() });
+
+            var controller = view.getController();
+            controller.show(win.getViewModel().data.current);
+        });
+    },
+
+    onEditLocationClick: function(button, e, eOpts) {
+        iRely.Functions.openScreen('Inventory.view.ItemLocation', this.current);
+    }
 });

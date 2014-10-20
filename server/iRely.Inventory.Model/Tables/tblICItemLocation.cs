@@ -8,14 +8,13 @@ using iRely.Common;
 
 namespace iRely.Inventory.Model
 {
-    public class tblICItemLocationStore : BaseEntity
+    public class tblICItemLocation : BaseEntity
     {
-        public int intItemLocationStoreId { get; set; }
+        public int intItemLocationId { get; set; }
         public int intItemId { get; set; }
         public int intLocationId { get; set; }
-        public int intStoreId { get; set; }
         public int intVendorId { get; set; }
-        public string strPOSDescription { get; set; }
+        public string strDescription { get; set; }
         public int intCostingMethod { get; set; }
         public int intCategoryId { get; set; }
         public string strRow { get; set; }
@@ -25,6 +24,7 @@ namespace iRely.Inventory.Model
         public int intReceiveUOMId { get; set; }
         public int intFamilyId { get; set; }
         public int intClassId { get; set; }
+        public int intProductCodeId { get; set; }
         public int intFuelTankId { get; set; }
         public string strPassportFuelId1 { get; set; }
         public string strPassportFuelId2 { get; set; }
@@ -58,8 +58,9 @@ namespace iRely.Inventory.Model
         public int intItemTypeSubCode { get; set; }
         public bool ysnAutoCalculateFreight { get; set; }
         public int intFreightMethodId { get; set; }
-        public double dblFreightRate { get; set; }
+        public decimal? dblFreightRate { get; set; }
         public int intFreightVendorId { get; set; }
+        public int intSort { get; set; }
 
         public tblICItem tblICItem { get; set; }
         

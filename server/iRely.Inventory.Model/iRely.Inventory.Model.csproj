@@ -73,7 +73,7 @@
     <Compile Include="Mappings\tblICItemUPCMap.cs" />
     <Compile Include="Mappings\tblICItemManufacturingUOMMap.cs" />
     <Compile Include="Mappings\tblICItemPOSMap.cs" />
-    <Compile Include="Mappings\tblICItemLocationStoreMap.cs" />
+    <Compile Include="Mappings\tblICItemLocationMap.cs" />
     <Compile Include="Mappings\tblICItemUOMMap.cs" />
     <Compile Include="Mappings\tblICBrandMap.cs" />
     <Compile Include="Mappings\tblICCatalogMap.cs" />
@@ -119,7 +119,7 @@
     <Compile Include="Tables\tblICItemCustomerXref.cs" />
     <Compile Include="Tables\tblICItemManufacturingUOM.cs" />
     <Compile Include="Tables\tblICItemPOS.cs" />
-    <Compile Include="Tables\tblICItemLocationStore.cs" />
+    <Compile Include="Tables\tblICItemLocation.cs" />
     <Compile Include="Tables\tblICItemUOM.cs" />
     <Compile Include="Tables\tblICBrand.cs" />
     <Compile Include="Tables\tblICCatalog.cs" />

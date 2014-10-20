@@ -2,8 +2,6 @@ Ext.define('Inventory.view.override.ItemViewModel', {
     override: 'Inventory.view.ItemViewModel',
 
     requires: [
-        'Inventory.model.ItemUOM',
-        'Inventory.model.ItemLocationStore',
         'Inventory.store.Manufacturer',
         'Inventory.store.Category',
         'Inventory.store.PatronageCategory',

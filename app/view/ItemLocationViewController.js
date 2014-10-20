@@ -15,5 +15,9 @@
 
 Ext.define('Inventory.view.ItemLocationViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.itemlocation'
+    alias: 'controller.itemlocation',
+
+    requires: [
+        'Inventory.view.override.ItemLocationViewController'
+    ]
 });

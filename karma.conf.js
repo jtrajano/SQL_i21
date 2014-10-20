@@ -30,7 +30,7 @@ var InventoryFiles = [
     {pattern: 'app/model/ItemManufacturingUOM.js', watched: false},
     {pattern: 'app/model/ItemPOSSLA.js', watched: false},
     {pattern: 'app/model/ItemPOSCategory.js', watched: false},
-    {pattern: 'app/model/ItemLocationStore.js', watched: false},
+    {pattern: 'app/model/ItemLocation.js', watched: false},
     {pattern: 'app/model/ItemUPC.js', watched: false},
     {pattern: 'app/model/ItemVendorXref.js', watched: false},
     {pattern: 'app/model/ItemCustomerXref.js', watched: false},

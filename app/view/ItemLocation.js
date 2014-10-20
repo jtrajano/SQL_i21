@@ -392,25 +392,25 @@ Ext.define('Inventory.view.ItemLocation', {
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtBottleDepositNo1',
+                                    itemId: 'txtVendorCategory',
                                     fieldLabel: 'Vendor Category',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'checkboxfield',
-                                    itemId: 'chkLinkedItem1',
+                                    itemId: 'chkCountbySerialNumber',
                                     fieldLabel: 'Count by Serial Number',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtBottleDepositNo2',
+                                    itemId: 'txtSerialNumberBegin',
                                     fieldLabel: 'Serial Number Begin',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'textfield',
-                                    itemId: 'txtBottleDepositNo3',
+                                    itemId: 'txtSerialNumberEnd',
                                     fieldLabel: 'Serial Number End',
                                     labelWidth: 140
                                 }
