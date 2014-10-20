@@ -727,6 +727,14 @@ GO
 		SET strCommand = 'Inventory.view.PackType', intSort = 26
 		WHERE strMenuName = 'Pack Type' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId
 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Brand' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId)
+		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+		VALUES ('Brand', 'Inventory', @InventoryMaintenanceId, 'Brand', 'Screen', 'Inventory.view.Brand', 'small-screen', 1, 1, 0, 1, 27, 0)
+	ELSE
+		UPDATE tblSMMasterMenu
+		SET strCommand = 'Inventory.view.Brand', intSort = 27
+		WHERE strMenuName = 'Brand' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId
+
 	/* ---------------------------------------- */
 	/* -- End of Inventory Maintenance Menus -- */
 	/* ---------------------------------------- */
