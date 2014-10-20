@@ -190,7 +190,8 @@ Ext.define('Inventory.view.InventoryTag', {
                             flex: 1,
                             itemId: 'txtMessage',
                             fieldLabel: 'Message',
-                            labelWidth: 90
+                            labelWidth: 90,
+                            grow: true
                         }
                     ]
                 }

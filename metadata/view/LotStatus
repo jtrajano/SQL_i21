@@ -326,7 +326,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbar18",
+                    "name": "statusbar17",
                     "designerId": "ca3fc84d-4856-4d72-afaa-cfd23eebce3b",
                     "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
                 }

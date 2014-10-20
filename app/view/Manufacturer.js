@@ -208,7 +208,8 @@ Ext.define('Inventory.view.Manufacturer', {
                                     height: 58,
                                     itemId: 'txtAddress',
                                     hideLabel: true,
-                                    labelWidth: 0
+                                    labelWidth: 0,
+                                    grow: true
                                 }
                             ]
                         },
@@ -410,7 +411,8 @@ Ext.define('Inventory.view.Manufacturer', {
                             flex: 1,
                             itemId: 'txtNotes',
                             fieldLabel: 'Notes',
-                            labelWidth: 90
+                            labelWidth: 90,
+                            grow: true
                         }
                     ]
                 }

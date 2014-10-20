@@ -193,7 +193,8 @@ Ext.define('Inventory.view.ItemLocation', {
                     xtype: 'textareafield',
                     itemId: 'txtDescription',
                     fieldLabel: 'Description',
-                    labelWidth: 105
+                    labelWidth: 105,
+                    grow: true
                 },
                 {
                     xtype: 'container',

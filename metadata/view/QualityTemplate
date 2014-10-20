@@ -10,14 +10,14 @@
         "defaultFocus": null,
         "designer|userAlias": "qualitytemplate",
         "designer|userClassName": "QualityTemplate",
-        "height": 615,
+        "height": 620,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
         "layout": "fit",
         "maxHeight": null,
         "maximizable": true,
-        "minHeight": 615,
+        "minHeight": 620,
         "minWidth": 800,
         "minimizable": null,
         "reference": null,
@@ -395,6 +395,7 @@
                                             "userConfig": {
                                                 "enforceMaxLength": null,
                                                 "fieldLabel": "Directions",
+                                                "grow": true,
                                                 "itemId": "txtDirections",
                                                 "labelWidth": 85,
                                                 "layout|flex": null,
@@ -415,6 +416,7 @@
                                             "userConfig": {
                                                 "enforceMaxLength": null,
                                                 "fieldLabel": "Notes",
+                                                "grow": true,
                                                 "itemId": "txtNotes",
                                                 "labelWidth": 85,
                                                 "layout|flex": null,
@@ -663,7 +665,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter159",
+                                                    "name": "filter149",
                                                     "designerId": "60f8a457-b9da-4ef6-8adc-99ff9885e983",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -879,7 +881,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter160",
+                                                    "name": "filter150",
                                                     "designerId": "c3ae7629-a992-448a-8cf3-a46b0b8a3aed",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }

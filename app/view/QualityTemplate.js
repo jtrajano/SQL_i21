@@ -39,9 +39,9 @@ Ext.define('Inventory.view.QualityTemplate', {
     viewModel: {
         type: 'qualitytemplate'
     },
-    height: 615,
+    height: 620,
     hidden: false,
-    minHeight: 615,
+    minHeight: 620,
     minWidth: 800,
     width: 800,
     layout: 'fit',
@@ -226,13 +226,15 @@ Ext.define('Inventory.view.QualityTemplate', {
                                             xtype: 'textareafield',
                                             itemId: 'txtDirections',
                                             fieldLabel: 'Directions',
-                                            labelWidth: 85
+                                            labelWidth: 85,
+                                            grow: true
                                         },
                                         {
                                             xtype: 'textareafield',
                                             itemId: 'txtNotes',
                                             fieldLabel: 'Notes',
-                                            labelWidth: 85
+                                            labelWidth: 85,
+                                            grow: true
                                         },
                                         {
                                             xtype: 'panel',

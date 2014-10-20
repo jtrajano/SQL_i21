@@ -327,6 +327,7 @@
                     "codeClass": null,
                     "userConfig": {
                         "fieldLabel": "Description",
+                        "grow": true,
                         "itemId": "txtDescription",
                         "labelWidth": 105,
                         "layout|flex": null,
