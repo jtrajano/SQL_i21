@@ -278,7 +278,7 @@ Ext.define('Inventory.view.override.ItemViewController', {
                     })
                 },
                 {
-                    key: 'tblICItemLocationStores',
+                    key: 'tblICItemLocations',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdLocationStore,
                         deleteButton : grdLocationStore.down('#btnDeleteLocation')
@@ -505,7 +505,8 @@ Ext.define('Inventory.view.override.ItemViewController', {
                 view = Ext.create(screenName, { controller: screen.toLowerCase() });
 
             var controller = view.getController();
-            controller.show(win.getViewModel().data.current);
+            var current = win.getViewModel().data.current;
+            controller.show({ id: current.get('intItemId'), action: 'new', store: current });
         });
     },
 

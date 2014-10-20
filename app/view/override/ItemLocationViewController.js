@@ -68,28 +68,29 @@ Ext.define('Inventory.view.override.ItemLocationViewController', {
         return win.context;
     },
 
-    show : function(context) {
+    show : function(config) {
         "use strict";
 
         var me = this,
             win = this.getView();
 
-        if (context) {
+        if (config) {
             win.show();
 
-            var context = me.setupContext( { window : win, store: context.data.tblICItemLocationStores } );
+            var current = config.store['tblICItemLocations']();
+            var context = me.setupContext( { window : win, store: current } );
 
             if (config.action === 'new') {
                 context.data.addRecord();
             } else {
-                if (config.id) {
-                    config.filters = [{
-                        column: 'intManufacturerId',
+                var filter = [{
+                        column: 'intItemId',
                         value: config.id
                     }];
-                }
+
+
                 context.data.load({
-                    filters: config.filters
+                    filters: filter
                 });
             }
         }

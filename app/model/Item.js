@@ -6,7 +6,7 @@ Ext.define('Inventory.model.Item', {
 
     requires: [
         'Inventory.model.ItemUOM',
-        'Inventory.model.ItemLocationStore',
+        'Inventory.model.ItemLocation',
         'Inventory.model.ItemUPC',
         'Inventory.model.ItemVendorXref',
         'Inventory.model.ItemCustomerXref',
@@ -118,8 +118,8 @@ Ext.define('Inventory.model.Item', {
                 }
             }
         },{
-            model: 'Inventory.model.ItemLocationStore',
-            name: 'tblICItemLocationStores',
+            model: 'Inventory.model.ItemLocation',
+            name: 'tblICItemLocations',
             foreignKey: 'intItemId',
             primaryKey: 'intItemId',
             storeConfig: {

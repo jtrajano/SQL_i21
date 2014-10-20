@@ -1,18 +1,17 @@
 /**
  * Created by LZabala on 9/18/2014.
  */
-Ext.define('Inventory.model.ItemLocationStore', {
+Ext.define('Inventory.model.ItemLocation', {
     extend: 'iRely.BaseEntity',
 
     requires: [
-        'Inventory.model.Item',
         'Ext.data.Field'
     ],
 
-    idProperty: 'intItemLocationStoreId',
+    idProperty: 'intItemLocationId',
 
     fields: [
-        { name: 'intItemLocationStoreId', type: 'int'},
+        { name: 'intItemLocationId', type: 'int'},
         { name: 'intLocationId', type: 'int'},
         { name: 'intVendorId', type: 'int'},
         { name: 'strDescription', type: 'string'},
