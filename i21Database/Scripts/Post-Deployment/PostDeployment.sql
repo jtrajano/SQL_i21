@@ -45,6 +45,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\DefaultData\8_WorkToDoItem.sql
 :r .\TM\DefaultData\9_WorkCloseReason.sql
 :r .\TM\DefaultData\10_RegulatorType.sql
+:r .\TM\DataCorrection\Customer.sql
 
 -- Canned Panels
 :r .\DB\1_CannedPanels_Panel.sql
