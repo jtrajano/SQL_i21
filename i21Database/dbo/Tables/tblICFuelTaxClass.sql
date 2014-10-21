@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblICFuelTaxClass]
 (
-	[intFuelTaxClassId] INT NOT NULL , 
+	[intFuelTaxClassId] INT NOT NULL IDENTITY, 
     [strTaxClassCode] NVARCHAR(50) NOT NULL, 
     [strDescription] NVARCHAR(50) NULL, 
     [strIRSTaxCode] NVARCHAR(50) NULL, 
