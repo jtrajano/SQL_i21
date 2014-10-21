@@ -733,6 +733,8 @@
     <Build Include="dbo\Tables\tblICLotStatus.sql" />
     <Build Include="dbo\Views\vyuEntityEFTInformation.sql" />
     <Build Include="dbo\Tables\tblSMFreightTerm.sql" />
+    <Build Include="dbo\Tables\tblICFuelTaxClass.sql" />
+    <Build Include="dbo\Tables\tblICFuelTaxClassProductCode.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
