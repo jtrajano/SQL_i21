@@ -68,7 +68,16 @@ IF (@param IS NOT NULL)
 BEGIN
 	IF(@param = 'all')
 	BEGIN
-		INSERT INTO #tmpPayablePostData SELECT intPaymentId FROM tblAPPayment WHERE ysnPosted = 0
+		IF(@post = 0)
+		BEGIN
+			INSERT INTO #tmpPayablePostData SELECT intPaymentId FROM tblAPPayment WHERE ysnPosted = 0
+		END
+		ELSE IF(@post = 1)
+		BEGIN
+			INSERT INTO #tmpPayablePostData 
+			SELECT intPaymentId FROM tblAPPayment WHERE ysnPosted = 1
+			AND NOT EXISTS (SELECT 1 FROM tblCMBankTransaction WHERE strTransactionId = tblAPPayment.strPaymentRecordNum AND ysnClr = 1)
+		END
 	END
 	ELSE
 	BEGIN

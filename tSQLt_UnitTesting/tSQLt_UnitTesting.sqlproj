@@ -71,6 +71,7 @@
     <Folder Include="Scripts" />
     <Folder Include="Schema" />
     <Folder Include="testi21Database\Functions" />
+    <Folder Include="testi21Database\Scripts" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="tSQLt\Tables\TestResult.sql" />
@@ -203,6 +204,10 @@
     <Build Include="testi21Database\Functions\test the fnGetCostingMethod function.sql" />
     <Build Include="testi21Database\Functions\test the fnGetItemGLAccounts function.sql" />
     <Build Include="testi21Database\Functions\test the fnGetGLAccountIdFromItemLocation function.sql" />
+    <Build Include="testi21Database\Scripts\test the constraints of tblAPBill.sql" />
+    <Build Include="testi21Database\Scripts\test the constraints of tblAPBillBatch.sql" />
+    <Build Include="testi21Database\Scripts\test the constraints of tblAPPayment.sql" />
+    <Build Include="testi21Database\Scripts\test the constraints of tblAPVendor.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

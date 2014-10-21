@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblARCustomerContract] (
     [intContractId]       INT            IDENTITY (1, 1) NOT NULL,
-    [intEntityId]         INT            NOT NULL,
+    [intCustomerId]         INT            NOT NULL,
     [strContractNumber]   NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [intContractPlanId]   INT            NULL,
     [intLocationId]       INT            NULL,
