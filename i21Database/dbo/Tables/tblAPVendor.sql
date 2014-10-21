@@ -7,7 +7,7 @@
     [strVendorPayToId]          NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [intPaymentMethodId]        INT            NULL,
     [intTaxCodeId]              INT            NULL,
-    [intGLAccountExpenseId]     INT            NOT NULL ,
+    [intGLAccountExpenseId]     INT            NULL ,
     [intVendorType]             INT            NOT NULL,
     [strVendorId]               NVARCHAR (50)  COLLATE Latin1_General_CI_AS NOT NULL,
     [strVendorAccountNum]       NVARCHAR (15)  COLLATE Latin1_General_CI_AS NULL,
@@ -29,7 +29,8 @@
     CONSTRAINT [PK_dbo.tblAPVendor] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
     CONSTRAINT [FK_dbo.tblAPVendor_dbo.tblEntities_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
     CONSTRAINT [UK_strVendorId] UNIQUE NONCLUSTERED ([strVendorId] ASC),
-	CONSTRAINT [UK_intVendorId] UNIQUE NONCLUSTERED ([intVendorId] ASC)
+	CONSTRAINT [UK_intVendorId] UNIQUE NONCLUSTERED ([intVendorId] ASC),
+	CONSTRAINT [FK_dbo.tblAPVendor_dbo.tblGLAccount_intAccountId] FOREIGN KEY (intGLAccountExpenseId) REFERENCES tblGLAccount(intAccountId)
 );
 
 
