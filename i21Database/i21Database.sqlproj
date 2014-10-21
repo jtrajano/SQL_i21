@@ -620,6 +620,7 @@
     <Build Include="dbo\Tables\tblRMDefaultOption.sql" />
     <Build Include="dbo\Tables\tblRMDefaultSort.sql" />
     <Build Include="dbo\Tables\tblARCustomerProductVersion.sql" />
+    <None Include="Scripts\Post-Deployment\TM\DefaultData\11_Customer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
