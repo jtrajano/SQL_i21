@@ -735,6 +735,8 @@
     <Build Include="dbo\Tables\tblSMFreightTerm.sql" />
     <Build Include="dbo\Tables\tblICFuelTaxClass.sql" />
     <Build Include="dbo\Tables\tblICFuelTaxClassProductCode.sql" />
+    <Build Include="dbo\Views\vyuAPPaidBillsHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspARDeleteCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
