@@ -358,8 +358,8 @@
                                 "layout|flex": 1,
                                 "title": "Product Codes"
                             },
-                            "name": "MyGridPanel35",
-                            "designerId": "9e263e93-09c1-4e8c-8bd0-c57c6575e575",
+                            "name": "MyGridPanel17",
+                            "designerId": "a03f80ee-54c2-45fd-b2d9-e39d96c6821d",
                             "cn": [
                                 {
                                     "type": "Ext.toolbar.Toolbar",
@@ -373,9 +373,41 @@
                                         "dock": "top",
                                         "itemId": "tlbGridOptions"
                                     },
-                                    "name": "MyToolbar37",
-                                    "designerId": "b01bca24-1d9c-4cd0-8623-ef6e9ea35d8d",
+                                    "name": "MyToolbar51",
+                                    "designerId": "abcba39d-5e55-4850-ae28-171127ea5d9f",
                                     "cn": [
+                                        {
+                                            "type": "Ext.button.Button",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "icon": null,
+                                                "iconCls": "small-delete",
+                                                "itemId": "btnDeleteProductCode",
+                                                "layout|flex": null,
+                                                "tabIndex": -1,
+                                                "text": "Delete"
+                                            },
+                                            "name": "MyButton163",
+                                            "designerId": "4832981f-7a6f-44c1-a2e0-97dd6d95b23d"
+                                        },
+                                        {
+                                            "type": "Ext.toolbar.Separator",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "designer|displayName": "separator",
+                                                "layout|flex": null
+                                            },
+                                            "name": "MySeparator51",
+                                            "designerId": "62b2b3c5-8dec-482c-a12a-558c17e18f1d"
+                                        },
                                         {
                                             "type": "linkedinstance",
                                             "reference": {
@@ -386,8 +418,8 @@
                                             "userConfig": {
                                                 "layout|flex": null
                                             },
-                                            "name": "filter114",
-                                            "designerId": "a6edc1ac-3fb1-409c-8533-ee41ecdec8f5",
+                                            "name": "filter124",
+                                            "designerId": "e1124fa2-1f3c-4468-b2f5-c45d35cb7517",
                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                         }
                                     ]
@@ -402,10 +434,34 @@
                                     "userConfig": {
                                         "dataIndex": "string",
                                         "flex": 1,
-                                        "text": "State"
+                                        "itemId": "colState",
+                                        "text": "State",
+                                        "width": 82
                                     },
-                                    "name": "MyColumn125",
-                                    "designerId": "b2873c72-f010-4f89-ab08-63fa1bff68d5"
+                                    "name": "MyColumn148",
+                                    "designerId": "cc7f728e-3fe0-4efd-8864-969402092ef4",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "editor",
+                                                "type": "object"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "displayField": "strState",
+                                                "store": [
+                                                    "{States}"
+                                                ],
+                                                "valueField": "strState"
+                                            },
+                                            "name": "MyComboBox46",
+                                            "configAlternates": {
+                                                "store": "binding"
+                                            },
+                                            "designerId": "88899df3-f26e-4a4c-b46d-06ea86b3ac97"
+                                        }
+                                    ]
                                 },
                                 {
                                     "type": "Ext.grid.column.Column",
@@ -416,10 +472,25 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "dataIndex": "string",
-                                        "text": "Product Code"
+                                        "flex": 1,
+                                        "itemId": "colProductCode",
+                                        "text": "Product Code",
+                                        "width": null
                                     },
-                                    "name": "MyColumn126",
-                                    "designerId": "3e5e2f37-0f6d-47e8-9f11-0a3bcaf641bc"
+                                    "name": "MyColumn150",
+                                    "designerId": "5a8af4ee-b660-4db5-b8fe-58aec6c26963",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.field.Text",
+                                            "reference": {
+                                                "name": "editor",
+                                                "type": "object"
+                                            },
+                                            "codeClass": null,
+                                            "name": "MyTextField1",
+                                            "designerId": "5243db58-4573-474b-8c51-a4bf63ee95aa"
+                                        }
+                                    ]
                                 },
                                 {
                                     "type": "Ext.grid.View",
@@ -431,8 +502,33 @@
                                     "userConfig": {
                                         "itemId": "grvProductCode"
                                     },
-                                    "name": "MyGridView35",
-                                    "designerId": "19b9d11e-b6ed-47a4-93c6-712fbdabf462"
+                                    "name": "MyGridView41",
+                                    "designerId": "4495ebf1-fd4a-43d1-9331-fd6b5b956f68"
+                                },
+                                {
+                                    "type": "Ext.selection.CheckboxModel",
+                                    "reference": {
+                                        "name": "selModel",
+                                        "type": "object"
+                                    },
+                                    "codeClass": "Ext.selection.CheckboxModel",
+                                    "name": "MyCheckboxSelectionModel31",
+                                    "designerId": "291b85f8-bb24-40f3-896f-c72482b20204"
+                                },
+                                {
+                                    "type": "Ext.grid.plugin.CellEditing",
+                                    "reference": {
+                                        "name": "plugins",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "clicksToEdit": 1,
+                                        "designer|displayName": "cepProductCode",
+                                        "pluginId": "cepProductCode"
+                                    },
+                                    "name": "MyCellEditingPlugin",
+                                    "designerId": "4fd2c230-2f53-4b37-95b3-5a968060b8bf"
                                 }
                             ]
                         }
@@ -454,7 +550,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging16",
+                    "name": "statusbarpaging13",
                     "designerId": "3ce78bff-7020-4a1e-8c5e-085e96515140",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

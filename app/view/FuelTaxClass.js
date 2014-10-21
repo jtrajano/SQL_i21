@@ -24,10 +24,12 @@ Ext.define('Inventory.view.FuelTaxClass', {
         'Ext.form.Panel',
         'Ext.button.Button',
         'Ext.toolbar.Separator',
-        'Ext.form.field.Text',
         'Ext.grid.Panel',
         'Ext.grid.column.Column',
+        'Ext.form.field.ComboBox',
         'Ext.grid.View',
+        'Ext.selection.CheckboxModel',
+        'Ext.grid.plugin.CellEditing',
         'Ext.toolbar.Paging'
     ],
 
@@ -45,192 +47,236 @@ Ext.define('Inventory.view.FuelTaxClass', {
     title: 'Fuel Tax Class',
     maximizable: true,
 
-    items: [
-        {
-            xtype: 'form',
-            autoShow: true,
-            height: 350,
-            itemId: 'frmFuelTaxClass',
-            margin: -1,
-            width: 450,
-            bodyBorder: false,
-            bodyPadding: 10,
-            header: false,
-            trackResetOnLoad: true,
-            layout: {
-                type: 'vbox',
-                align: 'stretch'
-            },
-            dockedItems: [
-                {
-                    xtype: 'toolbar',
-                    dock: 'top',
-                    width: 588,
-                    layout: {
-                        type: 'hbox',
-                        padding: '0 0 0 1'
-                    },
-                    items: [
-                        {
-                            xtype: 'button',
-                            tabIndex: -1,
-                            height: 57,
-                            itemId: 'btnNew',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-new',
-                            scale: 'large',
-                            text: 'New'
+    initConfig: function(instanceConfig) {
+        var me = this,
+            config = {
+                items: [
+                    {
+                        xtype: 'form',
+                        autoShow: true,
+                        height: 350,
+                        itemId: 'frmFuelTaxClass',
+                        margin: -1,
+                        width: 450,
+                        bodyBorder: false,
+                        bodyPadding: 10,
+                        header: false,
+                        trackResetOnLoad: true,
+                        layout: {
+                            type: 'vbox',
+                            align: 'stretch'
                         },
-                        {
-                            xtype: 'button',
-                            tabIndex: -1,
-                            height: 57,
-                            itemId: 'btnSave',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-save',
-                            scale: 'large',
-                            text: 'Save'
-                        },
-                        {
-                            xtype: 'button',
-                            tabIndex: -1,
-                            height: 57,
-                            itemId: 'btnSearch',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-search',
-                            scale: 'large',
-                            text: 'Search'
-                        },
-                        {
-                            xtype: 'button',
-                            tabIndex: -1,
-                            height: 57,
-                            itemId: 'btnDelete',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-delete',
-                            scale: 'large',
-                            text: 'Delete'
-                        },
-                        {
-                            xtype: 'button',
-                            tabIndex: -1,
-                            height: 57,
-                            itemId: 'btnUndo',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-undo',
-                            scale: 'large',
-                            text: 'Undo'
-                        },
-                        {
-                            xtype: 'tbseparator',
-                            height: 30
-                        },
-                        {
-                            xtype: 'button',
-                            tabIndex: -1,
-                            height: 57,
-                            itemId: 'btnClose',
-                            width: 45,
-                            iconAlign: 'top',
-                            iconCls: 'large-close',
-                            scale: 'large',
-                            text: 'Close'
-                        }
-                    ]
-                },
-                {
-                    xtype: 'ipagingstatusbar',
-                    itemId: 'pagingtoolbar',
-                    flex: 1,
-                    dock: 'bottom'
-                }
-            ],
-            items: [
-                {
-                    xtype: 'container',
-                    flex: 1.25,
-                    margin: '0 5 0 0',
-                    width: 1014,
-                    layout: {
-                        type: 'vbox',
-                        align: 'stretch'
-                    },
-                    items: [
-                        {
-                            xtype: 'container',
-                            margin: '0 0 5 0',
-                            layout: 'hbox',
-                            items: [
-                                {
-                                    xtype: 'textfield',
-                                    flex: 1,
-                                    itemId: 'txtTaxClassCode',
-                                    fieldLabel: 'Tax Class Code',
-                                    labelWidth: 90
+                        dockedItems: [
+                            {
+                                xtype: 'toolbar',
+                                dock: 'top',
+                                width: 588,
+                                layout: {
+                                    type: 'hbox',
+                                    padding: '0 0 0 1'
                                 },
-                                {
-                                    xtype: 'textfield',
-                                    flex: 1,
-                                    itemId: 'txtIrsTaxCode',
-                                    margin: '0 0 0 5',
-                                    fieldLabel: 'IRS Tax Code',
-                                    labelWidth: 90
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'textfield',
-                            itemId: 'txtDescription',
-                            fieldLabel: 'Description',
-                            labelWidth: 90
-                        },
-                        {
-                            xtype: 'gridpanel',
-                            flex: 1,
-                            itemId: 'grdProductCode',
-                            title: 'Product Codes',
-                            dockedItems: [
-                                {
-                                    xtype: 'toolbar',
-                                    dock: 'top',
-                                    itemId: 'tlbGridOptions',
-                                    layout: {
-                                        type: 'hbox',
-                                        padding: '0 0 0 1'
+                                items: [
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        height: 57,
+                                        itemId: 'btnNew',
+                                        width: 45,
+                                        iconAlign: 'top',
+                                        iconCls: 'large-new',
+                                        scale: 'large',
+                                        text: 'New'
                                     },
-                                    items: [
-                                        {
-                                            xtype: 'filter1'
-                                        }
-                                    ]
-                                }
-                            ],
-                            columns: [
-                                {
-                                    xtype: 'gridcolumn',
-                                    dataIndex: 'string',
-                                    text: 'State',
-                                    flex: 1
-                                },
-                                {
-                                    xtype: 'gridcolumn',
-                                    dataIndex: 'string',
-                                    text: 'Product Code'
-                                }
-                            ],
-                            viewConfig: {
-                                itemId: 'grvProductCode'
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        height: 57,
+                                        itemId: 'btnSave',
+                                        width: 45,
+                                        iconAlign: 'top',
+                                        iconCls: 'large-save',
+                                        scale: 'large',
+                                        text: 'Save'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        height: 57,
+                                        itemId: 'btnSearch',
+                                        width: 45,
+                                        iconAlign: 'top',
+                                        iconCls: 'large-search',
+                                        scale: 'large',
+                                        text: 'Search'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        height: 57,
+                                        itemId: 'btnDelete',
+                                        width: 45,
+                                        iconAlign: 'top',
+                                        iconCls: 'large-delete',
+                                        scale: 'large',
+                                        text: 'Delete'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        height: 57,
+                                        itemId: 'btnUndo',
+                                        width: 45,
+                                        iconAlign: 'top',
+                                        iconCls: 'large-undo',
+                                        scale: 'large',
+                                        text: 'Undo'
+                                    },
+                                    {
+                                        xtype: 'tbseparator',
+                                        height: 30
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        height: 57,
+                                        itemId: 'btnClose',
+                                        width: 45,
+                                        iconAlign: 'top',
+                                        iconCls: 'large-close',
+                                        scale: 'large',
+                                        text: 'Close'
+                                    }
+                                ]
+                            },
+                            {
+                                xtype: 'ipagingstatusbar',
+                                itemId: 'pagingtoolbar',
+                                flex: 1,
+                                dock: 'bottom'
                             }
-                        }
-                    ]
-                }
-            ]
+                        ],
+                        items: [
+                            {
+                                xtype: 'container',
+                                flex: 1.25,
+                                margin: '0 5 0 0',
+                                width: 1014,
+                                layout: {
+                                    type: 'vbox',
+                                    align: 'stretch'
+                                },
+                                items: [
+                                    {
+                                        xtype: 'container',
+                                        margin: '0 0 5 0',
+                                        layout: 'hbox',
+                                        items: [
+                                            {
+                                                xtype: 'textfield',
+                                                flex: 1,
+                                                itemId: 'txtTaxClassCode',
+                                                fieldLabel: 'Tax Class Code',
+                                                labelWidth: 90
+                                            },
+                                            {
+                                                xtype: 'textfield',
+                                                flex: 1,
+                                                itemId: 'txtIrsTaxCode',
+                                                margin: '0 0 0 5',
+                                                fieldLabel: 'IRS Tax Code',
+                                                labelWidth: 90
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'textfield',
+                                        itemId: 'txtDescription',
+                                        fieldLabel: 'Description',
+                                        labelWidth: 90
+                                    },
+                                    {
+                                        xtype: 'gridpanel',
+                                        flex: 1,
+                                        itemId: 'grdProductCode',
+                                        title: 'Product Codes',
+                                        dockedItems: [
+                                            {
+                                                xtype: 'toolbar',
+                                                dock: 'top',
+                                                itemId: 'tlbGridOptions',
+                                                layout: {
+                                                    type: 'hbox',
+                                                    padding: '0 0 0 1'
+                                                },
+                                                items: [
+                                                    {
+                                                        xtype: 'button',
+                                                        tabIndex: -1,
+                                                        itemId: 'btnDeleteProductCode',
+                                                        iconCls: 'small-delete',
+                                                        text: 'Delete'
+                                                    },
+                                                    {
+                                                        xtype: 'tbseparator'
+                                                    },
+                                                    {
+                                                        xtype: 'filter1'
+                                                    }
+                                                ]
+                                            }
+                                        ],
+                                        columns: [
+                                            {
+                                                xtype: 'gridcolumn',
+                                                dataIndex: 'string',
+                                                itemId: 'colState',
+                                                width: 82,
+                                                text: 'State',
+                                                flex: 1,
+                                                editor: {
+                                                    xtype: 'combobox',
+                                                    displayField: 'strState',
+                                                    valueField: 'strState',
+                                                    bind: {
+                                                        store: '{States}'
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                xtype: 'gridcolumn',
+                                                itemId: 'colProductCode',
+                                                dataIndex: 'string',
+                                                text: 'Product Code',
+                                                flex: 1,
+                                                editor: {
+                                                    xtype: 'textfield'
+                                                }
+                                            }
+                                        ],
+                                        viewConfig: {
+                                            itemId: 'grvProductCode'
+                                        },
+                                        selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                            selType: 'checkboxmodel'
+                                        }),
+                                        plugins: [
+                                            {
+                                                ptype: 'cellediting',
+                                                pluginId: 'cepProductCode',
+                                                clicksToEdit: 1
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            };
+        if (instanceConfig) {
+            me.getConfigurator().merge(me, config, instanceConfig);
         }
-    ]
+        return me.callParent([config]);
+    }
 
 });

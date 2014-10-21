@@ -29,6 +29,7 @@ namespace iRely.Inventory.BRL
         public object GetSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<tblICFuelTaxClass, bool>> predicate)
         {
             return GetSearchQuery()
+                .Include(p => p.tblICFuelTaxClassProductCodes)
                 .Where(predicate)
                 .OrderBySelector(sortSelector)
                 .Skip(start)

@@ -21,7 +21,7 @@ namespace iRely.Invetory.WebAPI.Controllers
         private FuelTaxClass _FuelTaxClassBRL = new FuelTaxClass();
 
         [HttpGet]
-        public HttpResponseMessage SearchFuelTaxClasss(int page, int start, int limit, string columns = "", string sort = "", string filter = "")
+        public HttpResponseMessage SearchFuelTaxClasses(int page, int start, int limit, string columns = "", string sort = "", string filter = "")
         {
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
@@ -68,7 +68,7 @@ namespace iRely.Invetory.WebAPI.Controllers
         }
 
         [HttpPost]
-        public HttpResponseMessage PostFuelTaxClasss(IEnumerable<tblICFuelTaxClass> taxclasses, bool continueOnConflict = false)
+        public HttpResponseMessage PostFuelTaxClasses(IEnumerable<tblICFuelTaxClass> taxclasses, bool continueOnConflict = false)
         {
             foreach (var taxclass in taxclasses)
                 _FuelTaxClassBRL.AddTaxClass(taxclass);
@@ -90,7 +90,7 @@ namespace iRely.Invetory.WebAPI.Controllers
         }
 
         [HttpPut]
-        public HttpResponseMessage PutFuelTaxClasss(IEnumerable<tblICFuelTaxClass> taxclasses, bool continueOnConflict = false)
+        public HttpResponseMessage PutFuelTaxClasses(IEnumerable<tblICFuelTaxClass> taxclasses, bool continueOnConflict = false)
         {
             foreach (var taxclass in taxclasses)
                 _FuelTaxClassBRL.UpdateTaxClass(taxclass);
@@ -112,7 +112,7 @@ namespace iRely.Invetory.WebAPI.Controllers
         }
 
         [HttpDelete]
-        public HttpResponseMessage DeleteFuelTaxClasss(IEnumerable<tblICFuelTaxClass> taxclasses, bool continueOnConflict = false)
+        public HttpResponseMessage DeleteFuelTaxClasses(IEnumerable<tblICFuelTaxClass> taxclasses, bool continueOnConflict = false)
         {
             foreach (var taxclass in taxclasses)
                 _FuelTaxClassBRL.DeleteTaxClass(taxclass);

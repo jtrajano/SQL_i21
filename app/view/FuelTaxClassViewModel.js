@@ -15,6 +15,10 @@
 
 Ext.define('Inventory.view.FuelTaxClassViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.fueltaxclass'
+    alias: 'viewmodel.fueltaxclass',
+
+    requires: [
+        'Inventory.view.override.FuelTaxClassViewModel'
+    ]
 
 });

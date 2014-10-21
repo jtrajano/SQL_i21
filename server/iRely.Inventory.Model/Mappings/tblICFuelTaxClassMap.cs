@@ -16,6 +16,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strDescription).HasColumnName("strDescription");
             this.Property(t => t.strIRSTaxCode).HasColumnName("strIRSTaxCode");
             this.Property(t => t.strTaxClassCode).HasColumnName("strTaxClassCode");
+
+            this.HasMany(p => p.tblICFuelTaxClassProductCodes)
+                .WithRequired(p => p.tblICFuelTaxClass)
+                .HasForeignKey(p => p.intFuelTaxClassId);
         }
     }
 

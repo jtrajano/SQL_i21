@@ -10,12 +10,17 @@ namespace iRely.Inventory.Model
 {
     public class tblICFuelTaxClass : BaseEntity
     {
+        public tblICFuelTaxClass()
+        {
+            this.tblICFuelTaxClassProductCodes = new List<tblICFuelTaxClassProductCode>();
+        }
+
         public int intFuelTaxClassId { get; set; }
         public string strTaxClassCode { get; set; }
         public string strDescription { get; set; }
         public string strIRSTaxCode { get; set; }
 
-        public ICollection<tblICFuelTaxClass> tblICFuelTaxClasses { get; set; }
+        public ICollection<tblICFuelTaxClassProductCode> tblICFuelTaxClassProductCodes { get; set; }
     }
 
     public class tblICFuelTaxClassProductCode : BaseEntity
