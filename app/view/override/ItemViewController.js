@@ -80,10 +80,10 @@ Ext.define('Inventory.view.override.ItemViewController', {
                 value: '{current.intPatronageCategoryId}',
                 store: '{PatronageCategory}'
             },
-//            cboTaxClass: {
-//                value: '{current.intTaxClassId}',
-//                store: '{}'
-//            },
+            cboTaxClass: {
+                value: '{current.intTaxClassId}',
+                store: '{FuelTaxClass}'
+            },
             chkStockedItem: '{current.ysnStockedItem}',
             chkDyedFuel: '{current.ysnDyedFuel}',
             cboBarcodePrint: {
@@ -124,10 +124,10 @@ Ext.define('Inventory.view.override.ItemViewController', {
                 store: '{InventoryTag}'
             },
             txtVolumeRebateGroup: '{current.strVolumeRebateGroup}',
-//            cboPhysicalItem: {
-//                value: '{current.intPhysicalItem}',
-//                store: '{Item}'
-//            },
+            cboPhysicalItem: {
+                value: '{current.intPhysicalItem}',
+                store: '{Item}'
+            },
             chkExtendOnPickTicket: '{current.ysnExtendPickTicket}',
             chkExportEdi: '{current.ysnExportEDI}',
             chkHazardMaterial: '{current.ysnHazardMaterial}',
@@ -331,6 +331,20 @@ Ext.define('Inventory.view.override.ItemViewController', {
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: win.down('#grdServiceLevelAgreement'),
                         deleteButton : win.down('#btnDeleteSLA')
+                    })
+                },
+                {
+                    key: 'tblICItemAccounts',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: win.down('#grdGlAccounts'),
+                        deleteButton : win.down('#btnDeleteGlAccounts')
+                    })
+                },
+                {
+                    key: 'tblICItemStocks',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: win.down('#grdStock'),
+                        deleteButton : win.down('#btnDeleteStock')
                     })
                 },
                 {

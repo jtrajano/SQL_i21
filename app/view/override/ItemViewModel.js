@@ -2,6 +2,7 @@ Ext.define('Inventory.view.override.ItemViewModel', {
     override: 'Inventory.view.ItemViewModel',
 
     requires: [
+        'Inventory.store.Item',
         'Inventory.store.Manufacturer',
         'Inventory.store.Category',
         'Inventory.store.PatronageCategory',
@@ -9,6 +10,7 @@ Ext.define('Inventory.view.override.ItemViewModel', {
         'Inventory.store.UnitMeasure',
         'Inventory.store.Brand',
         'Inventory.store.FuelCategory',
+        'Inventory.store.FuelTaxClass',
         'AccountsPayable.store.VendorBuffered',
         'i21.store.CompanyLocation'
     ],
@@ -362,6 +364,12 @@ Ext.define('Inventory.view.override.ItemViewModel', {
         },
         CompanyLocation: {
             type: 'companylocation'
+        },
+        FuelTaxClass: {
+            type: 'inventoryfueltaxclass'
+        },
+        Item: {
+            type: 'inventoryitem'
         }
 
     }

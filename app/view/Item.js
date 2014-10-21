@@ -825,19 +825,25 @@ Ext.define('Inventory.view.Item', {
                                                                         xtype: 'gridcombobox',
                                                                         columns: [
                                                                             {
-                                                                                dataIndex: 'intTaxClassId',
+                                                                                dataIndex: 'intFuelTaxClassId',
                                                                                 dataType: 'numeric',
                                                                                 text: 'Tax Class Id',
                                                                                 hidden: true
                                                                             },
                                                                             {
-                                                                                dataIndex: 'strTaxClass',
+                                                                                dataIndex: 'strTaxClassCode',
                                                                                 dataType: 'string',
                                                                                 text: 'Tax Class',
                                                                                 flex: 1
                                                                             },
                                                                             {
                                                                                 dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Description',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strIRSTaxCode',
                                                                                 dataType: 'string',
                                                                                 text: 'Description',
                                                                                 flex: 1
