@@ -140,6 +140,7 @@
     <Compile Include="Controllers\CategoryController.cs" />
     <Compile Include="Controllers\CommodityController.cs" />
     <Compile Include="Controllers\DocumentController.cs" />
+    <Compile Include="Controllers\FuelTaxClassController.cs" />
     <Compile Include="Controllers\FuelTypeController.cs" />
     <Compile Include="Controllers\ManufacturerController.cs" />
     <Compile Include="Controllers\ReceiptController.cs" />
