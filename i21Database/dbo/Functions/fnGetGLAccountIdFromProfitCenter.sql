@@ -1,32 +1,54 @@
 ﻿CREATE FUNCTION [dbo].[fnGetGLAccountIdFromProfitCenter]
 (
-	@intNaturalAccount INT
-	,@intProfitCenterId INT
+	@intGLAccountId AS INT 
+	,@intAccountSegmentId AS INT
 )
 RETURNS INT
 AS 
 BEGIN
-	DECLARE @intGLAccountId AS INT;
+	DECLARE @strAccountId AS NVARCHAR(40)
+	DECLARE @strDivider AS NVARCHAR(100)
+	DECLARE @Length AS INT
 
-	-- This function expects to return only one record. 
-	-- If it returns more than one record, then let SQL throw the error. 
-	SELECT	@intGLAccountId = Accnt.intAccountId
-	FROM	tblGLAccount Accnt 
-	WHERE	-- Condition for the natural account (Primary segment)
-			Accnt.intAccountId IN (
-				SELECT TOP 1 intAccountId FROM tblGLAccountSegmentMapping WHERE intAccountSegmentId = @intNaturalAccount
-			) 
-			-- Condition for the segment/s (profit center) 
-			AND Accnt.intAccountId IN (
-					SELECT intAccountId FROM tblGLAccountSegmentMapping WHERE intAccountSegmentId IN (
-							NULL 
-							-- TODO: Select the segments from the profit center table. 
-							-- For example: 
-							-- SELECT intAccountSegmentId FROM ProfitCenterDetail WHERE intProfitCenterId = @intProfitCenterId
-						)
-			);
+	DECLARE @intFoundGLAccountId INT
+	
+	-- Retrieve the account structure to modify. 
+	DECLARE @intAccountStructureToModify AS INT	
+	SELECT	@intAccountStructureToModify = Structure.intAccountStructureId
+	FROM	tblGLAccountSegment Segment INNER JOIN tblGLAccountStructure Structure
+				ON Segment.intAccountStructureId = Structure.intAccountStructureId
+	WHERE	Segment.intAccountSegmentId = @intAccountSegmentId 
 
-	RETURN @intGLAccountId;
-END 
+	-- Retrieve the divider to use. 
+	SELECT	@strDivider = strMask
+	FROM	tblGLAccountStructure
+	WHERE	strType = 'Divider'
+	
+	SET @Length = ISNULL(LEN(@strDivider), 0)
+	
+	-- Re-create the strAccountId (Original Account + Account Structure to modify)
+	SELECT	@strAccountId = STUFF((	
+					SELECT	@strDivider + RecreateStructure.strCode
+					FROM	tblGLAccountSegment RecreateStructure INNER JOIN (
+								SELECT	intAccountSegmentId = CASE WHEN @intAccountStructureToModify = Structure.intAccountStructureId THEN @intAccountSegmentId ELSE SegmentMap.intAccountSegmentId END 
+										,Structure.intSort 
+								FROM	tblGLAccountStructure Structure INNER JOIN tblGLAccountSegment Segment
+											ON Structure.intAccountStructureId = Segment.intAccountStructureId
+										INNER JOIN tblGLAccountSegmentMapping SegmentMap
+											ON Segment.intAccountSegmentId = SegmentMap.intAccountSegmentId
+								WHERE	Structure.strType <> 'Divider'
+										AND SegmentMap.intAccountId = @intGLAccountId
+							) TemplateStructure 
+								ON RecreateStructure.intAccountSegmentId = TemplateStructure.intAccountSegmentId
+					ORDER BY TemplateStructure.intSort
+					FOR XML PATH('')
+				), 1, @Length, '' 
+			)
 
-GO
+	-- Try to retrieve the intAccountId based on the re-created strAccountId
+	SELECT	@intFoundGLAccountId = intAccountId
+	FROM	tblGLAccount
+	WHERE	strAccountId = 	@strAccountId 
+
+	RETURN @intFoundGLAccountId
+END

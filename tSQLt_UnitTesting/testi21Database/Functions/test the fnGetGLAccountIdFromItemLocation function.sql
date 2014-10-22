@@ -32,12 +32,12 @@ BEGIN
 
 		-- Add fake data for Item-Location
 		-- TODO: Add the fields for the g/l account ids
-		INSERT INTO tblICItemLocationStore (intItemId, intLocationId) VALUES (1, 100)
-		INSERT INTO tblICItemLocationStore (intItemId, intLocationId) VALUES (2, 100)
-		INSERT INTO tblICItemLocationStore (intItemId, intLocationId) VALUES (3, 200)
-		INSERT INTO tblICItemLocationStore (intItemId, intLocationId) VALUES (4, 200)
-		INSERT INTO tblICItemLocationStore (intItemId, intLocationId) VALUES (400, 200)
-		INSERT INTO tblICItemLocationStore (intItemId, intLocationId) VALUES (10000, 100)
+		INSERT INTO tblICItemLocation (intItemId, intLocationId) VALUES (1, 100)
+		INSERT INTO tblICItemLocation (intItemId, intLocationId) VALUES (2, 100)
+		INSERT INTO tblICItemLocation (intItemId, intLocationId) VALUES (3, 200)
+		INSERT INTO tblICItemLocation (intItemId, intLocationId) VALUES (4, 200)
+		INSERT INTO tblICItemLocation (intItemId, intLocationId) VALUES (400, 200)
+		INSERT INTO tblICItemLocation (intItemId, intLocationId) VALUES (10000, 100)
 
 		-- Add fake data for Account Segment
 		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription) VALUES (1, '12040', 'INVENTORY WHEAT')
