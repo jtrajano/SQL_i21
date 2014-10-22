@@ -97,7 +97,9 @@ Ext.define('Inventory.view.override.BrandViewController', {
         if (cboManufacturer.getSelectedRecord())
         {
             var strManufacturer = cboManufacturer.getSelectedRecord().get('strManufacturer');
+            var intManufacturerId = cboManufacturer.getSelectedRecord().get('intManufacturerId');
             record.set('strManufacturer', strManufacturer);
+            record.set('intManufacturerId', intManufacturerId);
             view.refresh();
         }
     }

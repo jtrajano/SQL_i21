@@ -29,7 +29,6 @@ namespace iRely.Inventory.BRL
         public object GetSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<tblICBrand, bool>> predicate)
         {
             return GetSearchQuery()
-                .Include(p => p.tblICManufacturer)
                 .Where(predicate)
                 .OrderBySelector(sortSelector)
                 .Skip(start)
@@ -47,6 +46,7 @@ namespace iRely.Inventory.BRL
         {
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICBrand>()
+                .Include(p => p.tblICManufacturer)
                 .Where(w => query.Where(predicate).Any(a => a.intBrandId == w.intBrandId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)
                 .Skip(start)
