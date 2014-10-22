@@ -17,4 +17,19 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intCompanyLocationId).HasColumnName("intCompanyLocationId");
         }
     }
+
+    public class tblGLAccountMap : EntityTypeConfiguration<tblGLAccount>
+    {
+        public tblGLAccountMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intAccountId);
+
+            // Table & Column Mappings
+            this.ToTable("tblGLAccount");
+            this.Property(t => t.intAccountId).HasColumnName("intAccountId");
+            this.Property(t => t.strAccountId).HasColumnName("strAccountId");
+            this.Property(t => t.strDescription).HasColumnName("strDescription");
+        }
+    }
 }

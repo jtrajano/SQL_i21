@@ -146,6 +146,7 @@ namespace iRely.Inventory.Model
         public DbSet<tblICInventoryReceiptInspection> tblICInventoryReceiptInspections { get; set; }
 
         public DbSet<tblSMCompanyLocation> tblSMCompanyLocations { get; set; }
+        public DbSet<tblGLAccount> tblGLAccounts { get; set; }
         
         protected override void OnModelCreating(DbModelBuilder modelBuilder) 
         {
@@ -205,6 +206,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICInventoryReceiptInspectionMap());
 
             modelBuilder.Configurations.Add(new tblSMCompanyLocationMap());
+            modelBuilder.Configurations.Add(new tblGLAccountMap());
         }
     }
 }

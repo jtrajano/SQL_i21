@@ -72,7 +72,9 @@ namespace iRely.Inventory.BRL
                     .Include(p => p.tblICItemPricingLevels)
                     .Include(p => p.tblICItemSpecialPricings)
                     .Include(p => p.tblICItemStocks)
-                    .Include(p => p.tblICItemAccounts)
+                    .Include("tblICItemAccounts.tblGLAccount")
+                    .Include("tblICItemAccounts.ProfitCenter")
+                    .Include("tblICItemAccounts.tblSMCompanyLocation")
                     .Include("tblICItemNotes.tblSMCompanyLocation")
                     .Where(w => query.Where(predicate).Any(a => a.intItemId == w.intItemId)) //Filter the Main DataSource Based on Search Query
                     .OrderBySelector(sortSelector)

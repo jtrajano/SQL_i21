@@ -13,6 +13,8 @@ namespace iRely.Inventory.Model
         public int intCompanyLocationId { get; set; }
         public string strLocationName { get; set; }
         public string strLocationType { get; set; }
+        public int intProfitCenter { get; set; }
+
         //public string strAddress { get; set; }
         //public string strZipPostalCode { get; set; }
         //public string strCity { get; set; }
@@ -46,7 +48,6 @@ namespace iRely.Inventory.Model
         //public bool ysnDefaultCustomBlend { get; set; }
         //public bool ysnAgroguideInterface { get; set; }
         //public bool ysnLocationActive { get; set; }
-        //public int intProfitCenter { get; set; }
         //public int intCashAccount { get; set; }
         //public int intDepositAccount { get; set; }
         //public int intARAccount { get; set; }
@@ -107,5 +108,16 @@ namespace iRely.Inventory.Model
         //public bool ysnAutomaticCashDepositEntries { get; set; }
 
         public ICollection<tblICItemNote> tblICItemNotes { get; set; }
+        public ICollection<tblICItemAccount> tblICItemAccounts { get; set; }
+    }
+
+    public class tblGLAccount : BaseEntity
+    {
+        public int intAccountId { get; set; }
+        public string strAccountId { get; set; }
+        public string strDescription { get; set; }
+
+        public ICollection<tblICItemAccount> tblICItemAccounts { get; set; }
+        public ICollection<tblICItemAccount> tblICItemAccountProfitCenters { get; set; }
     }
 }

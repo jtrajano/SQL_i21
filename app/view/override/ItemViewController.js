@@ -73,6 +73,14 @@ Ext.define('Inventory.view.override.ItemViewController', {
             colLocStoreCostingMethod: 'intCostingMethod',
             colLocStoreUOM: 'intDefaultUOMId',
 
+            //--------------//
+            //GL Account Tab//
+            //--------------//
+            colGLAccountLocation: 'intLocationId',
+            colGLAccountDescription: 'strAccountDescription',
+            colGLAccountId: 'intAccountId',
+            colGLAccountProfitCenter: 'intProfitCenterId',
+
             //---------//
             //Sales Tab//
             //---------//
@@ -261,6 +269,7 @@ Ext.define('Inventory.view.override.ItemViewController', {
         var grdUOM = win.down('#grdUnitOfMeasure'),
             grdLocationStore = win.down('#grdLocationStore'),
             grdCategory = win.down('#grdCategory'),
+            grdGlAccounts = win.down('#grdGlAccounts'),
             grdUPC = win.down('#grdUPC'),
             grdNotes = win.down('#grdNotes');
 
@@ -336,8 +345,8 @@ Ext.define('Inventory.view.override.ItemViewController', {
                 {
                     key: 'tblICItemAccounts',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
-                        grid: win.down('#grdGlAccounts'),
-                        deleteButton : win.down('#btnDeleteGlAccounts')
+                        grid: grdGlAccounts,
+                        deleteButton : grdGlAccounts.down('#btnDeleteGlAccounts')
                     })
                 },
                 {
@@ -398,6 +407,21 @@ Ext.define('Inventory.view.override.ItemViewController', {
             edit: me.onGridLocationEdit,
             scope: me
         });
+
+        var colAccountLocation = grdGlAccounts.columns[0];
+        colAccountLocation.renderer = me.LocationRenderer;
+
+        var colAccountId = grdGlAccounts.columns[2];
+        colAccountId.renderer = me.AccountRenderer;
+
+        var colProfitCenterId = grdGlAccounts.columns[3];
+        colProfitCenterId.renderer = me.ProfitCenterRenderer;
+
+        var cepAccount = grdGlAccounts.getPlugin('cepAccount');
+        cepAccount.on({
+            edit: me.onGridAccountEdit,
+            scope: me
+        });
         // </editor-fold>
 
 
@@ -444,6 +468,16 @@ Ext.define('Inventory.view.override.ItemViewController', {
     LocationRenderer: function (value, metadata, record) {
         var location = record.get('strLocationName');
         return location;
+    },
+
+    AccountRenderer: function (value, metadata, record) {
+        var account = record.get('strAccountId');
+        return account;
+    },
+
+    ProfitCenterRenderer: function (value, metadata, record) {
+        var profitcenter = record.get('strProfitCenter');
+        return profitcenter;
     },
 
     onGridCategoryEdit: function(editor, e, eOpts){
@@ -504,6 +538,46 @@ Ext.define('Inventory.view.override.ItemViewController', {
             var strLocationName = cboLocation.getSelectedRecord().get('strLocationName');
             record.set('strLocationName', strLocationName);
             view.refresh();
+        }
+    },
+
+    onGridAccountEdit: function(editor, e, eOpts){
+        var me = this;
+        var record = e.record
+        var column = e.column;
+
+        var grid = column.up('grid');
+        var view = grid.view;
+
+        if (column.itemId === 'colGLAccountLocation')
+        {
+            var cboLocation = column.getEditor();
+            if (cboLocation.getSelectedRecord())
+            {
+                var strLocationName = cboLocation.getSelectedRecord().get('strLocationName');
+                record.set('strLocationName', strLocationName);
+                view.refresh();
+            }
+        }
+        else if (column.itemId === 'colGLAccountId')
+        {
+            var cboAccount = column.getEditor();
+            if (cboAccount.getSelectedRecord())
+            {
+                var strAccountId = cboAccount.getSelectedRecord().get('strAccountId');
+                record.set('strAccountId', strAccountId);
+                view.refresh();
+            }
+        }
+        else if (column.itemId === 'colGLAccountProfitCenter')
+        {
+            var cboProfitCenter = column.getEditor();
+            if (cboProfitCenter.getSelectedRecord())
+            {
+                var strProfitCenter = cboProfitCenter.getSelectedRecord().get('strProfitCenter');
+                record.set('strProfitCenter', strProfitCenter);
+                view.refresh();
+            }
         }
     },
 

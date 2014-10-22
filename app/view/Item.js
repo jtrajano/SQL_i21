@@ -725,38 +725,159 @@ Ext.define('Inventory.view.Item', {
                                                                 columns: [
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colGLAccountLocation',
                                                                         dataIndex: 'string',
                                                                         text: 'Location',
                                                                         flex: 1,
                                                                         editor: {
-                                                                            xtype: 'gridcombobox'
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intCompanyLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Location Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strLocationName',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Location Name',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strLocationType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Location Type',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboGLAccountLocation',
+                                                                            displayField: 'strLocationName',
+                                                                            valueField: 'intCompanyLocationId',
+                                                                            bind: {
+                                                                                store: '{CompanyLocation}'
+                                                                            }
                                                                         }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colGLAccountDescription',
                                                                         dataIndex: 'string',
                                                                         text: 'Account Description',
                                                                         flex: 1,
                                                                         editor: {
-                                                                            xtype: 'combobox'
+                                                                            xtype: 'combobox',
+                                                                            displayField: 'strDescription',
+                                                                            valueField: 'strDescription',
+                                                                            bind: {
+                                                                                store: '{AccountDescriptions}'
+                                                                            }
                                                                         }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colGLAccountId',
                                                                         dataIndex: 'string',
                                                                         text: 'Account ID',
                                                                         flex: 1,
                                                                         editor: {
-                                                                            xtype: 'gridcombobox'
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intAccountId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Account Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strAccountId',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Account Id',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strDescription',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Description',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intAccountGroupId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Account Group Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strAccountGroup',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Account Group',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strAccountType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Account Type',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            displayField: 'strAccountId',
+                                                                            valueField: 'intAccountId',
+                                                                            bind: {
+                                                                                store: '{GLAccount}'
+                                                                            }
                                                                         }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colGLAccountProfitCenter',
                                                                         dataIndex: 'string',
                                                                         text: 'Profit Center',
                                                                         flex: 1,
                                                                         editor: {
-                                                                            xtype: 'combobox'
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intAccountId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Account Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strAccountId',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Account Id',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strDescription',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Description',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intAccountGroupId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Account Group Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strAccountGroup',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Account Group',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strAccountType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Account Type',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            displayField: 'strAccountId',
+                                                                            valueField: 'intAccountId',
+                                                                            bind: {
+                                                                                store: '{GLAccount}'
+                                                                            }
                                                                         }
                                                                     }
                                                                 ],
@@ -2996,8 +3117,8 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
                                                         width: 100,
+                                                        dataIndex: 'string',
                                                         text: 'Sublocation',
                                                         editor: {
                                                             xtype: 'textfield'
