@@ -9,73 +9,9 @@ BEGIN
 		DECLARE @expected AS INT
 		DECLARE @actual AS INT
 		
-		-- Drop these views. It has dependencies with tblGLAccount table. Can't do fake table if these exists. 
-		-- note: when tSQLt do the rollback, the views are rolled back as well. 
-		DROP VIEW vyuAPBill
-		DROP VIEW vyuAPBillBatch
-		DROP VIEW vyuAPPayablesAgingSummary
-		DROP VIEW vyuAPPaymentDetail
-		DROP VIEW vyuAPVendor
-
-		-- Create the fake table		
-		EXEC tSQLt.FakeTable 'dbo.tblGLAccountStructure';
-		EXEC tSQLt.FakeTable 'dbo.tblGLAccountSegment';
-		EXEC tSQLt.FakeTable 'dbo.tblGLAccount';
-		EXEC tSQLt.FakeTable 'dbo.tblGLAccountSegmentMapping', @Identity = 1;
-		
-		-- Add fake data for Account Structure
-		INSERT INTO tblGLAccountStructure (intAccountStructureId, strType, intStartingPosition, strMask) VALUES (90, 'Primary', 1, '0')
-		INSERT INTO tblGLAccountStructure (intAccountStructureId, strType, intStartingPosition, strMask) VALUES (91, 'Divider', 0, '-')
-		INSERT INTO tblGLAccountStructure (intAccountStructureId, strType, intStartingPosition, strMask) VALUES (92, 'Segment', 2, '0')
-
-		-- Add fake data for Account Segment
-		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (1, '12040', 'INVENTORY WHEAT', 90)
-		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (2, '40100', 'SALES WHEAT', 90)
-		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (3, '50110', 'PURCHASES WHEAT', 90)
-		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (100, '1000', '', 92)
-		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (101, '1001', 'NEW HAVEN GRAIN', 92)
-
-		-- Add fake data for GL Account
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (1000, 'INVENTORY WHEAT-', '12040-1000');
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (2000, 'SALES WHEAT-', '40100-1000');
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (3000, 'PURCHASES WHEAT-', '50110-1000');
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (1001, 'INVENTORY WHEAT-NEW HAVEN GRAIN', '12040-1001');
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (2001, 'SALES WHEAT-NEW HAVEN GRAIN', '40100-1001');
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (3001, 'PURCHASES WHEAT-NEW HAVEN GRAIN', '50110-1001');
-
-		-- Add fake data for Segment Mapping
-		-- INVENTORY WHEAT-'
-		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (1000, 1);
-		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (1000, 100);
-		-- SALES WHEAT-
-		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (2000, 2);
-		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (2000, 100);
-		-- PURCHASES WHEAT-
-		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (3000, 3);
-		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (3000, 100);
-		-- INVENTORY WHEAT-NEW HAVEN GRAIN
-		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (1001, 1);
-		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (1001, 101);
-		-- SALES WHEAT-NEW HAVEN GRAIN
-		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (2001, 2);
-		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (2001, 101);
-		-- PURCHASES WHEAT-NEW HAVEN GRAIN
-		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (3001, 3);
-		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (3001, 101);
+		-- Call the fake data SP for simple COA
+		EXEC [testi21Database].[Fake data for simple COA]
 	END 	
-
-	DECLARE @strAccountId AS NVARCHAR(40)
-	DECLARE @strDivider AS NVARCHAR(100)
-	DECLARE @Length AS INT
-
-	DECLARE @intFoundGLAccountId INT
-	
-	-- Retrieve the account structure to overwrite. 
-	DECLARE @intAccountStructureToModify AS INT	
-	SELECT	@intAccountStructureToModify = Structure.intAccountStructureId
-	FROM	tblGLAccountSegment Segment INNER JOIN tblGLAccountStructure Structure
-				ON Segment.intAccountStructureId = Structure.intAccountStructureId
-	WHERE	Segment.intAccountSegmentId = 101 
 
 	-- Test case 1:
 	--		1. Base g/l account id is 12040-1000 ('INVENTORY WHEAT-')
