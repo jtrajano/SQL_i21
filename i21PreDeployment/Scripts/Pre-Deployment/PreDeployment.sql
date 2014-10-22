@@ -51,7 +51,6 @@
 :r .\8_AP\FixEntityId.sql
 :r .\8_AP\FixstrBillId.sql
 :r .\8_AP\FixPaymentWithoutVendorId.sql
-:r .\8_AP\FixVendorGLAccountExpense.sql
 
 -- FRD
 :r .\9_FRD\1_1420_to_1430.sql
