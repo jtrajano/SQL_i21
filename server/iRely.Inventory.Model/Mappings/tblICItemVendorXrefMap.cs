@@ -22,6 +22,17 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strProductDescription).HasColumnName("strProductDescription");
             this.Property(t => t.strStoreName).HasColumnName("strStoreName");
             this.Property(t => t.strVendorProduct).HasColumnName("strVendorProduct");
+
+            this.HasOptional(p => p.tblSMCompanyLocation)
+                .WithMany(p => p.tblICItemVendorXrefs)
+                .HasForeignKey(p => p.intLocationId);
+            this.HasOptional(p => p.vyuAPVendor)
+                .WithMany(p => p.tblICItemVendorXrefs)
+                .HasForeignKey(p => p.intVendorId);
+            this.HasOptional(p => p.tblICUnitMeasure)
+                .WithMany(p => p.tblICItemVendorXrefs)
+                .HasForeignKey(p => p.intUnitMeasureId);
+                
         }
     }
 }

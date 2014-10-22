@@ -12,6 +12,7 @@ Ext.define('Inventory.view.override.ItemViewModel', {
         'Inventory.store.FuelCategory',
         'Inventory.store.FuelTaxClass',
         'AccountsPayable.store.VendorBuffered',
+        'AccountsReceivable.store.Customer',
         'i21.store.CompanyLocation',
         'GeneralLedger.store.BufAccountId'
     ],
@@ -362,6 +363,9 @@ Ext.define('Inventory.view.override.ItemViewModel', {
         },
         Vendor: {
             type: 'vendorbuffered'
+        },
+        Customer: {
+            type: 'customer'
         },
         CompanyLocation: {
             type: 'companylocation'

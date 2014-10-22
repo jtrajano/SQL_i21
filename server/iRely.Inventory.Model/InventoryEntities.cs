@@ -147,6 +147,8 @@ namespace iRely.Inventory.Model
 
         public DbSet<tblSMCompanyLocation> tblSMCompanyLocations { get; set; }
         public DbSet<tblGLAccount> tblGLAccounts { get; set; }
+        public DbSet<vyuAPVendor> vyuAPVendors { get; set; }
+        public DbSet<tblARCustomer> tblARCustomers { get; set; }
         
         protected override void OnModelCreating(DbModelBuilder modelBuilder) 
         {
@@ -207,6 +209,8 @@ namespace iRely.Inventory.Model
 
             modelBuilder.Configurations.Add(new tblSMCompanyLocationMap());
             modelBuilder.Configurations.Add(new tblGLAccountMap());
+            modelBuilder.Configurations.Add(new vyuAPVendorMap());
+            modelBuilder.Configurations.Add(new tblARCustomerMap());
         }
     }
 }

@@ -109,6 +109,8 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICItemNote> tblICItemNotes { get; set; }
         public ICollection<tblICItemAccount> tblICItemAccounts { get; set; }
+        public ICollection<tblICItemCustomerXref> tblICItemCustomerXrefs { get; set; }
+        public ICollection<tblICItemVendorXref> tblICItemVendorXrefs { get; set; }
     }
 
     public class tblGLAccount : BaseEntity
@@ -119,5 +121,26 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICItemAccount> tblICItemAccounts { get; set; }
         public ICollection<tblICItemAccount> tblICItemAccountProfitCenters { get; set; }
+    }
+
+    public class vyuAPVendor
+    {
+        public int intEntityId { get; set; }
+        public string strName { get; set; }
+        public int intVendorId { get; set; }
+        public string strVendorAccountNum { get; set; }
+        public string strVendorId { get; set; }
+
+        public ICollection<tblICItemVendorXref> tblICItemVendorXrefs { get; set; }
+    }
+
+    public class tblARCustomer : BaseEntity
+    {
+        public int intEntityId { get; set; }
+        public int intCustomerId { get; set; }
+        public string strCustomerNumber { get; set; }
+        public string strType { get; set; }
+
+        public ICollection<tblICItemCustomerXref> tblICItemCustomerXrefs { get; set; }
     }
 }

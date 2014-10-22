@@ -19,6 +19,9 @@ Ext.define('Inventory.model.ItemCustomerXref', {
         { name: 'strCustomerProduct', type: 'string'},
         { name: 'strProductDescription', type: 'string'},
         { name: 'strPickTicketNotes', type: 'string'},
-        { name: 'intSort', type: 'int'}
+        { name: 'intSort', type: 'int'},
+
+        { name: 'strLocationName', type: 'string'},
+        { name: 'strCustomerNumber', type: 'string'}
     ]
 });

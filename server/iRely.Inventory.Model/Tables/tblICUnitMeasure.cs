@@ -23,5 +23,6 @@ namespace iRely.Inventory.Model
         public ICollection<tblICUnitType> DimensionUnitTypes { get; set; }
         public ICollection<tblICItemManufacturingUOM> tblICItemManufacturingUOMs { get; set; }
         public ICollection<tblICRinFeedStockUOM> tblICRinFeedStockUOMs { get; set; }
+        public ICollection<tblICItemVendorXref> tblICItemVendorXrefs { get; set; }
     }
 }

@@ -20,6 +20,10 @@ Ext.define('Inventory.model.ItemVendorXref', {
         { name: 'strProductDescription', type: 'string'},
         { name: 'dblConversionFactor', type: 'float'},
         { name: 'intUnitMeasureId', type: 'int'},
-        { name: 'intSort', type: 'int'}
+        { name: 'intSort', type: 'int'},
+
+        { name: 'strLocationName', type: 'string'},
+        { name: 'strVendorId', type: 'string'},
+        { name: 'strUnitMeasure', type: 'string'}
     ]
 });

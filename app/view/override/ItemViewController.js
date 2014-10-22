@@ -271,6 +271,8 @@ Ext.define('Inventory.view.override.ItemViewController', {
             grdCategory = win.down('#grdCategory'),
             grdGlAccounts = win.down('#grdGlAccounts'),
             grdUPC = win.down('#grdUPC'),
+            grdVendorXref = win.down('#grdVendorXref'),
+            grdCustomerXref = win.down('#grdCustomerXref'),
             grdNotes = win.down('#grdNotes');
 
         win.context = Ext.create('iRely.mvvm.Engine', {
@@ -303,15 +305,15 @@ Ext.define('Inventory.view.override.ItemViewController', {
                 {
                     key: 'tblICItemVendorXrefs',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
-                        grid: win.down('#grdVendorXref'),
-                        deleteButton : win.down('#btnDeleteVendorXref')
+                        grid: grdVendorXref,
+                        deleteButton : grdVendorXref.down('#btnDeleteVendorXref')
                     })
                 },
                 {
                     key: 'tblICItemCustomerXrefs',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
-                        grid: win.down('#grdCustomerXref'),
-                        deleteButton : win.down('#btnDeleteCustomerXref')
+                        grid: grdCustomerXref,
+                        deleteButton : grdCustomerXref.down('#btnDeleteCustomerXref')
                     })
                 },
                 {
@@ -422,6 +424,32 @@ Ext.define('Inventory.view.override.ItemViewController', {
             edit: me.onGridAccountEdit,
             scope: me
         });
+
+
+        var colCustomerLocation = grdCustomerXref.columns[0];
+        colCustomerLocation.renderer = me.LocationRenderer;
+        var colCustomerXref = grdCustomerXref.columns[1];
+        colCustomerXref.renderer = me.CustomerRenderer;
+
+        var cepCustomerXref = grdCustomerXref.getPlugin('cepCustomerXref');
+        cepCustomerXref.on({
+            edit: me.onGridCustomerXrefEdit,
+            scope: me
+        });
+
+        var colVendorLocation = grdVendorXref.columns[0];
+        colVendorLocation.renderer = me.LocationRenderer;
+        var colVendorXref = grdVendorXref.columns[1];
+        colVendorXref.renderer = me.VendorRenderer;
+        var colVendorUom = grdVendorXref.columns[5];
+        colVendorUom.renderer = me.UOMRenderer;
+
+        var cepVendorXref = grdVendorXref.getPlugin('cepVendorXref');
+        cepVendorXref.on({
+            edit: me.onGridVendorXrefEdit,
+            scope: me
+        });
+
         // </editor-fold>
 
 
@@ -478,6 +506,16 @@ Ext.define('Inventory.view.override.ItemViewController', {
     ProfitCenterRenderer: function (value, metadata, record) {
         var profitcenter = record.get('strProfitCenter');
         return profitcenter;
+    },
+
+    CustomerRenderer: function (value, metadata, record) {
+        var customer = record.get('strCustomerNumber');
+        return customer;
+    },
+
+    VendorRenderer: function (value, metadata, record) {
+        var vendor = record.get('strVendorId');
+        return vendor;
     },
 
     onGridCategoryEdit: function(editor, e, eOpts){
@@ -576,6 +614,76 @@ Ext.define('Inventory.view.override.ItemViewController', {
             {
                 var strProfitCenter = cboProfitCenter.getSelectedRecord().get('strProfitCenter');
                 record.set('strProfitCenter', strProfitCenter);
+                view.refresh();
+            }
+        }
+    },
+
+    onGridCustomerXrefEdit: function(editor, e, eOpts){
+        var me = this;
+        var record = e.record
+        var column = e.column;
+
+        var grid = column.up('grid');
+        var view = grid.view;
+
+        if (column.itemId === 'colCustomerXrefLocation')
+        {
+            var cboLocation = column.getEditor();
+            if (cboLocation.getSelectedRecord())
+            {
+                var strLocationName = cboLocation.getSelectedRecord().get('strLocationName');
+                record.set('strLocationName', strLocationName);
+                view.refresh();
+            }
+        }
+        else if (column.itemId === 'colCustomerXrefCustomer')
+        {
+            var cboCustomer = column.getEditor();
+            if (cboCustomer.getSelectedRecord())
+            {
+                var strCustomerNumber = cboCustomer.getSelectedRecord().get('strCustomerNumber');
+                record.set('strCustomerNumber', strCustomerNumber);
+                view.refresh();
+            }
+        }
+    },
+
+    onGridVendorXrefEdit: function(editor, e, eOpts){
+        var me = this;
+        var record = e.record
+        var column = e.column;
+
+        var grid = column.up('grid');
+        var view = grid.view;
+
+        if (column.itemId === 'colVendorXrefLocation')
+        {
+            var cboLocation = column.getEditor();
+            if (cboLocation.getSelectedRecord())
+            {
+                var strLocationName = cboLocation.getSelectedRecord().get('strLocationName');
+                record.set('strLocationName', strLocationName);
+                view.refresh();
+            }
+        }
+        else if (column.itemId === 'colVendorXrefVendor')
+        {
+            var cboVendor = column.getEditor();
+            if (cboVendor.getSelectedRecord())
+            {
+                var strVendorId = cboVendor.getSelectedRecord().get('strVendorId');
+                record.set('strVendorId', strVendorId);
+                view.refresh();
+            }
+        }
+        else if (column.itemId === 'colVendorXrefUnitMeasure')
+        {
+            var cboUom = column.getEditor();
+            if (cboUom.getSelectedRecord())
+            {
+                var strUnitMeasure = cboUom.getSelectedRecord().get('strUnitMeasure');
+                record.set('strUnitMeasure', strUnitMeasure);
                 view.refresh();
             }
         }

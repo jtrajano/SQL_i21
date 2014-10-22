@@ -2297,15 +2297,35 @@ Ext.define('Inventory.view.Item', {
                                                                         width: 215,
                                                                         dataIndex: 'string',
                                                                         text: 'Location',
-                                                                        flex: 1.5
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colCustomerXrefStore',
-                                                                        width: 215,
-                                                                        dataIndex: 'string',
-                                                                        text: 'Store',
-                                                                        flex: 1.5
+                                                                        flex: 1.5,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intCompanyLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Location Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strLocationName',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Location Name',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strLocationType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Location Type',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            displayField: 'strLocationName',
+                                                                            valueField: 'intCompanyLocationId',
+                                                                            bind: {
+                                                                                store: '{CompanyLocation}'
+                                                                            }
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
@@ -2313,28 +2333,65 @@ Ext.define('Inventory.view.Item', {
                                                                         width: 215,
                                                                         dataIndex: 'string',
                                                                         text: 'Customer',
-                                                                        flex: 1.5
+                                                                        flex: 1.5,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intCustomerId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Customer Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strCustomerNumber',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Customer No',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Type',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            displayField: 'strCustomerNumber',
+                                                                            valueField: 'intCustomerId',
+                                                                            bind: {
+                                                                                store: '{Customer}'
+                                                                            }
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colCustomerXrefProduct',
                                                                         dataIndex: 'string',
                                                                         text: 'Customer Product',
-                                                                        flex: 1
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'textfield'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colCustomerXrefDescription',
                                                                         dataIndex: 'string',
                                                                         text: 'Product Description',
-                                                                        flex: 2
+                                                                        flex: 2,
+                                                                        editor: {
+                                                                            xtype: 'textfield'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colCustomerXrefPickTicketNotes',
                                                                         dataIndex: 'string',
                                                                         text: 'Pick Ticket Notes',
-                                                                        flex: 2
+                                                                        flex: 2,
+                                                                        editor: {
+                                                                            xtype: 'textfield'
+                                                                        }
                                                                     }
                                                                 ],
                                                                 viewConfig: {
@@ -2342,7 +2399,14 @@ Ext.define('Inventory.view.Item', {
                                                                 },
                                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                                     selType: 'checkboxmodel'
-                                                                })
+                                                                }),
+                                                                plugins: [
+                                                                    {
+                                                                        ptype: 'cellediting',
+                                                                        pluginId: 'cepCustomerXref',
+                                                                        clicksToEdit: 1
+                                                                    }
+                                                                ]
                                                             },
                                                             {
                                                                 xtype: 'advancefiltergrid',
@@ -2383,15 +2447,35 @@ Ext.define('Inventory.view.Item', {
                                                                         width: 215,
                                                                         dataIndex: 'string',
                                                                         text: 'Location',
-                                                                        flex: 1.5
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colVendorXrefStore',
-                                                                        width: 215,
-                                                                        dataIndex: 'string',
-                                                                        text: 'Store',
-                                                                        flex: 1.5
+                                                                        flex: 1.5,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intCompanyLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Location Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strLocationName',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Location Name',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strLocationType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Location Type',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            displayField: 'strLocationName',
+                                                                            valueField: 'intCompanyLocationId',
+                                                                            bind: {
+                                                                                store: '{CompanyLocation}'
+                                                                            }
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
@@ -2399,35 +2483,106 @@ Ext.define('Inventory.view.Item', {
                                                                         width: 215,
                                                                         dataIndex: 'string',
                                                                         text: 'Vendor',
-                                                                        flex: 1.5
+                                                                        flex: 1.5,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intVendorId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Vendor Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strVendorId',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Vendor No',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strVendorName',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Vendor Name',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            displayField: 'strVendorId',
+                                                                            valueField: 'intVendorId',
+                                                                            bind: {
+                                                                                store: '{Vendor}'
+                                                                            }
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colVendorXrefProduct',
                                                                         dataIndex: 'string',
                                                                         text: 'Vendor Product',
-                                                                        flex: 1
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'textfield'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colVendorXrefDescription',
                                                                         dataIndex: 'string',
                                                                         text: 'Product Description',
-                                                                        flex: 2
+                                                                        flex: 2,
+                                                                        editor: {
+                                                                            xtype: 'textfield'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        itemId: 'colVendorXrefConversionFactor',
                                                                         dataIndex: 'string',
+                                                                        itemId: 'colVendorXrefConversionFactor',
                                                                         text: 'Conversion Factor',
-                                                                        flex: 1
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'numberfield'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colVendorXrefUnitMeasure',
                                                                         dataIndex: 'string',
                                                                         text: 'UOM',
-                                                                        flex: 1
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intUnitMeasureId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Unit Of Measure ID',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strUnitMeasure',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Unit Measure',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strUnitType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Unit Type',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'ysnDefault',
+                                                                                    dataType: 'boolean',
+                                                                                    text: 'Default',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            displayField: 'strUnitMeasure',
+                                                                            valueField: 'intUnitMeasureId',
+                                                                            bind: {
+                                                                                store: '{UnitMeasure}'
+                                                                            }
+                                                                        }
                                                                     }
                                                                 ],
                                                                 viewConfig: {
@@ -2435,7 +2590,14 @@ Ext.define('Inventory.view.Item', {
                                                                 },
                                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                                     selType: 'checkboxmodel'
-                                                                })
+                                                                }),
+                                                                plugins: [
+                                                                    {
+                                                                        ptype: 'cellediting',
+                                                                        pluginId: 'cepVendorXref',
+                                                                        clicksToEdit: 1
+                                                                    }
+                                                                ]
                                                             }
                                                         ]
                                                     },
