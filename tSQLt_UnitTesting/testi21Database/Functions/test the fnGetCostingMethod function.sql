@@ -14,33 +14,33 @@ BEGIN
 
 	-- Setup the fake table and data 
 	BEGIN 
-		EXEC tSQLt.FakeTable 'dbo.tblICItemLocationStore';
-		INSERT INTO tblICItemLocationStore(
-			intItemLocationStoreId
+		EXEC tSQLt.FakeTable 'dbo.tblICItemLocation';
+		INSERT INTO tblICItemLocation(
+			intItemLocationId
 			,intItemId
 			,intLocationId
 			,intCostingMethod
 		)
 		-- Add item-location, costing method is average cost
-		SELECT	intItemLocationStoreId = 1
+		SELECT	intItemLocationId = 1
 				,intItemId = 1
 				,intLocationId = 100
 				,intCostingMethod = @AverageCost
 		-- Add costing method for FIFO			
 		UNION ALL
-		SELECT	intItemLocationStoreId = 2
+		SELECT	intItemLocationId = 2
 				,intItemId = 1
 				,intLocationId = 200
 				,intCostingMethod = @FIFO	
 		-- Add costing method for LIFO
 		UNION ALL
-		SELECT	intItemLocationStoreId = 3
+		SELECT	intItemLocationId = 3
 				,intItemId = 1
 				,intLocationId = 300
 				,intCostingMethod = @LIFO	
 		-- Add costing method for Standard Cost
 		UNION ALL
-		SELECT	intItemLocationStoreId = 4
+		SELECT	intItemLocationId = 4
 				,intItemId = 1
 				,intLocationId = 400
 				,intCostingMethod = @StandardCost
