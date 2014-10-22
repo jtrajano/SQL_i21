@@ -333,15 +333,12 @@
                                         ],
                                         "designer|createAlias": "gridcombobox",
                                         "displayField": "strManufacturer",
-                                        "store": [
-                                            "{Manufacturers}"
-                                        ],
+                                        "itemId": "cboManufacturer",
                                         "valueField": "intManufacturerId"
                                     },
                                     "name": "MyComboBox14",
                                     "configAlternates": {
-                                        "columns": "array",
-                                        "store": "binding"
+                                        "columns": "array"
                                     },
                                     "designerId": "b5a607dd-72cf-4c61-b5f9-02fee6e3639a",
                                     "customConfigs": [

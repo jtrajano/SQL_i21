@@ -8,6 +8,16 @@ Ext.define('Inventory.view.override.BrandViewModel', {
     stores: {
         Manufacturers:{
             type: 'inventorymanufacturer'
+        },
+        Test: {
+            autoLoad: true,
+            data: [
+                { strDescription: 'test' },
+                { strDescription: 'test2' }
+            ],
+            fields: [
+                { name : 'strDescription'}
+            ]
         }
     }
 });

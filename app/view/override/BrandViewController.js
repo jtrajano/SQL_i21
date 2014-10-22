@@ -5,7 +5,10 @@ Ext.define('Inventory.view.override.BrandViewController', {
         binding: {
             colBrandCode : 'strBrandCode',
             colBrandName : 'strBrandName',
-            colManufacturer: 'intManufacturerId'
+            colManufacturer: {
+                value: 'intManufacturerId',
+                store: '{Manufacturers}'
+            }
         }
     },
 
@@ -13,16 +16,35 @@ Ext.define('Inventory.view.override.BrandViewController', {
         "use strict";
         var me = this,
             win = options.window,
-            store = Ext.create('Inventory.store.Brand', { pageSize: 1 });
+            store = Ext.create('Inventory.store.Brand', { pageSize: 1 }),
+            grdBrand = win.down('#grdBrand');
 
         win.context = Ext.create('iRely.mvvm.Engine', {
             binding: me.config.binding,
             window : win,
             store  : store,
             singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
-                grid:  win.down('#grdBrand'),
-                deleteButton: win.down('#btnDeleteBrand')
+                grid: grdBrand,
+                deleteButton: grdBrand.down('#btnDeleteBrand')
             })
+        });
+
+        var colManufacturer = grdBrand.columns[2];
+        colManufacturer.renderer = me.ManufacturerRenderer;
+
+        //-----------------------------------------------//
+        // Use old approach becuase the new one doesnt work
+        //-----------------------------------------------//
+        var manufacturer = Ext.create('Inventory.store.Manufacturer');
+        var cboManufacturer = colManufacturer.getEditor();
+        cboManufacturer.bindStore(manufacturer);
+        //-----------------------------------------------//
+
+
+        var cepBrand = grdBrand.getPlugin('cepBrand');
+        cepBrand.on({
+            edit: me.onGridManufacturerEdit,
+            scope: me
         });
 
         return win.context;
@@ -53,6 +75,30 @@ Ext.define('Inventory.view.override.BrandViewController', {
                 });
             }
         }
+    },
+
+    ManufacturerRenderer: function (value, metadata, record) {
+        var manufacturer = record.get('strManufacturer');
+        return manufacturer;
+    },
+
+    onGridManufacturerEdit: function(editor, e, eOpts){
+        var me = this;
+        var record = e.record
+        var column = e.column;
+
+        if (column.itemId !== 'colManufacturer')
+            return;
+
+        var grid = column.up('grid');
+        var view = grid.view;
+
+        var cboManufacturer = column.getEditor();
+        if (cboManufacturer.getSelectedRecord())
+        {
+            var strManufacturer = cboManufacturer.getSelectedRecord().get('strManufacturer');
+            record.set('strManufacturer', strManufacturer);
+            view.refresh();
+        }
     }
-    
 });

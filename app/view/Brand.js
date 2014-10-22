@@ -193,11 +193,9 @@ Ext.define('Inventory.view.Brand', {
                                                     flex: 1
                                                 }
                                             ],
+                                            itemId: 'cboManufacturer',
                                             displayField: 'strManufacturer',
-                                            valueField: 'intManufacturerId',
-                                            bind: {
-                                                store: '{Manufacturers}'
-                                            }
+                                            valueField: 'intManufacturerId'
                                         }
                                     }
                                 ],
