@@ -20,9 +20,6 @@
         "minWidth": 530,
         "minimizable": null,
         "reference": null,
-        "requires": [
-            "Inventory.store.UnitMeasure"
-        ],
         "title": "Feed Stock UOM",
         "width": 530
     },
@@ -274,7 +271,6 @@
                                         "designer|createAlias": "gridcombobox",
                                         "displayField": "strUnitMeasure",
                                         "itemId": "cboUOM",
-                                        "store": "UnitMeasure",
                                         "valueField": "intUnitMeasureId"
                                     },
                                     "name": "MyComboBox20",
@@ -353,7 +349,8 @@
                             "codeClass": null,
                             "userConfig": {
                                 "clicksToEdit": 1,
-                                "pluginId": "FeedStockUOMplugin"
+                                "designer|displayName": "cepFeedStockUOM",
+                                "pluginId": "cepFeedStockUOM"
                             },
                             "name": "MyCellEditingPlugin1",
                             "designerId": "3f956817-439b-43f2-8359-a85a20932fe7"

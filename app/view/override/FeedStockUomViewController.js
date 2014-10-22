@@ -29,6 +29,20 @@ Ext.define('Inventory.view.override.FeedStockUomViewController', {
         var colUom = grdFeedStockUom.columns[0];
         colUom.renderer = me.UomRenderer;
 
+        //-----------------------------------------------//
+        // Use old approach becuase the new one doesnt work
+        //-----------------------------------------------//
+        var uom = Ext.create('Inventory.store.UnitMeasure');
+        var cboUOM = colUom.getEditor();
+        cboUOM.bindStore(uom);
+        //-----------------------------------------------//
+
+        var cepFeedStockUOM = grdFeedStockUom.getPlugin('cepFeedStockUOM');
+        cepFeedStockUOM.on({
+            edit: me.onGridUOMEdit,
+            scope: me
+        });
+
         return win.context;
     },
 
@@ -62,6 +76,26 @@ Ext.define('Inventory.view.override.FeedStockUomViewController', {
     UomRenderer: function (value, metadata, record) {
         var strUnitMeasure = record.get('strUnitMeasure');
         return strUnitMeasure;
+    },
+
+    onGridUOMEdit: function(editor, e, eOpts){
+        var me = this;
+        var record = e.record
+        var column = e.column;
+
+        if (column.itemId !== 'colUOM')
+            return;
+
+        var grid = column.up('grid');
+        var view = grid.view;
+
+        var cboUOM = column.getEditor();
+        if (cboUOM.getSelectedRecord())
+        {
+            var strUnitMeasure = cboUOM.getSelectedRecord().get('strUnitMeasure');
+            record.set('strUnitMeasure', strUnitMeasure);
+            view.refresh();
+        }
     }
 
 });

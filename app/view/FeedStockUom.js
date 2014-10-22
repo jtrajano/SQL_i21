@@ -29,8 +29,7 @@ Ext.define('Inventory.view.FeedStockUom', {
         'Ext.form.field.ComboBox',
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
-        'Ext.grid.plugin.CellEditing',
-        'Inventory.store.UnitMeasure'
+        'Ext.grid.plugin.CellEditing'
     ],
 
     viewModel: {
@@ -179,7 +178,6 @@ Ext.define('Inventory.view.FeedStockUom', {
                                             ],
                                             itemId: 'cboUOM',
                                             displayField: 'strUnitMeasure',
-                                            store: 'UnitMeasure',
                                             valueField: 'intUnitMeasureId'
                                         }
                                     },
@@ -203,7 +201,7 @@ Ext.define('Inventory.view.FeedStockUom', {
                                 plugins: [
                                     {
                                         ptype: 'cellediting',
-                                        pluginId: 'FeedStockUOMplugin',
+                                        pluginId: 'cepFeedStockUOM',
                                         clicksToEdit: 1
                                     }
                                 ]
