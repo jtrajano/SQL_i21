@@ -2,7 +2,7 @@
     [intRecurringId]   INT           IDENTITY (1, 1) NOT NULL,
     [intTransactionId] INT           NOT NULL,
 	[intTransactionType] INT           NOT NULL,
-    [intFrequencyId]     INT COLLATE Latin1_General_CI_AS NULL,
+    [intFrequencyId]     INT  NULL,
     [dtmLastProcess]   DATETIME      NULL,
     [dtmNextProcess]   DATETIME      NULL,
     [dtmStartDate]     DATETIME      NULL,
