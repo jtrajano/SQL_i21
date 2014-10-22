@@ -77,6 +77,7 @@ print 'BEGIN POST DEPLOYMENT'
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
 --:r .\AP\FixEntitiesData.sql
+:r .\AP\FixVendorGLAccountExpense.sql
 
 -- Inventory 
 :r .\IC\1_InventoryTransactionTypes.sql 

@@ -742,6 +742,7 @@
     <Build Include="dbo\Functions\fnGetGLAccountIdFromLocation.sql" />
     <Build Include="dbo\Functions\fnGetGLAccountIdFromItemLocation.sql" />
     <Build Include="dbo\Tables\tblSMCompanyLocationAccount.sql" />
+    <None Include="Scripts\Post-Deployment\AP\FixVendorGLAccountExpense.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
