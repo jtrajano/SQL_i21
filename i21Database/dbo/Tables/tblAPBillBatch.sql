@@ -9,7 +9,8 @@
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     [intEntityId] INT NULL, 
     CONSTRAINT [PK_dbo.tblAPBillBatches] PRIMARY KEY CLUSTERED ([intBillBatchId] ASC),
-	CONSTRAINT [FK_dbo.tblAPBillBatch_dbo.tblEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEntity(intEntityId)
+	CONSTRAINT [FK_dbo.tblAPBillBatch_dbo.tblEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEntity(intEntityId),
+	CONSTRAINT [FK_dbo.tblAPBillBatch_dbo.tblGLAccount_intAccountId] FOREIGN KEY (intAccountId) REFERENCES tblGLAccount(intAccountId)
 );
 
 GO

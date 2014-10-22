@@ -700,4 +700,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intItemLocationId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="8c55b92e-439f-49be-afe4-37da2720de2d" ChangeDateTime="10/21/2014 02:04:14">
+    <Property Name="ElementName" Value="[dbo].[tblICFuelTaxClass].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICFuelTaxClass]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intFuelTaxClassId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="785164df-72ac-44ff-8d7f-a7babce57667" ChangeDateTime="10/21/2014 02:05:35">
+    <Property Name="ElementName" Value="[dbo].[tblICFuelTaxClassProductCode].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICFuelTaxClassProductCode]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intFuelTaxClassProductCodeId" />
+  </Operation>
 </Operations>

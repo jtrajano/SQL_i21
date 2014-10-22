@@ -65,6 +65,7 @@
     <Folder Include="dbo\Functions" />
     <Folder Include="Scripts\AP" />
     <Folder Include="dbo\Tables" />
+    <Folder Include="Scripts\TM" />
   </ItemGroup>
   <ItemGroup>
     <None Include="dbo\Views\apchkmst.sql" />
@@ -200,6 +201,7 @@
     <None Include="dbo\Stored Procedures\uspGLBuildAccount.sql" />
     <None Include="dbo\Stored Procedures\uspGLBuildOriginAccount.sql" />
     <None Include="dbo\Stored Procedures\uspSMMigrateCurrency.sql" />
+    <None Include="Scripts\TM\Customer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
