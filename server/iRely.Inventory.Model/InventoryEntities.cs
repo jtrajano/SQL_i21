@@ -138,6 +138,7 @@ namespace iRely.Inventory.Model
         public DbSet<tblICMaterialNMFC> tblICMaterialNMFCs { get; set; }
         public DbSet<tblICFuelTaxClass> tblICFuelTaxClasses { get; set; }
         public DbSet<tblICFuelTaxClassProductCode> tblICFuelTaxClassProductCodes { get; set; }
+        public DbSet<tblICCountGroup> tblICCountGroups { get; set; }
 
         public DbSet<tblICInventoryReceipt> tblICInventoryReceipts { get; set; }
         public DbSet<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
@@ -150,6 +151,7 @@ namespace iRely.Inventory.Model
         public DbSet<vyuAPVendor> vyuAPVendors { get; set; }
         public DbSet<tblARCustomer> tblARCustomers { get; set; }
         public DbSet<tblSMCountry> tblSMCountries { get; set; }
+        
         
         protected override void OnModelCreating(DbModelBuilder modelBuilder) 
         {
@@ -201,7 +203,8 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICMaterialNMFCMap());
             modelBuilder.Configurations.Add(new tblICFuelTaxClassMap());
             modelBuilder.Configurations.Add(new tblICFuelTaxClassProductCodeMap());
-
+            modelBuilder.Configurations.Add(new tblICCountGroupMap());
+            
             modelBuilder.Configurations.Add(new tblICInventoryReceiptMap());
             modelBuilder.Configurations.Add(new tblICInventoryReceiptItemMap());
             modelBuilder.Configurations.Add(new tblICInventoryReceiptItemLotMap());

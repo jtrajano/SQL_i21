@@ -112,6 +112,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemCustomerXref> tblICItemCustomerXrefs { get; set; }
         public ICollection<tblICItemVendorXref> tblICItemVendorXrefs { get; set; }
         public ICollection<tblICItemContract> tblICItemContracts { get; set; }
+        public ICollection<tblICItemStock> tblICItemStocks { get; set; }
     }
 
     public class tblGLAccount : BaseEntity
