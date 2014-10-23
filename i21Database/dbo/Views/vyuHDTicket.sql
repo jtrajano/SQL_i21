@@ -1,34 +1,40 @@
 ﻿CREATE VIEW [dbo].[vyuHDTicket]
 	AS
-	select
-      tic.intTicketId
-      ,tic.strTicketNumber
-      ,tic.strSubject
-      ,typ.strType
-      ,sta.strStatus
-      ,pri.strPriority
-      ,pro.strProduct
-      ,mo.strModule
-      ,ver.strVersionNo
-      ,strCreateBy = (select top 1 strName from tblEntity where intEntityId = tic.intCreatedUserEntityId)
-      ,tic.dtmCreated
-      ,tic.dtmLastModified
-      ,strCustomer = tic.strCustomerNumber
-      ,strAssignedTo = (select top 1 strName from tblEntity where intEntityId = tic.intAssignedToEntity)
-      ,tic.intConcurrencyId
-	  ,intAssignToEntity = tic.intAssignedToEntity
-	  ,strContactName = (select top 1 strName from tblEntity where intEntityId = tic.intCustomerContactId)
-	  ,tic.intCustomerContactId
-	  ,strDateCreated = convert(nvarchar,tic.dtmCreated, 101)
-	  ,strDateLastModified = convert(nvarchar,tic.dtmLastModified, 101)
-  from
-      tblHDTicket tic
-      left outer join tblHDTicketType typ on typ.intTicketTypeId = tic.intTicketTypeId
-      left outer join tblHDTicketStatus sta on sta.intTicketStatusId = tic.intTicketStatusId
-      left outer join tblHDTicketPriority pri on pri.intTicketPriorityId = tic.intTicketPriorityId
-      left outer join tblHDTicketProduct pro on pro.intTicketProductId = tic.intTicketProductId
-      left outer join tblHDModule mo on mo.intModuleId = tic.intModuleId
-      left outer join tblHDVersion ver on ver.intVersionId = tic.intVersionId 
+		select
+			tic.intTicketId
+			,tic.strTicketNumber
+			,tic.strSubject
+			,typ.strType
+			,sta.strStatus
+			,strStatusIcon = sta.strIcon
+			,strStatusFontColor = sta.strFontColor
+			,strStatusBackColor = sta.strBackColor
+			,pri.strPriority
+			,strPriorityIcon = pri.strIcon
+			,strPriorityFontColor = pri.strFontColor
+			,strPriorityBackColor = pri.strBackColor
+			,pro.strProduct
+			,mo.strModule
+			,ver.strVersionNo
+			,strCreateBy = (select top 1 strName from tblEntity where intEntityId = tic.intCreatedUserEntityId)
+			,tic.dtmCreated
+			,tic.dtmLastModified
+			,strCustomer = tic.strCustomerNumber
+			,strAssignedTo = (select top 1 strName from tblEntity where intEntityId = tic.intAssignedToEntity)
+			,tic.intConcurrencyId
+			,intAssignToEntity = tic.intAssignedToEntity
+			,strContactName = (select top 1 strName from tblEntity where intEntityId = tic.intCustomerContactId)
+			,tic.intCustomerContactId
+			,strDateCreated = convert(nvarchar,tic.dtmCreated, 101)
+			,strDateLastModified = convert(nvarchar,tic.dtmLastModified, 101)
+		from
+			tblHDTicket tic
+			left outer join tblHDTicketType typ on typ.intTicketTypeId = tic.intTicketTypeId
+			left outer join tblHDTicketStatus sta on sta.intTicketStatusId = tic.intTicketStatusId
+			left outer join tblHDTicketPriority pri on pri.intTicketPriorityId = tic.intTicketPriorityId
+			left outer join tblHDTicketProduct pro on pro.intTicketProductId = tic.intTicketProductId
+			left outer join tblHDModule mo on mo.intModuleId = tic.intModuleId
+			left outer join tblHDVersion ver on ver.intVersionId = tic.intVersionId  
 	/*
 	 select
       tic.intTicketId
