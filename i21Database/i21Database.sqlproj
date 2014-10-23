@@ -745,6 +745,7 @@
     <None Include="Scripts\Post-Deployment\AP\FixVendorGLAccountExpense.sql" />
     <Build Include="dbo\Tables\tblICMaterialNMFC.sql" />
     <Build Include="dbo\Tables\tblICCountGroup.sql" />
+    <Build Include="dbo\Views\vyuHDGroupUser.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
