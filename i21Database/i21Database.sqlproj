@@ -748,6 +748,9 @@
     <Build Include="dbo\Views\vyuHDGroupUser.sql" />
     <Build Include="dbo\Stored Procedures\uspAPProcessRecurring.sql" />
     <Build Include="dbo\Stored Procedures\uspAPBillRecurring.sql" />
+    <Build Include="dbo\Tables\tblSMTableDictionary.sql" />
+    <Build Include="dbo\Tables\tblSMMappingDictionary.sql" />
+    <Build Include="dbo\Tables\tblSMColumnDictionary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
