@@ -3,6 +3,7 @@
     [intTransactionId] INT           NOT NULL,
 	[intTransactionType] INT           NOT NULL,
     [intFrequencyId]     INT  NULL,
+	[intIterations]     INT  NOT NULL DEFAULT 1,
     [dtmLastProcess]   DATETIME      NULL,
     [dtmNextProcess]   DATETIME      NULL,
     [dtmStartDate]     DATETIME      NULL,

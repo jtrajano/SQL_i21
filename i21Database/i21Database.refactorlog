@@ -714,4 +714,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intFuelTaxClassProductCodeId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="407c898e-fc76-4578-b387-c1174ec56cf0" ChangeDateTime="10/23/2014 02:39:43">
+    <Property Name="ElementName" Value="[dbo].[tblICMaterialNMFC].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICMaterialNMFC]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intMaterialNFMCId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="34596445-82ce-4a8b-8c1f-2a44192913fe" ChangeDateTime="10/23/2014 02:41:20">
+    <Property Name="ElementName" Value="[dbo].[tblICMaterialNMFC].[intMaterialNFMCId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICMaterialNMFC]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intMaterialNMFCId" />
+  </Operation>
 </Operations>
