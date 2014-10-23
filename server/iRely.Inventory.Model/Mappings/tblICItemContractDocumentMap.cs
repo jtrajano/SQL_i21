@@ -17,7 +17,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intItemContractId).HasColumnName("intItemContractId");
             this.Property(t => t.intSort).HasColumnName("intSort");
 
-            this.HasRequired(p => p.tblICDocument)
+            this.HasOptional(p => p.tblICDocument)
                 .WithMany(p => p.tblICItemContractDocuments)
                 .HasForeignKey(p => p.intDocumentId);
         }

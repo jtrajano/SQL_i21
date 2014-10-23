@@ -71,7 +71,9 @@ namespace iRely.Inventory.BRL
                     .Include("tblICItemVendorXrefs.tblICUnitMeasure")
                     .Include("tblICItemContracts.tblSMCompanyLocation")
                     .Include("tblICItemContracts.tblSMCountry")
+                    
                     .Include("tblICItemContracts.tblICItemContractDocuments.tblICDocument")
+
                     .Include("tblICItemCertifications.tblICCertification")
                     .Include(p => p.tblICItemPricings)
                     .Include(p => p.tblICItemPricingLevels)

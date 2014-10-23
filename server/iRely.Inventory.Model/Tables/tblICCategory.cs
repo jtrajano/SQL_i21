@@ -73,10 +73,10 @@ namespace iRely.Inventory.Model
         public ICollection<tblICCategoryStore> tblICCategoryStores { get; set; }
         public ICollection<tblICCategoryVendor> tblICCategoryVendors { get; set; }
 
-        public virtual tblICCatalog tblICCatalog { get; set; }
-        public virtual tblICUnitMeasure tblICUnitMeasure { get; set; }
-        public virtual tblICFamily tblICFamily { get; set; }
-        public virtual tblICClass tblICClass { get; set; }
+        public tblICCatalog tblICCatalog { get; set; }
+        public tblICUnitMeasure tblICUnitMeasure { get; set; }
+        public tblICFamily tblICFamily { get; set; }
+        public tblICClass tblICClass { get; set; }
         
 
     }

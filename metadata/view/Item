@@ -5689,6 +5689,7 @@
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
                                                         "margin": "-1 -1 4 -1",
+                                                        "reference": "grdContractItem",
                                                         "title": "Contract Item"
                                                     },
                                                     "name": "MyGridPanel4",
@@ -7685,10 +7686,48 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "designer|createAlias": "gridcombobox"
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intCompanyLocationId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Location Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strLocationName',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Location Name',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strLocationType',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Location Type',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strLocationName",
+                                                        "store": [
+                                                            "{CompanyLocation}"
+                                                        ],
+                                                        "valueField": "intCompanyLocationId"
                                                     },
                                                     "name": "MyComboBox22",
-                                                    "designerId": "0b20a46c-c9b4-4d6e-86ce-3a8a1f2d28f4"
+                                                    "configAlternates": {
+                                                        "columns": "array",
+                                                        "store": "binding"
+                                                    },
+                                                    "designerId": "0b20a46c-c9b4-4d6e-86ce-3a8a1f2d28f4",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -7706,19 +7745,7 @@
                                                 "width": 100
                                             },
                                             "name": "MyColumn70",
-                                            "designerId": "701deda7-c5dc-4efc-acac-bd5aa95b18ac",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "name": "MyTextField32",
-                                                    "designerId": "9d37c844-c049-4577-a457-49b50ae005d9"
-                                                }
-                                            ]
+                                            "designerId": "701deda7-c5dc-4efc-acac-bd5aa95b18ac"
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -7964,7 +7991,15 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "store": [
+                                                            "{Counteds}"
+                                                        ]
+                                                    },
                                                     "name": "MyComboBox24",
+                                                    "configAlternates": {
+                                                        "store": "binding"
+                                                    },
                                                     "designerId": "88e3789e-f1c9-4478-9463-c8b238e2b44d"
                                                 }
                                             ]
@@ -7992,7 +8027,15 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "store": [
+                                                            "{InventoryGroup}"
+                                                        ]
+                                                    },
                                                     "name": "MyComboBox26",
+                                                    "configAlternates": {
+                                                        "store": "binding"
+                                                    },
                                                     "designerId": "bd4f5a12-68d2-4d75-be90-9293077aafb6"
                                                 }
                                             ]
@@ -8605,7 +8648,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging12",
                     "designerId": "64f13019-953f-46dc-920e-9a395d3cb3c9",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

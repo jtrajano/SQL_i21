@@ -13,7 +13,7 @@ namespace iRely.Inventory.Model
     {
         public int intItemContractDocumentId { get; set; }
         public int intItemContractId { get; set; }
-        public int intDocumentId { get; set; }
+        public int? intDocumentId { get; set; }
         public int intSort { get; set; }
 
         private string _document;

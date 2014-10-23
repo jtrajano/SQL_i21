@@ -1908,7 +1908,6 @@ Ext.define('Inventory.view.Item', {
                                                                                         items: [
                                                                                             {
                                                                                                 xtype: 'gridcombobox',
-                                                                                                flex: 1,
                                                                                                 columns: [
                                                                                                     {
                                                                                                         dataIndex: 'intMaterialNMFCId',
@@ -1929,6 +1928,7 @@ Ext.define('Inventory.view.Item', {
                                                                                                         flex: 2
                                                                                                     }
                                                                                                 ],
+                                                                                                flex: 1,
                                                                                                 itemId: 'cboNFMC',
                                                                                                 fieldLabel: 'NMFC',
                                                                                                 labelWidth: 125,
@@ -2639,6 +2639,7 @@ Ext.define('Inventory.view.Item', {
                                                             {
                                                                 xtype: 'advancefiltergrid',
                                                                 flex: 1,
+                                                                reference: 'grdContractItem',
                                                                 itemId: 'grdContractItem',
                                                                 margin: '-1 -1 4 -1',
                                                                 title: 'Contract Item',
@@ -3428,17 +3429,39 @@ Ext.define('Inventory.view.Item', {
                                                         dataIndex: 'string',
                                                         text: 'Location',
                                                         editor: {
-                                                            xtype: 'gridcombobox'
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intCompanyLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strLocationName',
+                                                                    dataType: 'string',
+                                                                    text: 'Location Name',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strLocationType',
+                                                                    dataType: 'string',
+                                                                    text: 'Location Type',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            displayField: 'strLocationName',
+                                                            valueField: 'intCompanyLocationId',
+                                                            bind: {
+                                                                store: '{CompanyLocation}'
+                                                            }
                                                         }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        width: 100,
                                                         dataIndex: 'string',
-                                                        text: 'Sublocation',
-                                                        editor: {
-                                                            xtype: 'textfield'
-                                                        }
+                                                        width: 100,
+                                                        text: 'Sublocation'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
@@ -3518,7 +3541,10 @@ Ext.define('Inventory.view.Item', {
                                                         dataIndex: 'string',
                                                         text: 'Counted',
                                                         editor: {
-                                                            xtype: 'combobox'
+                                                            xtype: 'combobox',
+                                                            bind: {
+                                                                store: '{Counteds}'
+                                                            }
                                                         }
                                                     },
                                                     {
@@ -3527,7 +3553,10 @@ Ext.define('Inventory.view.Item', {
                                                         dataIndex: 'string',
                                                         text: 'Inventory Group',
                                                         editor: {
-                                                            xtype: 'combobox'
+                                                            xtype: 'combobox',
+                                                            bind: {
+                                                                store: '{InventoryGroup}'
+                                                            }
                                                         }
                                                     }
                                                 ],

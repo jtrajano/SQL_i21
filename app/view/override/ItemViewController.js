@@ -280,6 +280,8 @@ Ext.define('Inventory.view.override.ItemViewController', {
             grdVendorXref = win.down('#grdVendorXref'),
             grdCustomerXref = win.down('#grdCustomerXref'),
             grdContractItem = win.down('#grdContractItem'),
+            grdDocumentAssociation = win.down('#grdDocumentAssociation'),
+            grdCertification = win.down('#grdCertification'),
             grdNotes = win.down('#grdNotes');
 
         win.context = Ext.create('iRely.mvvm.Engine', {
@@ -333,8 +335,8 @@ Ext.define('Inventory.view.override.ItemViewController', {
                         {
                             key: 'tblICItemContractDocuments',
                             component: Ext.create('iRely.mvvm.grid.Manager', {
-                                grid: win.down('#grdDocumentAssociation'),
-                                deleteButton : win.down('#btnDeleteDocumentAssociation')
+                                grid: grdDocumentAssociation,
+                                deleteButton : grdDocumentAssociation.down('#btnDeleteDocumentAssociation')
                             })
                         }
                     ]
@@ -342,8 +344,8 @@ Ext.define('Inventory.view.override.ItemViewController', {
                 {
                     key: 'tblICItemCertifications',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
-                        grid: win.down('#grdCertification'),
-                        deleteButton : win.down('#btnDeleteCertification')
+                        grid: grdCertification,
+                        deleteButton : grdCertification.down('#btnDeleteCertification')
                     })
                 },
                 {
@@ -477,6 +479,23 @@ Ext.define('Inventory.view.override.ItemViewController', {
             scope: me
         });
 
+        var colDocument = grdDocumentAssociation.columns[0];
+        colDocument.renderer = me.DocumentRenderer;
+
+        var cepDocument = grdDocumentAssociation.getPlugin('cepDocument');
+        cepDocument.on({
+            edit: me.onGridDocumentEdit,
+            scope: me
+        });
+
+        var colCertification = grdCertification.columns[0];
+        colCertification.renderer = me.CertificationRenderer;
+
+        var cepCertification = grdCertification.getPlugin('cepCertification');
+        cepCertification.on({
+            edit: me.onGridCertificationEdit,
+            scope: me
+        });
         // </editor-fold>
 
 
@@ -550,6 +569,16 @@ Ext.define('Inventory.view.override.ItemViewController', {
         return country;
     },
 
+    DocumentRenderer: function (value, metadata, record) {
+        var document = record.get('strDocumentName');
+        return document;
+    },
+
+    CertificationRenderer: function (value, metadata, record) {
+        var certification = record.get('strCertificationName');
+        return certification;
+    },
+
     onGridCategoryEdit: function(editor, e, eOpts){
         var me = this;
         var record = e.record
@@ -607,6 +636,46 @@ Ext.define('Inventory.view.override.ItemViewController', {
         {
             var strLocationName = cboLocation.getSelectedRecord().get('strLocationName');
             record.set('strLocationName', strLocationName);
+            view.refresh();
+        }
+    },
+
+    onGridDocumentEdit: function(editor, e, eOpts){
+        var me = this;
+        var record = e.record
+        var column = e.column;
+
+        if (column.itemId !== 'colCertification')
+            return;
+
+        var grid = column.up('grid');
+        var view = grid.view;
+
+        var cboCertification = column.getEditor();
+        if (cboCertification.getSelectedRecord())
+        {
+            var strDocumentName = cboCertification.getSelectedRecord().get('strDocumentName');
+            record.set('strDocumentName', strDocumentName);
+            view.refresh();
+        }
+    },
+
+    onGridCertificationEdit: function(editor, e, eOpts){
+        var me = this;
+        var record = e.record
+        var column = e.column;
+
+        if (column.itemId !== 'colDocument')
+            return;
+
+        var grid = column.up('grid');
+        var view = grid.view;
+
+        var cboDocument = column.getEditor();
+        if (cboDocument.getSelectedRecord())
+        {
+            var strCertificationName = cboDocument.getSelectedRecord().get('strCertificationName');
+            record.set('strCertificationName', strCertificationName);
             view.refresh();
         }
     },
