@@ -291,7 +291,7 @@ BEGIN
 			[dblCredit]				= CASE WHEN @post = 1 THEN A.dblTotal ELSE 0 END,
 			[dblDebitUnit]			= CASE WHEN @post = 1 THEN ISNULL(A.[dblTotal], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0) ELSE 0 END,
 			[dblCreditUnit]			= CASE WHEN @post = 1 THEN ISNULL(A.[dblTotal], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0) ELSE 0 END,
-			[dtmDate] = A.dtmDate,
+			[dtmDate] = DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 			[ysnIsUnposted] = CASE WHEN @post = 1 THEN 0 ELSE 1 END,
 			[intConcurrencyId] = 1,
 			[dblExchangeRate]		= 1,
@@ -323,7 +323,7 @@ BEGIN
 			[dblCredit]				= CASE WHEN @post = 1 THEN 0 ELSE B.dblTotal END, -- Bill
 			[dblDebitUnit]			= CASE WHEN @post = 1 THEN ISNULL(A.[dblTotal], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0) ELSE 0 END,
 			[dblCreditUnit]			= CASE WHEN @post = 1 THEN ISNULL(A.[dblTotal], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0) ELSE 0 END,
-			[dtmDate] = A.dtmDate,
+			[dtmDate] = DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 			[ysnIsUnposted] = CASE WHEN @post = 1 THEN 0 ELSE 1 END,
 			[intConcurrencyId] = 1,
 			[dblExchangeRate]		= 1,
