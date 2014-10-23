@@ -69,6 +69,8 @@ namespace iRely.Inventory.BRL
                     .Include("tblICItemVendorXrefs.tblSMCompanyLocation")
                     .Include("tblICItemVendorXrefs.vyuAPVendor")
                     .Include("tblICItemVendorXrefs.tblICUnitMeasure")
+                    .Include("tblICItemContracts.tblSMCompanyLocation")
+                    .Include("tblICItemContracts.tblSMCountry")
                     .Include("tblICItemContracts.tblICItemContractDocuments.tblICDocument")
                     .Include("tblICItemCertifications.tblICCertification")
                     .Include(p => p.tblICItemPricings)

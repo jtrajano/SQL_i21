@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +15,26 @@ namespace iRely.Inventory.Model
         public int intItemId { get; set; }
         public int intCertificationId { get; set; }
         public int intSort { get; set; }
+
+        private string _certification;
+        [NotMapped]
+        public string strCertificationName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_certification))
+                    if (tblICCertification != null)
+                        return tblICCertification.strCertificationName;
+                    else
+                        return null;
+                else
+                    return _certification;
+            }
+            set
+            {
+                _certification = value;
+            }
+        }
 
         public tblICItem tblICItem { get; set; }
         public tblICCertification tblICCertification { get; set; }

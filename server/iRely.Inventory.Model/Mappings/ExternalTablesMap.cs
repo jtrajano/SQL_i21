@@ -65,4 +65,18 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strType).HasColumnName("strType");
         }
     }
+
+    public class tblSMCountryMap : EntityTypeConfiguration<tblSMCountry>
+    {
+        public tblSMCountryMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intCountryID);
+
+            // Table & Column Mappings
+            this.ToTable("tblSMCountry");
+            this.Property(t => t.intCountryID).HasColumnName("intCountryID");
+            this.Property(t => t.strCountry).HasColumnName("strCountry");   
+        }
+    }
 }

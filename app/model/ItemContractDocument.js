@@ -14,6 +14,8 @@ Ext.define('Inventory.model.ItemContractDocument', {
         { name: 'intItemContractDocumentId', type: 'int'},
         { name: 'intItemContractId', type: 'int'},
         { name: 'intDocumentId', type: 'int'},
-        { name: 'intSort', type: 'int'}
+        { name: 'intSort', type: 'int'},
+
+        { name: 'strDocumentName', type: 'string'}
     ]
 });

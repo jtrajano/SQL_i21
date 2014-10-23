@@ -5,6 +5,7 @@ Ext.define('Inventory.model.ItemContract', {
     extend: 'iRely.BaseEntity',
 
     requires: [
+        'Inventory.model.ItemContractDocument',
         'Ext.data.Field'
     ],
 
@@ -23,7 +24,10 @@ Ext.define('Inventory.model.ItemContract', {
         { name: 'dblYieldPercent', type: 'float'},
         { name: 'dblTolerancePercent', type: 'float'},
         { name: 'dblFranchisePercent', type: 'float'},
-        { name: 'intSort', type: 'int'}
+        { name: 'intSort', type: 'int'},
+
+        { name: 'strLocationName', type: 'string'},
+        { name: 'strCountry', type: 'string'}
     ],
 
     hasMany: {

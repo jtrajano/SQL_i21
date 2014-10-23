@@ -2648,79 +2648,135 @@ Ext.define('Inventory.view.Item', {
                                                                         width: 215,
                                                                         dataIndex: 'string',
                                                                         text: 'Location',
-                                                                        flex: 1.5
+                                                                        flex: 1.5,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intCompanyLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Location Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strLocationName',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Location Name',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strLocationType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Location Type',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            displayField: 'strLocationName',
+                                                                            valueField: 'intCompanyLocationId',
+                                                                            bind: {
+                                                                                store: '{CompanyLocation}'
+                                                                            }
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        itemId: 'colContractStore',
-                                                                        width: 215,
                                                                         dataIndex: 'string',
-                                                                        text: 'Store',
-                                                                        flex: 1.5
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
                                                                         itemId: 'colContractItemName',
                                                                         width: 215,
-                                                                        dataIndex: 'string',
                                                                         text: 'Contract Item Name',
-                                                                        flex: 1.5
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colContractCommodity',
-                                                                        dataIndex: 'string',
-                                                                        text: 'Commodity',
-                                                                        flex: 1
+                                                                        flex: 1.5,
+                                                                        editor: {
+                                                                            xtype: 'textfield'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colContractOrigin',
                                                                         dataIndex: 'string',
                                                                         text: 'Origin',
-                                                                        flex: 1
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intCountryID',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Country Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strCountry',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Country',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            displayField: 'strCountry',
+                                                                            valueField: 'intCountryID',
+                                                                            bind: {
+                                                                                store: '{Country}'
+                                                                            }
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colContractGrade',
                                                                         dataIndex: 'string',
                                                                         text: 'Grade',
-                                                                        flex: 1
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'textfield'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colContractGradeType',
                                                                         dataIndex: 'string',
                                                                         text: 'Grade Type',
-                                                                        flex: 1
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'textfield'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colContractGarden',
                                                                         dataIndex: 'string',
                                                                         text: 'Garden',
-                                                                        flex: 1
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'textfield'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colContractYield',
                                                                         dataIndex: 'string',
                                                                         text: 'Yield %',
-                                                                        flex: 1
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'numberfield'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colContractTolerance',
                                                                         dataIndex: 'string',
                                                                         text: 'Tolerance %',
-                                                                        flex: 1
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'numberfield'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colContractFranchise',
                                                                         dataIndex: 'string',
                                                                         text: 'Franchise %',
-                                                                        flex: 1
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'numberfield'
+                                                                        }
                                                                     }
                                                                 ],
                                                                 viewConfig: {
@@ -2728,7 +2784,14 @@ Ext.define('Inventory.view.Item', {
                                                                 },
                                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                                     selType: 'checkboxmodel'
-                                                                })
+                                                                }),
+                                                                plugins: [
+                                                                    {
+                                                                        ptype: 'cellediting',
+                                                                        pluginId: 'cepContractItem',
+                                                                        clicksToEdit: 1
+                                                                    }
+                                                                ]
                                                             },
                                                             {
                                                                 xtype: 'container',
@@ -2778,7 +2841,35 @@ Ext.define('Inventory.view.Item', {
                                                                                 width: 215,
                                                                                 dataIndex: 'string',
                                                                                 text: 'Document',
-                                                                                flex: 1.5
+                                                                                flex: 1.5,
+                                                                                editor: {
+                                                                                    xtype: 'gridcombobox',
+                                                                                    columns: [
+                                                                                        {
+                                                                                            dataIndex: 'intDocumentId',
+                                                                                            dataType: 'numeric',
+                                                                                            text: 'Document Id',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strDocumentName',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Document Name',
+                                                                                            flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strDescription',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Description',
+                                                                                            flex: 1
+                                                                                        }
+                                                                                    ],
+                                                                                    displayField: 'strDocumentName',
+                                                                                    valueField: 'intDocumentId',
+                                                                                    bind: {
+                                                                                        store: '{Document}'
+                                                                                    }
+                                                                                }
                                                                             }
                                                                         ],
                                                                         viewConfig: {
@@ -2786,7 +2877,14 @@ Ext.define('Inventory.view.Item', {
                                                                         },
                                                                         selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                                             selType: 'checkboxmodel'
-                                                                        })
+                                                                        }),
+                                                                        plugins: [
+                                                                            {
+                                                                                ptype: 'cellediting',
+                                                                                pluginId: 'cepDocument',
+                                                                                clicksToEdit: 1
+                                                                            }
+                                                                        ]
                                                                     },
                                                                     {
                                                                         xtype: 'advancefiltergrid',
@@ -2827,7 +2925,29 @@ Ext.define('Inventory.view.Item', {
                                                                                 width: 215,
                                                                                 dataIndex: 'string',
                                                                                 text: 'Certification',
-                                                                                flex: 1.5
+                                                                                flex: 1.5,
+                                                                                editor: {
+                                                                                    xtype: 'gridcombobox',
+                                                                                    columns: [
+                                                                                        {
+                                                                                            dataIndex: 'intCertificationId',
+                                                                                            dataType: 'numeric',
+                                                                                            text: 'Certification Id',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strCertificationName',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Certification Name',
+                                                                                            flex: 1
+                                                                                        }
+                                                                                    ],
+                                                                                    displayField: 'strCertificationName',
+                                                                                    valueField: 'intCertificationId',
+                                                                                    bind: {
+                                                                                        store: '{Certification}'
+                                                                                    }
+                                                                                }
                                                                             }
                                                                         ],
                                                                         viewConfig: {
@@ -2835,7 +2955,14 @@ Ext.define('Inventory.view.Item', {
                                                                         },
                                                                         selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                                             selType: 'checkboxmodel'
-                                                                        })
+                                                                        }),
+                                                                        plugins: [
+                                                                            {
+                                                                                ptype: 'cellediting',
+                                                                                pluginId: 'cepCertification',
+                                                                                clicksToEdit: 1
+                                                                            }
+                                                                        ]
                                                                     }
                                                                 ]
                                                             }

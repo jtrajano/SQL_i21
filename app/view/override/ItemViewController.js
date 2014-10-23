@@ -273,6 +273,7 @@ Ext.define('Inventory.view.override.ItemViewController', {
             grdUPC = win.down('#grdUPC'),
             grdVendorXref = win.down('#grdVendorXref'),
             grdCustomerXref = win.down('#grdCustomerXref'),
+            grdContractItem = win.down('#grdContractItem'),
             grdNotes = win.down('#grdNotes');
 
         win.context = Ext.create('iRely.mvvm.Engine', {
@@ -319,9 +320,18 @@ Ext.define('Inventory.view.override.ItemViewController', {
                 {
                     key: 'tblICItemContracts',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
-                        grid: win.down('#grdContractItem'),
-                        deleteButton : win.down('#btnDeleteContractItem')
-                    })
+                        grid: grdContractItem,
+                        deleteButton : grdContractItem.down('#btnDeleteContractItem')
+                    }),
+                    details: [
+                        {
+                            key: 'tblICItemContractDocuments',
+                            component: Ext.create('iRely.mvvm.grid.Manager', {
+                                grid: win.down('#grdDocumentAssociation'),
+                                deleteButton : win.down('#btnDeleteDocumentAssociation')
+                            })
+                        }
+                    ]
                 },
                 {
                     key: 'tblICItemCertifications',
@@ -450,6 +460,17 @@ Ext.define('Inventory.view.override.ItemViewController', {
             scope: me
         });
 
+        var colContractLocation = grdContractItem.columns[0];
+        colContractLocation.renderer = me.LocationRenderer;
+        var colContractCountry = grdContractItem.columns[2];
+        colContractCountry.renderer = me.CountryRenderer;
+
+        var cepContractItem = grdContractItem.getPlugin('cepContractItem');
+        cepContractItem.on({
+            edit: me.onGridContractEdit,
+            scope: me
+        });
+
         // </editor-fold>
 
 
@@ -516,6 +537,11 @@ Ext.define('Inventory.view.override.ItemViewController', {
     VendorRenderer: function (value, metadata, record) {
         var vendor = record.get('strVendorId');
         return vendor;
+    },
+
+    CountryRenderer: function (value, metadata, record) {
+        var country = record.get('strCountry');
+        return country;
     },
 
     onGridCategoryEdit: function(editor, e, eOpts){
@@ -684,6 +710,36 @@ Ext.define('Inventory.view.override.ItemViewController', {
             {
                 var strUnitMeasure = cboUom.getSelectedRecord().get('strUnitMeasure');
                 record.set('strUnitMeasure', strUnitMeasure);
+                view.refresh();
+            }
+        }
+    },
+
+    onGridContractEdit: function(editor, e, eOpts){
+        var me = this;
+        var record = e.record
+        var column = e.column;
+
+        var grid = column.up('grid');
+        var view = grid.view;
+
+        if (column.itemId === 'colContractLocation')
+        {
+            var cboLocation = column.getEditor();
+            if (cboLocation.getSelectedRecord())
+            {
+                var strLocationName = cboLocation.getSelectedRecord().get('strLocationName');
+                record.set('strLocationName', strLocationName);
+                view.refresh();
+            }
+        }
+        else if (column.itemId === 'colContractOrigin')
+        {
+            var cboCountry = column.getEditor();
+            if (cboCountry.getSelectedRecord())
+            {
+                var strCountry = cboCountry.getSelectedRecord().get('strCountry');
+                record.set('strCountry', strCountry);
                 view.refresh();
             }
         }

@@ -14,6 +14,8 @@ Ext.define('Inventory.model.ItemCertification', {
         { name: 'intItemCertificationId', type: 'int'},
         { name: 'intItemId', type: 'int'},
         { name: 'intCertificationId', type: 'int'},
-        { name: 'intSort', type: 'int'}
+        { name: 'intSort', type: 'int'},
+
+        { name: 'strCertificationName', type: 'string'}
     ]
 });

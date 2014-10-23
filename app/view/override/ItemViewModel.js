@@ -11,9 +11,12 @@ Ext.define('Inventory.view.override.ItemViewModel', {
         'Inventory.store.Brand',
         'Inventory.store.FuelCategory',
         'Inventory.store.FuelTaxClass',
+        'Inventory.store.Document',
+        'Inventory.store.Certification',
         'AccountsPayable.store.VendorBuffered',
         'AccountsReceivable.store.Customer',
         'i21.store.CompanyLocation',
+        'i21.store.Country',
         'GeneralLedger.store.BufAccountId'
     ],
 
@@ -370,6 +373,9 @@ Ext.define('Inventory.view.override.ItemViewModel', {
         CompanyLocation: {
             type: 'companylocation'
         },
+        Country: {
+            type: 'country'
+        },
         FuelTaxClass: {
             type: 'inventoryfueltaxclass'
         },
@@ -378,7 +384,16 @@ Ext.define('Inventory.view.override.ItemViewModel', {
         },
         GLAccount: {
             type: 'bufaccountid'
+        },
+        Document: {
+            type: 'inventorydocument'
+        },
+        Certification: {
+            type: 'inventorycertification'
         }
+
+
+
 
     }
 });
