@@ -746,6 +746,8 @@
     <Build Include="dbo\Tables\tblICMaterialNMFC.sql" />
     <Build Include="dbo\Tables\tblICCountGroup.sql" />
     <Build Include="dbo\Views\vyuHDGroupUser.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPProcessRecurring.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPBillRecurring.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
