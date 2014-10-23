@@ -13,14 +13,15 @@
 	[dblSuggestedQuantity] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblLeadTime] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [strCounted] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [strInventoryGroup] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [intInventoryGroupId] INT NULL, 
     [ysnCountedDaily] BIT NULL DEFAULT ((0)), 
 	[intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICItemStock] PRIMARY KEY ([intItemStockId]), 
     CONSTRAINT [FK_tblICItemStock_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
     CONSTRAINT [FK_tblICItemStock_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
-    CONSTRAINT [FK_tblICItemStock_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
+    CONSTRAINT [FK_tblICItemStock_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
+    CONSTRAINT [FK_tblICItemStock_tblICCountGroup] FOREIGN KEY ([intInventoryGroupId]) REFERENCES [tblICCountGroup]([intCountGroupId])
 )
 
 GO
@@ -142,13 +143,13 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strCounted'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Inventory Group',
+    @value = N'Inventory Group Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblICItemStock',
     @level2type = N'COLUMN',
-    @level2name = N'strInventoryGroup'
+    @level2name = 'intInventoryGroupId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Counted Daily',

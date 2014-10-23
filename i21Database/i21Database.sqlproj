@@ -744,6 +744,7 @@
     <Build Include="dbo\Tables\tblSMCompanyLocationAccount.sql" />
     <None Include="Scripts\Post-Deployment\AP\FixVendorGLAccountExpense.sql" />
     <Build Include="dbo\Tables\tblICMaterialNMFC.sql" />
+    <Build Include="dbo\Tables\tblICCountGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

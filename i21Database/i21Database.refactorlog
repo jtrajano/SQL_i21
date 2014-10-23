@@ -728,4 +728,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intMaterialNMFCId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="d4556b3e-a9e8-45e0-a54e-83c27d7b6419" ChangeDateTime="10/23/2014 06:43:22">
+    <Property Name="ElementName" Value="[dbo].[tblICCountGroup].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCountGroup]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCountGroupId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="258d5a38-e753-47d3-b3bb-aa6f917a55a7" ChangeDateTime="10/23/2014 09:28:41">
+    <Property Name="ElementName" Value="[dbo].[tblICItemStock].[strInventoryGroup]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemStock]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInventoryGroupId" />
+  </Operation>
 </Operations>
