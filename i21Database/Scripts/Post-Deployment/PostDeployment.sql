@@ -81,6 +81,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- Inventory 
 :r .\IC\1_InventoryTransactionTypes.sql 
+:r .\IC\2_MaterialNMFC.sql 
 
 -- Version Update
 :r .\VersionUpdate.sql

@@ -743,6 +743,7 @@
     <Build Include="dbo\Functions\fnGetGLAccountIdFromItemLocation.sql" />
     <Build Include="dbo\Tables\tblSMCompanyLocationAccount.sql" />
     <None Include="Scripts\Post-Deployment\AP\FixVendorGLAccountExpense.sql" />
+    <Build Include="dbo\Tables\tblICMaterialNMFC.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -768,6 +769,7 @@
     <None Include="Scripts\Post-Deployment\HD\HDEntryDataFix.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\11_FreightTerms.sql" />
     <None Include="dbo\Views\vyuPREmployee.sql" />
+    <None Include="Scripts\Post-Deployment\IC\2_MaterialNMFC.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
