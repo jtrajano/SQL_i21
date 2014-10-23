@@ -26,6 +26,7 @@ BEGIN
 		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (3, '50110', 'PURCHASES WHEAT', 90)
 		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (100, '1000', '', 92)
 		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (101, '1001', 'NEW HAVEN GRAIN', 92)
+		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (102, '1002', 'BETTER HAVEN GRAIN', 92)
 
 		-- Add fake data for GL Account
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (1000, 'INVENTORY WHEAT-', '12040-1000');
@@ -34,6 +35,9 @@ BEGIN
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (1001, 'INVENTORY WHEAT-NEW HAVEN GRAIN', '12040-1001');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (2001, 'SALES WHEAT-NEW HAVEN GRAIN', '40100-1001');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (3001, 'PURCHASES WHEAT-NEW HAVEN GRAIN', '50110-1001');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (1002, 'INVENTORY WHEAT-BETTER HAVEN GRAIN', '12040-1002');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (2002, 'SALES WHEAT-BETTER HAVEN GRAIN', '40100-1002');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (3002, 'PURCHASES WHEAT-BETTER HAVEN GRAIN', '50110-1002');
 
 		-- Add fake data for Segment Mapping
 		-- INVENTORY WHEAT-'
@@ -45,6 +49,7 @@ BEGIN
 		-- PURCHASES WHEAT-
 		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (3000, 3);
 		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (3000, 100);
+
 		-- INVENTORY WHEAT-NEW HAVEN GRAIN
 		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (1001, 1);
 		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (1001, 101);
@@ -54,4 +59,15 @@ BEGIN
 		-- PURCHASES WHEAT-NEW HAVEN GRAIN
 		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (3001, 3);
 		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (3001, 101);	
+
+		-- INVENTORY WHEAT-BETTER HAVEN GRAIN
+		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (1002, 1);
+		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (1002, 102);
+		-- SALES WHEAT-BETTER HAVEN GRAIN
+		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (2002, 2);
+		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (2002, 102);
+		-- PURCHASES WHEAT-BETTER HAVEN GRAIN
+		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (3002, 3);
+		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (3002, 102);	
+
 END 

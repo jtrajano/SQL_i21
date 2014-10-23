@@ -203,7 +203,7 @@
     <Build Include="testi21Database\Stored Procedures\test the uspCMAddDeposit stored procedure.sql" />
     <Build Include="testi21Database\Functions\test the fnGetCostingMethod function.sql" />
     <Build Include="testi21Database\Functions\test the fnGetItemGLAccounts function.sql" />
-    <Build Include="testi21Database\Functions\test the fnGetGLAccountIdFromItemLocation function.sql" />
+    <Build Include="testi21Database\Functions\test the fnGetItemBaseGLAccount function.sql" />
     <Build Include="testi21Database\Scripts\test the constraints of tblAPBill.sql" />
     <Build Include="testi21Database\Scripts\test the constraints of tblAPBillBatch.sql" />
     <Build Include="testi21Database\Scripts\test the constraints of tblAPPayment.sql" />

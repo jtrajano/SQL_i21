@@ -738,11 +738,10 @@
     <Build Include="dbo\Views\vyuAPPaidBillsHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspARDeleteCustomer.sql" />
     <Build Include="dbo\Functions\fnGetGLAccountIdFromProfitCenter.sql" />
-    <Build Include="dbo\Functions\fnGetGLAccountIdFromCategory.sql" />
-    <Build Include="dbo\Functions\fnGetGLAccountIdFromLocation.sql" />
-    <Build Include="dbo\Functions\fnGetGLAccountIdFromItemLocation.sql" />
     <Build Include="dbo\Tables\tblSMCompanyLocationAccount.sql" />
     <None Include="Scripts\Post-Deployment\AP\FixVendorGLAccountExpense.sql" />
+    <Build Include="dbo\Functions\fnGetItemProfitCenter.sql" />
+    <Build Include="dbo\Functions\fnGetItemBaseGLAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -757,13 +756,6 @@
     <Build Include="dbo\Views\vyuARCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
-    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
-      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac</HintPath>
-      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
-      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
-    </ArtifactReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Scripts\Post-Deployment\HD\DefaultData\1_StatusData.sql" />
     <None Include="Scripts\Post-Deployment\HD\HDEntryDataFix.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\11_FreightTerms.sql" />
@@ -771,5 +763,17 @@
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
+    </ArtifactReference>
   </ItemGroup>
 </Project>
