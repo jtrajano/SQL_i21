@@ -1113,6 +1113,23 @@
                                     },
                                     "name": "MyComboBox49",
                                     "designerId": "db26cbf3-1f98-4e0c-9b78-52ea5a359d3d"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Negative Inventory",
+                                        "itemId": "chkNegativeInventory",
+                                        "labelWidth": 140,
+                                        "layout|flex": null
+                                    },
+                                    "name": "MyCheckbox43",
+                                    "designerId": "3ed155ce-f1e7-49af-904d-6d1f0367ae90"
                                 }
                             ]
                         }
