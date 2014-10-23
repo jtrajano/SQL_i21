@@ -65,6 +65,7 @@
     <Compile Include="Commodity.cs" />
     <Compile Include="Brand.cs" />
     <Compile Include="Certification.cs" />
+    <Compile Include="MaterialNMFC.cs" />
     <Compile Include="FuelTaxClass.cs" />
     <Compile Include="Receipt.cs" />
     <Compile Include="Document.cs" />

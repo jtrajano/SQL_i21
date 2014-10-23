@@ -135,7 +135,7 @@ namespace iRely.Inventory.Model
         public DbSet<tblICTag> tblICTags { get; set; }
         public DbSet<tblICUnitMeasure> tblICUnitMeasures { get; set; }
         public DbSet<tblICUnitType> tblICUnitTypes { get; set; }
-
+        public DbSet<tblICMaterialNMFC> tblICMaterialNMFCs { get; set; }
         public DbSet<tblICFuelTaxClass> tblICFuelTaxClasses { get; set; }
         public DbSet<tblICFuelTaxClassProductCode> tblICFuelTaxClassProductCodes { get; set; }
 
@@ -198,7 +198,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICTagMap());
             modelBuilder.Configurations.Add(new tblICUnitMeasureMap());
             modelBuilder.Configurations.Add(new tblICUnitTypeMap());
-
+            modelBuilder.Configurations.Add(new tblICMaterialNMFCMap());
             modelBuilder.Configurations.Add(new tblICFuelTaxClassMap());
             modelBuilder.Configurations.Add(new tblICFuelTaxClassProductCodeMap());
 

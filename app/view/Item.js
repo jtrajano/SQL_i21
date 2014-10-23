@@ -1752,9 +1752,11 @@ Ext.define('Inventory.view.Item', {
                                                                             },
                                                                             {
                                                                                 xtype: 'combobox',
+                                                                                disabled: true,
                                                                                 itemId: 'cboAssociatedRecipe',
                                                                                 fieldLabel: 'Associated Recipe',
-                                                                                labelWidth: 125
+                                                                                labelWidth: 125,
+                                                                                readOnly: false
                                                                             },
                                                                             {
                                                                                 xtype: 'checkboxfield',
@@ -1795,7 +1797,9 @@ Ext.define('Inventory.view.Item', {
                                                                                         flex: 1,
                                                                                         itemId: 'cboLifetimeType',
                                                                                         margin: '0 0 0 5',
-                                                                                        labelWidth: 125
+                                                                                        labelWidth: 125,
+                                                                                        displayField: 'strDescription',
+                                                                                        valueField: 'strDescription'
                                                                                     }
                                                                                 ]
                                                                             },
@@ -1810,6 +1814,7 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'panel',
                                                                         flex: 1,
+                                                                        hidden: true,
                                                                         layout: 'fit',
                                                                         title: 'BOM Dependencies',
                                                                         items: [
@@ -1902,11 +1907,33 @@ Ext.define('Inventory.view.Item', {
                                                                                         },
                                                                                         items: [
                                                                                             {
-                                                                                                xtype: 'combobox',
+                                                                                                xtype: 'gridcombobox',
                                                                                                 flex: 1,
+                                                                                                columns: [
+                                                                                                    {
+                                                                                                        dataIndex: 'intMaterialNMFCId',
+                                                                                                        dataType: 'numeric',
+                                                                                                        text: 'Material Id',
+                                                                                                        hidden: true
+                                                                                                    },
+                                                                                                    {
+                                                                                                        dataIndex: 'strInternalCode',
+                                                                                                        dataType: 'string',
+                                                                                                        text: 'Internal Code',
+                                                                                                        flex: 1
+                                                                                                    },
+                                                                                                    {
+                                                                                                        dataIndex: 'strDisplayMember',
+                                                                                                        dataType: 'string',
+                                                                                                        text: 'Display Member',
+                                                                                                        flex: 2
+                                                                                                    }
+                                                                                                ],
                                                                                                 itemId: 'cboNFMC',
                                                                                                 fieldLabel: 'NMFC',
-                                                                                                labelWidth: 125
+                                                                                                labelWidth: 125,
+                                                                                                displayField: 'strInternalCode',
+                                                                                                valueField: 'intMaterialNMFCId'
                                                                                             },
                                                                                             {
                                                                                                 xtype: 'checkboxfield',
@@ -2535,8 +2562,8 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        dataIndex: 'string',
                                                                         itemId: 'colVendorXrefConversionFactor',
+                                                                        dataIndex: 'string',
                                                                         text: 'Conversion Factor',
                                                                         flex: 1,
                                                                         editor: {
@@ -2680,9 +2707,9 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        dataIndex: 'string',
                                                                         itemId: 'colContractItemName',
                                                                         width: 215,
+                                                                        dataIndex: 'string',
                                                                         text: 'Contract Item Name',
                                                                         flex: 1.5,
                                                                         editor: {

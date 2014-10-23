@@ -13,6 +13,7 @@ Ext.define('Inventory.view.override.ItemViewModel', {
         'Inventory.store.FuelTaxClass',
         'Inventory.store.Document',
         'Inventory.store.Certification',
+        'Inventory.store.MaterialNMFC',
         'AccountsPayable.store.VendorBuffered',
         'AccountsReceivable.store.Customer',
         'i21.store.CompanyLocation',
@@ -341,6 +342,27 @@ Ext.define('Inventory.view.override.ItemViewModel', {
                 }
             ]
         },
+        LifeTimes: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Minutes'
+                },{
+                    strDescription: 'Hours'
+                },{
+                    strDescription: 'Days'
+                },{
+                    strDescription: 'Months'
+                },{
+                    strDescription: 'Years'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
 
 
         Manufacturer: {
@@ -390,6 +412,9 @@ Ext.define('Inventory.view.override.ItemViewModel', {
         },
         Certification: {
             type: 'inventorycertification'
+        },
+        MaterialNMFC: {
+            type: 'inventorymaterialnmfc'
         }
 
 

@@ -3739,10 +3739,12 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
+                                                                        "disabled": true,
                                                                         "fieldLabel": "Associated Recipe",
                                                                         "itemId": "cboAssociatedRecipe",
                                                                         "labelWidth": 125,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "readOnly": false
                                                                     },
                                                                     "name": "MyComboBox28",
                                                                     "designerId": "92f805f6-3f09-478a-936d-0ea49203960b"
@@ -3828,12 +3830,14 @@
                                                                             },
                                                                             "codeClass": null,
                                                                             "userConfig": {
+                                                                                "displayField": "strDescription",
                                                                                 "fieldLabel": null,
                                                                                 "itemId": "cboLifetimeType",
                                                                                 "labelWidth": 125,
                                                                                 "layout|flex": 1,
                                                                                 "layout|margins": null,
-                                                                                "margin": "0 0 0 5"
+                                                                                "margin": "0 0 0 5",
+                                                                                "valueField": "strDescription"
                                                                             },
                                                                             "name": "MyComboBox29",
                                                                             "designerId": "f21e13d2-4a10-4eea-ac33-540e6ea1d803"
@@ -3868,6 +3872,7 @@
                                                             "userConfig": {
                                                                 "bodyPadding": null,
                                                                 "height": null,
+                                                                "hidden": true,
                                                                 "layout": "fit",
                                                                 "layout|flex": 1,
                                                                 "layout|margins": null,
@@ -4077,13 +4082,49 @@
                                                                                     },
                                                                                     "codeClass": null,
                                                                                     "userConfig": {
+                                                                                        "columns": [
+                                                                                            "[",
+                                                                                            "\t{",
+                                                                                            "\t\tdataIndex: 'intMaterialNMFCId',",
+                                                                                            "\t\tdataType: 'numeric',",
+                                                                                            "\t\ttext: 'Material Id',",
+                                                                                            "\t\thidden: true",
+                                                                                            "\t},",
+                                                                                            "\t{",
+                                                                                            "\t\tdataIndex: 'strInternalCode',",
+                                                                                            "\t\tdataType: 'string',",
+                                                                                            "\t\ttext: 'Internal Code',",
+                                                                                            "\t\tflex: 1",
+                                                                                            "\t},",
+                                                                                            "\t{",
+                                                                                            "\t\tdataIndex: 'strDisplayMember',",
+                                                                                            "\t\tdataType: 'string',",
+                                                                                            "\t\ttext: 'Display Member',",
+                                                                                            "\t\tflex: 2",
+                                                                                            "\t}",
+                                                                                            "]",
+                                                                                            ""
+                                                                                        ],
+                                                                                        "designer|createAlias": "gridcombobox",
+                                                                                        "displayField": "strInternalCode",
                                                                                         "fieldLabel": "NMFC",
                                                                                         "itemId": "cboNFMC",
                                                                                         "labelWidth": 125,
-                                                                                        "layout|flex": 1
+                                                                                        "layout|flex": 1,
+                                                                                        "valueField": "intMaterialNMFCId"
                                                                                     },
                                                                                     "name": "MyComboBox34",
-                                                                                    "designerId": "a9916175-f9ec-4a78-8adb-a5f3dd003d59"
+                                                                                    "configAlternates": {
+                                                                                        "columns": "array"
+                                                                                    },
+                                                                                    "designerId": "a9916175-f9ec-4a78-8adb-a5f3dd003d59",
+                                                                                    "customConfigs": [
+                                                                                        {
+                                                                                            "group": "(Custom Properties)",
+                                                                                            "name": "columns",
+                                                                                            "type": "string"
+                                                                                        }
+                                                                                    ]
                                                                                 },
                                                                                 {
                                                                                     "type": "Ext.form.field.Checkbox",

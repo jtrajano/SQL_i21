@@ -187,14 +187,20 @@ Ext.define('Inventory.view.override.ItemViewController', {
             cboAssociatedRecipe: '{current.intRecipeId}',
             chkSanitizationRequired: '{current.ysnSanitationRequired}',
             txtLifeTime: '{current.intLifeTime}',
-            cboLifetimeType: '{current.strLifeTimeType}',
+            cboLifetimeType: {
+                value: '{current.strLifeTimeType}',
+                store: '{LifeTimes}'
+            },
             txtReceiveLife: '{current.intReceiveLife}',
             txtGTIN: '{current.strGTIN}',
             cboRotationType: {
                 value: '{current.strRotationType}',
                 store: '{RotationTypes}'
             },
-            cboNFMC: '{current.intNMFCId}',
+            cboNFMC: {
+                value: '{current.intNMFCId}',
+                store: '{MaterialNMFC}'
+            },
             chkStrictFIFO: '{current.ysnStrictFIFO}',
             txtHeight: '{current.dblHeight}',
             txtWidth: '{current.dblWidth}',
