@@ -490,6 +490,12 @@ Ext.define('Inventory.view.ItemLocation', {
                                     itemId: 'cboFreightVendor',
                                     fieldLabel: 'Freight Vendor',
                                     labelWidth: 140
+                                },
+                                {
+                                    xtype: 'checkboxfield',
+                                    itemId: 'chkNegativeInventory',
+                                    fieldLabel: 'Negative Inventory',
+                                    labelWidth: 140
                                 }
                             ]
                         }

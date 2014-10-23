@@ -2535,8 +2535,8 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        dataIndex: 'string',
                                                                         itemId: 'colVendorXrefConversionFactor',
+                                                                        dataIndex: 'string',
                                                                         text: 'Conversion Factor',
                                                                         flex: 1,
                                                                         editor: {
@@ -2680,9 +2680,9 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        dataIndex: 'string',
                                                                         itemId: 'colContractItemName',
                                                                         width: 215,
+                                                                        dataIndex: 'string',
                                                                         text: 'Contract Item Name',
                                                                         flex: 1.5,
                                                                         editor: {
