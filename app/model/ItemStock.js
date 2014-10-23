@@ -24,7 +24,7 @@ Ext.define('Inventory.model.ItemStock', {
         { name: 'dblSuggestedQuantity', type: 'float'},
         { name: 'dblLeadTime', type: 'float'},
         { name: 'strCounted', type: 'string'},
-        { name: 'intInventoryGroupId', type: 'int'},
+        { name: 'intInventoryGroupId', type: 'int', allowNull: true},
         { name: 'ysnCountedDaily', type: 'boolean'},
         { name: 'intSort', type: 'int'}
     ]

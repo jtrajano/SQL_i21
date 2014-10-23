@@ -14,6 +14,7 @@ Ext.define('Inventory.view.override.ItemViewModel', {
         'Inventory.store.Document',
         'Inventory.store.Certification',
         'Inventory.store.MaterialNMFC',
+        'Inventory.store.CountGroup',
         'AccountsPayable.store.VendorBuffered',
         'AccountsReceivable.store.Customer',
         'i21.store.CompanyLocation',
@@ -415,7 +416,11 @@ Ext.define('Inventory.view.override.ItemViewModel', {
         },
         MaterialNMFC: {
             type: 'inventorymaterialnmfc'
+        },
+        CountGroup: {
+            type: 'inventorycountgroup'
         }
+
 
 
 

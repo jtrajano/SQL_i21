@@ -3426,6 +3426,7 @@ Ext.define('Inventory.view.Item', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colStockLocation',
                                                         dataIndex: 'string',
                                                         text: 'Location',
                                                         editor: {
@@ -3460,20 +3461,54 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         dataIndex: 'string',
+                                                        itemId: 'colStockSubLocation',
                                                         width: 100,
                                                         text: 'Sublocation'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colStockUOM',
                                                         width: 45,
                                                         dataIndex: 'string',
                                                         text: 'Unit',
                                                         editor: {
-                                                            xtype: 'gridcombobox'
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intUnitMeasureId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Unit Of Measure ID',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Measure',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitType',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'ysnDefault',
+                                                                    dataType: 'boolean',
+                                                                    text: 'Default',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            displayField: 'strUnitMeasure',
+                                                            valueField: 'intUnitMeasureId',
+                                                            bind: {
+                                                                store: '{UnitMeasure}'
+                                                            }
                                                         }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        itemId: 'colStockOnHand',
                                                         width: 70,
                                                         align: 'right',
                                                         text: 'On Hand',
@@ -3483,6 +3518,7 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        itemId: 'colStockCommitted',
                                                         width: 80,
                                                         align: 'right',
                                                         text: 'Committed',
@@ -3492,6 +3528,7 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        itemId: 'colStockOnOrder',
                                                         width: 70,
                                                         align: 'right',
                                                         text: 'On Order',
@@ -3501,6 +3538,7 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        itemId: 'colStockReorderPoint',
                                                         width: 90,
                                                         align: 'right',
                                                         text: 'Reorder Point',
@@ -3510,6 +3548,7 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        itemId: 'colStockMinOrder',
                                                         width: 70,
                                                         align: 'right',
                                                         text: 'Min Order',
@@ -3519,6 +3558,7 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        itemId: 'colStockSuggestedQty',
                                                         width: 95,
                                                         align: 'right',
                                                         text: 'Suggested Qty',
@@ -3528,6 +3568,7 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        itemId: 'colStockLeadTime',
                                                         width: 61,
                                                         dataIndex: 'string',
                                                         text: 'Lead Time',
@@ -3537,11 +3578,14 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colStockCounted',
                                                         width: 58,
                                                         dataIndex: 'string',
                                                         text: 'Counted',
                                                         editor: {
                                                             xtype: 'combobox',
+                                                            displayField: 'strDescription',
+                                                            valueField: 'strDescription',
                                                             bind: {
                                                                 store: '{Counteds}'
                                                             }
@@ -3549,14 +3593,39 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colStockInventoryGroup',
                                                         width: 100,
                                                         dataIndex: 'string',
                                                         text: 'Inventory Group',
                                                         editor: {
-                                                            xtype: 'combobox',
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intCountGroupId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Count Group Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strCountGroup',
+                                                                    dataType: 'string',
+                                                                    text: 'Inventory Count Group',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            displayField: 'strCountGroup',
+                                                            valueField: 'intCountGroupId',
                                                             bind: {
-                                                                store: '{InventoryGroup}'
+                                                                store: '{CountGroup}'
                                                             }
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'checkcolumn',
+                                                        itemId: 'colStockCountedDaily',
+                                                        text: 'Counted Daily',
+                                                        editor: {
+                                                            xtype: 'checkboxfield'
                                                         }
                                                     }
                                                 ],

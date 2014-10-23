@@ -7673,6 +7673,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": null,
+                                                "itemId": "colStockLocation",
                                                 "text": "Location"
                                             },
                                             "name": "MyColumn52",
@@ -7741,6 +7742,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": null,
+                                                "itemId": "colStockSubLocation",
                                                 "text": "Sublocation",
                                                 "width": 100
                                             },
@@ -7757,6 +7759,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": null,
+                                                "itemId": "colStockUOM",
                                                 "text": "Unit",
                                                 "width": 45
                                             },
@@ -7771,10 +7774,54 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "designer|createAlias": "gridcombobox"
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intUnitMeasureId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Unit Of Measure ID',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strUnitMeasure',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Unit Measure',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strUnitType',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Unit Type',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'ysnDefault',",
+                                                            "\t\tdataType: 'boolean',",
+                                                            "\t\ttext: 'Default',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strUnitMeasure",
+                                                        "store": [
+                                                            "{UnitMeasure}"
+                                                        ],
+                                                        "valueField": "intUnitMeasureId"
                                                     },
                                                     "name": "MyComboBox23",
-                                                    "designerId": "2bbcd836-6d7f-4443-ba38-0f46bac979b2"
+                                                    "configAlternates": {
+                                                        "columns": "array",
+                                                        "store": "binding"
+                                                    },
+                                                    "designerId": "2bbcd836-6d7f-4443-ba38-0f46bac979b2",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -7787,6 +7834,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "align": "right",
+                                                "itemId": "colStockOnHand",
                                                 "text": "On Hand",
                                                 "width": 70
                                             },
@@ -7814,6 +7862,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "align": "right",
+                                                "itemId": "colStockCommitted",
                                                 "text": "Committed",
                                                 "width": 80
                                             },
@@ -7841,6 +7890,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "align": "right",
+                                                "itemId": "colStockOnOrder",
                                                 "text": "On Order",
                                                 "width": 70
                                             },
@@ -7868,6 +7918,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "align": "right",
+                                                "itemId": "colStockReorderPoint",
                                                 "text": "Reorder Point",
                                                 "width": 90
                                             },
@@ -7895,6 +7946,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "align": "right",
+                                                "itemId": "colStockMinOrder",
                                                 "text": "Min Order",
                                                 "width": 70
                                             },
@@ -7922,6 +7974,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "align": "right",
+                                                "itemId": "colStockSuggestedQty",
                                                 "text": "Suggested Qty",
                                                 "width": 95
                                             },
@@ -7950,6 +8003,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": null,
+                                                "itemId": "colStockLeadTime",
                                                 "text": "Lead Time",
                                                 "width": 61
                                             },
@@ -7978,6 +8032,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": null,
+                                                "itemId": "colStockCounted",
                                                 "text": "Counted",
                                                 "width": 58
                                             },
@@ -7992,9 +8047,11 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "displayField": "strDescription",
                                                         "store": [
                                                             "{Counteds}"
-                                                        ]
+                                                        ],
+                                                        "valueField": "strDescription"
                                                     },
                                                     "name": "MyComboBox24",
                                                     "configAlternates": {
@@ -8014,6 +8071,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": null,
+                                                "itemId": "colStockInventoryGroup",
                                                 "text": "Inventory Group",
                                                 "width": 100
                                             },
@@ -8028,15 +8086,68 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intCountGroupId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Count Group Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strCountGroup',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Inventory Count Group',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strCountGroup",
                                                         "store": [
-                                                            "{InventoryGroup}"
-                                                        ]
+                                                            "{CountGroup}"
+                                                        ],
+                                                        "valueField": "intCountGroupId"
                                                     },
                                                     "name": "MyComboBox26",
                                                     "configAlternates": {
-                                                        "store": "binding"
+                                                        "store": "binding",
+                                                        "columns": "array"
                                                     },
-                                                    "designerId": "bd4f5a12-68d2-4d75-be90-9293077aafb6"
+                                                    "designerId": "bd4f5a12-68d2-4d75-be90-9293077aafb6",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Check",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "itemId": "colStockCountedDaily",
+                                                "text": "Counted Daily"
+                                            },
+                                            "name": "MyCheck3",
+                                            "designerId": "c746ac9c-36c1-4ce3-9083-74b9ee0a2856",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyCheckbox44",
+                                                    "designerId": "7270a013-f6cf-44ab-ac6d-1af2b25c9da5"
                                                 }
                                             ]
                                         },

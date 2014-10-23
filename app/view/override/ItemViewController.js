@@ -261,6 +261,20 @@ Ext.define('Inventory.view.override.ItemViewController', {
 
             colCertification: 'intCertificationId',
 
+            colStockLocation: 'intLocationId',
+            colStockSubLocation: 'strWarehouse',
+            colStockUOM: 'intUnitMeasureId',
+            colStockOnHand: 'dblUnitOnHand',
+            colStockCommitted: 'dblOrderCommitted',
+            colStockOnOrder: 'dblOnOrder',
+            colStockReorderPoint: 'dblReorderPoint',
+            colStockMinOrder: 'dblMinOrder',
+            colStockSuggestedQty: 'dblSuggestedQuantity',
+            colStockLeadTime: 'dblLeadTime',
+            colStockCounted: 'strCounted',
+            colStockInventoryGroup: 'strInventoryGroup',
+            colStockCountedDaily: 'ysnCountedDaily',
+
             colNoteLocation: 'intLocationId',
             colNoteCommentType: 'strCommentType',
             colNoteComment: 'strComments'
@@ -282,6 +296,7 @@ Ext.define('Inventory.view.override.ItemViewController', {
             grdContractItem = win.down('#grdContractItem'),
             grdDocumentAssociation = win.down('#grdDocumentAssociation'),
             grdCertification = win.down('#grdCertification'),
+            grdStock = win.down('#grdStock'),
             grdNotes = win.down('#grdNotes');
 
         win.context = Ext.create('iRely.mvvm.Engine', {
@@ -372,8 +387,8 @@ Ext.define('Inventory.view.override.ItemViewController', {
                 {
                     key: 'tblICItemStocks',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
-                        grid: win.down('#grdStock'),
-                        deleteButton : win.down('#btnDeleteStock')
+                        grid: grdStock,
+                        deleteButton : grdStock.down('#btnDeleteStock')
                     })
                 },
                 {
@@ -496,6 +511,20 @@ Ext.define('Inventory.view.override.ItemViewController', {
             edit: me.onGridCertificationEdit,
             scope: me
         });
+
+
+        var colStockLocation = grdStock.columns[0];
+        colStockLocation.renderer = me.LocationRenderer;
+        var colStockUOM = grdStock.columns[2];
+        colStockUOM.renderer = me.UOMRenderer;
+        var colStockCountGroup = grdStock.columns[11];
+        colStockCountGroup.renderer = me.CountGroupRenderer;
+
+        var cepStock = grdStock.getPlugin('cepStock');
+        cepStock.on({
+            edit: me.onGridStockEdit,
+            scope: me
+        });
         // </editor-fold>
 
 
@@ -577,6 +606,11 @@ Ext.define('Inventory.view.override.ItemViewController', {
     CertificationRenderer: function (value, metadata, record) {
         var certification = record.get('strCertificationName');
         return certification;
+    },
+
+    CountGroupRenderer: function (value, metadata, record) {
+        var countgroup = record.get('strCountGroup');
+        return countgroup;
     },
 
     onGridCategoryEdit: function(editor, e, eOpts){
@@ -715,6 +749,46 @@ Ext.define('Inventory.view.override.ItemViewController', {
             {
                 var strProfitCenter = cboProfitCenter.getSelectedRecord().get('strProfitCenter');
                 record.set('strProfitCenter', strProfitCenter);
+                view.refresh();
+            }
+        }
+    },
+
+    onGridStockEdit: function(editor, e, eOpts){
+        var me = this;
+        var record = e.record
+        var column = e.column;
+
+        var grid = column.up('grid');
+        var view = grid.view;
+
+        if (column.itemId === 'colStockLocation')
+        {
+            var cboLocation = column.getEditor();
+            if (cboLocation.getSelectedRecord())
+            {
+                var strLocationName = cboLocation.getSelectedRecord().get('strLocationName');
+                record.set('strLocationName', strLocationName);
+                view.refresh();
+            }
+        }
+        else if (column.itemId === 'colStockUOM')
+        {
+            var cboUOM = column.getEditor();
+            if (cboUOM.getSelectedRecord())
+            {
+                var strUnitMeasure = cboUOM.getSelectedRecord().get('strUnitMeasure');
+                record.set('strUnitMeasure', strUnitMeasure);
+                view.refresh();
+            }
+        }
+        else if (column.itemId === 'colStockInventoryGroup')
+        {
+            var cboCountGroup = column.getEditor();
+            if (cboCountGroup.getSelectedRecord())
+            {
+                var strCountGroup = cboCountGroup.getSelectedRecord().get('strCountGroup');
+                record.set('strCountGroup', strCountGroup);
                 view.refresh();
             }
         }

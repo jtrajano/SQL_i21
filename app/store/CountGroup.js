@@ -2,7 +2,7 @@
  * Created by LZabala on 10/1/2014.
  */
 Ext.define('Inventory.store.CountGroup', {
-    extend: 'Ext.data.CountGroup',
+    extend: 'Ext.data.Store',
     alias: 'store.inventorycountgroup',
 
     requires: [
