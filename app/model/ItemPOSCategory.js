@@ -12,7 +12,21 @@ Ext.define('Inventory.model.ItemPOSCategory', {
 
     fields: [
         { name: 'intItemPOSCategoryId', type: 'int'},
-        { name: 'intItemId', type: 'int'},
+        { name: 'intItemId', type: 'int',
+            reference: {
+                type: 'Inventory.model.Item',
+                inverse: {
+                    role: 'tblICItemPOSCategories',
+                    storeConfig: {
+                        sortOnLoad: true,
+                        sorters: {
+                            direction: 'ASC',
+                            property: 'intSort'
+                        }
+                    }
+                }
+            }
+        },
         { name: 'intCategoryId', type: 'int'},
         { name: 'intSort', type: 'int'},
 

@@ -13,7 +13,21 @@ Ext.define('Inventory.model.ItemContract', {
 
     fields: [
         { name: 'intItemContractId', type: 'int'},
-        { name: 'intItemId', type: 'int'},
+        { name: 'intItemId', type: 'int',
+            reference: {
+                type: 'Inventory.model.Item',
+                inverse: {
+                    role: 'tblICItemContracts',
+                    storeConfig: {
+                        sortOnLoad: true,
+                        sorters: {
+                            direction: 'ASC',
+                            property: 'intSort'
+                        }
+                    }
+                }
+            }
+        },
         { name: 'intLocationId', type: 'int'},
         { name: 'strStoreName', type: 'string'},
         { name: 'strContractItemName', type: 'string'},
@@ -28,19 +42,5 @@ Ext.define('Inventory.model.ItemContract', {
 
         { name: 'strLocationName', type: 'string'},
         { name: 'strCountry', type: 'string'}
-    ],
-
-    hasMany: {
-        model: 'Inventory.model.ItemContractDocument',
-        name: 'tblICItemContractDocuments',
-        foreignKey: 'intItemContractId',
-        primaryKey: 'intItemContractId',
-        storeConfig: {
-            sortOnLoad: true,
-            sorters: {
-                direction: 'ASC',
-                property: 'intSort'
-            }
-        }
-    }
+    ]
 });

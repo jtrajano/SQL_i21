@@ -12,7 +12,21 @@ Ext.define('Inventory.model.ItemNote', {
 
     fields: [
         { name: 'intItemNoteId', type: 'int'},
-        { name: 'intItemId', type: 'int'},
+        { name: 'intItemId', type: 'int',
+            reference: {
+                type: 'Inventory.model.Item',
+                inverse: {
+                    role: 'tblICItemNotes',
+                    storeConfig: {
+                        sortOnLoad: true,
+                        sorters: {
+                            direction: 'ASC',
+                            property: 'intSort'
+                        }
+                    }
+                }
+            }
+        },
         { name: 'intLocationId', type: 'int'},
         { name: 'strCommentType', type: 'string'},
         { name: 'strComments', type: 'string'},

@@ -59,7 +59,10 @@ namespace iRely.Inventory.BRL
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICItem>()
                     .Include("tblICItemUOMs.tblICUnitMeasure")
-                    .Include(p => p.tblICItemLocations)
+                    .Include("tblICItemLocations.tblSMCompanyLocation")
+                    .Include("tblICItemLocations.vyuAPVendor")
+                    .Include("tblICItemLocations.tblICCategory")
+                    .Include("tblICItemLocations.tblICUnitMeasure")
                     .Include("tblICItemPOSCategories.tblICCategory")
                     .Include(p => p.tblICItemPOSSLAs)
                     .Include(p => p.tblICItemManufacturingUOMs)

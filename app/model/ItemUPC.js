@@ -12,7 +12,21 @@ Ext.define('Inventory.model.ItemUPC', {
 
     fields: [
         { name: 'intItemUPCId', type: 'int'},
-        { name: 'intItemId', type: 'int'},
+        { name: 'intItemId', type: 'int',
+            reference: {
+                type: 'Inventory.model.Item',
+                inverse: {
+                    role: 'tblICItemUPCs',
+                    storeConfig: {
+                        sortOnLoad: true,
+                        sorters: {
+                            direction: 'ASC',
+                            property: 'intSort'
+                        }
+                    }
+                }
+            }
+        },
         { name: 'intUnitMeasureId', type: 'int'},
         { name: 'dblUnitQty', type: 'float'},
         { name: 'strUPCCode', type: 'string'},

@@ -113,6 +113,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemVendorXref> tblICItemVendorXrefs { get; set; }
         public ICollection<tblICItemContract> tblICItemContracts { get; set; }
         public ICollection<tblICItemStock> tblICItemStocks { get; set; }
+        public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
     }
 
     public class tblGLAccount : BaseEntity
@@ -134,6 +135,7 @@ namespace iRely.Inventory.Model
         public string strVendorId { get; set; }
 
         public ICollection<tblICItemVendorXref> tblICItemVendorXrefs { get; set; }
+        public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
     }
 
     public class tblARCustomer : BaseEntity

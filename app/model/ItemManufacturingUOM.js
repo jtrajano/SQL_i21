@@ -12,7 +12,21 @@ Ext.define('Inventory.model.ItemManufacturingUOM', {
 
     fields: [
         { name: 'intItemManufacturingUOMId', type: 'int'},
-        { name: 'intItemManufacturingId', type: 'int'},
+        { name: 'intItemId', type: 'int',
+            reference: {
+                type: 'Inventory.model.Item',
+                inverse: {
+                    role: 'tblICItemManufacturingUOMs',
+                    storeConfig: {
+                        sortOnLoad: true,
+                        sorters: {
+                            direction: 'ASC',
+                            property: 'intSort'
+                        }
+                    }
+                }
+            }
+        },
         { name: 'intUnitMeasureId', type: 'int'},
         { name: 'intSort', type: 'int'},
     ]

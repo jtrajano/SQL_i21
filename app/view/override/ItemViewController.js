@@ -65,13 +65,12 @@ Ext.define('Inventory.view.override.ItemViewController', {
             //------------------//
             //Location Store Tab//
             //------------------//
-            colLocStoreLocation: 'intLocationId',
-            colLocStoreStore: 'intStoreId',
-            colLocStorePOSDescription: 'strPOSDescription',
-            colLocStoreCategory: 'intCategoryId',
-            colLocStoreVendor: 'intVendorId',
-            colLocStoreCostingMethod: 'intCostingMethod',
-            colLocStoreUOM: 'intDefaultUOMId',
+            colLocationLocation: 'intLocationId',
+            colLocationPOSDescription: 'strDescription',
+            colLocationCategory: 'intCategoryId',
+            colLocationVendor: 'intVendorId',
+            colLocationCostingMethod: 'intCostingMethod',
+            colLocationUOM: 'intDefaultUOMId',
 
             //--------------//
             //GL Account Tab//
@@ -316,7 +315,8 @@ Ext.define('Inventory.view.override.ItemViewController', {
                     key: 'tblICItemLocations',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdLocationStore,
-                        deleteButton : grdLocationStore.down('#btnDeleteLocation')
+                        deleteButton : grdLocationStore.down('#btnDeleteLocation'),
+                        position: 'none'
                     })
                 },
                 {
@@ -407,6 +407,17 @@ Ext.define('Inventory.view.override.ItemViewController', {
         btnEditLocation.on('click', me.onEditLocationClick);
 
         // <editor-fold desc="Subscribe to Renderers and Cell Editing Plugins">
+        var colLocationLocation = grdLocationStore.columns[0];
+        colLocationLocation.renderer = me.LocationRenderer;
+        var colLocationCategory = grdLocationStore.columns[2];
+        colLocationCategory.renderer = me.CategoryRenderer;
+        var colLocationVendor = grdLocationStore.columns[3];
+        colLocationVendor.renderer = me.VendorRenderer;
+        var colLocationCostingMethod = grdLocationStore.columns[4];
+        colLocationCostingMethod.renderer = me.CostingMethodRenderer;
+        var colLocationUOM = grdLocationStore.columns[5];
+        colLocationUOM.renderer = me.UOMRenderer;
+
         var colDetailUOM = grdUOM.columns[0];
         colDetailUOM.renderer = me.UOMRenderer;
 
@@ -611,6 +622,23 @@ Ext.define('Inventory.view.override.ItemViewController', {
     CountGroupRenderer: function (value, metadata, record) {
         var countgroup = record.get('strCountGroup');
         return countgroup;
+    },
+
+    CostingMethodRenderer: function (value, metadata, record) {
+        var intMethod = record.get('intCostingMethod');
+        var costingMethod = '';
+        switch (intMethod) {
+            case 1:
+                costingMethod = 'AVG';
+                break;
+            case 2:
+                costingMethod = 'FIFO';
+                break;
+            case 3:
+                costingMethod = 'LIFO';
+                break;
+        }
+        return costingMethod;
     },
 
     onGridCategoryEdit: function(editor, e, eOpts){
@@ -895,23 +923,41 @@ Ext.define('Inventory.view.override.ItemViewController', {
     },
 
     onAddLocationClick: function(button, e, eOpts) {
-        var screenName = 'Inventory.view.ItemLocation';
         var win = button.up('window');
+        var me = win.controller;
+        me.openItemLocationScreen('new', win);
+    },
+
+    onEditLocationClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var me = win.controller;
+        me.openItemLocationScreen('edit', win);
+    },
+
+    openItemLocationScreen: function (action, window) {
+        var win = window;
+        var me = win.controller;
+        var screenName = 'Inventory.view.ItemLocation';
 
         Ext.require([
             screenName,
             screenName + 'ViewController',
         ], function() {
-            var screen = screenName.substring(screenName.indexOf('view.') + 5, screenName.length),
-                view = Ext.create(screenName, { controller: screen.toLowerCase() });
+            var screen = screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
+            var view = Ext.create(screenName, { controller: screen.toLowerCase() });
+            view.on('destroy', me.onDestroyItemLocationScreen, me, { window: win });
 
             var controller = view.getController();
             var current = win.getViewModel().data.current;
-            controller.show({ id: current.get('intItemId'), action: 'new', store: current });
+            controller.show({ id: current.get('intItemId'), action: action });
         });
     },
 
-    onEditLocationClick: function(button, e, eOpts) {
-        iRely.Functions.openScreen('Inventory.view.ItemLocation', this.current);
+    onDestroyItemLocationScreen: function(win, eOpts) {
+        var me = eOpts.window.getController();
+        var win = eOpts.window;
+        var grdLocation = win.down('#grdLocationStore');
+
+        grdLocation.store.reload();
     }
 });

@@ -9,5 +9,205 @@
         "designer|userAlias": "itemlocation",
         "designer|userClassName": "ItemLocationViewModel"
     },
-    "designerId": "25cf1c0c-a796-4bf9-9545-85fca4dea793"
+    "designerId": "25cf1c0c-a796-4bf9-9545-85fca4dea793",
+    "cn": [
+        {
+            "type": "arraystore",
+            "reference": {
+                "name": "stores",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "data": [
+                    "[",
+                    "                {",
+                    "                    intCostingMethodId: '1',",
+                    "                    strDescription: 'AVG'",
+                    "                },",
+                    "                {",
+                    "                    intCostingMethodId: '2',",
+                    "                    strDescription: 'FIFO'",
+                    "                },",
+                    "                {",
+                    "                    intCostingMethodId: '3',",
+                    "                    strDescription: 'LIFO'",
+                    "                }",
+                    "            ]"
+                ],
+                "name": "CostingMethods"
+            },
+            "name": "MyArrayStore",
+            "designerId": "5df01610-2757-4d36-81e9-26b80d29ae29",
+            "cn": [
+                {
+                    "type": "Ext.data.field.Integer",
+                    "reference": {
+                        "name": "fields",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "name": "intCostingMethodId"
+                    },
+                    "name": "MyInteger3",
+                    "designerId": "ea5307c4-abac-443f-bd8a-402362325af4"
+                },
+                {
+                    "type": "Ext.data.field.Field",
+                    "reference": {
+                        "name": "fields",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "name": "strDescription"
+                    },
+                    "name": "MyField1",
+                    "designerId": "02ae15a6-631e-46fd-83e0-f72d29243fd3"
+                }
+            ]
+        },
+        {
+            "type": "arraystore",
+            "reference": {
+                "name": "stores",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "data": [
+                    "[",
+                    "                {",
+                    "\t\t\t\t\tintNegativeInventoryId: '0',",
+                    "                    strDescription: 'Yes'",
+                    "                },",
+                    "                {",
+                    "\t\t\t\t\tintNegativeInventoryId: '1',",
+                    "                    strDescription: 'Yes with Auto Write-Off'",
+                    "                },",
+                    "                {",
+                    "\t\t\t\t\tintNegativeInventoryId: '2',",
+                    "                    strDescription: 'No'",
+                    "                }",
+                    "            ]"
+                ],
+                "name": "NegativeInventory"
+            },
+            "name": "MyArrayStore2",
+            "designerId": "edaa197f-fbbd-4a4a-9436-488ec8cda327",
+            "cn": [
+                {
+                    "type": "Ext.data.field.Integer",
+                    "reference": {
+                        "name": "fields",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "name": "intNegativeInventoryId"
+                    },
+                    "name": "MyInteger3",
+                    "designerId": "8c7d505a-c7fd-478a-9b79-682893526ee4"
+                },
+                {
+                    "type": "Ext.data.field.Field",
+                    "reference": {
+                        "name": "fields",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "name": "strDescription"
+                    },
+                    "name": "MyField1",
+                    "designerId": "7a89953f-4fd9-4871-995c-8947cfecca6e"
+                }
+            ]
+        },
+        {
+            "type": "Ext.data.Store",
+            "reference": {
+                "name": "stores",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "name": "Location",
+                "type": "companylocation"
+            },
+            "name": "MyStore",
+            "designerId": "b5966463-4f58-49e6-856f-5adbfabf5b4a",
+            "customConfigs": [
+                {
+                    "group": "(Custom Properties)",
+                    "name": "type",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "type": "Ext.data.Store",
+            "reference": {
+                "name": "stores",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "name": "Vendor",
+                "type": "vendorbuffered"
+            },
+            "name": "MyStore1",
+            "designerId": "2ddbaafa-d423-49e9-909a-7b07599e2513",
+            "customConfigs": [
+                {
+                    "group": "(Custom Properties)",
+                    "name": "type",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "type": "Ext.data.Store",
+            "reference": {
+                "name": "stores",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "name": "Category",
+                "type": "inventorycategory"
+            },
+            "name": "MyStore3",
+            "designerId": "c1ec6d50-dd82-4f06-a2e1-fde0b95766af",
+            "customConfigs": [
+                {
+                    "group": "(Custom Properties)",
+                    "name": "type",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "type": "Ext.data.Store",
+            "reference": {
+                "name": "stores",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "name": "UnitMeasure",
+                "type": "inventoryuom"
+            },
+            "name": "MyStore2",
+            "designerId": "b9a65554-c377-4bde-bb4b-fd889087f3d4",
+            "customConfigs": [
+                {
+                    "group": "(Custom Properties)",
+                    "name": "type",
+                    "type": "string"
+                }
+            ]
+        }
+    ]
 }

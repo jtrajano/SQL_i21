@@ -18,7 +18,74 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
     alias: 'viewmodel.itemlocation',
 
     requires: [
-        'Inventory.view.override.ItemLocationViewModel'
-    ]
+        'Inventory.view.override.ItemLocationViewModel',
+        'Ext.data.Store',
+        'Ext.data.field.Integer'
+    ],
+
+    stores: {
+        CostingMethods: {
+            data: [
+                {
+                    intCostingMethodId: '1',
+                    strDescription: 'AVG'
+                },
+                {
+                    intCostingMethodId: '2',
+                    strDescription: 'FIFO'
+                },
+                {
+                    intCostingMethodId: '3',
+                    strDescription: 'LIFO'
+                }
+            ],
+            fields: [
+                {
+                    type: 'int',
+                    name: 'intCostingMethodId'
+                },
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        NegativeInventory: {
+            data: [
+                {
+                    intNegativeInventoryId: '0',
+                    strDescription: 'Yes'
+                },
+                {
+                    intNegativeInventoryId: '1',
+                    strDescription: 'Yes with Auto Write-Off'
+                },
+                {
+                    intNegativeInventoryId: '2',
+                    strDescription: 'No'
+                }
+            ],
+            fields: [
+                {
+                    type: 'int',
+                    name: 'intNegativeInventoryId'
+                },
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        Location: {
+            type: 'companylocation'
+        },
+        Vendor: {
+            type: 'vendorbuffered'
+        },
+        Category: {
+            type: 'inventorycategory'
+        },
+        UnitMeasure: {
+            type: 'inventoryuom'
+        }
+    }
 
 });

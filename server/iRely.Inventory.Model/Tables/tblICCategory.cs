@@ -77,6 +77,7 @@ namespace iRely.Inventory.Model
         public tblICUnitMeasure tblICUnitMeasure { get; set; }
         public tblICFamily tblICFamily { get; set; }
         public tblICClass tblICClass { get; set; }
+        public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
         
 
     }

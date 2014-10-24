@@ -12,20 +12,46 @@ Ext.define('Inventory.model.ItemLocation', {
 
     fields: [
         { name: 'intItemLocationId', type: 'int'},
-        { name: 'intLocationId', type: 'int'},
-        { name: 'intVendorId', type: 'int'},
+        { name: 'intItemId', type: 'int',
+            reference: {
+                type: 'Inventory.model.Item',
+                inverse: {
+                    role: 'tblICItemLocations',
+                    storeConfig: {
+                        proxy: {
+                            type: 'rest',
+                            api: {
+                                read: '../Inventory/api/ItemLocation/GetItemLocations'
+                            },
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data',
+                                messageProperty: 'message'
+                            }
+                        },
+                        sortOnLoad: true,
+                        sorters: {
+                            direction: 'ASC',
+                            property: 'intSort'
+                        }
+                    }
+                }
+            }
+        },
+        { name: 'intLocationId', type: 'int', allowNull: true},
+        { name: 'intVendorId', type: 'int', allowNull: true},
         { name: 'strDescription', type: 'string'},
         { name: 'intCostingMethod', type: 'int'},
-        { name: 'intCategoryId', type: 'int'},
+        { name: 'intCategoryId', type: 'int', allowNull: true},
         { name: 'strRow', type: 'string'},
         { name: 'strBin', type: 'string'},
-        { name: 'intDefaultUOMId', type: 'int'},
-        { name: 'intIssueUOMId', type: 'int'},
-        { name: 'intReceiveUOMId', type: 'int'},
-        { name: 'intFamilyId', type: 'int'},
-        { name: 'intClassId', type: 'int'},
-        { name: 'intProductCodeId', type: 'int'},
-        { name: 'intFuelTankId', type: 'int'},
+        { name: 'intDefaultUOMId', type: 'int', allowNull: true},
+        { name: 'intIssueUOMId', type: 'int', allowNull: true},
+        { name: 'intReceiveUOMId', type: 'int', allowNull: true},
+        { name: 'intFamilyId', type: 'int', allowNull: true},
+        { name: 'intClassId', type: 'int', allowNull: true},
+        { name: 'intProductCodeId', type: 'int', allowNull: true},
+        { name: 'intFuelTankId', type: 'int', allowNull: true},
         { name: 'strPassportFuelId1', type: 'string'},
         { name: 'strPassportFuelId2', type: 'string'},
         { name: 'strPassportFuelId3', type: 'string'},
@@ -34,7 +60,7 @@ Ext.define('Inventory.model.ItemLocation', {
         { name: 'ysnTaxFlag3', type: 'boolean'},
         { name: 'ysnTaxFlag4', type: 'boolean'},
         { name: 'ysnPromotionalItem', type: 'boolean'},
-        { name: 'intMixMatchId', type: 'int'},
+        { name: 'intMixMatchId', type: 'int', allowNull: true},
         { name: 'ysnDepositRequired', type: 'boolean'},
         { name: 'intBottleDepositNo', type: 'int'},
         { name: 'ysnSaleable', type: 'boolean'},
@@ -54,12 +80,17 @@ Ext.define('Inventory.model.ItemLocation', {
         { name: 'intMinimumAge', type: 'int'},
         { name: 'ysnApplyBlueLaw1', type: 'boolean'},
         { name: 'ysnApplyBlueLaw2', type: 'boolean'},
-        { name: 'intItemTypeCode', type: 'int'},
-        { name: 'intItemTypeSubCode', type: 'int'},
+        { name: 'intItemTypeCode', type: 'int', allowNull: true},
+        { name: 'intItemTypeSubCode', type: 'int', allowNull: true},
         { name: 'ysnAutoCalculateFreight', type: 'boolean'},
-        { name: 'intFreightMethodId', type: 'int'},
+        { name: 'intFreightMethodId', type: 'int', allowNull: true},
         { name: 'dblFreightRate', type: 'float'},
-        { name: 'intFreightVendorId', type: 'int'},
-        { name: 'intSort', type: 'int'}
+        { name: 'intFreightVendorId', type: 'int', allowNull: true},
+        { name: 'intSort', type: 'int'},
+
+        { name: 'strLocationName', type: 'string'},
+        { name: 'strVendorId', type: 'string'},
+        { name: 'strCategory', type: 'string'},
+        { name: 'strUnitMeasure', type: 'string'},
     ]
 });

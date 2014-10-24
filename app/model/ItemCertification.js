@@ -12,7 +12,21 @@ Ext.define('Inventory.model.ItemCertification', {
 
     fields: [
         { name: 'intItemCertificationId', type: 'int'},
-        { name: 'intItemId', type: 'int'},
+        { name: 'intItemId', type: 'int',
+            reference: {
+                type: 'Inventory.model.Item',
+                inverse: {
+                    role: 'tblICItemCertifications',
+                    storeConfig: {
+                        sortOnLoad: true,
+                        sorters: {
+                            direction: 'ASC',
+                            property: 'intSort'
+                        }
+                    }
+                }
+            }
+        },
         { name: 'intCertificationId', type: 'int'},
         { name: 'intSort', type: 'int'},
 

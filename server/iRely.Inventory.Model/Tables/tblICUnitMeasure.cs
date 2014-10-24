@@ -25,5 +25,6 @@ namespace iRely.Inventory.Model
         public ICollection<tblICRinFeedStockUOM> tblICRinFeedStockUOMs { get; set; }
         public ICollection<tblICItemVendorXref> tblICItemVendorXrefs { get; set; }
         public ICollection<tblICItemStock> tblICItemStocks { get; set; }
+        public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
     }
 }

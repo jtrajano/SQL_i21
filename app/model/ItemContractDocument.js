@@ -12,7 +12,21 @@ Ext.define('Inventory.model.ItemContractDocument', {
 
     fields: [
         { name: 'intItemContractDocumentId', type: 'int'},
-        { name: 'intItemContractId', type: 'int'},
+        { name: 'intItemContractId', type: 'int',
+            reference: {
+                type: 'Inventory.model.ItemContract',
+                inverse: {
+                    role: 'tblICItemContractDocuments',
+                    storeConfig: {
+                        sortOnLoad: true,
+                        sorters: {
+                            direction: 'ASC',
+                            property: 'intSort'
+                        }
+                    }
+                }
+            }
+        },
         { name: 'intDocumentId', type: 'int'},
         { name: 'intSort', type: 'int'},
 

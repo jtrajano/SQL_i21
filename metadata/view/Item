@@ -1342,6 +1342,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1,
+                                                                "itemId": "colLocationLocation",
                                                                 "text": "Location"
                                                             },
                                                             "name": "MyColumn3",
@@ -1357,6 +1358,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 2,
+                                                                "itemId": "colLocationPOSDescription",
                                                                 "text": "POS Description"
                                                             },
                                                             "name": "MyColumn80",
@@ -1372,6 +1374,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1,
+                                                                "itemId": "colLocationCategory",
                                                                 "text": "Category",
                                                                 "width": 96
                                                             },
@@ -1388,6 +1391,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": null,
+                                                                "itemId": "colLocationVendor",
                                                                 "text": "Default Vendor"
                                                             },
                                                             "name": "MyColumn79",
@@ -1403,6 +1407,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": null,
+                                                                "itemId": "colLocationCostingMethod",
                                                                 "text": "Costing Method"
                                                             },
                                                             "name": "MyColumn5",
@@ -1418,6 +1423,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": null,
+                                                                "itemId": "colLocationUOM",
                                                                 "text": "Default UOM",
                                                                 "width": 100
                                                             },

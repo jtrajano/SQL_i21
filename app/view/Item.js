@@ -643,18 +643,21 @@ Ext.define('Inventory.view.Item', {
                                                                 columns: [
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colLocationLocation',
                                                                         dataIndex: 'string',
                                                                         text: 'Location',
                                                                         flex: 1
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colLocationPOSDescription',
                                                                         dataIndex: 'string',
                                                                         text: 'POS Description',
                                                                         flex: 2
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colLocationCategory',
                                                                         width: 96,
                                                                         dataIndex: 'string',
                                                                         text: 'Category',
@@ -662,16 +665,19 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colLocationVendor',
                                                                         dataIndex: 'string',
                                                                         text: 'Default Vendor'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colLocationCostingMethod',
                                                                         dataIndex: 'string',
                                                                         text: 'Costing Method'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colLocationUOM',
                                                                         width: 100,
                                                                         dataIndex: 'string',
                                                                         text: 'Default UOM'

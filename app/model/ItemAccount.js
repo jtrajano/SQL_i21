@@ -12,7 +12,21 @@ Ext.define('Inventory.model.ItemAccount', {
 
     fields: [
         { name: 'intItemAccountId', type: 'int'},
-        { name: 'intItemId', type: 'int'},
+        { name: 'intItemId', type: 'int',
+            reference: {
+                type: 'Inventory.model.Item',
+                inverse: {
+                    role: 'tblICItemAccounts',
+                    storeConfig: {
+                        sortOnLoad: true,
+                        sorters: {
+                            direction: 'ASC',
+                            property: 'intSort'
+                        }
+                    }
+                }
+            }
+        },
         { name: 'intLocationId', type: 'int'},
         { name: 'strAccountDescription', type: 'string'},
         { name: 'intAccountId', type: 'int'},

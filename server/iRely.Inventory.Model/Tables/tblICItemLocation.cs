@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,20 +13,20 @@ namespace iRely.Inventory.Model
     {
         public int intItemLocationId { get; set; }
         public int intItemId { get; set; }
-        public int intLocationId { get; set; }
-        public int intVendorId { get; set; }
+        public int? intLocationId { get; set; }
+        public int? intVendorId { get; set; }
         public string strDescription { get; set; }
-        public int intCostingMethod { get; set; }
-        public int intCategoryId { get; set; }
+        public int? intCostingMethod { get; set; }
+        public int? intCategoryId { get; set; }
         public string strRow { get; set; }
         public string strBin { get; set; }
-        public int intDefaultUOMId { get; set; }
-        public int intIssueUOMId { get; set; }
-        public int intReceiveUOMId { get; set; }
-        public int intFamilyId { get; set; }
-        public int intClassId { get; set; }
-        public int intProductCodeId { get; set; }
-        public int intFuelTankId { get; set; }
+        public int? intDefaultUOMId { get; set; }
+        public int? intIssueUOMId { get; set; }
+        public int? intReceiveUOMId { get; set; }
+        public int? intFamilyId { get; set; }
+        public int? intClassId { get; set; }
+        public int? intProductCodeId { get; set; }
+        public int? intFuelTankId { get; set; }
         public string strPassportFuelId1 { get; set; }
         public string strPassportFuelId2 { get; set; }
         public string strPassportFuelId3 { get; set; }
@@ -34,7 +35,7 @@ namespace iRely.Inventory.Model
         public bool ysnTaxFlag3 { get; set; }
         public bool ysnTaxFlag4 { get; set; }
         public bool ysnPromotionalItem { get; set; }
-        public int intMixMatchId { get; set; }
+        public int? intMixMatchId { get; set; }
         public bool ysnDepositRequired { get; set; }
         public int intBottleDepositNo { get; set; }
         public bool ysnSaleable { get; set; }
@@ -54,15 +55,96 @@ namespace iRely.Inventory.Model
         public int intMinimumAge { get; set; }
         public bool ysnApplyBlueLaw1 { get; set; }
         public bool ysnApplyBlueLaw2 { get; set; }
-        public int intItemTypeCode { get; set; }
-        public int intItemTypeSubCode { get; set; }
+        public int? intItemTypeCode { get; set; }
+        public int? intItemTypeSubCode { get; set; }
         public bool ysnAutoCalculateFreight { get; set; }
-        public int intFreightMethodId { get; set; }
+        public int? intFreightMethodId { get; set; }
         public decimal? dblFreightRate { get; set; }
-        public int intFreightVendorId { get; set; }
+        public int? intFreightVendorId { get; set; }
         public int intSort { get; set; }
 
+        private string _location;
+        [NotMapped]
+        public string strLocationName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_location))
+                    if (tblSMCompanyLocation != null)
+                        return tblSMCompanyLocation.strLocationName;
+                    else
+                        return null;
+                else
+                    return _location;
+            }
+            set
+            {
+                _location = value;
+            }
+        }
+        private string _vendor;
+        [NotMapped]
+        public string strVendorId
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_vendor))
+                    if (vyuAPVendor != null)
+                        return vyuAPVendor.strVendorId;
+                    else
+                        return null;
+                else
+                    return _vendor;
+            }
+            set
+            {
+                _vendor = value;
+            }
+        }
+        private string _category;
+        [NotMapped]
+        public string strCategory
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_category))
+                    if (tblICCategory != null)
+                        return tblICCategory.strCategoryCode;
+                    else
+                        return null;
+                else
+                    return _category;
+            }
+            set
+            {
+                _category = value;
+            }
+        }
+        private string _unitmeasure;
+        [NotMapped]
+        public string strUnitMeasure
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_unitmeasure))
+                    if (tblICUnitMeasure != null)
+                        return tblICUnitMeasure.strUnitMeasure;
+                    else
+                        return null;
+                else
+                    return _unitmeasure;
+            }
+            set
+            {
+                _unitmeasure = value;
+            }
+        }
+
         public tblICItem tblICItem { get; set; }
+        public tblSMCompanyLocation tblSMCompanyLocation { get; set; }
+        public vyuAPVendor vyuAPVendor { get; set; }
+        public tblICCategory tblICCategory { get; set; }
+        public tblICUnitMeasure tblICUnitMeasure { get; set; }
         
     }
 }

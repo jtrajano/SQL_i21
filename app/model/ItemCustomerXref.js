@@ -12,7 +12,21 @@ Ext.define('Inventory.model.ItemCustomerXref', {
 
     fields: [
         { name: 'intItemCustomerXrefId', type: 'int'},
-        { name: 'intItemId', type: 'int'},
+        { name: 'intItemId', type: 'int',
+            reference: {
+                type: 'Inventory.model.Item',
+                inverse: {
+                    role: 'tblICItemCustomerXrefs',
+                    storeConfig: {
+                        sortOnLoad: true,
+                        sorters: {
+                            direction: 'ASC',
+                            property: 'intSort'
+                        }
+                    }
+                }
+            }
+        },
         { name: 'intLocationId', type: 'int'},
         { name: 'strStoreName', type: 'string'},
         { name: 'intCustomerId', type: 'int'},

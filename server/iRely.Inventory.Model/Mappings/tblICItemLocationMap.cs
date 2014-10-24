@@ -63,6 +63,19 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnTaxFlag2).HasColumnName("ysnTaxFlag2");
             this.Property(t => t.ysnTaxFlag3).HasColumnName("ysnTaxFlag3");
             this.Property(t => t.ysnTaxFlag4).HasColumnName("ysnTaxFlag4");
+
+            this.HasOptional(p => p.tblSMCompanyLocation)
+                .WithMany(p => p.tblICItemLocations)
+                .HasForeignKey(p => p.intLocationId);
+            this.HasOptional(p => p.vyuAPVendor)
+                .WithMany(p => p.tblICItemLocations)
+                .HasForeignKey(p => p.intVendorId);
+            this.HasOptional(p => p.tblICCategory)
+                .WithMany(p => p.tblICItemLocations)
+                .HasForeignKey(p => p.intCategoryId);
+            this.HasOptional(p => p.tblICUnitMeasure)
+                .WithMany(p => p.tblICItemLocations)
+                .HasForeignKey(p => p.intDefaultUOMId);
         }
     }
 }

@@ -12,7 +12,21 @@ Ext.define('Inventory.model.ItemPOSSLA', {
 
     fields: [
         { name: 'intItemPOSSLAId', type: 'int'},
-        { name: 'intItemId', type: 'int'},
+        { name: 'intItemId', type: 'int',
+            reference: {
+                type: 'Inventory.model.Item',
+                inverse: {
+                    role: 'tblICItemPOSSLAs',
+                    storeConfig: {
+                        sortOnLoad: true,
+                        sorters: {
+                            direction: 'ASC',
+                            property: 'intSort'
+                        }
+                    }
+                }
+            }
+        },
         { name: 'strSLAContract', type: 'string'},
         { name: 'dblContractPrice', type: 'float'},
         { name: 'ysnServiceWarranty', type: 'boolean'}

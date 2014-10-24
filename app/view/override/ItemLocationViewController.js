@@ -3,16 +3,37 @@ Ext.define('Inventory.view.override.ItemLocationViewController', {
 
     config: {
         binding: {
-            cboLocation: '{current.intLocationId}',
-            cboDefaultVendor: '{current.intVendorId}',
-            cboCostingMethod: '{current.intCostingMethod}',
-            cboCategory: '{current.intCategoryId}',
-            txtDescription: '{current.strPOSDescription}',
+            cboLocation: {
+                value: '{current.intLocationId}',
+                store: '{Location}'
+            },
+            cboDefaultVendor: {
+                value: '{current.intVendorId}',
+                store: '{Vendor}'
+            },
+            cboCostingMethod: {
+                value: '{current.intCostingMethod}',
+                store: '{CostingMethods}'
+            },
+            cboCategory: {
+                value: '{current.intCategoryId}',
+                store: '{Category}'
+            },
+            txtDescription: '{current.strDescription}',
             txtRow: '{current.strRow}',
             txtBon: '{current.strBin}',
-            cboDefaultUom: '{current.intDefaultUOMId}',
-            cboIssueUom: '{current.intIssueUOMId}',
-            cboReceiveUom: '{current.intReceiveUOMId}',
+            cboDefaultUom: {
+                value: '{current.intDefaultUOMId}',
+                store: '{UnitMeasure}'
+            },
+            cboIssueUom: {
+                value: '{current.intIssueUOMId}',
+                store: '{UnitMeasure}'
+            },
+            cboReceiveUom: {
+                value: '{current.intReceiveUOMId}',
+                store: '{UnitMeasure}'
+            },
             cboFamily: '{current.intFamilyId}',
             cboClass: '{current.intClassId}',
             cboProductCode: '{current.intProductCodeId}',
@@ -50,19 +71,27 @@ Ext.define('Inventory.view.override.ItemLocationViewController', {
             chkAutoCalculateFreight: '{current.ysnAutoCalculateFreight}',
             cboFreightMethod: '{current.intFreightMethodId}',
             txtFreightRate: '{current.dblFreightRate}',
-            cboFreightVendor: '{current.intFreightVendorId}'
+            cboFreightVendor: {
+                value: '{current.intFreightVendorId}',
+                store: '{Vendor}'
+            }
         }
     },
 
     setupContext : function(options){
         var me = this,
             win = options.window,
-            store = options.store;
+            store = Ext.create('Inventory.store.ItemLocation', { pageSize: 1 });
+
 
         win.context = Ext.create('iRely.mvvm.Engine', {
             window : win,
             store  : store,
-            binding: me.config.binding
+            binding: me.config.binding,
+            createRecord: {
+                fn: me.createRecord,
+                scope: me
+            }
         });
 
         return win.context;
@@ -77,9 +106,8 @@ Ext.define('Inventory.view.override.ItemLocationViewController', {
         if (config) {
             win.show();
 
-            var current = config.store['tblICItemLocations']();
-            var context = me.setupContext( { window : win, store: current } );
-
+            var context = me.setupContext( { window : win } );
+            me.intItemId = config.id;
             if (config.action === 'new') {
                 context.data.addRecord();
             } else {
@@ -87,13 +115,18 @@ Ext.define('Inventory.view.override.ItemLocationViewController', {
                         column: 'intItemId',
                         value: config.id
                     }];
-
-
                 context.data.load({
                     filters: filter
                 });
             }
         }
+    },
+
+    createRecord: function(config, action) {
+        var me = this;
+        var record = Ext.create('Inventory.model.ItemLocation');
+        record.set('intItemId', me.intItemId);
+        action(record);
     }
     
 });
