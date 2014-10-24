@@ -364,6 +364,82 @@ Ext.define('Inventory.view.override.ItemViewModel', {
                 }
             ]
         },
+        PromotionTypes:{
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Rebate'
+                },{
+                    strDescription: 'Discount'
+                },{
+                    strDescription: 'Vendor Discount'
+                },{
+                    strDescription: 'Customer Discount'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        DiscountsBy:{
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Percent'
+                },{
+                    strDescription: 'Amount'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        PricingMethods:{
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Fixed Dollar Amount'
+                },{
+                    strDescription: 'Markup Standard Cost'
+                },{
+                    strDescription: 'Percent of Margin'
+                },{
+                    strDescription: 'Discount Sales Price'
+                },{
+                    strDescription: 'MSRP Discount'
+                },{
+                    strDescription: 'Percent of Margin (MSRP)'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        CommissionsOn:{
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Percent'
+                },{
+                    strDescription: 'Units'
+                },{
+                    strDescription: 'Amount'
+                },{
+                    strDescription: 'Gross Profit'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
 
 
         Manufacturer: {

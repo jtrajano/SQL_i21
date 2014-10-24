@@ -3017,7 +3017,7 @@ Ext.define('Inventory.view.Item', {
                                             {
                                                 xtype: 'advancefiltergrid',
                                                 flex: 1,
-                                                itemId: 'grdLocationStore1',
+                                                itemId: 'grdPricing',
                                                 margin: -1,
                                                 dockedItems: [
                                                     {
@@ -3062,72 +3062,84 @@ Ext.define('Inventory.view.Item', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colPricingLocation',
                                                         width: 116,
                                                         dataIndex: 'string',
                                                         text: 'Location'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colPricingSalePrice',
                                                         width: 80,
                                                         dataIndex: 'string',
                                                         text: 'Sale Price'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colPricingRetailPrice',
                                                         width: 80,
                                                         dataIndex: 'string',
                                                         text: 'Retail Price'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colPricingWholesalePrice',
                                                         width: 90,
                                                         dataIndex: 'string',
                                                         text: 'Wholesale Price'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colPricingLargeVolumePrice',
                                                         width: 110,
                                                         dataIndex: 'string',
                                                         text: 'Large Volume Price'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colPricingMSRP',
                                                         width: 80,
                                                         dataIndex: 'string',
                                                         text: 'MSRP'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colPricingMethod',
                                                         width: 85,
                                                         dataIndex: 'string',
                                                         text: 'Pricing Method'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colPricingLastCost',
                                                         width: 80,
                                                         dataIndex: 'string',
                                                         text: 'Last Cost'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colPricingStandardCost',
                                                         width: 85,
                                                         dataIndex: 'string',
                                                         text: 'Standard Cost'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colPricingAverageCost',
                                                         width: 85,
                                                         dataIndex: 'string',
                                                         text: 'Avarage Cost'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colPricingEOMCost',
                                                         width: 85,
                                                         dataIndex: 'string',
                                                         text: 'End of Month Cost'
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',
+                                                        itemId: 'colPricingActive',
                                                         width: 52,
                                                         text: 'Active'
                                                     }
@@ -3182,92 +3194,194 @@ Ext.define('Inventory.view.Item', {
                                                                 columns: [
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colPricingLevelLocation',
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Location',
-                                                                        flex: 1
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intCompanyLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Location Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strLocationName',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Location Name',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strLocationType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Location Type',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            displayField: 'strLocationName',
+                                                                            valueField: 'intCompanyLocationId',
+                                                                            bind: {
+                                                                                store: '{CompanyLocation}'
+                                                                            }
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colPricingLevelPriceLevel',
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Price Level',
-                                                                        flex: 1
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'combobox',
+                                                                            displayField: 'strDescription',
+                                                                            valueField: 'strDescription'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colPricingLevelUOM',
                                                                         width: 50,
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'UOM'
+                                                                        text: 'UOM',
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intUnitMeasureId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Unit Of Measure ID',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strUnitMeasure',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Unit Measure',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strUnitType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Unit Type',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'ysnDefault',
+                                                                                    dataType: 'boolean',
+                                                                                    text: 'Default',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            displayField: 'strUnitMeasure',
+                                                                            valueField: 'intUnitMeasureId',
+                                                                            bind: {
+                                                                                store: '{UnitMeasure}'
+                                                                            }
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colPricingLevelUnits',
                                                                         width: 50,
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Units'
+                                                                        text: 'Units',
+                                                                        editor: {
+                                                                            xtype: 'numberfield'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        hidden: true,
-                                                                        dataIndex: 'strPhone',
-                                                                        text: 'Phone',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        hidden: true,
-                                                                        dataIndex: 'strFax',
-                                                                        text: 'Fax',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colPricingLevelMin',
                                                                         width: 50,
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Min'
+                                                                        text: 'Min',
+                                                                        editor: {
+                                                                            xtype: 'numberfield'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colPricingLevelMax',
                                                                         width: 50,
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Max'
+                                                                        text: 'Max',
+                                                                        editor: {
+                                                                            xtype: 'numberfield'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colPricingLevelMethod',
                                                                         width: 85,
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Pricing Method'
+                                                                        text: 'Pricing Method',
+                                                                        editor: {
+                                                                            xtype: 'combobox',
+                                                                            displayField: 'strDescription',
+                                                                            valueField: 'strDescription',
+                                                                            bind: {
+                                                                                store: '{PricingMethods}'
+                                                                            }
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colPricingLevelCommissionOn',
                                                                         width: 100,
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Commission On'
+                                                                        text: 'Commission On',
+                                                                        editor: {
+                                                                            xtype: 'combobox',
+                                                                            displayField: 'strDescription',
+                                                                            valueField: 'strDescription',
+                                                                            bind: {
+                                                                                store: '{CommissionsOn}'
+                                                                            }
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colPricingLevelCommissionRate',
                                                                         width: 104,
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Commision Rate'
+                                                                        text: 'Commision Rate',
+                                                                        editor: {
+                                                                            xtype: 'numberfield'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colPricingLevelAmount',
                                                                         width: 68,
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Amount',
-                                                                        flex: 1
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'numberfield'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colPricingLevelUnitPrice',
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Unit Price',
-                                                                        flex: 1
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'numberfield'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'checkcolumn',
+                                                                        itemId: 'colPricingLevelActive',
                                                                         width: 52,
-                                                                        text: 'Active'
+                                                                        text: 'Active',
+                                                                        editor: {
+                                                                            xtype: 'checkboxfield'
+                                                                        }
                                                                     }
                                                                 ],
                                                                 viewConfig: {
@@ -3276,7 +3390,14 @@ Ext.define('Inventory.view.Item', {
                                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                                     selType: 'checkboxmodel',
                                                                     mode: 'SINGLE'
-                                                                })
+                                                                }),
+                                                                plugins: [
+                                                                    {
+                                                                        ptype: 'cellediting',
+                                                                        pluginId: 'cepPricingLevel',
+                                                                        clicksToEdit: 1
+                                                                    }
+                                                                ]
                                                             }
                                                         ]
                                                     },
@@ -3287,7 +3408,7 @@ Ext.define('Inventory.view.Item', {
                                                         items: [
                                                             {
                                                                 xtype: 'advancefiltergrid',
-                                                                itemId: 'grdRebateDiscount',
+                                                                itemId: 'grdSpecialPricing',
                                                                 margin: -1,
                                                                 dockedItems: [
                                                                     {
@@ -3302,7 +3423,7 @@ Ext.define('Inventory.view.Item', {
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
-                                                                                itemId: 'btnDeleteRebate',
+                                                                                itemId: 'btnDeleteSpecialPricing',
                                                                                 iconCls: 'small-delete',
                                                                                 text: 'Delete'
                                                                             },
@@ -3318,66 +3439,176 @@ Ext.define('Inventory.view.Item', {
                                                                 columns: [
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colSpecialPricingLocation',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Location'
+                                                                        text: 'Location',
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intCompanyLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Location Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strLocationName',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Location Name',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strLocationType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Location Type',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            displayField: 'strLocationName',
+                                                                            valueField: 'intCompanyLocationId',
+                                                                            bind: {
+                                                                                store: '{CompanyLocation}'
+                                                                            }
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colSpecialPricingPromotionType',
                                                                         width: 101,
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Promotion Type'
+                                                                        text: 'Promotion Type',
+                                                                        editor: {
+                                                                            xtype: 'combobox',
+                                                                            displayField: 'strDescription',
+                                                                            valueField: 'strDescription',
+                                                                            bind: {
+                                                                                store: '{PromotionTypes}'
+                                                                            }
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'datecolumn',
+                                                                        itemId: 'colSpecialPricingBeginDate',
                                                                         width: 80,
-                                                                        text: 'Begin Date'
+                                                                        text: 'Begin Date',
+                                                                        editor: {
+                                                                            xtype: 'datefield'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'datecolumn',
+                                                                        itemId: 'colSpecialPricingEndDate',
                                                                         width: 80,
-                                                                        text: 'End Date'
+                                                                        text: 'End Date',
+                                                                        editor: {
+                                                                            xtype: 'datefield'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colSpecialPricingUnit',
                                                                         width: 53,
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Unit'
+                                                                        text: 'Unit',
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intUnitMeasureId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Unit Of Measure ID',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strUnitMeasure',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Unit Measure',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strUnitType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Unit Type',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'ysnDefault',
+                                                                                    dataType: 'boolean',
+                                                                                    text: 'Default',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            displayField: 'strUnitMeasure',
+                                                                            valueField: 'intUnitMeasureId',
+                                                                            bind: {
+                                                                                store: '{UnitMeasure}'
+                                                                            }
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colSpecialPricingQty',
                                                                         width: 58,
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Quantity'
+                                                                        text: 'Quantity',
+                                                                        editor: {
+                                                                            xtype: 'numberfield'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colSpecialPricingDiscountBy',
                                                                         width: 74,
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Discount By'
+                                                                        text: 'Discount By',
+                                                                        editor: {
+                                                                            xtype: 'combobox',
+                                                                            displayField: 'strDescription',
+                                                                            valueField: 'strDescription',
+                                                                            bind: {
+                                                                                store: '{DiscountsBy}'
+                                                                            }
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colSpecialPricingDiscountRate',
                                                                         width: 96,
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Discount Rate'
+                                                                        text: 'Discount Rate',
+                                                                        editor: {
+                                                                            xtype: 'numberfield'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colSpecialPricingUnitPrice',
                                                                         width: 69,
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Unit Price'
+                                                                        text: 'Unit Price',
+                                                                        editor: {
+                                                                            xtype: 'numberfield'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colSpecialPricingAccumQty',
                                                                         width: 73,
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Accum. Qty'
+                                                                        text: 'Accum. Qty',
+                                                                        editor: {
+                                                                            xtype: 'numberfield'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colSpecialPricingAccumAmount',
                                                                         width: 112,
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Accum. Amount'
+                                                                        text: 'Accum. Amount',
+                                                                        editor: {
+                                                                            xtype: 'numberfield'
+                                                                        }
                                                                     }
                                                                 ],
                                                                 viewConfig: {
@@ -3386,7 +3617,14 @@ Ext.define('Inventory.view.Item', {
                                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                                     selType: 'checkboxmodel',
                                                                     mode: 'SINGLE'
-                                                                })
+                                                                }),
+                                                                plugins: [
+                                                                    {
+                                                                        ptype: 'cellediting',
+                                                                        pluginId: 'cepSpecialPricing',
+                                                                        clicksToEdit: 1
+                                                                    }
+                                                                ]
                                                             }
                                                         ]
                                                     }

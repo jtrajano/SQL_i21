@@ -17,6 +17,9 @@ Ext.define('Inventory.model.Item', {
         'Inventory.model.ItemManufacturingUOM',
         'Inventory.model.ItemAccount',
         'Inventory.model.ItemStock',
+        'Inventory.model.ItemPricing',
+        'Inventory.model.ItemPricingLevel',
+        'Inventory.model.ItemSpecialPricing',
         'Inventory.model.ItemNote',
         'Ext.data.Field'
     ],

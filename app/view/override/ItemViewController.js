@@ -274,6 +274,44 @@ Ext.define('Inventory.view.override.ItemViewController', {
             colStockInventoryGroup: 'strInventoryGroup',
             colStockCountedDaily: 'ysnCountedDaily',
 
+            colPricingLocation: 'intLocationId',
+            colPricingSalePrice: 'dblSalePrice',
+            colPricingRetailPrice: 'dblRetailPrice',
+            colPricingWholesalePrice: 'dblWholesalePrice',
+            colPricingLargeVolumePrice: 'dblLargeVolumePrice',
+            colPricingMSRP: 'dblMSRPPrice',
+            colPricingMethod: 'strPricingMethod',
+            colPricingLastCost: 'dblLastCost',
+            colPricingStandardCost: 'dblStandardCost',
+            colPricingAverageCost: 'dblMovingAverageCost',
+            colPricingEOMCost: 'dblEndMonthCost',
+            colPricingActive: 'ysnActive',
+
+            colPricingLevelLocation: 'intLocationId',
+            colPricingLevelPriceLevel: 'strPriceLevel',
+            colPricingLevelUOM: 'intUnitMeasureId',
+            colPricingLevelUnits: 'dblUnit',
+            colPricingLevelMin: 'dblMin',
+            colPricingLevelMax: 'dblMax',
+            colPricingLevelMethod: 'strPricingMethod',
+            colPricingLevelCommissionOn: 'strCommissionOn',
+            colPricingLevelCommissionRate: 'dblCommissionRate',
+            colPricingLevelAmount: '',
+            colPricingLevelUnitPrice: 'dblUnitPrice',
+            colPricingLevelActive: 'ysnActive',
+
+            colSpecialPricingLocation: 'intLocationId',
+            colSpecialPricingPromotionType: 'strPromotionType',
+            colSpecialPricingBeginDate: 'dtmBeginDate',
+            colSpecialPricingEndDate: 'dtmEndDate',
+            colSpecialPricingUnit: 'intUnitMeasureId',
+            colSpecialPricingQty: 'dblUnit',
+            colSpecialPricingDiscountBy: 'strDiscountBy',
+            colSpecialPricingDiscountRate: 'dblDiscount',
+            colSpecialPricingUnitPrice: 'dblUnitAfterDiscount',
+            colSpecialPricingAccumQty: 'dblAccumulatedQty',
+            colSpecialPricingAccumAmount: 'dblAccumulatedAmount',
+
             colNoteLocation: 'intLocationId',
             colNoteCommentType: 'strCommentType',
             colNoteComment: 'strComments'
@@ -296,6 +334,11 @@ Ext.define('Inventory.view.override.ItemViewController', {
             grdDocumentAssociation = win.down('#grdDocumentAssociation'),
             grdCertification = win.down('#grdCertification'),
             grdStock = win.down('#grdStock'),
+
+            grdPricing = win.down('#grdPricing'),
+            grdPricingLevel = win.down('#grdPricingLevel'),
+            grdSpecialPricing = win.down('#grdSpecialPricing'),
+
             grdNotes = win.down('#grdNotes');
 
         win.context = Ext.create('iRely.mvvm.Engine', {
@@ -396,6 +439,28 @@ Ext.define('Inventory.view.override.ItemViewController', {
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdNotes,
                         deleteButton : grdNotes.down('#btnDeleteNotes')
+                    })
+                },
+                {
+                    key: 'tblICItemPricings',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdPricing,
+                        deleteButton : grdPricing.down('#btnDeletePricing'),
+                        position: 'none'
+                    })
+                },
+                {
+                    key: 'tblICItemPricingLevels',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdPricingLevel,
+                        deleteButton : grdPricingLevel.down('#btnDeletePricingLevel')
+                    })
+                },
+                {
+                    key: 'tblICItemSpecialPricings',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdSpecialPricing,
+                        deleteButton : grdSpecialPricing.down('#btnDeleteSpecialPricing')
                     })
                 }
             ]
