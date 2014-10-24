@@ -9,6 +9,8 @@ SELECT
 	B.intVendorId,
 	B.intCurrencyId,
 	B.intGLAccountExpenseId,
+	B.intDefaultContactId,
+	B.intDefaultLocationId,
 	F.strAccountId AS strExpenseAccountId,
 	B.intPaymentMethodId,
 	A.str1099Form,
