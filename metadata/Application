@@ -16,7 +16,8 @@
             "QATest",
             "QualityTemplate",
             "InventoryUOM",
-            "QAProperties"
+            "QAProperties",
+            "Catalog"
         ]
     },
     "name": "Application",
