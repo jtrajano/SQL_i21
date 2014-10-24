@@ -225,8 +225,13 @@ GO
 GO
 -- moved to 14.3
 GO
-	DELETE FROM tblSMMasterMenu where strMenuName = 'Paid Bills History' and strModuleName = 'Accounts Payable' and strType = 'Screen' 
+	-- DELETE FROM tblSMMasterMenu where strMenuName = 'Paid Bills History' and strModuleName = 'Accounts Payable' and strType = 'Screen' 
 	DELETE FROM tblSMMasterMenu where strMenuName = 'Posted Payables' and strModuleName = 'Accounts Payable' and strType = 'Screen' 
+
+	IF NOT EXISTS(SELECT 1 FROM tblSMMasterMenu where strMenuName = 'Paid Bills History' and strModuleName = 'Accounts Payable' and strType = 'Screen')
+	BEGIN
+		INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Paid Bills History', N'Accounts Payable', 113, N'Paid Bills History', N'Screen', N'', N'small-screen', 0, 0, 0, 1, NULL, 1)
+	END
 GO
 --update missing commands
 	UPDATE tblSMMasterMenu
