@@ -284,6 +284,16 @@ GO
 	IF NOT EXISTS(SELECT * FROM tblSMMasterMenu WHERE strMenuName = 'Bill Entry' AND strType = 'Screen' AND strModuleName = 'Accounts Payable')
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Bill Entry', N'Accounts Payable', 113, N'Bill Entry', N'Screen', N'AccountsPayable.controller.Bill', N'small-screen', 0, 0, 0, 1, NULL, 1)
 GO
+	DECLARE @intMenuId INT
+	SELECT @intMenuId = intMenuID FROM dbo.tblSMMasterMenu
+	WHERE strModuleName = 'General Ledger' AND strDescription = 'Financial Reports' AND strType = 'Screen'
+
+	UPDATE [dbo].[tblSMMasterMenu]
+	SET
+		strMenuName = 'Financial Report Viewer',
+		strDescription = 'Financial Report Viewer'
+	WHERE intMenuID = @intMenuId
+GO
 	DECLARE @intParent INT
 	SELECT @intParent = intMenuID FROM tblSMMasterMenu
 	WHERE strMenuName = 'Activities'

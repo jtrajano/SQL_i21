@@ -4,6 +4,7 @@
 	[intTransactionType] INT           NOT NULL,
     [intFrequencyId]     INT  NULL,
 	[intIterations]     INT  NOT NULL DEFAULT 1,
+	[strReference]		NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [dtmLastProcess]   DATETIME      NULL,
     [dtmNextProcess]   DATETIME      NULL,
     [dtmStartDate]     DATETIME      NULL,
