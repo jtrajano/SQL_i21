@@ -7,9 +7,5 @@ BEGIN
 		SET A.dtmBatchDate = ISNULL((SELECT TOP 1 dtmDate FROM tblAPBill WHERE intBillBatchId = A.intBillBatchId), GETDATE())
 	FROM tblAPBillBatch A
 	WHERE dtmBatchDate IS NULL
-	
-	--SET NOT NULL after the update
-	ALTER TABLE dbo.tblAPBillBatch
-	ALTER COLUMN dtmBatchDate DATETIME NOT NULL
 
 END
