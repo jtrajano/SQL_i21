@@ -7,30 +7,24 @@ BEGIN
 		DECLARE @intLocationId AS INT
 
 		-- GL Account types used in inventory costing
-		DECLARE @InventoryAccountId AS INT = 1;
-		DECLARE @COGSAccountId AS INT = 2;
-		DECLARE @SalesAccountId AS INT = 3;
-		DECLARE @RevalueCostAccountId AS INT = 4;
-		DECLARE @WriteOffCostAccountId AS INT = 5;
-		DECLARE @AutoNegativeAccountId AS INT = 6;
-
-		DECLARE @actual AS NVARCHAR(40);
-
+		DECLARE @Inventory AS INT = 1;
+		DECLARE @Sales AS INT = 2;
+		DECLARE @Purchases AS INT = 3;
+		
 		CREATE TABLE expected(
-			intInventoryAccount INT
-			,intCOGSAccount INT
-			,intRevalueCostAccount INT
-			,intWriteOffCostAccount INT
-			,intAutoNegativeAccount INT
+			Inventory INT
+			,Sales INT
+			,Purchases INT
 		)
 
 		CREATE TABLE actual(
-			intInventoryAccount INT
-			,intCOGSAccount INT
-			,intRevalueCostAccount INT
-			,intWriteOffCostAccount INT
-			,intAutoNegativeAccount INT
+			Inventory INT
+			,Sales INT
+			,Purchases INT
 		)
+
+		-- Create the Fake data 
+		EXEC [testi21Database].[Fake data for simple Items]
 	END 
 
 	-- Test case
@@ -38,34 +32,60 @@ BEGIN
 	BEGIN 
 		-- Act
 		INSERT actual (
-			intInventoryAccount
-			,intCOGSAccount
-			,intRevalueCostAccount
-			,intWriteOffCostAccount
-			,intAutoNegativeAccount
+			Inventory
+			,Sales
+			,Purchases
 		)
 		SELECT	*
 		FROM	[dbo].[fnGetItemGLAccounts](@intItemId, @intLocationId)
 
 		-- expects a row with NULL values on all fields. 
 		INSERT expected (
-			intInventoryAccount
-			,intCOGSAccount
-			,intRevalueCostAccount
-			,intWriteOffCostAccount
-			,intAutoNegativeAccount
+			Inventory
+			,Sales
+			,Purchases
 		)
 		SELECT				
-			intInventoryAccount = NULL
-			,intCOGSAccount = NULL
-			,intRevalueCostAccount = NULL
-			,intWriteOffCostAccount = NULL
-			,intAutoNegativeAccount = NULL
-
+			Inventory = NULL 
+			,Sales = NULL 
+			,Purchases = NULL 
+			
 		-- Assert
 		EXEC tSQLt.AssertObjectExists 'actual';
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 	END
+	
+	-- Test case 2: 
+	BEGIN 
+		DELETE FROM actual
+		DELETE FROM expected
+		
+		SET @intItemId = 1; -- WET GRAINS
+		SET @intLocationId = 2; -- NEW HAVEN
+		
+		INSERT actual (
+			Inventory
+			,Sales
+			,Purchases
+		)
+		SELECT	*
+		FROM	[dbo].[fnGetItemGLAccounts](@intItemId, @intLocationId)		
+		
+		-- expects a row with NULL values on all fields. 
+		INSERT expected (
+			Inventory
+			,Sales
+			,Purchases
+		)
+		SELECT				
+			Inventory = 1001	-- 12040-1001
+			,Sales = 2001		-- 40100-1001
+			,Purchases = 3001	-- 50110-1001
+			
+		-- Assert
+		EXEC tSQLt.AssertObjectExists 'actual';
+		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
+	END 
 
 	-- Clean-up: remove the tables used in the unit test
 	BEGIN
@@ -75,4 +95,4 @@ BEGIN
 		IF OBJECT_ID('expected') IS NOT NULL 
 			DROP TABLE dbo.expected
 	END 
-END 
+END

@@ -6,6 +6,7 @@
     [intVendorId] INT NULL, 
     [strDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [intCostingMethod] INT NULL, 
+	[intAllowNegativeInventory] INT DEFAULT 3,
     [intCategoryId] INT NULL, 
     [strRow] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strBin] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
@@ -531,3 +532,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICItemLocation',
     @level2type = N'COLUMN',
     @level2name = N'intSort'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'1: Yes allow negative, 2: Yes with Write-Off, 3: No. Default to 3 (Do not allow negative)',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemLocation',
+    @level2type = N'COLUMN',
+    @level2name = N'intAllowNegativeInventory'
