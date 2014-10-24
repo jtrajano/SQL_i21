@@ -135,7 +135,7 @@ GO
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (116, N'Bill Batch Entry', N'Accounts Payable', 113, N'Bill Batch Entry', N'Screen', N'AccountsPayable.controller.BillBatch', N'small-screen', 0, 0, 0, 1, NULL, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (117, N'Batch Posting', N'Accounts Payable', 113, N'Batch Posting', N'Screen', N'AccountsPayable.controller.BatchPosting', N'small-screen', 0, 0, 0, 1, NULL, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (118, N'Print Checks', N'Accounts Payable', 113, N'Print Checks', N'Screen', N'', N'small-screen', 0, 0, 0, 1, NULL, 1)
-		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (119, N'Paid Bills History', N'Accounts Payable', 113, N'Paid Bills History', N'Screen', N'', N'small-screen', 0, 0, 0, 1, NULL, 1)
+		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (119, N'Paid Bills History', N'Accounts Payable', 113, N'Shows all the payments', N'Screen', N'AccountsPayable.view.PaidBillsHistory', N'small-screen', 0, 0, 0, 1, NULL, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (120, N'Import Bills from Origin', N'Accounts Payable', 113, N'Import Bills from Origin', N'Screen', N'AccountsPayable.controller.ImportAPInvoice', N'small-screen', 0, 0, 0, 1, NULL, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (121, N'Maintenance', N'Accounts Payable', 112, N'Maintenance', N'Folder', N'', N'small-folder', 1, 0, 0, 0, NULL, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (122, N'Vendors', N'Accounts Payable', 121, N'Vendors', N'Screen', N'AccountsPayable.controller.Vendor', N'small-screen', 0, 0, 0, 1, NULL, 1)
@@ -230,7 +230,12 @@ GO
 
 	IF NOT EXISTS(SELECT 1 FROM tblSMMasterMenu where strMenuName = 'Paid Bills History' and strModuleName = 'Accounts Payable' and strType = 'Screen')
 	BEGIN
-		INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Paid Bills History', N'Accounts Payable', 113, N'Paid Bills History', N'Screen', N'', N'small-screen', 0, 0, 0, 1, NULL, 1)
+		INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Paid Bills History', N'Accounts Payable', 113, N'Shows all the payments', N'Screen', N'AccountsPayable.view.PaidBillsHistory', N'small-screen', 0, 0, 0, 1, NULL, 1)
+	END
+
+	IF NOT EXISTS(SELECT 1 FROM tblSMMasterMenu where strMenuName = 'Recurring Transactions' and strModuleName = 'Accounts Payable' and strType = 'Screen')
+	BEGIN
+		INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Recurring Transactions', N'Accounts Payable', 113, N'', N'Screen', N'AccountsPayable.view.RecurringTransaction', N'small-screen', 0, 0, 0, 1, NULL, 1)
 	END
 GO
 --update missing commands
@@ -291,7 +296,7 @@ GO
 GO
 	DECLARE @intMenuId INT
 	SELECT @intMenuId = intMenuID FROM dbo.tblSMMasterMenu
-	WHERE strModuleName = 'General Ledger' AND strDescription = 'Financial Reports' AND strType = 'Screen'
+	WHERE strModuleName = 'General Ledger' AND strMenuName = 'Financial Reports' AND strType = 'Screen'
 
 	UPDATE [dbo].[tblSMMasterMenu]
 	SET
