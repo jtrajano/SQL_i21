@@ -152,7 +152,7 @@ Ext.define('Inventory.view.FuelCategory', {
                                         itemId: 'colFuelTypeCode',
                                         width: 82,
                                         dataIndex: 'string',
-                                        text: 'Fuel Type Code',
+                                        text: 'Fuel Category Code',
                                         flex: 1,
                                         editor: {
                                             xtype: 'textfield'

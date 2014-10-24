@@ -228,9 +228,9 @@ Ext.define('Inventory.view.FuelTaxClass', {
                                         columns: [
                                             {
                                                 xtype: 'gridcolumn',
-                                                dataIndex: 'string',
                                                 itemId: 'colState',
                                                 width: 82,
+                                                dataIndex: 'string',
                                                 text: 'State',
                                                 flex: 1,
                                                 editor: {

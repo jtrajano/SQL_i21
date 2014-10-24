@@ -10,7 +10,7 @@
         "defaultFocus": null,
         "designer|userAlias": "itemlocation",
         "designer|userClassName": "ItemLocation",
-        "height": 680,
+        "height": 660,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
@@ -252,54 +252,15 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "columns": [
-                                    "[",
-                                    "\t{",
-                                    "\t\tdataIndex: 'intCompanyLocationId',",
-                                    "\t\tdataType: 'numeric',",
-                                    "\t\ttext: 'Location Id',",
-                                    "\t\thidden: true",
-                                    "\t},",
-                                    "\t{",
-                                    "\t\tdataIndex: 'strLocationName',",
-                                    "\t\tdataType: 'string',",
-                                    "\t\ttext: 'Location Name',",
-                                    "\t\tflex: 1",
-                                    "\t},",
-                                    "\t{",
-                                    "\t\tdataIndex: 'strLocationType',",
-                                    "\t\tdataType: 'string',",
-                                    "\t\ttext: 'Location Type',",
-                                    "\t\tflex: 1",
-                                    "\t}",
-                                    "]"
-                                ],
-                                "designer|createAlias": "gridcombobox",
-                                "displayField": "strLocationName",
                                 "fieldLabel": "Location",
                                 "itemId": "cboLocation",
                                 "labelAlign": null,
                                 "labelWidth": 105,
                                 "layout|flex": 1.4,
-                                "margin": null,
-                                "store": [
-                                    "{Location}"
-                                ],
-                                "valueField": "intCompanyLocationId"
+                                "margin": null
                             },
                             "name": "MyComboBox44",
-                            "configAlternates": {
-                                "columns": "array",
-                                "store": "binding"
-                            },
-                            "designerId": "01cd1254-c32e-4c52-be00-5a3d2a4642a7",
-                            "customConfigs": [
-                                {
-                                    "group": "(Custom Properties)",
-                                    "name": "columns",
-                                    "type": "string"
-                                }
-                            ]
+                            "designerId": "01cd1254-c32e-4c52-be00-5a3d2a4642a7"
                         },
                         {
                             "type": "Ext.form.field.ComboBox",
@@ -309,50 +270,15 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "columns": [
-                                    "[",
-                                    "\t{",
-                                    "\t\tdataIndex: 'intVendorId',",
-                                    "\t\tdataType: 'numeric',",
-                                    "\t\ttext: 'Vendor Id',",
-                                    "\t\thidden: true",
-                                    "\t},",
-                                    "\t{",
-                                    "\t\tdataIndex: 'strVendorId',",
-                                    "\t\tdataType: 'string',",
-                                    "\t\ttext: 'Vendor No',",
-                                    "\t\tflex: 1",
-                                    "\t},",
-                                    "\t{",
-                                    "\t\tdataIndex: 'strVendorName',",
-                                    "\t\tdataType: 'string',",
-                                    "\t\ttext: 'Vendor Name',",
-                                    "\t\tflex: 1",
-                                    "\t}",
-                                    "]"
-                                ],
-                                "designer|createAlias": "gridcombobox",
-                                "displayField": "strVendorId",
                                 "fieldLabel": "Vendor",
                                 "itemId": "cboDefaultVendor",
                                 "labelAlign": null,
                                 "labelWidth": 50,
                                 "layout|flex": 1,
-                                "margin": "0 5",
-                                "valueField": "intVendorId"
+                                "margin": "0 5"
                             },
                             "name": "MyComboBox1",
-                            "configAlternates": {
-                                "columns": "array"
-                            },
-                            "designerId": "965e5a47-304a-430a-8d97-ed850d3d9227",
-                            "customConfigs": [
-                                {
-                                    "group": "(Custom Properties)",
-                                    "name": "columns",
-                                    "type": "string"
-                                }
-                            ]
+                            "designerId": "965e5a47-304a-430a-8d97-ed850d3d9227"
                         },
                         {
                             "type": "Ext.form.field.ComboBox",
@@ -362,22 +288,14 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "displayField": "strDescription",
                                 "fieldLabel": "Costing Method",
                                 "itemId": "cboCostingMethod",
                                 "labelAlign": null,
                                 "labelWidth": 95,
                                 "layout|flex": 1,
-                                "margin": null,
-                                "store": [
-                                    "{CostingMethods}"
-                                ],
-                                "valueField": "intCostingMethodId"
+                                "margin": null
                             },
                             "name": "MyComboBox20",
-                            "configAlternates": {
-                                "store": "binding"
-                            },
                             "designerId": "9e6c9559-01c7-4ada-a282-00b519aa1336"
                         },
                         {
@@ -388,50 +306,15 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "columns": [
-                                    "[",
-                                    "\t{",
-                                    "\t\tdataIndex: 'intCategoryId',",
-                                    "\t\tdataType: 'numeric',",
-                                    "\t\ttext: 'Category ID',",
-                                    "\t\thidden: true",
-                                    "\t},",
-                                    "\t{",
-                                    "\t\tdataIndex: 'strCategoryCode',",
-                                    "\t\tdataType: 'string',",
-                                    "\t\ttext: 'Category Code',",
-                                    "\t\tflex: 1",
-                                    "\t},",
-                                    "\t{",
-                                    "\t\tdataIndex: 'strDescription',",
-                                    "\t\tdataType: 'string',",
-                                    "\t\ttext: 'Description',",
-                                    "\t\tflex: 1",
-                                    "\t}",
-                                    "]"
-                                ],
-                                "designer|createAlias": "gridcombobox",
-                                "displayField": "strCategoryCode",
                                 "fieldLabel": "Category",
                                 "itemId": "cboCategory",
                                 "labelAlign": null,
                                 "labelWidth": 55,
                                 "layout|flex": 1,
-                                "margin": "0 0 0 5",
-                                "valueField": "intCategoryId"
+                                "margin": "0 0 0 5"
                             },
                             "name": "MyComboBox2",
-                            "configAlternates": {
-                                "columns": "array"
-                            },
-                            "designerId": "3db1edb2-ce6f-4e17-b52a-12f8096c187f",
-                            "customConfigs": [
-                                {
-                                    "group": "(Custom Properties)",
-                                    "name": "columns",
-                                    "type": "string"
-                                }
-                            ]
+                            "designerId": "3db1edb2-ce6f-4e17-b52a-12f8096c187f"
                         }
                     ]
                 },
@@ -463,6 +346,7 @@
                     "userConfig": {
                         "container|align": "stretch",
                         "designer|displayName": "container",
+                        "height": 432,
                         "layout": "hbox",
                         "layout|flex": 1
                     },
@@ -525,54 +409,13 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "columns": [
-                                            "[",
-                                            "\t{",
-                                            "\t\tdataIndex: 'intUnitMeasureId',",
-                                            "\t\tdataType: 'numeric',",
-                                            "\t\ttext: 'Unit Of Measure ID',",
-                                            "\t\thidden: true",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'strUnitMeasure',",
-                                            "\t\tdataType: 'string',",
-                                            "\t\ttext: 'Unit Measure',",
-                                            "\t\tflex: 1",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'strUnitType',",
-                                            "\t\tdataType: 'string',",
-                                            "\t\ttext: 'Unit Type',",
-                                            "\t\tflex: 1",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'ysnDefault',",
-                                            "\t\tdataType: 'boolean',",
-                                            "\t\ttext: 'Default',",
-                                            "\t\tflex: 1",
-                                            "\t}",
-                                            "]"
-                                        ],
-                                        "designer|createAlias": "gridcombobox",
-                                        "displayField": "strUnitMeasure",
                                         "fieldLabel": "Default UOM",
                                         "itemId": "cboDefaultUom",
                                         "labelWidth": 105,
-                                        "layout|flex": null,
-                                        "valueField": "intUnitMeasureId"
+                                        "layout|flex": null
                                     },
                                     "name": "MyComboBox22",
-                                    "configAlternates": {
-                                        "columns": "array"
-                                    },
-                                    "designerId": "f56d43cc-e1d8-4979-939d-18f546029773",
-                                    "customConfigs": [
-                                        {
-                                            "group": "(Custom Properties)",
-                                            "name": "columns",
-                                            "type": "string"
-                                        }
-                                    ]
+                                    "designerId": "f56d43cc-e1d8-4979-939d-18f546029773"
                                 },
                                 {
                                     "type": "Ext.form.field.ComboBox",
@@ -582,54 +425,13 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "columns": [
-                                            "[",
-                                            "\t{",
-                                            "\t\tdataIndex: 'intUnitMeasureId',",
-                                            "\t\tdataType: 'numeric',",
-                                            "\t\ttext: 'Unit Of Measure ID',",
-                                            "\t\thidden: true",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'strUnitMeasure',",
-                                            "\t\tdataType: 'string',",
-                                            "\t\ttext: 'Unit Measure',",
-                                            "\t\tflex: 1",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'strUnitType',",
-                                            "\t\tdataType: 'string',",
-                                            "\t\ttext: 'Unit Type',",
-                                            "\t\tflex: 1",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'ysnDefault',",
-                                            "\t\tdataType: 'boolean',",
-                                            "\t\ttext: 'Default',",
-                                            "\t\tflex: 1",
-                                            "\t}",
-                                            "]"
-                                        ],
-                                        "designer|createAlias": "gridcombobox",
-                                        "displayField": "strUnitMeasure",
                                         "fieldLabel": "Issue UOM",
                                         "itemId": "cboIssueUom",
                                         "labelWidth": 105,
-                                        "layout|flex": null,
-                                        "valueField": "intUnitMeasureId"
+                                        "layout|flex": null
                                     },
                                     "name": "MyComboBox23",
-                                    "configAlternates": {
-                                        "columns": "array"
-                                    },
-                                    "designerId": "a8ff9d98-9d07-4056-a9b5-cbd1557df918",
-                                    "customConfigs": [
-                                        {
-                                            "group": "(Custom Properties)",
-                                            "name": "columns",
-                                            "type": "string"
-                                        }
-                                    ]
+                                    "designerId": "a8ff9d98-9d07-4056-a9b5-cbd1557df918"
                                 },
                                 {
                                     "type": "Ext.form.field.ComboBox",
@@ -639,54 +441,13 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "columns": [
-                                            "[",
-                                            "\t{",
-                                            "\t\tdataIndex: 'intUnitMeasureId',",
-                                            "\t\tdataType: 'numeric',",
-                                            "\t\ttext: 'Unit Of Measure ID',",
-                                            "\t\thidden: true",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'strUnitMeasure',",
-                                            "\t\tdataType: 'string',",
-                                            "\t\ttext: 'Unit Measure',",
-                                            "\t\tflex: 1",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'strUnitType',",
-                                            "\t\tdataType: 'string',",
-                                            "\t\ttext: 'Unit Type',",
-                                            "\t\tflex: 1",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'ysnDefault',",
-                                            "\t\tdataType: 'boolean',",
-                                            "\t\ttext: 'Default',",
-                                            "\t\tflex: 1",
-                                            "\t}",
-                                            "]"
-                                        ],
-                                        "designer|createAlias": "gridcombobox",
-                                        "displayField": "strUnitMeasure",
                                         "fieldLabel": "Receive UOM",
                                         "itemId": "cboReceiveUom",
                                         "labelWidth": 105,
-                                        "layout|flex": null,
-                                        "valueField": "intUnitMeasureId"
+                                        "layout|flex": null
                                     },
                                     "name": "MyComboBox26",
-                                    "configAlternates": {
-                                        "columns": "array"
-                                    },
-                                    "designerId": "58d855fb-516a-42a2-a084-51549e240291",
-                                    "customConfigs": [
-                                        {
-                                            "group": "(Custom Properties)",
-                                            "name": "columns",
-                                            "type": "string"
-                                        }
-                                    ]
+                                    "designerId": "58d855fb-516a-42a2-a084-51549e240291"
                                 },
                                 {
                                     "type": "Ext.form.field.ComboBox",
@@ -1346,65 +1107,29 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "columns": [
-                                            "[",
-                                            "\t{",
-                                            "\t\tdataIndex: 'intVendorId',",
-                                            "\t\tdataType: 'numeric',",
-                                            "\t\ttext: 'Vendor Id',",
-                                            "\t\thidden: true",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'strVendorId',",
-                                            "\t\tdataType: 'string',",
-                                            "\t\ttext: 'Vendor No',",
-                                            "\t\tflex: 1",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'strVendorName',",
-                                            "\t\tdataType: 'string',",
-                                            "\t\ttext: 'Vendor Name',",
-                                            "\t\tflex: 1",
-                                            "\t}",
-                                            "]"
-                                        ],
-                                        "designer|createAlias": "gridcombobox",
-                                        "displayField": "strVendorId",
                                         "fieldLabel": "Freight Vendor",
                                         "itemId": "cboFreightVendor",
                                         "labelWidth": 140,
-                                        "layout|flex": null,
-                                        "valueField": "intVendorId"
+                                        "layout|flex": null
                                     },
                                     "name": "MyComboBox49",
-                                    "configAlternates": {
-                                        "columns": "array"
-                                    },
-                                    "designerId": "db26cbf3-1f98-4e0c-9b78-52ea5a359d3d",
-                                    "customConfigs": [
-                                        {
-                                            "group": "(Custom Properties)",
-                                            "name": "columns",
-                                            "type": "string"
-                                        }
-                                    ]
+                                    "designerId": "db26cbf3-1f98-4e0c-9b78-52ea5a359d3d"
                                 },
                                 {
-                                    "type": "Ext.form.field.Checkbox",
+                                    "type": "Ext.form.field.ComboBox",
                                     "reference": {
                                         "name": "items",
                                         "type": "array"
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "boxLabel": null,
                                         "fieldLabel": "Negative Inventory",
-                                        "itemId": "chkNegativeInventory",
+                                        "itemId": "cboNegativeInventory",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
-                                    "name": "MyCheckbox43",
-                                    "designerId": "3ed155ce-f1e7-49af-904d-6d1f0367ae90"
+                                    "name": "MyComboBox",
+                                    "designerId": "6c2800e6-6c69-42a6-b38a-9f92bbd291a3"
                                 }
                             ]
                         }
@@ -1426,7 +1151,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging13",
+                    "name": "statusbarpaging1",
                     "designerId": "3812557b-eaf0-4f41-b444-7da5890f9c89",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

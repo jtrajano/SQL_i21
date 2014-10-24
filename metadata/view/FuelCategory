@@ -232,7 +232,7 @@
                                 "dataIndex": "string",
                                 "flex": 1,
                                 "itemId": "colFuelTypeCode",
-                                "text": "Fuel Type Code",
+                                "text": "Fuel Category Code",
                                 "width": 82
                             },
                             "name": "MyColumn148",
@@ -359,7 +359,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbar13",
+                    "name": "statusbar11",
                     "designerId": "99386690-7688-4b71-bfb9-0d5559b4cdad",
                     "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
                 }

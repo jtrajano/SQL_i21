@@ -3466,9 +3466,9 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
                                                         itemId: 'colStockSubLocation',
                                                         width: 100,
+                                                        dataIndex: 'string',
                                                         text: 'Sublocation'
                                                     },
                                                     {
@@ -3722,6 +3722,252 @@ Ext.define('Inventory.view.Item', {
                                                     type: 'vbox',
                                                     align: 'stretch'
                                                 }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        layout: 'fit',
+                                        title: 'Assembly',
+                                        items: [
+                                            {
+                                                xtype: 'advancefiltergrid',
+                                                itemId: 'grdAssembly',
+                                                margin: -1,
+                                                dockedItems: [
+                                                    {
+                                                        xtype: 'toolbar',
+                                                        dock: 'top',
+                                                        itemId: 'tlbGridOptions',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            padding: '0 0 0 1'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnDeleteAssembly',
+                                                                iconCls: 'small-delete',
+                                                                text: 'Delete'
+                                                            },
+                                                            {
+                                                                xtype: 'tbseparator'
+                                                            },
+                                                            {
+                                                                xtype: 'filter1'
+                                                            }
+                                                        ]
+                                                    }
+                                                ],
+                                                columns: [
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        dataIndex: 'string',
+                                                        text: 'Component',
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        width: 60,
+                                                        text: 'Quantity'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        width: 60,
+                                                        text: 'Stock'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        dataIndex: 'string',
+                                                        text: 'Description',
+                                                        flex: 2
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 82,
+                                                        dataIndex: 'string',
+                                                        text: 'Unit Measure'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        width: 37,
+                                                        text: 'Unit'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        width: 70,
+                                                        text: 'Cost'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        width: 70,
+                                                        text: 'Other Cost'
+                                                    },
+                                                    {
+                                                        xtype: 'checkcolumn',
+                                                        width: 28
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        width: 70,
+                                                        text: 'Total'
+                                                    }
+                                                ],
+                                                viewConfig: {
+                                                    itemId: 'grvAssembly'
+                                                },
+                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                    selType: 'checkboxmodel'
+                                                })
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        layout: 'fit',
+                                        title: 'Bundle Details',
+                                        items: [
+                                            {
+                                                xtype: 'advancefiltergrid',
+                                                itemId: 'grdBundle',
+                                                margin: -1,
+                                                dockedItems: [
+                                                    {
+                                                        xtype: 'toolbar',
+                                                        dock: 'top',
+                                                        itemId: 'tlbGridOptions',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            padding: '0 0 0 1'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnDeleteBundle',
+                                                                iconCls: 'small-delete',
+                                                                text: 'Delete'
+                                                            },
+                                                            {
+                                                                xtype: 'tbseparator'
+                                                            },
+                                                            {
+                                                                xtype: 'filter1'
+                                                            }
+                                                        ]
+                                                    }
+                                                ],
+                                                columns: [
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        dataIndex: 'string',
+                                                        text: 'Item',
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        width: 60,
+                                                        text: 'Quantity'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        width: 60,
+                                                        text: 'Stock'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        dataIndex: 'string',
+                                                        text: 'Description',
+                                                        flex: 2
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 82,
+                                                        dataIndex: 'string',
+                                                        text: 'Unit Measure'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        width: 37,
+                                                        text: 'Unit'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        width: 70,
+                                                        text: 'Price'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        width: 70,
+                                                        text: 'Subtotal'
+                                                    }
+                                                ],
+                                                viewConfig: {
+                                                    itemId: 'grvBundle'
+                                                },
+                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                    selType: 'checkboxmodel'
+                                                })
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        layout: 'fit',
+                                        title: 'Kit Details',
+                                        items: [
+                                            {
+                                                xtype: 'advancefiltergrid',
+                                                itemId: 'grdKit',
+                                                margin: -1,
+                                                dockedItems: [
+                                                    {
+                                                        xtype: 'toolbar',
+                                                        dock: 'top',
+                                                        itemId: 'tlbGridOptions',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            padding: '0 0 0 1'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnDeleteKit',
+                                                                iconCls: 'small-delete',
+                                                                text: 'Delete'
+                                                            },
+                                                            {
+                                                                xtype: 'tbseparator'
+                                                            },
+                                                            {
+                                                                xtype: 'filter1'
+                                                            }
+                                                        ]
+                                                    }
+                                                ],
+                                                columns: [
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        dataIndex: 'string',
+                                                        text: 'Component',
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 82,
+                                                        dataIndex: 'string',
+                                                        text: 'Input Type',
+                                                        flex: 1
+                                                    }
+                                                ],
+                                                viewConfig: {
+                                                    itemId: 'grvKit'
+                                                },
+                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                    selType: 'checkboxmodel'
+                                                })
                                             }
                                         ]
                                     },
