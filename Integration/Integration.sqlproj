@@ -65,6 +65,7 @@
     <Folder Include="dbo\Functions" />
     <Folder Include="Scripts\AP" />
     <Folder Include="dbo\Tables" />
+    <Folder Include="Scripts\TM" />
   </ItemGroup>
   <ItemGroup>
     <None Include="dbo\Views\apchkmst.sql" />
@@ -193,6 +194,7 @@
     <None Include="dbo\Views\vyuECCFCardTransaction.sql" />
     <Build Include="dbo\Tables\tblAPTermsImported.sql" />
     <Build Include="dbo\Tables\tblAPImportedVendors.sql" />
+    <None Include="Scripts\TM\Customer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

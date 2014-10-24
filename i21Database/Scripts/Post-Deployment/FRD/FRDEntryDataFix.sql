@@ -33,7 +33,7 @@ UPDATE tblFRRowDesignFilterAccount
 UPDATE tblFRColumnDesignCalculation 
 	SET intColumnDetailId = (SELECT intColumnDetailId FROM tblFRColumnDesign WHERE tblFRColumnDesign.intColumnId = tblFRColumnDesignCalculation.intColumnId and tblFRColumnDesign.intRefNo = tblFRColumnDesignCalculation.intRefNoId),
 		intColumnDetailRefNo = (SELECT intColumnDetailId FROM tblFRColumnDesign WHERE tblFRColumnDesign.intColumnId = tblFRColumnDesignCalculation.intColumnId and tblFRColumnDesign.intRefNo = tblFRColumnDesignCalculation.intRefNoCalc)
-		WHERE intColumnDetailId IS NULL
+	WHERE intColumnDetailId IS NULL
 
 UPDATE tblFRColumnDesignSegment 
 	SET intColumnDetailId = (SELECT intColumnDetailId FROM tblFRColumnDesign WHERE tblFRColumnDesign.intColumnId = tblFRColumnDesignSegment.intColumnId and tblFRColumnDesign.intRefNo = tblFRColumnDesignSegment.intRefNo)

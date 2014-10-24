@@ -33,7 +33,7 @@ BEGIN
 			ProductID = F.A4GLIdentity,
 			ClockNo = D.strClockNumber,
 			DispatchRequestedDate = A.dtmRequestedDate,
-			DispatchDate = A.dtmCallInDate,
+			DispatchDate = A.dtmDispatchingDate,
 			MinimumQuantity = A.dblMinimumQuantity,
 			Price = A.dblPrice,
 			Total = A.dblTotal,
