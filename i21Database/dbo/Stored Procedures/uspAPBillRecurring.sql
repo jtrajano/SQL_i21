@@ -9,9 +9,11 @@ CREATE TABLE #tmpRecurringData (
 	UNIQUE ([intRecurringId])
 );
 
+DECLARE @InsertedData TABLE (intBillId INT)
+
 INSERT INTO #tmpRecurringData SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@recurrings)
 
-SELECT intTransactionId INTO #tmpRecurringBill FROM tblAPRecurringTransaction
+SELECT * INTO #tmpRecurringBill FROM tblAPRecurringTransaction
 WHERE intRecurringId IN (SELECT intRecurringId FROM #tmpRecurringData)
 
 INSERT INTO tblAPBill(
@@ -48,6 +50,7 @@ INSERT INTO tblAPBill(
 		[intOrderById],
 		[intEntityId]
 	)
+	OUTPUT inserted.intBillId INTO @InsertedData
 	SELECT 
 		[strVendorOrderNumber], 
 		[intTermsId],
@@ -58,8 +61,8 @@ INSERT INTO tblAPBill(
 		[strDescription],
 		[dblTotal],
 		[dblSubtotal],
-		[ysnPosted],
-		[ysnPaid],
+		0,
+		0,
 		[strBillId],
 		[dblAmountDue],
 		[dtmDatePaid],
@@ -71,7 +74,7 @@ INSERT INTO tblAPBill(
 		[dblWithheld],
 		[dblDiscount],
 		[dblBillTax],
-		[dblPayment],
+		0,
 		[dblInterest],
 		[intTransactionType],
 		[intPurchaseOrderId],
@@ -83,5 +86,28 @@ INSERT INTO tblAPBill(
 		@userId
 	FROM tblAPBill
 	WHERE intBillId IN (SELECT intTransactionId FROM #tmpRecurringBill)
+
+	--Create History
+	INSERT INTO tblAPRecurringHistory(
+		[strTransactionId], 
+		[strTransactionCreated], 
+		[dtmDateProcessed], 
+		[strReference], 
+		[dtmNextProcess], 
+		[dtmLastProcess], 
+		[intTransactionType]
+	)
+	SELECT 
+		[strTransactionId]		= C.strBillId, 
+		[strTransactionCreated]	= B.strBillId, 
+		[dtmDateProcessed]		= GETDATE(), 
+		[strReference]			= D.strReference, 
+		[dtmNextProcess]		= D.dtmNextProcess, 
+		[dtmLastProcess]		= D.dtmLastProcess,
+		[intTransactionType]	= 1
+	FROM @InsertedData A
+		INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
+		INNER JOIN tblAPBill C ON B.strVendorOrderNumber = C.strVendorOrderNumber
+		INNER JOIN #tmpRecurringBill D ON C.intBillId = D.intTransactionId
 
 END
