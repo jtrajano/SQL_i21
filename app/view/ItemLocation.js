@@ -32,7 +32,7 @@ Ext.define('Inventory.view.ItemLocation', {
     viewModel: {
         type: 'itemlocation'
     },
-    height: 684,
+    height: 660,
     hidden: false,
     minHeight: 660,
     minWidth: 995,
@@ -199,6 +199,7 @@ Ext.define('Inventory.view.ItemLocation', {
                 {
                     xtype: 'container',
                     flex: 1,
+                    height: 432,
                     layout: {
                         type: 'hbox',
                         align: 'stretch'
@@ -492,8 +493,8 @@ Ext.define('Inventory.view.ItemLocation', {
                                     labelWidth: 140
                                 },
                                 {
-                                    xtype: 'checkboxfield',
-                                    itemId: 'chkNegativeInventory',
+                                    xtype: 'combobox',
+                                    itemId: 'cboNegativeInventory',
                                     fieldLabel: 'Negative Inventory',
                                     labelWidth: 140
                                 }

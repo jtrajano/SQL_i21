@@ -10,7 +10,7 @@
         "defaultFocus": null,
         "designer|userAlias": "itemlocation",
         "designer|userClassName": "ItemLocation",
-        "height": 684,
+        "height": 660,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
@@ -346,6 +346,7 @@
                     "userConfig": {
                         "container|align": "stretch",
                         "designer|displayName": "container",
+                        "height": 432,
                         "layout": "hbox",
                         "layout|flex": 1
                     },
@@ -1115,21 +1116,20 @@
                                     "designerId": "db26cbf3-1f98-4e0c-9b78-52ea5a359d3d"
                                 },
                                 {
-                                    "type": "Ext.form.field.Checkbox",
+                                    "type": "Ext.form.field.ComboBox",
                                     "reference": {
                                         "name": "items",
                                         "type": "array"
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "boxLabel": null,
                                         "fieldLabel": "Negative Inventory",
-                                        "itemId": "chkNegativeInventory",
+                                        "itemId": "cboNegativeInventory",
                                         "labelWidth": 140,
                                         "layout|flex": null
                                     },
-                                    "name": "MyCheckbox43",
-                                    "designerId": "3ed155ce-f1e7-49af-904d-6d1f0367ae90"
+                                    "name": "MyComboBox",
+                                    "designerId": "6c2800e6-6c69-42a6-b38a-9f92bbd291a3"
                                 }
                             ]
                         }
@@ -1151,7 +1151,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging1",
                     "designerId": "3812557b-eaf0-4f41-b444-7da5890f9c89",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
