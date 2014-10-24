@@ -751,6 +751,7 @@
     <Build Include="dbo\Tables\tblSMTableDictionary.sql" />
     <Build Include="dbo\Tables\tblSMMappingDictionary.sql" />
     <Build Include="dbo\Tables\tblSMColumnDictionary.sql" />
+    <Build Include="dbo\Tables\tblAPRecurringHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

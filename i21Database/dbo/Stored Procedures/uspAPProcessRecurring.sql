@@ -29,7 +29,7 @@ IF EXISTS(SELECT 1 FROM #tmpRecurringBill)
 BEGIN
 
 	DECLARE @billRecurringIds NVARCHAR(MAX);
-	SELECT @billRecurringIds = COALESCE(@billRecurringIds + ',', '') +  CONVERT(VARCHAR(12),col) FROM #tmpRecurringBill
+	SELECT @billRecurringIds = COALESCE(@billRecurringIds + ',', '') +  CONVERT(VARCHAR(12),intTransactionId) FROM #tmpRecurringBill
 	EXEC uspAPBillRecurring @recurrings = @billRecurringIds, @userId = @userId
 
 END
