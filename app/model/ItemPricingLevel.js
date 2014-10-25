@@ -39,5 +39,8 @@ Ext.define('Inventory.model.ItemPricingLevel', {
         { name: 'dblUnitPrice', type: 'float'},
         { name: 'ysnActive', type: 'boolean'},
         { name: 'intSort', type: 'int'},
+
+        { name: 'strLocationName', type: 'string'},
+        { name: 'strUnitMeasure', type: 'string'}
     ]
 });

@@ -41,6 +41,6 @@ Ext.define('Inventory.model.ItemPricing', {
         { name: 'ysnActive', type: 'boolean'},
         { name: 'intSort', type: 'int'},
 
-
+        { name: 'strLocationName', type: 'string'}
     ]
 });

@@ -26,6 +26,13 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
             this.Property(t => t.strDiscountBy).HasColumnName("strDiscountBy");
             this.Property(t => t.strPromotionType).HasColumnName("strPromotionType");
+
+            this.HasOptional(p => p.tblSMCompanyLocation)
+                .WithMany(p => p.tblICItemSpecialPricings)
+                .HasForeignKey(p => p.intLocationId);
+            this.HasOptional(p => p.tblICUnitMeasure)
+                .WithMany(p => p.tblICItemSpecialPricings)
+                .HasForeignKey(p => p.intUnitMeasureId);
         }
     }
 }

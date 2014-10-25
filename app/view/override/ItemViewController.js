@@ -601,6 +601,30 @@ Ext.define('Inventory.view.override.ItemViewController', {
             edit: me.onGridStockEdit,
             scope: me
         });
+
+        var colPricingLevelLocation = grdPricingLevel.columns[0];
+        colPricingLevelLocation.renderer = me.LocationRenderer;
+        var colPricingLevelUOM = grdPricingLevel.columns[2];
+        colPricingLevelUOM.renderer = me.UOMRenderer;
+
+        var cepPricingLevel = grdPricingLevel.getPlugin('cepPricingLevel');
+        cepPricingLevel.on({
+            edit: me.onGridPricingLevelEdit,
+            scope: me
+        });
+
+        var colPricingLevelLocation = grdSpecialPricing.columns[0];
+        colPricingLevelLocation.renderer = me.LocationRenderer;
+        var colPricingLevelUOM = grdSpecialPricing.columns[3];
+        colPricingLevelUOM.renderer = me.UOMRenderer;
+
+        var cepSpecialPricing = grdSpecialPricing.getPlugin('cepSpecialPricing');
+        cepSpecialPricing   .on({
+            edit: me.onGridSpecialPricingEdit,
+            scope: me
+        });
+
+
         // </editor-fold>
 
 
@@ -882,6 +906,66 @@ Ext.define('Inventory.view.override.ItemViewController', {
             {
                 var strCountGroup = cboCountGroup.getSelectedRecord().get('strCountGroup');
                 record.set('strCountGroup', strCountGroup);
+                view.refresh();
+            }
+        }
+    },
+
+    onGridPricingLevelEdit: function(editor, e, eOpts){
+        var me = this;
+        var record = e.record
+        var column = e.column;
+
+        var grid = column.up('grid');
+        var view = grid.view;
+
+        if (column.itemId === 'colPricingLevelLocation')
+        {
+            var cboLocation = column.getEditor();
+            if (cboLocation.getSelectedRecord())
+            {
+                var strLocationName = cboLocation.getSelectedRecord().get('strLocationName');
+                record.set('strLocationName', strLocationName);
+                view.refresh();
+            }
+        }
+        else if (column.itemId === 'colPricingLevelUOM')
+        {
+            var cboUOM = column.getEditor();
+            if (cboUOM.getSelectedRecord())
+            {
+                var strUnitMeasure = cboUOM.getSelectedRecord().get('strUnitMeasure');
+                record.set('strUnitMeasure', strUnitMeasure);
+                view.refresh();
+            }
+        }
+    },
+
+    onGridSpecialPricingEdit: function(editor, e, eOpts){
+        var me = this;
+        var record = e.record
+        var column = e.column;
+
+        var grid = column.up('grid');
+        var view = grid.view;
+
+        if (column.itemId === 'colSpecialPricingLocation')
+        {
+            var cboLocation = column.getEditor();
+            if (cboLocation.getSelectedRecord())
+            {
+                var strLocationName = cboLocation.getSelectedRecord().get('strLocationName');
+                record.set('strLocationName', strLocationName);
+                view.refresh();
+            }
+        }
+        else if (column.itemId === 'colSpecialPricingUnit')
+        {
+            var cboUOM = column.getEditor();
+            if (cboUOM.getSelectedRecord())
+            {
+                var strUnitMeasure = cboUOM.getSelectedRecord().get('strUnitMeasure');
+                record.set('strUnitMeasure', strUnitMeasure);
                 view.refresh();
             }
         }
