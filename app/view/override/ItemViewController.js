@@ -3,16 +3,16 @@ Ext.define('Inventory.view.override.ItemViewController', {
 
     config: {
         searchConfig: {
-            title:  'Search Item',
+            title: 'Search Item',
             type: 'Inventory.Item',
             api: {
                 read: '../Inventory/api/Item/SearchItems'
             },
             columns: [
-                {dataIndex: 'intItemId',text: "Item Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
-                {dataIndex: 'strItemNo', text: 'Item No', flex: 1,  dataType: 'string'},
-                {dataIndex: 'strDescription', text: 'Description', flex: 1,  dataType: 'string'},
-                {dataIndex: 'strModelNo',text: 'Model No', flex: 1,  dataType: 'string'}
+                {dataIndex: 'intItemId', text: "Item Id", flex: 1, defaultSort: true, dataType: 'numeric', key: true, hidden: true},
+                {dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string'},
+                {dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string'},
+                {dataIndex: 'strModelNo', text: 'Model No', flex: 1, dataType: 'string'}
             ]
         },
         binding: {
@@ -29,7 +29,7 @@ Ext.define('Inventory.view.override.ItemViewController', {
             cboManufacturer: {
                 value: '{current.intManufacturerId}',
                 store: '{Manufacturer}'
-            } ,
+            },
             cboBrand: {
                 value: '{current.intBrandId}',
                 store: '{Brand}'
@@ -311,6 +311,40 @@ Ext.define('Inventory.view.override.ItemViewController', {
             colSpecialPricingUnitPrice: 'dblUnitAfterDiscount',
             colSpecialPricingAccumQty: 'dblAccumulatedQty',
             colSpecialPricingAccumAmount: 'dblAccumulatedAmount',
+
+            cboCommodity: {
+                value: '{current.intCommodityId}',
+                store: '{Commodity}'
+            },
+            txtGaShrinkFactor: '{current.dblGAShrinkFactor}',
+            cboOrigin: {
+                value: '{current.intOriginId}',
+                store: '{Origin}'
+            },
+            cboProductType: {
+                value: '{current.intProductTypeId}',
+                store: '{ProductType}'
+            },
+            cboRegion: {
+                value: '{current.intRegionId}',
+                store: '{Region}'
+            },
+            cboSeason: {
+                value: '{current.intSeasonId}',
+                store: '{Season}'
+            },
+            cboClass: {
+                value: '{current.intClassVarietyId}',
+                store: '{Class}'
+            },
+            cboProductLine: {
+                value: '{current.intProductLineId}',
+                store: '{ProductLine}'
+            },
+            cboMarketValuation: {
+                value: '{current.strMarketValuation}',
+                store: '{MarketValuations}'
+            },
 
             colNoteLocation: 'intLocationId',
             colNoteCommentType: 'strCommentType',

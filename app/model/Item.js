@@ -107,7 +107,17 @@ Ext.define('Inventory.model.Item', {
         { name: 'dblTaxExempt', type: 'float'},
         { name: 'ysnDropShip', type: 'boolean'},
         { name: 'ysnCommisionable', type: 'boolean'},
-        { name: 'ysnSpecialCommission', type: 'boolean'}
+        { name: 'ysnSpecialCommission', type: 'boolean'},
+        { name: 'intCommodityId', type: 'int'},
+        { name: 'intCommodityHierarchyId', type: 'int'},
+        { name: 'dblGAShrinkFactor', type: 'float'},
+        { name: 'intOriginId', type: 'int'},
+        { name: 'intProductTypeId', type: 'int'},
+        { name: 'intRegionId', type: 'int'},
+        { name: 'intSeasonId', type: 'int'},
+        { name: 'intClassVarietyId', type: 'int'},
+        { name: 'intProductLineId', type: 'int'},
+        { name: 'strMarketValuation', type: 'string'}
     ],
 
     validators: [
