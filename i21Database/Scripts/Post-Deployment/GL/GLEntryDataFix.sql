@@ -43,6 +43,10 @@ UPDATE tblGLDetail SET strTransactionType = X.strJournalType,
 						 intTransactionId = X.intJournalId
 	FROM (SELECT strJournalType, intJournalId, strJournalId FROM tblGLJournal) X 
 	WHERE X.strJournalId = tblGLDetail.strTransactionId AND (strTransactionType IS NULL OR intTransactionId IS NULL)
+	
+UPDATE tblGLDetail SET strDescription = X.strDescription
+	FROM (SELECT strJournalType, intJournalId, strJournalId, strDescription FROM tblGLJournal) X 
+	WHERE X.intJournalId = tblGLDetail.intTransactionId
 
 GO
 	PRINT N'END Normalize tblGLDetail Fields'

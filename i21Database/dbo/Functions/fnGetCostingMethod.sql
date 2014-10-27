@@ -11,7 +11,7 @@ BEGIN
 
 	-- Get the costing method in the item-location table. 
 	SELECT	@costingMethod = intCostingMethod
-	FROM	tblICItemLocationStore
+	FROM	tblICItemLocation
 	WHERE	intItemId = @intItemId
 			AND intLocationId = @intLocationId
 

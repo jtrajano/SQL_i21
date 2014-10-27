@@ -1,42 +1,29 @@
 ﻿
 -- Returns the account ids that can be used in item costing. 
+-- The location of the item is important. It is used to determine the g/l account and profit center 
 CREATE FUNCTION [dbo].[fnGetItemGLAccounts] (
 	@intItemId INT
 	,@intLocationId INT
 )
-RETURNS @returntable TABLE
-(
-	intGLAccountId int,
-	intGLType int
-)
-AS
-BEGIN
-	DECLARE @InventoryType AS INT = 1
-	DECLARE @COGSType AS INT = 2
-	DECLARE @WriteOffType AS INT = 3
-	DECLARE @RevalueType AS INT = 4
-	DECLARE @AutoNegativeType AS INT = 5
+RETURNS TABLE
+AS 
+RETURN 
+	SELECT	-- Get the inventory g/l account id
+			Inventory =  dbo.fnGetGLAccountIdFromProfitCenter(
+				dbo.fnGetItemBaseGLAccount(@intItemId, @intLocationId, 1)
+				,dbo.fnGetItemProfitCenter(@intItemId, @intLocationId, 1)
+			)
 
-	-- TODO: Replace it with the correct business rule 
-	-- See: http://www.inet.irelyserver.com/display/INV/Category+%28GL+Accounts%29+tab?focusedCommentId=38209047#comment-38209047
+			-- Get the COGS g/l account id
+			,Sales = dbo.fnGetGLAccountIdFromProfitCenter(
+				dbo.fnGetItemBaseGLAccount(@intItemId, @intLocationId, 2)
+				,dbo.fnGetItemProfitCenter(@intItemId, @intLocationId, 2)
+			)
 
-	INSERT INTO @returntable
-	SELECT	TOP 1 
-			intGLAccountId = CAST(NULL AS INT) 
-			,intGLType = @InventoryType 
-	FROM	tblICItemLocationStore
-	WHERE	intItemId = @intItemId
-			AND intLocationId = intLocationId
-			-- TODO: Add in the where clause the filter to know if an account is an inventory account. 
+			-- Get the Revalue Cost g/l account id
+			,Purchases = dbo.fnGetGLAccountIdFromProfitCenter(
+				dbo.fnGetItemBaseGLAccount(@intItemId, @intLocationId, 3)
+				,dbo.fnGetItemProfitCenter(@intItemId, @intLocationId, 3)
+			)
 
-	UNION ALL 
-	SELECT	TOP 1 
-			intGLAccountId = CAST(NULL AS INT) 
-			,intGLType = @COGSType 
-	FROM	tblICItemLocationStore
-	WHERE	intItemId = @intItemId
-			AND intLocationId = intLocationId
-			-- TODO: Add in the where clause the filter to know if an account is a COGS account. 
-	
-	RETURN
-END
+GO

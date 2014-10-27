@@ -9,6 +9,7 @@ SELECT
 	A.ysnPaid,
 	A.strVendorOrderNumber,
 	A.intTransactionType,
+	A.dtmDate,
 	B1.strName,
 	C.strAccountId
 FROM

@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblICItemAccount]
 (
-	[intItemAccountId] INT NOT NULL , 
+	[intItemAccountId] INT NOT NULL IDENTITY, 
     [intItemId] INT NOT NULL, 
     [intLocationId] INT NOT NULL, 
     [strAccountDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 

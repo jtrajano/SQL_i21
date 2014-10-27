@@ -10,6 +10,9 @@ SELECT
 	A.strBillBatchNumber,
 	A.strReference,
 	A.ysnPosted,
-	B.strAccountId AS strAccountId
+	A.dtmBatchDate,
+	B.strAccountId AS strAccountId,
+	D.strUserName AS strUserId
 FROM dbo.tblAPBillBatch A
 		INNER JOIN dbo.tblGLAccount B ON A.intAccountId = B.intAccountId
+		LEFT JOIN dbo.tblSMUserSecurity D ON A.intEntityId = D.intEntityId

@@ -77,9 +77,12 @@ print 'BEGIN POST DEPLOYMENT'
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
 --:r .\AP\FixEntitiesData.sql
+:r .\AP\FixVendorGLAccountExpense.sql
+:r .\AP\UpdateBillBatch.sql
 
 -- Inventory 
 :r .\IC\1_InventoryTransactionTypes.sql 
+:r .\IC\2_MaterialNMFC.sql 
 
 -- Version Update
 :r .\VersionUpdate.sql
