@@ -5,7 +5,7 @@
 CREATE TYPE [dbo].[ItemCostingTableType] AS TABLE
 (
 	[intItemId] INT NOT NULL, -- The PK of the item. 
-	[intItemLocationStoreId] INT NOT NULL, -- The location-store where the item is found or served.
+	[intItemLocationId] INT NOT NULL, -- The location-store where the item is found or served.
 	[dtmDate] DATETIME NOT NULL, -- The date of the transaction
     [dblUnitQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, -- The unit quantity of an item in relation to its UOM (ex: 10 boxes). Positive unit qty means additional stock. Negative unit qty means reduction (selling) of the stock. 
 	[dblUOMQty] NUMERIC(18, 6) NOT NULL DEFAULT 1, -- The quantity of an item per UOM (ex. 1 box can contain 100 individual pieces of an item)

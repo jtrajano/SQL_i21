@@ -17,39 +17,50 @@ BEGIN
             @ParamName sysname,
             @TypeName sysname,
             @IsOutput BIT,
-            @IsCursorRef BIT;
-            
-
+            @IsCursorRef BIT,
+			@IsTableType BIT;
       
     SELECT @Seperator = '', @ProcParmTypeListSeparater = '', 
            @ProcParmList = '', @TableColList = '', @ProcParmTypeList = '', @TableColTypeList = '';
       
     DECLARE Parameters CURSOR FOR
-     SELECT p.name, t.TypeName, is_output, is_cursor_ref
-       FROM sys.parameters p
-       CROSS APPLY tSQLt.Private_GetFullTypeName(p.user_type_id,p.max_length,p.precision,p.scale,NULL) t
-      WHERE object_id = @ProcedureObjectId;
+	SELECT	p.name, t.TypeName, is_output, is_cursor_ref, tp.is_table_type
+			FROM	sys.parameters p CROSS APPLY tSQLt.Private_GetFullTypeName(p.user_type_id,p.max_length,p.precision,p.scale,NULL) t										
+					INNER JOIN sys.types tp
+						ON p.user_type_id = tp.user_type_id
+	WHERE object_id = @ProcedureObjectId;
     
     OPEN Parameters;
     
-    FETCH NEXT FROM Parameters INTO @ParamName, @TypeName, @IsOutput, @IsCursorRef;
+    FETCH NEXT FROM Parameters INTO @ParamName, @TypeName, @IsOutput, @IsCursorRef, @IsTableType;
     WHILE (@@FETCH_STATUS = 0)
     BEGIN
         IF @IsCursorRef = 0
         BEGIN
-            SELECT @ProcParmList = @ProcParmList + @Seperator + @ParamName, 
+            SELECT @ProcParmList = @ProcParmList + @Seperator + 
+										CASE WHEN @IsTableType = 1
+											THEN '(SELECT * FROM ' + @ParamName + ' for xml path(''''))'
+											ELSE 
+											@ParamName
+										END
+									, 
                    @TableColList = @TableColList + @Seperator + '[' + STUFF(@ParamName,1,1,'') + ']', 
-                   @ProcParmTypeList = @ProcParmTypeList + @ProcParmTypeListSeparater + @ParamName + ' ' + @TypeName + ' = NULL ' + 
-                                       CASE WHEN @IsOutput = 1 THEN ' OUT' 
-                                            ELSE '' 
-                                       END, 
+                   @ProcParmTypeList =	@ProcParmTypeList 
+										+ @ProcParmTypeListSeparater 
+										+ @ParamName 
+										+ ' ' 
+										+ @TypeName 
+										+ CASE WHEN @IsTableType = 1 THEN ' READONLY ' ELSE ' = NULL ' END
+										+ CASE WHEN @IsOutput = 1 THEN ' OUT'  ELSE '' END, 
                    @TableColTypeList = @TableColTypeList + ',[' + STUFF(@ParamName,1,1,'') + '] ' + 
-                          CASE WHEN @TypeName LIKE '%nchar%'
-                                 OR @TypeName LIKE '%nvarchar%'
-                               THEN 'nvarchar(MAX)'
-                               WHEN @TypeName LIKE '%char%'
-                               THEN 'varchar(MAX)'
-                               ELSE @TypeName
+                          CASE	WHEN @IsTableType = 1 -- If parameter is a user-defined table type.
+									THEN 'xml'
+								WHEN	@TypeName LIKE '%nchar%'
+										OR @TypeName LIKE '%nvarchar%'							 
+									THEN 'nvarchar(MAX)'
+								WHEN @TypeName LIKE '%char%'
+									THEN 'varchar(MAX)'
+								ELSE @TypeName
                           END + ' NULL';
 
             SELECT @Seperator = ',';        
@@ -61,7 +72,7 @@ BEGIN
             SELECT @ProcParmTypeListSeparater = ',';
         END;
         
-        FETCH NEXT FROM Parameters INTO @ParamName, @TypeName, @IsOutput, @IsCursorRef;
+        FETCH NEXT FROM Parameters INTO @ParamName, @TypeName, @IsOutput, @IsCursorRef, @IsTableType;
     END;
     
     CLOSE Parameters;

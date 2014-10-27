@@ -688,7 +688,6 @@
     <Build Include="dbo\Stored Procedures\uspICValidateCostingOnUnpost.sql" />
     <Build Include="dbo\Tables\tblICInventoryCostingResult.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostCosting.sql" />
-    <Build Include="dbo\Stored Procedures\uspICFoundCostingErrors.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\1_ReportDisableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\2_ReportDeleteOldData.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\3_ReportEnableConstraints.sql" />

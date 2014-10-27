@@ -71,6 +71,7 @@
     <Folder Include="Scripts\Pre-Deployment\8_AP" />
     <Folder Include="Scripts\Pre-Deployment\9_FRD" />
     <Folder Include="Scripts\Pre-Deployment\10_RPT" />
+    <Folder Include="Scripts\Pre-Deployment\11_IC" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1_DataCleanup.sql" />
@@ -135,5 +136,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\8_AP\FixstrBillId.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\11_IC\Drop_References_to_ItemCostingTableType.sql" />
   </ItemGroup>
 </Project>
