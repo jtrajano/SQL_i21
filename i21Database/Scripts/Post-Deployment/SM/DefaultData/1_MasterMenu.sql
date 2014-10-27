@@ -796,7 +796,7 @@ GO
 			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Process Pay Groups', 'Payroll', @PayrollActivityId, 'Process Pay Groups', 'Screen', '', 'small-screen', 1, 1, 0, 1, 2, 0		
 
 			-- Payroll / Maintenance / Payroll Types
-			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Payroll Types' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollModuleId)
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Payroll Types' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceId)
 			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Payroll Types', 'Payroll', @PayrollMaintenanceId, 'Payroll Types', 'Folder', '', 'small-folder', 1, 1, 0, 0, 1, 0
 
 			-- Payroll / Maintenance / Employees
