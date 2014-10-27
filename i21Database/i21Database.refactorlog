@@ -742,4 +742,81 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intInventoryGroupId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="a69901c0-4e74-42cf-9fa1-3dc81bd75eae" ChangeDateTime="10/27/2014 07:42:47">
+    <Property Name="ElementName" Value="[dbo].[tblPREmployee].[intEthnicOriginId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPREmployee]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strEthnicity" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="1bfb8ce8-fa21-4d12-a1c3-c182dff25b2c" ChangeDateTime="10/27/2014 07:43:28">
+    <Property Name="ElementName" Value="[dbo].[tblPREmployee].[intEEOCCodeId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPREmployee]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strEEOCCode" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="56df4896-1db2-4e07-a919-1357901a5b37" ChangeDateTime="10/27/2014 07:47:31">
+    <Property Name="ElementName" Value="[dbo].[tblPRPayGroup].[intPayGroupId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPRPayGroup]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDepartmentId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="cc8f0dcb-07f0-496e-8bf7-6b0d8292c1e0" ChangeDateTime="10/27/2014 07:47:37">
+    <Property Name="ElementName" Value="[dbo].[tblPRPayGroup].[strPayGroup]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPRPayGroup]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strDepartment" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3066a6e4-ee7c-42a9-8ee7-e2747a0703db" ChangeDateTime="10/27/2014 07:47:49">
+    <Property Name="ElementName" Value="[dbo].[tblPRPayGroup].[strPayPeriod]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPRPayGroup]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intProfitCenter" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="605cf4f6-69b8-4141-8dc7-834074a099bb" ChangeDateTime="10/27/2014 07:51:08">
+    <Property Name="ElementName" Value="[dbo].[tblPREmployeeTimeOff].[strAccrualPeriod]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPREmployeeTimeOff]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strPeriod" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="76c46bc2-fde1-4a77-8a6a-8f842ce86ab3" ChangeDateTime="10/27/2014 07:51:30">
+    <Property Name="ElementName" Value="[dbo].[tblPREmployeeTimeOff].[dblAccrualRate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPREmployeeTimeOff]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblRate" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="28c5f0da-0a45-4fca-b54a-b53680d5ca48" ChangeDateTime="10/27/2014 07:52:39">
+    <Property Name="ElementName" Value="[dbo].[tblPRTemplateTimeOff].[dblAccrualRate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPRTemplateTimeOff]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblRate" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="bb7edcbd-a28f-4571-84e6-5826e26f1da4" ChangeDateTime="10/27/2014 07:52:47">
+    <Property Name="ElementName" Value="[dbo].[tblPRTemplateTimeOff].[strAccrualPeriod]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPRTemplateTimeOff]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strPeriod" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c1da1627-9189-4fdb-8a5e-960596265ab7" ChangeDateTime="10/27/2014 07:55:08">
+    <Property Name="ElementName" Value="[dbo].[tblPRTypeTimeOff].[dblAccrualRate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPRTypeTimeOff]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblRate" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8cfb19ce-df5d-4b16-b9d6-b623c4c0d815" ChangeDateTime="10/27/2014 07:55:14">
+    <Property Name="ElementName" Value="[dbo].[tblPRTypeTimeOff].[strAccrualPeriod]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPRTypeTimeOff]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strPeriod" />
+  </Operation>
 </Operations>

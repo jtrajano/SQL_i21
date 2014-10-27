@@ -2,6 +2,7 @@
 	[intEntityId] [int] NOT NULL,
 	[intEmployeeId] [int] NOT NULL IDENTITY (1, 1),
 	[strEmployeeId] [nvarchar](50) NOT NULL,
+	[strType] [nvarchar](30) NULL,
 	[strFirstName] [nvarchar](50) NULL,
 	[strMiddleName] [nvarchar](50) NULL,
 	[strLastName] [nvarchar](50) NULL,
@@ -14,9 +15,8 @@
 	[strMaritalStatus] [nvarchar](50) NULL,
 	[strSpouse] [nvarchar](50) NULL,
 	[strWorkPhone] [nvarchar](50) NULL,
-	[intEthnicOriginId] [int] NULL,
-	[intRaceId] [int] NULL,
-	[intEEOCCodeId] [int] NULL,
+	[strEthnicity] NVARCHAR(50) NULL,
+	[strEEOCCode] NVARCHAR(50) NULL,
 	[strSocialSecurity] [nvarchar](15) NULL,
 	[ysn1099Employee] [bit] NULL,
 	[dtmTerminated] [datetime] NULL,
@@ -40,10 +40,7 @@
     CONSTRAINT [UK_tblPREmployee] UNIQUE ([intEmployeeId]), 
     CONSTRAINT [AK_tblPREmployee_strEmployeeId] UNIQUE ([strEmployeeId]),
 	CONSTRAINT [FK_tblPREmployee_tblPREmployee] FOREIGN KEY ([intSupervisorId]) REFERENCES [tblPREmployee]([intEmployeeId]),
-	CONSTRAINT [FK_tblPREmployee_tblPRPayGroup] FOREIGN KEY ([intPayGroupId]) REFERENCES [tblPRPayGroup]([intPayGroupId]),
-	CONSTRAINT [FK_tblPREmployee_tblPREthnicOrigin] FOREIGN KEY ([intEthnicOriginId]) REFERENCES [tblPREthnicOrigin]([intEthnicOriginId]),
-	CONSTRAINT [FK_tblPREmployee_tblPRRace] FOREIGN KEY ([intRaceId]) REFERENCES [tblPRRace]([intRaceId]),
-	CONSTRAINT [FK_tblPREmployee_tblPREEOCCode] FOREIGN KEY ([intEEOCCodeId]) REFERENCES [tblPREEOCCode]([intEEOCCodeId])
+	CONSTRAINT [FK_tblPREmployee_tblPRPayGroup] FOREIGN KEY ([intPayGroupId]) REFERENCES [tblPRPayGroup]([intPayGroupId])
 ) ON [PRIMARY]
 GO
 
@@ -216,7 +213,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployee',
     @level2type = N'COLUMN',
-    @level2name = N'intEthnicOriginId'
+    @level2name = 'strEthnicity'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Date Terminated',
@@ -308,23 +305,16 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'intSupervisorId'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Race',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'intRaceId'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'EEOC Code Id',
+    @value = N'EEOC Code',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployee',
     @level2type = N'COLUMN',
-    @level2name = N'intEEOCCodeId'
+    @level2name = 'strEEOCCode'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Review Date',
@@ -379,3 +369,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPREmployee',
     @level2type = N'COLUMN',
     @level2name = N'ysnThirdPartySickPay'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Type',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPREmployee',
+    @level2type = N'COLUMN',
+    @level2name = N'strType'

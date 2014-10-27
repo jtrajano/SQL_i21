@@ -2,11 +2,12 @@
 	[intEmployeeTimeOffId] [int] NOT NULL IDENTITY,
 	[intEmployeeId] INT NOT NULL,
 	[intTypeTimeOffId] INT NOT NULL,
-	[dblAccrualRate] [numeric](18, 6) NULL DEFAULT ((0)),
+	[dblRate] [numeric](18, 6) NULL DEFAULT ((0)),
 	[dblPerPeriod] [numeric](18, 6) NULL DEFAULT ((0)),
-	[strAccrualPeriod] NVARCHAR(30) NULL DEFAULT ((0)),
+	[strPeriod] NVARCHAR(30) NULL DEFAULT ((0)),
 	[strAwardPeriod] NVARCHAR(30) NULL DEFAULT ((0)),
 	[dblMaxCarryover] [numeric](18, 6) NULL DEFAULT ((0)),
+	[dblMaxEarned] [numeric](18, 6) NULL DEFAULT ((0)),
 	[dtmLastAward] DATETIME NULL, 
     [dblHoursAccrued] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblHoursEarned] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -78,13 +79,13 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intConcurrencyId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Accrual Rate',
+    @value = N'Rate',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployeeTimeOff',
     @level2type = N'COLUMN',
-    @level2name = N'dblAccrualRate'
+    @level2name = 'dblRate'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Per Period',
@@ -96,13 +97,13 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblPerPeriod'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Accrual Period',
+    @value = N'Period',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployeeTimeOff',
     @level2type = N'COLUMN',
-    @level2name = N'strAccrualPeriod'
+    @level2name = 'strPeriod'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Award Period',
@@ -157,3 +158,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPREmployeeTimeOff',
     @level2type = N'COLUMN',
     @level2name = N'dblHoursUsed'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Max Earned',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPREmployeeTimeOff',
+    @level2type = N'COLUMN',
+    @level2name = N'dblMaxEarned'
