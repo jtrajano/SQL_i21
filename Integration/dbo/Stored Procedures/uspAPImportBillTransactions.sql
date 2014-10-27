@@ -94,6 +94,7 @@ BEGIN
 				[dtmDueDate], 
 				[intAccountId], 
 				[strDescription], 
+				[strPONumber],
 				[dblTotal], 
 				[dblAmountDue],
 				[intEntityId],
@@ -119,6 +120,7 @@ BEGIN
 				[dtmDueDate] 			=	CASE WHEN ISDATE(A.aptrx_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 				[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
 				[strDescription] 		=	A.aptrx_comment,
+				[strPONumber]			=	A.aptrx_pur_ord_no,
 				[dblTotal] 				=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
 				[dblAmountDue]			=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
 				[intEntityId]				=	@UserId,
@@ -155,6 +157,7 @@ BEGIN
 				[dtmDueDate] 			=	CASE WHEN ISDATE(A.apivc_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 				[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
 				[strDescription] 		=	A.apivc_comment,
+				[strPONumber]			=	A.apivc_pur_ord_no,
 				[dblTotal] 				=	CASE WHEN A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'' THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END,
 				[dblAmountDue]			=	CASE WHEN A.apivc_status_ind = ''P'' THEN 0 ELSE 
 													CASE WHEN A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'' THEN A.apivc_orig_amt * -1
@@ -183,13 +186,19 @@ BEGIN
 			INSERT INTO tblAPBillDetail(
 				[intBillId],
 				[strDescription],
+				[dblQtyOrdered],
+				[dblQtyReceived],
 				[intAccountId],
-				[dblTotal]
+				[dblTotal],
+				[dblCost]
 			)
 			SELECT 
 				A.intBillId,
 				A.strDescription,
+				1,
+				1,
 				ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.apegl_gl_acct), 0),
+				C.apegl_gl_amt,
 				C.apegl_gl_amt
 			FROM tblAPBill A
 				INNER JOIN tblAPVendor B
@@ -212,7 +221,10 @@ BEGIN
 			SELECT 
 				A.intBillId,
 				A.strDescription,
+				1,
+				1,
 				ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.aphgl_gl_acct), 0),
+				C.aphgl_gl_amt,
 				C.aphgl_gl_amt
 				FROM tblAPBill A
 				INNER JOIN tblAPVendor B
@@ -413,6 +425,7 @@ BEGIN
 				[dtmDueDate], 
 				[intAccountId], 
 				[strDescription], 
+				[strPONumber],
 				[dblTotal], 
 				[dblAmountDue],
 				[intEntityId],
@@ -438,6 +451,7 @@ BEGIN
 				[dtmDueDate] 			=	CASE WHEN ISDATE(A.aptrx_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 				[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
 				[strDescription] 		=	A.aptrx_comment,
+				[strPONumber]			=	A.aptrx_pur_ord_no,
 				[dblTotal] 				=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
 				[dblAmountDue]			=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
 				[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CS_AS = RTRIM(A.aptrx_user_id)),@UserId),
@@ -508,13 +522,19 @@ BEGIN
 			INSERT INTO tblAPBillDetail(
 				[intBillId],
 				[strDescription],
+				[dblQtyOrdered],
+				[dblQtyReceived],
 				[intAccountId],
-				[dblTotal]
+				[dblTotal],
+				[dblCost]
 			)
 			SELECT 
 				A.intBillId,
 				A.strDescription,
+				1,
+				1,
 				ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.apegl_gl_acct), 0),
+				C.apegl_gl_amt,
 				C.apegl_gl_amt
 				FROM tblAPBill A
 					INNER JOIN tblAPVendor B
