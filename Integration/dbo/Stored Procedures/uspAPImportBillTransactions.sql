@@ -215,8 +215,11 @@ BEGIN
 			INSERT INTO tblAPBillDetail(
 				[intBillId],
 				[strDescription],
+				[dblQtyOrdered],
+				[dblQtyReceived],
 				[intAccountId],
-				[dblTotal]
+				[dblTotal],
+				[dblCost]
 			)
 			SELECT 
 				A.intBillId,
