@@ -2,11 +2,13 @@
 	[intTypeTimeOffId] INT NOT NULL,
 	[strTimeOff] nvarchar(30) NOT NULL,
 	[strDescription] NVARCHAR(50) NULL, 
-	[dblAccrualRate] [numeric](18, 6) NULL DEFAULT ((0)),
+	[dblRate] [numeric](18, 6) NULL DEFAULT ((0)),
 	[dblPerPeriod] [numeric](18, 6) NULL DEFAULT ((0)),
-	[strAccrualPeriod] NVARCHAR(30) NULL DEFAULT ((0)),
+	[strPeriod] NVARCHAR(30) NULL DEFAULT ((0)),
 	[strAwardPeriod] NVARCHAR(30) NULL DEFAULT ((0)),
 	[dblMaxCarryover] [numeric](18, 6) NULL DEFAULT ((0)),
+	[dblMaxEarned] [numeric](18, 6) NULL DEFAULT ((0)),
+	[intAccountId] [int] NULL,
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblPRTypeTimeOff] PRIMARY KEY ([intTypeTimeOffId])
 	)
@@ -38,13 +40,13 @@ GO
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Accrual Rate',
+    @value = N'Rate',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblPRTypeTimeOff',
     @level2type = N'COLUMN',
-    @level2name = 'dblAccrualRate'
+    @level2name = 'dblRate'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Per Period',
@@ -56,13 +58,13 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = 'dblPerPeriod'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Accrual Period',
+    @value = N'Period',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblPRTypeTimeOff',
     @level2type = N'COLUMN',
-    @level2name = 'strAccrualPeriod'
+    @level2name = 'strPeriod'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Award Period',
@@ -103,3 +105,21 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRTypeTimeOff',
     @level2type = N'COLUMN',
     @level2name = N'strDescription'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Max Earned',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTypeTimeOff',
+    @level2type = N'COLUMN',
+    @level2name = N'dblMaxEarned'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Liability Account',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTypeTimeOff',
+    @level2type = N'COLUMN',
+    @level2name = N'intAccountId'

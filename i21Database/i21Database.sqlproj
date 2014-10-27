@@ -617,7 +617,6 @@
     <Build Include="dbo\Tables\tblRMDefaultFilter.sql" />
     <Build Include="dbo\Tables\tblRMDefaultOption.sql" />
     <Build Include="dbo\Tables\tblRMDefaultSort.sql" />
-    <Build Include="dbo\Tables\tblPRRace.sql" />
     <Build Include="dbo\Tables\tblPRTemplate.sql" />
     <Build Include="dbo\Tables\tblPRTemplateEarning.sql" />
     <Build Include="dbo\Tables\tblPRTemplateEarningTax.sql" />
@@ -638,7 +637,6 @@
     <Build Include="dbo\Tables\tblPREmployeeEarning.sql" />
     <Build Include="dbo\Tables\tblPREmployeeTax.sql" />
     <Build Include="dbo\Tables\tblPREmployeeTimeOff.sql" />
-    <Build Include="dbo\Tables\tblPREthnicOrigin.sql" />
     <Build Include="dbo\Tables\tblPRPaycheck.sql" />
     <Build Include="dbo\Tables\tblPRPaycheckDeduction.sql" />
     <Build Include="dbo\Tables\tblPRPaycheckEarning.sql" />
@@ -694,7 +692,6 @@
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\3_ReportEnableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\4_ReportData.sql" />
     <Build Include="dbo\Tables\tblICInventoryCostingBucket.sql" />
-    <Build Include="dbo\Tables\tblPREEOCCode.sql" />
     <Build Include="dbo\Tables\tblPRPaycheckDeductionTax.sql" />
     <Build Include="dbo\Tables\tblPRPaycheckEarningTax.sql" />
     <Build Include="dbo\Tables\tblICInventoryAveCost.sql" />
@@ -738,18 +735,20 @@
     <Build Include="dbo\Views\vyuAPPaidBillsHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspARDeleteCustomer.sql" />
     <Build Include="dbo\Functions\fnGetGLAccountIdFromProfitCenter.sql" />
-    <Build Include="dbo\Functions\fnGetGLAccountIdFromCategory.sql" />
-    <Build Include="dbo\Functions\fnGetGLAccountIdFromLocation.sql" />
-    <Build Include="dbo\Functions\fnGetGLAccountIdFromItemLocation.sql" />
     <Build Include="dbo\Tables\tblSMCompanyLocationAccount.sql" />
     <None Include="Scripts\Post-Deployment\AP\FixVendorGLAccountExpense.sql" />
+    <Build Include="dbo\Functions\fnGetItemProfitCenter.sql" />
+    <Build Include="dbo\Functions\fnGetItemBaseGLAccount.sql" />
     <Build Include="dbo\Tables\tblICMaterialNMFC.sql" />
     <Build Include="dbo\Tables\tblICCountGroup.sql" />
-    <Build Include="dbo\Tables\tblICItemAssembly.sql" />
-    <Build Include="dbo\Tables\tblICItemBundle.sql" />
-    <Build Include="dbo\Tables\tblICCommodityAttribute.sql" />
-    <Build Include="dbo\Tables\tblICItemKit.sql" />
-    <Build Include="dbo\Tables\tblICItemKitDetail.sql" />
+    <Build Include="dbo\Views\vyuHDGroupUser.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPProcessRecurring.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPBillRecurring.sql" />
+    <Build Include="dbo\Tables\tblSMTableDictionary.sql" />
+    <Build Include="dbo\Tables\tblSMMappingDictionary.sql" />
+    <Build Include="dbo\Tables\tblSMColumnDictionary.sql" />
+    <Build Include="dbo\Tables\tblAPRecurringHistory.sql" />
+    <Build Include="dbo\Tables\tblPRDepartment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -764,20 +763,26 @@
     <Build Include="dbo\Views\vyuARCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
-    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
-      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac</HintPath>
-      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
-      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
-    </ArtifactReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Scripts\Post-Deployment\HD\DefaultData\1_StatusData.sql" />
     <None Include="Scripts\Post-Deployment\HD\HDEntryDataFix.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\11_FreightTerms.sql" />
     <None Include="dbo\Views\vyuPREmployee.sql" />
     <None Include="Scripts\Post-Deployment\IC\2_MaterialNMFC.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdateBillBatch.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
+    </ArtifactReference>
   </ItemGroup>
 </Project>

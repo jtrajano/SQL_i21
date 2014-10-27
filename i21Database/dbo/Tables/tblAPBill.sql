@@ -3,7 +3,7 @@
     [intBillBatchId]       INT             NULL ,
     [strVendorOrderNumber] NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [intTermsId]           INT             NOT NULL DEFAULT 0,
-    [intTaxId]         INT             NULL ,
+    [intTaxId]				INT             NULL ,
     [dtmDate]              DATETIME        NOT NULL DEFAULT GETDATE(),
     [dtmDueDate]           DATETIME        NOT NULL DEFAULT GETDATE(),
     [intAccountId]         INT             NOT NULL DEFAULT 0,
