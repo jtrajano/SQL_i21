@@ -14,16 +14,16 @@ namespace iRely.Inventory.Model
         public int intItemPricingId { get; set; }
         public int intItemId { get; set; }
         public int? intLocationId { get; set; }
-        public double dblRetailPrice { get; set; }
-        public double dblWholesalePrice { get; set; }
-        public double dblLargeVolumePrice { get; set; }
-        public double dblSalePrice { get; set; }
-        public double dblMSRPPrice { get; set; }
+        public decimal? dblRetailPrice { get; set; }
+        public decimal? dblWholesalePrice { get; set; }
+        public decimal? dblLargeVolumePrice { get; set; }
+        public decimal? dblSalePrice { get; set; }
+        public decimal? dblMSRPPrice { get; set; }
         public string strPricingMethod { get; set; }
-        public double dblLastCost { get; set; }
-        public double dblStandardCost { get; set; }
-        public double dblMovingAverageCost { get; set; }
-        public double dblEndMonthCost { get; set; }
+        public decimal? dblLastCost { get; set; }
+        public decimal? dblStandardCost { get; set; }
+        public decimal? dblMovingAverageCost { get; set; }
+        public decimal? dblEndMonthCost { get; set; }
         public bool ysnActive { get; set; }
         public int intSort { get; set; }
 

@@ -4268,8 +4268,8 @@ Ext.define('Inventory.view.Item', {
                                                                 columns: [
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        dataIndex: 'strFieldName',
                                                                         itemId: 'colPricingLevelLocation',
+                                                                        dataIndex: 'strFieldName',
                                                                         text: 'Factory Name',
                                                                         flex: 1
                                                                     },
@@ -4386,8 +4386,8 @@ Ext.define('Inventory.view.Item', {
                                                                 columns: [
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        dataIndex: 'strFieldName',
                                                                         itemId: 'colSpecialPricingLocation',
+                                                                        dataIndex: 'strFieldName',
                                                                         text: 'Owner',
                                                                         flex: 1
                                                                     },

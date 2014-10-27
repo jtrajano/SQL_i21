@@ -261,23 +261,62 @@
                             "designerId": "c41b3b18-fbf5-47e3-94fb-bd8fedde7559",
                             "cn": [
                                 {
-                                    "type": "Ext.form.field.Text",
+                                    "type": "Ext.form.field.ComboBox",
                                     "reference": {
                                         "name": "items",
                                         "type": "array"
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "columns": [
+                                            "[",
+                                            "\t{",
+                                            "\t\tdataIndex: 'intCompanyLocationId',",
+                                            "\t\tdataType: 'numeric',",
+                                            "\t\ttext: 'Location Id',",
+                                            "\t\thidden: true",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strLocationName',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Location Name',",
+                                            "\t\tflex: 1",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strLocationType',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Location Type',",
+                                            "\t\tflex: 1",
+                                            "\t}",
+                                            "]"
+                                        ],
+                                        "designer|createAlias": "gridcombobox",
+                                        "displayField": "strLocationName",
                                         "fieldLabel": "Location",
-                                        "itemId": "txtLocation",
+                                        "itemId": "cboLocation",
                                         "labelWidth": 110,
-                                        "layout|flex": null
+                                        "layout|flex": null,
+                                        "store": [
+                                            "{Location}"
+                                        ],
+                                        "valueField": "intCompanyLocationId"
                                     },
-                                    "name": "MyTextField39",
-                                    "designerId": "ebe91a3b-12ae-4c5b-9400-e4c3c5093492"
+                                    "name": "MyComboBox64",
+                                    "configAlternates": {
+                                        "store": "binding",
+                                        "columns": "array"
+                                    },
+                                    "designerId": "ebe91a3b-12ae-4c5b-9400-e4c3c5093492",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "columns",
+                                            "type": "string"
+                                        }
+                                    ]
                                 },
                                 {
-                                    "type": "Ext.form.field.Text",
+                                    "type": "Ext.form.field.Number",
                                     "reference": {
                                         "name": "items",
                                         "type": "array"
@@ -285,15 +324,16 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Sale Price",
-                                        "itemId": "txtRetailPrice",
+                                        "fieldStyle": "text-align:right",
+                                        "itemId": "txtSalePrice",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
-                                    "name": "MyTextField41",
+                                    "name": "MyNumberField43",
                                     "designerId": "887aa2b4-9b87-46bf-9231-4f1bcfaec4ab"
                                 },
                                 {
-                                    "type": "Ext.form.field.Text",
+                                    "type": "Ext.form.field.Number",
                                     "reference": {
                                         "name": "items",
                                         "type": "array"
@@ -301,15 +341,16 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Retail Price",
-                                        "itemId": "txtRetailPrice1",
+                                        "fieldStyle": "text-align:right",
+                                        "itemId": "txtRetailPrice",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
-                                    "name": "MyTextField40",
+                                    "name": "MyNumberField44",
                                     "designerId": "bf066783-a6e9-4703-aab2-50678d949c4c"
                                 },
                                 {
-                                    "type": "Ext.form.field.Text",
+                                    "type": "Ext.form.field.Number",
                                     "reference": {
                                         "name": "items",
                                         "type": "array"
@@ -317,15 +358,16 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Wholesale Price",
-                                        "itemId": "txtWolesalePrice",
+                                        "fieldStyle": "text-align:right",
+                                        "itemId": "txtWholesalePrice",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
-                                    "name": "MyTextField42",
+                                    "name": "MyNumberField45",
                                     "designerId": "76f0714f-fcbc-442f-a075-7cc3adb0a9ac"
                                 },
                                 {
-                                    "type": "Ext.form.field.Text",
+                                    "type": "Ext.form.field.Number",
                                     "reference": {
                                         "name": "items",
                                         "type": "array"
@@ -333,15 +375,16 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Large Volume Price",
+                                        "fieldStyle": "text-align:right",
                                         "itemId": "txtLargeVolumePrice",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
-                                    "name": "MyTextField43",
+                                    "name": "MyNumberField46",
                                     "designerId": "35aa5c9e-32e0-4966-993a-4ed186303e8b"
                                 },
                                 {
-                                    "type": "Ext.form.field.Text",
+                                    "type": "Ext.form.field.Number",
                                     "reference": {
                                         "name": "items",
                                         "type": "array"
@@ -349,11 +392,12 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "MSRP",
+                                        "fieldStyle": "text-align:right",
                                         "itemId": "txtMsrp",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
-                                    "name": "MyTextField44",
+                                    "name": "MyNumberField47",
                                     "designerId": "a662b97c-8638-443d-b1e8-3b7ffd88cf0c"
                                 }
                             ]
@@ -384,16 +428,25 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "displayField": "strDescription",
                                         "fieldLabel": "Pricing Method",
                                         "itemId": "cboPricingMethod",
                                         "labelWidth": 110,
-                                        "layout|flex": null
+                                        "layout|flex": null,
+                                        "store": [
+                                            "{PricingMethods}"
+                                        ],
+                                        "valueField": "strDescription"
                                     },
-                                    "name": "MyComboBox48",
-                                    "designerId": "fa631e75-86d5-472d-93bd-ed222c9cb1fb"
+                                    "name": "MyComboBox65",
+                                    "configAlternates": {
+                                        "store": "binding",
+                                        "columns": "array"
+                                    },
+                                    "designerId": "c644b62b-fc20-4cc6-af5a-4259ff6d3371"
                                 },
                                 {
-                                    "type": "Ext.form.field.Text",
+                                    "type": "Ext.form.field.Number",
                                     "reference": {
                                         "name": "items",
                                         "type": "array"
@@ -401,15 +454,16 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Last Cost",
+                                        "fieldStyle": "text-align:right",
                                         "itemId": "txtLastCost",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
-                                    "name": "MyTextField48",
+                                    "name": "MyNumberField48",
                                     "designerId": "968f3f82-abdf-4bc9-9d5b-24627a7c1c8e"
                                 },
                                 {
-                                    "type": "Ext.form.field.Text",
+                                    "type": "Ext.form.field.Number",
                                     "reference": {
                                         "name": "items",
                                         "type": "array"
@@ -417,15 +471,16 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Standard Cost",
+                                        "fieldStyle": "text-align:right",
                                         "itemId": "txtStandardCost",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
-                                    "name": "MyTextField50",
+                                    "name": "MyNumberField49",
                                     "designerId": "da85e908-4dbe-460a-9736-911b711029b3"
                                 },
                                 {
-                                    "type": "Ext.form.field.Text",
+                                    "type": "Ext.form.field.Number",
                                     "reference": {
                                         "name": "items",
                                         "type": "array"
@@ -433,15 +488,16 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Average Cost",
+                                        "fieldStyle": "text-align:right",
                                         "itemId": "txtAverageCost",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
-                                    "name": "MyTextField49",
+                                    "name": "MyNumberField50",
                                     "designerId": "9c7aa544-87b2-4f8e-950a-b9c7f291d7f5"
                                 },
                                 {
-                                    "type": "Ext.form.field.Text",
+                                    "type": "Ext.form.field.Number",
                                     "reference": {
                                         "name": "items",
                                         "type": "array"
@@ -449,11 +505,12 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "End of Month Cost",
+                                        "fieldStyle": "text-align:right",
                                         "itemId": "txtEndofMonthCost",
                                         "labelWidth": 110,
                                         "layout|flex": null
                                     },
-                                    "name": "MyTextField51",
+                                    "name": "MyNumberField51",
                                     "designerId": "65129da8-fe40-45a9-b634-58915ede5a85"
                                 },
                                 {
@@ -466,6 +523,7 @@
                                     "userConfig": {
                                         "boxLabel": null,
                                         "fieldLabel": "Active",
+                                        "itemId": "chkActive",
                                         "labelWidth": 110,
                                         "layout|flex": 1
                                     },

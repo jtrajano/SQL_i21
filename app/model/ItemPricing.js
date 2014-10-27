@@ -18,6 +18,17 @@ Ext.define('Inventory.model.ItemPricing', {
                 inverse: {
                     role: 'tblICItemPricings',
                     storeConfig: {
+                        proxy: {
+                            type: 'rest',
+                            api: {
+                                read: '../Inventory/api/ItemPricing/GetItemPricings'
+                            },
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data',
+                                messageProperty: 'message'
+                            }
+                        },
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',

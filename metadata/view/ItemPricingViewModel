@@ -7,7 +7,77 @@
     "codeClass": null,
     "userConfig": {
         "designer|userAlias": "itempricing",
-        "designer|userClassName": "ItemPricingViewModel"
+        "designer|userClassName": "ItemPricingViewModel",
+        "requires": [
+            "i21.store.CompanyLocation"
+        ]
     },
-    "designerId": "b1f1d727-8a31-4af4-8bf1-e1bb328a9b69"
+    "designerId": "b1f1d727-8a31-4af4-8bf1-e1bb328a9b69",
+    "cn": [
+        {
+            "type": "arraystore",
+            "reference": {
+                "name": "stores",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "data": [
+                    "[",
+                    "                {",
+                    "                    strDescription: 'None'",
+                    "                },",
+                    "                {",
+                    "                    strDescription: 'Fixed Dollar Amount'",
+                    "                },",
+                    "                {",
+                    "                    strDescription: 'Markup Standard Cost'",
+                    "                },",
+                    "                {",
+                    "                    strDescription: 'Percent of Margin'",
+                    "                }",
+                    "            ]"
+                ],
+                "name": "PricingMethods"
+            },
+            "name": "MyArrayStore",
+            "designerId": "090e8cbf-23ab-46d4-869d-4b2565bbadba",
+            "cn": [
+                {
+                    "type": "Ext.data.field.Field",
+                    "reference": {
+                        "name": "fields",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "name": "strDescription"
+                    },
+                    "name": "MyField",
+                    "designerId": "4aa9159d-3882-4175-b7c0-2976533a4438"
+                }
+            ]
+        },
+        {
+            "type": "Ext.data.Store",
+            "reference": {
+                "name": "stores",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "name": "Location",
+                "type": "companylocation"
+            },
+            "name": "MyStore",
+            "designerId": "63a099f5-9a41-4595-a7cb-ccfdeae19a93",
+            "customConfigs": [
+                {
+                    "group": "(Custom Properties)",
+                    "name": "type",
+                    "type": "string"
+                }
+            ]
+        }
+    ]
 }

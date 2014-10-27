@@ -15,6 +15,40 @@
 
 Ext.define('Inventory.view.ItemPricingViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.itempricing'
+    alias: 'viewmodel.itempricing',
+
+    requires: [
+        'Inventory.view.override.ItemPricingViewModel',
+        'Ext.data.Store',
+        'Ext.data.field.Field',
+        'i21.store.CompanyLocation'
+    ],
+
+    stores: {
+        PricingMethods: {
+            data: [
+                {
+                    strDescription: 'None'
+                },
+                {
+                    strDescription: 'Fixed Dollar Amount'
+                },
+                {
+                    strDescription: 'Markup Standard Cost'
+                },
+                {
+                    strDescription: 'Percent of Margin'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        Location: {
+            type: 'companylocation'
+        }
+    }
 
 });

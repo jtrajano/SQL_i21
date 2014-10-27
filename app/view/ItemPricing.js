@@ -24,6 +24,7 @@ Ext.define('Inventory.view.ItemPricing', {
         'Ext.button.Button',
         'Ext.toolbar.Separator',
         'Ext.form.field.ComboBox',
+        'Ext.form.field.Number',
         'Ext.form.field.Checkbox',
         'Ext.toolbar.Paging'
     ],
@@ -166,40 +167,70 @@ Ext.define('Inventory.view.ItemPricing', {
                             },
                             items: [
                                 {
-                                    xtype: 'textfield',
-                                    itemId: 'txtLocation',
+                                    xtype: 'gridcombobox',
+                                    columns: [
+                                        {
+                                            dataIndex: 'intCompanyLocationId',
+                                            dataType: 'numeric',
+                                            text: 'Location Id',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strLocationName',
+                                            dataType: 'string',
+                                            text: 'Location Name',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strLocationType',
+                                            dataType: 'string',
+                                            text: 'Location Type',
+                                            flex: 1
+                                        }
+                                    ],
+                                    itemId: 'cboLocation',
                                     fieldLabel: 'Location',
-                                    labelWidth: 110
+                                    labelWidth: 110,
+                                    displayField: 'strLocationName',
+                                    valueField: 'intCompanyLocationId',
+                                    bind: {
+                                        store: '{Location}'
+                                    }
                                 },
                                 {
-                                    xtype: 'textfield',
-                                    itemId: 'txtRetailPrice',
+                                    xtype: 'numberfield',
+                                    itemId: 'txtSalePrice',
                                     fieldLabel: 'Sale Price',
-                                    labelWidth: 110
+                                    labelWidth: 110,
+                                    fieldStyle: 'text-align:right'
                                 },
                                 {
-                                    xtype: 'textfield',
-                                    itemId: 'txtRetailPrice1',
+                                    xtype: 'numberfield',
+                                    itemId: 'txtRetailPrice',
                                     fieldLabel: 'Retail Price',
-                                    labelWidth: 110
+                                    labelWidth: 110,
+                                    fieldStyle: 'text-align:right'
                                 },
                                 {
-                                    xtype: 'textfield',
-                                    itemId: 'txtWolesalePrice',
+                                    xtype: 'numberfield',
+                                    itemId: 'txtWholesalePrice',
                                     fieldLabel: 'Wholesale Price',
-                                    labelWidth: 110
+                                    labelWidth: 110,
+                                    fieldStyle: 'text-align:right'
                                 },
                                 {
-                                    xtype: 'textfield',
+                                    xtype: 'numberfield',
                                     itemId: 'txtLargeVolumePrice',
                                     fieldLabel: 'Large Volume Price',
-                                    labelWidth: 110
+                                    labelWidth: 110,
+                                    fieldStyle: 'text-align:right'
                                 },
                                 {
-                                    xtype: 'textfield',
+                                    xtype: 'numberfield',
                                     itemId: 'txtMsrp',
                                     fieldLabel: 'MSRP',
-                                    labelWidth: 110
+                                    labelWidth: 110,
+                                    fieldStyle: 'text-align:right'
                                 }
                             ]
                         },
@@ -216,35 +247,45 @@ Ext.define('Inventory.view.ItemPricing', {
                                     xtype: 'combobox',
                                     itemId: 'cboPricingMethod',
                                     fieldLabel: 'Pricing Method',
-                                    labelWidth: 110
+                                    labelWidth: 110,
+                                    displayField: 'strDescription',
+                                    valueField: 'strDescription',
+                                    bind: {
+                                        store: '{PricingMethods}'
+                                    }
                                 },
                                 {
-                                    xtype: 'textfield',
+                                    xtype: 'numberfield',
                                     itemId: 'txtLastCost',
                                     fieldLabel: 'Last Cost',
-                                    labelWidth: 110
+                                    labelWidth: 110,
+                                    fieldStyle: 'text-align:right'
                                 },
                                 {
-                                    xtype: 'textfield',
+                                    xtype: 'numberfield',
                                     itemId: 'txtStandardCost',
                                     fieldLabel: 'Standard Cost',
-                                    labelWidth: 110
+                                    labelWidth: 110,
+                                    fieldStyle: 'text-align:right'
                                 },
                                 {
-                                    xtype: 'textfield',
+                                    xtype: 'numberfield',
                                     itemId: 'txtAverageCost',
                                     fieldLabel: 'Average Cost',
-                                    labelWidth: 110
+                                    labelWidth: 110,
+                                    fieldStyle: 'text-align:right'
                                 },
                                 {
-                                    xtype: 'textfield',
+                                    xtype: 'numberfield',
                                     itemId: 'txtEndofMonthCost',
                                     fieldLabel: 'End of Month Cost',
-                                    labelWidth: 110
+                                    labelWidth: 110,
+                                    fieldStyle: 'text-align:right'
                                 },
                                 {
                                     xtype: 'checkboxfield',
                                     flex: 1,
+                                    itemId: 'chkActive',
                                     fieldLabel: 'Active',
                                     labelWidth: 110
                                 }

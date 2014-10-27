@@ -471,6 +471,11 @@ Ext.define('Inventory.view.override.ItemViewController', {
         var btnEditLocation = grdLocationStore.down('#btnEditLocation');
         btnEditLocation.on('click', me.onEditLocationClick);
 
+        var btnAddPricing = grdPricing.down('#btnAddPricing');
+        btnAddPricing.on('click', me.onAddPricingClick);
+        var btnEditPricing = grdPricing.down('#btnEditPricing');
+        btnEditPricing.on('click', me.onEditPricingClick);
+
         // <editor-fold desc="Subscribe to Renderers and Cell Editing Plugins">
         var colLocationLocation = grdLocationStore.columns[0];
         colLocationLocation.renderer = me.LocationRenderer;
@@ -601,6 +606,9 @@ Ext.define('Inventory.view.override.ItemViewController', {
             edit: me.onGridStockEdit,
             scope: me
         });
+
+        var colPricingLocation = grdPricing.columns[0];
+        colPricingLocation.renderer = me.LocationRenderer;
 
         var colPricingLevelLocation = grdPricingLevel.columns[0];
         colPricingLevelLocation.renderer = me.LocationRenderer;
@@ -1108,5 +1116,46 @@ Ext.define('Inventory.view.override.ItemViewController', {
         var grdLocation = win.down('#grdLocationStore');
 
         grdLocation.store.reload();
+    },
+
+    onAddPricingClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var me = win.controller;
+        me.openItemPricingScreen('new', win);
+    },
+
+    onEditPricingClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var me = win.controller;
+        me.openItemPricingScreen('edit', win);
+    },
+
+    openItemPricingScreen: function (action, window) {
+        var win = window;
+        var me = win.controller;
+        var screenName = 'Inventory.view.ItemPricing';
+
+        Ext.require([
+            screenName,
+                screenName + 'ViewController',
+        ], function() {
+            var screen = screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
+            var view = Ext.create(screenName, { controller: screen.toLowerCase() });
+            view.on('destroy', me.onDestroyItemPricingScreen, me, { window: win });
+
+            var controller = view.getController();
+            var current = win.getViewModel().data.current;
+            controller.show({ id: current.get('intItemId'), action: action });
+        });
+    },
+
+    onDestroyItemPricingScreen: function(win, eOpts) {
+        var me = eOpts.window.getController();
+        var win = eOpts.window;
+        var grdPricing = win.down('#grdPricing');
+
+        grdPricing.store.reload();
     }
+
+
 });
