@@ -32,13 +32,15 @@ Ext.define('Inventory.view.Category', {
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
         'Ext.grid.column.Check',
+        'Ext.form.FieldSet',
+        'Ext.form.Label',
         'Ext.toolbar.Paging'
     ],
 
     viewModel: {
         type: 'category'
     },
-    height: 560,
+    height: 573,
     hidden: false,
     minHeight: 560,
     minWidth: 860,
@@ -638,7 +640,7 @@ Ext.define('Inventory.view.Category', {
                                     },
                                     {
                                         xtype: 'panel',
-                                        bodyPadding: 10,
+                                        bodyPadding: '10 10 0 10',
                                         title: 'Manufacturing',
                                         layout: {
                                             type: 'vbox',
@@ -669,7 +671,6 @@ Ext.define('Inventory.view.Category', {
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
-                                                                flex: 1,
                                                                 itemId: 'txtLifeTime',
                                                                 fieldLabel: 'Life Time (mins)',
                                                                 labelWidth: 160,
@@ -677,7 +678,6 @@ Ext.define('Inventory.view.Category', {
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
-                                                                flex: 1,
                                                                 itemId: 'txtBOMItemShrinkage',
                                                                 fieldLabel: 'BOM Item Shrinkage',
                                                                 labelWidth: 160,
@@ -685,7 +685,6 @@ Ext.define('Inventory.view.Category', {
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
-                                                                flex: 1,
                                                                 itemId: 'txtBOMItemUpperTolerance',
                                                                 fieldLabel: 'BOM Item Upper Tolerance',
                                                                 labelWidth: 160,
@@ -693,7 +692,6 @@ Ext.define('Inventory.view.Category', {
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
-                                                                flex: 1,
                                                                 itemId: 'txtBOMItemLowerTolerance',
                                                                 fieldLabel: 'BOM Item Lower Tolerance',
                                                                 labelWidth: 160,
@@ -716,18 +714,6 @@ Ext.define('Inventory.view.Category', {
                                                                 itemId: 'txtConsumptionMethod',
                                                                 fieldLabel: 'Consumption Method',
                                                                 labelWidth: 160
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtBOMItemType',
-                                                                fieldLabel: 'BOM Item Type',
-                                                                labelWidth: 160
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtShortName',
-                                                                fieldLabel: 'Short Name',
-                                                                labelWidth: 160
                                                             }
                                                         ]
                                                     },
@@ -742,26 +728,14 @@ Ext.define('Inventory.view.Category', {
                                                         items: [
                                                             {
                                                                 xtype: 'textfield',
-                                                                itemId: 'txtReceiptImage',
-                                                                fieldLabel: 'Receipt Image',
+                                                                itemId: 'txtBOMItemType',
+                                                                fieldLabel: 'BOM Item Type',
                                                                 labelWidth: 160
                                                             },
                                                             {
                                                                 xtype: 'textfield',
-                                                                itemId: 'txtWIPImage',
-                                                                fieldLabel: 'WIP Image',
-                                                                labelWidth: 160
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtFGImage',
-                                                                fieldLabel: 'FG Image',
-                                                                labelWidth: 160
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtShipImage',
-                                                                fieldLabel: 'Ship Image',
+                                                                itemId: 'txtShortName',
+                                                                fieldLabel: 'Short Name',
                                                                 labelWidth: 160
                                                             },
                                                             {
@@ -805,6 +779,114 @@ Ext.define('Inventory.view.Category', {
                                                                 itemId: 'chkYieldAdjustment',
                                                                 fieldLabel: 'Yield Adjustment',
                                                                 labelWidth: 160
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                xtype: 'fieldset',
+                                                flex: 1,
+                                                itemId: 'pnlImages',
+                                                padding: 5,
+                                                title: 'Images',
+                                                layout: {
+                                                    type: 'hbox',
+                                                    align: 'stretch',
+                                                    pack: 'center'
+                                                },
+                                                items: [
+                                                    {
+                                                        xtype: 'container',
+                                                        layout: {
+                                                            type: 'vbox',
+                                                            align: 'center'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'label',
+                                                                margin: '0 0 5 0',
+                                                                text: 'Receipt Image'
+                                                            },
+                                                            {
+                                                                xtype: 'imagecontainer',
+                                                                name: 'imgPhoto',
+                                                                baseCls: 'x-container x-header-panel-white',
+                                                                height: 121,
+                                                                itemId: 'imgReceipt',
+                                                                style: 'background-color: white ;border:1px #b5b8c8 solid',
+                                                                width: 158
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        xtype: 'container',
+                                                        margin: '0 10',
+                                                        layout: {
+                                                            type: 'vbox',
+                                                            align: 'center'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'label',
+                                                                margin: '0 0 5 0',
+                                                                text: 'WIP Image'
+                                                            },
+                                                            {
+                                                                xtype: 'imagecontainer',
+                                                                name: 'imgPhoto',
+                                                                baseCls: 'x-container x-header-panel-white',
+                                                                height: 121,
+                                                                itemId: 'imgWIP',
+                                                                style: 'background-color: white ;border:1px #b5b8c8 solid',
+                                                                width: 158
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        xtype: 'container',
+                                                        layout: {
+                                                            type: 'vbox',
+                                                            align: 'center'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'label',
+                                                                margin: '0 0 5 0',
+                                                                text: 'FG Image'
+                                                            },
+                                                            {
+                                                                xtype: 'imagecontainer',
+                                                                name: 'imgPhoto',
+                                                                baseCls: 'x-container x-header-panel-white',
+                                                                height: 121,
+                                                                itemId: 'imgFG',
+                                                                style: 'background-color: white ;border:1px #b5b8c8 solid',
+                                                                width: 158
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        xtype: 'container',
+                                                        margin: '0 0 0 10',
+                                                        layout: {
+                                                            type: 'vbox',
+                                                            align: 'center'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'label',
+                                                                margin: '0 0 5 0',
+                                                                text: 'Ship Image'
+                                                            },
+                                                            {
+                                                                xtype: 'imagecontainer',
+                                                                name: 'imgPhoto',
+                                                                baseCls: 'x-container x-header-panel-white',
+                                                                height: 121,
+                                                                itemId: 'imgShip',
+                                                                style: 'background-color: white ;border:1px #b5b8c8 solid',
+                                                                width: 158
                                                             }
                                                         ]
                                                     }

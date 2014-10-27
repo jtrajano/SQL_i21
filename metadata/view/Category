@@ -11,7 +11,7 @@
         "defaultFocus": null,
         "designer|userAlias": "category",
         "designer|userClassName": "Category",
-        "height": 560,
+        "height": 573,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
@@ -1492,7 +1492,7 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "bodyPadding": 10,
+                                "bodyPadding": "10 10 0 10",
                                 "container|align": "stretch",
                                 "layout": "vbox",
                                 "title": "Manufacturing"
@@ -1572,7 +1572,7 @@
                                                         "hideTrigger": true,
                                                         "itemId": "txtLifeTime",
                                                         "labelWidth": 160,
-                                                        "layout|flex": 1
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyNumberField12",
                                                     "designerId": "574a6410-c8b5-4c43-a2b5-d9c9f47ce0f0"
@@ -1589,7 +1589,7 @@
                                                         "hideTrigger": true,
                                                         "itemId": "txtBOMItemShrinkage",
                                                         "labelWidth": 160,
-                                                        "layout|flex": 1
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyNumberField13",
                                                     "designerId": "abc764a7-235a-4f49-a479-f73e56f57d77"
@@ -1606,7 +1606,7 @@
                                                         "hideTrigger": true,
                                                         "itemId": "txtBOMItemUpperTolerance",
                                                         "labelWidth": 160,
-                                                        "layout|flex": 1
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyNumberField14",
                                                     "designerId": "e088aa99-cc3c-419f-b701-32b79f57f740"
@@ -1623,7 +1623,7 @@
                                                         "hideTrigger": true,
                                                         "itemId": "txtBOMItemLowerTolerance",
                                                         "labelWidth": 160,
-                                                        "layout|flex": 1
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyNumberField15",
                                                     "designerId": "00893aaf-59f7-4a43-9ac1-f8acaa9b07f9"
@@ -1677,7 +1677,27 @@
                                                     },
                                                     "name": "MyTextField34",
                                                     "designerId": "0f938a87-2017-4beb-8085-0719af8b0530"
-                                                },
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.container.Container",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "container|align": "stretch",
+                                                "designer|displayName": "container",
+                                                "layout": "vbox",
+                                                "layout|flex": 1,
+                                                "layout|margins": null,
+                                                "margin": "0 1 0 5"
+                                            },
+                                            "name": "MyContainer48",
+                                            "designerId": "4273bf2b-eac5-4b6e-9088-b937f9b67812",
+                                            "cn": [
                                                 {
                                                     "type": "Ext.form.field.Text",
                                                     "reference": {
@@ -1709,90 +1729,6 @@
                                                     },
                                                     "name": "MyTextField36",
                                                     "designerId": "75ef587b-a49e-4d23-878e-f5c3468d7885"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.container.Container",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "container|align": "stretch",
-                                                "designer|displayName": "container",
-                                                "layout": "vbox",
-                                                "layout|flex": 1,
-                                                "layout|margins": null,
-                                                "margin": "0 1 0 5"
-                                            },
-                                            "name": "MyContainer48",
-                                            "designerId": "4273bf2b-eac5-4b6e-9088-b937f9b67812",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Receipt Image",
-                                                        "itemId": "txtReceiptImage",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "MyTextField37",
-                                                    "designerId": "21c0bb0c-8cc6-49f8-bb8c-d494fbb2a20a"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "WIP Image",
-                                                        "itemId": "txtWIPImage",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "MyTextField38",
-                                                    "designerId": "dec56de1-4e03-4585-9090-28d5886e729f"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "FG Image",
-                                                        "itemId": "txtFGImage",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "MyTextField39",
-                                                    "designerId": "435689b8-0df0-4792-b676-5b73ad370e11"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Ship Image",
-                                                        "itemId": "txtShipImage",
-                                                        "labelWidth": 160,
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "MyTextField40",
-                                                    "designerId": "f473c514-0421-435b-9056-b4e079eeb70a"
                                                 },
                                                 {
                                                     "type": "Ext.form.field.Number",
@@ -1901,6 +1837,290 @@
                                             ]
                                         }
                                     ]
+                                },
+                                {
+                                    "type": "Ext.form.FieldSet",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "stretch",
+                                        "container|pack": "center",
+                                        "designer|displayName": "container",
+                                        "itemId": "pnlImages",
+                                        "layout": "hbox",
+                                        "layout|flex": 1,
+                                        "padding": 5,
+                                        "title": "Images"
+                                    },
+                                    "name": "MyFieldSet",
+                                    "designerId": "c53148e5-a3b4-4601-9bf0-755fc58ede51",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.container.Container",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "container|align": "center",
+                                                "designer|displayName": "container",
+                                                "layout": "vbox",
+                                                "layout|flex": null
+                                            },
+                                            "name": "MyContainer4",
+                                            "designerId": "2becbb25-c13d-4601-bd9c-65b99cf2d2f8",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.Label",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "margin": "0 0 5 0",
+                                                        "text": "Receipt Image"
+                                                    },
+                                                    "name": "MyLabel2",
+                                                    "designerId": "d9dc6ed8-d307-4211-b8e3-ff4478d1d0fa"
+                                                },
+                                                {
+                                                    "type": "Ext.container.Container",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "baseCls": "x-container x-header-panel-white",
+                                                        "designer|createAlias": "imagecontainer",
+                                                        "designer|displayName": "imageContainer",
+                                                        "height": 121,
+                                                        "itemId": "imgReceipt",
+                                                        "layout|flex": null,
+                                                        "margin": null,
+                                                        "maxWidth": null,
+                                                        "name": "imgPhoto",
+                                                        "style": "background-color: white ;border:1px #b5b8c8 solid",
+                                                        "width": 158
+                                                    },
+                                                    "name": "MyContainer135",
+                                                    "configAlternates": {
+                                                        "style": "string"
+                                                    },
+                                                    "designerId": "34e58794-a28a-47b1-93ad-e42c0e97c7d8",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "name",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.container.Container",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "container|align": "center",
+                                                "designer|displayName": "container",
+                                                "layout": "vbox",
+                                                "layout|flex": null,
+                                                "margin": "0 10"
+                                            },
+                                            "name": "MyContainer5",
+                                            "designerId": "3d5b95af-84b0-462d-9696-287ff54b1217",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.Label",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "margin": "0 0 5 0",
+                                                        "text": "WIP Image"
+                                                    },
+                                                    "name": "MyLabel2",
+                                                    "designerId": "d2c73c3c-ebe7-4cdf-94a9-850c86dd8149"
+                                                },
+                                                {
+                                                    "type": "Ext.container.Container",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "baseCls": "x-container x-header-panel-white",
+                                                        "designer|createAlias": "imagecontainer",
+                                                        "designer|displayName": "imageContainer",
+                                                        "height": 121,
+                                                        "itemId": "imgWIP",
+                                                        "layout|flex": null,
+                                                        "margin": null,
+                                                        "maxWidth": null,
+                                                        "name": "imgPhoto",
+                                                        "style": "background-color: white ;border:1px #b5b8c8 solid",
+                                                        "width": 158
+                                                    },
+                                                    "name": "MyContainer135",
+                                                    "configAlternates": {
+                                                        "style": "string"
+                                                    },
+                                                    "designerId": "27460393-b8a0-4f48-9ed8-ef2f6b732d37",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "name",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.container.Container",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "container|align": "center",
+                                                "designer|displayName": "container",
+                                                "layout": "vbox",
+                                                "layout|flex": null
+                                            },
+                                            "name": "MyContainer6",
+                                            "designerId": "61fbc76c-3fb8-4c7f-b759-516b5a348ea0",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.Label",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "margin": "0 0 5 0",
+                                                        "text": "FG Image"
+                                                    },
+                                                    "name": "MyLabel2",
+                                                    "designerId": "0d1be5e5-66dc-448e-bf38-d3248c2add00"
+                                                },
+                                                {
+                                                    "type": "Ext.container.Container",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "baseCls": "x-container x-header-panel-white",
+                                                        "designer|createAlias": "imagecontainer",
+                                                        "designer|displayName": "imageContainer",
+                                                        "height": 121,
+                                                        "itemId": "imgFG",
+                                                        "layout|flex": null,
+                                                        "margin": null,
+                                                        "maxWidth": null,
+                                                        "name": "imgPhoto",
+                                                        "style": "background-color: white ;border:1px #b5b8c8 solid",
+                                                        "width": 158
+                                                    },
+                                                    "name": "MyContainer135",
+                                                    "configAlternates": {
+                                                        "style": "string"
+                                                    },
+                                                    "designerId": "e4aab2e3-3225-4ab3-9317-ed413f2ce92c",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "name",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.container.Container",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "container|align": "center",
+                                                "designer|displayName": "container",
+                                                "layout": "vbox",
+                                                "layout|flex": null,
+                                                "margin": "0 0 0 10"
+                                            },
+                                            "name": "MyContainer7",
+                                            "designerId": "e57fa9c2-d882-42bf-9eb6-e0624270bce8",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.Label",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "margin": "0 0 5 0",
+                                                        "text": "Ship Image"
+                                                    },
+                                                    "name": "MyLabel2",
+                                                    "designerId": "79ac6f96-7d16-4438-8228-e4faad10c0cf"
+                                                },
+                                                {
+                                                    "type": "Ext.container.Container",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "baseCls": "x-container x-header-panel-white",
+                                                        "designer|createAlias": "imagecontainer",
+                                                        "designer|displayName": "imageContainer",
+                                                        "height": 121,
+                                                        "itemId": "imgShip",
+                                                        "layout|flex": null,
+                                                        "margin": null,
+                                                        "maxWidth": null,
+                                                        "name": "imgPhoto",
+                                                        "style": "background-color: white ;border:1px #b5b8c8 solid",
+                                                        "width": 158
+                                                    },
+                                                    "name": "MyContainer135",
+                                                    "configAlternates": {
+                                                        "style": "string"
+                                                    },
+                                                    "designerId": "b7ca06e1-a695-406f-96b3-f93c24e17d8e",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "name",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
                                 }
                             ]
                         }
@@ -1920,7 +2140,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging11",
                     "designerId": "0ca3c6d6-785e-4ad8-ac4f-3eaa2d75593b",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

@@ -4211,6 +4211,208 @@ Ext.define('Inventory.view.Item', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        bodyPadding: 5,
+                                        title: 'Factory & Lines',
+                                        layout: {
+                                            type: 'vbox',
+                                            align: 'stretch'
+                                        },
+                                        items: [
+                                            {
+                                                xtype: 'tabpanel',
+                                                flex: 1,
+                                                itemId: 'tabFactoryLines',
+                                                activeTab: 0,
+                                                plain: true,
+                                                items: [
+                                                    {
+                                                        xtype: 'panel',
+                                                        title: 'Factory',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            align: 'stretch'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'advancefiltergrid',
+                                                                flex: 1,
+                                                                itemId: 'grdFactory',
+                                                                margin: -1,
+                                                                title: 'Factory Association',
+                                                                dockedItems: [
+                                                                    {
+                                                                        xtype: 'toolbar',
+                                                                        dock: 'top',
+                                                                        itemId: 'tlbGridOptions',
+                                                                        layout: {
+                                                                            type: 'hbox',
+                                                                            padding: '0 0 0 1'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnDeleteFactory',
+                                                                                iconCls: 'small-delete',
+                                                                                text: 'Delete'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'tbseparator'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'filter1'
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ],
+                                                                columns: [
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        dataIndex: 'strFieldName',
+                                                                        itemId: 'colPricingLevelLocation',
+                                                                        text: 'Factory Name',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        xtype: 'checkcolumn',
+                                                                        width: 60,
+                                                                        text: 'Default'
+                                                                    }
+                                                                ],
+                                                                viewConfig: {
+                                                                    itemId: 'grvFactory'
+                                                                },
+                                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                                    selType: 'checkboxmodel',
+                                                                    mode: 'SINGLE'
+                                                                })
+                                                            },
+                                                            {
+                                                                xtype: 'advancefiltergrid',
+                                                                flex: 1,
+                                                                itemId: 'grdManufacturingCellAssociation',
+                                                                margin: '-1 -1 -1 5',
+                                                                title: 'Manufacturing Cell Association',
+                                                                dockedItems: [
+                                                                    {
+                                                                        xtype: 'toolbar',
+                                                                        dock: 'top',
+                                                                        itemId: 'tlbGridOptions',
+                                                                        layout: {
+                                                                            type: 'hbox',
+                                                                            padding: '0 0 0 1'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnDeleteManufacturingCellAssociation',
+                                                                                iconCls: 'small-delete',
+                                                                                text: 'Delete'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'tbseparator'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'filter1'
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ],
+                                                                columns: [
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colPricingLevelLocation',
+                                                                        dataIndex: 'strFieldName',
+                                                                        text: 'Cell Name',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        xtype: 'checkcolumn',
+                                                                        width: 60,
+                                                                        text: 'Default'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numbercolumn',
+                                                                        text: 'Preference'
+                                                                    }
+                                                                ],
+                                                                viewConfig: {
+                                                                    itemId: 'grvManufacturingCellAssociation'
+                                                                },
+                                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                                    selType: 'checkboxmodel',
+                                                                    mode: 'SINGLE'
+                                                                })
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        xtype: 'panel',
+                                                        layout: 'fit',
+                                                        title: 'Owner',
+                                                        items: [
+                                                            {
+                                                                xtype: 'advancefiltergrid',
+                                                                itemId: 'grdOwner',
+                                                                margin: -1,
+                                                                title: 'Owner Association',
+                                                                dockedItems: [
+                                                                    {
+                                                                        xtype: 'toolbar',
+                                                                        dock: 'top',
+                                                                        itemId: 'tlbGridOptions',
+                                                                        layout: {
+                                                                            type: 'hbox',
+                                                                            padding: '0 0 0 1'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnDeleteOwner',
+                                                                                iconCls: 'small-delete',
+                                                                                text: 'Delete'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'tbseparator'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'filter1'
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ],
+                                                                columns: [
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        dataIndex: 'strFieldName',
+                                                                        itemId: 'colSpecialPricingLocation',
+                                                                        text: 'Owner',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        xtype: 'checkcolumn',
+                                                                        width: 70,
+                                                                        text: 'Is Default'
+                                                                    }
+                                                                ],
+                                                                viewConfig: {
+                                                                    itemId: 'grvOwner'
+                                                                },
+                                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                                    selType: 'checkboxmodel',
+                                                                    mode: 'SINGLE'
+                                                                })
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'panel',
                                         layout: 'fit',
                                         title: 'Notes',
                                         items: [
