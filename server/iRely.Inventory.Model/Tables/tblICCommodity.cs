@@ -14,6 +14,8 @@ namespace iRely.Inventory.Model
         {
             this.tblICCommodityGroups = new List<tblICCommodityGroup>();
             this.tblICCommodityUnitMeasures = new List<tblICCommodityUnitMeasure>();
+            this.tblICCommodityAccounts = new List<tblICCommodityAccount>();
+            this.tblICCommodityAttributes = new List<tblICCommodityAttribute>();
         }
 
         public int intCommodityId { get; set; }
@@ -52,6 +54,8 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICCommodityGroup> tblICCommodityGroups { get; set; }
         public ICollection<tblICCommodityUnitMeasure> tblICCommodityUnitMeasures { get; set; }
+        public ICollection<tblICCommodityAccount> tblICCommodityAccounts { get; set; }
+        public ICollection<tblICCommodityAttribute> tblICCommodityAttributes { get; set; }
 
     }
 }

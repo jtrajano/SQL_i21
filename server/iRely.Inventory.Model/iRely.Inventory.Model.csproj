@@ -54,6 +54,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="InventoryEntities.cs" />
+    <Compile Include="Mappings\tblICItemBundleMap.cs" />
+    <Compile Include="Mappings\tblICItemAssemblyMap.cs" />
+    <Compile Include="Mappings\tblICItemKitDetailMap.cs" />
+    <Compile Include="Mappings\tblICItemKitMap.cs" />
+    <Compile Include="Mappings\tblICCommodityAttributeMap.cs" />
     <Compile Include="Mappings\tblICCountGroupMap.cs" />
     <Compile Include="Mappings\tblICMaterialNMFCMap.cs" />
     <Compile Include="Mappings\tblICFuelTaxClassMap.cs" />
@@ -104,6 +109,11 @@
     <Compile Include="Mappings\tblICUnitMeasureMap.cs" />
     <Compile Include="Mappings\tblICUnitTypeMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tables\tblICCommodityAttribute.cs" />
+    <Compile Include="Tables\tblICItemBundle.cs" />
+    <Compile Include="Tables\tblICItemAssembly.cs" />
+    <Compile Include="Tables\tblICItemKitDetail.cs" />
+    <Compile Include="Tables\tblICItemKit.cs" />
     <Compile Include="Tables\tblICCountGroup.cs" />
     <Compile Include="Tables\tblICMaterialNMFC.cs" />
     <Compile Include="Tables\tblICFuelTaxClass.cs" />

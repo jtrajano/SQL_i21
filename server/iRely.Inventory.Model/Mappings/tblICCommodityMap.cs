@@ -49,6 +49,19 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.PatronageCategoryDirect)
                 .WithMany(p => p.tblICCommoditiesDirect)
                 .HasForeignKey(p => p.intPatronageCategoryDirectId);
+
+            this.HasMany(p => p.tblICCommodityAccounts)
+                .WithRequired(p => p.tblICCommodity)
+                .HasForeignKey(p => p.intCommodityId);
+            this.HasMany(p => p.tblICCommodityAttributes)
+                .WithRequired(p => p.tblICCommodity)
+                .HasForeignKey(p => p.intCommodityId);
+            this.HasMany(p => p.tblICCommodityGroups)
+                .WithRequired(p => p.tblICCommodity)
+                .HasForeignKey(p => p.intCommodityId);
+            this.HasMany(p => p.tblICCommodityUnitMeasures)
+                .WithRequired(p => p.tblICCommodity)
+                .HasForeignKey(p => p.intCommodityId);
         }
     }
 }

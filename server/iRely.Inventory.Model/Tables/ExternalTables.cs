@@ -127,6 +127,8 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICItemAccount> tblICItemAccounts { get; set; }
         public ICollection<tblICItemAccount> tblICItemAccountProfitCenters { get; set; }
+        public ICollection<tblICCommodityAccount> tblICCommodityAccounts { get; set; }
+
     }
 
     public class vyuAPVendor

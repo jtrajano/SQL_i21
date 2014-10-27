@@ -140,6 +140,13 @@ namespace iRely.Inventory.Model
         public DbSet<tblICFuelTaxClassProductCode> tblICFuelTaxClassProductCodes { get; set; }
         public DbSet<tblICCountGroup> tblICCountGroups { get; set; }
 
+        public DbSet<tblICCommodityAccount> tblICCommodityAccounts { get; set; }
+        public DbSet<tblICCommodityAttribute> tblICCommodityAttributes { get; set; }
+        public DbSet<tblICItemKit> tblICItemKits { get; set; }
+        public DbSet<tblICItemKitDetail> tblICItemKitDetails { get; set; }
+        public DbSet<tblICItemAssembly> tblICItemAssemblies { get; set; }
+        public DbSet<tblICItemBundle> tblICItemBundles { get; set; }
+
         public DbSet<tblICInventoryReceipt> tblICInventoryReceipts { get; set; }
         public DbSet<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
         public DbSet<tblICInventoryReceiptItemLot> tblICInventoryReceiptItemLots { get; set; }
@@ -204,7 +211,14 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICFuelTaxClassMap());
             modelBuilder.Configurations.Add(new tblICFuelTaxClassProductCodeMap());
             modelBuilder.Configurations.Add(new tblICCountGroupMap());
-            
+
+            modelBuilder.Configurations.Add(new tblICCommodityAccountMap());
+            modelBuilder.Configurations.Add(new tblICCommodityAttributeMap());
+            modelBuilder.Configurations.Add(new tblICItemAssemblyMap());
+            modelBuilder.Configurations.Add(new tblICItemBundleMap());
+            modelBuilder.Configurations.Add(new tblICItemKitMap());
+            modelBuilder.Configurations.Add(new tblICItemKitDetailMap());
+
             modelBuilder.Configurations.Add(new tblICInventoryReceiptMap());
             modelBuilder.Configurations.Add(new tblICInventoryReceiptItemMap());
             modelBuilder.Configurations.Add(new tblICInventoryReceiptItemLotMap());

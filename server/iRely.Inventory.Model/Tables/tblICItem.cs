@@ -111,6 +111,16 @@ namespace iRely.Inventory.Model
         public bool ysnDropShip { get; set; }
         public bool ysnCommisionable { get; set; }
         public bool ysnSpecialCommission { get; set; }
+        public int? intCommodityId { get; set; }
+        public int? intCommodityHierarchyId { get; set; }
+        public decimal? dblGAShrinkFactor { get; set; }
+        public int? intOriginId { get; set; }
+        public int? intProductTypeId { get; set; }
+        public int? intRegionId { get; set; }
+        public int? intSeasonId { get; set; }
+        public int? intClassVarietyId { get; set; }
+        public int? intProductLineId { get; set; }
+        public string strMarketValuation { get; set; }
 
         public ICollection<tblICItemUOM> tblICItemUOMs { get; set; }
         public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
@@ -130,6 +140,23 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemStock> tblICItemStocks { get; set; }
         public ICollection<tblICItemAccount> tblICItemAccounts { get; set; }
         public ICollection<tblICItemNote> tblICItemNotes { get; set; }
+        public ICollection<tblICItemKit> tblICItemKits { get; set; }
+        public ICollection<tblICItemKitDetail> tblICItemKitDetails { get; set; }
+        public ICollection<tblICItemBundle> tblICItemBundles { get; set; }
+        public ICollection<tblICItemAssembly> tblICItemAssemblies { get; set; }
+
+        public tblICCommodity tblICCommodity { get; set; }
+        //public tblICCommodityhie tblICCommodity { get; set; }
+        public tblICCommodityAttribute CommodityOrigin { get; set; }
+        public tblICCommodityAttribute CommodityProductType { get; set; }
+        public tblICCommodityAttribute CommodityRegion { get; set; }
+        public tblICCommodityAttribute CommoditySeason { get; set; }
+        public tblICCommodityAttribute CommodityClassVariety { get; set; }
+        public tblICCommodityAttribute CommodityProductLine { get; set; }
+        
+
+        
+
 
     }
 

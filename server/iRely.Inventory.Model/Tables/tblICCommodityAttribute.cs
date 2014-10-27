@@ -8,16 +8,14 @@ using iRely.Common;
 
 namespace iRely.Inventory.Model
 {
-    public class tblICCommodityAccount : BaseEntity
+    public class tblICCommodityAttribute : BaseEntity
     {
-        public int intCommodityAccountId { get; set; }
+        public int intCommodityAttributeId { get; set; }
         public int intCommodityId { get; set; }
-        public int? intLocationId { get; set; }
-        public string strAccountDescription { get; set; }
-        public int? intAccountId { get; set; }
+        public string strType { get; set; }
+        public string strDescription { get; set; }
         public int intSort { get; set; }
 
         public tblICCommodity tblICCommodity { get; set; }
-        public tblGLAccount tblGLAccount { get; set; }
     }
 }
