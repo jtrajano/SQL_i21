@@ -215,7 +215,10 @@
     <Build Include="testi21Database\Stored Procedures\Fake data for simple Items.sql" />
     <Build Include="testi21Database\Functions\test the fnGetNegativeInventoryOptions function.sql" />
     <Build Include="testi21Database\Stored Procedures\test the basics of uspICProcessCosting stored procedure.sql" />
-    <Build Include="testi21Database\Stored Procedures\test case one for error handling in uspICProcessCosting stored procedure.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessCosting for errors thrown by uspICValidateCostingOnPost.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessCosting for errors thrown by uspICPostCosting.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessCosting for errors thrown by uspICValidateCostingOnUnpost.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessCosting for errors thrown by uspICUnpostCosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
