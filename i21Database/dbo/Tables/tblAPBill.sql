@@ -28,6 +28,7 @@
 	[dblInterest] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
     [intTransactionType] INT NOT NULL DEFAULT 0, 
     [intPurchaseOrderId] INT NULL, 
+	[strPONumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
     [intShipFromId] INT NULL , 
 	[intShipToId] INT NULL , 
     [intStoreLocationId] INT NULL , 

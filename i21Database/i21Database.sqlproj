@@ -617,7 +617,6 @@
     <Build Include="dbo\Tables\tblRMDefaultFilter.sql" />
     <Build Include="dbo\Tables\tblRMDefaultOption.sql" />
     <Build Include="dbo\Tables\tblRMDefaultSort.sql" />
-    <Build Include="dbo\Tables\tblPRRace.sql" />
     <Build Include="dbo\Tables\tblPRTemplate.sql" />
     <Build Include="dbo\Tables\tblPRTemplateEarning.sql" />
     <Build Include="dbo\Tables\tblPRTemplateEarningTax.sql" />
@@ -638,7 +637,6 @@
     <Build Include="dbo\Tables\tblPREmployeeEarning.sql" />
     <Build Include="dbo\Tables\tblPREmployeeTax.sql" />
     <Build Include="dbo\Tables\tblPREmployeeTimeOff.sql" />
-    <Build Include="dbo\Tables\tblPREthnicOrigin.sql" />
     <Build Include="dbo\Tables\tblPRPaycheck.sql" />
     <Build Include="dbo\Tables\tblPRPaycheckDeduction.sql" />
     <Build Include="dbo\Tables\tblPRPaycheckEarning.sql" />
@@ -693,7 +691,6 @@
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\3_ReportEnableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\4_ReportData.sql" />
     <Build Include="dbo\Tables\tblICInventoryCostingBucket.sql" />
-    <Build Include="dbo\Tables\tblPREEOCCode.sql" />
     <Build Include="dbo\Tables\tblPRPaycheckDeductionTax.sql" />
     <Build Include="dbo\Tables\tblPRPaycheckEarningTax.sql" />
     <Build Include="dbo\Tables\tblICInventoryAveCost.sql" />
@@ -750,6 +747,12 @@
     <Build Include="dbo\Tables\tblSMMappingDictionary.sql" />
     <Build Include="dbo\Tables\tblSMColumnDictionary.sql" />
     <Build Include="dbo\Tables\tblAPRecurringHistory.sql" />
+    <Build Include="dbo\Tables\tblPRDepartment.sql" />
+    <Build Include="dbo\Tables\tblICItemAssembly.sql" />
+    <Build Include="dbo\Tables\tblICItemBundle.sql" />
+    <Build Include="dbo\Tables\tblICCommodityAttribute.sql" />
+    <Build Include="dbo\Tables\tblICItemKit.sql" />
+    <Build Include="dbo\Tables\tblICItemKitDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

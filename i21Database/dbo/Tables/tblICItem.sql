@@ -80,7 +80,17 @@
     [ysnDropShip] BIT NOT NULL DEFAULT ((0)), 
     [ysnCommisionable] BIT NOT NULL DEFAULT ((0)), 
     [ysnSpecialCommission] BIT NOT NULL DEFAULT ((0)), 
-    [intConcurrencyId] INT NULL DEFAULT ((0)), 
+    [intCommodityId] INT NULL,
+    [intCommodityHierarchyId] INT NULL, 
+    [dblGAShrinkFactor] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+    [intOriginId] INT NULL, 
+    [intProductTypeId] INT NULL, 
+    [intRegionId] INT NULL, 
+    [intSeasonId] INT NULL, 
+    [intClassVarietyId] INT NULL, 
+    [intProductLineId] INT NULL, 
+    [strMarketValuation] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 
     CONSTRAINT [PK_tblICItem] PRIMARY KEY ([intItemId]), 
     CONSTRAINT [FK_tblICItem_tblICManufacturer] FOREIGN KEY ([intManufacturerId]) REFERENCES [tblICManufacturer]([intManufacturerId]), 
@@ -769,3 +779,93 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICItem',
     @level2type = N'COLUMN',
     @level2name = 'ysnSpecialCommission'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Commodity Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItem',
+    @level2type = N'COLUMN',
+    @level2name = N'intCommodityId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Commodity Hierarchy Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItem',
+    @level2type = N'COLUMN',
+    @level2name = N'intCommodityHierarchyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'GA Shrink Factor',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItem',
+    @level2type = N'COLUMN',
+    @level2name = N'dblGAShrinkFactor'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Origin Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItem',
+    @level2type = N'COLUMN',
+    @level2name = N'intOriginId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Product Type Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItem',
+    @level2type = N'COLUMN',
+    @level2name = N'intProductTypeId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Region Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItem',
+    @level2type = N'COLUMN',
+    @level2name = N'intRegionId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Season Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItem',
+    @level2type = N'COLUMN',
+    @level2name = N'intSeasonId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Class/Variety Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItem',
+    @level2type = N'COLUMN',
+    @level2name = N'intClassVarietyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Product Line Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItem',
+    @level2type = N'COLUMN',
+    @level2name = N'intProductLineId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Market Valuation',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItem',
+    @level2type = N'COLUMN',
+    @level2name = N'strMarketValuation'
