@@ -4737,7 +4737,7 @@ Ext.define('Inventory.view.Item', {
                                                 forceFit: true,
                                                 columns: [
                                                     {
-                                                        xtype: 'gridcolumn',
+                                                        xtype: 'attachmentgrid',
                                                         dataIndex: 'string',
                                                         text: 'String'
                                                     }

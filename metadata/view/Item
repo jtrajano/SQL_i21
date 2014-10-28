@@ -10870,6 +10870,8 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "string",
+                                                "designer|createAlias": "attachmentgrid",
+                                                "itemId": null,
                                                 "text": "String"
                                             },
                                             "name": "MyColumn67",

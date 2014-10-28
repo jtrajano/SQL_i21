@@ -405,6 +405,10 @@ Ext.define('Inventory.view.override.ItemViewController', {
             store  : store,
             createRecord : me.createRecord,
             binding: me.config.binding,
+            attachment: Ext.create('iRely.mvvm.attachment.Manager', {
+                type: 'Inventory.Item',
+                window: win
+            }),
             details: [
                 {
                     key: 'tblICItemUOMs',
