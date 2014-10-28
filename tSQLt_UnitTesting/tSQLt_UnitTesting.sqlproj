@@ -219,6 +219,11 @@
     <Build Include="testi21Database\Stored Procedures\test uspICProcessCosting for errors thrown by uspICPostCosting.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICProcessCosting for errors thrown by uspICValidateCostingOnUnpost.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICProcessCosting for errors thrown by uspICUnpostCosting.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateCostingOnPost as it checks for an invalid item.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateCostingOnPost as it checks for an invalid item location.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateCostingOnPost as it checks for a valid item and location.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateCostingOnPost if negative stock qty is not allowed.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateCostingOnPost if negative stock qty is allowed.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

@@ -108,3 +108,15 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50026) EXEC sp_dropmessa
 SET @strmessage = 'Unable to unpost while check printing is in progress.'
 EXEC sp_addmessage 50026,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50027) EXEC sp_dropmessage 50027, 'us_english'	
+SET @strmessage = 'Item id is invalid or missing.'
+EXEC sp_addmessage 50027,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50028) EXEC sp_dropmessage 50028, 'us_english'	
+SET @strmessage = 'Item Location is invalid or missing.'
+EXEC sp_addmessage 50028,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50029) EXEC sp_dropmessage 50029, 'us_english'	
+SET @strmessage = 'Negative stock quantity is not allowed.'
+EXEC sp_addmessage 50029,11,@strmessage,'us_english','False'
+
