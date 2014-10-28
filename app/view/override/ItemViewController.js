@@ -560,6 +560,8 @@ Ext.define('Inventory.view.override.ItemViewController', {
             ]
         });
 
+        me.subscribeCommodityEvents(win, me);
+
         var btnAddLocation = grdLocationStore.down('#btnAddLocation');
         btnAddLocation.on('click', me.onAddLocationClick);
         var btnEditLocation = grdLocationStore.down('#btnEditLocation');
@@ -1334,6 +1336,57 @@ Ext.define('Inventory.view.override.ItemViewController', {
         var grdPricing = win.down('#grdPricing');
 
         grdPricing.store.reload();
+    },
+
+    subscribeCommodityEvents: function(win, scope) {
+        var me = scope;
+        var tabItem = win.down('#tabItem');
+        var pnlCommodity = tabItem.items.items[4];
+
+        if (tabItem.items.items[4].title !== 'Commodity')
+            return;
+
+        var cboCommodity = pnlCommodity.down('#cboCommodity');
+
+
+        cboCommodity.on('select', me.onCboCommoditySelect);
+    },
+
+    onCboCommoditySelect: function (combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var commodity = records[0];
+        var intCommodityId = commodity.get('intCommodityId');
+
+        var pnlCommodity = combo.up('panel');
+        var cboOrigin = pnlCommodity.down('#cboOrigin');
+        var cboProductType = pnlCommodity.down('#cboProductType');
+        var cboRegion = pnlCommodity.down('#cboRegion');
+        var cboSeason = pnlCommodity.down('#cboSeason');
+        var cboClass = pnlCommodity.down('#cboClass');
+        var cboProductLine = pnlCommodity.down('#cboProductLine');
+
+
+        cboOrigin.defaultFilters =
+            [{ dataIndex: 'intCommodityId', value: intCommodityId, condition: 'eq' }
+            , { dataIndex: 'strType', value: 'Origin', condition: 'eq' }];
+        cboProductType.defaultFilters =
+            [{ dataIndex: 'intCommodityId', value: intCommodityId, condition: 'eq' }
+                , { dataIndex: 'strType', value: 'ProductType', condition: 'eq' }];
+        cboRegion.defaultFilters =
+            [{ dataIndex: 'intCommodityId', value: intCommodityId, condition: 'eq' }
+                , { dataIndex: 'strType', value: 'Region', condition: 'eq' }];
+        cboSeason.defaultFilters =
+            [{ dataIndex: 'intCommodityId', value: intCommodityId, condition: 'eq' }
+                , { dataIndex: 'strType', value: 'Season', condition: 'eq' }];
+        cboClass.defaultFilters =
+            [{ dataIndex: 'intCommodityId', value: intCommodityId, condition: 'eq' }
+                , { dataIndex: 'strType', value: 'Class', condition: 'eq' }];
+        cboProductLine.defaultFilters =
+            [{ dataIndex: 'intCommodityId', value: intCommodityId, condition: 'eq' }
+                , { dataIndex: 'strType', value: 'ProductLine', condition: 'eq' }];
+
     }
 
 

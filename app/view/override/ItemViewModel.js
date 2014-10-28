@@ -15,6 +15,8 @@ Ext.define('Inventory.view.override.ItemViewModel', {
         'Inventory.store.Certification',
         'Inventory.store.MaterialNMFC',
         'Inventory.store.CountGroup',
+        'Inventory.store.Commodity',
+        'Inventory.store.CommodityAttribute',
 //        'AccountsPayable.store.VendorBuffered',
         'AccountsReceivable.store.Customer',
         'i21.store.CompanyLocation',
@@ -461,6 +463,21 @@ Ext.define('Inventory.view.override.ItemViewModel', {
                 }
             ]
         },
+        MarketValuations:{
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Outright Price'
+                },{
+                    strDescription: 'Differential/Premium Price'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
 
 
         Manufacturer: {
@@ -516,11 +533,27 @@ Ext.define('Inventory.view.override.ItemViewModel', {
         },
         CountGroup: {
             type: 'inventorycountgroup'
+        },
+        Commodity: {
+            type: 'inventorycommodity'
+        },
+        Origin: {
+            type: 'inventorycommodityattribute'
+        },
+        ProductType: {
+            type: 'inventorycommodityattribute'
+        },
+        Region: {
+            type: 'inventorycommodityattribute'
+        },
+        Season: {
+            type: 'inventorycommodityattribute'
+        },
+        Class: {
+            type: 'inventorycommodityattribute'
+        },
+        ProductLine: {
+            type: 'inventorycommodityattribute'
         }
-
-
-
-
-
     }
 });
