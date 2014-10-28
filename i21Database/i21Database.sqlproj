@@ -356,7 +356,7 @@
     <Build Include="dbo\Stored Procedures\uspCMPostBankTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspCMPostBankTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspCMPostMiscChecks.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMPostMessages.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMErrorMessages.sql" />
     <Build Include="dbo\Stored Procedures\uspCMPostRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspCMReconcileBankRecords.sql" />
     <Build Include="dbo\Stored Procedures\uspCMReverseGLEntries.sql" />

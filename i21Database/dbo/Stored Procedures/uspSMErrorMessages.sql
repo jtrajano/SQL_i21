@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE uspCMPostMessages
+CREATE PROCEDURE uspSMErrorMessages
 AS
 
 DECLARE @strmessage AS NVARCHAR(MAX)
