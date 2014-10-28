@@ -3934,7 +3934,7 @@ Ext.define('Inventory.view.Item', {
                                                         valueField: 'intCommodityId'
                                                     },
                                                     {
-                                                        xtype: 'textfield',
+                                                        xtype: 'numberfield',
                                                         itemId: 'txtGaShrinkFactor',
                                                         fieldLabel: 'GA Shrink Factor'
                                                     },

@@ -1370,22 +1370,22 @@ Ext.define('Inventory.view.override.ItemViewController', {
 
         cboOrigin.defaultFilters =
             [{ dataIndex: 'intCommodityId', value: intCommodityId, condition: 'eq' }
-            , { dataIndex: 'strType', value: 'Origin', condition: 'eq' }];
+            , { dataIndex: 'strType', value: 'Origin', condition: 'eq', conjunction: 'and'}];
         cboProductType.defaultFilters =
             [{ dataIndex: 'intCommodityId', value: intCommodityId, condition: 'eq' }
-                , { dataIndex: 'strType', value: 'ProductType', condition: 'eq' }];
+                , { dataIndex: 'strType', value: 'ProductType', condition: 'eq' , conjunction: 'and'}];
         cboRegion.defaultFilters =
             [{ dataIndex: 'intCommodityId', value: intCommodityId, condition: 'eq' }
-                , { dataIndex: 'strType', value: 'Region', condition: 'eq' }];
+                , { dataIndex: 'strType', value: 'Region', condition: 'eq' , conjunction: 'and'}];
         cboSeason.defaultFilters =
             [{ dataIndex: 'intCommodityId', value: intCommodityId, condition: 'eq' }
-                , { dataIndex: 'strType', value: 'Season', condition: 'eq' }];
+                , { dataIndex: 'strType', value: 'Season', condition: 'eq' , conjunction: 'and'}];
         cboClass.defaultFilters =
             [{ dataIndex: 'intCommodityId', value: intCommodityId, condition: 'eq' }
-                , { dataIndex: 'strType', value: 'Class', condition: 'eq' }];
+                , { dataIndex: 'strType', value: 'Class', condition: 'eq' , conjunction: 'and'}];
         cboProductLine.defaultFilters =
             [{ dataIndex: 'intCommodityId', value: intCommodityId, condition: 'eq' }
-                , { dataIndex: 'strType', value: 'ProductLine', condition: 'eq' }];
+                , { dataIndex: 'strType', value: 'ProductLine', condition: 'eq' , conjunction: 'and'}];
 
     }
 

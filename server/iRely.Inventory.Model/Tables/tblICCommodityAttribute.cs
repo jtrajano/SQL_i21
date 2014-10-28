@@ -14,7 +14,7 @@ namespace iRely.Inventory.Model
         public int intCommodityId { get; set; }
         public string strType { get; set; }
         public string strDescription { get; set; }
-        public int intSort { get; set; }
+        public int? intSort { get; set; }
 
         public tblICCommodity tblICCommodity { get; set; }
     }

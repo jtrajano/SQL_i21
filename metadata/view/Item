@@ -8821,7 +8821,7 @@
                                             ]
                                         },
                                         {
-                                            "type": "Ext.form.field.Text",
+                                            "type": "Ext.form.field.Number",
                                             "reference": {
                                                 "name": "items",
                                                 "type": "array"
@@ -8832,7 +8832,7 @@
                                                 "itemId": "txtGaShrinkFactor",
                                                 "layout|flex": null
                                             },
-                                            "name": "MyTextField31",
+                                            "name": "MyNumberField40",
                                             "designerId": "0ada3a39-9637-4eaf-b37d-d240ba2e4b84"
                                         },
                                         {
