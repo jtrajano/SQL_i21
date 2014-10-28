@@ -754,6 +754,7 @@
     <Build Include="dbo\Tables\tblICItemKit.sql" />
     <Build Include="dbo\Tables\tblICItemKitDetail.sql" />
     <Build Include="dbo\Functions\fnGetItemCostingOnPostErrors.sql" />
+    <Build Include="dbo\Tables\tblHDTicketEscallation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
