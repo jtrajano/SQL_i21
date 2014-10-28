@@ -30,13 +30,15 @@ BEGIN
 		SET strBillId = @BillId
 		WHERE intBillId = @intBillId
 
-		IF(@posted = 1)
+		IF(@posted = 1) AND EXISTS(SELECT * FROM sys.columns WHERE [name] = N'intTransactionId' AND [object_id] = OBJECT_ID(N'tblGLDetail'))
 		BEGIN
-			UPDATE A
-			SET strTransactionId = @BillId,
-			intTransactionId = @intBillId 
-			FROM tblGLDetail A
-			WHERE strTransactionForm = CAST(@intBillId AS NVARCHAR(50)) AND strCode = 'AP'
+			EXEC('
+				UPDATE A
+				SET strTransactionId = @BillId,
+				intTransactionId = @intBillId 
+				FROM tblGLDetail A
+				WHERE strTransactionForm = CAST(@intBillId AS NVARCHAR(50)) AND strCode = ''AP''		
+			');
 		END
 
 		DELETE FROM #tmpWrongBillId
