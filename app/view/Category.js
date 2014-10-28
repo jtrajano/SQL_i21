@@ -453,12 +453,6 @@ Ext.define('Inventory.view.Category', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         dataIndex: 'string',
-                                                        text: 'Location',
-                                                        flex: 1
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
                                                         text: 'Account Description',
                                                         flex: 1
                                                     },

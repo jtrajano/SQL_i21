@@ -32,7 +32,7 @@ Ext.define('Inventory.view.ItemLocation', {
     viewModel: {
         type: 'itemlocation'
     },
-    height: 660,
+    height: 689,
     hidden: false,
     minHeight: 660,
     minWidth: 995,
@@ -308,6 +308,12 @@ Ext.define('Inventory.view.ItemLocation', {
                                     itemId: 'chkTaxFlag4',
                                     fieldLabel: 'Tax Flag 4',
                                     labelWidth: 105
+                                },
+                                {
+                                    xtype: 'checkboxfield',
+                                    itemId: 'chkPromotionalItem',
+                                    fieldLabel: 'Promotional Item',
+                                    labelWidth: 105
                                 }
                             ]
                         },
@@ -320,12 +326,6 @@ Ext.define('Inventory.view.ItemLocation', {
                                 align: 'stretch'
                             },
                             items: [
-                                {
-                                    xtype: 'checkboxfield',
-                                    itemId: 'chkPromotionalItem',
-                                    fieldLabel: 'Promotional Item',
-                                    labelWidth: 140
-                                },
                                 {
                                     xtype: 'combobox',
                                     itemId: 'cboMixMatchCode',
@@ -415,17 +415,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                     itemId: 'txtSerialNumberEnd',
                                     fieldLabel: 'Serial Number End',
                                     labelWidth: 140
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            flex: 1,
-                            layout: {
-                                type: 'vbox',
-                                align: 'stretch'
-                            },
-                            items: [
+                                },
                                 {
                                     xtype: 'checkboxfield',
                                     itemId: 'chkIdRequiredLiqour',
@@ -437,7 +427,17 @@ Ext.define('Inventory.view.ItemLocation', {
                                     itemId: 'chkIdRequiredCigarettes',
                                     fieldLabel: 'ID Required (Cigarettes)',
                                     labelWidth: 140
-                                },
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'container',
+                            flex: 1,
+                            layout: {
+                                type: 'vbox',
+                                align: 'stretch'
+                            },
+                            items: [
                                 {
                                     xtype: 'textfield',
                                     itemId: 'txtMinimumAge',
@@ -496,6 +496,48 @@ Ext.define('Inventory.view.ItemLocation', {
                                     xtype: 'combobox',
                                     itemId: 'cboNegativeInventory',
                                     fieldLabel: 'Negative Inventory',
+                                    labelWidth: 140
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    itemId: 'txtReorderPoint',
+                                    fieldLabel: 'Reorder Point',
+                                    labelWidth: 140
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    itemId: 'txtMinOrder',
+                                    fieldLabel: 'Min Order',
+                                    labelWidth: 140
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    itemId: 'txtSuggestedQty',
+                                    fieldLabel: 'Suggested Qty',
+                                    labelWidth: 140
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    itemId: 'txtLeadTime',
+                                    fieldLabel: 'Lead Time',
+                                    labelWidth: 140
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    itemId: 'txtCounted',
+                                    fieldLabel: 'Counted',
+                                    labelWidth: 140
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    itemId: 'txtInventoryGroupField',
+                                    fieldLabel: 'Inventory Group Field',
+                                    labelWidth: 140
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    itemId: 'txtCountedDaily',
+                                    fieldLabel: 'Counted Daily',
                                     labelWidth: 140
                                 }
                             ]
