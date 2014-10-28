@@ -9,7 +9,8 @@ BEGIN
 		EXEC tSQLt.FakeTable 'dbo.tblSMCompanyLocationAccount', @Identity = 1;
 
 		EXEC tSQLt.FakeTable 'dbo.tblICItem';
-		EXEC tSQLt.FakeTable 'dbo.tblICItemLocation', @Identity = 1;	
+		EXEC tSQLt.FakeTable 'dbo.tblICItemLocation', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;	
 		EXEC tSQLt.FakeTable 'dbo.tblICItemAccount', @Identity = 1;
 
 		EXEC tSQLt.FakeTable 'dbo.tblICCategory';
@@ -83,6 +84,27 @@ BEGIN
 		INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (3, 3, 3)
 		INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (4, 3, 3)
 		INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (5, 3, 3)
+		
+		-- Add stock information for items under location 1 ('')
+		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (1, 1, 100)
+		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (2, 1, 150)
+		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (3, 1, 200)
+		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (4, 1, 250)
+		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (5, 1, 300)
+
+		-- Add stock information for items under location 2 ('NEW HAVEN')
+		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (1, 2, 0)
+		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (2, 2, 0)
+		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (3, 2, 0)
+		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (4, 2, 0)
+		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (5, 2, 0)
+
+		-- Add stock information for items under location 3 ('BETTER HAVEN')
+		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (1, 3, 0)
+		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (2, 3, 0)
+		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (3, 3, 0)
+		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (4, 3, 0)
+		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (5, 3, 0)
 
 		-- Add the G/L accounts for WET GRAINS
 		--		for Location 1

@@ -33,6 +33,7 @@
 
 -- SM
 :r .\4_SM\1_DataCleanup.sql
+:r .\4_SM\2_DropProcedureUspCMPostMessages.sql
 
 -- CM
 :r .\5_CM\1_DropTriggers.sql
