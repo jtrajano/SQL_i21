@@ -2,7 +2,7 @@
 -- Note: This stored procedure is monolithic (huge)
 -- Unit test involved here is to check if the stored procedures called by this SP is called correctly. 
 
-CREATE PROCEDURE [testi21Database].[test case one for error handling in uspICProcessCosting stored procedure]
+CREATE PROCEDURE [testi21Database].[test uspICProcessCosting for errors thrown by uspICPostCosting]
 AS
 BEGIN
 	-- Arrange 
@@ -14,10 +14,10 @@ BEGIN
 
 		DECLARE @errorCommand AS NVARCHAR(MAX)
 		DECLARE @command AS NVARCHAR(MAX)
-		SET @errorCommand = 'RAISERROR(''Error raised inside uspICValidateCostingOnPost'', 16, 1);';
+		SET @errorCommand = 'RAISERROR(''Error raised inside uspICPostCosting'', 16, 1);';
 
-		EXEC tSQLt.SpyProcedure 'dbo.uspICValidateCostingOnPost', @errorCommand;
-		EXEC tSQLt.SpyProcedure 'dbo.uspICPostCosting';
+		EXEC tSQLt.SpyProcedure 'dbo.uspICValidateCostingOnPost';
+		EXEC tSQLt.SpyProcedure 'dbo.uspICPostCosting', @errorCommand;
 		EXEC tSQLt.SpyProcedure 'dbo.uspICValidateCostingOnUnpost';
 		EXEC tSQLt.SpyProcedure 'dbo.uspICUnpostCosting';
 
@@ -44,8 +44,7 @@ BEGIN
 					AND CAST(ItemsToValidate AS NVARCHAR(MAX)) = (SELECT * FROM @Items FOR XML PATH(''))
 
 			EXEC tSQLt.AssertEquals 1 ,@isCalledUspICValidateCostingOnPost;			
-	
-		-- NOT CALLED
+
 			-- Check if the post costing sp is NOT called. 
 			SELECT	@isCalledUspICPostCosting = 1 
 			FROM	uspICPostCosting_SpyProcedureLog 
@@ -53,7 +52,9 @@ BEGIN
 					AND CAST(ItemsToProcess AS NVARCHAR(MAX)) = (SELECT * FROM @Items FOR XML PATH(''))
 					AND strBatchId = 'BATCH-XXXX'
 
-			EXEC tSQLt.AssertEquals 0, @isCalledUspICPostCosting;	
+			EXEC tSQLt.AssertEquals 1, @isCalledUspICPostCosting;	
+	
+		-- NOT CALLED
 			
 			-- Check if the Validate Costing on unpost sp is NOT called. 
 			SELECT	@isCalledUspICValidateCostingOnUnpost = 1 
