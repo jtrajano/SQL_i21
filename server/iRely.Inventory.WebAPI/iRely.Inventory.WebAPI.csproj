@@ -139,6 +139,7 @@
     <Compile Include="Controllers\BrandController.cs" />
     <Compile Include="Controllers\CategoryController.cs" />
     <Compile Include="Controllers\CertificationController.cs" />
+    <Compile Include="Controllers\CommodityAttributeController.cs" />
     <Compile Include="Controllers\CommodityController.cs" />
     <Compile Include="Controllers\CountGroupController.cs" />
     <Compile Include="Controllers\DocumentController.cs" />
