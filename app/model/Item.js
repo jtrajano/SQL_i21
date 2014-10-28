@@ -20,6 +20,9 @@ Ext.define('Inventory.model.Item', {
         'Inventory.model.ItemPricing',
         'Inventory.model.ItemPricingLevel',
         'Inventory.model.ItemSpecialPricing',
+        'Inventory.model.ItemAssembly',
+        'Inventory.model.ItemBundle',
+        'Inventory.model.ItemKit',
         'Inventory.model.ItemNote',
         'Ext.data.Field'
     ],

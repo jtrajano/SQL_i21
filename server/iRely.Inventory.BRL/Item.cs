@@ -29,11 +29,8 @@ namespace iRely.Inventory.BRL
                     strItemNo = p.strItemNo,
                     strType = p.strType,
                     strDescription = p.strDescription,
-                    intManufacturerId = p.intManufacturerId,
-                    intBrandId = p.intBrandId,
                     strStatus = p.strStatus,
                     strModelNo = p.strModelNo,
-                    intTrackingId = p.intTrackingId,
                     strLotTracking = p.strLotTracking
                 });
         }
@@ -57,7 +54,7 @@ namespace iRely.Inventory.BRL
         public IQueryable<tblICItem> GetItems(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<ItemVM, bool>> predicate)
         {
             var query = GetSearchQuery(); //Get Search Query
-            return _db.GetQuery<tblICItem>()
+            var finalQuery = _db.GetQuery<tblICItem>()
                     .Include("tblICItemUOMs.tblICUnitMeasure")
                     .Include("tblICItemLocations.tblSMCompanyLocation")
                     .Include("tblICItemLocations.vyuAPVendor")
@@ -74,7 +71,7 @@ namespace iRely.Inventory.BRL
                     .Include("tblICItemVendorXrefs.tblICUnitMeasure")
                     .Include("tblICItemContracts.tblSMCompanyLocation")
                     .Include("tblICItemContracts.tblSMCountry")
-                    
+
                     .Include("tblICItemContracts.tblICItemContractDocuments.tblICDocument")
 
                     .Include("tblICItemCertifications.tblICCertification")
@@ -89,12 +86,42 @@ namespace iRely.Inventory.BRL
                     .Include("tblICItemAccounts.tblGLAccount")
                     .Include("tblICItemAccounts.ProfitCenter")
                     .Include("tblICItemAccounts.tblSMCompanyLocation")
+
+                    .Include("tblICItemAssemblies.AssemblyItem")
+                    .Include("tblICItemAssemblies.tblICUnitMeasure")
+                    .Include("tblICItemBundles.BundleItem")
+                    .Include("tblICItemBundles.tblICUnitMeasure")
+                    .Include("tblICItemKits.tblICItemKitDetails.tblICItem")
+                    .Include("tblICItemKits.tblICItemKitDetails.tblICUnitMeasure")
+
                     .Include("tblICItemNotes.tblSMCompanyLocation")
                     .Where(w => query.Where(predicate).Any(a => a.intItemId == w.intItemId)) //Filter the Main DataSource Based on Search Query
                     .OrderBySelector(sortSelector)
                     .Skip(start)
                     .Take(limit)
                     .AsNoTracking();
+            return finalQuery;
+        }
+
+        public object GetCompactItems(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<ItemVM, bool>> predicate)
+        {
+            var query = GetSearchQuery(); //Get Search Query
+            return _db.GetQuery<tblICItem>()
+                    .Where(w => query.Where(predicate).Any(a => a.intItemId == w.intItemId)) //Filter the Main DataSource Based on Search Query
+                    .OrderBySelector(sortSelector)
+                    .Skip(start)
+                    .Take(limit)
+                    .AsNoTracking()
+                    .Select(p => new
+                    {
+                        intItemId = p.intItemId,
+                        strItemNo = p.strItemNo,
+                        strType = p.strType,
+                        strDescription = p.strDescription,
+                        strStatus = p.strStatus,
+                        strModelNo = p.strModelNo,
+                        strLotTracking = p.strLotTracking
+                    }).ToList();
         }
 
         public void AddItem(tblICItem item)

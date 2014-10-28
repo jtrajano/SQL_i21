@@ -24,7 +24,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strDescription).HasColumnName("strDescription");
 
             this.HasOptional(p => p.BundleItem)
-                .WithMany(p => p.tblICItemBundles)
+                .WithMany(p => p.BundleItems)
                 .HasForeignKey(p => p.intBundleItemId);
             this.HasOptional(p => p.tblICUnitMeasure)
                 .WithMany(p => p.tblICItemBundles)

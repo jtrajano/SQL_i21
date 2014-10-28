@@ -4001,53 +4001,132 @@ Ext.define('Inventory.view.Item', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colAssemblyComponent',
                                                         dataIndex: 'string',
                                                         text: 'Component',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intItemId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Item Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strItemNo',
+                                                                    dataType: 'string',
+                                                                    text: 'Item Number',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strType',
+                                                                    dataType: 'string',
+                                                                    text: 'Item Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strDescription',
+                                                                    dataType: 'string',
+                                                                    text: 'Description',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            displayField: 'strItemNo',
+                                                            valueField: 'intItemId',
+                                                            bind: {
+                                                                store: '{Item}'
+                                                            }
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        itemId: 'colAssemblyQuantity',
                                                         width: 60,
-                                                        text: 'Quantity'
+                                                        text: 'Quantity',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        itemId: 'colAssemblyStock',
                                                         width: 60,
                                                         text: 'Stock'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colAssemblyDescription',
                                                         dataIndex: 'string',
                                                         text: 'Description',
-                                                        flex: 2
+                                                        flex: 2,
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colAssemblyUOM',
                                                         width: 82,
                                                         dataIndex: 'string',
-                                                        text: 'Unit Measure'
+                                                        text: 'Unit Measure',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intUnitMeasureId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Unit Of Measure ID',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Measure',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitType',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'ysnDefault',
+                                                                    dataType: 'boolean',
+                                                                    text: 'Default',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            displayField: 'strUnitMeasure',
+                                                            valueField: 'intUnitMeasureId',
+                                                            bind: {
+                                                                store: '{UnitMeasure}'
+                                                            }
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        itemId: 'colAssemblyUnit',
                                                         width: 37,
-                                                        text: 'Unit'
+                                                        text: 'Unit',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        itemId: 'colAssemblyCost',
                                                         width: 70,
-                                                        text: 'Cost'
+                                                        text: 'Cost',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
-                                                        width: 70,
-                                                        text: 'Other Cost'
-                                                    },
-                                                    {
-                                                        xtype: 'checkcolumn',
-                                                        width: 28
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colAssemblyTotal',
                                                         width: 70,
                                                         text: 'Total'
                                                     }
@@ -4057,7 +4136,14 @@ Ext.define('Inventory.view.Item', {
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'
-                                                })
+                                                }),
+                                                plugins: [
+                                                    {
+                                                        ptype: 'cellediting',
+                                                        pluginId: 'cepAssembly',
+                                                        clicksToEdit: 1
+                                                    }
+                                                ]
                                             }
                                         ]
                                     },
@@ -4099,44 +4185,132 @@ Ext.define('Inventory.view.Item', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colBundleItem',
                                                         dataIndex: 'string',
                                                         text: 'Item',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intItemId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Item Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strItemNo',
+                                                                    dataType: 'string',
+                                                                    text: 'Item Number',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strType',
+                                                                    dataType: 'string',
+                                                                    text: 'Item Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strDescription',
+                                                                    dataType: 'string',
+                                                                    text: 'Description',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            displayField: 'strItemNo',
+                                                            valueField: 'intItemId',
+                                                            bind: {
+                                                                store: '{Item}'
+                                                            }
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        itemId: 'colBundleQuantity',
                                                         width: 60,
-                                                        text: 'Quantity'
+                                                        text: 'Quantity',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        itemId: 'colBundleStock',
                                                         width: 60,
                                                         text: 'Stock'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colBundleDescription',
                                                         dataIndex: 'string',
                                                         text: 'Description',
-                                                        flex: 2
+                                                        flex: 2,
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colBundleUOM',
                                                         width: 82,
                                                         dataIndex: 'string',
-                                                        text: 'Unit Measure'
+                                                        text: 'Unit Measure',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intUnitMeasureId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Unit Of Measure ID',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Measure',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitType',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'ysnDefault',
+                                                                    dataType: 'boolean',
+                                                                    text: 'Default',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            displayField: 'strUnitMeasure',
+                                                            valueField: 'intUnitMeasureId',
+                                                            bind: {
+                                                                store: '{UnitMeasure}'
+                                                            }
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        itemId: 'colBundleUnit',
                                                         width: 37,
-                                                        text: 'Unit'
+                                                        text: 'Unit',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        itemId: 'colBundlePrice',
                                                         width: 70,
-                                                        text: 'Price'
+                                                        text: 'Price',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        itemId: 'colBundleSubtotal',
                                                         width: 70,
                                                         text: 'Subtotal'
                                                     }
@@ -4146,7 +4320,14 @@ Ext.define('Inventory.view.Item', {
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'
-                                                })
+                                                }),
+                                                plugins: [
+                                                    {
+                                                        ptype: 'cellediting',
+                                                        pluginId: 'cepBundle',
+                                                        clicksToEdit: 1
+                                                    }
+                                                ]
                                             }
                                         ]
                                     },
@@ -4188,16 +4369,29 @@ Ext.define('Inventory.view.Item', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colKitComponent',
                                                         dataIndex: 'string',
                                                         text: 'Component',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colKitInputType',
                                                         width: 82,
                                                         dataIndex: 'string',
                                                         text: 'Input Type',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'combobox',
+                                                            displayField: 'strDescription',
+                                                            valueField: 'strDescription',
+                                                            bind: {
+                                                                store: '{InputTypes}'
+                                                            }
+                                                        }
                                                     }
                                                 ],
                                                 viewConfig: {
@@ -4205,7 +4399,14 @@ Ext.define('Inventory.view.Item', {
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'
-                                                })
+                                                }),
+                                                plugins: [
+                                                    {
+                                                        ptype: 'cellediting',
+                                                        pluginId: 'cepKit',
+                                                        clicksToEdit: 1
+                                                    }
+                                                ]
                                             }
                                         ]
                                     },

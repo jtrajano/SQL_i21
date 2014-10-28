@@ -138,6 +138,16 @@ namespace iRely.Inventory.Model
                 .WithRequired(p => p.tblICItem)
                 .HasForeignKey(p => p.intItemId);
 
+            this.HasMany(p => p.tblICItemAssemblies)
+                .WithRequired(p => p.tblICItem)
+                .HasForeignKey(p => p.intItemId);
+            this.HasMany(p => p.tblICItemBundles)
+                .WithRequired(p => p.tblICItem)
+                .HasForeignKey(p => p.intItemId);
+            this.HasMany(p => p.tblICItemKits)
+                .WithRequired(p => p.tblICItem)
+                .HasForeignKey(p => p.intItemId);
+
             this.HasMany(p => p.tblICItemPricings)
                 .WithRequired(p => p.tblICItem)
                 .HasForeignKey(p => p.intItemId);

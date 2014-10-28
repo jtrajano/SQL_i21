@@ -346,6 +346,27 @@ Ext.define('Inventory.view.override.ItemViewController', {
                 store: '{MarketValuations}'
             },
 
+            colAssemblyComponent: 'intAssemblyItemId',
+            colAssemblyQuantity: 'dblQuantity',
+//            colAssemblyStock: '',
+            colAssemblyDescription: 'strDescription',
+            colAssemblyUOM: 'intUnitMeasureId',
+            colAssemblyUnit: 'dblUnit',
+            colAssemblyCost: 'dblCost',
+//            colAssemblyTotal: '',
+
+            colBundleItem: 'intBundleItemId',
+            colBundleQuantity: 'dblQuantity',
+//            colBundleStock: '',
+            colBundleDescription: 'strDescription',
+            colBundleUOM: 'intUnitMeasureId',
+            colBundleUnit: 'dblUnit',
+            colBundlePrice: 'dblPrice',
+//            colBundleSubTotal: '',
+
+            colKitComponent: 'strComponent',
+            colKitInputType: 'strInputType',
+
             colNoteLocation: 'intLocationId',
             colNoteCommentType: 'strCommentType',
             colNoteComment: 'strComments'
@@ -372,6 +393,10 @@ Ext.define('Inventory.view.override.ItemViewController', {
             grdPricing = win.down('#grdPricing'),
             grdPricingLevel = win.down('#grdPricingLevel'),
             grdSpecialPricing = win.down('#grdSpecialPricing'),
+
+            grdAssembly = win.down('#grdAssembly'),
+            grdBundle = win.down('#grdBundle'),
+            grdKit = win.down('#grdKit'),
 
             grdNotes = win.down('#grdNotes');
 
@@ -496,6 +521,37 @@ Ext.define('Inventory.view.override.ItemViewController', {
                         grid: grdSpecialPricing,
                         deleteButton : grdSpecialPricing.down('#btnDeleteSpecialPricing')
                     })
+                },
+                {
+                    key: 'tblICItemAssemblies',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdAssembly,
+                        deleteButton : grdAssembly.down('#btnDeleteAssembly')
+                    })
+                },
+                {
+                    key: 'tblICItemBundles',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdBundle,
+                        deleteButton : grdBundle.down('#btnDeleteBundle')
+                    })
+                },
+                {
+                    key: 'tblICItemKits',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdKit,
+                        deleteButton : grdKit.down('#btnDeleteKit')
+                    })
+//                    ,
+//                    details: [
+//                        {
+//                            key: 'tblICItemKitDetails',
+//                            component: Ext.create('iRely.mvvm.grid.Manager', {
+//                                grid: grdDocumentAssociation,
+//                                deleteButton : grdDocumentAssociation.down('#btnDeleteDocumentAssociation')
+//                            })
+//                        }
+//                    ]
                 }
             ]
         });
@@ -666,7 +722,27 @@ Ext.define('Inventory.view.override.ItemViewController', {
             scope: me
         });
 
+        var colAssemblyItem = grdAssembly.columns[0];
+        colAssemblyItem.renderer = me.ItemRenderer;
+        var colAssemblyUOM = grdAssembly.columns[4];
+        colAssemblyUOM.renderer = me.UOMRenderer;
 
+        var cepAssembly = grdAssembly.getPlugin('cepAssembly');
+        cepAssembly.on({
+            edit: me.onGridAssemblyEdit,
+            scope: me
+        });
+
+        var colBundleItem = grdBundle.columns[0];
+        colBundleItem.renderer = me.ItemRenderer;
+        var colBundleUOM = grdBundle.columns[4];
+        colBundleUOM.renderer = me.UOMRenderer;
+
+        var cepBundle = grdBundle.getPlugin('cepBundle');
+        cepBundle.on({
+            edit: me.onGridBundleEdit,
+            scope: me
+        });
         // </editor-fold>
 
 
@@ -753,6 +829,11 @@ Ext.define('Inventory.view.override.ItemViewController', {
     CountGroupRenderer: function (value, metadata, record) {
         var countgroup = record.get('strCountGroup');
         return countgroup;
+    },
+
+    ItemRenderer: function (value, metadata, record) {
+        var item = record.get('strItemNo');
+        return item;
     },
 
     CostingMethodRenderer: function (value, metadata, record) {
@@ -1108,6 +1189,66 @@ Ext.define('Inventory.view.override.ItemViewController', {
             {
                 var strCountry = cboCountry.getSelectedRecord().get('strCountry');
                 record.set('strCountry', strCountry);
+                view.refresh();
+            }
+        }
+    },
+
+    onGridAssemblyEdit: function(editor, e, eOpts){
+        var me = this;
+        var record = e.record
+        var column = e.column;
+
+        var grid = column.up('grid');
+        var view = grid.view;
+
+        if (column.itemId === 'colAssemblyComponent')
+        {
+            var cboItem = column.getEditor();
+            if (cboItem.getSelectedRecord())
+            {
+                var strItemNo = cboItem.getSelectedRecord().get('strItemNo');
+                record.set('strItemNo', strItemNo);
+                view.refresh();
+            }
+        }
+        else if (column.itemId === 'colAssemblyUOM')
+        {
+            var cboUOM = column.getEditor();
+            if (cboUOM.getSelectedRecord())
+            {
+                var strUnitMeasure = cboUOM.getSelectedRecord().get('strUnitMeasure');
+                record.set('strUnitMeasure', strUnitMeasure);
+                view.refresh();
+            }
+        }
+    },
+
+    onGridBundleEdit: function(editor, e, eOpts){
+        var me = this;
+        var record = e.record
+        var column = e.column;
+
+        var grid = column.up('grid');
+        var view = grid.view;
+
+        if (column.itemId === 'colBundleItem')
+        {
+            var cboItem = column.getEditor();
+            if (cboItem.getSelectedRecord())
+            {
+                var strItemNo = cboItem.getSelectedRecord().get('strItemNo');
+                record.set('strItemNo', strItemNo);
+                view.refresh();
+            }
+        }
+        else if (column.itemId === 'colBundleUOM')
+        {
+            var cboUOM = column.getEditor();
+            if (cboUOM.getSelectedRecord())
+            {
+                var strUnitMeasure = cboUOM.getSelectedRecord().get('strUnitMeasure');
+                record.set('strUnitMeasure', strUnitMeasure);
                 view.refresh();
             }
         }

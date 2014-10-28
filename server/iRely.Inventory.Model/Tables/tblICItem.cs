@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,6 +29,10 @@ namespace iRely.Inventory.Model
             this.tblICItemStocks = new List<tblICItemStock>();
             this.tblICItemAccounts = new List<tblICItemAccount>();
             this.tblICItemNotes = new List<tblICItemNote>();
+
+            this.tblICItemKits = new List<tblICItemKit>();
+            this.tblICItemAssemblies = new List<tblICItemAssembly>();
+            this.tblICItemBundles = new List<tblICItemBundle>();
         }
 
         public int intItemId { get; set; }
@@ -143,10 +148,11 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemKit> tblICItemKits { get; set; }
         public ICollection<tblICItemKitDetail> tblICItemKitDetails { get; set; }
         public ICollection<tblICItemBundle> tblICItemBundles { get; set; }
+        public ICollection<tblICItemBundle> BundleItems { get; set; }
         public ICollection<tblICItemAssembly> tblICItemAssemblies { get; set; }
+        public ICollection<tblICItemAssembly> AssemblyItems { get; set; }
 
         public tblICCommodity tblICCommodity { get; set; }
-        //public tblICCommodityhie tblICCommodity { get; set; }
         public tblICCommodityAttribute CommodityOrigin { get; set; }
         public tblICCommodityAttribute CommodityProductType { get; set; }
         public tblICCommodityAttribute CommodityRegion { get; set; }
@@ -154,23 +160,17 @@ namespace iRely.Inventory.Model
         public tblICCommodityAttribute CommodityClassVariety { get; set; }
         public tblICCommodityAttribute CommodityProductLine { get; set; }
         
-
-        
-
-
     }
 
     public class ItemVM : BaseEntity
     {
+        [Key]
         public int intItemId { get; set; }
         public string strItemNo { get; set; }
         public string strType { get; set; }
         public string strDescription { get; set; }
-        public int? intManufacturerId { get; set; }
-        public int? intBrandId { get; set; }
         public string strStatus { get; set; }
         public string strModelNo { get; set; }
-        public int? intTrackingId { get; set; }
         public string strLotTracking { get; set; }
     }
 }

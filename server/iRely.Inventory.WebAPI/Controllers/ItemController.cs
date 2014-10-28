@@ -67,6 +67,30 @@ namespace iRely.Invetory.WebAPI.Controllers
             });
         }
 
+        [HttpGet]
+        [ActionName("GetCompactItems")]
+        public HttpResponseMessage GetCompactItems(int start = 0, int limit = 1, int page = 0, string sort = "", string filter = "")
+        {
+            filter = string.IsNullOrEmpty(filter) ? "" : filter;
+
+            var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
+            var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
+            var predicate = ExpressionBuilder.True<ItemVM>();
+            var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intItemId", "DESC");
+
+            if (searchFilters != null)
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<ItemVM>(searchFilters, true);
+
+            var total = _ItemBRL.GetCount(predicate);
+            var data = _ItemBRL.GetCompactItems(page, start, page == 0 ? total : limit, sortSelector, predicate);
+
+            return Request.CreateResponse(HttpStatusCode.OK, new
+            {
+                data = data,
+                total = total
+            });
+        }
+
         [HttpPost]
         public HttpResponseMessage PostItems(IEnumerable<tblICItem> items, bool continueOnConflict = false)
         {

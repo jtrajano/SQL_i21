@@ -2,7 +2,7 @@ Ext.define('Inventory.view.override.ItemViewModel', {
     override: 'Inventory.view.ItemViewModel',
 
     requires: [
-        'Inventory.store.Item',
+        'Inventory.store.CompactItem',
         'Inventory.store.Manufacturer',
         'Inventory.store.Category',
         'Inventory.store.PatronageCategory',
@@ -15,7 +15,7 @@ Ext.define('Inventory.view.override.ItemViewModel', {
         'Inventory.store.Certification',
         'Inventory.store.MaterialNMFC',
         'Inventory.store.CountGroup',
-        'AccountsPayable.store.VendorBuffered',
+//        'AccountsPayable.store.VendorBuffered',
         'AccountsReceivable.store.Customer',
         'i21.store.CompanyLocation',
         'i21.store.Country',
@@ -440,6 +440,27 @@ Ext.define('Inventory.view.override.ItemViewModel', {
                 }
             ]
         },
+        InputTypes:{
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Included - Hidden'
+                },{
+                    strDescription: 'Included - Shown'
+                },{
+                    strDescription: 'Drop Down'
+                },{
+                    strDescription: 'Radio Button'
+                },{
+                    strDescription: 'Check Box'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
 
 
         Manufacturer: {
@@ -463,9 +484,9 @@ Ext.define('Inventory.view.override.ItemViewModel', {
         FuelCategory: {
             type: 'inventoryfuelcategory'
         },
-        Vendor: {
-            type: 'vendorbuffered'
-        },
+//        Vendor: {
+//            type: 'vendorbuffered'
+//        },
         Customer: {
             type: 'customer'
         },
@@ -479,10 +500,10 @@ Ext.define('Inventory.view.override.ItemViewModel', {
             type: 'inventoryfueltaxclass'
         },
         Item: {
-            type: 'inventoryitem'
+            type: 'inventorycompactitem'
         },
         GLAccount: {
-            type: 'bufaccountid'
+            type: 'bufAccountid'
         },
         Document: {
             type: 'inventorydocument'
