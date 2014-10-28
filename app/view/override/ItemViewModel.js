@@ -469,7 +469,7 @@ Ext.define('Inventory.view.override.ItemViewModel', {
                 {
                     strDescription: 'Outright Price'
                 },{
-                    strDescription: 'Differential/Premium Price'
+                    strDescription: 'Futures + Basis/Differential/Premium Price'
                 }
             ],
             fields: [
