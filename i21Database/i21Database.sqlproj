@@ -755,6 +755,13 @@
     <Build Include="dbo\Tables\tblICItemKitDetail.sql" />
     <Build Include="dbo\Functions\fnGetItemCostingOnPostErrors.sql" />
     <Build Include="dbo\Tables\tblHDTicketEscalation.sql" />
+    <Build Include="dbo\Tables\tblICUnitMeasureConversion.sql" />
+    <Build Include="dbo\Tables\tblICLineOfBusiness.sql" />
+    <Build Include="dbo\Tables\tblICPackType.sql" />
+    <Build Include="dbo\Tables\tblICPackTypeDetail.sql" />
+    <Build Include="dbo\Tables\tblICStorageUnitType.sql" />
+    <Build Include="dbo\Tables\tblICManufacturingCell.sql" />
+    <Build Include="dbo\Tables\tblICManufacturingCellPackType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
