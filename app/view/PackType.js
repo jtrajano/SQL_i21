@@ -24,10 +24,12 @@ Ext.define('Inventory.view.PackType', {
         'Ext.form.Panel',
         'Ext.button.Button',
         'Ext.toolbar.Separator',
-        'Ext.form.field.Text',
         'Ext.grid.Panel',
+        'Ext.form.field.ComboBox',
         'Ext.grid.column.Number',
+        'Ext.form.field.Number',
         'Ext.grid.View',
+        'Ext.grid.plugin.CellEditing',
         'Ext.selection.CheckboxModel',
         'Ext.toolbar.Paging'
     ],
@@ -206,25 +208,106 @@ Ext.define('Inventory.view.PackType', {
                     columns: [
                         {
                             xtype: 'gridcolumn',
+                            itemId: 'colSourceUOM',
                             dataIndex: 'string',
                             text: 'Source UOM',
-                            flex: 1
+                            flex: 1,
+                            editor: {
+                                xtype: 'gridcombobox',
+                                columns: [
+                                    {
+                                        dataIndex: 'intUnitMeasureId',
+                                        dataType: 'numeric',
+                                        text: 'Unit Of Measure ID',
+                                        hidden: true
+                                    },
+                                    {
+                                        dataIndex: 'strUnitMeasure',
+                                        dataType: 'string',
+                                        text: 'Unit Measure',
+                                        flex: 1
+                                    },
+                                    {
+                                        dataIndex: 'strUnitType',
+                                        dataType: 'string',
+                                        text: 'Unit Type',
+                                        flex: 1
+                                    },
+                                    {
+                                        dataIndex: 'ysnDefault',
+                                        dataType: 'boolean',
+                                        text: 'Default',
+                                        flex: 1
+                                    }
+                                ],
+                                displayField: 'strUnitMeasure',
+                                valueField: 'strUnitMeasure',
+                                bind: {
+                                    store: '{sourceUnitMeasure}'
+                                }
+                            }
                         },
                         {
                             xtype: 'gridcolumn',
+                            itemId: 'colTargetUOM',
                             dataIndex: 'string',
                             text: 'Target UOM',
-                            flex: 1
+                            flex: 1,
+                            editor: {
+                                xtype: 'gridcombobox',
+                                columns: [
+                                    {
+                                        dataIndex: 'intUnitMeasureId',
+                                        dataType: 'numeric',
+                                        text: 'Unit Of Measure ID',
+                                        hidden: true
+                                    },
+                                    {
+                                        dataIndex: 'strUnitMeasure',
+                                        dataType: 'string',
+                                        text: 'Unit Measure',
+                                        flex: 1
+                                    },
+                                    {
+                                        dataIndex: 'strUnitType',
+                                        dataType: 'string',
+                                        text: 'Unit Type',
+                                        flex: 1
+                                    },
+                                    {
+                                        dataIndex: 'ysnDefault',
+                                        dataType: 'boolean',
+                                        text: 'Default',
+                                        flex: 1
+                                    }
+                                ],
+                                displayField: 'strUnitMeasure',
+                                valueField: 'strUnitMeasure',
+                                bind: {
+                                    store: '{targetUnitMeasure}'
+                                }
+                            }
                         },
                         {
                             xtype: 'numbercolumn',
+                            itemId: 'colConversionFactor',
                             width: 125,
-                            text: 'Conversion Factor'
+                            text: 'Conversion Factor',
+                            editor: {
+                                xtype: 'numberfield'
+                            }
                         }
                     ],
                     viewConfig: {
                         itemId: 'grvPackType'
                     },
+                    plugins: [
+                        {
+                            ptype: 'cellediting',
+                            pluginId: 'cepPackType',
+                            clicksToEdit: 1
+                        }
+                    ],
                     selModel: {
                         selType: 'checkboxmodel'
                     }

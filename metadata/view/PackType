@@ -377,7 +377,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter142",
+                                    "name": "filter15",
                                     "designerId": "c39762ed-6d5b-4268-95f3-6514bb2f553b",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -393,10 +393,70 @@
                             "userConfig": {
                                 "dataIndex": "string",
                                 "flex": 1,
+                                "itemId": "colSourceUOM",
                                 "text": "Source UOM"
                             },
                             "name": "MyColumn125",
-                            "designerId": "4f057dd3-2636-4eb7-b83b-1bb26c838817"
+                            "designerId": "4f057dd3-2636-4eb7-b83b-1bb26c838817",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.ComboBox",
+                                    "reference": {
+                                        "name": "editor",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "columns": [
+                                            "[",
+                                            "\t{",
+                                            "\t\tdataIndex: 'intUnitMeasureId',",
+                                            "\t\tdataType: 'numeric',",
+                                            "\t\ttext: 'Unit Of Measure ID',",
+                                            "\t\thidden: true",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strUnitMeasure',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Unit Measure',",
+                                            "\t\tflex: 1",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strUnitType',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Unit Type',",
+                                            "\t\tflex: 1",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'ysnDefault',",
+                                            "\t\tdataType: 'boolean',",
+                                            "\t\ttext: 'Default',",
+                                            "\t\tflex: 1",
+                                            "\t}",
+                                            "]"
+                                        ],
+                                        "designer|createAlias": "gridcombobox",
+                                        "displayField": "strUnitMeasure",
+                                        "store": [
+                                            "{sourceUnitMeasure}"
+                                        ],
+                                        "valueField": "strUnitMeasure"
+                                    },
+                                    "name": "MyComboBox1",
+                                    "configAlternates": {
+                                        "columns": "array",
+                                        "store": "binding"
+                                    },
+                                    "designerId": "b218e9db-6adb-4e78-826e-c04e29172862",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "columns",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.grid.column.Column",
@@ -408,10 +468,70 @@
                             "userConfig": {
                                 "dataIndex": "string",
                                 "flex": 1,
+                                "itemId": "colTargetUOM",
                                 "text": "Target UOM"
                             },
                             "name": "MyColumn8",
-                            "designerId": "0d5dd984-3193-4024-81e7-d6323d589ee5"
+                            "designerId": "0d5dd984-3193-4024-81e7-d6323d589ee5",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.ComboBox",
+                                    "reference": {
+                                        "name": "editor",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "columns": [
+                                            "[",
+                                            "\t{",
+                                            "\t\tdataIndex: 'intUnitMeasureId',",
+                                            "\t\tdataType: 'numeric',",
+                                            "\t\ttext: 'Unit Of Measure ID',",
+                                            "\t\thidden: true",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strUnitMeasure',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Unit Measure',",
+                                            "\t\tflex: 1",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strUnitType',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Unit Type',",
+                                            "\t\tflex: 1",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'ysnDefault',",
+                                            "\t\tdataType: 'boolean',",
+                                            "\t\ttext: 'Default',",
+                                            "\t\tflex: 1",
+                                            "\t}",
+                                            "]"
+                                        ],
+                                        "designer|createAlias": "gridcombobox",
+                                        "displayField": "strUnitMeasure",
+                                        "store": [
+                                            "{targetUnitMeasure}"
+                                        ],
+                                        "valueField": "strUnitMeasure"
+                                    },
+                                    "name": "MyComboBox2",
+                                    "configAlternates": {
+                                        "columns": "array",
+                                        "store": "binding"
+                                    },
+                                    "designerId": "137508d4-4280-4056-9489-dfd99618072d",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "columns",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.grid.column.Number",
@@ -421,11 +541,24 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "itemId": "colConversionFactor",
                                 "text": "Conversion Factor",
                                 "width": 125
                             },
                             "name": "MyNumberColumn15",
-                            "designerId": "013dfa6b-b596-4e30-abb7-9d4003cea8b1"
+                            "designerId": "013dfa6b-b596-4e30-abb7-9d4003cea8b1",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Number",
+                                    "reference": {
+                                        "name": "editor",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "name": "MyNumberField2",
+                                    "designerId": "da8cfd81-497d-401e-a99a-f47f8ac8378a"
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.grid.View",
@@ -441,14 +574,29 @@
                             "designerId": "a0bcdcbd-4c24-4738-9648-001b6b306cf2"
                         },
                         {
+                            "type": "Ext.grid.plugin.CellEditing",
+                            "reference": {
+                                "name": "plugins",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "clicksToEdit": 1,
+                                "designer|displayName": "cepPackType",
+                                "pluginId": "cepPackType"
+                            },
+                            "name": "MyCellEditingPlugin1",
+                            "designerId": "0d0d5d35-3887-437c-8ee0-fa30b53e75b3"
+                        },
+                        {
                             "type": "Ext.selection.CheckboxModel",
                             "reference": {
                                 "name": "selModel",
                                 "type": "object"
                             },
                             "codeClass": null,
-                            "name": "MyCheckboxSelectionModel27",
-                            "designerId": "113f2792-8afe-4e33-8382-09c2f6c02f8b"
+                            "name": "MyCheckboxSelectionModel",
+                            "designerId": "4929acc6-fff3-47b7-bb34-ddd88c77c6a7"
                         }
                     ]
                 },
@@ -468,7 +616,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging117",
+                    "name": "statusbarpaging12",
                     "designerId": "d35ca290-fbac-4426-80de-75a0826117ac",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

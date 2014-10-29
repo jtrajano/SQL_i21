@@ -15,5 +15,9 @@
 
 Ext.define('Inventory.view.PackTypeViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.packtype'
+    alias: 'controller.packtype',
+
+    requires: [
+        'Inventory.view.override.PackTypeViewController'
+    ]
 });

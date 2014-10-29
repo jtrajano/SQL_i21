@@ -141,6 +141,9 @@ namespace iRely.Inventory.Model
         public DbSet<tblICFuelTaxClassProductCode> tblICFuelTaxClassProductCodes { get; set; }
         public DbSet<tblICCountGroup> tblICCountGroups { get; set; }
 
+        public DbSet<tblICPackType> tblICPackTypes { get; set; }
+        public DbSet<tblICPackTypeDetail> tblICPackTypeDetails { get; set; }
+
         public DbSet<tblICCommodityAccount> tblICCommodityAccounts { get; set; }
         public DbSet<tblICCommodityAttribute> tblICCommodityAttributes { get; set; }
         public DbSet<tblICItemKit> tblICItemKits { get; set; }
@@ -213,6 +216,9 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICFuelTaxClassMap());
             modelBuilder.Configurations.Add(new tblICFuelTaxClassProductCodeMap());
             modelBuilder.Configurations.Add(new tblICCountGroupMap());
+
+            modelBuilder.Configurations.Add(new tblICPackTypeMap());
+            modelBuilder.Configurations.Add(new tblICPackTypeDetailMap());
 
             modelBuilder.Configurations.Add(new tblICCommodityAccountMap());
             modelBuilder.Configurations.Add(new tblICCommodityAttributeMap());

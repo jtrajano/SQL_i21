@@ -15,6 +15,10 @@
 
 Ext.define('Inventory.view.PackTypeViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.packtype'
+    alias: 'viewmodel.packtype',
+
+    requires: [
+        'Inventory.view.override.PackTypeViewModel'
+    ]
 
 });
