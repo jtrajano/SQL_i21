@@ -13,15 +13,13 @@ DECLARE @Contacts TABLE
 	 id int identity(1,1)
 	, sscon_contact_id nvarchar(max)
 	, sscon_cus_no nvarchar(max)
-	, sscon_contact_title nvarchar(max)
 	, sscon_email nvarchar(max)
 	, sscon_first_name nvarchar(max)
 	, sscon_last_name nvarchar(max)
 	, sscon_work_no nvarchar(max)
 	, sscon_work_ext nvarchar(max)
 	, sscon_cell_no nvarchar(max)
-	, sscon_cell_ext nvarchar(max)
-	, sscon_fax_no nvarchar(max))
+	, sscon_cell_ext nvarchar(max))
 
 	
 	BEGIN -- Get Customers to be imported to #tmpContacts
@@ -29,7 +27,6 @@ DECLARE @Contacts TABLE
 		(
 			sscon_contact_id
 			, sscon_cus_no 
-			, sscon_contact_title
 			, sscon_email 
 			, sscon_first_name 
 			, sscon_last_name 
@@ -37,12 +34,10 @@ DECLARE @Contacts TABLE
 			, sscon_work_ext 
 			, sscon_cell_no 
 			, sscon_cell_ext 
-			, sscon_fax_no
 		)
-		SELECT 
+		SELECT top 10
 			isnull(sscon_contact_id, '')
 			, isnull(sscon_cus_no, '')
-			, isnull(sscon_contact_title, '')
 			, isnull(sscon_email, '')
 			, isnull(sscon_first_name, '')
 			, isnull(sscon_last_name, '')
@@ -50,7 +45,6 @@ DECLARE @Contacts TABLE
 			, isnull(sscon_work_ext, '')
 			, isnull(sscon_cell_no, '')
 			, isnull(sscon_cell_ext, '')
-			, isnull(sscon_fax_no, '')
 		FROM ssconmst sscon
 		WHERE 
 			sscon_cus_no LIKE '%[a-z0-9]%'
@@ -65,10 +59,6 @@ DECLARE @Contacts TABLE
 					OR isnull(sscon_email, '') = ''
 				)
 			AND sscon_cus_no in (select strCustomerNumber collate SQL_Latin1_General_CP1_CS_AS from tblARCustomer)
-			AND rtrim(ltrim(sscon_last_name)) + ', ' + rtrim(ltrim(sscon_first_name))
-			not in (
-				select strName COLLATE SQL_Latin1_General_CP1_CS_AS from tblEntity E inner join tblEntityContact EC on E.intEntityId = EC.intEntityId
-			)
 
 	END
 		-- LOOP Insertions
@@ -83,9 +73,9 @@ DECLARE @Contacts TABLE
 
 				insert @Entity
 				select top 1 
-					rtrim(ltrim(sscon_last_name)) + ', ' + rtrim(ltrim(sscon_first_name)), sscon_email, '', '' , 0, '', '', '', '', null, null
+					sscon_last_name + ', ' + sscon_first_name, sscon_email, '', '' , 0, '', '', '', '', null, null
 				from @Contacts where id = @id
-				--select * from @Entity
+
 					declare @intEntityId int
 					exec uspEntityCreateEntity @Entity , @intEntityId OUT
 			
@@ -96,16 +86,14 @@ DECLARE @Contacts TABLE
 				insert @EntityContact
 				select top 1
 					@intEntityId
-					, rtrim(ltrim(sscon_contact_id))
-					, rtrim(ltrim(sscon_contact_title))
+					, sscon_contact_id
 					, ''
-					, rtrim(ltrim(sscon_cell_no)) + ' x' + rtrim(ltrim(sscon_cell_ext))
-					, rtrim(ltrim(sscon_work_no)) + ' x' + rtrim(ltrim(sscon_work_ext))
-					, '' , ''
-					, rtrim(ltrim(sscon_fax_no))
-					, '', '', ''
+					, ''
+					, sscon_cell_no + ' x' + sscon_cell_ext
+					, sscon_work_no + ' x' + sscon_work_ext
+					, '' , '', '', '', '', ''
 				from @Contacts where id = @id
-				--select * from @EntityContact
+
 					declare @intContactId int
 					exec [uspEntityCreateEntityContact] @EntityContact, @intContactId OUT
 			END
@@ -134,13 +122,13 @@ DECLARE @Contacts TABLE
 
 			END
 			
-			----TODO1: remove this select and delete tblEntity and tblEntityContact
-			--	select * from tblEntity where intEntityId = @intEntityId
-			--	select * from tblEntityContact where intContactId = @intContactId 
+			--TODO1: remove this select and delete tblEntity and tblEntityContact
+				select * from tblEntity where intEntityId = @intEntityId
+				select * from tblEntityContact where intContactId = @intContactId 
 				
-			--	delete from tblEntityContact where intContactId = @intContactId 
-			--	delete from tblEntity where intEntityId = @intEntityId
-			---- End of TODO1
+				delete from tblEntityContact where intContactId = @intContactId 
+				delete from tblEntity where intEntityId = @intEntityId
+			-- End of TODO1
 			
 				delete from @Entity
 				delete from @EntityContact 
