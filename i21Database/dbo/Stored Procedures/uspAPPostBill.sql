@@ -190,7 +190,7 @@ BEGIN
 		SELECT
 			A.strPaymentRecordNum + ' payment was already made on this bill.',
 			'Bill',
-			C.intBillId,
+			C.strBillId,
 			@batchId,
 			C.intBillId
 		FROM tblAPPayment A
