@@ -35,7 +35,7 @@ DECLARE @Contacts TABLE
 			, sscon_cell_no 
 			, sscon_cell_ext 
 		)
-		SELECT top 10
+		SELECT 
 			isnull(sscon_contact_id, '')
 			, isnull(sscon_cus_no, '')
 			, isnull(sscon_email, '')
@@ -73,9 +73,9 @@ DECLARE @Contacts TABLE
 
 				insert @Entity
 				select top 1 
-					sscon_last_name + ', ' + sscon_first_name, sscon_email, '', '' , 0, '', '', '', '', null, null
+					rtrim(ltrim(sscon_last_name)) + ', ' + rtrim(ltrim(sscon_first_name)), sscon_email, '', '' , 0, '', '', '', '', null, null
 				from @Contacts where id = @id
-
+				--select * from @Entity
 					declare @intEntityId int
 					exec uspEntityCreateEntity @Entity , @intEntityId OUT
 			
@@ -86,14 +86,14 @@ DECLARE @Contacts TABLE
 				insert @EntityContact
 				select top 1
 					@intEntityId
-					, sscon_contact_id
+					, rtrim(ltrim(sscon_contact_id))
 					, ''
 					, ''
-					, sscon_cell_no + ' x' + sscon_cell_ext
-					, sscon_work_no + ' x' + sscon_work_ext
+					, rtrim(ltrim(sscon_cell_no)) + ' x' + rtrim(ltrim(sscon_cell_ext))
+					, rtrim(ltrim(sscon_work_no)) + ' x' + rtrim(ltrim(sscon_work_ext))
 					, '' , '', '', '', '', ''
 				from @Contacts where id = @id
-
+				--select * from @EntityContact
 					declare @intContactId int
 					exec [uspEntityCreateEntityContact] @EntityContact, @intContactId OUT
 			END
@@ -122,13 +122,13 @@ DECLARE @Contacts TABLE
 
 			END
 			
-			--TODO1: remove this select and delete tblEntity and tblEntityContact
-				select * from tblEntity where intEntityId = @intEntityId
-				select * from tblEntityContact where intContactId = @intContactId 
+			----TODO1: remove this select and delete tblEntity and tblEntityContact
+			--	select * from tblEntity where intEntityId = @intEntityId
+			--	select * from tblEntityContact where intContactId = @intContactId 
 				
-				delete from tblEntityContact where intContactId = @intContactId 
-				delete from tblEntity where intEntityId = @intEntityId
-			-- End of TODO1
+			--	delete from tblEntityContact where intContactId = @intContactId 
+			--	delete from tblEntity where intEntityId = @intEntityId
+			---- End of TODO1
 			
 				delete from @Entity
 				delete from @EntityContact 
