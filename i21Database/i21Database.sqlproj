@@ -621,6 +621,8 @@
     <Build Include="dbo\Tables\tblRMDefaultSort.sql" />
     <Build Include="dbo\Tables\tblARCustomerProductVersion.sql" />
     <Build Include="dbo\Views\vyuHDGroupUser.sql" />
+    <Build Include="dbo\Stored Procedures\uspEntityCreateEntity.sql" />
+    <Build Include="dbo\User Defined Types\Entity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
