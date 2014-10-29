@@ -42,21 +42,5 @@ Ext.define('Inventory.model.Commodity', {
         { name: 'dblMaxOver', type: 'float'},
         { name: 'intPatronageCategoryId', type: 'int', allowNull: true},
         { name: 'intPatronageCategoryDirectId', type: 'int', allowNull: true}
-    ],
-
-    hasMany: [
-        {
-            model: 'Inventory.model.CommodityUnitMeasure',
-            name: 'tblICCommodityUnitMeasures',
-            foreignKey: 'intCommodityId',
-            primaryKey: 'intCommodityId',
-            storeConfig: {
-                sortOnLoad: true,
-                sorters: {
-                    direction: 'ASC',
-                    property: 'intSort'
-                }
-            }
-        }
     ]
 });
