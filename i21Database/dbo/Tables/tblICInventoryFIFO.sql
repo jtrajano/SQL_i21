@@ -7,7 +7,7 @@ CREATE TABLE [dbo].[tblICInventoryFIFO]
 (
 	[intInventoryFIFOId] INT NOT NULL IDENTITY, 
     [intItemId] INT NOT NULL, 
-	[intItemLocationStoreId] INT NOT NULL,
+	[intItemLocationId] INT NOT NULL,
     [dtmDate] DATETIME NOT NULL, 
     [dblStockIn] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [dblStockOut] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
@@ -20,7 +20,7 @@ CREATE TABLE [dbo].[tblICInventoryFIFO]
 GO
 
 CREATE CLUSTERED INDEX [IDX_tblICInventoryFIFO]
-    ON [dbo].[tblICInventoryFIFO]([dtmDate] ASC, [intItemId] ASC, [intItemLocationStoreId] ASC, [intInventoryFIFOId] ASC);
+    ON [dbo].[tblICInventoryFIFO]([dtmDate] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intInventoryFIFOId] ASC);
 GO
 
 CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFO_intItemId]

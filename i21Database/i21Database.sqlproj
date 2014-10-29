@@ -762,6 +762,8 @@
     <Build Include="dbo\Tables\tblICStorageUnitType.sql" />
     <Build Include="dbo\Tables\tblICManufacturingCell.sql" />
     <Build Include="dbo\Tables\tblICManufacturingCellPackType.sql" />
+    <Build Include="dbo\Functions\fnGetItemsToUnpost.sql" />
+    <Build Include="dbo\Functions\fnGetItemCostingOnUnpostErrors.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

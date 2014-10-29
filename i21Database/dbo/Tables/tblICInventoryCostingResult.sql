@@ -10,7 +10,7 @@ CREATE TABLE [dbo].[tblICInventoryCostingResult]
 	[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, -- The string id of the transaction.  
     [intTransactionTypeId] INT NOT NULL, -- The transaction type id of the transaction. 
 	[intItemId] INT NOT NULL, -- The item id being posted/unposted. 
-	[intItemLocationStoreId] INT NOT NULL, -- The location-store id of the item being posted/unposted. 
+	[intItemLocationId] INT NOT NULL, -- The location id of the item being posted/unposted. 
 	[dblUnitQty] NUMERIC(18,6) NOT NULL DEFAULT 0, -- The unit qty of the item being posted/unposted. 
 	[dblUOMQty] NUMERIC(18,6) NOT NULL DEFAULT 1, -- The UOM qty of the item being posted/unposted. 
 	[dblCost] NUMERIC(18,6) NOT NULL DEFAULT 0, -- The cost of the item. 
