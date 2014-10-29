@@ -9,6 +9,7 @@ BEGIN
 			--Delete payment without vendor id and unposted to work with additional foreign key
 			DELETE FROM tblAPPayment
 			WHERE ISNULL(intVendorId, 0) = 0 AND ysnPosted = 0
+			AND NOT EXISTS(SELECT * FROM tblGLDetail WHERE strTransactionId = tblAPPayment.strPaymentRecordNum)
 
 			UPDATE A
 				SET A.intVendorId = C.intVendorId

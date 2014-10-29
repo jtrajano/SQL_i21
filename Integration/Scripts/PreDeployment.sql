@@ -107,6 +107,7 @@
 :r "..\dbo\Stored Procedures\uspAPPostOriginPayment.sql"
 :r "..\Scripts\AP\FixPaymentCMRecords.sql"
 :r "..\Scripts\AP\FixBillData.sql"
+:r "..\Scripts\AP\UpdateBillPONumber.sql"
 
 -- TAX FORMS
 :r ..\dbo\Views\vyuTFTaxCycle.sql
