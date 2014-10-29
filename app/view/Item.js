@@ -731,42 +731,6 @@ Ext.define('Inventory.view.Item', {
                                                                 columns: [
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        itemId: 'colGLAccountLocation',
-                                                                        dataIndex: 'string',
-                                                                        text: 'Location',
-                                                                        flex: 1,
-                                                                        editor: {
-                                                                            xtype: 'gridcombobox',
-                                                                            columns: [
-                                                                                {
-                                                                                    dataIndex: 'intCompanyLocationId',
-                                                                                    dataType: 'numeric',
-                                                                                    text: 'Location Id',
-                                                                                    hidden: true
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strLocationName',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Location Name',
-                                                                                    flex: 1
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strLocationType',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Location Type',
-                                                                                    flex: 1
-                                                                                }
-                                                                            ],
-                                                                            itemId: 'cboGLAccountLocation',
-                                                                            displayField: 'strLocationName',
-                                                                            valueField: 'intCompanyLocationId',
-                                                                            bind: {
-                                                                                store: '{CompanyLocation}'
-                                                                            }
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
                                                                         itemId: 'colGLAccountDescription',
                                                                         dataIndex: 'string',
                                                                         text: 'Account Description',
@@ -785,59 +749,6 @@ Ext.define('Inventory.view.Item', {
                                                                         itemId: 'colGLAccountId',
                                                                         dataIndex: 'string',
                                                                         text: 'Account ID',
-                                                                        flex: 1,
-                                                                        editor: {
-                                                                            xtype: 'gridcombobox',
-                                                                            columns: [
-                                                                                {
-                                                                                    dataIndex: 'intAccountId',
-                                                                                    dataType: 'numeric',
-                                                                                    text: 'Account Id',
-                                                                                    hidden: true
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strAccountId',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Account Id',
-                                                                                    flex: 1
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strDescription',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Description',
-                                                                                    flex: 1
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'intAccountGroupId',
-                                                                                    dataType: 'numeric',
-                                                                                    text: 'Account Group Id',
-                                                                                    hidden: true
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strAccountGroup',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Account Group',
-                                                                                    flex: 1
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strAccountType',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Account Type',
-                                                                                    flex: 1
-                                                                                }
-                                                                            ],
-                                                                            displayField: 'strAccountId',
-                                                                            valueField: 'intAccountId',
-                                                                            bind: {
-                                                                                store: '{GLAccount}'
-                                                                            }
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colGLAccountProfitCenter',
-                                                                        dataIndex: 'string',
-                                                                        text: 'Profit Center',
                                                                         flex: 1,
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
@@ -3673,6 +3584,7 @@ Ext.define('Inventory.view.Item', {
                                                         itemId: 'colStockLocation',
                                                         dataIndex: 'string',
                                                         text: 'Location',
+                                                        flex: 1,
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -3707,7 +3619,8 @@ Ext.define('Inventory.view.Item', {
                                                         itemId: 'colStockSubLocation',
                                                         width: 100,
                                                         dataIndex: 'string',
-                                                        text: 'Sublocation'
+                                                        text: 'Sublocation',
+                                                        flex: 1
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
@@ -3715,6 +3628,7 @@ Ext.define('Inventory.view.Item', {
                                                         width: 45,
                                                         dataIndex: 'string',
                                                         text: 'Unit',
+                                                        flex: 1,
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -3778,98 +3692,6 @@ Ext.define('Inventory.view.Item', {
                                                         text: 'On Order',
                                                         editor: {
                                                             xtype: 'numberfield'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colStockReorderPoint',
-                                                        width: 90,
-                                                        align: 'right',
-                                                        text: 'Reorder Point',
-                                                        editor: {
-                                                            xtype: 'numberfield'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colStockMinOrder',
-                                                        width: 70,
-                                                        align: 'right',
-                                                        text: 'Min Order',
-                                                        editor: {
-                                                            xtype: 'numberfield'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colStockSuggestedQty',
-                                                        width: 95,
-                                                        align: 'right',
-                                                        text: 'Suggested Qty',
-                                                        editor: {
-                                                            xtype: 'numberfield'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colStockLeadTime',
-                                                        width: 61,
-                                                        dataIndex: 'string',
-                                                        text: 'Lead Time',
-                                                        editor: {
-                                                            xtype: 'numberfield'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colStockCounted',
-                                                        width: 58,
-                                                        dataIndex: 'string',
-                                                        text: 'Counted',
-                                                        editor: {
-                                                            xtype: 'combobox',
-                                                            displayField: 'strDescription',
-                                                            valueField: 'strDescription',
-                                                            bind: {
-                                                                store: '{Counteds}'
-                                                            }
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colStockInventoryGroup',
-                                                        width: 100,
-                                                        dataIndex: 'string',
-                                                        text: 'Inventory Group',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intCountGroupId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Count Group Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strCountGroup',
-                                                                    dataType: 'string',
-                                                                    text: 'Inventory Count Group',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            displayField: 'strCountGroup',
-                                                            valueField: 'intCountGroupId',
-                                                            bind: {
-                                                                store: '{CountGroup}'
-                                                            }
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'checkcolumn',
-                                                        itemId: 'colStockCountedDaily',
-                                                        text: 'Counted Daily',
-                                                        editor: {
-                                                            xtype: 'checkboxfield'
                                                         }
                                                     }
                                                 ],
@@ -4525,13 +4347,18 @@ Ext.define('Inventory.view.Item', {
                                     },
                                     {
                                         xtype: 'panel',
-                                        layout: 'fit',
                                         title: 'Kit Details',
+                                        layout: {
+                                            type: 'vbox',
+                                            align: 'stretch'
+                                        },
                                         items: [
                                             {
                                                 xtype: 'advancefiltergrid',
+                                                flex: 1,
                                                 itemId: 'grdKit',
-                                                margin: -1,
+                                                margin: '5 -1 5 -1',
+                                                title: 'Kit Components',
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
@@ -4599,6 +4426,81 @@ Ext.define('Inventory.view.Item', {
                                                         clicksToEdit: 1
                                                     }
                                                 ]
+                                            },
+                                            {
+                                                xtype: 'advancefiltergrid',
+                                                flex: 1,
+                                                itemId: 'grdKitDetails',
+                                                margin: -1,
+                                                title: 'Component Details',
+                                                dockedItems: [
+                                                    {
+                                                        xtype: 'toolbar',
+                                                        dock: 'top',
+                                                        itemId: 'tlbGridOptions',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            padding: '0 0 0 1'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnDeleteKitDetail',
+                                                                iconCls: 'small-delete',
+                                                                text: 'Delete'
+                                                            },
+                                                            {
+                                                                xtype: 'tbseparator'
+                                                            },
+                                                            {
+                                                                xtype: 'filter1'
+                                                            }
+                                                        ]
+                                                    }
+                                                ],
+                                                columns: [
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        dataIndex: 'string',
+                                                        text: 'Item No.',
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        dataIndex: 'string',
+                                                        text: 'Description',
+                                                        flex: 2
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        dataIndex: 'string',
+                                                        width: 74,
+                                                        text: 'Quantity'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        dataIndex: 'string',
+                                                        text: 'UOM'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        dataIndex: 'string',
+                                                        width: 98,
+                                                        align: 'right',
+                                                        text: 'Price'
+                                                    },
+                                                    {
+                                                        xtype: 'checkcolumn',
+                                                        text: 'Selected'
+                                                    }
+                                                ],
+                                                viewConfig: {
+                                                    itemId: 'grvKitDetails'
+                                                },
+                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                    selType: 'checkboxmodel'
+                                                })
                                             }
                                         ]
                                     },

@@ -20,29 +20,26 @@ Ext.define('Inventory.view.InventoryUOM', {
     requires: [
         'Inventory.view.InventoryUOMViewModel',
         'Inventory.view.Filter1',
-        'Inventory.view.Statusbar1',
+        'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
-        'Ext.toolbar.Toolbar',
+        'Ext.button.Button',
         'Ext.toolbar.Separator',
-        'Ext.tab.Panel',
-        'Ext.tab.Tab',
-        'Ext.grid.Panel',
         'Ext.form.field.ComboBox',
-        'Ext.grid.column.Check',
         'Ext.form.field.Checkbox',
+        'Ext.grid.Panel',
+        'Ext.grid.column.Column',
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
-        'Ext.grid.plugin.CellEditing'
+        'Ext.toolbar.Paging'
     ],
 
     viewModel: {
         type: 'inventoryuom'
     },
-    height: 500,
+    height: 542,
     hidden: false,
     minHeight: 500,
-    minWidth: 530,
-    width: 530,
+    width: 434,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
@@ -60,7 +57,7 @@ Ext.define('Inventory.view.InventoryUOM', {
                         itemId: 'frmInventoryUOM',
                         margin: -1,
                         width: 450,
-                        bodyPadding: 5,
+                        bodyPadding: 10,
                         trackResetOnLoad: true,
                         layout: {
                             type: 'vbox',
@@ -116,192 +113,105 @@ Ext.define('Inventory.view.InventoryUOM', {
                                 ]
                             },
                             {
-                                xtype: 'istatusbar',
+                                xtype: 'statusbarpaging1',
                                 flex: 1,
                                 dock: 'bottom'
                             }
                         ],
                         items: [
                             {
-                                xtype: 'tabpanel',
-                                flex: 1,
-                                itemId: 'tabInventoryUOM',
-                                activeTab: 0,
-                                plain: true,
+                                xtype: 'textfield',
+                                itemId: 'txtUnitMeasure',
+                                fieldLabel: 'Unit Measure'
+                            },
+                            {
+                                xtype: 'textfield',
+                                itemId: 'txtSymbol',
+                                fieldLabel: 'Symbol'
+                            },
+                            {
+                                xtype: 'container',
+                                margin: '0 0 10 0',
+                                layout: {
+                                    type: 'hbox',
+                                    align: 'stretch'
+                                },
                                 items: [
                                     {
-                                        xtype: 'panel',
-                                        layout: 'fit',
-                                        title: 'UOM',
-                                        items: [
-                                            {
-                                                xtype: 'gridpanel',
-                                                itemId: 'grdUOM',
-                                                margin: -1,
-                                                dockedItems: [
-                                                    {
-                                                        xtype: 'toolbar',
-                                                        dock: 'top',
-                                                        itemId: 'tlbGridOptions',
-                                                        layout: {
-                                                            type: 'hbox',
-                                                            padding: '0 0 0 1'
-                                                        },
-                                                        items: [
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnDeleteUOM',
-                                                                iconCls: 'small-delete',
-                                                                text: 'Delete'
-                                                            },
-                                                            {
-                                                                xtype: 'tbseparator'
-                                                            },
-                                                            {
-                                                                xtype: 'filter1'
-                                                            }
-                                                        ]
-                                                    }
-                                                ],
-                                                columns: [
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colUOM',
-                                                        dataIndex: 'string',
-                                                        text: 'UOM',
-                                                        flex: 1,
-                                                        editor: {
-                                                            xtype: 'textfield'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colSymbol',
-                                                        width: 64,
-                                                        dataIndex: 'string',
-                                                        text: 'Symbol',
-                                                        editor: {
-                                                            xtype: 'textfield'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colUnitType',
-                                                        dataIndex: 'string',
-                                                        text: 'Unit Type',
-                                                        flex: 1,
-                                                        editor: {
-                                                            xtype: 'combobox',
-                                                            itemId: 'cboUnitType',
-                                                            displayField: 'strDescription',
-                                                            valueField: 'strDescription',
-                                                            bind: {
-                                                                store: '{UnitTypes}'
-                                                            }
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'checkcolumn',
-                                                        itemId: 'colDefault',
-                                                        width: 60,
-                                                        text: 'Default',
-                                                        editor: {
-                                                            xtype: 'checkboxfield'
-                                                        }
-                                                    }
-                                                ],
-                                                viewConfig: {
-                                                    itemId: 'grvUOM'
-                                                },
-                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                    selType: 'checkboxmodel'
-                                                }),
-                                                plugins: [
-                                                    {
-                                                        ptype: 'cellediting',
-                                                        pluginId: 'cepUOM',
-                                                        clicksToEdit: 1
-                                                    }
-                                                ]
-                                            }
-                                        ]
+                                        xtype: 'combobox',
+                                        flex: 1,
+                                        itemId: 'cboUnitType',
+                                        fieldLabel: 'Unit Type'
                                     },
                                     {
-                                        xtype: 'panel',
-                                        layout: 'fit',
-                                        title: 'Conversion ',
+                                        xtype: 'checkboxfield',
+                                        itemId: 'chkDefault',
+                                        margin: '0 0 0 5',
+                                        fieldLabel: 'Default',
+                                        labelWidth: 50
+                                    }
+                                ]
+                            },
+                            {
+                                xtype: 'gridpanel',
+                                flex: 1,
+                                itemId: 'grdConversion',
+                                title: 'Conversion',
+                                dockedItems: [
+                                    {
+                                        xtype: 'toolbar',
+                                        dock: 'top',
+                                        itemId: 'tlbGridOptions',
+                                        layout: {
+                                            type: 'hbox',
+                                            padding: '0 0 0 1'
+                                        },
                                         items: [
                                             {
-                                                xtype: 'gridpanel',
-                                                itemId: 'grdConversion',
-                                                margin: -1,
-                                                dockedItems: [
-                                                    {
-                                                        xtype: 'toolbar',
-                                                        dock: 'top',
-                                                        itemId: 'tlbGridOptions',
-                                                        layout: {
-                                                            type: 'hbox',
-                                                            padding: '0 0 0 1'
-                                                        },
-                                                        items: [
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnDeleteConversion',
-                                                                iconCls: 'small-delete',
-                                                                text: 'Delete'
-                                                            },
-                                                            {
-                                                                xtype: 'tbseparator'
-                                                            },
-                                                            {
-                                                                xtype: 'filter1'
-                                                            }
-                                                        ]
-                                                    }
-                                                ],
-                                                columns: [
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colConversionUOM',
-                                                        dataIndex: 'string',
-                                                        text: 'UOM',
-                                                        flex: 1
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colConversionStockUOM',
-                                                        dataIndex: 'string',
-                                                        text: 'Stock UOM',
-                                                        flex: 1
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colConversionToStockUOM',
-                                                        width: 98,
-                                                        dataIndex: 'string',
-                                                        text: 'Conversion<br>to Stock UOM'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colConversionFromStockUOM',
-                                                        width: 98,
-                                                        dataIndex: 'string',
-                                                        text: 'Conversion from<br>Stock UOM'
-                                                    }
-                                                ],
-                                                viewConfig: {
-                                                    itemId: 'grvConversion'
-                                                },
-                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                    selType: 'checkboxmodel'
-                                                })
+                                                xtype: 'button',
+                                                tabIndex: -1,
+                                                itemId: 'btnDeleteConversion',
+                                                iconCls: 'small-delete',
+                                                text: 'Delete'
+                                            },
+                                            {
+                                                xtype: 'tbseparator'
+                                            },
+                                            {
+                                                xtype: 'filter1'
                                             }
                                         ]
                                     }
-                                ]
+                                ],
+                                columns: [
+                                    {
+                                        xtype: 'gridcolumn',
+                                        itemId: 'colConversionStockUOM',
+                                        dataIndex: 'string',
+                                        text: 'Stock UOM',
+                                        flex: 1
+                                    },
+                                    {
+                                        xtype: 'gridcolumn',
+                                        itemId: 'colConversionToStockUOM',
+                                        width: 98,
+                                        dataIndex: 'string',
+                                        text: 'Conversion<br>to Stock UOM'
+                                    },
+                                    {
+                                        xtype: 'gridcolumn',
+                                        itemId: 'colConversionFromStockUOM',
+                                        width: 98,
+                                        dataIndex: 'string',
+                                        text: 'Conversion from<br>Stock UOM'
+                                    }
+                                ],
+                                viewConfig: {
+                                    itemId: 'grvConversion'
+                                },
+                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                    selType: 'checkboxmodel'
+                                })
                             }
                         ]
                     }

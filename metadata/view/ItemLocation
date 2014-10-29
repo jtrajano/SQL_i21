@@ -10,7 +10,7 @@
         "defaultFocus": null,
         "designer|userAlias": "itemlocation",
         "designer|userClassName": "ItemLocation",
-        "height": 660,
+        "height": 689,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
@@ -628,6 +628,23 @@
                                     },
                                     "name": "MyCheckbox29",
                                     "designerId": "0dd568d8-b934-45a7-b7f5-3b91d85e36a6"
+                                },
+                                {
+                                    "type": "Ext.form.field.Checkbox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "boxLabel": null,
+                                        "fieldLabel": "Promotional Item",
+                                        "itemId": "chkPromotionalItem",
+                                        "labelWidth": 105,
+                                        "layout|flex": null
+                                    },
+                                    "name": "MyCheckbox19",
+                                    "designerId": "4852eacd-d64f-4b72-93d5-a85dc71eaa32"
                                 }
                             ]
                         },
@@ -649,23 +666,6 @@
                             "name": "MyContainer26",
                             "designerId": "233f4805-c8ef-4fcd-bacf-1440e9479720",
                             "cn": [
-                                {
-                                    "type": "Ext.form.field.Checkbox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "boxLabel": null,
-                                        "fieldLabel": "Promotional Item",
-                                        "itemId": "chkPromotionalItem",
-                                        "labelWidth": 140,
-                                        "layout|flex": null
-                                    },
-                                    "name": "MyCheckbox19",
-                                    "designerId": "4852eacd-d64f-4b72-93d5-a85dc71eaa32"
-                                },
                                 {
                                     "type": "Ext.form.field.ComboBox",
                                     "reference": {
@@ -915,25 +915,7 @@
                                     },
                                     "name": "MyTextField14",
                                     "designerId": "bca19ad9-6d09-49dc-a3a7-d6a2591000e9"
-                                }
-                            ]
-                        },
-                        {
-                            "type": "Ext.container.Container",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "container|align": "stretch",
-                                "designer|displayName": "container",
-                                "layout": "vbox",
-                                "layout|flex": 1
-                            },
-                            "name": "MyContainer10",
-                            "designerId": "b478b6ef-7ddd-423e-9f47-d20db97740f0",
-                            "cn": [
+                                },
                                 {
                                     "type": "Ext.form.field.Checkbox",
                                     "reference": {
@@ -967,7 +949,25 @@
                                     },
                                     "name": "MyCheckbox36",
                                     "designerId": "9e05d9d4-c9ca-4dd6-ae31-92653014970d"
-                                },
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.container.Container",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "stretch",
+                                "designer|displayName": "container",
+                                "layout": "vbox",
+                                "layout|flex": 1
+                            },
+                            "name": "MyContainer10",
+                            "designerId": "b478b6ef-7ddd-423e-9f47-d20db97740f0",
+                            "cn": [
                                 {
                                     "type": "Ext.form.field.Text",
                                     "reference": {
@@ -1130,6 +1130,118 @@
                                     },
                                     "name": "MyComboBox",
                                     "designerId": "6c2800e6-6c69-42a6-b38a-9f92bbd291a3"
+                                },
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Reorder Point",
+                                        "itemId": "txtReorderPoint",
+                                        "labelWidth": 140,
+                                        "layout|flex": null
+                                    },
+                                    "name": "MyTextField47",
+                                    "designerId": "6bdcb8e9-b5a8-4745-a1b4-10adf4e822a9"
+                                },
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Min Order",
+                                        "itemId": "txtMinOrder",
+                                        "labelWidth": 140,
+                                        "layout|flex": null
+                                    },
+                                    "name": "MyTextField48",
+                                    "designerId": "06884e2c-cf02-4b89-b0bc-64e8597cdafe"
+                                },
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Suggested Qty",
+                                        "itemId": "txtSuggestedQty",
+                                        "labelWidth": 140,
+                                        "layout|flex": null
+                                    },
+                                    "name": "MyTextField49",
+                                    "designerId": "2e57e615-b411-4d8c-ba8a-9bae31dfc416"
+                                },
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Lead Time",
+                                        "itemId": "txtLeadTime",
+                                        "labelWidth": 140,
+                                        "layout|flex": null
+                                    },
+                                    "name": "MyTextField50",
+                                    "designerId": "041d6c95-c1e7-4c14-a4fb-d2a68eb8fdff"
+                                },
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Counted",
+                                        "itemId": "txtCounted",
+                                        "labelWidth": 140,
+                                        "layout|flex": null
+                                    },
+                                    "name": "MyTextField51",
+                                    "designerId": "0303a591-73b4-470c-9cc1-173244de395c"
+                                },
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Inventory Group Field",
+                                        "itemId": "txtInventoryGroupField",
+                                        "labelWidth": 140,
+                                        "layout|flex": null
+                                    },
+                                    "name": "MyTextField52",
+                                    "designerId": "63f0e54a-eb5b-4801-bfa6-4884f7711e65"
+                                },
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Counted Daily",
+                                        "itemId": "txtCountedDaily",
+                                        "labelWidth": 140,
+                                        "layout|flex": null
+                                    },
+                                    "name": "MyTextField53",
+                                    "designerId": "2654dce5-3cf7-443a-8758-0767459aabc9"
                                 }
                             ]
                         }
@@ -1151,7 +1263,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging13",
                     "designerId": "3812557b-eaf0-4f41-b444-7da5890f9c89",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
