@@ -33,22 +33,31 @@
 
 -- SM
 :r .\4_SM\1_DataCleanup.sql
+:r .\4_SM\2_DropProcedureUspCMPostMessages.sql
 
 -- CM
 :r .\5_CM\1_DropTriggers.sql
 
 -- GL
 :r .\6_GL\1_1410_to_1420.sql
+:r .\6_GL\2_1430_to_1440.sql
 
 -- AR
 :r .\7_AR\1_1410_to_1420.sql
 
 -- AP
+:r .\8_AP\DropAPViews.sql
 :r .\8_AP\1_1410_to_1420.sql
 :r .\8_AP\1_1420_to_1430.sql
+--:r .\8_AP\FixEntityId.sql
+--:r .\8_AP\FixstrBillId.sql
+--:r .\8_AP\FixPaymentWithoutVendorId.sql
 
 -- FRD
 :r .\9_FRD\1_1420_to_1430.sql
 
 -- RPT
 :r .\10_RPT\1_1430_to_1430.sql
+
+-- IC
+:r .\11_IC\Drop_References_to_ItemCostingTableType.sql
