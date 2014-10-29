@@ -36,7 +36,7 @@ BEGIN
 	
 		-- Assert
 		-- CALLED
-			-- Check if the Validate Costing on unpost sp is NOT called. 
+			-- Check if the Validate Costing on unpost sp is called. 
 			SELECT	@isCalledUspICValidateCostingOnUnpost = 1 
 			FROM	uspICValidateCostingOnUnpost_SpyProcedureLog 
 			WHERE	_id_ = 1
@@ -56,7 +56,7 @@ BEGIN
 			
 			EXEC tSQLt.AssertEquals 0, @isCalledUspICUnpostCosting;			
 		
-			-- Check if the validate costing on post is CALLED. 
+			-- Check if the validate costing on post is NOT CALLED. 
 			SELECT	@isCalledUspICValidateCostingOnPost = 1 
 			FROM	uspICValidateCostingOnPost_SpyProcedureLog 
 			WHERE	_id_ = 1 

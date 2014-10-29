@@ -755,6 +755,8 @@
     <Build Include="dbo\Tables\tblICItemKitDetail.sql" />
     <Build Include="dbo\Functions\fnGetItemCostingOnPostErrors.sql" />
     <Build Include="dbo\Tables\tblHDTicketEscalation.sql" />
+    <Build Include="dbo\Functions\fnGetItemsToUnpost.sql" />
+    <Build Include="dbo\Functions\fnGetItemCostingOnUnpostErrors.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

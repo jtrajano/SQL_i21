@@ -5,7 +5,7 @@
 * Sample usage: 
 *
 *	SELECT	B.*
-*	FROM	tblICItemLocation A CROSS APPLY dbo.fnGetBankTransactionReversalErrors(A.intItemId, A.intLocationId) B
+*	FROM	tblICItemLocation A CROSS APPLY dbo.fnGetItemCostingOnPostErrors(A.intItemId, A.intLocationId, (A.dblUnitQty * A.dblUOMQty)) B
 * 
 */
 CREATE FUNCTION fnGetItemCostingOnPostErrors (@intItemId AS INT, @intLocationId AS INT, @dblQty AS NUMERIC(18,6) = 0)

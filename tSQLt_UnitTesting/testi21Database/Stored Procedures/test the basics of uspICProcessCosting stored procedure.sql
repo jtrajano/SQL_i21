@@ -50,8 +50,6 @@ BEGIN
 		SELECT	@isCalledUspICValidateCostingOnUnpost = 1 
 		FROM	uspICValidateCostingOnUnpost_SpyProcedureLog 
 		WHERE	_id_ = 1
-				AND intTransactionId = 1
-				AND intTransactionTypeId = 1
 			
 		EXEC tSQLt.AssertEquals 0, @isCalledUspICValidateCostingOnUnpost;
 		
@@ -104,8 +102,6 @@ BEGIN
 		SELECT	@isCalledUspICValidateCostingOnUnpost = 1 
 		FROM	uspICValidateCostingOnUnpost_SpyProcedureLog 
 		WHERE	_id_ = 1
-				AND intTransactionId = 1
-				AND intTransactionTypeId = 1
 			
 		EXEC tSQLt.AssertEquals 1, @isCalledUspICValidateCostingOnUnpost;
 		
