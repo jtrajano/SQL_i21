@@ -757,6 +757,8 @@
     <Build Include="dbo\Tables\tblHDTicketEscalation.sql" />
     <Build Include="dbo\Stored Procedures\uspEntityCreateEntity.sql" />
     <Build Include="dbo\User Defined Types\Entity.sql" />
+    <Build Include="dbo\User Defined Types\EntityContact.sql" />
+    <Build Include="dbo\Stored Procedures\uspEntityCreateEntityContact.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

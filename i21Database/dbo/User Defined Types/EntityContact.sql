@@ -1,7 +1,7 @@
 ﻿CREATE TYPE [dbo].[EntityContact] AS TABLE
 (
 	EntityId int NOT NULL,
-	[ContactNumber] NVARCHAR (15)   COLLATE Latin1_General_CI_AS NOT NULL DEFAULT '',
+	[ContactNumber] NVARCHAR (20)   COLLATE Latin1_General_CI_AS NOT NULL DEFAULT '',
     [Title]         NVARCHAR (35)  COLLATE Latin1_General_CI_AS NULL,
     [Department]    NVARCHAR (30)  COLLATE Latin1_General_CI_AS NULL,
     [Mobile]        NVARCHAR (25)  COLLATE Latin1_General_CI_AS NULL,
