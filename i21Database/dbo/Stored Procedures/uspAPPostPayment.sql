@@ -121,6 +121,7 @@ BEGIN
 				INNER JOIN tblAPVendor B
 					ON A.intVendorId = B.intVendorId AND B.ysnWithholding = 1
 				WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData)
+				AND 1 = (CASE WHEN (SELECT intWithholdAccountId FROM tblAPPreference) IS NULL THEN 1 ELSE 0 END)
 
 			--Payment without payment on detail
 			INSERT INTO #tmpPayableInvalidData
