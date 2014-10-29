@@ -59,6 +59,10 @@ DECLARE @Contacts TABLE
 					OR isnull(sscon_email, '') = ''
 				)
 			AND sscon_cus_no in (select strCustomerNumber collate SQL_Latin1_General_CP1_CS_AS from tblARCustomer)
+			AND rtrim(ltrim(sscon_last_name)) + ', ' + rtrim(ltrim(sscon_first_name))
+			not in (
+				select strName COLLATE SQL_Latin1_General_CP1_CS_AS from tblEntity E inner join tblEntityContact EC on E.intEntityId = EC.intEntityId
+			)
 
 	END
 		-- LOOP Insertions

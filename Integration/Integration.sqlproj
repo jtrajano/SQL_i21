@@ -210,10 +210,4 @@
     <Build Include="dbo\Tables\tblAPaptrxmst.sql" />
     <None Include="dbo\Stored Procedures\uspCMBankTransactionReversalOrigin.sql" />
   </ItemGroup>
-  <ItemGroup>
-    <SqlCmdVariable Include="i21Database">
-      <DefaultValue>i21Database</DefaultValue>
-      <Value>$(SqlCmdVar__1)</Value>
-    </SqlCmdVariable>
-  </ItemGroup>
 </Project>
