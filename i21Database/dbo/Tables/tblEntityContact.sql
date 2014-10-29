@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblEntityContact] (
     [intEntityId]      INT            NOT NULL,
     [intContactId]     INT            IDENTITY (1, 1) NOT NULL,
+	[strContactNumber]               NVARCHAR (15)   COLLATE Latin1_General_CI_AS NOT NULL,
     [strTitle]         NVARCHAR (35)  COLLATE Latin1_General_CI_AS NULL,
     [strDepartment]    NVARCHAR (30)  COLLATE Latin1_General_CI_AS NULL,
     [strMobile]        NVARCHAR (25)  COLLATE Latin1_General_CI_AS NULL,
@@ -19,3 +20,13 @@
 
 
 
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Used for Origin link to ssconmst.sscon_contact_id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblEntityContact',
+    @level2type = N'COLUMN',
+    @level2name = N'strContactNumber'
