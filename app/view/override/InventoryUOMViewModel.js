@@ -1,6 +1,10 @@
 Ext.define('Inventory.view.override.InventoryUOMViewModel', {
     override: 'Inventory.view.InventoryUOMViewModel',
 
+    requires: [
+        'Inventory.store.BufferedUnitMeasure'
+    ],
+
     stores: {
         UnitTypes: {
             autoLoad: true,
@@ -22,6 +26,9 @@ Ext.define('Inventory.view.override.InventoryUOMViewModel', {
             fields: {
                 name: 'strDescription'
             }
+        },
+        UnitMeasure: {
+            type: 'inventorybuffereduom'
         }
     }
 

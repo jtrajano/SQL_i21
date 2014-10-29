@@ -46,11 +46,12 @@ namespace iRely.Inventory.BRL
         {
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICUnitMeasure>()
-                      .Where(w => query.Where(predicate).Any(a => a.intUnitMeasureId == w.intUnitMeasureId)) //Filter the Main DataSource Based on Search Query
-                      .OrderBySelector(sortSelector)
-                      .Skip(start)
-                      .Take(limit)
-                      .AsNoTracking();
+                    .Include("tblICUnitMeasureConversions.StockUnitMeasure")
+                    .Where(w => query.Where(predicate).Any(a => a.intUnitMeasureId == w.intUnitMeasureId)) //Filter the Main DataSource Based on Search Query
+                    .OrderBySelector(sortSelector)
+                    .Skip(start)
+                    .Take(limit)
+                    .AsNoTracking();
         }
 
         public void AddUnitMeasure(tblICUnitMeasure UnitMeasure)

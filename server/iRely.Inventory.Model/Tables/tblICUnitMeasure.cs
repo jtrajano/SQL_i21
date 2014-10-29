@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,8 @@ namespace iRely.Inventory.Model
         public string strSymbol { get; set; }
         public string strUnitType { get; set; }
         public bool ysnDefault { get; set; }
+
+        public ICollection<tblICUnitMeasureConversion> tblICUnitMeasureConversions { get; set; }
 
         public ICollection<tblICCategory> tblICCategories { get; set; }
         public ICollection<tblICCommodityUnitMeasure> tblICCommodityUnitMeasures { get; set; }
@@ -32,5 +35,40 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemKitDetail> tblICItemKitDetails { get; set; }
         public ICollection<tblICItemAssembly> tblICItemAssemblies { get; set; }
         public ICollection<tblICItemBundle> tblICItemBundles { get; set; }
+
+        public ICollection<tblICUnitMeasureConversion> StockUnitMeasureConversions { get; set; }
+    }
+
+    public class tblICUnitMeasureConversion : BaseEntity
+    {
+        public int intUnitMeasureConversionId { get; set; }
+        public int intUnitMeasureId { get; set; }
+        public int intStockUnitMeasureId { get; set; }
+        public decimal? dblConversionToStock { get; set; }
+        public decimal? dblConversionFromStock { get; set; }
+        public int intSort { get; set; }
+
+        private string _unitmeasure;
+        [NotMapped]
+        public string strUnitMeasure
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_unitmeasure))
+                    if (StockUnitMeasure != null)
+                        return StockUnitMeasure.strUnitMeasure;
+                    else
+                        return null;
+                else
+                    return _unitmeasure;
+            }
+            set
+            {
+                _unitmeasure = value;
+            }
+        }
+
+        public tblICUnitMeasure tblICUnitMeasure { get; set; }
+        public tblICUnitMeasure StockUnitMeasure { get; set; }
     }
 }

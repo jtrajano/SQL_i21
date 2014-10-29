@@ -27,9 +27,11 @@ Ext.define('Inventory.view.InventoryUOM', {
         'Ext.form.field.ComboBox',
         'Ext.form.field.Checkbox',
         'Ext.grid.Panel',
-        'Ext.grid.column.Column',
+        'Ext.grid.column.Number',
+        'Ext.form.field.Number',
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
+        'Ext.grid.plugin.CellEditing',
         'Ext.toolbar.Paging'
     ],
 
@@ -113,7 +115,7 @@ Ext.define('Inventory.view.InventoryUOM', {
                                 ]
                             },
                             {
-                                xtype: 'statusbarpaging1',
+                                xtype: 'ipagingstatusbar',
                                 flex: 1,
                                 dock: 'bottom'
                             }
@@ -141,7 +143,9 @@ Ext.define('Inventory.view.InventoryUOM', {
                                         xtype: 'combobox',
                                         flex: 1,
                                         itemId: 'cboUnitType',
-                                        fieldLabel: 'Unit Type'
+                                        fieldLabel: 'Unit Type',
+                                        displayField: 'strDescription',
+                                        valueField: 'strDescription'
                                     },
                                     {
                                         xtype: 'checkboxfield',
@@ -189,21 +193,61 @@ Ext.define('Inventory.view.InventoryUOM', {
                                         itemId: 'colConversionStockUOM',
                                         dataIndex: 'string',
                                         text: 'Stock UOM',
-                                        flex: 1
+                                        flex: 1,
+                                        editor: {
+                                            xtype: 'gridcombobox',
+                                            columns: [
+                                                {
+                                                    dataIndex: 'intUnitMeasureId',
+                                                    dataType: 'numeric',
+                                                    text: 'Unit Of Measure ID',
+                                                    hidden: true
+                                                },
+                                                {
+                                                    dataIndex: 'strUnitMeasure',
+                                                    dataType: 'string',
+                                                    text: 'Unit Measure',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    dataIndex: 'strUnitType',
+                                                    dataType: 'string',
+                                                    text: 'Unit Type',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    dataIndex: 'ysnDefault',
+                                                    dataType: 'boolean',
+                                                    text: 'Default',
+                                                    flex: 1
+                                                }
+                                            ],
+                                            displayField: 'strUnitMeasure',
+                                            valueField: 'intUnitMeasureId',
+                                            bind: {
+                                                store: '{UnitMeasure}'
+                                            }
+                                        }
                                     },
                                     {
-                                        xtype: 'gridcolumn',
+                                        xtype: 'numbercolumn',
                                         itemId: 'colConversionToStockUOM',
                                         width: 98,
                                         dataIndex: 'string',
-                                        text: 'Conversion<br>to Stock UOM'
+                                        text: 'Conversion<br>to Stock UOM',
+                                        editor: {
+                                            xtype: 'numberfield'
+                                        }
                                     },
                                     {
-                                        xtype: 'gridcolumn',
+                                        xtype: 'numbercolumn',
                                         itemId: 'colConversionFromStockUOM',
                                         width: 98,
                                         dataIndex: 'string',
-                                        text: 'Conversion from<br>Stock UOM'
+                                        text: 'Conversion from<br>Stock UOM',
+                                        editor: {
+                                            xtype: 'numberfield'
+                                        }
                                     }
                                 ],
                                 viewConfig: {
@@ -211,7 +255,14 @@ Ext.define('Inventory.view.InventoryUOM', {
                                 },
                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                     selType: 'checkboxmodel'
-                                })
+                                }),
+                                plugins: [
+                                    {
+                                        ptype: 'cellediting',
+                                        pluginId: 'cepConversion',
+                                        clicksToEdit: 1
+                                    }
+                                ]
                             }
                         ]
                     }

@@ -6,6 +6,7 @@ Ext.define('Inventory.model.UnitMeasure', {
     extend: 'iRely.BaseEntity',
 
     requires: [
+        'Inventory.model.UnitMeasureConversion',
         'Ext.data.Field'
     ],
 
@@ -17,5 +18,10 @@ Ext.define('Inventory.model.UnitMeasure', {
         { name: 'strSymbol', type: 'string'},
         { name: 'strUnitType', type: 'string'},
         { name: 'ysnDefault', type: 'bool'}
+    ],
+
+    validators: [
+        {type: 'presence', field: 'strUnitMeasure'},
+        {type: 'presence', field: 'strUnitType'}
     ]
 });

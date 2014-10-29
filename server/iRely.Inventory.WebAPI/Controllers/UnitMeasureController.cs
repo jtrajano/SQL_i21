@@ -20,6 +20,7 @@ namespace iRely.Invetory.WebAPI.Controllers
     {
         private UnitMeasure _UnitMeasureBRL = new UnitMeasure();
 
+        [HttpGet]
         public HttpResponseMessage SearchUnitMeasures(int page, int start, int limit, string columns = "", string sort = "", string filter = "")
         {
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
