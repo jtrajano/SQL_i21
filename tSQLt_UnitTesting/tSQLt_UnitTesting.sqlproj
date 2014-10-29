@@ -229,6 +229,7 @@
     <Build Include="testi21Database\Functions\test the fnGetItemCostingOnPostErrors function.sql" />
     <Build Include="testi21Database\Stored Procedures\Fake data for items in a transaction to unpost.sql" />
     <Build Include="testi21Database\Functions\test the fnGetItemsToUnpost function.sql" />
+    <Build Include="testi21Database\Functions\test the fnGetItemCostingOnUnpostErrors function.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
