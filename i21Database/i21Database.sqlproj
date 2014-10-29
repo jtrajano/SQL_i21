@@ -764,6 +764,7 @@
     <Build Include="dbo\Tables\tblICManufacturingCellPackType.sql" />
     <Build Include="dbo\Functions\fnGetItemsToUnpost.sql" />
     <Build Include="dbo\Functions\fnGetItemCostingOnUnpostErrors.sql" />
+    <Build Include="dbo\Views\vyuAPRptVendorHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
