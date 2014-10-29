@@ -11,6 +11,9 @@
     [intShipViaId]         INT             NOT NULL,
     [strPONumber]          NVARCHAR (25)   NULL,
     [intTermId]            INT             NOT NULL,
+    [dblInvoiceSubtotal]   NUMERIC (18, 6) NULL,
+    [dblShipping]          NUMERIC (18, 6) NULL,
+    [dblTax]               NUMERIC (18, 6) NULL,
     [dblInvoiceTotal]      NUMERIC (18, 6) NULL,
     [dblDiscount]          NUMERIC (18, 6) NULL,
     [dblAmountDue]         NUMERIC (18, 6) NULL,
@@ -25,6 +28,8 @@
     CONSTRAINT [PK_tblARInvoice] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
     CONSTRAINT [FK_tblARInvoice_tblEntity] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblEntity] ([intEntityId])
 );
+
+
 
 
 
