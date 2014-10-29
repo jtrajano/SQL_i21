@@ -32,13 +32,13 @@ BEGIN
 
 		IF(@posted = 1) AND EXISTS(SELECT * FROM sys.columns WHERE [name] = N'intTransactionId' AND [object_id] = OBJECT_ID(N'tblGLDetail'))
 		BEGIN
-			EXEC('
+			EXEC sp_executesql N'
 				UPDATE A
-				SET strTransactionId = @BillId,
-				intTransactionId = @intBillId 
+				SET strTransactionId = @billId,
+				intTransactionId = @intbillId 
 				FROM tblGLDetail A
-				WHERE strTransactionForm = CAST(@intBillId AS NVARCHAR(50)) AND strCode = ''AP''		
-			');
+				WHERE strTransactionForm = CAST(@intbillId AS NVARCHAR(50)) AND strCode = ''AP''		
+			', N'@billId NVARCHAR(50), @intbillId INT', @billId = @BillId, @intbillId = @intBillId
 		END
 
 		DELETE FROM #tmpWrongBillId

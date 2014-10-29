@@ -423,6 +423,11 @@ GO
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Freight Terms', N'System Manager', 13, N'Freight Terms', N'Screen', N'i21.controller.FreightTerms', N'small-screen', 0, 0, 0, 1, NULL, 1)
 GO
 	/* ---------------------------------- */
+	/* -- Remove Ecommerce Module Menu -- */
+	/* ---------------------------------- */
+	DELETE FROM tblSMMasterMenu WHERE strModuleName = 'Customer Portal'
+GO
+	/* ---------------------------------- */
 	/* -- Create Inventory Module Menu -- */
 	/* ---------------------------------- */
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inventory' AND strModuleName = 'Inventory' AND intParentMenuID = 0)
