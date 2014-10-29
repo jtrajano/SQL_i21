@@ -143,6 +143,8 @@ namespace iRely.Inventory.Model
 
         public DbSet<tblICPackType> tblICPackTypes { get; set; }
         public DbSet<tblICPackTypeDetail> tblICPackTypeDetails { get; set; }
+        public DbSet<tblICManufacturingCell> tblICManufacturingCells { get; set; }
+        public DbSet<tblICManufacturingCellPackType> tblICManufacturingCellPackTypes { get; set; }
 
         public DbSet<tblICCommodityAccount> tblICCommodityAccounts { get; set; }
         public DbSet<tblICCommodityAttribute> tblICCommodityAttributes { get; set; }
@@ -219,6 +221,8 @@ namespace iRely.Inventory.Model
 
             modelBuilder.Configurations.Add(new tblICPackTypeMap());
             modelBuilder.Configurations.Add(new tblICPackTypeDetailMap());
+            modelBuilder.Configurations.Add(new tblICManufacturingCellMap());
+            modelBuilder.Configurations.Add(new tblICManufacturingCellPackTypeMap());
 
             modelBuilder.Configurations.Add(new tblICCommodityAccountMap());
             modelBuilder.Configurations.Add(new tblICCommodityAttributeMap());

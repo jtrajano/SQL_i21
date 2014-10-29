@@ -148,6 +148,7 @@
     <Compile Include="Controllers\ItemLocationController.cs" />
     <Compile Include="Controllers\ItemPricingController.cs" />
     <Compile Include="Controllers\ManufacturerController.cs" />
+    <Compile Include="Controllers\ManufacturingCellController.cs" />
     <Compile Include="Controllers\MaterialNMFCController.cs" />
     <Compile Include="Controllers\PackTypeController.cs" />
     <Compile Include="Controllers\ReceiptController.cs" />

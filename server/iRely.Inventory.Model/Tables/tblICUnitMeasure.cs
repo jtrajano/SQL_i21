@@ -39,6 +39,14 @@ namespace iRely.Inventory.Model
         public ICollection<tblICUnitMeasureConversion> StockUnitMeasureConversions { get; set; }
         public ICollection<tblICPackTypeDetail> SourcePackTypeDetails { get; set; }
         public ICollection<tblICPackTypeDetail> TargetPackTypeDetails { get; set; }
+
+        public ICollection<tblICManufacturingCell> CapacityRateManufacturingCells { get; set; }
+        public ICollection<tblICManufacturingCell> CapacityManufacturingCells { get; set; }
+
+        public ICollection<tblICManufacturingCellPackType> CapacityRateManufacturingCellPackTypes { get; set; }
+        public ICollection<tblICManufacturingCellPackType> CapacityManufacturingCellPackTypes { get; set; }
+
+
     }
 
     public class tblICUnitMeasureConversion : BaseEntity

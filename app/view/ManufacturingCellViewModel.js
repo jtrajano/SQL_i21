@@ -15,6 +15,10 @@
 
 Ext.define('Inventory.view.ManufacturingCellViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.manufacturingcell'
+    alias: 'viewmodel.manufacturingcell',
+
+    requires: [
+        'Inventory.view.override.ManufacturingCellViewModel'
+    ]
 
 });

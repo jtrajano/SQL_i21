@@ -29,9 +29,10 @@ Ext.define('Inventory.view.ManufacturingCell', {
         'Ext.form.field.Number',
         'Ext.form.field.Checkbox',
         'Ext.grid.Panel',
-        'Ext.grid.column.Column',
+        'Ext.grid.column.Number',
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
+        'Ext.grid.plugin.CellEditing',
         'Ext.toolbar.Paging'
     ],
 
@@ -319,39 +320,147 @@ Ext.define('Inventory.view.ManufacturingCell', {
                                     columns: [
                                         {
                                             xtype: 'gridcolumn',
+                                            itemId: 'colPackTypeName',
                                             dataIndex: 'string',
                                             text: 'PackType Name',
-                                            flex: 1
+                                            flex: 1,
+                                            editor: {
+                                                xtype: 'gridcombobox',
+                                                columns: [
+                                                    {
+                                                        dataIndex: 'intPackTypeId',
+                                                        dataType: 'numeric',
+                                                        text: 'Pack Type Id',
+                                                        hidden: true
+                                                    },
+                                                    {
+                                                        dataIndex: 'strPackName',
+                                                        dataType: 'string',
+                                                        text: 'Pack Name',
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        dataIndex: 'strDescription',
+                                                        dataType: 'string',
+                                                        text: 'Description',
+                                                        flex: 1
+                                                    }
+                                                ],
+                                                displayField: 'strPackName',
+                                                valueField: 'strPackName',
+                                                bind: {
+                                                    store: '{packType}'
+                                                }
+                                            }
                                         },
                                         {
                                             xtype: 'gridcolumn',
+                                            itemId: 'colPackTypeDescription',
                                             dataIndex: 'string',
                                             text: 'PackType Description',
                                             flex: 1
                                         },
                                         {
-                                            xtype: 'gridcolumn',
+                                            xtype: 'numbercolumn',
+                                            itemId: 'colLineCapacity',
                                             width: 83,
                                             dataIndex: 'string',
-                                            text: 'Line Capacity'
+                                            text: 'Line Capacity',
+                                            editor: {
+                                                xtype: 'numberfield'
+                                            }
                                         },
                                         {
                                             xtype: 'gridcolumn',
+                                            itemId: 'colLineCapacityUOM',
                                             width: 105,
                                             dataIndex: 'string',
-                                            text: 'Line Capacity UOM'
+                                            text: 'Line Capacity UOM',
+                                            editor: {
+                                                xtype: 'gridcombobox',
+                                                columns: [
+                                                    {
+                                                        dataIndex: 'intUnitMeasureId',
+                                                        dataType: 'numeric',
+                                                        text: 'Unit Of Measure ID',
+                                                        hidden: true
+                                                    },
+                                                    {
+                                                        dataIndex: 'strUnitMeasure',
+                                                        dataType: 'string',
+                                                        text: 'Unit Measure',
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        dataIndex: 'strUnitType',
+                                                        dataType: 'string',
+                                                        text: 'Unit Type',
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        dataIndex: 'ysnDefault',
+                                                        dataType: 'boolean',
+                                                        text: 'Default',
+                                                        flex: 1
+                                                    }
+                                                ],
+                                                displayField: 'strUnitMeasure',
+                                                valueField: 'strUnitMeasure',
+                                                bind: {
+                                                    store: '{packTypeCapacityUOM}'
+                                                }
+                                            }
                                         },
                                         {
                                             xtype: 'gridcolumn',
+                                            itemId: 'colLineCapacityRate',
                                             width: 105,
                                             dataIndex: 'string',
-                                            text: 'Line Capacity Rate'
+                                            text: 'Line Capacity Rate',
+                                            editor: {
+                                                xtype: 'gridcombobox',
+                                                columns: [
+                                                    {
+                                                        dataIndex: 'intUnitMeasureId',
+                                                        dataType: 'numeric',
+                                                        text: 'Unit Of Measure ID',
+                                                        hidden: true
+                                                    },
+                                                    {
+                                                        dataIndex: 'strUnitMeasure',
+                                                        dataType: 'string',
+                                                        text: 'Unit Measure',
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        dataIndex: 'strUnitType',
+                                                        dataType: 'string',
+                                                        text: 'Unit Type',
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        dataIndex: 'ysnDefault',
+                                                        dataType: 'boolean',
+                                                        text: 'Default',
+                                                        flex: 1
+                                                    }
+                                                ],
+                                                displayField: 'strUnitMeasure',
+                                                valueField: 'strUnitMeasure',
+                                                bind: {
+                                                    store: '{packTypeCapacityRateUOM}'
+                                                }
+                                            }
                                         },
                                         {
-                                            xtype: 'gridcolumn',
+                                            xtype: 'numbercolumn',
+                                            itemId: 'colLineEfficiency',
                                             width: 85,
                                             dataIndex: 'string',
-                                            text: 'Line Efficiency'
+                                            text: 'Line Efficiency',
+                                            editor: {
+                                                xtype: 'numberfield'
+                                            }
                                         }
                                     ],
                                     viewConfig: {
@@ -359,7 +468,14 @@ Ext.define('Inventory.view.ManufacturingCell', {
                                     },
                                     selModel: {
                                         selType: 'checkboxmodel'
-                                    }
+                                    },
+                                    plugins: [
+                                        {
+                                            ptype: 'cellediting',
+                                            pluginId: 'cepPackType',
+                                            clicksToEdit: 1
+                                        }
+                                    ]
                                 }
                             ]
                         }
