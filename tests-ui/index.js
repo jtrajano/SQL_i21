@@ -22,41 +22,50 @@ Harness.start(
     { group: 'FuelCategory',
         items: [
             {
-                url: 'FuelCategory/AddFuelCategory.js',  // url of the js file, containing actual test code
+                url: 'FuelCategory/AddFuelCategory.js',
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            },
+            {
+                url: 'FuelCategory/DeleteFuelCategory.js',
                 preload: [
                     '../../GlobalComponentEngine/irely/TestEngine.js'
                 ]
             }
-
-
-
         ]
     },
-
     { group: 'FuelCode',
         items: [
             {
-                url: 'FuelCode/AddFuelCode.js',  // url of the js file, containing actual test code
+                url: 'FuelCode/AddFuelCode.js',
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            },
+            {
+                url: 'FuelCode/DeleteFuelCode.js',
                 preload: [
                     '../../GlobalComponentEngine/irely/TestEngine.js'
                 ]
             }
-
-
-
         ]
     },
+
     { group: 'ProcessCode',
         items: [
             {
-                url: 'ProcessCode/AddProcessCode.js',  // url of the js file, containing actual test code
+                url: 'ProcessCode/AddProcessCode.js',
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            },
+            {
+                url: 'ProcessCode/DeleteProcessCode.js',
                 preload: [
                     '../../GlobalComponentEngine/irely/TestEngine.js'
                 ]
             }
-
-
-
         ]
     },
     { group: 'FeedStockCode',
@@ -66,16 +75,25 @@ Harness.start(
                 preload: [
                     '../../GlobalComponentEngine/irely/TestEngine.js'
                 ]
+            },
+            {
+                url: 'FeedStockCode/DeleteFeedStockCode.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
             }
-
-
-
         ]
     },
-    { group: 'FeedStock UOM',
+    { group: 'FeedStockUOM',
         items: [
             {
                 url: 'FeedStockUOM/AddFeedStockUOM.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            },
+            {
+                url: 'FeedStockUOM/DeleteFeedStockUOM.js',  // url of the js file, containing actual test code
                 preload: [
                     '../../GlobalComponentEngine/irely/TestEngine.js'
                 ]
