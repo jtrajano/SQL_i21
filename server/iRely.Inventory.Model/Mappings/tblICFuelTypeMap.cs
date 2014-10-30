@@ -16,12 +16,12 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblPercentDenaturant).HasColumnName("dblPercentDenaturant");
             this.Property(t => t.intBatchNumber).HasColumnName("intBatchNumber");
             this.Property(t => t.intEndingRinGallons).HasColumnName("intEndingRinGallons");
-            this.Property(t => t.intEquivalenceValue).HasColumnName("intEquivalenceValue");
+            this.Property(t => t.strEquivalenceValue).HasColumnName("strEquivalenceValue");
             this.Property(t => t.intFuelTypeId).HasColumnName("intFuelTypeId");
             this.Property(t => t.intRinFeedStockId).HasColumnName("intRinFeedStockId");
             this.Property(t => t.intRinFeedStockUOMId).HasColumnName("intRinFeedStockUOMId");
             this.Property(t => t.intRinFuelId).HasColumnName("intRinFuelId");
-            this.Property(t => t.intRinFuelTypeId).HasColumnName("intRinFuelTypeId");
+            this.Property(t => t.intRinFuelCategoryId).HasColumnName("intRinFuelCategoryId");
             this.Property(t => t.intRinProcessId).HasColumnName("intRinProcessId");
             this.Property(t => t.ysnDeductDenaturant).HasColumnName("ysnDeductDenaturant");
             this.Property(t => t.ysnRenewableBiomass).HasColumnName("ysnRenewableBiomass");

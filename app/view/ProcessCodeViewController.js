@@ -17,7 +17,46 @@ Ext.define('Inventory.view.ProcessCodeViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.processcode',
 
-    requires: [
-        'Inventory.view.override.ProcessCodeViewController'
-    ]
+    setupContext: function () {
+        "use strict";
+        var win = this.getView();
+        win.context = Ext.create('iRely.mvvm.Engine', {
+            window: win,
+            store: Ext.create('Inventory.store.ProcessCode'),
+            singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
+                grid: win.down('grid'),
+                title: 'Process Code',
+                columns: [
+                    {
+                        itemId: 'colRinProcessCode',
+                        dataIndex: 'strRinProcessCode',
+                        text: 'Process Code',
+                        flex: 1,
+                        editor: {
+                            xtype: 'textfield'
+                        }
+                    },
+                    {
+                        itemId: 'colDescription',
+                        dataIndex: 'strDescription',
+                        text: 'Description',
+                        flex: 1,
+                        editor: {
+                            xtype: 'textfield'
+                        }
+                    }
+                ]
+            })
+        });
+        return win.context;
+    },
+
+    show: function () {
+        "use strict";
+        var me = this;
+        me.getView().show();
+        var context = me.setupContext();
+        context.data.load();
+    }
+
 });

@@ -17,7 +17,87 @@ Ext.define('Inventory.view.FeedStockUomViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.feedstockuom',
 
-    requires: [
-        'Inventory.view.override.FeedStockUomViewController'
-    ]
+    setupContext: function () {
+        "use strict";
+        var win = this.getView();
+        win.context = Ext.create('iRely.mvvm.Engine', {
+            window: win,
+            store: Ext.create('Inventory.store.FeedStockUom'),
+            singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
+                grid: win.down('grid'),
+                title: 'Feed Stock UOM',
+                columns: [
+                    {
+                        itemId: 'colUOM',
+                        dataIndex: 'strUnitMeasure',
+                        text: 'UOM',
+                        flex: 1,
+                        editor: {
+                            xtype: 'gridcombobox',
+                            columns: [
+                                {
+                                    dataIndex: 'intUnitMeasureId',
+                                    dataType: 'numeric',
+                                    text: 'Unit Of Measure Id',
+                                    hidden: true
+                                },
+                                {
+                                    dataIndex: 'strUnitMeasure',
+                                    dataType: 'string',
+                                    text: 'Unit Measure',
+                                    flex: 1
+                                },
+                                {
+                                    dataIndex: 'strUnitType',
+                                    dataType: 'string',
+                                    text: 'Unit Type',
+                                    flex: 1
+                                }
+                            ],
+                            itemId: 'cboUOM',
+                            displayField: 'strUnitMeasure',
+                            valueField: 'strUnitMeasure',
+                            bind: {
+                                store: '{unitMeasure}'
+                            },
+                            listeners: {
+                                select: 'onCboUOMSelect'
+                            }
+                        }
+                    },
+                    {
+                        itemId: 'colRinFeedStockUOMCode',
+                        dataIndex: 'strRinFeedStockUOMCode',
+                        text: 'UOM Code',
+                        flex: 1,
+                        editor: {
+                            xtype: 'textfield'
+                        }
+                    }
+                ]
+            })
+        });
+        return win.context;
+    },
+
+    show: function () {
+        "use strict";
+        var me = this;
+        me.getView().show();
+        var context = me.setupContext();
+        context.data.load();
+    },
+
+    onCboUOMSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.plugins[0];
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colUOM' && current) {
+            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
+        }
+    }
 });
