@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblARInvoice] (
     [intInvoiceId]         INT             IDENTITY (1, 1) NOT NULL,
-    [strInvoiceNumber]     NVARCHAR (25)   COLLATE Latin1_General_CI_AS NOT NULL,
+    [strInvoiceNumber]     NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,
     [intCustomerId]        INT             NOT NULL,
     [dtmDate]              DATETIME        NOT NULL,
     [dtmDueDate]           DATETIME        NOT NULL,
@@ -24,6 +24,16 @@
     [intAccountId]         INT             NOT NULL,
     [ysnPosted]            BIT             CONSTRAINT [DF_tblARInvoice_ysnPosted] DEFAULT ((0)) NOT NULL,
     [ysnPaid]              BIT             CONSTRAINT [DF_tblARInvoice_ysnPaid] DEFAULT ((0)) NOT NULL,
+    [strShipToAddress]     NVARCHAR (100)  NULL,
+    [strShipToCity]        NVARCHAR (30)   NULL,
+    [strShipToState]       NVARCHAR (50)   NULL,
+    [strShipToZipCode]     NVARCHAR (12)   NULL,
+    [strShipToCountry]     NVARCHAR (25)   NULL,
+    [strBillToAddress]     NVARCHAR (100)  NULL,
+    [strBillToCity]        NVARCHAR (30)   NULL,
+    [strBillToState]       NVARCHAR (50)   NULL,
+    [strBillToZipCode]     NVARCHAR (12)   NULL,
+    [strBillToCountry]     NVARCHAR (25)   NULL,
     [intConcurrencyId]     INT             CONSTRAINT [DF_tblARInvoice_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARInvoice] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
     CONSTRAINT [FK_tblARInvoice_tblEntity] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblEntity] ([intEntityId])
@@ -37,3 +47,43 @@
 
 
 
+
+
+
+
+
+GO
+CREATE TRIGGER trgInvoiceNumber
+ON dbo.tblARInvoice
+AFTER INSERT
+AS
+
+DECLARE @inserted TABLE(intInvoiceId INT)
+DECLARE @count INT = 0
+DECLARE @intInvoiceId INT
+DECLARE @InvoiceNumber NVARCHAR(50)
+
+INSERT INTO @inserted
+SELECT intInvoiceId FROM INSERTED ORDER BY intInvoiceId
+
+WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
+BEGIN
+	
+	--EXEC uspARFixStartingNumbers 17
+	--IF(OBJECT_ID('tempdb..#tblTempAPByPassFixStartingNumber') IS NOT NULL) RETURN;
+	EXEC uspSMGetStartingNumber 19, @InvoiceNumber OUT
+
+	SELECT TOP 1 @intInvoiceId = intInvoiceId FROM @inserted
+	
+	IF(@InvoiceNumber IS NOT NULL)
+	BEGIN
+		UPDATE tblARInvoice
+			SET tblARInvoice.strInvoiceNumber = @InvoiceNumber
+		FROM tblARInvoice A
+		WHERE A.intInvoiceId = @intInvoiceId
+	END
+
+	DELETE FROM @inserted
+	WHERE intInvoiceId = @intInvoiceId
+
+END

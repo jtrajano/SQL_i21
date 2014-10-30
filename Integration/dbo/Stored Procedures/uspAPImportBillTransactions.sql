@@ -123,7 +123,7 @@ BEGIN
 				[strPONumber]			=	A.aptrx_pur_ord_no,
 				[dblTotal] 				=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
 				[dblAmountDue]			=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
-				[intEntityId]				=	@UserId,
+				[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CS_AS = RTRIM(A.aptrx_user_id)),@UserId),
 				[ysnPosted]				=	0,
 				[ysnPaid]				=	0,
 				[intTransactionType]	=	CASE WHEN A.aptrx_trans_type = ''I'' THEN 1

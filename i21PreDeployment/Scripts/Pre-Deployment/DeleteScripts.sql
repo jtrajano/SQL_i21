@@ -86,7 +86,6 @@ PRINT N' BEGIN CONSOLIDATED DELETE PATH: 13.4 to 14.1'
 	WHERE TABLE_NAME 
 	IN('vwapivcmst'
 	,'vwcoctlmst'
-	,'vwticmst'
 	,'vyu_GLAccountView'
 	,'vyu_GLDetailView')
 	

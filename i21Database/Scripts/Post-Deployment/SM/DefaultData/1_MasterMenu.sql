@@ -228,6 +228,11 @@ GO
 	-- DELETE FROM tblSMMasterMenu where strMenuName = 'Paid Bills History' and strModuleName = 'Accounts Payable' and strType = 'Screen' 
 	DELETE FROM tblSMMasterMenu where strMenuName = 'Posted Payables' and strModuleName = 'Accounts Payable' and strType = 'Screen' 
 
+	UPDATE tblSMMasterMenu
+	SET strMenuName = 'Batch Posting',
+		strDescription = 'Batch Posting'
+	WHERE strModuleName = 'Accounts Payable' AND strType = 'Screen'  AND strMenuName LIKE '%Batch Post%'
+
 	IF NOT EXISTS(SELECT 1 FROM tblSMMasterMenu where strMenuName = 'Paid Bills History' and strModuleName = 'Accounts Payable' and strType = 'Screen')
 	BEGIN
 		INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Paid Bills History', N'Accounts Payable', 113, N'Shows all the payments', N'Screen', N'AccountsPayable.view.PaidBillsHistory', N'small-screen', 0, 0, 0, 1, NULL, 1)
@@ -237,6 +242,8 @@ GO
 	BEGIN
 		INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Recurring Transactions', N'Accounts Payable', 113, N'', N'Screen', N'AccountsPayable.view.RecurringTransaction', N'small-screen', 0, 0, 0, 1, NULL, 1)
 	END
+
+	
 GO
 --update missing commands
 	UPDATE tblSMMasterMenu
@@ -427,6 +434,11 @@ GO
 	/*-- will need to be removed once nearing release		 --**/
 	DELETE FROM tblSMMasterMenu WHERE strModuleName = 'Inventory' 
 	
+	/* ---------------------------------- */
+	/* -- Remove Ecommerce Module Menu -- */
+	/* ---------------------------------- */
+	DELETE FROM tblSMMasterMenu WHERE strModuleName = 'Customer Portal'
+GO
 	/* ---------------------------------- */
 	/* -- Create Inventory Module Menu -- */
 	/* ---------------------------------- */

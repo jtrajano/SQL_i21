@@ -224,6 +224,12 @@
     <Build Include="testi21Database\Stored Procedures\test uspICValidateCostingOnPost as it checks for a valid item and location.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICValidateCostingOnPost if negative stock qty is not allowed.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICValidateCostingOnPost if negative stock qty is allowed.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateCostingOnUnpost if negative stock qty is allowed.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateCostingOnUnpost if negative stock qty is not allowed.sql" />
+    <Build Include="testi21Database\Functions\test the fnGetItemCostingOnPostErrors function.sql" />
+    <Build Include="testi21Database\Stored Procedures\Fake data for items in a transaction to unpost.sql" />
+    <Build Include="testi21Database\Functions\test the fnGetItemsToUnpost function.sql" />
+    <Build Include="testi21Database\Functions\test the fnGetItemCostingOnUnpostErrors function.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

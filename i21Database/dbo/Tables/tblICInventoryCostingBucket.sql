@@ -22,7 +22,7 @@ CREATE TABLE [dbo].[tblICInventoryCostingBucket]
 (
 	[intCostingBucketId] INT NOT NULL IDENTITY, 
     [intItemId] INT NOT NULL, 
-    [intItemLocationStoreId] INT NOT NULL, 
+    [intItemLocationId] INT NOT NULL, 
     [dtmDate] INT NOT NULL, 
     [intGLAccountId] INT NOT NULL, 
 	[dblUnitQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 

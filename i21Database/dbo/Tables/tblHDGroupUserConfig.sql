@@ -5,6 +5,7 @@
 	[intUserSecurityId] [int] NOT NULL,
 	[intUserSecurityEntityId] [int] NULL,
 	[ysnOwner] BIT NULL,
+	[ysnEscalation] BIT NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	PRIMARY KEY CLUSTERED (	[intGroupUserConfigId] ASC),
 	CONSTRAINT [UNQ_tblHDGroupUserConfig] UNIQUE ([intTicketGroupId],[intUserSecurityId]),

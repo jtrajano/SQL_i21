@@ -1,6 +1,6 @@
 --Update Bill records for the new fields in 14.3
 
-IF EXISTS(SELECT 1 FROM tblAPBillDetail A WHERE A.dblQtyOrdered = 0 AND A.dblTotal <> 0)
+IF EXISTS(SELECT 1 FROM tblAPBillDetail A WHERE A.dblCost = 0 AND A.dblTotal <> 0)
 BEGIN
 
 	PRINT 'BEGIN Updating value of new fields in tblAPBill'
@@ -11,6 +11,7 @@ BEGIN
 	,dblQtyReceived = 1
 	FROM tblAPBillDetail A
 		INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
+	WHERE A.dblCost = 0 AND A.dblTotal <> 0
 
 	PRINT 'END Updating value of new fields in tblAPBill'
 	

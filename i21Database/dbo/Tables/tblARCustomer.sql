@@ -8,6 +8,7 @@
     [strAccountNumber]                NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strTaxNumber]                    NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strCurrency]                     NVARCHAR (3)    COLLATE Latin1_General_CI_AS NULL,
+	[intCurrencyId]					  INT             NULL,
     [intAccountStatusId]              INT             NULL,
     [intSalespersonId]                INT             NULL,
     [strPricing]                      NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
@@ -76,6 +77,8 @@
     CONSTRAINT [UK_intCustomerId] UNIQUE NONCLUSTERED ([intCustomerId] ASC),
     CONSTRAINT [UKstrCusomerNumber] UNIQUE NONCLUSTERED ([strCustomerNumber] ASC)
 );
+
+
 
 
 

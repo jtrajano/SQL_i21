@@ -8,7 +8,7 @@ CREATE TABLE [dbo].[tblICInventoryTransactionFIFO]
 (
 	[intInventoryTransactionFIFOId] INT NOT NULL  IDENTITY, 
 	[intItemId] INT NOT NULL,
-	[intItemLocationStoreId] INT NOT NULL,
+	[intItemLocationId] INT NOT NULL,
 	[dtmDate] DATETIME NOT NULL, 
     [dblUnitQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 	[dblUOMQty] NUMERIC(18,6) NOT NULL DEFAULT 1,
@@ -28,7 +28,7 @@ CREATE TABLE [dbo].[tblICInventoryTransactionFIFO]
 GO
 
 CREATE CLUSTERED INDEX [IDX_tblICInventoryTransactionFIFO]
-    ON [dbo].[tblICInventoryTransactionFIFO]([intItemId] ASC, [intItemLocationStoreId] ASC, [dtmDate] ASC, [intInventoryTransactionFIFOId] ASC);
+    ON [dbo].[tblICInventoryTransactionFIFO]([intItemId] ASC, [intItemLocationId] ASC, [dtmDate] ASC, [intInventoryTransactionFIFOId] ASC);
 GO
 
 CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransactionFIFO_intInventoryTransactionId]
@@ -39,5 +39,5 @@ CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransactionFIFO_intItemId]
     ON [dbo].[tblICInventoryTransactionFIFO]([intItemId] ASC);
 
 GO
-CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransactionFIFO_intItemLocationStoreId]
-    ON [dbo].[tblICInventoryTransactionFIFO]([intItemLocationStoreId] ASC);
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransactionFIFO_intItemLocationId]
+    ON [dbo].[tblICInventoryTransactionFIFO]([intItemLocationId] ASC);

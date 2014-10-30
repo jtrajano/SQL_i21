@@ -121,6 +121,7 @@ BEGIN
 				INNER JOIN tblAPVendor B
 					ON A.intVendorId = B.intVendorId AND B.ysnWithholding = 1
 				WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData)
+				AND 1 = (CASE WHEN (SELECT intWithholdAccountId FROM tblAPPreference) IS NULL THEN 1 ELSE 0 END)
 
 			--Payment without payment on detail
 			INSERT INTO #tmpPayableInvalidData
@@ -1069,92 +1070,7 @@ ELSE
 		GOTO Post_Commit;
 	END
 
---=====================================================================================================================================
--- 	UPDATE STARTING NUMBERS
----------------------------------------------------------------------------------------------------------------------------------------
---UPDATE tblSMStartingNumber
---SET [intNumber] = ISNULL([intNumber], 0) + 1
---WHERE [strTransactionType] = 'Batch Post';
-
 IF @@ERROR <> 0	GOTO Post_Rollback;
-
---=====================================================================================================================================
--- 	UPDATE GL SUMMARY RECORDS
----------------------------------------------------------------------------------------------------------------------------------------
-
---UPDATE	tblGLSummary 
---SET		 [dblDebit] = ISNULL(tblGLSummary.[dblDebit], 0) + ISNULL(GLDetailGrouped.[dblDebit], 0)
---		,[dblCredit] = ISNULL(tblGLSummary.[dblCredit], 0) + ISNULL(GLDetailGrouped.[dblCredit], 0)
---		,[intConcurrencyId] = ISNULL([intConcurrencyId], 0) + 1
---FROM	(
---			SELECT	 [dblDebit]		= SUM(ISNULL(B.[dblDebit], 0))
---					,[dblCredit]	= SUM(ISNULL(B.[dblCredit], 0))
---					,[intAccountId] = A.[intAccountId]
---					,[dtmDate]		= ISNULL(CONVERT(DATE, A.[dtmDate]), '') 								
---			FROM tblGLSummary A 
---					INNER JOIN JournalDetail B 
---					ON CONVERT(DATE, A.[dtmDate]) = CONVERT(DATE, B.[dtmDate]) AND A.[intAccountId] = B.[intAccountId]			
---			GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountId]
---		) AS GLDetailGrouped
---WHERE tblGLSummary.[intAccountId] = GLDetailGrouped.[intAccountId] AND 
---	  ISNULL(CONVERT(DATE, tblGLSummary.[dtmDate]), '') = ISNULL(CONVERT(DATE, GLDetailGrouped.[dtmDate]), '');
-
---IF @@ERROR <> 0	GOTO Post_Rollback;
-
---=====================================================================================================================================
--- 	INSERT TO GL SUMMARY RECORDS
----------------------------------------------------------------------------------------------------------------------------------------
---WITH Units
---AS 
---(
---	SELECT	A.[dblLbsPerUnit], B.[intAccountId] 
---	FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
---),
---JournalDetail 
---AS
---(
---	SELECT [dtmDate]		= ISNULL(B.[dtmDate], GETDATE())
---		,[intAccountId]		= A.[intAccountId]
---		,[dblDebit]			= CASE	WHEN [dblCredit] < 0 THEN ABS([dblCredit])
---									WHEN [dblDebit] < 0 THEN 0
---									ELSE [dblDebit] END 
---		,[dblCredit]		= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
---									WHEN [dblCredit] < 0 THEN 0
---									ELSE [dblCredit] END	
---		,[dblDebitUnit]		= ISNULL(A.[dblDebitUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
---		,[dblCreditUnit]	= ISNULL(A.[dblCreditUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
---	FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B ON A.[intJournalID] = B.[intJournalID]
---	WHERE B.intJournalID IN (SELECT [intJournalID] FROM #tmpValidJournals)
---)
---INSERT INTO tblGLSummary (
---	 [intAccountId]
---	,[dtmDate]
---	,[dblDebit]
---	,[dblCredit]
---	,[dblDebitUnit]
---	,[dblCreditUnit]
---	,[intConcurrencyId]
---)
---SELECT	
---	 [intAccountId]		= A.[intAccountId]
---	,[dtmDate]			= ISNULL(CONVERT(DATE, A.[dtmDate]), '')
---	,[dblDebit]			= SUM(A.[dblDebit])
---	,[dblCredit]		= SUM(A.[dblCredit])
---	,[dblDebitUnit]		= SUM(A.[dblDebitUnit])
---	,[dblCreditUnit]	= SUM(A.[dblCreditUnit])
---	,[intConcurrencyId] = 1
---FROM JournalDetail A
---WHERE NOT EXISTS 
---		(
---			SELECT TOP 1 1
---			FROM tblGLSummary B
---			WHERE ISNULL(CONVERT(DATE, A.[dtmDate]), '') = ISNULL(CONVERT(DATE, B.[dtmDate]), '') AND 
---				  A.[intAccountId] = B.[intAccountId]
---		)
---GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountId];
-
---IF @@ERROR <> 0	GOTO Post_Rollback;
-
 
 --=====================================================================================================================================
 -- 	FINALIZING STAGE
@@ -1175,26 +1091,30 @@ Post_Rollback:
 Post_Cleanup:
 	IF(ISNULL(@recap,0) = 0)
 	BEGIN
-		--DELETE PAYMENT DETAIL WITH PAYMENT AMOUNT
-		DELETE FROM tblAPPaymentDetail
-		WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-		AND dblPayment = 0
+		----DELETE PAYMENT DETAIL WITH PAYMENT AMOUNT
 
-		--IF(@post = 1)
-		--BEGIN
+		IF(@post = 1)
+		BEGIN		
+			DELETE FROM tblAPPaymentDetail
+			WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+			AND dblPayment = 0
+		END
 
-		--	----clean gl detail recap after posting
-		--	--DELETE FROM tblGLDetailRecap
-		--	--FROM tblGLDetailRecap A
-		--	--INNER JOIN #tmpPayablePostData B ON A.intTransactionId = B.intPaymentId 
+		----IF(@post = 1)
+		----BEGIN
+
+		----	----clean gl detail recap after posting
+		----	--DELETE FROM tblGLDetailRecap
+		----	--FROM tblGLDetailRecap A
+		----	--INNER JOIN #tmpPayablePostData B ON A.intTransactionId = B.intPaymentId 
 
 		
-		--	----removed from tblAPInvalidTransaction the successful records
-		--	--DELETE FROM tblAPInvalidTransaction
-		--	--FROM tblAPInvalidTransaction A
-		--	--INNER JOIN #tmpPayablePostData B ON A.intTransactionId = B.intPaymentId 
+		----	----removed from tblAPInvalidTransaction the successful records
+		----	--DELETE FROM tblAPInvalidTransaction
+		----	--FROM tblAPInvalidTransaction A
+		----	--INNER JOIN #tmpPayablePostData B ON A.intTransactionId = B.intPaymentId 
 
-		--END
+		----END
 
 	END
 
