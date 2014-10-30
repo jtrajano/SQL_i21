@@ -3,7 +3,7 @@
 	[intStorageUnitTypeId] INT NOT NULL IDENTITY, 
     [strStorageName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
-    [strUnitType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [intUnitTypeId] INT NULL, 
     [intCapacityUnitMeasureId] INT NULL, 
     [dblMaxWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [ysnAllowPick] BIT NULL DEFAULT ((0)), 
@@ -17,7 +17,8 @@
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICStorageUnitType] PRIMARY KEY ([intStorageUnitTypeId]), 
     CONSTRAINT [FK_tblICStorageUnitType_CapacityUnitMeasure] FOREIGN KEY ([intCapacityUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
-	CONSTRAINT [FK_tblICStorageUnitType_DimensionUnitMeasure] FOREIGN KEY ([intDimensionUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])  
+	CONSTRAINT [FK_tblICStorageUnitType_DimensionUnitMeasure] FOREIGN KEY ([intDimensionUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
+    CONSTRAINT [FK_tblICStorageUnitType_tblICUnitType] FOREIGN KEY ([intUnitTypeId]) REFERENCES [tblICUnitType]([intUnitTypeId])  
 )
 
 GO
@@ -55,7 +56,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblICStorageUnitType',
     @level2type = N'COLUMN',
-    @level2name = N'strUnitType'
+    @level2name = 'intUnitTypeId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Capacity Unit Measure Id',
