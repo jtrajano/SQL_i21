@@ -65,7 +65,7 @@ EXEC( 'CREATE PROCEDURE [dbo].[uspARContactOriginSync]
 				(CASE WHEN CHARINDEX('' x'', Contact.strMobile) > 0 THEN SUBSTRING(SUBSTRING(Contact.strMobile,1,30), 0, CHARINDEX('' x'',Contact.strMobile)) ELSE SUBSTRING(Contact.strMobile,1,30)END) AS Moblie,
 				(CASE WHEN CHARINDEX('' x'', Contact.strMobile) > 0 THEN SUBSTRING(SUBSTRING(Contact.strMobile,1,30),CHARINDEX('' x'',Contact.strMobile) + 2, LEN(Contact.strMobile))END) AS ExtMoblie,
 				Contact.strFax,
-				E.strEmail
+				E.strEmail,
 				'''',
 				'''',
 				''''
