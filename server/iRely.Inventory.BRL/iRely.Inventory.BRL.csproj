@@ -66,6 +66,7 @@
     <Compile Include="Brand.cs" />
     <Compile Include="Certification.cs" />
     <Compile Include="CommodityAttribute.cs" />
+    <Compile Include="LineOfBusiness.cs" />
     <Compile Include="ManufacturingCell.cs" />
     <Compile Include="PackType.cs" />
     <Compile Include="ItemPricing.cs" />
