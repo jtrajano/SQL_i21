@@ -266,10 +266,10 @@ IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwcus
 BEGIN
 		EXEC ('
 				UPDATE tblTMCustomer
-				SET strOriginCustomerKey = ISNULL(A.vwcus_key,'')
+				SET strOriginCustomerKey = ISNULL(A.vwcus_key,'''')
 				FROM vwcusmst A
 				WHERE tblTMCustomer.intCustomerNumber = A.A4GLIdentity
-				AND tblTMCustomer.strOriginCustomerKey IS NULL OR tblTMCustomer.strOriginCustomerKey = ''
+				AND tblTMCustomer.strOriginCustomerKey IS NULL OR tblTMCustomer.strOriginCustomerKey = ''''
 			  ')
 END
 GO
