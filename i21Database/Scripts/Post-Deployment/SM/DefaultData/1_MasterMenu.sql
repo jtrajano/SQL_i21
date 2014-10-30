@@ -242,9 +242,13 @@ GO
 	BEGIN
 		INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Recurring Transactions', N'Accounts Payable', 113, N'', N'Screen', N'AccountsPayable.view.RecurringTransaction', N'small-screen', 0, 0, 0, 1, NULL, 1)
 	END
+
+	
 GO
 --update missing commands
-	
+	UPDATE tblSMMasterMenu
+	SET strCommand = 'AccountsPayable.controller.PrintChecks'
+	where strMenuName = 'Print Checks' and strModuleName = 'Accounts Payable' and strType = 'Screen' and strCommand = ''
 GO
 	UPDATE tblSMMasterMenu
 	SET strCommand = strMenuName
