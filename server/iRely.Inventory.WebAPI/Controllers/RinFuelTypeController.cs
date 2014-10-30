@@ -16,26 +16,26 @@ using iRely.Inventory.BRL;
 
 namespace iRely.Invetory.WebAPI.Controllers
 {
-    public class RinFuelTypeController : ApiController
+    public class FuelCategoryController : ApiController
     {
-        private RinFuelType _RinFuelTypeBRL = new RinFuelType();
+        private FuelCategory _FuelCategoryBRL = new FuelCategory();
 
         [HttpGet]
-        public HttpResponseMessage SearchRinFuelTypes(int page, int start, int limit, string columns = "", string sort = "", string filter = "")
+        public HttpResponseMessage SearchFuelCategories(int page, int start, int limit, string columns = "", string sort = "", string filter = "")
         {
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
-            var predicate = ExpressionBuilder.True<tblICRinFuelType>();
+            var predicate = ExpressionBuilder.True<tblICRinFuelCategory>();
             var selector = ExpressionBuilder.GetSelector(columns);
 
             var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts);
 
             if (searchFilters != null)
-                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICRinFuelType>(searchFilters);
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICRinFuelCategory>(searchFilters);
 
-            var data = _RinFuelTypeBRL.GetSearchQuery(page, start, limit, selector, sortSelector, predicate);
+            var data = _FuelCategoryBRL.GetSearchQuery(page, start, limit, selector, sortSelector, predicate);
 
-            var total = _RinFuelTypeBRL.GetCount(predicate);
+            var total = _FuelCategoryBRL.GetCount(predicate);
             return Request.CreateResponse(HttpStatusCode.OK, new
             {
                 data = data,
@@ -44,21 +44,21 @@ namespace iRely.Invetory.WebAPI.Controllers
         }
 
         [HttpGet]
-        [ActionName("GetRinFuelTypes")]
-        public HttpResponseMessage GetRinFuelTypes(int start = 0, int limit = 1, int page = 0, string sort = "", string filter = "")
+        [ActionName("GetFuelCategories")]
+        public HttpResponseMessage GetFuelCategories(int start = 0, int limit = 1, int page = 0, string sort = "", string filter = "")
         {
             filter = string.IsNullOrEmpty(filter) ? "" : filter;
 
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
-            var predicate = ExpressionBuilder.True<tblICRinFuelType>();
-            var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intRinFuelTypeId", "DESC");
+            var predicate = ExpressionBuilder.True<tblICRinFuelCategory>();
+            var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intRinFuelCategoryId", "DESC");
 
             if (searchFilters != null)
-                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICRinFuelType>(searchFilters, true);
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICRinFuelCategory>(searchFilters, true);
 
-            var total = _RinFuelTypeBRL.GetCount(predicate);
-            var data = _RinFuelTypeBRL.GetRinFuelTypes(page, start, page == 0 ? total : limit, sortSelector, predicate);
+            var total = _FuelCategoryBRL.GetCount(predicate);
+            var data = _FuelCategoryBRL.GetFuelCategories(page, start, page == 0 ? total : limit, sortSelector, predicate);
 
             return Request.CreateResponse(HttpStatusCode.OK, new
             {
@@ -68,17 +68,17 @@ namespace iRely.Invetory.WebAPI.Controllers
         }
 
         [HttpPost]
-        public HttpResponseMessage PostRinFuelTypes(IEnumerable<tblICRinFuelType> RinFuelTypes, bool continueOnConflict = false)
+        public HttpResponseMessage PostFuelCategories(IEnumerable<tblICRinFuelCategory> categories, bool continueOnConflict = false)
         {
-            foreach (var RinFuelType in RinFuelTypes)
-                _RinFuelTypeBRL.AddRinFuelType(RinFuelType);
+            foreach (var category in categories)
+                _FuelCategoryBRL.AddFuelCategory(category);
 
-            var result = _RinFuelTypeBRL.Save(continueOnConflict);
-            _RinFuelTypeBRL.Dispose();
+            var result = _FuelCategoryBRL.Save(continueOnConflict);
+            _FuelCategoryBRL.Dispose();
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
-                data = RinFuelTypes,
+                data = categories,
                 success = !result.HasError,
                 message = new
                 {
@@ -90,17 +90,17 @@ namespace iRely.Invetory.WebAPI.Controllers
         }
 
         [HttpPut]
-        public HttpResponseMessage PutRinFuelTypes(IEnumerable<tblICRinFuelType> RinFuelTypes, bool continueOnConflict = false)
+        public HttpResponseMessage PutFuelCategories(IEnumerable<tblICRinFuelCategory> categories, bool continueOnConflict = false)
         {
-            foreach (var RinFuelType in RinFuelTypes)
-                _RinFuelTypeBRL.UpdateRinFuelType(RinFuelType);
+            foreach (var category in categories)
+                _FuelCategoryBRL.UpdateFuelCategory(category);
 
-            var result = _RinFuelTypeBRL.Save(continueOnConflict);
-            _RinFuelTypeBRL.Dispose();
+            var result = _FuelCategoryBRL.Save(continueOnConflict);
+            _FuelCategoryBRL.Dispose();
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
-                data = RinFuelTypes,
+                data = categories,
                 success = !result.HasError,
                 message = new
                 {
@@ -112,17 +112,17 @@ namespace iRely.Invetory.WebAPI.Controllers
         }
 
         [HttpDelete]
-        public HttpResponseMessage DeleteRinFuelTypes(IEnumerable<tblICRinFuelType> RinFuelTypes, bool continueOnConflict = false)
+        public HttpResponseMessage DeleteFuelCategories(IEnumerable<tblICRinFuelCategory> categories, bool continueOnConflict = false)
         {
-            foreach (var RinFuelType in RinFuelTypes)
-                _RinFuelTypeBRL.DeleteRinFuelType(RinFuelType);
+            foreach (var category in categories)
+                _FuelCategoryBRL.DeleteFuelCategory(category);
 
-            var result = _RinFuelTypeBRL.Save(continueOnConflict);
-            _RinFuelTypeBRL.Dispose();
+            var result = _FuelCategoryBRL.Save(continueOnConflict);
+            _FuelCategoryBRL.Dispose();
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
-                data = RinFuelTypes,
+                data = categories,
                 success = !result.HasError,
                 message = new
                 {

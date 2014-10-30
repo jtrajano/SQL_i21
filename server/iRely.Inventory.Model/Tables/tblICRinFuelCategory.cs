@@ -8,12 +8,12 @@ using iRely.Common;
 
 namespace iRely.Inventory.Model
 {
-    public class tblICRinFuelType : BaseEntity
+    public class tblICRinFuelCategory : BaseEntity
     {
-        public int intRinFuelTypeId { get; set; }
-        public string strRinFuelTypeCode { get; set; }
+        public int intRinFuelCategoryId { get; set; }
+        public string strRinFuelCategoryCode { get; set; }
         public string strDescription { get; set; }
-        public Nullable<decimal> dblEquivalenceValue { get; set; }
+        public string strEquivalenceValue { get; set; }
         public int intSort { get; set; }
 
         public ICollection<tblICFuelType> RinFuelTypes { get; set; }

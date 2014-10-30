@@ -24,7 +24,7 @@ namespace iRely.Inventory.Model
         public decimal? dblPercentDenaturant { get; set; }
         public bool ysnDeductDenaturant { get; set; }
 
-        public tblICRinFuelType RinFuelType { get; set; }
+        public tblICRinFuelCategory RinFuelCategory { get; set; }
         public tblICRinFeedStock RinFeedStock { get; set; }
         public tblICRinFuel RinFuel { get; set; }
         public tblICRinFeedStockUOM RinFeedStockUOM { get; set; }

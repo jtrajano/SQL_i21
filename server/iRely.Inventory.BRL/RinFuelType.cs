@@ -12,21 +12,21 @@ using IdeaBlade.Linq;
 
 namespace iRely.Inventory.BRL
 {
-    public class RinFuelType : IDisposable
+    public class FuelCategory : IDisposable
     {
         private Repository _db;
 
-        public RinFuelType()
+        public FuelCategory()
         {
             _db = new Repository(new Inventory.Model.InventoryEntities());
         }
 
-        public IQueryable<tblICRinFuelType> GetSearchQuery()
+        public IQueryable<tblICRinFuelCategory> GetSearchQuery()
         {
-            return _db.GetQuery<tblICRinFuelType>();
+            return _db.GetQuery<tblICRinFuelCategory>();
         }
 
-        public object GetSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<tblICRinFuelType, bool>> predicate)
+        public object GetSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<tblICRinFuelCategory, bool>> predicate)
         {
             return GetSearchQuery()
                 .Where(predicate)
@@ -37,35 +37,35 @@ namespace iRely.Inventory.BRL
                 .AsNoTracking();
         }
 
-        public int GetCount(Expression<Func<tblICRinFuelType, bool>> predicate)
+        public int GetCount(Expression<Func<tblICRinFuelCategory, bool>> predicate)
         {
             return GetSearchQuery().Where(predicate).Count();
         }
 
-        public IQueryable<tblICRinFuelType> GetRinFuelTypes(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<tblICRinFuelType, bool>> predicate)
+        public IQueryable<tblICRinFuelCategory> GetFuelCategories(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<tblICRinFuelCategory, bool>> predicate)
         {
             var query = GetSearchQuery(); //Get Search Query
-            return _db.GetQuery<tblICRinFuelType>()
-                      .Where(w => query.Where(predicate).Any(a => a.intRinFuelTypeId == w.intRinFuelTypeId)) //Filter the Main DataSource Based on Search Query
+            return _db.GetQuery<tblICRinFuelCategory>()
+                      .Where(w => query.Where(predicate).Any(a => a.intRinFuelCategoryId == w.intRinFuelCategoryId)) //Filter the Main DataSource Based on Search Query
                       .OrderBySelector(sortSelector)
                       .Skip(start)
                       .Take(limit)
                       .AsNoTracking();
         }
 
-        public void AddRinFuelType(tblICRinFuelType RinFuelType)
+        public void AddFuelCategory(tblICRinFuelCategory category)
         {
-            _db.AddNew<tblICRinFuelType>(RinFuelType);
+            _db.AddNew<tblICRinFuelCategory>(category);
         }
 
-        public void UpdateRinFuelType(tblICRinFuelType RinFuelType)
+        public void UpdateFuelCategory(tblICRinFuelCategory category)
         {
-            _db.UpdateBatch<tblICRinFuelType>(RinFuelType);
+            _db.UpdateBatch<tblICRinFuelCategory>(category);
         }
 
-        public void DeleteRinFuelType(tblICRinFuelType RinFuelType)
+        public void DeleteFuelCategory(tblICRinFuelCategory category)
         {
-            _db.Delete<tblICRinFuelType>(RinFuelType);
+            _db.Delete<tblICRinFuelCategory>(category);
         }
 
         public SaveResult Save(bool continueOnConflict)
