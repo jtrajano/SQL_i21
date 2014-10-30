@@ -1015,4 +1015,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strRinFuelCategoryCode" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="e3a031b5-55cf-4301-b0b8-cd1c0baf1aca" ChangeDateTime="10/30/2014 11:18:34">
+    <Property Name="ElementName" Value="[dbo].[tblICFuelType].[intRinFuelTypeId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICFuelType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intRinFuelCategoryId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="f02f3a2a-8918-4a0b-85d8-dbc284a30204" ChangeDateTime="10/30/2014 11:18:53">
+    <Property Name="ElementName" Value="[dbo].[tblICFuelType].[intEquivalenceValue]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICFuelType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strEquivalenceValue" />
+  </Operation>
 </Operations>

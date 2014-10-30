@@ -1,11 +1,11 @@
 ﻿CREATE TABLE [dbo].[tblICFuelType]
 (
 	[intFuelTypeId] INT NOT NULL IDENTITY, 
-    [intRinFuelTypeId] INT NULL, 
+    [intRinFuelCategoryId] INT NULL, 
     [intRinFeedStockId] INT NULL, 
     [intBatchNumber] INT NULL DEFAULT ((0)), 
     [intEndingRinGallons] INT NULL DEFAULT ((0)), 
-    [intEquivalenceValue] INT NULL, 
+    [strEquivalenceValue] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intRinFuelId] INT NULL, 
     [intRinProcessId] INT NULL, 
     [intRinFeedStockUOMId] INT NULL, 
@@ -15,7 +15,7 @@
     [ysnDeductDenaturant] BIT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICFuelType] PRIMARY KEY ([intFuelTypeId]), 
-    CONSTRAINT [FK_tblICFuelType_tblICRinFuelType] FOREIGN KEY ([intRinFuelTypeId]) REFERENCES [tblICRinFuelCategory]([intRinFuelCategoryId]),
+    CONSTRAINT [FK_tblICFuelType_tblICRinFuelType] FOREIGN KEY ([intRinFuelCategoryId]) REFERENCES [tblICRinFuelCategory]([intRinFuelCategoryId]),
 	CONSTRAINT [FK_tblICFuelType_tblICRinFeedStock] FOREIGN KEY ([intRinFeedStockId]) REFERENCES [tblICRinFeedStock]([intRinFeedStockId]),
 	CONSTRAINT [FK_tblICFuelType_tblICRinFuel] FOREIGN KEY ([intRinFuelId]) REFERENCES [tblICRinFuel]([intRinFuelId]),
 	CONSTRAINT [FK_tblICFuelType_tblICRinProcess] FOREIGN KEY ([intRinProcessId]) REFERENCES [tblICRinProcess]([intRinProcessId]),
@@ -33,13 +33,13 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intFuelTypeId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'RIN Fuel Type Id',
+    @value = N'RIN Fuel Category Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblICFuelType',
     @level2type = N'COLUMN',
-    @level2name = N'intRinFuelTypeId'
+    @level2name = 'intRinFuelCategoryId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'RIN Feed Stock Id',
@@ -75,7 +75,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblICFuelType',
     @level2type = N'COLUMN',
-    @level2name = N'intEquivalenceValue'
+    @level2name = 'strEquivalenceValue'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'RIN Fuel Id',
