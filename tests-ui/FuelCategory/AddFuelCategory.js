@@ -24,8 +24,8 @@ StartTest (function (t) {
         .checkStatusMessage('Ready')
 
 
-            /* 2. Data entry */
-        .addFunction(function(next){t.diag("Scenario 1. Add new records > 2. Data entry"); next();}).wait(100)
+            /* 2. Multiple Data entry */
+        .addFunction(function(next){t.diag("Scenario 1. Add new records > 2. Multiple Data entry"); next();}).wait(100)
         .enterGridData('#grdFuelCategory', 0, 'colFuelTypeCode', 'fcc01').wait(100)
         .enterGridData('#grdFuelCategory', 0, 'colDescription', 'fuel category 01').wait(100)
         .enterGridData('#grdFuelCategory', 1, 'colFuelTypeCode', 'fcc02').wait(100)
@@ -79,7 +79,7 @@ StartTest (function (t) {
         .addFunction(function(next){t.diag("Scenario 4. Add another record, click Close button, SAVE the changes"); next();}).wait(100)
         .checkMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel', 'question')
         .clickMessageBoxButton('yes').wait(500)
-        .checkIfScreenClosed('fuelcategory').wait(100) /*issue - FRM-1547*/
+        .checkIfScreenClosed('fuelcategory').wait(100) /*issue - FRM-1547 or TS-445*/
 
             /* 2. Verify record not added*/
         .addFunction(function(next){t.diag("Scenario 2. Add another record, click Close button, do NOT save the changes > 2. Verify record added"); next();}).wait(100)
@@ -97,16 +97,19 @@ StartTest (function (t) {
         .enterGridData('#grdFuelCategory', 3, 'colFuelTypeCode', 'fcc03').wait(100)
         .enterGridData('#grdFuelCategory', 3, 'colDescription', 'fuel category 04').wait(100)
         .clickButton('#btnSave').wait(100)
-        .checkMessageBox('iRely i21','Fuel Category already exists.','ok','error')
+        .checkMessageBox('iRely i21','Fuel Category already exists.','ok','error') /*issue - IC-84 */
         .clickMessageBoxButton('ok').wait(10)
 
         /*Scenario 6. Modify duplicate FuelTypeCode to correct it*/
         .addFunction(function(next){t.diag("Scenario 6. Modify duplicate FuelTypeCode to correct it"); next();}).wait(100)
-        .enterGridData('#grdFuelCategory', 3, 'colFuelTypeCode', 'fcc04').wait(100)
+        .enterGridData('#grdFuelCategory', 3, 'colFuelTypeCode', 'fcc04').wait(100) /*issue - IC-81 */
         .clickButton('#closeButton').wait(100)
+        .checkMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel', 'question')
+        .clickMessageBoxButton('yes').wait(500)
+        .checkIfScreenClosed('fuelcategory').wait(100)
 
 
-//        .enterDummyRowData('#grdFuelCategory', [{ column: 'strRinFuelTypeCode', data: '10Et'}, {column: 'strDescription', data: '10-Ethanol'}]) /*issue - FRM-1535*/
+//        .enterDummyRowData('#grdFuelCategory', [{ column: 'strRinFuelTypeCode', data: '10Et'}, {column: 'strDescription', data: '10-Ethanol'}]) /*issue - FRM-1535 or TS-446*/
 
 
 
