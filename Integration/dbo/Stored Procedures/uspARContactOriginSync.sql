@@ -57,7 +57,10 @@ EXEC( 'CREATE PROCEDURE [dbo].[uspARContactOriginSync]
 				(CASE WHEN CHARINDEX('' x'', Contact.strMobile) > 0 THEN SUBSTRING(SUBSTRING(Contact.strMobile,1,30), 0, CHARINDEX('' x'',Contact.strMobile)) ELSE SUBSTRING(Contact.strMobile,1,30)END) AS Moblie,
 				(CASE WHEN CHARINDEX('' x'', Contact.strMobile) > 0 THEN SUBSTRING(SUBSTRING(Contact.strMobile,1,30),CHARINDEX('' x'',Contact.strMobile) + 2, LEN(Contact.strMobile))END) AS ExtMoblie,
 				Contact.strFax,
-				E.strEmail
+				E.strEmail,
+				'''',
+				'''',
+				''''
 			FROM tblEntityContact Contact
 				INNER JOIN tblEntity E ON E.intEntityId = Contact.intEntityId
 				WHERE Contact.strContactNumber = @ContactNumber
