@@ -60,7 +60,7 @@ StartTest (function (t) {
 //        .clickButton('#btnDeleteFuelCategory').wait(100)
 //        .checkMessageBox('iRely i21','You are about to delete 1 row. Are you sure you want to continue?','yesno', 'question')
 //        .clickMessageBoxButton('no').wait(10)
-////        .checkGridData('#grdFuelCategory', 0, 'colFuelTypeCode','fcc01')/* FRM-1552 > this is to make this checking false*/
+////        .checkGridData('#grdFuelCategory', 0, 'colFuelTypeCode','fcc01')/* FRM-1552 or FRM-1561> this is to make this checking false*/
 ////        .checkGridData('#grdFuelCategory', 0, 'colDescription','fuel category 01')
 //        .clickButton('#btnDeleteFuelCategory').wait(100)
 //        .checkMessageBox('iRely i21','You are about to delete 1 row. Are you sure you want to continue?','yesno', 'question')
