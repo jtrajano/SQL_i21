@@ -13,6 +13,7 @@ DECLARE @Contacts TABLE
 	 id int identity(1,1)
 	, sscon_contact_id nvarchar(max)
 	, sscon_cus_no nvarchar(max)
+	, sscon_contact_title nvarchar(max)
 	, sscon_email nvarchar(max)
 	, sscon_first_name nvarchar(max)
 	, sscon_last_name nvarchar(max)
@@ -27,6 +28,7 @@ DECLARE @Contacts TABLE
 		(
 			sscon_contact_id
 			, sscon_cus_no 
+			, sscon_contact_title
 			, sscon_email 
 			, sscon_first_name 
 			, sscon_last_name 
@@ -38,6 +40,7 @@ DECLARE @Contacts TABLE
 		SELECT 
 			isnull(sscon_contact_id, '')
 			, isnull(sscon_cus_no, '')
+			, isnull(sscon_contact_title, '')
 			, isnull(sscon_email, '')
 			, isnull(sscon_first_name, '')
 			, isnull(sscon_last_name, '')
@@ -91,7 +94,7 @@ DECLARE @Contacts TABLE
 				select top 1
 					@intEntityId
 					, rtrim(ltrim(sscon_contact_id))
-					, ''
+					, rtrim(ltrim(sscon_contact_title))
 					, ''
 					, rtrim(ltrim(sscon_cell_no)) + ' x' + rtrim(ltrim(sscon_cell_ext))
 					, rtrim(ltrim(sscon_work_no)) + ' x' + rtrim(ltrim(sscon_work_ext))
