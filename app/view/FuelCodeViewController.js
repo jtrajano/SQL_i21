@@ -17,7 +17,45 @@ Ext.define('Inventory.view.FuelCodeViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.fuelcode',
 
-    requires: [
-        'Inventory.view.override.FuelCodeViewController'
-    ]
+    setupContext: function () {
+        "use strict";
+        var win = this.getView();
+        win.context = Ext.create('iRely.mvvm.Engine', {
+            window: win,
+            store: Ext.create('Inventory.store.FuelCode'),
+            singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
+                grid: win.down('grid'),
+                title: 'Fuel Code',
+                columns: [
+                    {
+                        itemId: 'colRinFuelCode',
+                        dataIndex: 'strRinFuelCode',
+                        text: 'Fuel Category Code',
+                        flex: 1,
+                        editor: {
+                            xtype: 'textfield'
+                        }
+                    },
+                    {
+                        itemId: 'colDescription',
+                        dataIndex: 'strDescription',
+                        text: 'Description',
+                        flex: 1,
+                        editor: {
+                            xtype: 'textfield'
+                        }
+                    }
+                ]
+            })
+        });
+        return win.context;
+    },
+
+    show: function () {
+        "use strict";
+        var me = this;
+        me.getView().show();
+        var context = me.setupContext();
+        context.data.load();
+    }
 });
