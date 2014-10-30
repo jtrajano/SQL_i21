@@ -79,7 +79,7 @@ StartTest (function (t) {
         .addFunction(function(next){t.diag("Scenario 4. Add another record, click Close button, SAVE the changes"); next();}).wait(100)
         .checkMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel', 'question')
         .clickMessageBoxButton('yes').wait(500)
-        .checkIfScreenClosed('fuelcategory').wait(100) /*issue - FRM-1547 or TS-445*/
+        .checkIfScreenClosed('fuelcategory').wait(100) /*issue - FRM-1547 or TS-445 or FRM-1560*/
 
             /* 2. Verify record not added*/
         .addFunction(function(next){t.diag("Scenario 2. Add another record, click Close button, do NOT save the changes > 2. Verify record added"); next();}).wait(100)
@@ -105,11 +105,11 @@ StartTest (function (t) {
         .enterGridData('#grdFuelCategory', 3, 'colFuelTypeCode', 'fcc04').wait(100) /*issue - IC-81 */
         .clickButton('#closeButton').wait(100)
         .checkMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel', 'question')
-        .clickMessageBoxButton('yes').wait(500)
+        .clickMessageBoxButton('yes').wait(500) /*issue - FRM-1562 */
         .checkIfScreenClosed('fuelcategory').wait(100)
 
 
-//        .enterDummyRowData('#grdFuelCategory', [{ column: 'strRinFuelTypeCode', data: '10Et'}, {column: 'strDescription', data: '10-Ethanol'}]) /*issue - FRM-1535 or TS-446*/
+//        .enterDummyRowData('#grdFuelCategory', [{ column: 'strRinFuelTypeCode', data: '10Et'}, {column: 'strDescription', data: '10-Ethanol'}]) /*issue - FRM-1535 or TS-446 or FRM-1559*/
 
 
 
