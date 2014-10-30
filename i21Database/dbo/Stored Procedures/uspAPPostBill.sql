@@ -119,6 +119,18 @@ BEGIN
 		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
 			0 = ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0)
 
+		--zero amount
+		INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		SELECT 
+			'You cannot post a bill with zero amount.',
+			'Bill',
+			A.strBillId,
+			@batchId,
+			A.intBillId
+		FROM tblAPBill A 
+		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData) 
+		AND A.dblTotal = 0
+
 		--No Terms specified
 		INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT 
