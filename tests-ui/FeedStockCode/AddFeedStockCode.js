@@ -99,10 +99,10 @@ StartTest (function (t) {
 //
         /*Scenario 5. Add duplicate record > FuelCode*/
         .addFunction(function(next){t.diag("Scenario 5. Add duplicate record > FuelTypeCode"); next();}).wait(100)
-        .openScreen('Feed Stock Code Code').wait(200)
+        .openScreen('Feed Stock Code').wait(200)
         .checkScreenShown ('feedstockcode').wait(100)
         .enterGridData('#grdFeedStockCode', 3, 'colFeedStockCode', 'fsc03').wait(100)
-        .enterGridData('#grdFeedStockCode', 3, 'colDescription', 'feed stock category 04').wait(100)
+        .enterGridData('#grdFeedStockCode', 3, 'colDescription', 'feed stock code 04').wait(100)
         .clickButton('#btnSave').wait(100)
         .checkMessageBox('iRely i21','Fuel Category already exists.','ok','error') /* IC-84 */
         .clickMessageBoxButton('ok').wait(10)
