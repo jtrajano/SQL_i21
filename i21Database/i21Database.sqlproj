@@ -664,7 +664,7 @@
     <Build Include="dbo\Tables\tblICRinFeedStock.sql" />
     <Build Include="dbo\Tables\tblICRinFeedStockUOM.sql" />
     <Build Include="dbo\Tables\tblICRinFuel.sql" />
-    <Build Include="dbo\Tables\tblICRinFuelType.sql" />
+    <Build Include="dbo\Tables\tblICRinFuelCategory.sql" />
     <Build Include="dbo\Tables\tblICRinProcess.sql" />
     <Build Include="dbo\Tables\tblICTag.sql" />
     <Build Include="dbo\Tables\tblICUnitMeasure.sql" />

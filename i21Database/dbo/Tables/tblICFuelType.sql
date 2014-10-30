@@ -15,7 +15,7 @@
     [ysnDeductDenaturant] BIT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICFuelType] PRIMARY KEY ([intFuelTypeId]), 
-    CONSTRAINT [FK_tblICFuelType_tblICRinFuelType] FOREIGN KEY ([intRinFuelTypeId]) REFERENCES [tblICRinFuelType]([intRinFuelTypeId]),
+    CONSTRAINT [FK_tblICFuelType_tblICRinFuelType] FOREIGN KEY ([intRinFuelTypeId]) REFERENCES [tblICRinFuelCategory]([intRinFuelCategoryId]),
 	CONSTRAINT [FK_tblICFuelType_tblICRinFeedStock] FOREIGN KEY ([intRinFeedStockId]) REFERENCES [tblICRinFeedStock]([intRinFeedStockId]),
 	CONSTRAINT [FK_tblICFuelType_tblICRinFuel] FOREIGN KEY ([intRinFuelId]) REFERENCES [tblICRinFuel]([intRinFuelId]),
 	CONSTRAINT [FK_tblICFuelType_tblICRinProcess] FOREIGN KEY ([intRinProcessId]) REFERENCES [tblICRinProcess]([intRinProcessId]),
