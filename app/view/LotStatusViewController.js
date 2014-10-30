@@ -15,5 +15,60 @@
 
 Ext.define('Inventory.view.LotStatusViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.lotstatus'
+    alias: 'controller.lotstatus',
+
+
+    setupContext: function () {
+        "use strict";
+        var win = this.getView();
+        win.context = Ext.create('iRely.mvvm.Engine', {
+            window: win,
+            store: Ext.create('Inventory.store.LotStatus'),
+            singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
+                grid: win.down('grid'),
+                title: 'Lot Status',
+                columns: [
+                    {
+                        dataIndex: 'strSecondaryStatus',
+                        text: 'Secondary Status',
+                        flex: 1,
+                        editor: {
+                            xtype: 'textfield'
+                        }
+                    },
+                    {
+                        dataIndex: 'strDescription',
+                        text: 'Description',
+                        flex: 1,
+                        editor: {
+                            xtype: 'textfield'
+                        }
+                    },
+                    {
+                        dataIndex: 'strPrimaryStatus',
+                        text: 'Primary Status',
+                        flex: 1,
+                        editor: {
+                            xtype: 'combobox',
+                            displayField: 'strDescription',
+                            valueField: 'strDescription',
+                            bind: {
+                                store: '{primaryStatus}'
+                            }
+                        }
+                    }
+                ]
+            })
+        });
+        return win.context;
+    },
+
+    show: function () {
+        "use strict";
+        var me = this;
+        me.getView().show();
+        var context = me.setupContext();
+        context.data.load();
+    }
+
 });

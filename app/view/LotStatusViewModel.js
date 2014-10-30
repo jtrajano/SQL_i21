@@ -15,6 +15,18 @@
 
 Ext.define('Inventory.view.LotStatusViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.lotstatus'
+    alias: 'viewmodel.lotstatus',
 
+    stores: {
+        primaryStatus: {
+            data: [
+                { strDescription: 'Active' },
+                { strDescription: 'On Hole' },
+                { strDescription: 'Quarantine' }
+            ],
+            fields: [
+                { name: 'strDescription' }
+            ]
+        }
+    }
 });
