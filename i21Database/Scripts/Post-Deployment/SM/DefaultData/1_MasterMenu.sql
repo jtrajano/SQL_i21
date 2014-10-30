@@ -228,6 +228,11 @@ GO
 	-- DELETE FROM tblSMMasterMenu where strMenuName = 'Paid Bills History' and strModuleName = 'Accounts Payable' and strType = 'Screen' 
 	DELETE FROM tblSMMasterMenu where strMenuName = 'Posted Payables' and strModuleName = 'Accounts Payable' and strType = 'Screen' 
 
+	UPDATE tblSMMasterMenu
+	SET strMenuName = 'Batch Posting',
+		strDescription = 'Batch Posting'
+	WHERE strModuleName = 'Accounts Payable' AND strType = 'Screen'  AND strMenuName LIKE '%Batch Post%'
+
 	IF NOT EXISTS(SELECT 1 FROM tblSMMasterMenu where strMenuName = 'Paid Bills History' and strModuleName = 'Accounts Payable' and strType = 'Screen')
 	BEGIN
 		INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Paid Bills History', N'Accounts Payable', 113, N'Shows all the payments', N'Screen', N'AccountsPayable.view.PaidBillsHistory', N'small-screen', 0, 0, 0, 1, NULL, 1)
@@ -239,9 +244,7 @@ GO
 	END
 GO
 --update missing commands
-	UPDATE tblSMMasterMenu
-	SET strCommand = 'AccountsPayable.controller.PrintChecks'
-	where strMenuName = 'Print Checks' and strModuleName = 'Accounts Payable' and strType = 'Screen' and strCommand = ''
+	
 GO
 	UPDATE tblSMMasterMenu
 	SET strCommand = strMenuName
