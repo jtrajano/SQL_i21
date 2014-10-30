@@ -20,7 +20,10 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
     requires: [
         'Inventory.view.override.ItemLocationViewModel',
         'Ext.data.Store',
-        'Ext.data.field.Integer'
+        'Ext.data.field.Integer',
+        'i21.store.CompanyLocation',
+        'Inventory.store.UnitMeasure',
+        'Inventory.store.Category'
     ],
 
     stores: {
@@ -76,9 +79,6 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
         },
         Location: {
             type: 'companylocation'
-        },
-        Vendor: {
-            type: 'vendorbuffered'
         },
         Category: {
             type: 'inventorycategory'

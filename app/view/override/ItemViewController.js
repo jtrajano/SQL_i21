@@ -65,20 +65,18 @@ Ext.define('Inventory.view.override.ItemViewController', {
             //------------------//
             //Location Store Tab//
             //------------------//
-            colLocationLocation: 'intLocationId',
+            colLocationLocation: 'strLocationName',
             colLocationPOSDescription: 'strDescription',
-            colLocationCategory: 'intCategoryId',
-            colLocationVendor: 'intVendorId',
+            colLocationCategory: 'strCategory',
+            colLocationVendor: 'strVendorId',
             colLocationCostingMethod: 'intCostingMethod',
-            colLocationUOM: 'intDefaultUOMId',
+            colLocationUOM: 'strUnitMeasure',
 
             //--------------//
             //GL Account Tab//
             //--------------//
-            colGLAccountLocation: 'intLocationId',
             colGLAccountDescription: 'strAccountDescription',
             colGLAccountId: 'intAccountId',
-            colGLAccountProfitCenter: 'intProfitCenterId',
 
             //---------//
             //Sales Tab//
@@ -225,29 +223,34 @@ Ext.define('Inventory.view.override.ItemViewController', {
 
             colManufacturingUOM: 'intUnitMeasureId',
 
+            //-------//
+            //UPC Tab//
+            //-------//
             colUPCUnitMeasure: 'intUnitMeasureId',
             colUPCUnitQty: 'dblUnitQty',
             colUPCCode: 'strUPCCode',
 
+            //-------------------//
+            //Cross Reference Tab//
+            //-------------------//
             colCustomerXrefLocation: 'intLocationId',
-            colCustomerXrefStore: 'strStoreName',
             colCustomerXrefCustomer: 'intCustomerId',
             colCustomerXrefProduct: 'strCustomerProduct',
             colCustomerXrefDescription: 'strProductDescription',
             colCustomerXrefPickTicketNotes: 'strPickTicketNotes',
 
             colVendorXrefLocation: 'intLocationId',
-            colVendorXrefStore: 'strStoreName',
             colVendorXrefVendor: 'intVendorId',
             colVendorXrefProduct: 'strVendorProduct',
             colVendorXrefDescription: 'strProductDescription',
             colVendorXrefConversionFactor: 'dblConversionFactor',
             colVendorXrefUnitMeasure: 'intUnitMeasureId',
 
+            //-----------------//
+            //Contract Item Tab//
+            //-----------------//
             colContractLocation: 'intLocationId',
-            colContractStore: 'strStoreName',
             colContractItemName: 'strContractItemName',
-            colContractCommodity: '',
             colContractOrigin: 'intCountryId',
             colContractGrade: 'strGrade',
             colContractGarden: 'strGarden',
@@ -260,20 +263,9 @@ Ext.define('Inventory.view.override.ItemViewController', {
 
             colCertification: 'intCertificationId',
 
-            colStockLocation: 'intLocationId',
-            colStockSubLocation: 'strWarehouse',
-            colStockUOM: 'intUnitMeasureId',
-            colStockOnHand: 'dblUnitOnHand',
-            colStockCommitted: 'dblOrderCommitted',
-            colStockOnOrder: 'dblOnOrder',
-            colStockReorderPoint: 'dblReorderPoint',
-            colStockMinOrder: 'dblMinOrder',
-            colStockSuggestedQty: 'dblSuggestedQuantity',
-            colStockLeadTime: 'dblLeadTime',
-            colStockCounted: 'strCounted',
-            colStockInventoryGroup: 'strInventoryGroup',
-            colStockCountedDaily: 'ysnCountedDaily',
-
+            //-----------//
+            //Pricing Tab//
+            //-----------//
             colPricingLocation: 'intLocationId',
             colPricingSalePrice: 'dblSalePrice',
             colPricingRetailPrice: 'dblRetailPrice',
@@ -312,6 +304,19 @@ Ext.define('Inventory.view.override.ItemViewController', {
             colSpecialPricingAccumQty: 'dblAccumulatedQty',
             colSpecialPricingAccumAmount: 'dblAccumulatedAmount',
 
+            //---------//
+            //Stock Tab//
+            //---------//
+            colStockLocation: 'intLocationId',
+            colStockSubLocation: 'strWarehouse',
+            colStockUOM: 'intUnitMeasureId',
+            colStockOnHand: 'dblUnitOnHand',
+            colStockCommitted: 'dblOrderCommitted',
+            colStockOnOrder: 'dblOnOrder',
+
+            //-------------//
+            //Commodity Tab//
+            //-------------//
             cboCommodity: {
                 value: '{current.intCommodityId}',
                 store: '{Commodity}'
@@ -346,6 +351,9 @@ Ext.define('Inventory.view.override.ItemViewController', {
                 store: '{MarketValuations}'
             },
 
+            //------------//
+            //Assembly Tab//
+            //------------//
             colAssemblyComponent: 'intAssemblyItemId',
             colAssemblyQuantity: 'dblQuantity',
 //            colAssemblyStock: '',
@@ -355,6 +363,9 @@ Ext.define('Inventory.view.override.ItemViewController', {
             colAssemblyCost: 'dblCost',
 //            colAssemblyTotal: '',
 
+            //------------------//
+            //Bundle Details Tab//
+            //------------------//
             colBundleItem: 'intBundleItemId',
             colBundleQuantity: 'dblQuantity',
 //            colBundleStock: '',
@@ -364,9 +375,20 @@ Ext.define('Inventory.view.override.ItemViewController', {
             colBundlePrice: 'dblPrice',
 //            colBundleSubTotal: '',
 
+            //---------------//
+            //Kit Details Tab//
+            //---------------//
             colKitComponent: 'strComponent',
             colKitInputType: 'strInputType',
 
+            //-------------------//
+            //Factory & Lines Tab//
+            //-------------------//
+
+
+            //---------//
+            //Notes Tab//
+            //---------//
             colNoteLocation: 'intLocationId',
             colNoteCommentType: 'strCommentType',
             colNoteComment: 'strComments'
@@ -560,12 +582,10 @@ Ext.define('Inventory.view.override.ItemViewController', {
             ]
         });
 
+        me.subscribeLocationEvents(grdLocationStore, me);
+
         me.subscribeCommodityEvents(win, me);
 
-        var btnAddLocation = grdLocationStore.down('#btnAddLocation');
-        btnAddLocation.on('click', me.onAddLocationClick);
-        var btnEditLocation = grdLocationStore.down('#btnEditLocation');
-        btnEditLocation.on('click', me.onEditLocationClick);
 
         var btnAddPricing = grdPricing.down('#btnAddPricing');
         btnAddPricing.on('click', me.onAddPricingClick);
@@ -573,20 +593,10 @@ Ext.define('Inventory.view.override.ItemViewController', {
         btnEditPricing.on('click', me.onEditPricingClick);
 
         // <editor-fold desc="Subscribe to Renderers and Cell Editing Plugins">
-        var colLocationLocation = grdLocationStore.columns[0];
-        colLocationLocation.renderer = me.LocationRenderer;
-        var colLocationCategory = grdLocationStore.columns[2];
-        colLocationCategory.renderer = me.CategoryRenderer;
-        var colLocationVendor = grdLocationStore.columns[3];
-        colLocationVendor.renderer = me.VendorRenderer;
-        var colLocationCostingMethod = grdLocationStore.columns[4];
-        colLocationCostingMethod.renderer = me.CostingMethodRenderer;
-        var colLocationUOM = grdLocationStore.columns[5];
-        colLocationUOM.renderer = me.UOMRenderer;
+
 
         var colDetailUOM = grdUOM.columns[0];
         colDetailUOM.renderer = me.UOMRenderer;
-
         var cepDetailUOM = grdUOM.getPlugin('cepDetailUOM');
         cepDetailUOM.on({
             edit: me.onGridUOMEdit,
@@ -595,7 +605,6 @@ Ext.define('Inventory.view.override.ItemViewController', {
 
         var colCategory = grdCategory.columns[0];
         colCategory.renderer = me.CategoryRenderer;
-
         var cepPOSCategory = grdCategory.getPlugin('cepPOSCategory');
         cepPOSCategory.on({
             edit: me.onGridCategoryEdit,
@@ -604,7 +613,6 @@ Ext.define('Inventory.view.override.ItemViewController', {
 
         var colUPUom = grdUPC.columns[0];
         colUPUom.renderer = me.UOMRenderer;
-
         var cepUPC = grdUPC.getPlugin('cepUPC');
         cepUPC.on({
             edit: me.onGridUOMEdit,
@@ -613,22 +621,14 @@ Ext.define('Inventory.view.override.ItemViewController', {
 
         var colNoteLocation = grdNotes.columns[0];
         colNoteLocation.renderer = me.LocationRenderer;
-
         var cepNotes = grdNotes.getPlugin('cepNotes');
         cepNotes.on({
             edit: me.onGridLocationEdit,
             scope: me
         });
 
-        var colAccountLocation = grdGlAccounts.columns[0];
-        colAccountLocation.renderer = me.LocationRenderer;
-
-        var colAccountId = grdGlAccounts.columns[2];
+        var colAccountId = grdGlAccounts.columns[1];
         colAccountId.renderer = me.AccountRenderer;
-
-        var colProfitCenterId = grdGlAccounts.columns[3];
-        colProfitCenterId.renderer = me.ProfitCenterRenderer;
-
         var cepAccount = grdGlAccounts.getPlugin('cepAccount');
         cepAccount.on({
             edit: me.onGridAccountEdit,
@@ -640,7 +640,6 @@ Ext.define('Inventory.view.override.ItemViewController', {
         colCustomerLocation.renderer = me.LocationRenderer;
         var colCustomerXref = grdCustomerXref.columns[1];
         colCustomerXref.renderer = me.CustomerRenderer;
-
         var cepCustomerXref = grdCustomerXref.getPlugin('cepCustomerXref');
         cepCustomerXref.on({
             edit: me.onGridCustomerXrefEdit,
@@ -653,7 +652,6 @@ Ext.define('Inventory.view.override.ItemViewController', {
         colVendorXref.renderer = me.VendorRenderer;
         var colVendorUom = grdVendorXref.columns[5];
         colVendorUom.renderer = me.UOMRenderer;
-
         var cepVendorXref = grdVendorXref.getPlugin('cepVendorXref');
         cepVendorXref.on({
             edit: me.onGridVendorXrefEdit,
@@ -664,7 +662,6 @@ Ext.define('Inventory.view.override.ItemViewController', {
         colContractLocation.renderer = me.LocationRenderer;
         var colContractCountry = grdContractItem.columns[2];
         colContractCountry.renderer = me.CountryRenderer;
-
         var cepContractItem = grdContractItem.getPlugin('cepContractItem');
         cepContractItem.on({
             edit: me.onGridContractEdit,
@@ -673,7 +670,6 @@ Ext.define('Inventory.view.override.ItemViewController', {
 
         var colDocument = grdDocumentAssociation.columns[0];
         colDocument.renderer = me.DocumentRenderer;
-
         var cepDocument = grdDocumentAssociation.getPlugin('cepDocument');
         cepDocument.on({
             edit: me.onGridDocumentEdit,
@@ -682,21 +678,16 @@ Ext.define('Inventory.view.override.ItemViewController', {
 
         var colCertification = grdCertification.columns[0];
         colCertification.renderer = me.CertificationRenderer;
-
         var cepCertification = grdCertification.getPlugin('cepCertification');
         cepCertification.on({
             edit: me.onGridCertificationEdit,
             scope: me
         });
 
-
         var colStockLocation = grdStock.columns[0];
         colStockLocation.renderer = me.LocationRenderer;
         var colStockUOM = grdStock.columns[2];
         colStockUOM.renderer = me.UOMRenderer;
-        var colStockCountGroup = grdStock.columns[11];
-        colStockCountGroup.renderer = me.CountGroupRenderer;
-
         var cepStock = grdStock.getPlugin('cepStock');
         cepStock.on({
             edit: me.onGridStockEdit,
@@ -705,12 +696,10 @@ Ext.define('Inventory.view.override.ItemViewController', {
 
         var colPricingLocation = grdPricing.columns[0];
         colPricingLocation.renderer = me.LocationRenderer;
-
         var colPricingLevelLocation = grdPricingLevel.columns[0];
         colPricingLevelLocation.renderer = me.LocationRenderer;
         var colPricingLevelUOM = grdPricingLevel.columns[2];
         colPricingLevelUOM.renderer = me.UOMRenderer;
-
         var cepPricingLevel = grdPricingLevel.getPlugin('cepPricingLevel');
         cepPricingLevel.on({
             edit: me.onGridPricingLevelEdit,
@@ -719,9 +708,8 @@ Ext.define('Inventory.view.override.ItemViewController', {
 
         var colPricingLevelLocation = grdSpecialPricing.columns[0];
         colPricingLevelLocation.renderer = me.LocationRenderer;
-        var colPricingLevelUOM = grdSpecialPricing.columns[3];
+        var colPricingLevelUOM = grdSpecialPricing.columns[4];
         colPricingLevelUOM.renderer = me.UOMRenderer;
-
         var cepSpecialPricing = grdSpecialPricing.getPlugin('cepSpecialPricing');
         cepSpecialPricing   .on({
             edit: me.onGridSpecialPricingEdit,
@@ -732,7 +720,6 @@ Ext.define('Inventory.view.override.ItemViewController', {
         colAssemblyItem.renderer = me.ItemRenderer;
         var colAssemblyUOM = grdAssembly.columns[4];
         colAssemblyUOM.renderer = me.UOMRenderer;
-
         var cepAssembly = grdAssembly.getPlugin('cepAssembly');
         cepAssembly.on({
             edit: me.onGridAssemblyEdit,
@@ -743,7 +730,6 @@ Ext.define('Inventory.view.override.ItemViewController', {
         colBundleItem.renderer = me.ItemRenderer;
         var colBundleUOM = grdBundle.columns[4];
         colBundleUOM.renderer = me.UOMRenderer;
-
         var cepBundle = grdBundle.getPlugin('cepBundle');
         cepBundle.on({
             edit: me.onGridBundleEdit,
@@ -782,6 +768,8 @@ Ext.define('Inventory.view.override.ItemViewController', {
         }
     },
 
+    // <editor-fold desc="Grid Combo Box Renderers">
+
     CategoryRenderer: function (value, metadata, record) {
         var category = record.get('strCategory');
         return category;
@@ -800,11 +788,6 @@ Ext.define('Inventory.view.override.ItemViewController', {
     AccountRenderer: function (value, metadata, record) {
         var account = record.get('strAccountId');
         return account;
-    },
-
-    ProfitCenterRenderer: function (value, metadata, record) {
-        var profitcenter = record.get('strProfitCenter');
-        return profitcenter;
     },
 
     CustomerRenderer: function (value, metadata, record) {
@@ -832,11 +815,6 @@ Ext.define('Inventory.view.override.ItemViewController', {
         return certification;
     },
 
-    CountGroupRenderer: function (value, metadata, record) {
-        var countgroup = record.get('strCountGroup');
-        return countgroup;
-    },
-
     ItemRenderer: function (value, metadata, record) {
         var item = record.get('strItemNo');
         return item;
@@ -859,25 +837,9 @@ Ext.define('Inventory.view.override.ItemViewController', {
         return costingMethod;
     },
 
-    onGridCategoryEdit: function(editor, e, eOpts){
-        var me = this;
-        var record = e.record
-        var column = e.column;
+    // </editor-fold>
 
-        if (column.itemId !== 'colPOSCategoryName')
-            return;
-
-        var grid = column.up('grid');
-        var view = grid.view;
-
-        var cboCategory = column.getEditor();
-        if (cboCategory.getSelectedRecord())
-        {
-            var strCategory = cboCategory.getSelectedRecord().get('strCategory');
-            record.set('strCategory', strCategory);
-            view.refresh();
-        }
-    },
+    // <editor-fold desc="Details Tab Methods and Event Handlers">
 
     onGridUOMEdit: function(editor, e, eOpts){
         var me = this;
@@ -900,6 +862,21 @@ Ext.define('Inventory.view.override.ItemViewController', {
         }
     },
 
+    // </editor-fold>
+
+    // <editor-fold desc="Location Tab Methods and Event Handlers">
+
+    subscribeLocationEvents: function (grid, scope) {
+        var me = scope;
+        var btnAddLocation = grid.down('#btnAddLocation');
+        if (btnAddLocation) btnAddLocation.on('click', me.onAddLocationClick);
+        var btnEditLocation = grid.down('#btnEditLocation');
+        if (btnEditLocation) btnEditLocation.on('click', me.onEditLocationClick);
+
+        var colLocationCostingMethod = grid.columns[4];
+        if (colLocationCostingMethod) colLocationCostingMethod.renderer = me.CostingMethodRenderer;
+    },
+
     onGridLocationEdit: function(editor, e, eOpts){
         var me = this;
         var record = e.record
@@ -920,45 +897,48 @@ Ext.define('Inventory.view.override.ItemViewController', {
         }
     },
 
-    onGridDocumentEdit: function(editor, e, eOpts){
-        var me = this;
-        var record = e.record
-        var column = e.column;
-
-        if (column.itemId !== 'colCertification')
-            return;
-
-        var grid = column.up('grid');
-        var view = grid.view;
-
-        var cboCertification = column.getEditor();
-        if (cboCertification.getSelectedRecord())
-        {
-            var strDocumentName = cboCertification.getSelectedRecord().get('strDocumentName');
-            record.set('strDocumentName', strDocumentName);
-            view.refresh();
-        }
+    onAddLocationClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var me = win.controller;
+        me.openItemLocationScreen('new', win);
     },
 
-    onGridCertificationEdit: function(editor, e, eOpts){
-        var me = this;
-        var record = e.record
-        var column = e.column;
-
-        if (column.itemId !== 'colDocument')
-            return;
-
-        var grid = column.up('grid');
-        var view = grid.view;
-
-        var cboDocument = column.getEditor();
-        if (cboDocument.getSelectedRecord())
-        {
-            var strCertificationName = cboDocument.getSelectedRecord().get('strCertificationName');
-            record.set('strCertificationName', strCertificationName);
-            view.refresh();
-        }
+    onEditLocationClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var me = win.controller;
+        me.openItemLocationScreen('edit', win);
     },
+
+    openItemLocationScreen: function (action, window) {
+        var win = window;
+        var me = win.controller;
+        var screenName = 'Inventory.view.ItemLocation';
+
+        Ext.require([
+            screenName,
+            screenName + 'ViewController',
+        ], function() {
+            var screen = screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
+            var view = Ext.create(screenName, { controller: screen.toLowerCase() });
+            view.on('destroy', me.onDestroyItemLocationScreen, me, { window: win });
+
+            var controller = view.getController();
+            var current = win.getViewModel().data.current;
+            controller.show({ id: current.get('intItemId'), action: action });
+        });
+    },
+
+    onDestroyItemLocationScreen: function(win, eOpts) {
+        var me = eOpts.window.getController();
+        var win = eOpts.window;
+        var grdLocation = win.down('#grdLocationStore');
+
+        grdLocation.store.reload();
+    },
+
+    // </editor-fold>
+
+    // <editor-fold desc="GL Accounts Tab Methods and Event Handlers">
 
     onGridAccountEdit: function(editor, e, eOpts){
         var me = this;
@@ -968,17 +948,7 @@ Ext.define('Inventory.view.override.ItemViewController', {
         var grid = column.up('grid');
         var view = grid.view;
 
-        if (column.itemId === 'colGLAccountLocation')
-        {
-            var cboLocation = column.getEditor();
-            if (cboLocation.getSelectedRecord())
-            {
-                var strLocationName = cboLocation.getSelectedRecord().get('strLocationName');
-                record.set('strLocationName', strLocationName);
-                view.refresh();
-            }
-        }
-        else if (column.itemId === 'colGLAccountId')
+        if (column.itemId === 'colGLAccountId')
         {
             var cboAccount = column.getEditor();
             if (cboAccount.getSelectedRecord())
@@ -988,117 +958,35 @@ Ext.define('Inventory.view.override.ItemViewController', {
                 view.refresh();
             }
         }
-        else if (column.itemId === 'colGLAccountProfitCenter')
-        {
-            var cboProfitCenter = column.getEditor();
-            if (cboProfitCenter.getSelectedRecord())
-            {
-                var strProfitCenter = cboProfitCenter.getSelectedRecord().get('strProfitCenter');
-                record.set('strProfitCenter', strProfitCenter);
-                view.refresh();
-            }
-        }
     },
 
-    onGridStockEdit: function(editor, e, eOpts){
+    // </editor-fold>
+
+    // <editor-fold desc="Point Of Sale Tab Methods and Event Handlers">
+
+    onGridCategoryEdit: function(editor, e, eOpts){
         var me = this;
         var record = e.record
         var column = e.column;
 
-        var grid = column.up('grid');
-        var view = grid.view;
-
-        if (column.itemId === 'colStockLocation')
-        {
-            var cboLocation = column.getEditor();
-            if (cboLocation.getSelectedRecord())
-            {
-                var strLocationName = cboLocation.getSelectedRecord().get('strLocationName');
-                record.set('strLocationName', strLocationName);
-                view.refresh();
-            }
-        }
-        else if (column.itemId === 'colStockUOM')
-        {
-            var cboUOM = column.getEditor();
-            if (cboUOM.getSelectedRecord())
-            {
-                var strUnitMeasure = cboUOM.getSelectedRecord().get('strUnitMeasure');
-                record.set('strUnitMeasure', strUnitMeasure);
-                view.refresh();
-            }
-        }
-        else if (column.itemId === 'colStockInventoryGroup')
-        {
-            var cboCountGroup = column.getEditor();
-            if (cboCountGroup.getSelectedRecord())
-            {
-                var strCountGroup = cboCountGroup.getSelectedRecord().get('strCountGroup');
-                record.set('strCountGroup', strCountGroup);
-                view.refresh();
-            }
-        }
-    },
-
-    onGridPricingLevelEdit: function(editor, e, eOpts){
-        var me = this;
-        var record = e.record
-        var column = e.column;
+        if (column.itemId !== 'colPOSCategoryName')
+            return;
 
         var grid = column.up('grid');
         var view = grid.view;
 
-        if (column.itemId === 'colPricingLevelLocation')
+        var cboCategory = column.getEditor();
+        if (cboCategory.getSelectedRecord())
         {
-            var cboLocation = column.getEditor();
-            if (cboLocation.getSelectedRecord())
-            {
-                var strLocationName = cboLocation.getSelectedRecord().get('strLocationName');
-                record.set('strLocationName', strLocationName);
-                view.refresh();
-            }
-        }
-        else if (column.itemId === 'colPricingLevelUOM')
-        {
-            var cboUOM = column.getEditor();
-            if (cboUOM.getSelectedRecord())
-            {
-                var strUnitMeasure = cboUOM.getSelectedRecord().get('strUnitMeasure');
-                record.set('strUnitMeasure', strUnitMeasure);
-                view.refresh();
-            }
+            var strCategory = cboCategory.getSelectedRecord().get('strCategory');
+            record.set('strCategory', strCategory);
+            view.refresh();
         }
     },
 
-    onGridSpecialPricingEdit: function(editor, e, eOpts){
-        var me = this;
-        var record = e.record
-        var column = e.column;
+    // </editor-fold>
 
-        var grid = column.up('grid');
-        var view = grid.view;
-
-        if (column.itemId === 'colSpecialPricingLocation')
-        {
-            var cboLocation = column.getEditor();
-            if (cboLocation.getSelectedRecord())
-            {
-                var strLocationName = cboLocation.getSelectedRecord().get('strLocationName');
-                record.set('strLocationName', strLocationName);
-                view.refresh();
-            }
-        }
-        else if (column.itemId === 'colSpecialPricingUnit')
-        {
-            var cboUOM = column.getEditor();
-            if (cboUOM.getSelectedRecord())
-            {
-                var strUnitMeasure = cboUOM.getSelectedRecord().get('strUnitMeasure');
-                record.set('strUnitMeasure', strUnitMeasure);
-                view.refresh();
-            }
-        }
-    },
+    // <editor-fold desc="Cross Reference Tab Methods and Event Handlers">
 
     onGridCustomerXrefEdit: function(editor, e, eOpts){
         var me = this;
@@ -1170,6 +1058,10 @@ Ext.define('Inventory.view.override.ItemViewController', {
         }
     },
 
+    // </editor-fold>
+
+    // <editor-fold desc="Contract Item Tab Methods and Event Handlers">
+
     onGridContractEdit: function(editor, e, eOpts){
         var me = this;
         var record = e.record
@@ -1200,7 +1092,51 @@ Ext.define('Inventory.view.override.ItemViewController', {
         }
     },
 
-    onGridAssemblyEdit: function(editor, e, eOpts){
+    onGridDocumentEdit: function(editor, e, eOpts){
+        var me = this;
+        var record = e.record
+        var column = e.column;
+
+        if (column.itemId !== 'colCertification')
+            return;
+
+        var grid = column.up('grid');
+        var view = grid.view;
+
+        var cboCertification = column.getEditor();
+        if (cboCertification.getSelectedRecord())
+        {
+            var strDocumentName = cboCertification.getSelectedRecord().get('strDocumentName');
+            record.set('strDocumentName', strDocumentName);
+            view.refresh();
+        }
+    },
+
+    onGridCertificationEdit: function(editor, e, eOpts){
+        var me = this;
+        var record = e.record
+        var column = e.column;
+
+        if (column.itemId !== 'colDocument')
+            return;
+
+        var grid = column.up('grid');
+        var view = grid.view;
+
+        var cboDocument = column.getEditor();
+        if (cboDocument.getSelectedRecord())
+        {
+            var strCertificationName = cboDocument.getSelectedRecord().get('strCertificationName');
+            record.set('strCertificationName', strCertificationName);
+            view.refresh();
+        }
+    },
+
+    // </editor-fold>
+
+    // <editor-fold desc="Pricing Tab Methods and Event Handlers">
+
+    onGridPricingLevelEdit: function(editor, e, eOpts){
         var me = this;
         var record = e.record
         var column = e.column;
@@ -1208,17 +1144,17 @@ Ext.define('Inventory.view.override.ItemViewController', {
         var grid = column.up('grid');
         var view = grid.view;
 
-        if (column.itemId === 'colAssemblyComponent')
+        if (column.itemId === 'colPricingLevelLocation')
         {
-            var cboItem = column.getEditor();
-            if (cboItem.getSelectedRecord())
+            var cboLocation = column.getEditor();
+            if (cboLocation.getSelectedRecord())
             {
-                var strItemNo = cboItem.getSelectedRecord().get('strItemNo');
-                record.set('strItemNo', strItemNo);
+                var strLocationName = cboLocation.getSelectedRecord().get('strLocationName');
+                record.set('strLocationName', strLocationName);
                 view.refresh();
             }
         }
-        else if (column.itemId === 'colAssemblyUOM')
+        else if (column.itemId === 'colPricingLevelUOM')
         {
             var cboUOM = column.getEditor();
             if (cboUOM.getSelectedRecord())
@@ -1230,7 +1166,7 @@ Ext.define('Inventory.view.override.ItemViewController', {
         }
     },
 
-    onGridBundleEdit: function(editor, e, eOpts){
+    onGridSpecialPricingEdit: function(editor, e, eOpts){
         var me = this;
         var record = e.record
         var column = e.column;
@@ -1238,17 +1174,17 @@ Ext.define('Inventory.view.override.ItemViewController', {
         var grid = column.up('grid');
         var view = grid.view;
 
-        if (column.itemId === 'colBundleItem')
+        if (column.itemId === 'colSpecialPricingLocation')
         {
-            var cboItem = column.getEditor();
-            if (cboItem.getSelectedRecord())
+            var cboLocation = column.getEditor();
+            if (cboLocation.getSelectedRecord())
             {
-                var strItemNo = cboItem.getSelectedRecord().get('strItemNo');
-                record.set('strItemNo', strItemNo);
+                var strLocationName = cboLocation.getSelectedRecord().get('strLocationName');
+                record.set('strLocationName', strLocationName);
                 view.refresh();
             }
         }
-        else if (column.itemId === 'colBundleUOM')
+        else if (column.itemId === 'colSpecialPricingUnit')
         {
             var cboUOM = column.getEditor();
             if (cboUOM.getSelectedRecord())
@@ -1258,45 +1194,6 @@ Ext.define('Inventory.view.override.ItemViewController', {
                 view.refresh();
             }
         }
-    },
-
-    onAddLocationClick: function(button, e, eOpts) {
-        var win = button.up('window');
-        var me = win.controller;
-        me.openItemLocationScreen('new', win);
-    },
-
-    onEditLocationClick: function(button, e, eOpts) {
-        var win = button.up('window');
-        var me = win.controller;
-        me.openItemLocationScreen('edit', win);
-    },
-
-    openItemLocationScreen: function (action, window) {
-        var win = window;
-        var me = win.controller;
-        var screenName = 'Inventory.view.ItemLocation';
-
-        Ext.require([
-            screenName,
-            screenName + 'ViewController',
-        ], function() {
-            var screen = screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
-            var view = Ext.create(screenName, { controller: screen.toLowerCase() });
-            view.on('destroy', me.onDestroyItemLocationScreen, me, { window: win });
-
-            var controller = view.getController();
-            var current = win.getViewModel().data.current;
-            controller.show({ id: current.get('intItemId'), action: action });
-        });
-    },
-
-    onDestroyItemLocationScreen: function(win, eOpts) {
-        var me = eOpts.window.getController();
-        var win = eOpts.window;
-        var grdLocation = win.down('#grdLocationStore');
-
-        grdLocation.store.reload();
     },
 
     onAddPricingClick: function(button, e, eOpts) {
@@ -1337,6 +1234,54 @@ Ext.define('Inventory.view.override.ItemViewController', {
 
         grdPricing.store.reload();
     },
+
+    // </editor-fold>
+
+    // <editor-fold desc="Stock Tab Methods and Event Handlers">
+
+    onGridStockEdit: function(editor, e, eOpts){
+        var me = this;
+        var record = e.record
+        var column = e.column;
+
+        var grid = column.up('grid');
+        var view = grid.view;
+
+        if (column.itemId === 'colStockLocation')
+        {
+            var cboLocation = column.getEditor();
+            if (cboLocation.getSelectedRecord())
+            {
+                var strLocationName = cboLocation.getSelectedRecord().get('strLocationName');
+                record.set('strLocationName', strLocationName);
+                view.refresh();
+            }
+        }
+        else if (column.itemId === 'colStockUOM')
+        {
+            var cboUOM = column.getEditor();
+            if (cboUOM.getSelectedRecord())
+            {
+                var strUnitMeasure = cboUOM.getSelectedRecord().get('strUnitMeasure');
+                record.set('strUnitMeasure', strUnitMeasure);
+                view.refresh();
+            }
+        }
+        else if (column.itemId === 'colStockInventoryGroup')
+        {
+            var cboCountGroup = column.getEditor();
+            if (cboCountGroup.getSelectedRecord())
+            {
+                var strCountGroup = cboCountGroup.getSelectedRecord().get('strCountGroup');
+                record.set('strCountGroup', strCountGroup);
+                view.refresh();
+            }
+        }
+    },
+
+    // </editor-fold>
+
+    // <editor-fold desc="Commodity Tab Methods and Event Handlers">
 
     subscribeCommodityEvents: function(win, scope) {
         var me = scope;
@@ -1387,7 +1332,82 @@ Ext.define('Inventory.view.override.ItemViewController', {
             [{ dataIndex: 'intCommodityId', value: intCommodityId, condition: 'eq' }
                 , { dataIndex: 'strType', value: 'ProductLine', condition: 'eq' , conjunction: 'and'}];
 
+    },
+
+    // </editor-fold>
+
+    // <editor-fold desc="Assembly Tab Methods and Event Handlers">
+
+    onGridAssemblyEdit: function(editor, e, eOpts){
+        var me = this;
+        var record = e.record
+        var column = e.column;
+
+        var grid = column.up('grid');
+        var view = grid.view;
+
+        if (column.itemId === 'colAssemblyComponent')
+        {
+            var cboItem = column.getEditor();
+            if (cboItem.getSelectedRecord())
+            {
+                var strItemNo = cboItem.getSelectedRecord().get('strItemNo');
+                record.set('strItemNo', strItemNo);
+                view.refresh();
+            }
+        }
+        else if (column.itemId === 'colAssemblyUOM')
+        {
+            var cboUOM = column.getEditor();
+            if (cboUOM.getSelectedRecord())
+            {
+                var strUnitMeasure = cboUOM.getSelectedRecord().get('strUnitMeasure');
+                record.set('strUnitMeasure', strUnitMeasure);
+                view.refresh();
+            }
+        }
+    },
+
+    // </editor-fold>
+
+    // <editor-fold desc="Bundle Details Tab Methods and Event Handlers">
+
+    onGridBundleEdit: function(editor, e, eOpts){
+        var me = this;
+        var record = e.record
+        var column = e.column;
+
+        var grid = column.up('grid');
+        var view = grid.view;
+
+        if (column.itemId === 'colBundleItem')
+        {
+            var cboItem = column.getEditor();
+            if (cboItem.getSelectedRecord())
+            {
+                var strItemNo = cboItem.getSelectedRecord().get('strItemNo');
+                record.set('strItemNo', strItemNo);
+                view.refresh();
+            }
+        }
+        else if (column.itemId === 'colBundleUOM')
+        {
+            var cboUOM = column.getEditor();
+            if (cboUOM.getSelectedRecord())
+            {
+                var strUnitMeasure = cboUOM.getSelectedRecord().get('strUnitMeasure');
+                record.set('strUnitMeasure', strUnitMeasure);
+                view.refresh();
+            }
+        }
     }
 
+    // </editor-fold>
+
+    // <editor-fold desc="Kit Details Tab Methods and Event Handlers">
+
+
+
+    // </editor-fold>
 
 });

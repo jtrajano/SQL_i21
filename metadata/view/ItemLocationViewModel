@@ -7,7 +7,12 @@
     "codeClass": null,
     "userConfig": {
         "designer|userAlias": "itemlocation",
-        "designer|userClassName": "ItemLocationViewModel"
+        "designer|userClassName": "ItemLocationViewModel",
+        "requires": [
+            "i21.store.CompanyLocation",
+            "Inventory.store.UnitMeasure",
+            "Inventory.store.Category"
+        ]
     },
     "designerId": "25cf1c0c-a796-4bf9-9545-85fca4dea793",
     "cn": [
@@ -138,27 +143,6 @@
             },
             "name": "MyStore",
             "designerId": "b5966463-4f58-49e6-856f-5adbfabf5b4a",
-            "customConfigs": [
-                {
-                    "group": "(Custom Properties)",
-                    "name": "type",
-                    "type": "string"
-                }
-            ]
-        },
-        {
-            "type": "Ext.data.Store",
-            "reference": {
-                "name": "stores",
-                "type": "array"
-            },
-            "codeClass": null,
-            "userConfig": {
-                "name": "Vendor",
-                "type": "vendorbuffered"
-            },
-            "name": "MyStore1",
-            "designerId": "2ddbaafa-d423-49e9-909a-7b07599e2513",
             "customConfigs": [
                 {
                     "group": "(Custom Properties)",

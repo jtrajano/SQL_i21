@@ -158,15 +158,60 @@ Ext.define('Inventory.view.ItemLocation', {
                     },
                     items: [
                         {
-                            xtype: 'combobox',
+                            xtype: 'gridcombobox',
                             flex: 1.4,
+                            columns: [
+                                {
+                                    dataIndex: 'intCompanyLocationId',
+                                    dataType: 'numeric',
+                                    text: 'Location Id',
+                                    hidden: true
+                                },
+                                {
+                                    dataIndex: 'strLocationName',
+                                    dataType: 'string',
+                                    text: 'Location Name',
+                                    flex: 1
+                                },
+                                {
+                                    dataIndex: 'strLocationType',
+                                    dataType: 'string',
+                                    text: 'Location Type',
+                                    flex: 1
+                                }
+                            ],
                             itemId: 'cboLocation',
                             fieldLabel: 'Location',
-                            labelWidth: 105
+                            labelWidth: 105,
+                            displayField: 'strLocationName',
+                            valueField: 'intCompanyLocationId',
+                            bind: {
+                                store: '{Location}'
+                            }
                         },
                         {
                             xtype: 'combobox',
                             flex: 1,
+                            columns: [
+                                {
+                                    dataIndex: 'intVendorId',
+                                    dataType: 'numeric',
+                                    text: 'Vendor Id',
+                                    hidden: true
+                                },
+                                {
+                                    dataIndex: 'strVendorId',
+                                    dataType: 'string',
+                                    text: 'Vendor No',
+                                    flex: 1
+                                },
+                                {
+                                    dataIndex: 'strVendorName',
+                                    dataType: 'string',
+                                    text: 'Vendor Name',
+                                    flex: 1
+                                }
+                            ],
                             itemId: 'cboDefaultVendor',
                             margin: '0 5',
                             fieldLabel: 'Vendor',
@@ -177,15 +222,45 @@ Ext.define('Inventory.view.ItemLocation', {
                             flex: 1,
                             itemId: 'cboCostingMethod',
                             fieldLabel: 'Costing Method',
-                            labelWidth: 95
+                            labelWidth: 95,
+                            displayField: 'strDescription',
+                            valueField: 'intCostingMethodId',
+                            bind: {
+                                store: '{CostingMethods}'
+                            }
                         },
                         {
-                            xtype: 'combobox',
+                            xtype: 'gridcombobox',
                             flex: 1,
+                            columns: [
+                                {
+                                    dataIndex: 'intCategoryId',
+                                    dataType: 'numeric',
+                                    text: 'Category ID',
+                                    hidden: true
+                                },
+                                {
+                                    dataIndex: 'strCategoryCode',
+                                    dataType: 'string',
+                                    text: 'Category Code',
+                                    flex: 1
+                                },
+                                {
+                                    dataIndex: 'strDescription',
+                                    dataType: 'string',
+                                    text: 'Description',
+                                    flex: 1
+                                }
+                            ],
                             itemId: 'cboCategory',
                             margin: '0 0 0 5',
                             fieldLabel: 'Category',
-                            labelWidth: 55
+                            labelWidth: 55,
+                            displayField: 'strCategoryCode',
+                            valueField: 'intCategoryId',
+                            bind: {
+                                store: '{Category}'
+                            }
                         }
                     ]
                 },
@@ -226,22 +301,115 @@ Ext.define('Inventory.view.ItemLocation', {
                                     labelWidth: 105
                                 },
                                 {
-                                    xtype: 'combobox',
+                                    xtype: 'gridcombobox',
+                                    columns: [
+                                        {
+                                            dataIndex: 'intUnitMeasureId',
+                                            dataType: 'numeric',
+                                            text: 'Unit Of Measure ID',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strUnitMeasure',
+                                            dataType: 'string',
+                                            text: 'Unit Measure',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strUnitType',
+                                            dataType: 'string',
+                                            text: 'Unit Type',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'ysnDefault',
+                                            dataType: 'boolean',
+                                            text: 'Default',
+                                            flex: 1
+                                        }
+                                    ],
                                     itemId: 'cboDefaultUom',
                                     fieldLabel: 'Default UOM',
-                                    labelWidth: 105
+                                    labelWidth: 105,
+                                    displayField: 'strUnitMeasure',
+                                    valueField: 'intUnitMeasureId',
+                                    bind: {
+                                        store: '{UnitMeasure}'
+                                    }
                                 },
                                 {
-                                    xtype: 'combobox',
+                                    xtype: 'gridcombobox',
+                                    columns: [
+                                        {
+                                            dataIndex: 'intUnitMeasureId',
+                                            dataType: 'numeric',
+                                            text: 'Unit Of Measure ID',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strUnitMeasure',
+                                            dataType: 'string',
+                                            text: 'Unit Measure',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strUnitType',
+                                            dataType: 'string',
+                                            text: 'Unit Type',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'ysnDefault',
+                                            dataType: 'boolean',
+                                            text: 'Default',
+                                            flex: 1
+                                        }
+                                    ],
                                     itemId: 'cboIssueUom',
                                     fieldLabel: 'Issue UOM',
-                                    labelWidth: 105
+                                    labelWidth: 105,
+                                    displayField: 'strUnitMeasure',
+                                    valueField: 'intUnitMeasureId',
+                                    bind: {
+                                        store: '{UnitMeasure}'
+                                    }
                                 },
                                 {
-                                    xtype: 'combobox',
+                                    xtype: 'gridcombobox',
+                                    columns: [
+                                        {
+                                            dataIndex: 'intUnitMeasureId',
+                                            dataType: 'numeric',
+                                            text: 'Unit Of Measure ID',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strUnitMeasure',
+                                            dataType: 'string',
+                                            text: 'Unit Measure',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strUnitType',
+                                            dataType: 'string',
+                                            text: 'Unit Type',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'ysnDefault',
+                                            dataType: 'boolean',
+                                            text: 'Default',
+                                            flex: 1
+                                        }
+                                    ],
                                     itemId: 'cboReceiveUom',
                                     fieldLabel: 'Receive UOM',
-                                    labelWidth: 105
+                                    labelWidth: 105,
+                                    displayField: 'strUnitMeasure',
+                                    valueField: 'intUnitMeasureId',
+                                    bind: {
+                                        store: '{UnitMeasure}'
+                                    }
                                 },
                                 {
                                     xtype: 'combobox',
@@ -488,6 +656,26 @@ Ext.define('Inventory.view.ItemLocation', {
                                 },
                                 {
                                     xtype: 'combobox',
+                                    columns: [
+                                        {
+                                            dataIndex: 'intVendorId',
+                                            dataType: 'numeric',
+                                            text: 'Vendor Id',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strVendorId',
+                                            dataType: 'string',
+                                            text: 'Vendor No',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strVendorName',
+                                            dataType: 'string',
+                                            text: 'Vendor Name',
+                                            flex: 1
+                                        }
+                                    ],
                                     itemId: 'cboFreightVendor',
                                     fieldLabel: 'Freight Vendor',
                                     labelWidth: 140
@@ -496,7 +684,12 @@ Ext.define('Inventory.view.ItemLocation', {
                                     xtype: 'combobox',
                                     itemId: 'cboNegativeInventory',
                                     fieldLabel: 'Negative Inventory',
-                                    labelWidth: 140
+                                    labelWidth: 140,
+                                    displayField: 'strDescription',
+                                    valueField: 'strDescription',
+                                    bind: {
+                                        store: '{NegativeInventory}'
+                                    }
                                 },
                                 {
                                     xtype: 'textfield',
