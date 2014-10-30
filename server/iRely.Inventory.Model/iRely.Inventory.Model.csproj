@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="InventoryEntities.cs" />
+    <Compile Include="Mappings\tblICLotStatusMap.cs" />
     <Compile Include="Mappings\tblICLineOfBusinessMap.cs" />
     <Compile Include="Mappings\tblICManufacturingCellMap.cs" />
     <Compile Include="Mappings\tblICPackTypeMap.cs" />
@@ -112,6 +113,7 @@
     <Compile Include="Mappings\tblICUnitMeasureMap.cs" />
     <Compile Include="Mappings\tblICUnitTypeMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tables\tblICLotStatus.cs" />
     <Compile Include="Tables\tblICLineOfBusiness.cs" />
     <Compile Include="Tables\tblICManufacturingCell.cs" />
     <Compile Include="Tables\tblICPackType.cs" />

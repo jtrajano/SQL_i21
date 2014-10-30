@@ -17,7 +17,8 @@
             "QualityTemplate",
             "InventoryUOM",
             "QAProperties",
-            "Catalog"
+            "Catalog",
+            "LineOfBusiness"
         ]
     },
     "name": "Application",

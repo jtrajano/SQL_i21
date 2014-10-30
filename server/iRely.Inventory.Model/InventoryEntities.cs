@@ -164,7 +164,9 @@ namespace iRely.Inventory.Model
         public DbSet<vyuAPVendor> vyuAPVendors { get; set; }
         public DbSet<tblARCustomer> tblARCustomers { get; set; }
         public DbSet<tblSMCountry> tblSMCountries { get; set; }
-        
+
+        public DbSet<tblICLineOfBusiness> tblICLineOfBusinesses { get; set; }
+        public DbSet<tblICLotStatus> tblICLotStatuses { get; set; }
         
         protected override void OnModelCreating(DbModelBuilder modelBuilder) 
         {
@@ -243,6 +245,8 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblARCustomerMap());
             modelBuilder.Configurations.Add(new tblSMCountryMap());
 
+            modelBuilder.Configurations.Add(new tblICLineOfBusinessMap());
+            modelBuilder.Configurations.Add(new tblICLotStatusMap());
 
         }
     }
