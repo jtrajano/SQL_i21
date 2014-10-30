@@ -33,11 +33,13 @@ EXEC( 'CREATE PROCEDURE [dbo].[uspARContactOriginSync]
 				sscon_email = E.strEmail
 			FROM tblEntityContact Contact
 				INNER JOIN tblEntity E ON E.intEntityId = Contact.intEntityId
-				WHERE Contact.strContactNumber = @ContactNumber
+				WHERE Contact.strContactNumber = @ContactNumber AND sscon_contact_id = @ContactNumber
 		END
 		--INSERT IF NOT EXIST IN THE ORIGIN
 		ELSE
 			INSERT INTO ssconmst(
+				sscon_contact_id,
+				sscon_cus_no,
 				sscon_first_name,
 				sscon_last_name,
 				sscon_contact_title,
@@ -46,9 +48,15 @@ EXEC( 'CREATE PROCEDURE [dbo].[uspARContactOriginSync]
 				sscon_cell_no,
 				sscon_cell_ext,
 				sscon_fax_no,
-				sscon_email
+				sscon_email,
+				--not to be null on origin
+				sscon_lead_id, 
+				sscon_loc_id,
+				sscon_vnd_no
 			)
 			SELECT
+				UPPER(Contact.strContactNumber),
+				Cus.strCustomerNumber,
 				(CASE WHEN CHARINDEX('', '', E.strName) > 0 THEN SUBSTRING(SUBSTRING(E.strName,1,30), 0, CHARINDEX('', '',E.strName)) ELSE SUBSTRING(E.strName,1,30)END) AS LastName,
 				(CASE WHEN CHARINDEX('', '', E.strName) > 0 THEN SUBSTRING(SUBSTRING(E.strName,1,30),CHARINDEX('', '',E.strName) + 2, LEN(E.strName))END) AS FirstName,
 				Contact.strTitle,
@@ -58,8 +66,13 @@ EXEC( 'CREATE PROCEDURE [dbo].[uspARContactOriginSync]
 				(CASE WHEN CHARINDEX('' x'', Contact.strMobile) > 0 THEN SUBSTRING(SUBSTRING(Contact.strMobile,1,30),CHARINDEX('' x'',Contact.strMobile) + 2, LEN(Contact.strMobile))END) AS ExtMoblie,
 				Contact.strFax,
 				E.strEmail
+				'''',
+				'''',
+				''''
 			FROM tblEntityContact Contact
 				INNER JOIN tblEntity E ON E.intEntityId = Contact.intEntityId
+				INNER JOIN tblARCustomerToContact  CusToCon ON Contact.intContactId = CusToCon.intContactId
+				INNER JOIN tblARCustomer Cus ON CusToCon.intCustomerId = Cus.intCustomerId
 				WHERE Contact.strContactNumber = @ContactNumber
 	
 
