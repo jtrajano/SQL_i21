@@ -23,6 +23,9 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblGLAccount)
                 .WithMany(p => p.tblICCommodityAccounts)
                 .HasForeignKey(p => p.intAccountId);
+            this.HasOptional(p => p.tblSMCompanyLocation)
+                .WithMany(p => p.tblICCommodityAccounts)
+                .HasForeignKey(p => p.intLocationId);
         }
     }
 }

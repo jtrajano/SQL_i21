@@ -32,5 +32,9 @@ Ext.define('Inventory.model.CommodityUnitMeasure', {
         { name: 'ysnAllowPurchase', type: 'boolean'},
         { name: 'ysnAllowSale', type: 'boolean'},
         { name: 'intSort', type: 'int'}
+    ],
+
+    validators: [
+        {type: 'presence', field: 'intUnitMeasureId'}
     ]
 });

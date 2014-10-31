@@ -20,6 +20,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnAllowPurchase).HasColumnName("ysnAllowPurchase");
             this.Property(t => t.ysnAllowSale).HasColumnName("ysnAllowSale");
             this.Property(t => t.ysnStockUnit).HasColumnName("ysnStockUnit");
+
+            this.HasOptional(p => p.tblICUnitMeasure)
+                .WithMany(p => p.tblICCommodityUnitMeasures)
+                .HasForeignKey(p => p.intUnitMeasureId);
         }
     }
 }

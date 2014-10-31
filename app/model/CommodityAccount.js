@@ -1,23 +1,22 @@
 /**
- * Created by LZabala on 10/28/2014.
+ * Created by LZabala on 10/31/2014.
  */
-Ext.define('Inventory.model.CommodityAttribute', {
+Ext.define('Inventory.model.CommodityAccount', {
     extend: 'iRely.BaseEntity',
 
     requires: [
-        'Inventory.model.Commodity',
         'Ext.data.Field'
     ],
 
-    idProperty: 'intCommodityAttributeId',
+    idProperty: 'intCommodityAccountId',
 
     fields: [
-        { name: 'intCommodityAttributeId', type: 'int'},
+        { name: 'intCommodityAccountId', type: 'int'},
         { name: 'intCommodityId', type: 'int',
             reference: {
                 type: 'Inventory.model.Commodity',
                 inverse: {
-                    role: 'tblICCommodityAttributes',
+                    role: 'tblICCommodityAccounts',
                     storeConfig: {
                         sortOnLoad: true,
                         sorters: {
@@ -26,14 +25,15 @@ Ext.define('Inventory.model.CommodityAttribute', {
                         }
                     }
                 }
-            }
-        },
-        { name: 'strType', type: 'string'},
-        { name: 'strDescription', type: 'string'},
-        { name: 'intSort', type: 'int'}
+            }},
+        { name: 'intLocationId', type: 'int'},
+        { name: 'strAccountDescription', type: 'string'},
+        { name: 'intAccountId', type: 'int'},
+        { name: 'intSort', type: 'int'},
     ],
 
     validators: [
-        {type: 'presence', field: 'strDescription'}
+        {type: 'presence', field: 'intLocationId'},
+        {type: 'presence', field: 'intAccountId'}
     ]
 });

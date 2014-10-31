@@ -119,6 +119,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemSpecialPricing> tblICItemSpecialPricings { get; set; }
 
         public ICollection<tblICManufacturingCell> tblICManufacturingCells { get; set; }
+        public ICollection<tblICCommodityAccount> tblICCommodityAccounts { get; set; }
     }
 
     public class tblGLAccount : BaseEntity

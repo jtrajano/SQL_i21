@@ -18,7 +18,53 @@ Ext.define('Inventory.view.CommodityViewModel', {
     alias: 'viewmodel.commodity',
 
     requires: [
-        'Inventory.view.override.CommodityViewModel'
-    ]
+        'Inventory.store.PatronageCategory',
+        'Inventory.store.BufferedUnitMeasure',
+        'GeneralLedger.store.BufAccountId',
+        'i21.store.CompanyLocation'
+    ],
+
+    stores: {
+        accountDescriptions: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Sales'
+                },
+                {
+                    strDescription: 'Purchase'
+                },
+                {
+                    strDescription: 'Variance'
+                },
+                {
+                    strDescription: 'COGS'
+                },
+                {
+                    strDescription: 'Expenses'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        patronageCategory: {
+            type: 'inventorypatronagecategory'
+        },
+        directPatronageCategory: {
+            type: 'inventorypatronagecategory'
+        },
+        unitMeasure: {
+            type: 'inventorybuffereduom'
+        },
+        glAccount: {
+            type: 'bufAccountid'
+        },
+        location: {
+            type: 'companylocation'
+        }
+    }
 
 });

@@ -17,7 +17,175 @@ Ext.define('Inventory.view.CommodityViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.commodity',
 
-    requires: [
-        'Inventory.view.override.CommodityViewController'
-    ]
+    config: {
+        searchConfig: {
+            title:  'Search Commodity',
+            type: 'Inventory.Commodity',
+            api: {
+                read: '../Inventory/api/Commodity/SearchCommodities'
+            },
+            columns: [
+                {dataIndex: 'intCommodityId',text: "Commodity Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
+                {dataIndex: 'strCommodityCode', text: 'Commodity Code', flex: 1,  dataType: 'string'},
+                {dataIndex: 'strDescription', text: 'Description', flex: 1,  dataType: 'string'}
+            ]
+        },
+        binding: {
+            txtCommodityCode: '{current.strCommodityCode}',
+            txtDescription: '{current.strDescription}',
+            chkExchangeTraded: '{current.ysnExchangeTraded}',
+            txtDecimalsOnDpr: '{current.intDecimalDPR}',
+            txtConsolidateFactor: '{current.dblConsolidateFactor}',
+            chkFxExposure: '{current.ysnFXExposure}',
+            txtPriceChecksMin: '{current.dblPriceCheckMin}',
+            txtPriceChecksMax: '{current.dblPriceCheckMax}',
+            txtCheckoffTaxDesc: '{current.strCheckoffTaxDesc}',
+            cboCheckoffTaxAllStates: {
+                value: '{current.strCheckoffAllState}'
+            },
+            txtInsuranceTaxDesc: '{current.strInsuranceTaxDesc}',
+            cboInsuranceTaxAllStates: {
+                value: '{current.strInsuranceAllState}'
+            },
+            dtmCropEndDateCurrent: '{current.dtmCropEndDateCurrent}',
+            dtmCropEndDateNew: '{current.dtmCropEndDateNew}',
+            txtEdiCode: '{current.strEDICode}',
+            txtDefaultScheduleStore: '{current.strScheduleStore}',
+            txtDefaultScheduleDiscount: '{current.strScheduleDiscount}',
+            txtTextPurchase: '{current.strTextPurchase}',
+            txtTextSales: '{current.strTextSales}',
+            txtTextFees: '{current.strTextFees}',
+            txtAgItemNumber: '{current.strAGItemNumber}',
+            cboScaleAutoDistDefault: {
+                value: '{current.strScaleAutoDist}'
+            },
+            chkRequireLoadNoAtKiosk: '{current.ysnRequireLoadNumber}',
+            chkAllowVariety: '{current.ysnAllowVariety}',
+            chkAllowLoadContracts: '{current.ysnAllowLoadContracts}',
+            txtMaximumUnder: '{current.dblMaxUnder}',
+            txtMaximumOver: '{current.dblMaxOver}',
+            cboPatronageCategory: {
+                value: '{current.intPatronageCategoryId}',
+                store: '{patronageCategory}'
+            },
+            cboPatronageCategoryDirect: {
+                value: '{current.intPatronageCategoryDirectId}',
+                store: '{directPatronageCategory}'
+            },
+
+            colUOMCode: 'strUnitMeasure',
+            colUOMWeightPerPack: 'dblWeightPerPack',
+            colUOMStockUnit: 'ysnStockUnit',
+            colUOMAllowPurchase: 'ysnAllowPurchase',
+            colUOMAllowSale: 'ysnAllowSale',
+
+            colAccountLocation: 'strLocationName',
+            colAccountDescription: 'strAccountDescription',
+            colAccountId: 'strAccountId'
+        }
+    },
+
+    setupContext : function(options){
+        "use strict";
+        var me = this,
+            win = options.window,
+            store = Ext.create('Inventory.store.Commodity', { pageSize: 1 });
+
+        win.context = Ext.create('iRely.mvvm.Engine', {
+            window : win,
+            store  : store,
+            binding: me.config.binding,
+            details: [
+                {
+                    key: 'tblICCommodityUnitMeasures',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: win.down('#grdUom'),
+                        deleteButton : win.down('#btnDeleteUom')
+                    })
+                },
+                {
+                    key: 'tblICCommodityAccounts',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: win.down('#grdGlAccounts'),
+                        deleteButton : win.down('#btnDeleteGlAccounts')
+                    })
+                }
+            ]
+        });
+
+        return win.context;
+    },
+
+    show : function(config) {
+        "use strict";
+
+        var me = this,
+            win = this.getView();
+
+        if (config) {
+            win.show();
+
+            var context = me.setupContext( {window : win} );
+
+            if (config.action === 'new') {
+                context.data.addRecord();
+            } else {
+                if (config.id) {
+                    config.filters = [{
+                        column: 'intCommodityId',
+                        value: config.id
+                    }];
+                }
+                context.data.load({
+                    filters: config.filters
+                });
+            }
+        }
+    },
+
+    onUOMSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepUOM');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colUOMCode')
+        {
+            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
+        }
+    },
+
+    onAccountSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepAccounts');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colAccountLocation')
+        {
+            current.set('intLocationId', records[0].get('intCompanyLocationId'));
+        }
+        else if (combo.column.itemId === 'colAccountId')
+        {
+            current.set('intAccountId', records[0].get('intAccountId'));
+        }
+    },
+
+    init: function(application) {
+        this.control({
+            "#cboUOM": {
+                select: this.onUOMSelect
+            },
+            "#cboAccountLocation": {
+                select: this.onAccountSelect
+            },
+            "#cboAccountId": {
+                select: this.onAccountSelect
+            }
+        });
+    }
 });
