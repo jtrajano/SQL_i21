@@ -17,7 +17,92 @@ Ext.define('Inventory.view.BrandViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.brand',
 
-    requires: [
-        'Inventory.view.override.BrandViewController'
-    ]
+    setupContext: function () {
+        "use strict";
+        var win = this.getView();
+        win.context = Ext.create('iRely.mvvm.Engine', {
+            window: win,
+            store: Ext.create('Inventory.store.Brand'),
+            singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
+                grid: win.down('grid'),
+                title: 'Brand',
+                columns: [
+                    {
+                        itemId: 'colBrandCode',
+                        dataIndex: 'strBrandCode',
+                        text: 'Brand Code',
+                        flex: 1,
+                        editor: {
+                            xtype: 'textfield'
+                        }
+                    },
+                    {
+                        itemId: 'colBrandName',
+                        dataIndex: 'strBrandName',
+                        text: 'Brand Name',
+                        flex: 1,
+                        editor: {
+                            xtype: 'textfield'
+                        }
+                    }
+                    ,
+                    {
+                        itemId: 'colManufacturer',
+                        dataIndex: 'strManufacturer',
+                        text: 'Manufacturer',
+                        flex: 1,
+                        editor: {
+                            xtype: 'gridcombobox',
+                            columns: [
+                                {
+                                    dataIndex: 'intManufacturerId',
+                                    dataType: 'numeric',
+                                    text: 'Manufacturer ID',
+                                    hidden: true
+                                },
+                                {
+                                    dataIndex: 'strManufacturer',
+                                    dataType: 'string',
+                                    text: 'Manufacturer',
+                                    flex: 1
+                                }
+                            ],
+                            itemId: 'cboManufacturer',
+                            displayField: 'strManufacturer',
+                            valueField: 'strManufacturer',
+                            bind: {
+                                store: '{manufacturer}'
+                            },
+                            listeners: {
+                                select: 'onCboManufacturerSelect'
+                            }
+                        }
+                    }
+                ]
+            })
+        });
+        return win.context;
+    },
+
+    show: function () {
+        "use strict";
+        var me = this;
+        me.getView().show();
+        var context = me.setupContext();
+        context.data.load();
+    },
+
+    onCboManufacturerSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.plugins[0];
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colManufacturer' && current) {
+            current.set('intManufacturerId', records[0].get('intManufacturerId'));
+        }
+    }
+
 });

@@ -20,7 +20,7 @@
         "minWidth": null,
         "minimizable": null,
         "reference": null,
-        "title": "Factory Unit Type",
+        "title": "Storage Unit Type",
         "width": 622
     },
     "name": "FuelTaxClass1",
@@ -354,7 +354,7 @@
                             ]
                         },
                         {
-                            "type": "Ext.form.field.Text",
+                            "type": "Ext.form.field.Number",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
@@ -369,7 +369,7 @@
                                 "name": null,
                                 "tabIndex": null
                             },
-                            "name": "MyTextField42",
+                            "name": "MyNumberField",
                             "designerId": "54740918-b7e0-42b5-9769-080b6b4cc452"
                         },
                         {
@@ -459,7 +459,7 @@
                             ]
                         },
                         {
-                            "type": "Ext.form.field.Text",
+                            "type": "Ext.form.field.Number",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
@@ -474,11 +474,11 @@
                                 "name": null,
                                 "tabIndex": null
                             },
-                            "name": "MyTextField44",
+                            "name": "MyNumberField1",
                             "designerId": "ce5f5cce-2e63-48d0-b2ee-475f8ff5a104"
                         },
                         {
-                            "type": "Ext.form.field.Text",
+                            "type": "Ext.form.field.Number",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
@@ -493,11 +493,11 @@
                                 "name": null,
                                 "tabIndex": null
                             },
-                            "name": "MyTextField45",
+                            "name": "MyNumberField6",
                             "designerId": "2508f9de-8291-4f5e-998a-0a7175b83784"
                         },
                         {
-                            "type": "Ext.form.field.Text",
+                            "type": "Ext.form.field.Number",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
@@ -512,17 +512,18 @@
                                 "name": null,
                                 "tabIndex": null
                             },
-                            "name": "MyTextField46",
+                            "name": "MyNumberField7",
                             "designerId": "a585c399-9be1-43fd-b5a1-257b076e25e4"
                         },
                         {
-                            "type": "Ext.form.field.Text",
+                            "type": "Ext.form.field.Number",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "allowDecimals": false,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Pallet Stack",
                                 "itemId": "txtPalletStack",
@@ -531,17 +532,18 @@
                                 "name": null,
                                 "tabIndex": null
                             },
-                            "name": "MyTextField47",
+                            "name": "MyNumberField8",
                             "designerId": "a8908981-3386-4308-a19a-90546aa1dc80"
                         },
                         {
-                            "type": "Ext.form.field.Text",
+                            "type": "Ext.form.field.Number",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "allowDecimals": false,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Pallet Columns",
                                 "itemId": "txtPalletColumns",
@@ -550,17 +552,18 @@
                                 "name": null,
                                 "tabIndex": null
                             },
-                            "name": "MyTextField48",
+                            "name": "MyNumberField9",
                             "designerId": "0dc143a1-a3ea-4846-9bb4-d5da08bb1c80"
                         },
                         {
-                            "type": "Ext.form.field.Text",
+                            "type": "Ext.form.field.Number",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "allowDecimals": false,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Pallet Rows",
                                 "itemId": "txtPalletRows",
@@ -569,7 +572,7 @@
                                 "name": null,
                                 "tabIndex": null
                             },
-                            "name": "MyTextField49",
+                            "name": "MyNumberField10",
                             "designerId": "fe36d9ba-c1f7-489c-8827-ef98dfe048f1"
                         }
                     ]
@@ -590,7 +593,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging16",
+                    "name": "statusbarpaging1",
                     "designerId": "1d4ebb2b-904c-462e-8f22-e82f1e2a5bad",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

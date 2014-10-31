@@ -107,7 +107,7 @@
     <Compile Include="Mappings\tblICRinFeedStockMap.cs" />
     <Compile Include="Mappings\tblICRinFeedStockUOMMap.cs" />
     <Compile Include="Mappings\tblICRinFuelMap.cs" />
-    <Compile Include="Mappings\tblICRinFuelTypeMap.cs" />
+    <Compile Include="Mappings\tblICRinFuelCategoryMap.cs" />
     <Compile Include="Mappings\tblICRinProcessMap.cs" />
     <Compile Include="Mappings\tblICTagMap.cs" />
     <Compile Include="Mappings\tblICUnitMeasureMap.cs" />
@@ -166,7 +166,7 @@
     <Compile Include="Tables\tblICRinFeedStock.cs" />
     <Compile Include="Tables\tblICRinFeedStockUOM.cs" />
     <Compile Include="Tables\tblICRinFuel.cs" />
-    <Compile Include="Tables\tblICRinFuelType.cs" />
+    <Compile Include="Tables\tblICRinFuelCategory.cs" />
     <Compile Include="Tables\tblICRinProcess.cs" />
     <Compile Include="Tables\tblICTag.cs" />
     <Compile Include="Tables\tblICUnitMeasure.cs" />

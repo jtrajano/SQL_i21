@@ -12,17 +12,17 @@ Ext.define('Inventory.model.FuelType', {
 
     fields: [
         { name: 'intFuelTypeId', type: 'int'},
-        { name: 'intRinFuelTypeId', type: 'int'},
+        { name: 'intRinFuelCategoryId', type: 'int'},
         { name: 'intRinFeedStockId', type: 'int'},
-        { name: 'intBatchNumber', type: 'int', allowNull: true },
-        { name: 'intEndingRinGallons', type: 'int', allowNull: true },
-        { name: 'intEquivalenceValue', type: 'int', allowNull: true },
+        { name: 'intBatchNumber', type: 'int'},
+        { name: 'intEndingRinGallons', type: 'int'},
+        { name: 'strEquivalenceValue', type: 'string'},
         { name: 'intRinFuelId', type: 'int'},
         { name: 'intRinProcessId', type: 'int'},
         { name: 'intRinFeedStockUOMId', type: 'int'},
-        { name: 'dblFeedStockFactor', type: 'float', allowNull: true },
-        { name: 'dblPercentDenaturant', type: 'float', allowNull: true },
+        { name: 'dblFeedStockFactor', type: 'float'},
         { name: 'ysnRenewableBiomass', type: 'boolean'},
+        { name: 'dblPercentDenaturant', type: 'float'},
         { name: 'ysnDeductDenaturant', type: 'boolean'},
 
         {name: 'strRinFuelTypeCodeId', type: 'string'},

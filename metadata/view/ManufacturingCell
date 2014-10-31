@@ -373,6 +373,30 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intCompanyLocationId',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'Location Id',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strLocationName',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Location Name',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strLocationType',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Location Type',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t}",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strLocationName",
                                                                 "enforceMaxLength": null,
                                                                 "fieldLabel": "Location Name",
                                                                 "itemId": "cboLocationName",
@@ -381,32 +405,38 @@
                                                                 "layout|margins": null,
                                                                 "maxLength": null,
                                                                 "name": null,
-                                                                "tabIndex": null
+                                                                "tabIndex": null,
+                                                                "valueField": "intCompanyLocationId"
                                                             },
                                                             "name": "MyComboBox1",
-                                                            "designerId": "213b479c-626e-49db-8c5e-62601a2c98f2"
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "213b479c-626e-49db-8c5e-62601a2c98f2",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         },
                                                         {
-                                                            "type": "Ext.form.field.ComboBox",
+                                                            "type": "Ext.form.field.Checkbox",
                                                             "reference": {
                                                                 "name": "items",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "enforceMaxLength": null,
+                                                                "boxLabel": "",
                                                                 "fieldLabel": "Status",
-                                                                "itemId": "cboStatus",
+                                                                "itemId": "chkStatus",
                                                                 "labelWidth": 160,
-                                                                "layout|flex": 1,
-                                                                "layout|margins": null,
-                                                                "margin": null,
-                                                                "maxLength": null,
-                                                                "name": null,
-                                                                "tabIndex": null
+                                                                "layout|flex": 1
                                                             },
-                                                            "name": "MyComboBox14",
-                                                            "designerId": "a11919e8-b7f5-43d2-8f9c-f289b1314a16"
+                                                            "name": "MyCheckbox1",
+                                                            "designerId": "84988369-4999-4d7e-8ae0-246844a06f89"
                                                         },
                                                         {
                                                             "type": "Ext.form.field.Number",
@@ -438,6 +468,36 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intUnitMeasureId',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'Unit Of Measure ID',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strUnitMeasure',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Unit Measure',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strUnitType',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Unit Type',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'ysnDefault',",
+                                                                    "\t\tdataType: 'boolean',",
+                                                                    "\t\ttext: 'Default',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t}",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strUnitMeasure",
                                                                 "enforceMaxLength": null,
                                                                 "fieldLabel": "Standard Capacity UOM",
                                                                 "itemId": "cboStandardCapacityUom",
@@ -447,10 +507,21 @@
                                                                 "margin": null,
                                                                 "maxLength": null,
                                                                 "name": null,
-                                                                "tabIndex": null
+                                                                "tabIndex": null,
+                                                                "valueField": "intUnitMeasureId"
                                                             },
                                                             "name": "MyComboBox50",
-                                                            "designerId": "318a5eab-7116-4f99-9791-dad12ee9a1cd"
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "318a5eab-7116-4f99-9791-dad12ee9a1cd",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         },
                                                         {
                                                             "type": "Ext.form.field.ComboBox",
@@ -460,6 +531,36 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intUnitMeasureId',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'Unit Of Measure ID',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strUnitMeasure',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Unit Measure',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strUnitType',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Unit Type',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'ysnDefault',",
+                                                                    "\t\tdataType: 'boolean',",
+                                                                    "\t\ttext: 'Default',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t}",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strUnitMeasure",
                                                                 "enforceMaxLength": null,
                                                                 "fieldLabel": "Standard Capacity Rate",
                                                                 "itemId": "cboStandardCapacityRate",
@@ -468,10 +569,21 @@
                                                                 "layout|margins": null,
                                                                 "maxLength": null,
                                                                 "name": null,
-                                                                "tabIndex": null
+                                                                "tabIndex": null,
+                                                                "valueField": "intUnitMeasureId"
                                                             },
                                                             "name": "MyComboBox51",
-                                                            "designerId": "acaf6a6b-d6e7-41b0-8d9e-6399d3350f20"
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "acaf6a6b-d6e7-41b0-8d9e-6399d3350f20",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         },
                                                         {
                                                             "type": "Ext.form.field.Number",
@@ -636,7 +748,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter113",
+                                                    "name": "filter1",
                                                     "designerId": "c9ec8acc-5eda-44f2-b041-640223eb1297",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -690,6 +802,7 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strPackName",
+                                                        "itemId": "cboPackType",
                                                         "store": [
                                                             "{packType}"
                                                         ],
@@ -811,6 +924,7 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strUnitMeasure",
+                                                        "itemId": "cboCapacityUOM",
                                                         "store": [
                                                             "{packTypeCapacityUOM}"
                                                         ],
@@ -887,6 +1001,7 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strUnitMeasure",
+                                                        "itemId": "cboCapacityRateUOM",
                                                         "store": [
                                                             "{packTypeCapacityRateUOM}"
                                                         ],
@@ -998,7 +1113,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging16",
+                    "name": "statusbarpaging11",
                     "designerId": "b8c68781-2254-4e56-be5b-6f6e6ef770ac",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

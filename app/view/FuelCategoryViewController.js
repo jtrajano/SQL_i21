@@ -17,7 +17,54 @@ Ext.define('Inventory.view.FuelCategoryViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.fuelcategory',
 
-    requires: [
-        'Inventory.view.override.FuelCategoryViewController'
-    ]
+    setupContext: function () {
+        "use strict";
+        var win = this.getView();
+        win.context = Ext.create('iRely.mvvm.Engine', {
+            window: win,
+            store: Ext.create('Inventory.store.FuelCategory'),
+            singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
+                grid: win.down('grid'),
+                title: 'Fuel Category',
+                columns: [
+                    {
+                        itemId: 'colRinFuelCategoryCode',
+                        dataIndex: 'strRinFuelCategoryCode',
+                        text: 'Fuel Category Code',
+                        flex: 1,
+                        editor: {
+                            xtype: 'textfield'
+                        }
+                    },
+                    {
+                        itemId: 'colDescription',
+                        dataIndex: 'strDescription',
+                        text: 'Description',
+                        flex: 1,
+                        editor: {
+                            xtype: 'textfield'
+                        }
+                    },
+                    {
+                        itemId: 'colEquivalenceValue',
+                        dataIndex: 'strEquivalenceValue',
+                        text: 'Equivalence Value',
+                        flex: 1,
+                        editor: {
+                            xtype: 'textfield'
+                        }
+                    }
+                ]
+            })
+        });
+        return win.context;
+    },
+
+    show: function () {
+        "use strict";
+        var me = this;
+        me.getView().show();
+        var context = me.setupContext();
+        context.data.load();
+    }
 });

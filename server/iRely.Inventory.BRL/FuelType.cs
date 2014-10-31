@@ -27,7 +27,7 @@ namespace iRely.Inventory.BRL
                 .Select(p => new FuelTypeVM
                 {
                     intFuelTypeId = p.intFuelTypeId,
-                    strRinFuelTypeCodeId = p.RinFuelType.strRinFuelTypeCode,
+                    strRinFuelTypeCodeId = p.RinFuelCategory.strRinFuelCategoryCode,
                     strRinFeedStockId = p.RinFeedStock.strRinFeedStockCode,
                     strRinFuelId = p.RinFuel.strRinFuelCode,
                     strRinProcessId = p.RinProcess.strRinProcessCode

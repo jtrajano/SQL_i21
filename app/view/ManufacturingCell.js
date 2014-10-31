@@ -18,7 +18,6 @@ Ext.define('Inventory.view.ManufacturingCell', {
     alias: 'widget.manufacturingcell',
 
     requires: [
-        'Inventory.view.ManufacturingCellViewModel',
         'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
@@ -26,8 +25,8 @@ Ext.define('Inventory.view.ManufacturingCell', {
         'Ext.tab.Panel',
         'Ext.tab.Tab',
         'Ext.form.field.ComboBox',
-        'Ext.form.field.Number',
         'Ext.form.field.Checkbox',
+        'Ext.form.field.Number',
         'Ext.grid.Panel',
         'Ext.grid.column.Number',
         'Ext.grid.View',
@@ -36,9 +35,6 @@ Ext.define('Inventory.view.ManufacturingCell', {
         'Ext.toolbar.Paging'
     ],
 
-    viewModel: {
-        type: 'manufacturingcell'
-    },
     height: 442,
     hidden: false,
     minHeight: 335,
@@ -212,18 +208,41 @@ Ext.define('Inventory.view.ManufacturingCell', {
                                                     },
                                                     items: [
                                                         {
-                                                            xtype: 'combobox',
+                                                            xtype: 'gridcombobox',
                                                             flex: 1.4,
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intCompanyLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strLocationName',
+                                                                    dataType: 'string',
+                                                                    text: 'Location Name',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strLocationType',
+                                                                    dataType: 'string',
+                                                                    text: 'Location Type',
+                                                                    flex: 1
+                                                                }
+                                                            ],
                                                             itemId: 'cboLocationName',
                                                             fieldLabel: 'Location Name',
-                                                            labelWidth: 160
+                                                            labelWidth: 160,
+                                                            displayField: 'strLocationName',
+                                                            valueField: 'intCompanyLocationId'
                                                         },
                                                         {
-                                                            xtype: 'combobox',
+                                                            xtype: 'checkboxfield',
                                                             flex: 1,
-                                                            itemId: 'cboStatus',
+                                                            itemId: 'chkStatus',
                                                             fieldLabel: 'Status',
-                                                            labelWidth: 160
+                                                            labelWidth: 160,
+                                                            boxLabel: ''
                                                         },
                                                         {
                                                             xtype: 'numberfield',
@@ -234,18 +253,74 @@ Ext.define('Inventory.view.ManufacturingCell', {
                                                             hideTrigger: true
                                                         },
                                                         {
-                                                            xtype: 'combobox',
+                                                            xtype: 'gridcombobox',
                                                             flex: 1,
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intUnitMeasureId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Unit Of Measure ID',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Measure',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitType',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'ysnDefault',
+                                                                    dataType: 'boolean',
+                                                                    text: 'Default',
+                                                                    flex: 1
+                                                                }
+                                                            ],
                                                             itemId: 'cboStandardCapacityUom',
                                                             fieldLabel: 'Standard Capacity UOM',
-                                                            labelWidth: 160
+                                                            labelWidth: 160,
+                                                            displayField: 'strUnitMeasure',
+                                                            valueField: 'intUnitMeasureId'
                                                         },
                                                         {
-                                                            xtype: 'combobox',
+                                                            xtype: 'gridcombobox',
                                                             flex: 1.4,
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intUnitMeasureId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Unit Of Measure ID',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Measure',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitType',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'ysnDefault',
+                                                                    dataType: 'boolean',
+                                                                    text: 'Default',
+                                                                    flex: 1
+                                                                }
+                                                            ],
                                                             itemId: 'cboStandardCapacityRate',
                                                             fieldLabel: 'Standard Capacity Rate',
-                                                            labelWidth: 160
+                                                            labelWidth: 160,
+                                                            displayField: 'strUnitMeasure',
+                                                            valueField: 'intUnitMeasureId'
                                                         },
                                                         {
                                                             xtype: 'numberfield',
@@ -346,6 +421,7 @@ Ext.define('Inventory.view.ManufacturingCell', {
                                                         flex: 1
                                                     }
                                                 ],
+                                                itemId: 'cboPackType',
                                                 displayField: 'strPackName',
                                                 valueField: 'strPackName',
                                                 bind: {
@@ -404,6 +480,7 @@ Ext.define('Inventory.view.ManufacturingCell', {
                                                         flex: 1
                                                     }
                                                 ],
+                                                itemId: 'cboCapacityUOM',
                                                 displayField: 'strUnitMeasure',
                                                 valueField: 'strUnitMeasure',
                                                 bind: {
@@ -445,6 +522,7 @@ Ext.define('Inventory.view.ManufacturingCell', {
                                                         flex: 1
                                                     }
                                                 ],
+                                                itemId: 'cboCapacityRateUOM',
                                                 displayField: 'strUnitMeasure',
                                                 valueField: 'strUnitMeasure',
                                                 bind: {

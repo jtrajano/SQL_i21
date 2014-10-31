@@ -18,7 +18,30 @@ Ext.define('Inventory.view.ManufacturingCellViewModel', {
     alias: 'viewmodel.manufacturingcell',
 
     requires: [
-        'Inventory.view.override.ManufacturingCellViewModel'
-    ]
+        'i21.store.CompanyLocation',
+        'Inventory.store.BufferedUnitMeasure',
+        'Inventory.store.PackType'
+    ],
+
+    stores: {
+        capacityUOM: {
+            type: 'inventorybuffereduom'
+        },
+        capacityRateUOM: {
+            type: 'inventorybuffereduom'
+        },
+        location: {
+            type: 'companylocation'
+        },
+        packType: {
+            type: 'inventorypacktype'
+        },
+        packTypeCapacityUOM: {
+            type: 'inventorybuffereduom'
+        },
+        packTypeCapacityRateUOM: {
+            type: 'inventorybuffereduom'
+        }
+    }
 
 });

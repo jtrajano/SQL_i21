@@ -130,7 +130,7 @@ namespace iRely.Inventory.Model
         public DbSet<tblICRinFeedStock> tblICRinFeedStocks { get; set; }
         public DbSet<tblICRinFeedStockUOM> tblICRinFeedStockUOMs { get; set; }
         public DbSet<tblICRinFuel> tblICRinFuels { get; set; }
-        public DbSet<tblICRinFuelType> tblICRinFuelTypes { get; set; }
+        public DbSet<tblICRinFuelCategory> tblICRinFuelTypes { get; set; }
         public DbSet<tblICRinProcess> tblICRinProcesss { get; set; }
         public DbSet<tblICTag> tblICTags { get; set; }
         public DbSet<tblICUnitMeasure> tblICUnitMeasures { get; set; }
@@ -210,7 +210,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICRinFeedStockMap());
             modelBuilder.Configurations.Add(new tblICRinFeedStockUOMMap());
             modelBuilder.Configurations.Add(new tblICRinFuelMap());
-            modelBuilder.Configurations.Add(new tblICRinFuelTypeMap());
+            modelBuilder.Configurations.Add(new tblICRinFuelCategoryMap());
             modelBuilder.Configurations.Add(new tblICRinProcessMap());
             modelBuilder.Configurations.Add(new tblICTagMap());
             modelBuilder.Configurations.Add(new tblICUnitMeasureMap());

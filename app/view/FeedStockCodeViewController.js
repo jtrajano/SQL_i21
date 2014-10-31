@@ -17,7 +17,46 @@ Ext.define('Inventory.view.FeedStockCodeViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.feedstockcode',
 
-    requires: [
-        'Inventory.view.override.FeedStockCodeViewController'
-    ]
+    setupContext: function () {
+        "use strict";
+        var win = this.getView();
+        win.context = Ext.create('iRely.mvvm.Engine', {
+            window: win,
+            store: Ext.create('Inventory.store.FeedStockCode'),
+            singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
+                grid: win.down('grid'),
+                title: 'Feed Stock Code',
+                columns: [
+                    {
+                        itemId: 'colRinFeedStockCode',
+                        dataIndex: 'strRinFeedStockCode',
+                        text: 'Feed Stock Code',
+                        flex: 1,
+                        editor: {
+                            xtype: 'textfield'
+                        }
+                    },
+                    {
+                        itemId: 'colDescription',
+                        dataIndex: 'strDescription',
+                        text: 'Description',
+                        flex: 1,
+                        editor: {
+                            xtype: 'textfield'
+                        }
+                    }
+                ]
+            })
+        });
+        return win.context;
+    },
+
+    show: function () {
+        "use strict";
+        var me = this;
+        me.getView().show();
+        var context = me.setupContext();
+        context.data.load();
+    }
+
 });

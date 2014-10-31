@@ -18,26 +18,23 @@ Ext.define('Inventory.view.FactoryUnitType', {
     alias: 'widget.factoryunittype',
 
     requires: [
-        'Inventory.view.FactoryUnitTypeViewModel',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
         'Ext.button.Button',
         'Ext.toolbar.Separator',
         'Ext.form.field.ComboBox',
+        'Ext.form.field.Number',
         'Ext.form.field.Checkbox',
         'Ext.toolbar.Paging'
     ],
 
-    viewModel: {
-        type: 'factoryunittype'
-    },
     height: 380,
     hidden: false,
     width: 622,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
-    title: 'Factory Unit Type',
+    title: 'Storage Unit Type',
     maximizable: true,
 
     items: [
@@ -201,7 +198,7 @@ Ext.define('Inventory.view.FactoryUnitType', {
                             valueField: 'intUnitMeasureId'
                         },
                         {
-                            xtype: 'textfield',
+                            xtype: 'numberfield',
                             itemId: 'txtMaxWeight',
                             fieldLabel: 'Max. Weight',
                             labelWidth: 90
@@ -249,40 +246,43 @@ Ext.define('Inventory.view.FactoryUnitType', {
                             valueField: 'intUnitMeasureId'
                         },
                         {
-                            xtype: 'textfield',
+                            xtype: 'numberfield',
                             itemId: 'txtHeight',
                             fieldLabel: 'Height',
                             labelWidth: 90
                         },
                         {
-                            xtype: 'textfield',
+                            xtype: 'numberfield',
                             itemId: 'txtDepth',
                             fieldLabel: 'Depth',
                             labelWidth: 90
                         },
                         {
-                            xtype: 'textfield',
+                            xtype: 'numberfield',
                             itemId: 'txtWidth',
                             fieldLabel: 'Width',
                             labelWidth: 90
                         },
                         {
-                            xtype: 'textfield',
+                            xtype: 'numberfield',
                             itemId: 'txtPalletStack',
                             fieldLabel: 'Pallet Stack',
-                            labelWidth: 90
+                            labelWidth: 90,
+                            allowDecimals: false
                         },
                         {
-                            xtype: 'textfield',
+                            xtype: 'numberfield',
                             itemId: 'txtPalletColumns',
                             fieldLabel: 'Pallet Columns',
-                            labelWidth: 90
+                            labelWidth: 90,
+                            allowDecimals: false
                         },
                         {
-                            xtype: 'textfield',
+                            xtype: 'numberfield',
                             itemId: 'txtPalletRows',
                             fieldLabel: 'Pallet Rows',
-                            labelWidth: 90
+                            labelWidth: 90,
+                            allowDecimals: false
                         }
                     ]
                 }

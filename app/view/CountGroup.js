@@ -13,13 +13,13 @@
  * Do NOT hand edit this file.
  */
 
-Ext.define('Inventory.view.Brand', {
+Ext.define('Inventory.view.CountGroup', {
     extend: 'GlobalComponentEngine.view.GridTemplate',
-    alias: 'widget.brand',
+    alias: 'widget.countgroup',
 
     requires: [
         'GlobalComponentEngine.view.GridTemplate',
-        'Inventory.view.BrandViewModel',
-        'Inventory.view.BrandViewController'
+        'Inventory.view.CountGroupViewModel',
+        'Inventory.view.CountGroupViewController'
     ]
 });

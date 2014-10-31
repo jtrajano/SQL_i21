@@ -8,17 +8,17 @@ Ext.define('Inventory.model.FuelCategory', {
         'Ext.data.Field'
     ],
 
-    idProperty: 'intRinFuelTypeId',
+    idProperty: 'intRinFuelCategoryId',
 
     fields: [
-        { name: 'intRinFuelTypeId', type: 'int'},
-        { name: 'strRinFuelTypeCode', type: 'string'},
+        { name: 'intRinFuelCategoryId', type: 'int'},
+        { name: 'strRinFuelCategoryCode', type: 'string'},
         { name: 'strDescription', type: 'string'},
-        { name: 'dblEquivalenceValue', type: 'float'},
+        { name: 'strEquivalenceValue', type: 'string'},
         { name: 'intSort', type: 'int'}
     ],
 
     validators: [
-        {type: 'presence', field: 'strRinFuelTypeCode'}
+        {type: 'presence', field: 'intRinFuelCategoryId'}
     ]
 });
