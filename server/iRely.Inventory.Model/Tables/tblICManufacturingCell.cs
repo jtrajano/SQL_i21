@@ -11,11 +11,12 @@ namespace iRely.Inventory.Model
 {
     public class tblICManufacturingCell : BaseEntity
     {
+
         public int intManufacturingCellId { get; set; }
         public string strCellName { get; set; }
         public string strDescription { get; set; }
         public int? intLocationId { get; set; }
-        public string strStatus { get; set; }
+        public bool ysnActive { get; set; }
         public decimal? dblStdCapacity { get; set; }
         public int? intStdUnitMeasureId { get; set; }
         public int? intStdCapacityRateId { get; set; }

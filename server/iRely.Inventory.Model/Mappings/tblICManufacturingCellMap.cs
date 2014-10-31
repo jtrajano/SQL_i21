@@ -20,7 +20,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intStdUnitMeasureId).HasColumnName("intStdUnitMeasureId");
             this.Property(t => t.strCellName).HasColumnName("strCellName");
             this.Property(t => t.strDescription).HasColumnName("strDescription");
-            this.Property(t => t.strStatus).HasColumnName("strStatus");
+            this.Property(t => t.ysnActive).HasColumnName("ysnActive");
             this.Property(t => t.ysnIncludeSchedule).HasColumnName("ysnIncludeSchedule");
 
             this.HasMany(p => p.tblICManufacturingCellPackTypes)

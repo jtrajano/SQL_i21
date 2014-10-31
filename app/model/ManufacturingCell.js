@@ -16,7 +16,7 @@ Ext.define('Inventory.model.ManufacturingCell', {
         { name: 'strCellName', type: 'string'},
         { name: 'strDescription', type: 'string'},
         { name: 'intLocationId', type: 'int', allowNull: true },
-        { name: 'strStatus', type: 'string'},
+        { name: 'ysnActive', type: 'boolean'},
         { name: 'dblStdCapacity', type: 'float'},
         { name: 'intStdUnitMeasureId', type: 'int', allowNull: true },
         { name: 'intStdCapacityRateId', type: 'int', allowNull: true },

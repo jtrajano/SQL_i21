@@ -209,7 +209,6 @@ Ext.define('Inventory.view.ManufacturingCell', {
                                                     items: [
                                                         {
                                                             xtype: 'gridcombobox',
-                                                            flex: 1.4,
                                                             columns: [
                                                                 {
                                                                     dataIndex: 'intCompanyLocationId',
@@ -230,6 +229,7 @@ Ext.define('Inventory.view.ManufacturingCell', {
                                                                     flex: 1
                                                                 }
                                                             ],
+                                                            flex: 1.4,
                                                             itemId: 'cboLocationName',
                                                             fieldLabel: 'Location Name',
                                                             labelWidth: 160,
@@ -239,8 +239,8 @@ Ext.define('Inventory.view.ManufacturingCell', {
                                                         {
                                                             xtype: 'checkboxfield',
                                                             flex: 1,
-                                                            itemId: 'chkStatus',
-                                                            fieldLabel: 'Status',
+                                                            itemId: 'chkActive',
+                                                            fieldLabel: 'Active',
                                                             labelWidth: 160,
                                                             boxLabel: ''
                                                         },
@@ -254,7 +254,6 @@ Ext.define('Inventory.view.ManufacturingCell', {
                                                         },
                                                         {
                                                             xtype: 'gridcombobox',
-                                                            flex: 1,
                                                             columns: [
                                                                 {
                                                                     dataIndex: 'intUnitMeasureId',
@@ -281,6 +280,7 @@ Ext.define('Inventory.view.ManufacturingCell', {
                                                                     flex: 1
                                                                 }
                                                             ],
+                                                            flex: 1,
                                                             itemId: 'cboStandardCapacityUom',
                                                             fieldLabel: 'Standard Capacity UOM',
                                                             labelWidth: 160,
@@ -289,7 +289,6 @@ Ext.define('Inventory.view.ManufacturingCell', {
                                                         },
                                                         {
                                                             xtype: 'gridcombobox',
-                                                            flex: 1.4,
                                                             columns: [
                                                                 {
                                                                     dataIndex: 'intUnitMeasureId',
@@ -316,6 +315,7 @@ Ext.define('Inventory.view.ManufacturingCell', {
                                                                     flex: 1
                                                                 }
                                                             ],
+                                                            flex: 1.4,
                                                             itemId: 'cboStandardCapacityRate',
                                                             fieldLabel: 'Standard Capacity Rate',
                                                             labelWidth: 160,

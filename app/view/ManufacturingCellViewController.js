@@ -37,7 +37,7 @@ Ext.define('Inventory.view.ManufacturingCellViewController', {
                 value: '{current.intLocationId}',
                 store: '{location}'
             },
-//            chkStatus: '{current.strStatus}',
+            chkActive: '{current.ysnActive}',
             txtStandardCapacity: '{current.dblStdCapacity}',
             cboStandardCapacityUom: {
                 value: '{current.intStdUnitMeasureId}',
@@ -81,18 +81,6 @@ Ext.define('Inventory.view.ManufacturingCellViewController', {
                 }
             ]
         });
-
-//        var colPackType = grdPackingType.columns[0];
-//        var cboPackType = colPackType.editor;
-//        cboPackType.on('select', me.onPackTypeSelect);
-//
-//        var colCapUOM = grdPackingType.columns[3];
-//        var cboCapUOM = colCapUOM.editor;
-//        cboCapUOM.on('select', me.onPackTypeSelect);
-//
-//        var colCapRateUOM = grdPackingType.columns[4];
-//        var cboCapRateUOM = colCapRateUOM.getEditor();
-//        cboCapRateUOM.on('select', me.onPackTypeSelect);
 
         return win.context;
     },

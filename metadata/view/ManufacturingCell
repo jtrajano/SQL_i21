@@ -430,8 +430,8 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "boxLabel": "",
-                                                                "fieldLabel": "Status",
-                                                                "itemId": "chkStatus",
+                                                                "fieldLabel": "Active",
+                                                                "itemId": "chkActive",
                                                                 "labelWidth": 160,
                                                                 "layout|flex": 1
                                                             },
