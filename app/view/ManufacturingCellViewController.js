@@ -37,7 +37,7 @@ Ext.define('Inventory.view.ManufacturingCellViewController', {
                 value: '{current.intLocationId}',
                 store: '{location}'
             },
-//            cboStatus: '{current.strStatus}',
+//            chkStatus: '{current.strStatus}',
             txtStandardCapacity: '{current.dblStdCapacity}',
             cboStandardCapacityUom: {
                 value: '{current.intStdUnitMeasureId}',
@@ -82,17 +82,17 @@ Ext.define('Inventory.view.ManufacturingCellViewController', {
             ]
         });
 
-        var colPackType = grdPackingType.columns[0];
-        var cboPackType = colPackType.editor;
-        cboPackType.on('select', me.onPackTypeSelect);
-
-        var colCapUOM = grdPackingType.columns[3];
-        var cboCapUOM = colCapUOM.editor;
-        cboCapUOM.on('select', me.onPackTypeSelect);
-
-        var colCapRateUOM = grdPackingType.columns[4];
-        var cboCapRateUOM = colCapRateUOM.getEditor();
-        cboCapRateUOM.on('select', me.onPackTypeSelect);
+//        var colPackType = grdPackingType.columns[0];
+//        var cboPackType = colPackType.editor;
+//        cboPackType.on('select', me.onPackTypeSelect);
+//
+//        var colCapUOM = grdPackingType.columns[3];
+//        var cboCapUOM = colCapUOM.editor;
+//        cboCapUOM.on('select', me.onPackTypeSelect);
+//
+//        var colCapRateUOM = grdPackingType.columns[4];
+//        var cboCapRateUOM = colCapRateUOM.getEditor();
+//        cboCapRateUOM.on('select', me.onPackTypeSelect);
 
         return win.context;
     },
@@ -145,5 +145,19 @@ Ext.define('Inventory.view.ManufacturingCellViewController', {
         {
             current.set('intLineCapacityRateUnitMeasureId', records[0].get('intUnitMeasureId'));
         }
+    },
+
+    init: function(application) {
+        this.control({
+            "#cboPackType": {
+                select: this.onPackTypeSelect
+            },
+            "#cboCapacityUOM": {
+                select: this.onPackTypeSelect
+            },
+            "#cboCapacityRateUOM": {
+                select: this.onPackTypeSelect
+            }
+        });
     }
 });
