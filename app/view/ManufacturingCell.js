@@ -18,7 +18,6 @@ Ext.define('Inventory.view.ManufacturingCell', {
     alias: 'widget.manufacturingcell',
 
     requires: [
-        'Inventory.view.ManufacturingCellViewModel',
         'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
@@ -36,9 +35,6 @@ Ext.define('Inventory.view.ManufacturingCell', {
         'Ext.toolbar.Paging'
     ],
 
-    viewModel: {
-        type: 'manufacturingcell'
-    },
     height: 442,
     hidden: false,
     minHeight: 335,
