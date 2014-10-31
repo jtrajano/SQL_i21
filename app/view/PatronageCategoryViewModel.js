@@ -17,8 +17,39 @@ Ext.define('Inventory.view.PatronageCategoryViewModel', {
     extend: 'Ext.app.ViewModel',
     alias: 'viewmodel.patronagecategory',
 
-    requires: [
-        'Inventory.view.override.PatronageCategoryViewModel'
-    ]
+    stores: {
+        purchaseSales: {
+            autoLoad: true,
+            data: [
+                {
+                    strPurchaseSale: 'Purchase'
+                },
+                {
+                    strPurchaseSale: 'Sale'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strPurchaseSale'
+                }
+            ]
+        },
+        unitAmount:{
+            autoLoad: true,
+            data: [
+                {
+                    strUnitAmount: 'Unit'
+                },
+                {
+                    strUnitAmount: 'Amount'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strUnitAmount'
+                }
+            ]
+        }
+    }
 
 });
