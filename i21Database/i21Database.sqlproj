@@ -628,6 +628,7 @@
     <Build Include="dbo\User Defined Types\Entity.sql" />
     <Build Include="dbo\User Defined Types\EntityContact.sql" />
     <Build Include="dbo\Stored Procedures\uspEntityCreateEntityContact.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMPostMessages.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
