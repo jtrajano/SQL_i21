@@ -18,7 +18,13 @@ Ext.define('Inventory.view.BrandViewModel', {
     alias: 'viewmodel.brand',
 
     requires: [
-        'Inventory.view.override.BrandViewModel'
-    ]
+        'Inventory.store.Manufacturer'
+    ],
+
+    stores: {
+        manufacturer:{
+            type: 'inventorymanufacturer'
+        }
+    }
 
 });
