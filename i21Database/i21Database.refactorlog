@@ -1029,4 +1029,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strEquivalenceValue" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="abb62a91-0232-47a1-9441-34af38944d91" ChangeDateTime="10/31/2014 03:28:33">
+    <Property Name="ElementName" Value="[dbo].[tblICManufacturingCell].[strStatus]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICManufacturingCell]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnActive" />
+  </Operation>
 </Operations>

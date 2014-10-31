@@ -4,7 +4,7 @@
     [strCellName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [intLocationId] INT NULL, 
-    [strStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [ysnActive] BIT NULL DEFAULT ((0)), 
     [dblStdCapacity] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [intStdUnitMeasureId] INT NULL, 
     [intStdCapacityRateId] INT NULL, 
@@ -56,13 +56,13 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intLocationId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Status',
+    @value = N'Active',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblICManufacturingCell',
     @level2type = N'COLUMN',
-    @level2name = N'strStatus'
+    @level2name = 'ysnActive'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Standard Capacity',
