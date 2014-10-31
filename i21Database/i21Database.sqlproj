@@ -787,7 +787,7 @@
     <None Include="dbo\Views\vyuPREmployee.sql" />
     <None Include="Scripts\Post-Deployment\IC\2_MaterialNMFC.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillBatch.sql" />
-    <None Include="dbo\Tables\tblFRAccountMonitor.sql" />
+    <Build Include="dbo\Tables\tblFRAccountMonitor.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
