@@ -5,10 +5,14 @@
     [strFieldName]           NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL,
     [strFieldType]           NVARCHAR (50)  COLLATE Latin1_General_CI_AS NOT NULL,
     [intSize]                INT            NULL,
+    [strDelimiter]           NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strFieldStatus]         NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strConversionType]      NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
+    [intSort]                INT            NULL,
     [intConcurrencyId]       INT            NOT NULL,
     CONSTRAINT [PK_tblSMMappingDictionary] PRIMARY KEY CLUSTERED ([intMappingDictionaryId] ASC),
     CONSTRAINT [FK_tblSMMappingDictionary_tblSMColumnDictionary] FOREIGN KEY ([intColumnDictionaryId]) REFERENCES [dbo].[tblSMColumnDictionary] ([intColumnDictionaryId])
 );
+
+
 

@@ -767,6 +767,7 @@
     <Build Include="dbo\Views\vyuAPRptVendorHistory.sql" />
     <Build Include="dbo\Views\vyuSMOriginTable.sql" />
     <Build Include="dbo\Stored Procedures\uspFRAccountMonitor.sql" />
+    <Build Include="dbo\Views\vyuSMOriginColumn.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
