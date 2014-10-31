@@ -9,6 +9,7 @@
 			,strFullName = e.strName
 			,strEmail = e.strEmail
 			,ysnOwner = gc.ysnOwner
+			,ysnEscalation = gc.ysnEscalation
 			,intGroupUserConfigId = gc.intGroupUserConfigId
 		from
 			tblHDTicketGroup g
