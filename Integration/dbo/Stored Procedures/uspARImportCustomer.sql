@@ -488,9 +488,12 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 		
 			SET @ContactEntityId = SCOPE_IDENTITY()
 	
-			INSERT [dbo].[tblEntityContact] ([intEntityId], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
-			VALUES							 (@ContactEntityId, @strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
-			
+			-- RULE: when creating a default contact from agcusmst.agcus_contact, trim tblEntityContact.strContactNumber to 20 characters
+			INSERT [dbo].[tblEntityContact] ([intEntityId], [strContactNumber], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
+			SELECT							 @ContactEntityId, 
+											CASE WHEN @strContactName IS NOT NULL THEN SUBSTRING(@strContactName, 1, 20) ELSE SUBSTRING(@strName, 1, 20) END
+											,@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes
+						
 			--Get intContactId
 			SELECT @intContactId = intContactId FROM tblEntityContact WHERE intEntityId = @ContactEntityId
 		
@@ -543,7 +546,8 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 	IF(@Update = 1 AND @CustomerId IS NULL) 
 	BEGIN
 		SELECT @Total = COUNT(agcus_key) from tblARTempCustomer
-	END'
+	END
+	')
 )
 END
 
@@ -1021,8 +1025,11 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			
 			SET @ContactEntityId = SCOPE_IDENTITY()
 		
-			INSERT [dbo].[tblEntityContact] ([intEntityId], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
-			VALUES							 (@ContactEntityId, @strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
+			-- RULE: when creating a default contact from agcusmst.agcus_contact, trim tblEntityContact.strContactNumber to 20 characters
+			INSERT [dbo].[tblEntityContact] ([intEntityId], [strContactNumber], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
+			SELECT							 @ContactEntityId, 
+											CASE WHEN @strContactName IS NOT NULL THEN SUBSTRING(@strContactName, 1, 20) ELSE SUBSTRING(@strName, 1, 20) END
+											,@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes
 				
 			--Get intContactId
 			SELECT @intContactId = intContactId FROM tblEntityContact WHERE intEntityId = @ContactEntityId
