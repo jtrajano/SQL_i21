@@ -209,6 +209,5 @@
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPaptrxmst.sql" />
     <None Include="dbo\Stored Procedures\uspCMBankTransactionReversalOrigin.sql" />
-    <None Include="dbo\Stored Procedures\uspARContactOriginSync.sql" />
   </ItemGroup>
 </Project>
