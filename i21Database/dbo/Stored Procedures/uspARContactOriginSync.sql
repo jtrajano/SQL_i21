@@ -21,7 +21,9 @@
 				sscon_work_ext = (CASE WHEN CHARINDEX(' x', Contact.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Contact.strPhone,1,30),CHARINDEX(' x',Contact.strPhone) + 2, LEN(Contact.strPhone))END),
 				sscon_cell_no = (CASE WHEN CHARINDEX(' x', Contact.strMobile) > 0 THEN SUBSTRING(SUBSTRING(Contact.strMobile,1,30), 0, CHARINDEX(' x',Contact.strMobile)) ELSE SUBSTRING(Contact.strMobile,1,30)END),
 				sscon_cell_ext = (CASE WHEN CHARINDEX(' x', Contact.strMobile) > 0 THEN SUBSTRING(SUBSTRING(Contact.strMobile,1,30),CHARINDEX(' x',Contact.strMobile) + 2, LEN(Contact.strMobile))END),
-				sscon_fax_no = Contact.strFax,
+				sscon_fax_no = (CASE WHEN CHARINDEX(' x', Contact.strFax) > 0 THEN SUBSTRING(SUBSTRING(Contact.strFax,1,30), 0, CHARINDEX(' x',Contact.strFax)) ELSE SUBSTRING(Contact.strFax,1,30)END),
+				sscon_fax_ext = (CASE WHEN CHARINDEX(' x', Contact.strFax) > 0 THEN SUBSTRING(SUBSTRING(Contact.strFax,1,30),CHARINDEX(' x',Contact.strFax) + 2, LEN(Contact.strFax))END),
+
 				sscon_email = E.strEmail
 			FROM tblEntityContact Contact
 				INNER JOIN tblEntity E ON E.intEntityId = Contact.intEntityId
@@ -40,6 +42,7 @@
 				sscon_cell_no,
 				sscon_cell_ext,
 				sscon_fax_no,
+				sscon_fax_ext,
 				sscon_email,
 				--not to be null on origin
 				sscon_lead_id, 
@@ -57,7 +60,8 @@
 				(CASE WHEN CHARINDEX(' x', Contact.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Contact.strPhone,1,30),CHARINDEX(' x',Contact.strPhone) + 2, LEN(Contact.strPhone))END) AS ExtPhone,
 				(CASE WHEN CHARINDEX(' x', Contact.strMobile) > 0 THEN SUBSTRING(SUBSTRING(Contact.strMobile,1,30), 0, CHARINDEX(' x',Contact.strMobile)) ELSE SUBSTRING(Contact.strMobile,1,30)END) AS Moblie,
 				(CASE WHEN CHARINDEX(' x', Contact.strMobile) > 0 THEN SUBSTRING(SUBSTRING(Contact.strMobile,1,30),CHARINDEX(' x',Contact.strMobile) + 2, LEN(Contact.strMobile))END) AS ExtMoblie,
-				Contact.strFax,
+				(CASE WHEN CHARINDEX(' x', Contact.strFax) > 0 THEN SUBSTRING(SUBSTRING(Contact.strFax,1,30), 0, CHARINDEX(' x',Contact.strFax)) ELSE SUBSTRING(Contact.strFax,1,30)END) AS Fax,
+				(CASE WHEN CHARINDEX(' x', Contact.strFax) > 0 THEN SUBSTRING(SUBSTRING(Contact.strFax,1,30),CHARINDEX(' x',Contact.strFax) + 2, LEN(Contact.strFax))END) AS ExtFax,
 				E.strEmail,
 				'',
 				'',

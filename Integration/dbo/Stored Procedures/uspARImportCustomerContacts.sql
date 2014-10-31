@@ -21,7 +21,9 @@ DECLARE @Contacts TABLE
 	, sscon_work_ext nvarchar(max)
 	, sscon_cell_no nvarchar(max)
 	, sscon_cell_ext nvarchar(max)
-	, sscon_fax_no nvarchar(max))
+	, sscon_fax_no nvarchar(max)
+	, sscon_fax_ext nvarchar(max)
+)
 
 	
 	BEGIN -- Get Customers to be imported to #tmpContacts
@@ -38,6 +40,7 @@ DECLARE @Contacts TABLE
 			, sscon_cell_no 
 			, sscon_cell_ext 
 			, sscon_fax_no
+			, sscon_fax_ext
 		)
 		SELECT 
 			isnull(sscon_contact_id, '')
@@ -51,6 +54,7 @@ DECLARE @Contacts TABLE
 			, isnull(sscon_cell_no, '')
 			, isnull(sscon_cell_ext, '')
 			, isnull(sscon_fax_no, '')
+			, isnull(sscon_fax_ext, '')
 		FROM ssconmst sscon
 		WHERE 
 			sscon_cus_no LIKE '%[a-z0-9]%'
@@ -102,7 +106,7 @@ DECLARE @Contacts TABLE
 					, rtrim(ltrim(sscon_cell_no)) + ' x' + rtrim(ltrim(sscon_cell_ext))
 					, rtrim(ltrim(sscon_work_no)) + ' x' + rtrim(ltrim(sscon_work_ext))
 					, '' , ''
-					, rtrim(ltrim(sscon_fax_no))
+					, rtrim(ltrim(sscon_fax_no)) + ' x' + rtrim(ltrim(sscon_fax_ext))
 					, '', '', ''
 				from @Contacts where id = @id
 				--select * from @EntityContact
