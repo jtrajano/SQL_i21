@@ -19,6 +19,7 @@ Harness.configure({
     //autoRun: true
 });
 Harness.start(
+
     { group: 'FuelCategory',
         items: [
             {
@@ -98,9 +99,6 @@ Harness.start(
                     '../../GlobalComponentEngine/irely/TestEngine.js'
                 ]
             }
-
-
-
         ]
     },
     { group: 'FuelType',
@@ -110,10 +108,45 @@ Harness.start(
                 preload: [
                     '../../GlobalComponentEngine/irely/TestEngine.js'
                 ]
+            },
+            {
+                url: 'FuelType/DeleteFuelType.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
             }
-
-
-
+        ]
+    },
+    { group: 'FuelTaxClass',
+        items: [
+            {
+                url: 'FuelTaxClass/AddFuelTaxClass.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            },
+            {
+                url: 'FuelTaxClass/DeleteFuelTaxClass.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            }
+        ]
+    },
+    { group: 'InventoryTag',
+        items: [
+            {
+                url: 'InventoryTag/AddInventoryTag.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            },
+            {
+                url: 'InventoryTag/DeleteInventoryTag.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            }
         ]
     },
     { group: 'PatronageCategory',
@@ -123,11 +156,47 @@ Harness.start(
                 preload: [
                     '../../GlobalComponentEngine/irely/TestEngine.js'
                 ]
+            },
+            {
+                url: 'PatronageCategory/DeletePatronageCategory.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
             }
-
-
-
+        ]
+    },
+    { group: 'Manufacturer',
+        items: [
+            {
+                url: 'Manufacturer/AddManufacturer.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            },
+            {
+                url: 'Manufacturer/DeleteManufacturer.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            }
+        ]
+    },
+    { group: 'InventoryUOM',
+        items: [
+            {
+                url: 'InventoryUOM/AddInventoryUOM.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            },
+            {
+                url: 'InventoryUOM/DeleteInventoryUOM.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            }
         ]
     }
+
 
 )

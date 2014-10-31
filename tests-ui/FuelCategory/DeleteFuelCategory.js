@@ -39,7 +39,7 @@ StartTest (function (t) {
         .addFunction(function(next){t.diag("Scenario 2. Delete multiple records"); next();}).wait(100)
         .openScreen('Fuel Category').wait(200)
         .checkScreenShown ('fuelcategory').wait(100)
-        .selectGridRow('#grdFuelCategory',1) /* IC-98 */
+        .selectGridRow('#grdFuelCategory',1) /*issue IC-98 or FRM-1574 */
         .selectGridRow('#grdFuelCategory',2)
         .clickButton('#btnDeleteFuelCategory').wait(100)
         .checkMessageBox('iRely i21','You are about to delete 2 rows. Are you sure you want to continue?','yesno', 'question')
