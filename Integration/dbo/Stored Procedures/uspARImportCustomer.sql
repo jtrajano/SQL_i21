@@ -548,7 +548,6 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 		SELECT @Total = COUNT(agcus_key) from tblARTempCustomer
 	END
 	')
-)
 END
 
 IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1
