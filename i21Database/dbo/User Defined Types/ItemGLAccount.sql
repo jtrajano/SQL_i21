@@ -5,7 +5,6 @@
 CREATE TYPE [dbo].[ItemGLAccount] AS TABLE
 (
 	[Inventory] INT NULL
-	,[Sales] INT NULL
-	,[Purchases] INT NULL
-	,[COGS] INT NULL
+	,[CostOfGoods] INT NULL
+	,[PurchaseAccount] INT NULL
 )

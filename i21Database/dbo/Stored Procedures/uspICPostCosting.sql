@@ -76,8 +76,8 @@ BEGIN
 			,@NegativeInventoryOption = dbo.fnGetNegativeInventoryOptions(@intItemId, @intItemLocationId);
 
 	-- Get the g/l accounts for the item based on its item level setup, category setup, or location setup. 
-	INSERT INTO @GLAccounts (Inventory, Sales, Purchases, COGS)	
-	SELECT	Inventory, Sales, Purchases, NULL 
+	INSERT INTO @GLAccounts (Inventory, CostOfGoods, PurchaseAccount)	
+	SELECT	Inventory, CostOfGoods, PurchaseAccount
 	FROM	dbo.fnGetItemGLAccounts(@intItemId, @intItemLocationId); 
 
 	-- Moving Average Cost
@@ -85,6 +85,8 @@ BEGIN
 	-- FIFO
 
 	-- LIFO
+
+	-- Generate the G/L entries by reading the data from tblICInventoryTransaction
 
 
 	-- Attempt to fetch the next row from cursor. 

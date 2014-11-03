@@ -13,14 +13,14 @@ BEGIN
 		
 		CREATE TABLE expected(
 			Inventory INT
-			,Sales INT
-			,Purchases INT
+			,CostOfGoods INT
+			,PurchaseAccount INT
 		)
 
 		CREATE TABLE actual(
 			Inventory INT
-			,Sales INT
-			,Purchases INT
+			,CostOfGoods INT
+			,PurchaseAccount INT
 		)
 
 		-- Create the Fake data 
@@ -33,8 +33,8 @@ BEGIN
 		-- Act
 		INSERT actual (
 			Inventory
-			,Sales
-			,Purchases
+			,CostOfGoods
+			,PurchaseAccount
 		)
 		SELECT	*
 		FROM	[dbo].[fnGetItemGLAccounts](@intItemId, @intLocationId)
@@ -42,13 +42,13 @@ BEGIN
 		-- expects a row with NULL values on all fields. 
 		INSERT expected (
 			Inventory
-			,Sales
-			,Purchases
+			,CostOfGoods
+			,PurchaseAccount
 		)
 		SELECT				
 			Inventory = NULL 
-			,Sales = NULL 
-			,Purchases = NULL 
+			,CostOfGoods = NULL 
+			,PurchaseAccount = NULL 
 			
 		-- Assert
 		EXEC tSQLt.AssertObjectExists 'actual';
@@ -65,8 +65,8 @@ BEGIN
 		
 		INSERT actual (
 			Inventory
-			,Sales
-			,Purchases
+			,CostOfGoods
+			,PurchaseAccount
 		)
 		SELECT	*
 		FROM	[dbo].[fnGetItemGLAccounts](@intItemId, @intLocationId)		
@@ -74,13 +74,13 @@ BEGIN
 		-- expects a row with NULL values on all fields. 
 		INSERT expected (
 			Inventory
-			,Sales
-			,Purchases
+			,CostOfGoods
+			,PurchaseAccount
 		)
 		SELECT				
 			Inventory = 1001	-- 12040-1001
-			,Sales = 2001		-- 40100-1001
-			,Purchases = 3001	-- 50110-1001
+			,CostOfGoods = 2001		-- 40100-1001
+			,PurchaseAccount = 3001	-- 50110-1001
 			
 		-- Assert
 		EXEC tSQLt.AssertObjectExists 'actual';

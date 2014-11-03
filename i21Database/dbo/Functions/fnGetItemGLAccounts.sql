@@ -8,22 +8,22 @@ CREATE FUNCTION [dbo].[fnGetItemGLAccounts] (
 RETURNS TABLE
 AS 
 RETURN 
-	SELECT	-- Get the inventory g/l account id
+	SELECT	-- Get the inventory GL Account id
 			Inventory =  dbo.fnGetGLAccountIdFromProfitCenter(
-				dbo.fnGetItemBaseGLAccount(@intItemId, @intLocationId, 1)
-				,dbo.fnGetItemProfitCenter(@intItemId, @intLocationId, 1)
+				dbo.fnGetItemBaseGLAccount(@intItemId, @intLocationId, 'Inventory')
+				,dbo.fnGetItemProfitCenter(@intLocationId)
 			)
 
-			-- Get the COGS g/l account id
-			,Sales = dbo.fnGetGLAccountIdFromProfitCenter(
-				dbo.fnGetItemBaseGLAccount(@intItemId, @intLocationId, 2)
-				,dbo.fnGetItemProfitCenter(@intItemId, @intLocationId, 2)
+			-- Get the Sales GL Account id
+			,CostOfGoods = dbo.fnGetGLAccountIdFromProfitCenter(
+				dbo.fnGetItemBaseGLAccount(@intItemId, @intLocationId, 'Cost of Goods')
+				,dbo.fnGetItemProfitCenter(@intLocationId)
 			)
 
-			-- Get the Revalue Cost g/l account id
-			,Purchases = dbo.fnGetGLAccountIdFromProfitCenter(
-				dbo.fnGetItemBaseGLAccount(@intItemId, @intLocationId, 3)
-				,dbo.fnGetItemProfitCenter(@intItemId, @intLocationId, 3)
+			-- Get the Purchases GL Account id
+			,PurchaseAccount = dbo.fnGetGLAccountIdFromProfitCenter(
+				dbo.fnGetItemBaseGLAccount(@intItemId, @intLocationId, 'Purchase Account')
+				,dbo.fnGetItemProfitCenter(@intLocationId)
 			)
 
 GO

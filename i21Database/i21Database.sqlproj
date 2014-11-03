@@ -766,6 +766,7 @@
     <Build Include="dbo\Functions\fnGetItemCostingOnUnpostErrors.sql" />
     <Build Include="dbo\Views\vyuAPRptVendorHistory.sql" />
     <Build Include="dbo\Views\vyuSMOriginTable.sql" />
+    <Build Include="dbo\User Defined Types\ItemGLAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
