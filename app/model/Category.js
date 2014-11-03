@@ -6,7 +6,7 @@ Ext.define('Inventory.model.Category', {
 
     requires: [
         'Inventory.model.CategoryAccount',
-        'Inventory.model.CategoryStore',
+        'Inventory.model.CategoryLocation',
         'Inventory.model.CategoryVendor',
         'Ext.data.Field'
     ],
@@ -17,33 +17,18 @@ Ext.define('Inventory.model.Category', {
         { name: 'intCategoryId', type: 'int'},
         { name: 'strCategoryCode', type: 'string'},
         { name: 'strDescription', type: 'string'},
-        { name: 'intCatalogGroupId', type: 'int', allowNull: true},
-        { name: 'intCostingMethod', type: 'int'},
+        { name: 'strLineOfBusiness', type: 'string'},
+        { name: 'intCatalogGroupId', type: 'int', allowNull: true },
+        { name: 'intCostingMethod', type: 'int', allowNull: true },
         { name: 'strInventoryTracking', type: 'string'},
         { name: 'dblStandardQty', type: 'float'},
-        { name: 'intUOMId', type: 'int', allowNull: true},
+        { name: 'intUOMId', type: 'int', allowNull: true },
         { name: 'strGLDivisionNumber', type: 'string'},
         { name: 'ysnSalesAnalysisByTon', type: 'boolean'},
         { name: 'strMaterialFee', type: 'string'},
-        { name: 'intMaterialItemId', type: 'int', allowNull: true},
+        { name: 'intMaterialItemId', type: 'int', allowNull: true },
         { name: 'ysnAutoCalculateFreight', type: 'boolean'},
-        { name: 'intFreightItemId', type: 'int', allowNull: true},
-        { name: 'ysnNonRetailUseDepartment', type: 'boolean'},
-        { name: 'ysnReportNetGross', type: 'boolean'},
-        { name: 'ysnDepartmentPumps', type: 'boolean'},
-        { name: 'intConvertPaidOutId', type: 'int', allowNull: true},
-        { name: 'ysnDeleteRegister', type: 'boolean'},
-        { name: 'ysnDepartmentKeyTaxed', type: 'boolean'},
-        { name: 'intProductCodeId', type: 'int', allowNull: true},
-        { name: 'intFamilyId', type: 'int', allowNull: true},
-        { name: 'intClassId', type: 'int', allowNull: true},
-        { name: 'ysnFoodStampable', type: 'boolean'},
-        { name: 'ysnReturnable', type: 'boolean'},
-        { name: 'ysnSaleable', type: 'boolean'},
-        { name: 'ysnPrepriced', type: 'boolean'},
-        { name: 'ysnIdRequiredLiquor', type: 'boolean'},
-        { name: 'ysnIdRequiredCigarette', type: 'boolean'},
-        { name: 'intMinimumAge', type: 'int'},
+        { name: 'intFreightItemId', type: 'int', allowNull: true },
         { name: 'strERPItemClass', type: 'string'},
         { name: 'dblLifeTime', type: 'float'},
         { name: 'dblBOMItemShrinkage', type: 'float'},
@@ -63,48 +48,6 @@ Ext.define('Inventory.model.Category', {
         { name: 'dblPercentage', type: 'float'},
         { name: 'strCostDistributionMethod', type: 'string'},
         { name: 'ysnSellable', type: 'boolean'},
-        { name: 'ysnYieldAdjustment', type: 'boolean'}
-    ],
-
-    hasMany: [
-        {
-            model: 'Inventory.model.CategoryAccount',
-            name: 'tblICCategoryAccounts',
-            foreignKey: 'intCategoryId',
-            primaryKey: 'intCategoryId',
-            storeConfig: {
-                sortOnLoad: true,
-                sorters: {
-                    direction: 'ASC',
-                    property: 'intSort'
-                }
-            }
-        },
-        {
-            model: 'Inventory.model.CategoryStore',
-            name: 'tblICCategoryStores',
-            foreignKey: 'intCategoryId',
-            primaryKey: 'intCategoryId',
-            storeConfig: {
-                sortOnLoad: true,
-                sorters: {
-                    direction: 'ASC',
-                    property: 'intSort'
-                }
-            }
-        },
-        {
-            model: 'Inventory.model.CategoryVendor',
-            name: 'tblICCategoryVendors',
-            foreignKey: 'intCategoryId',
-            primaryKey: 'intCategoryId',
-            storeConfig: {
-                sortOnLoad: true,
-                sorters: {
-                    direction: 'ASC',
-                    property: 'intSort'
-                }
-            }
-        }
+        { name: 'ysnYieldAdjustment', type: 'boolean'},
     ]
 });

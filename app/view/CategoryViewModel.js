@@ -19,7 +19,8 @@ Ext.define('Inventory.view.CategoryViewModel', {
 
     requires: [
         'Inventory.store.BufferedUnitMeasure',
-        'Inventory.store.BufferedCompactItem'
+        'Inventory.store.BufferedCompactItem',
+        'GeneralLedger.store.BufAccountId'
     ],
 
     stores: {
@@ -85,6 +86,31 @@ Ext.define('Inventory.view.CategoryViewModel', {
                 name: 'strDescription'
             }
         },
+        accountDescriptions: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Sales'
+                },
+                {
+                    strDescription: 'Purchase'
+                },
+                {
+                    strDescription: 'Variance'
+                },
+                {
+                    strDescription: 'COGS'
+                },
+                {
+                    strDescription: 'Expenses'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
         unitMeasures:{
             type: 'inventorybuffereduom'
         },
@@ -93,6 +119,9 @@ Ext.define('Inventory.view.CategoryViewModel', {
         },
         freightItem:{
             type: 'inventorybufferedcompactitem'
+        },
+        glAccount: {
+            type: 'bufAccountid'
         }
     }
 

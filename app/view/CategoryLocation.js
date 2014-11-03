@@ -22,10 +22,10 @@ Ext.define('Inventory.view.CategoryLocation', {
         'Ext.form.Panel',
         'Ext.button.Button',
         'Ext.toolbar.Separator',
+        'Ext.form.field.ComboBox',
         'Ext.form.field.Checkbox',
         'Ext.form.field.Number',
         'Ext.form.field.Date',
-        'Ext.form.field.ComboBox',
         'Ext.toolbar.Paging'
     ],
 
@@ -165,10 +165,32 @@ Ext.define('Inventory.view.CategoryLocation', {
                             },
                             items: [
                                 {
-                                    xtype: 'textfield',
-                                    itemId: 'txtLocation',
+                                    xtype: 'gridcombobox',
+                                    columns: [
+                                        {
+                                            dataIndex: 'intCompanyLocationId',
+                                            dataType: 'numeric',
+                                            text: 'Location Id',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strLocationName',
+                                            dataType: 'string',
+                                            text: 'Location Name',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strLocationType',
+                                            dataType: 'string',
+                                            text: 'Location Type',
+                                            flex: 1
+                                        }
+                                    ],
+                                    itemId: 'cboLocation',
                                     fieldLabel: 'Location',
-                                    labelWidth: 165
+                                    labelWidth: 165,
+                                    displayField: 'strLocationName',
+                                    valueField: 'intCompanyLocationId'
                                 },
                                 {
                                     xtype: 'textfield',

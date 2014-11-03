@@ -30,6 +30,7 @@ Ext.define('Inventory.view.Category', {
         'Ext.grid.Panel',
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
+        'Ext.grid.plugin.CellEditing',
         'Ext.grid.column.Check',
         'Ext.form.FieldSet',
         'Ext.form.Label',
@@ -383,7 +384,7 @@ Ext.define('Inventory.view.Category', {
                                         items: [
                                             {
                                                 xtype: 'advancefiltergrid',
-                                                itemId: 'grdStore',
+                                                itemId: 'grdLocation',
                                                 margin: -1,
                                                 dockedItems: [
                                                     {
@@ -398,21 +399,21 @@ Ext.define('Inventory.view.Category', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
-                                                                itemId: 'btnAddStore',
+                                                                itemId: 'btnAddLocation',
                                                                 iconCls: 'small-add',
                                                                 text: 'Add'
                                                             },
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
-                                                                itemId: 'btnEditStore',
+                                                                itemId: 'btnEditLocation',
                                                                 iconCls: 'small-edit',
                                                                 text: 'Edit'
                                                             },
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
-                                                                itemId: 'btnDeleteStore',
+                                                                itemId: 'btnDeleteLocation',
                                                                 iconCls: 'small-delete',
                                                                 text: 'Delete'
                                                             },
@@ -428,30 +429,35 @@ Ext.define('Inventory.view.Category', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colLocationId',
                                                         dataIndex: 'string',
                                                         text: 'Location',
                                                         flex: 1
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colLocationCashRegisterDept',
                                                         dataIndex: 'string',
                                                         text: 'Cash Register Dept.',
                                                         flex: 1
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colLocationTargetGrossProfit',
                                                         dataIndex: 'string',
                                                         text: 'Target Gross Profit %',
                                                         flex: 1
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colLocationTargetInventoryCost',
                                                         dataIndex: 'string',
                                                         text: 'Target Inventory at Cost',
                                                         flex: 1
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colLocationCostInventoryBOM',
                                                         dataIndex: 'string',
                                                         text: 'Cost of Inventory at BOM',
                                                         flex: 1
@@ -504,15 +510,67 @@ Ext.define('Inventory.view.Category', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colAccountDescription',
                                                         dataIndex: 'string',
                                                         text: 'Account Description',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'combobox',
+                                                            itemId: 'cboAccountDescription',
+                                                            displayField: 'strDescription',
+                                                            valueField: 'strDescription'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colAccountId',
                                                         dataIndex: 'string',
                                                         text: 'Account ID',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intAccountId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Account Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strAccountId',
+                                                                    dataType: 'string',
+                                                                    text: 'Account Id',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strDescription',
+                                                                    dataType: 'string',
+                                                                    text: 'Description',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intAccountGroupId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Account Group Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strAccountGroup',
+                                                                    dataType: 'string',
+                                                                    text: 'Account Group',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strAccountType',
+                                                                    dataType: 'string',
+                                                                    text: 'Account Type',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboAccountId',
+                                                            displayField: 'strAccountId',
+                                                            valueField: 'strAccountId'
+                                                        }
                                                     }
                                                 ],
                                                 viewConfig: {
@@ -520,7 +578,14 @@ Ext.define('Inventory.view.Category', {
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'
-                                                })
+                                                }),
+                                                plugins: [
+                                                    {
+                                                        ptype: 'cellediting',
+                                                        pluginId: 'cepAccount',
+                                                        clicksToEdit: 1
+                                                    }
+                                                ]
                                             }
                                         ]
                                     },

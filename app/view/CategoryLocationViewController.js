@@ -15,5 +15,95 @@
 
 Ext.define('Inventory.view.CategoryLocationViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.categorylocation'
+    alias: 'controller.categorylocation',
+
+    config: {
+        binding: {
+            cboLocation: {
+                value: '{current.intLocationId}',
+                store: '{location}'
+            },
+            txtCashRegisterDepartment: '{current.intRegisterDepartmentId}',
+            chkUpdatePricesOnPbImports: '{current.ysnUpdatePrices}',
+            chkDefaultUseTaxFlag1: '{current.ysnUseTaxFlag1}',
+            chkDefaultUseTaxFlag2: '{current.ysnUseTaxFlag2}',
+            chkDefaultUseTaxFlag3: '{current.ysnUseTaxFlag3}',
+            chkDefaultUseTaxFlag4: '{current.ysnUseTaxFlag4}',
+            chkDefaultBlueLaw1: '{current.ysnBlueLaw1}',
+            chkDefaultBlueLaw2: '{current.ysnBlueLaw2}',
+            txtDefaultNucleusGroupId: '{current.intNucleusGroupId}',
+            txtTargetGrossProfitPercent: '{current.dblTargetGrossProfit}',
+            txtTargetInventoryAtCost: '{current.dblTargetInventoryCost}',
+            txtCostOfInventoryAtBom: '{current.dblCostInventoryBOM}',
+            txtLowGrossMarginPercentAlert: '{current.dblLowGrossMarginAlert}',
+            txtHighGrossMarginPercentAlert: '{current.dblHighGrossMarginAlert}',
+            dtmLastInventoryLevelEntry: '{current.dtmLastInventoryLevelEntry}',
+            chkNonRetailUseDepartment: '{current.ysnNonRetailUseDepartment}',
+            chkReportInNetOrGross: '{current.ysnReportNetGross}',
+            chkDepartmentForPumps: '{current.ysnDepartmentForPumps}',
+            cboConvertToPaidout: '{current.intConvertPaidOutId}',
+            chkDeleteFromRegister: '{current.ysnDeleteFromRegister}',
+            chkDepartmentKeyTaxed: '{current.ysnDeptKeyTaxed}',
+            cboDefaultProductCode: '{current.intProductCodeId}',
+            cboDefaultFamily: '{current.intFamilyId}',
+            cboDefaultClass: '{current.intClassId}',
+            chkDefaultFoodStampable: '{current.ysnFoodStampable}',
+            chkDefaultReturnable: '{current.ysnReturnable}',
+            chkDefaultSaleable: '{current.ysnSaleable}',
+            chkDefaultPrepriced: '{current.ysnPrePriced}',
+            chkDefaultIdRequiredLiquor: '{current.ysnIdRequiredLiquor}',
+            chkDefaultIdRequiredCigarette: '{current.ysnIdRequiredCigarette}',
+            txtDefaultMinimumAge: '{current.intMinimumAge}'
+        }
+    },
+
+    setupContext : function(options){
+        var me = this,
+            win = options.window,
+            store = Ext.create('Inventory.store.CategoryLocation', { pageSize: 1 });
+
+        win.context = Ext.create('iRely.mvvm.Engine', {
+            window : win,
+            store  : store,
+            binding: me.config.binding,
+            createRecord: {
+                fn: me.createRecord,
+                scope: me
+            }
+        });
+
+        return win.context;
+    },
+
+    show : function(config) {
+        "use strict";
+
+        var me = this,
+            win = this.getView();
+
+        if (config) {
+            win.show();
+
+            var context = me.setupContext( { window : win } );
+            me.intCategoryId = config.id;
+            if (config.action === 'new') {
+                context.data.addRecord();
+            } else {
+                var filter = [{
+                    column: 'intCategoryId',
+                    value: config.id
+                }];
+                context.data.load({
+                    filters: filter
+                });
+            }
+        }
+    },
+
+    createRecord: function(config, action) {
+        var me = this;
+        var record = Ext.create('Inventory.model.CategoryLocation');
+        record.set('intCategoryId', me.intCategoryId);
+        action(record);
+    }
 });

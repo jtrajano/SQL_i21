@@ -149,7 +149,7 @@
     <Compile Include="Tables\tblICCatalog.cs" />
     <Compile Include="Tables\tblICCategory.cs" />
     <Compile Include="Tables\tblICCategoryAccount.cs" />
-    <Compile Include="Tables\tblICCategoryStore.cs" />
+    <Compile Include="Tables\tblICCategoryLocation.cs" />
     <Compile Include="Tables\tblICCategoryVendor.cs" />
     <Compile Include="Tables\tblICClass.cs" />
     <Compile Include="Tables\tblICCommodity.cs" />

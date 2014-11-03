@@ -727,7 +727,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "designer|createAlias": "advancefiltergrid",
-                                        "itemId": "grdStore",
+                                        "itemId": "grdLocation",
                                         "margin": -1,
                                         "title": null
                                     },
@@ -759,7 +759,7 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-add",
-                                                        "itemId": "btnAddStore",
+                                                        "itemId": "btnAddLocation",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Add"
@@ -777,7 +777,7 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-edit",
-                                                        "itemId": "btnEditStore",
+                                                        "itemId": "btnEditLocation",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Edit"
@@ -795,7 +795,7 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-delete",
-                                                        "itemId": "btnDeleteStore",
+                                                        "itemId": "btnDeleteLocation",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Delete"
@@ -827,7 +827,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter17",
+                                                    "name": "filter1",
                                                     "designerId": "9be921ca-705f-47f3-98b7-abf79fa0ae14",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -843,6 +843,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
+                                                "itemId": "colLocationId",
                                                 "text": "Location"
                                             },
                                             "name": "MyColumn95",
@@ -858,6 +859,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
+                                                "itemId": "colLocationCashRegisterDept",
                                                 "text": "Cash Register Dept."
                                             },
                                             "name": "MyColumn96",
@@ -873,6 +875,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
+                                                "itemId": "colLocationTargetGrossProfit",
                                                 "text": "Target Gross Profit %"
                                             },
                                             "name": "MyColumn97",
@@ -888,6 +891,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
+                                                "itemId": "colLocationTargetInventoryCost",
                                                 "text": "Target Inventory at Cost"
                                             },
                                             "name": "MyColumn98",
@@ -903,6 +907,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
+                                                "itemId": "colLocationCostInventoryBOM",
                                                 "text": "Cost of Inventory at BOM"
                                             },
                                             "name": "MyColumn99",
@@ -1033,7 +1038,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter18",
+                                                    "name": "filter11",
                                                     "designerId": "336cd22c-55d7-4f75-bd45-20820dfc01b5",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1049,10 +1054,28 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
+                                                "itemId": "colAccountDescription",
                                                 "text": "Account Description"
                                             },
                                             "name": "MyColumn102",
-                                            "designerId": "44ef482f-bf67-4181-87e9-43dfd05e01aa"
+                                            "designerId": "44ef482f-bf67-4181-87e9-43dfd05e01aa",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "displayField": "strDescription",
+                                                        "itemId": "cboAccountDescription",
+                                                        "valueField": "strDescription"
+                                                    },
+                                                    "name": "MyComboBox",
+                                                    "designerId": "da1af9af-f3be-4b4b-a90b-56c4b7591e5b"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -1064,10 +1087,79 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
+                                                "itemId": "colAccountId",
                                                 "text": "Account ID"
                                             },
                                             "name": "MyColumn103",
-                                            "designerId": "97a1bc1c-4b25-4d49-a445-dfe55fbd4f15"
+                                            "designerId": "97a1bc1c-4b25-4d49-a445-dfe55fbd4f15",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intAccountId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Account Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strAccountId',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Account Id',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strDescription',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Description',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intAccountGroupId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Account Group Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strAccountGroup',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Account Group',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strAccountType',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Account Type',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strAccountId",
+                                                        "itemId": "cboAccountId",
+                                                        "valueField": "strAccountId"
+                                                    },
+                                                    "name": "MyComboBox1",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "23ba5832-1d40-4249-a5e1-45ab6f79fb3a",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.View",
@@ -1091,6 +1183,21 @@
                                             "codeClass": "Ext.selection.CheckboxModel",
                                             "name": "MyCheckboxSelectionModel23",
                                             "designerId": "42647992-b28b-4067-9d97-40bef3fae074"
+                                        },
+                                        {
+                                            "type": "Ext.grid.plugin.CellEditing",
+                                            "reference": {
+                                                "name": "plugins",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "clicksToEdit": 1,
+                                                "designer|displayName": "cepAccount",
+                                                "pluginId": "cepAccount"
+                                            },
+                                            "name": "MyCellEditingPlugin",
+                                            "designerId": "bbc8a5aa-aa79-40f4-8ec6-d0a1050a8155"
                                         }
                                     ]
                                 }
@@ -1194,7 +1301,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter19",
+                                                    "name": "filter12",
                                                     "designerId": "1f016d2c-d6a9-4998-be84-a17777e4dd56",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1488,7 +1595,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter110",
+                                                    "name": "filter13",
                                                     "designerId": "0763d06c-c630-47e6-91f4-89ddac6c34ff",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2207,7 +2314,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging13",
+                    "name": "statusbarpaging1",
                     "designerId": "0ca3c6d6-785e-4ad8-ac4f-3eaa2d75593b",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

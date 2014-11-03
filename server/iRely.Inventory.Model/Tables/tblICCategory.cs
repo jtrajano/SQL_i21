@@ -14,15 +14,16 @@ namespace iRely.Inventory.Model
         public tblICCategory()
         {
             this.tblICCategoryAccounts = new List<tblICCategoryAccount>();
-            this.tblICCategoryStores = new List<tblICCategoryStore>();
+            this.tblICCategoryLocations = new List<tblICCategoryLocation>();
             this.tblICCategoryVendors = new List<tblICCategoryVendor>();
         }
 
         public int intCategoryId { get; set; }
         public string strCategoryCode { get; set; }
         public string strDescription { get; set; }
+        public string strLineOfBusiness { get; set; }
         public int? intCatalogGroupId { get; set; }
-        public int intCostingMethod { get; set; }
+        public int? intCostingMethod { get; set; }
         public string strInventoryTracking { get; set; }
         public decimal? dblStandardQty { get; set; }
         public int? intUOMId { get; set; }
@@ -32,22 +33,6 @@ namespace iRely.Inventory.Model
         public int? intMaterialItemId { get; set; }
         public bool ysnAutoCalculateFreight { get; set; }
         public int? intFreightItemId { get; set; }
-        public bool ysnNonRetailUseDepartment { get; set; }
-        public bool ysnReportNetGross { get; set; }
-        public bool ysnDepartmentPumps { get; set; }
-        public int? intConvertPaidOutId { get; set; }
-        public bool ysnDeleteRegister { get; set; }
-        public bool ysnDepartmentKeyTaxed { get; set; }
-        public int? intProductCodeId { get; set; }
-        public int? intFamilyId { get; set; }
-        public int? intClassId { get; set; }
-        public bool ysnFoodStampable { get; set; }
-        public bool ysnReturnable { get; set; }
-        public bool ysnSaleable { get; set; }
-        public bool ysnPrepriced { get; set; }
-        public bool ysnIdRequiredLiquor { get; set; }
-        public bool ysnIdRequiredCigarette { get; set; }
-        public int intMinimumAge { get; set; }
         public string strERPItemClass { get; set; }
         public decimal? dblLifeTime { get; set; }
         public decimal? dblBOMItemShrinkage { get; set; }
@@ -70,15 +55,13 @@ namespace iRely.Inventory.Model
         public bool ysnYieldAdjustment { get; set; }
 
         public ICollection<tblICCategoryAccount> tblICCategoryAccounts { get; set; }
-        public ICollection<tblICCategoryStore> tblICCategoryStores { get; set; }
+        public ICollection<tblICCategoryLocation> tblICCategoryLocations { get; set; }
         public ICollection<tblICCategoryVendor> tblICCategoryVendors { get; set; }
 
         public tblICCatalog tblICCatalog { get; set; }
         public tblICUnitMeasure tblICUnitMeasure { get; set; }
-        public tblICFamily tblICFamily { get; set; }
-        public tblICClass tblICClass { get; set; }
         public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
-        
+
 
     }
 }

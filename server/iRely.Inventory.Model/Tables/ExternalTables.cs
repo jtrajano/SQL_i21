@@ -119,6 +119,7 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICManufacturingCell> tblICManufacturingCells { get; set; }
         public ICollection<tblICCommodityAccount> tblICCommodityAccounts { get; set; }
+        public ICollection<tblICCategoryLocation> tblICCategoryLocations { get; set; }
     }
 
     public class tblGLAccount : BaseEntity
@@ -130,6 +131,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemAccount> tblICItemAccounts { get; set; }
         public ICollection<tblICItemAccount> tblICItemAccountProfitCenters { get; set; }
         public ICollection<tblICCommodityAccount> tblICCommodityAccounts { get; set; }
+        public ICollection<tblICCategoryAccount> tblICCategoryAccounts { get; set; }
 
     }
 
@@ -143,6 +145,7 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICItemVendorXref> tblICItemVendorXrefs { get; set; }
         public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
+        public ICollection<tblICCategoryVendor> tblICCategoryVendors { get; set; }
     }
 
     public class tblARCustomer : BaseEntity

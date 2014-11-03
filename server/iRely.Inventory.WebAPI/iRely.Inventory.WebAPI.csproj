@@ -138,6 +138,7 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\BrandController.cs" />
     <Compile Include="Controllers\CategoryController.cs" />
+    <Compile Include="Controllers\CategoryLocationController.cs" />
     <Compile Include="Controllers\CertificationController.cs" />
     <Compile Include="Controllers\CommodityAttributeController.cs" />
     <Compile Include="Controllers\CommodityController.cs" />

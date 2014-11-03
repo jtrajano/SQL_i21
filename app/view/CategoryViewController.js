@@ -34,7 +34,7 @@ Ext.define('Inventory.view.CategoryViewController', {
             txtCategoryCode: '{current.strCategoryCode}',
             txtDescription: '{current.strDescription}',
             cboLineOfBusiness: {
-                value: '{current.strLineBusiness}',
+                value: '{current.strLineOfBusiness}',
                 store: '{linesOfBusiness}'
             },
             cboCatalogGroup: '{current.intCatalogGroupId}',
@@ -63,24 +63,32 @@ Ext.define('Inventory.view.CategoryViewController', {
                 value: '{current.intFreightItemId}',
                 store: '{freightItem}'
             },
-            chkNonRetailUseDepartment: '{current.ysnNonRetailUseDepartment}',
-            chkReportInNetOrGross: '{current.ysnReportNetGross}',
-            chkDepartmentForPumps: '{current.ysnDepartmentPumps}',
-            cboConvertToPaidout: '{current.intConvertPaidOutId}',
-            chkDeleteFromRegister: '{current.ysnDeleteRegister}',
-            chkDepartmentKeyTaxed: '{current.ysnDepartmentKeyTaxed}',
-            cboDefaultProductCode: '{current.intProductCodeId}',
-            cboDefaultFamily: '{current.intFamilyId}',
-            cboDefaultClass: '{current.intClassId}',
-            chkDefaultFoodStampable: '{current.ysnFoodStampable}',
-            chkDefaultReturnable: '{current.ysnReturnable}',
-            chkDefaultSaleable: '{current.ysnSaleable}',
-            chkDefaultPrepriced: '{current.ysnPrepriced}',
-            chkDefaultIdRequiredLiquor: '{current.ysnIdRequiredLiquor}',
-            chkDefaultIdRequiredCigarette: '{current.ysnIdRequiredCigarette}',
-            txtDefaultMinimumAge: '{current.intMinimumAge}',
+
+            grdLocation: {
+                colLocationId: 'strLocationName',
+                colLocationCashRegisterDept: 'intRegisterDepartmentId',
+                colLocationTargetGrossProfit: 'dblTargetGrossProfit',
+                colLocationTargetInventoryCost: 'dblTargetInventoryCost',
+                colLocationCostInventoryBOM: 'dblCostInventoryBOM'
+            },
+
+            grdGlAccounts: {
+                colAccountDescription: {
+                    dataIndex: 'strAccountDescription',
+                    editor: {
+                        store: '{accountDescriptions}'
+                    }
+                },
+                colAccountId: {
+                    dataIndex: 'strAccountId',
+                    editor: {
+                        store: '{glAccount}'
+                    }
+                }
+            },
+
             txtERPItemClass: '{current.strERPItemClass}',
-            txtLifeTime: '{current.dblfeTime}',
+            txtLifeTime: '{current.dblLifeTime}',
             txtBOMItemShrinkage: '{current.dblBOMItemShrinkage}',
             txtBOMItemUpperTolerance: '{current.dblBOMItemUpperTolerance}',
             txtBOMItemLowerTolerance: '{current.dblBOMItemLowerTolerance}',
@@ -89,10 +97,10 @@ Ext.define('Inventory.view.CategoryViewController', {
             txtConsumptionMethod: '{current.strConsumptionMethod}',
             txtBOMItemType: '{current.strBOMItemType}',
             txtShortName: '{current.strShortName}',
-            txtReceiptImage: '{current.imgReceiptImage}',
-            txtWIPImage: '{current.imgWIPImage}',
-            txtFGImage: '{current.imgFGImage}',
-            txtShipImage: '{current.imgShipImage}',
+            imgReceipt: '{current.imgReceiptImage}',
+            imgWIP: '{current.imgWIPImage}',
+            imgFG: '{current.imgFGImage}',
+            imgShip: '{current.imgShipImage}',
             txtLaborCost: '{current.dblLaborCost}',
             txtOverHead: '{current.dblOverHead}',
             txtPercentage: '{current.dblPercentage}',
@@ -121,10 +129,11 @@ Ext.define('Inventory.view.CategoryViewController', {
                     })
                 },
                 {
-                    key: 'tblICCategoryStores',
+                    key: 'tblICCategoryLocations',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
-                        grid: win.down('#grdStore'),
-                        deleteButton : win.down('#btnDeleteStore')
+                        grid: win.down('#grdLocation'),
+                        deleteButton : win.down('#btnDeleteLocation'),
+                        position: 'none'
                     })
                 },
                 {
@@ -164,5 +173,73 @@ Ext.define('Inventory.view.CategoryViewController', {
                 });
             }
         }
+    },
+
+    onAccountSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepAccount');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colAccountId')
+        {
+            current.set('intAccountId', records[0].get('intAccountId'));
+        }
+    },
+
+    onbtnAddLocationClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var me = win.controller;
+        me.openCategoryLocationScreen('new', win);
+    },
+
+    onbtnEditLocationClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var me = win.controller;
+        me.openCategoryLocationScreen('edit', win);
+    },
+
+    openCategoryLocationScreen: function (action, window) {
+        var win = window;
+        var me = win.controller;
+        var screenName = 'Inventory.view.CategoryLocation';
+
+        Ext.require([
+                screenName,
+                screenName + 'ViewModel',
+                screenName + 'ViewController',
+        ], function() {
+            var screen = screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
+            var view = Ext.create(screenName, { controller: screen.toLowerCase(), viewModel : { type: screen.toLowerCase() } });
+            view.on('destroy', me.onDestroyCategoryLocationScreen, me, { window: win });
+
+            var controller = view.getController();
+            var current = win.getViewModel().data.current;
+            controller.show({ id: current.get('intCategoryId'), action: action });
+        });
+    },
+
+    onDestroyCategoryLocationScreen: function(win, eOpts) {
+        var me = eOpts.window.getController();
+        var win = eOpts.window;
+        var grdLocation = win.down('#grdLocation');
+
+        grdLocation.store.reload();
+    },
+
+    init: function(application) {
+        this.control({
+            "#cboAccountId": {
+                select: this.onAccountSelect
+            },
+            "#btnAddLocation": {
+                click: this.onbtnAddLocationClick
+            },
+            "#btnEditLocation": {
+                click: this.onbtnEditLocationClick
+            }
+        });
     }
 });

@@ -92,14 +92,14 @@ namespace iRely.Inventory.Model
 
         public DbSet<tblICBrand> tblICBrands { get; set; }
         public DbSet<tblICCatalog> tblICCatalogs { get; set; }
-        public DbSet<tblICCategory> tblICCategorys { get; set; }
+        public DbSet<tblICCategory> tblICCategories { get; set; }
         public DbSet<tblICCategoryAccount> tblICCategoryAccounts { get; set; }
-        public DbSet<tblICCategoryStore> tblICCategoryStores { get; set; }
+        public DbSet<tblICCategoryLocation> tblICCategoryLocations { get; set; }
         public DbSet<tblICCategoryVendor> tblICCategoryVendors { get; set; }
         public DbSet<tblICCertification> tblICCertifications { get; set; }
-        public DbSet<tblICCertificationCommodity> tblICCertificationCommoditys { get; set; }
+        public DbSet<tblICCertificationCommodity> tblICCertificationCommodities { get; set; }
         public DbSet<tblICClass> tblICClasss { get; set; }
-        public DbSet<tblICCommodity> tblICCommoditys { get; set; }
+        public DbSet<tblICCommodity> tblICCommodities { get; set; }
         public DbSet<tblICCommodityGroup> tblICCommodityGroups { get; set; }
         public DbSet<tblICCommodityUnitMeasure> tblICCommodityUnitMeasures { get; set; }
         public DbSet<tblICDocument> tblICDocuments { get; set; }
@@ -174,7 +174,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICCatalogMap());
             modelBuilder.Configurations.Add(new tblICCategoryMap());
             modelBuilder.Configurations.Add(new tblICCategoryAccountMap());
-            modelBuilder.Configurations.Add(new tblICCategoryStoreMap());
+            modelBuilder.Configurations.Add(new tblICCategoryLocationMap());
             modelBuilder.Configurations.Add(new tblICCategoryVendorMap());
             modelBuilder.Configurations.Add(new tblICCertificationMap());
             modelBuilder.Configurations.Add(new tblICCertificationCommodityMap());

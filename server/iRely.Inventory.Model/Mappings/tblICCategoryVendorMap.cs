@@ -17,7 +17,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intFamilyId).HasColumnName("intFamilyId");
             this.Property(t => t.intOrderClassId).HasColumnName("intOrderClassId");
             this.Property(t => t.intSellClassId).HasColumnName("intSellClassId");
-            this.Property(t => t.intStoreId).HasColumnName("intStoreId");
             this.Property(t => t.intVendorId).HasColumnName("intVendorId");
             this.Property(t => t.strComments).HasColumnName("strComments");
             this.Property(t => t.strVendorDepartment).HasColumnName("strVendorDepartment");
@@ -35,6 +34,9 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.SellClass)
                 .WithMany(p => p.VendorSells)
                 .HasForeignKey(p => p.intSellClassId);
+            this.HasRequired(p => p.vyuAPVendor)
+                .WithMany(p => p.tblICCategoryVendors)
+                .HasForeignKey(p => p.intVendorId);
         }
     }
 }
