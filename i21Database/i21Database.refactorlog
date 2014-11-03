@@ -1036,4 +1036,39 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="ysnActive" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="5b8d3ef7-37e2-436a-a646-af029770c99f" ChangeDateTime="11/03/2014 03:16:08">
+    <Property Name="ElementName" Value="[dbo].[tblICCategoryLocation].[intCategoryStoreId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCategoryLocation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCategoryLocationId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a0af35a2-13a3-4dcc-b4de-3db41b6be202" ChangeDateTime="11/03/2014 03:21:40">
+    <Property Name="ElementName" Value="[dbo].[tblICCategoryLocation].[intProductCode]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCategoryLocation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intProductCodeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a746d9a9-32de-485b-b565-888ca038ee85" ChangeDateTime="11/03/2014 03:21:44">
+    <Property Name="ElementName" Value="[dbo].[tblICCategoryLocation].[intConvertPaidOut]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCategoryLocation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intConvertPaidOutId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="852a3b60-7104-486a-a7b9-b672217778a9" ChangeDateTime="11/03/2014 03:23:37">
+    <Property Name="ElementName" Value="[dbo].[tblICCategoryLocation].[ysnIDRequiredLiquor]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCategoryLocation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnIdRequiredLiquor" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9cfbf563-d528-4f14-b08b-21aa294f1bf0" ChangeDateTime="11/03/2014 03:40:11">
+    <Property Name="ElementName" Value="[dbo].[tblICCategoryVendor].[intStoreId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCategoryVendor]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intLocationId" />
+  </Operation>
 </Operations>
