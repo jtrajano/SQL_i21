@@ -31,9 +31,9 @@ BEGIN
 		INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (2, 'Purchase Account', 3001);
 
 		-- G/L Accounts for Company Location 3 ('BETTER HAVEN')
-		INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (3, 'Inventory', 1000);
-		INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (3, 'Cost of Goods', 2000);
-		INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (3, 'Purchase Account', 3000);
+		INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (3, 'Inventory', 1002);
+		INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (3, 'Cost of Goods', 2002);
+		INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (3, 'Purchase Account', 3002);
 
 		-- Category
 		INSERT INTO tblICCategory (intCategoryId, strDescription) VALUES (1, 'Hot Items');
