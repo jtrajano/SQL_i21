@@ -20,19 +20,19 @@ StartTest (function (t) {
         .checkToolbarButton({new: true, save: true, search: true, delete: true, undo: true, close: true}).wait(100)
         /*Control checking*/
         .checkControlVisible([
-            '#cboFuelType',
+            '#cboFuelType', /* change cboFuelType to cboFuelCategory when issue is fixed*/
             '#cboFeedStock',
             '#txtBatchNo',
             '#txtEndingRinGallonsForBatch',
             '#txtEquivalenceValue',
             '#cboFuelCode',
-            '#cboProcessCode',
+            '#cboProcessCode', /*cboProductionCode*/
             '#cboFeedStockUom',
             '#txtFeedStockFactor',
             '#chkRenewableBiomass',
             '#txtPercentOfDenaturant',
             '#chkDeductDenaturantFromRin'
-            ], true) /* change cboFuelType to cboFuelCategory when issue is fixed*/
+            ], true)
         .checkControlVisible(['#btnHelp', '#btnSupport', '#btnFieldName'], true)
         .checkStatusBar()
         .checkStatusMessage('Ready')
