@@ -30,7 +30,8 @@ Ext.application({
         'QualityTemplate',
         'InventoryUOM',
         'QAProperties',
-        'Catalog'
+        'Catalog',
+        'LineOfBusiness'
     ],
     name: 'Inventory',
 

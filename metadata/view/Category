@@ -1317,7 +1317,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": null,
-                                                "text": "Store",
+                                                "text": "Location",
                                                 "width": 110
                                             },
                                             "name": "MyColumn104",

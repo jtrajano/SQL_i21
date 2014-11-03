@@ -629,7 +629,7 @@ Ext.define('Inventory.view.Category', {
                                                         xtype: 'gridcolumn',
                                                         width: 110,
                                                         dataIndex: 'string',
-                                                        text: 'Store'
+                                                        text: 'Location'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
