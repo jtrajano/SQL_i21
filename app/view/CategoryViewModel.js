@@ -18,7 +18,82 @@ Ext.define('Inventory.view.CategoryViewModel', {
     alias: 'viewmodel.category',
 
     requires: [
-        'Inventory.view.override.CategoryViewModel'
-    ]
+        'Inventory.store.BufferedUnitMeasure',
+        'Inventory.store.BufferedCompactItem'
+    ],
+
+    stores: {
+        linesOfBusiness: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Agronomy'
+                },{
+                    strDescription: 'Feed'
+                },{
+                    strDescription: 'Petroleum'
+                },{
+                    strDescription: 'Retail'
+                },{
+                    strDescription: 'Grain'
+                },{
+                    strDescription: 'Oil & Grease'
+                }
+            ],
+            fields: {
+                name: 'strDescription'
+            }
+        },
+        costingMethods: {
+            autoLoad: true,
+            data: [
+                {
+                    intCostingMethodId: '1',
+                    strDescription: 'AVG'
+                },
+                {
+                    intCostingMethodId: '2',
+                    strDescription: 'FIFO'
+                },
+                {
+                    intCostingMethodId: '3',
+                    strDescription: 'LIFO'
+                }
+            ],
+            fields: [
+                {
+                    name: 'intCostingMethodId',
+                    type: 'int'
+                },
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        materialFees: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'No'
+                },{
+                    strDescription: 'Yes'
+                },{
+                    strDescription: 'Unit'
+                }
+            ],
+            fields: {
+                name: 'strDescription'
+            }
+        },
+        unitMeasures:{
+            type: 'inventorybuffereduom'
+        },
+        materialItem:{
+            type: 'inventorybufferedcompactitem'
+        },
+        freightItem:{
+            type: 'inventorybufferedcompactitem'
+        }
+    }
 
 });

@@ -15,5 +15,8 @@ Ext.define('Inventory.model.CompactItem', {
         { name: 'strItemNo', type: 'string'},
         { name: 'strType', type: 'string'},
         { name: 'strDescription', type: 'string'},
+        { name: 'strStatus', type: 'string'},
+        { name: 'strModelNo', type: 'string'},
+        { name: 'strLotTracking', type: 'string'},
     ]
 });

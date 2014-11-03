@@ -18,7 +18,6 @@ Ext.define('Inventory.view.CategoryLocation', {
     alias: 'widget.categorylocation',
 
     requires: [
-        'Inventory.view.CategoryLocationViewModel',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
         'Ext.button.Button',
@@ -30,9 +29,6 @@ Ext.define('Inventory.view.CategoryLocation', {
         'Ext.toolbar.Paging'
     ],
 
-    viewModel: {
-        type: 'categorylocation'
-    },
     height: 575,
     hidden: false,
     maxHeight: 575,

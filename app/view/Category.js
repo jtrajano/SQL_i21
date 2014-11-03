@@ -18,7 +18,6 @@ Ext.define('Inventory.view.Category', {
     alias: 'widget.category',
 
     requires: [
-        'Inventory.view.CategoryViewModel',
         'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.toolbar.Separator',
@@ -37,9 +36,6 @@ Ext.define('Inventory.view.Category', {
         'Ext.toolbar.Paging'
     ],
 
-    viewModel: {
-        type: 'category'
-    },
     height: 573,
     hidden: false,
     minHeight: 560,
@@ -292,10 +288,38 @@ Ext.define('Inventory.view.Category', {
                                                                 valueField: 'strDescription'
                                                             },
                                                             {
-                                                                xtype: 'combobox',
+                                                                xtype: 'gridcombobox',
+                                                                columns: [
+                                                                    {
+                                                                        dataIndex: 'intItemId',
+                                                                        dataType: 'numeric',
+                                                                        text: 'Item Id',
+                                                                        hidden: true
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strItemNo',
+                                                                        dataType: 'string',
+                                                                        text: 'Item Number',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strType',
+                                                                        dataType: 'string',
+                                                                        text: 'Item Type',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strDescription',
+                                                                        dataType: 'string',
+                                                                        text: 'Description',
+                                                                        flex: 1
+                                                                    }
+                                                                ],
                                                                 itemId: 'cboMaterialItem',
                                                                 fieldLabel: 'Material Item',
-                                                                labelWidth: 130
+                                                                labelWidth: 130,
+                                                                displayField: 'strItemNo',
+                                                                valueField: 'intItemId'
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
@@ -304,10 +328,38 @@ Ext.define('Inventory.view.Category', {
                                                                 labelWidth: 130
                                                             },
                                                             {
-                                                                xtype: 'combobox',
+                                                                xtype: 'gridcombobox',
+                                                                columns: [
+                                                                    {
+                                                                        dataIndex: 'intItemId',
+                                                                        dataType: 'numeric',
+                                                                        text: 'Item Id',
+                                                                        hidden: true
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strItemNo',
+                                                                        dataType: 'string',
+                                                                        text: 'Item Number',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strType',
+                                                                        dataType: 'string',
+                                                                        text: 'Item Type',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strDescription',
+                                                                        dataType: 'string',
+                                                                        text: 'Description',
+                                                                        flex: 1
+                                                                    }
+                                                                ],
                                                                 itemId: 'cboFreightItem',
                                                                 fieldLabel: 'Freight Item',
-                                                                labelWidth: 130
+                                                                labelWidth: 130,
+                                                                displayField: 'strItemNo',
+                                                                valueField: 'intItemId'
                                                             }
                                                         ]
                                                     },

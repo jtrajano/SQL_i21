@@ -13,7 +13,6 @@ Ext.define('Inventory.model.CategoryAccount', {
     fields: [
         { name: 'intCategoryAccountId', type: 'int'},
         { name: 'intCategoryId', type: 'int'},
-        { name: 'intLocationId', type: 'int'},
         { name: 'intStoreId', type: 'int'},
         { name: 'strAccountDescription', type: 'string'},
         { name: 'intAccountId', type: 'int'},
