@@ -56,13 +56,13 @@ Harness.start(
     { group: 'ProcessCode',
         items: [
             {
-                url: 'ProcessCode/AddProcessCode.js',
+                url: 'ProcessCode/AddProductionProcess.js',
                 preload: [
                     '../../GlobalComponentEngine/irely/TestEngine.js'
                 ]
             },
             {
-                url: 'ProcessCode/DeleteProcessCode.js',
+                url: 'ProcessCode/DeleteProductionProcess.js',
                 preload: [
                     '../../GlobalComponentEngine/irely/TestEngine.js'
                 ]
@@ -72,13 +72,13 @@ Harness.start(
     { group: 'FeedStockCode',
         items: [
             {
-                url: 'FeedStockCode/AddFeedStockCode.js',  // url of the js file, containing actual test code
+                url: 'FeedStockCode/AddFeedStock.js',  // url of the js file, containing actual test code
                 preload: [
                     '../../GlobalComponentEngine/irely/TestEngine.js'
                 ]
             },
             {
-                url: 'FeedStockCode/DeleteFeedStockCode.js',  // url of the js file, containing actual test code
+                url: 'FeedStockCode/DeleteFeedStock.js',  // url of the js file, containing actual test code
                 preload: [
                     '../../GlobalComponentEngine/irely/TestEngine.js'
                 ]
@@ -196,7 +196,166 @@ Harness.start(
                 ]
             }
         ]
+    },
+    { group: 'ManufacturingCell',
+        items: [
+            {
+                url: 'ManufacturingCell/AddManufacturingCell.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            },
+            {
+                url: 'ManufacturingCell/DeleteManufacturingCell.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            }
+        ]
+    },
+    { group: 'Reason',
+        items: [
+            {
+                url: 'Reason/AddReason.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            },
+            {
+                url: 'Reason/DeleteReason.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            }
+        ]
+    },
+    { group: 'StorageUnitType',
+        items: [
+            {
+                url: 'StorageUnitType/AddStorageUnitType.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            },
+            {
+                url: 'StorageUnitType/DeleteStorageUnitType.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            }
+        ]
+    },
+    { group: 'ItemSubstitution',
+        items: [
+            {
+                url: 'ItemSubstitution/AddItemSubstitution.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            },
+            {
+                url: 'ItemSubstitution/DeleteItemSubstitution.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            }
+        ]
+    },
+    { group: 'Warehouse',
+        items: [
+            {
+                url: 'Warehouse/AddWarehouse.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            },
+            {
+                url: 'Warehouse/DeleteWarehouse.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            }
+        ]
+    },
+    { group: 'CertificationPrograms',
+        items: [
+            {
+                url: 'CertificationPrograms/AddCertificationPrograms.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            },
+            {
+                url: 'CertificationPrograms/DeleteCertificationPrograms.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            }
+        ]
+    },
+    { group: 'ContractDocument',
+        items: [
+            {
+                url: 'ContractDocument/AddContractDocument.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            },
+            {
+                url: 'ContractDocument/DeleteContractDocument.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            }
+        ]
+    },
+    { group: 'LotStatus',
+        items: [
+            {
+                url: 'LotStatus/AddLotStatus.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            },
+            {
+                url: 'LotStatus/DeleteLotStatus.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            }
+        ]
+    },
+    { group: 'Brand',
+        items: [
+            {
+                url: 'Brand/AddBrand.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            },
+            {
+                url: 'Brand/DeleteBrand.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            }
+        ]
+    },
+    { group: 'PackType',
+        items: [
+            {
+                url: 'PackType/AddPackType.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            },
+            {
+                url: 'PackType/DeletePackType.js',  // url of the js file, containing actual test code
+                preload: [
+                    '../../GlobalComponentEngine/irely/TestEngine.js'
+                ]
+            }
+        ]
     }
-
 
 )
