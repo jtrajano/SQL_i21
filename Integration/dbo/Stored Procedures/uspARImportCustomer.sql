@@ -194,7 +194,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			-- INSERT Contact to ssonmst
 			DECLARE @ContactNumber nvarchar(20)
 			
-			select top 1 @ContactNumber = substring(isnull(Ent.strName, ''''), 1,20)
+			select top 1 @ContactNumber = substring(isnull((SELECT top 1 strName FROM tblEntity WHERE intEntityId = Con.intEntityId), ''''), 1,20)
 			FROM tblEntity Ent
 			INNER JOIN tblARCustomer Cus ON Ent.intEntityId = Cus.intEntityId
 			INNER JOIN tblARCustomerToContact CusToCon ON Cus.intDefaultContactId = CusToCon.intARCustomerToContactId
