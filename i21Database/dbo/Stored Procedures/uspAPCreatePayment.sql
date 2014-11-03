@@ -17,6 +17,8 @@ BEGIN
 	DECLARE @paymentId INT
 	DECLARE @vendorId INT
 
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillsId')) DROP TABLE #tmpBillsId
+
 	--Compute Discount Here
 
 	--Compute Interest Here
@@ -119,5 +121,5 @@ BEGIN
 	EXEC sp_executesql @queryPaymentDetail, 
 	N'@paymentId INT',
 	 @paymentId = @paymentId;
-
+	 
 END

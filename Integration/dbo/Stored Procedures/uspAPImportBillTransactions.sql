@@ -277,6 +277,19 @@ BEGIN
 
 			--CREATE PAYMENT
 
+			IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID(''tempdb..#tmpBillsPayment'')) DROP TABLE #tmpBillsPayment;
+
+			CREATE TABLE #tmpBillsPayment (
+				apchk_cbk_no CHAR(4),
+				apchk_vnd_no CHAR(20),
+				apchk_chk_amt DECIMAL(11,2),
+				apchk_rev_dt INT,
+				apchk_chk_no CHAR(16),
+				apchk_disc_amt DECIMAL(11,2),
+				strBillIds NVARCHAR(MAX),
+				id INT IDENTITY(1,1)
+			);
+
 			WITH CTE (apchk_cbk_no, apchk_vnd_no, apchk_chk_amt, apchk_rev_dt, apchk_chk_no, apchk_disc_amt, intBillId)
 			AS (
 				SELECT
@@ -300,6 +313,7 @@ BEGIN
 					AND B.apivc_vnd_no = D.strVendorId COLLATE Latin1_General_CS_AS
 				--ORDER BY A.apchk_rev_dt, A.apchk_cbk_no, A.apchk_chk_no
 			)
+			INSERT INTO #tmpBillsPayment
 			SELECT
 				A.apchk_cbk_no
 				,A.apchk_vnd_no
@@ -315,7 +329,6 @@ BEGIN
 						AND A.apchk_cbk_no = B.apchk_cbk_no
 					   --ORDER BY B.apchk_rev_dt, B.apchk_cbk_no, B.apchk_chk_no
 					  FOR XML PATH('''')), 1, 2, '''') AS BillIds
-			INTO #tmpBillsPayment
 			FROM CTE A
 			GROUP BY A.apchk_cbk_no
 				,A.apchk_vnd_no
@@ -325,19 +338,20 @@ BEGIN
 				,A.apchk_disc_amt
 			--ORDER BY A.apchk_rev_dt, A.apchk_cbk_no, A.apchk_chk_no
 
-			DECLARE @paymentId INT
+			DECLARE @paymentId INT, @key INT;
 
 			WHILE EXISTS(SELECT 1 FROM #tmpBillsPayment)
 			BEGIN
 
-				SELECT TOP 1
+				SELECT TOP(1)
 					@bankAccount = C.intBankAccountId,
 					@intVendorId = B.intVendorId,
 					@paymentInfo = A.apchk_chk_no,
 					@payment = A.apchk_chk_amt,
 					@datePaid = CASE WHEN ISDATE(A.apchk_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apchk_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 					@paymentMethod = (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = ''Check''),
-					@billIds = A.BillIds
+					@billIds = A.strBillIds,
+					@key = id
 				FROM #tmpBillsPayment A
 					INNER JOIN tblAPVendor B
 						ON A.apchk_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
@@ -355,13 +369,14 @@ BEGIN
 						@post = @post,
 						@billId = @billIds
 
-			SET @paymentId = IDENT_CURRENT(''tblAPPayment'')
+				SET @paymentId = IDENT_CURRENT(''tblAPPayment'')
 
-			UPDATE tblAPPayment
-			SET ysnOrigin = 1
-			WHERE intPaymentId = @paymentId
+				UPDATE tblAPPayment
+				SET ysnOrigin = 1
+				WHERE intPaymentId = @paymentId
 
-				DELETE TOP(1) FROM #tmpBillsPayment
+				DELETE FROM #tmpBillsPayment
+				WHERE id = @key
 
 			END
 
