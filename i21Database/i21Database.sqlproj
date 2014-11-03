@@ -769,6 +769,7 @@
     <Build Include="dbo\User Defined Types\ItemGLAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspFRAccountMonitor.sql" />
     <Build Include="dbo\Views\vyuSMOriginColumn.sql" />
+    <Build Include="dbo\Views\vyuAPRecapTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
