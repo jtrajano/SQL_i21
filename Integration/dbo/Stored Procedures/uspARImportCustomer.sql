@@ -190,6 +190,19 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			INNER JOIN tblEntityContact Con ON CusToCon.intContactId = Con.intContactId
 			INNER JOIN tblEntityLocation Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId
 			WHERE strCustomerNumber = @CustomerId
+
+			-- INSERT Contact to ssonmst
+			DECLARE @ContactNumber nvarchar(20)
+			
+			select top 1 @ContactNumber = substring(isnull(Ent.strName, ''''), 1,20)
+			FROM tblEntity Ent
+			INNER JOIN tblARCustomer Cus ON Ent.intEntityId = Cus.intEntityId
+			INNER JOIN tblARCustomerToContact CusToCon ON Cus.intDefaultContactId = CusToCon.intARCustomerToContactId
+			INNER JOIN tblEntityContact Con ON CusToCon.intContactId = Con.intContactId
+			INNER JOIN tblEntityLocation Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId
+			WHERE strCustomerNumber = @CustomerId
+
+			EXEC uspARContactOriginSync @ContactNumber
 		
 
 	RETURN;
