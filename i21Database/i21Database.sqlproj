@@ -766,7 +766,9 @@
     <Build Include="dbo\Functions\fnGetItemCostingOnUnpostErrors.sql" />
     <Build Include="dbo\Views\vyuAPRptVendorHistory.sql" />
     <Build Include="dbo\Views\vyuSMOriginTable.sql" />
-    <Build Include="dbo\User Defined Types\ItemGLAccount.sql" />
+	<Build Include="dbo\User Defined Types\ItemGLAccount.sql" />
+	<Build Include="dbo\Stored Procedures\uspFRAccountMonitor.sql" />
+	<Build Include="dbo\Views\vyuSMOriginColumn.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -787,6 +789,7 @@
     <None Include="dbo\Views\vyuPREmployee.sql" />
     <None Include="Scripts\Post-Deployment\IC\2_MaterialNMFC.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillBatch.sql" />
+    <Build Include="dbo\Tables\tblFRAccountMonitor.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

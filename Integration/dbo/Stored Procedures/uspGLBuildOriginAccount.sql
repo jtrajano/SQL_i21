@@ -71,10 +71,11 @@ BEGIN
 			 strMask				NVARCHAR(100)
 			,strType				NVARCHAR(17)
 			,intAccountStructureId	INT
+			,intSort				INT
 		)
 
 		INSERT INTO #Structure 
-		SELECT strMask, strType, intAccountStructureId
+		SELECT strMask, strType, intAccountStructureId, intSort
 		FROM tblGLAccountStructure WHERE strType <> ''Divider''
 		ORDER BY intSort DESC
 
@@ -106,7 +107,7 @@ BEGIN
 
 		WHILE EXISTS(SELECT 1 FROM #Structure)
 		BEGIN
-			SELECT @strMask = strMask, @strType = strType, @iStructureType = intAccountStructureId FROM #Structure
+			SELECT TOP 1 @strMask = strMask, @strType = strType, @iStructureType = intAccountStructureId FROM #Structure ORDER BY intSort
 			IF @strType = ''Primary'' 
 				BEGIN
 					IF NOT EXISTS (SELECT 1 FROM #ConstructAccount)

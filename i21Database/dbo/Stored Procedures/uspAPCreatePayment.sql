@@ -31,7 +31,7 @@ BEGIN
 		INNER JOIN  #tmpBillsId B
 			ON A.intBillId = B.intID
 		INNER JOIN tblAPVendor C
-			ON A.intVendorId = C.intEntityId
+			ON A.intVendorId = C.intVendorId
 
 	SET @queryPayment = '
 	INSERT INTO tblAPPayment(
