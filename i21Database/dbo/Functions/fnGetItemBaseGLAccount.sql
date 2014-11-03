@@ -10,15 +10,15 @@ BEGIN
 	DECLARE @intGLAccountId AS INT
 
 	--Hierarchy:
-	--1. Item-location is checked first. 
-	--2. If account id is not found in item-location, try the category 
+	--1. Item Account is checked first. 
+	--2. If account id is not found in item-account, try the category 
 	--3. If account id is not found in category, try the company location. 
 
 	-- 1: Try to get the account id from the item (G/L Setup tab)
 	SELECT	@intGLAccountId = intAccountId
 	FROM	tblICItemAccount
 	WHERE	tblICItemAccount.intItemId = @intItemId
-			AND tblICItemAccount.intLocationId = @intLocationId
+			--AND tblICItemAccount.intLocationId = @intLocationId
 			AND tblICItemAccount.strAccountDescription = @strAccountDescription 
 
 	IF @intGLAccountId IS NOT NULL 
@@ -31,7 +31,7 @@ BEGIN
 			INNER JOIN tblICCategoryAccount CatGLAccounts
 				ON Cat.intCategoryId = CatGLAccounts.intCategoryId
 	WHERE	Item.intItemId = @intItemId
-			AND CatGLAccounts.intLocationId = @intLocationId
+			--AND CatGLAccounts.intLocationId = @intLocationId
 			AND CatGLAccounts.strAccountDescription = @strAccountDescription 
 
 	IF @intGLAccountId IS NOT NULL 

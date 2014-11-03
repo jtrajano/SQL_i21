@@ -724,7 +724,7 @@
     <Build Include="dbo\Tables\tblICInventoryReceiptItemTax.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCosting.sql" />
     <Build Include="dbo\Functions\fnGetCostingMethod.sql" />
-    <Build Include="dbo\Functions\fnGetItemGLAccounts.sql" />
+    <Build Include="dbo\Functions\fnGetItemGLAccount.sql" />
     <Build Include="dbo\Functions\fnGetNegativeInventoryOption.sql" />
     <Build Include="dbo\Tables\tblICLotStatus.sql" />
     <Build Include="dbo\Views\vyuEntityEFTInformation.sql" />
@@ -766,9 +766,9 @@
     <Build Include="dbo\Functions\fnGetItemCostingOnUnpostErrors.sql" />
     <Build Include="dbo\Views\vyuAPRptVendorHistory.sql" />
     <Build Include="dbo\Views\vyuSMOriginTable.sql" />
-	<Build Include="dbo\User Defined Types\ItemGLAccount.sql" />
-	<Build Include="dbo\Stored Procedures\uspFRAccountMonitor.sql" />
-	<Build Include="dbo\Views\vyuSMOriginColumn.sql" />
+    <Build Include="dbo\User Defined Types\ItemGLAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRAccountMonitor.sql" />
+    <Build Include="dbo\Views\vyuSMOriginColumn.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

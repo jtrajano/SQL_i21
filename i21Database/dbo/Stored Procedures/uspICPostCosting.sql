@@ -1,16 +1,28 @@
 ﻿
 /*
-	It process each the items submitted for costing. There is cursor used in this procedure. 
-	It iterates over the list of items in @ItemsToProcess. 
+	This is the stored procedure that handles the "posting" of items. 
+	
+	It uses a cursor to iterate over the list of records found in the @ItemsToProcess table-parameter(variable). 
 
 	The each iteration, it does the following: 
 		1. Determines if a stock is for incoming or outgoing then calls the appropriate stored procedure. 
 		2. Determines the type of inventory transaction it is, whether an in, out, or cost adjustment. 
+
+	Parameters: 
+	@ItemsToProcess - A user-defined table type. This is a table variable that tells this SP what items to process. 
+	
+	@strBatchId - The generated batch id from the calling code. This is the same batch id this SP will use when posting the financials of an item. 
+
+	@strAccountDescription - The contra g/l account id to use when posting an item. By default, it is set to "Cost of Goods". 
+				The calling code needs to specify it because each module may use a different contra g/l account against the 
+				Inventory account. For example, a Sales transaction will contra Inventory account with "Cost of Goods" while 
+				Receive stocks from AP module may use "A/P Clearing".
 */
 
 CREATE PROCEDURE [dbo].[uspICPostCosting]
 	@ItemsToProcess AS ItemCostingTableType READONLY
 	,@strBatchId AS NVARCHAR(20)
+	,@strAccountDescription AS NVARCHAR(255) = 'Cost of Goods'
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -75,10 +87,21 @@ BEGIN
 	SELECT @CostingMethod = dbo.fnGetCostingMethod(@intItemId, @intItemLocationId)
 			,@NegativeInventoryOption = dbo.fnGetNegativeInventoryOptions(@intItemId, @intItemLocationId);
 
-	-- Get the g/l accounts for the item based on its item level setup, category setup, or location setup. 
-	INSERT INTO @GLAccounts (Inventory, CostOfGoods, PurchaseAccount)	
-	SELECT	Inventory, CostOfGoods, PurchaseAccount
-	FROM	dbo.fnGetItemGLAccounts(@intItemId, @intItemLocationId); 
+	-- Get the g/l accounts id to use. 
+	-- 1. Internal values: Retrieve Inventory, RevalueSold, WriteOffSold, and AutoNegative. 
+	-- 2. Defined value: retrieve the contra-g/l account id (ContraInventory). 
+	INSERT INTO @GLAccounts (
+		Inventory
+		,ContraInventory
+		,RevalueSold
+		,WriteOffSold
+		,AutoNegative
+	)
+	SELECT	Inventory = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, 'Inventory')
+			,ContraInventory = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, @strAccountDescription)
+			,RevalueSold = NULL -- TODO
+			,WriteOffSold = NULL -- TODO
+			,AutoNegative = NULL -- TODO
 
 	-- Moving Average Cost
 

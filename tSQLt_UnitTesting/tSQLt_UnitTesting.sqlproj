@@ -202,8 +202,7 @@
     <Build Include="testi21Database\Functions\test the fnAddZeroPrefixes function.sql" />
     <Build Include="testi21Database\Stored Procedures\test the uspCMAddDeposit stored procedure.sql" />
     <Build Include="testi21Database\Functions\test the fnGetCostingMethod function.sql" />
-    <Build Include="testi21Database\Functions\test the fnGetItemGLAccounts function.sql" />
-    <Build Include="testi21Database\Functions\test the fnGetItemBaseGLAccount function.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemGLAccount function for purchase account.sql" />
     <Build Include="testi21Database\Scripts\test the constraints of tblAPBill.sql" />
     <Build Include="testi21Database\Scripts\test the constraints of tblAPBillBatch.sql" />
     <Build Include="testi21Database\Scripts\test the constraints of tblAPPayment.sql" />
@@ -230,6 +229,13 @@
     <Build Include="testi21Database\Stored Procedures\Fake data for items in a transaction to unpost.sql" />
     <Build Include="testi21Database\Functions\test the fnGetItemsToUnpost function.sql" />
     <Build Include="testi21Database\Functions\test the fnGetItemCostingOnUnpostErrors function.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemGLAccount function for bad inputs.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemGLAccount function for cost of goods.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemBaseGLAccount function for bad inputs.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemBaseGLAccount function for item-level.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemBaseGLAccount function for category level.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemBaseGLAccount function for location level.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemBaseGLAccount function for profit center.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
