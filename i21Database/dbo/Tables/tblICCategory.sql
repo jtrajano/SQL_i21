@@ -3,6 +3,7 @@
 	[intCategoryId] INT NOT NULL IDENTITY , 
     [strCategoryCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[strLineOfBusiness] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intCatalogGroupId] INT NULL, 
     [intCostingMethod] INT NOT NULL DEFAULT 1,
     [strInventoryTracking] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
@@ -14,23 +15,7 @@
 	[intMaterialItemId] INT NULL, 
     [ysnAutoCalculateFreight] BIT NULL DEFAULT ((0)), 
 	[intFreightItemId] INT NULL, 
-	[ysnNonRetailUseDepartment] BIT NULL, 
-	[ysnReportNetGross] BIT NULL DEFAULT ((0)), 
-	[ysnDepartmentPumps] BIT NULL DEFAULT ((0)), 
 
-    [intConvertPaidOutId] INT NULL, 
-    [ysnDeleteRegister] BIT NULL DEFAULT ((0)), 
-    [ysnDepartmentKeyTaxed] BIT NULL DEFAULT ((0)), 
-    [intProductCodeId] INT NULL, 
-    [intFamilyId] INT NULL, 
-    [intClassId] INT NULL, 
-    [ysnFoodStampable] BIT NULL DEFAULT ((0)), 
-    [ysnReturnable] BIT NULL DEFAULT ((0)), 
-    [ysnSaleable] BIT NULL DEFAULT ((0)), 
-    [ysnPrepriced] BIT NULL DEFAULT ((0)), 
-    [ysnIdRequiredLiquor] BIT NULL DEFAULT ((0)), 
-    [ysnIdRequiredCigarette] BIT NULL DEFAULT ((0)), 
-    [intMinimumAge] INT NULL DEFAULT ((0)), 
     [strERPItemClass] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [dblLifeTime] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblBOMItemShrinkage] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -190,149 +175,37 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'intFreightItemId'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Non Retail Use Department',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICCategory',
-    @level2type = N'COLUMN',
-    @level2name = N'ysnNonRetailUseDepartment'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Report in Net or Gross',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICCategory',
-    @level2type = N'COLUMN',
-    @level2name = N'ysnReportNetGross'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Department for Pumps',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICCategory',
-    @level2type = N'COLUMN',
-    @level2name = N'ysnDepartmentPumps'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Convert to PaidOut Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICCategory',
-    @level2type = N'COLUMN',
-    @level2name = N'intConvertPaidOutId'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Delete from Register',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICCategory',
-    @level2type = N'COLUMN',
-    @level2name = N'ysnDeleteRegister'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Department Key Taxed',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICCategory',
-    @level2type = N'COLUMN',
-    @level2name = N'ysnDepartmentKeyTaxed'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Default Product Code Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICCategory',
-    @level2type = N'COLUMN',
-    @level2name = N'intProductCodeId'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Default Family Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICCategory',
-    @level2type = N'COLUMN',
-    @level2name = N'intFamilyId'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Default Class Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICCategory',
-    @level2type = N'COLUMN',
-    @level2name = N'intClassId'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Default Food Stampable',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICCategory',
-    @level2type = N'COLUMN',
-    @level2name = N'ysnFoodStampable'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Default Returnable',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICCategory',
-    @level2type = N'COLUMN',
-    @level2name = N'ysnReturnable'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Default Salesable',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICCategory',
-    @level2type = N'COLUMN',
-    @level2name = N'ysnSaleable'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Default Pre-priced',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICCategory',
-    @level2type = N'COLUMN',
-    @level2name = N'ysnPrepriced'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Default Id Required (Liquor)',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICCategory',
-    @level2type = N'COLUMN',
-    @level2name = N'ysnIdRequiredLiquor'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Default Id Required (Cigarette)',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICCategory',
-    @level2type = N'COLUMN',
-    @level2name = N'ysnIdRequiredCigarette'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Default Minimum Age',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICCategory',
-    @level2type = N'COLUMN',
-    @level2name = N'intMinimumAge'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'ERP Item Class',
@@ -522,3 +395,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICCategory',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Line Of Business',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICCategory',
+    @level2type = N'COLUMN',
+    @level2name = N'strLineOfBusiness'

@@ -2,7 +2,7 @@
 (
 	[intCategoryVendorId] INT NOT NULL IDENTITY, 
 	[intCategoryId] INT NOT NULL, 
-    [intStoreId] INT NULL, 
+    [intLocationId] INT NULL, 
     [intVendorId] INT NULL, 
     [strVendorDepartment] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL  , 
     [ysnAddOrderingUPC] BIT NULL, 
@@ -13,6 +13,7 @@
     [intSellClassId] INT NULL, 
     [intOrderClassId] INT NULL, 
     [strComments] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
+	[intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICCategoryVendor] PRIMARY KEY ([intCategoryVendorId]), 
     CONSTRAINT [FK_tblICCategoryVendor_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]), 
@@ -45,7 +46,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblICCategoryVendor',
     @level2type = N'COLUMN',
-    @level2name = N'intStoreId'
+    @level2name = 'intLocationId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Vendor Id',

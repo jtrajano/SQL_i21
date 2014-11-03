@@ -8,6 +8,7 @@ CREATE PROCEDURE [dbo].[uspICProcessCosting]
 	,@ysnPost AS BIT
 	,@intTransactionId INT
 	,@intTransactionTypeId INT
+	,@strAccountDescription AS NVARCHAR(255) = 'Cost of Goods'
 AS
 
 SET QUOTED_IDENTIFIER OFF

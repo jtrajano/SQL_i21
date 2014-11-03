@@ -938,4 +938,137 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intLineCapacityRateUnitMeasureId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="cc36a062-19d3-4136-b372-748ab6d20e68" ChangeDateTime="10/29/2014 03:55:05">
+    <Property Name="ElementName" Value="[dbo].[tblICStorageUnitType].[strUnitType]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICStorageUnitType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intUnitTypeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="56933090-06e7-4e85-888d-0b02cdfd3405" ChangeDateTime="10/30/2014 08:22:29">
+    <Property Name="ElementName" Value="[dbo].[tblICRinFuelType].[intRinFuelTypeId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICRinFuelType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intFuelCategoryId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="96c8e67c-5836-4275-b9a9-e467734cef91" ChangeDateTime="10/30/2014 08:22:37">
+    <Property Name="ElementName" Value="[dbo].[tblICRinFuelType].[dblEquivalenceValue]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICRinFuelType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strEquivalenceValue" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="fbfbecfd-b736-4df0-a606-fc3dbba573ab" ChangeDateTime="10/30/2014 08:24:07">
+    <Property Name="ElementName" Value="[dbo].[tblICFuelCategory].[strRinFuelTypeCode]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICFuelCategory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strFuelCategory" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="44704e80-3b9f-4a45-8b3a-7b0749f4d679" ChangeDateTime="10/30/2014 08:24:13">
+    <Property Name="ElementName" Value="[dbo].[tblICFuelCategory].[strFuelCategory]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICFuelCategory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strFuelCategoryCode" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="dc54729c-2bec-4f9c-ad26-21686c2255fc" ChangeDateTime="10/30/2014 08:26:34">
+    <Property Name="ElementName" Value="[dbo].[tblICRinFeedStock].[intRinFeedStockId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICRinFeedStock]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intFeedStockId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5ec89f40-fa0a-45ce-a42c-9e3639c7ce70" ChangeDateTime="10/30/2014 08:26:37">
+    <Property Name="ElementName" Value="[dbo].[tblICRinFeedStock].[strRinFeedStockCode]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICRinFeedStock]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strFeedStockCode" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="78ca0394-1fa5-4e3c-b9b7-78ec2c668b5f" ChangeDateTime="10/30/2014 08:29:33">
+    <Property Name="ElementName" Value="[dbo].[tblICFeedStock].[intFeedStockId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICFeedStock]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intRinFeedStockId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a1087144-306c-4a04-9ef9-168d6c8fe978" ChangeDateTime="10/30/2014 08:29:36">
+    <Property Name="ElementName" Value="[dbo].[tblICFeedStock].[strFeedStockCode]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICFeedStock]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strRinFeedStockCode" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b129119a-9628-422a-97f4-8f09e9798388" ChangeDateTime="10/30/2014 08:29:43">
+    <Property Name="ElementName" Value="[dbo].[tblICFuelCategory].[intFuelCategoryId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICFuelCategory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intRinFuelCategoryId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="10c2ab3d-6cad-409c-9446-9e9752e2bbe0" ChangeDateTime="10/30/2014 08:29:48">
+    <Property Name="ElementName" Value="[dbo].[tblICFuelCategory].[strFuelCategoryCode]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICFuelCategory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strRinFuelCategoryCode" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e3a031b5-55cf-4301-b0b8-cd1c0baf1aca" ChangeDateTime="10/30/2014 11:18:34">
+    <Property Name="ElementName" Value="[dbo].[tblICFuelType].[intRinFuelTypeId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICFuelType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intRinFuelCategoryId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="f02f3a2a-8918-4a0b-85d8-dbc284a30204" ChangeDateTime="10/30/2014 11:18:53">
+    <Property Name="ElementName" Value="[dbo].[tblICFuelType].[intEquivalenceValue]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICFuelType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strEquivalenceValue" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="abb62a91-0232-47a1-9441-34af38944d91" ChangeDateTime="10/31/2014 03:28:33">
+    <Property Name="ElementName" Value="[dbo].[tblICManufacturingCell].[strStatus]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICManufacturingCell]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnActive" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5b8d3ef7-37e2-436a-a646-af029770c99f" ChangeDateTime="11/03/2014 03:16:08">
+    <Property Name="ElementName" Value="[dbo].[tblICCategoryLocation].[intCategoryStoreId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCategoryLocation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCategoryLocationId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a0af35a2-13a3-4dcc-b4de-3db41b6be202" ChangeDateTime="11/03/2014 03:21:40">
+    <Property Name="ElementName" Value="[dbo].[tblICCategoryLocation].[intProductCode]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCategoryLocation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intProductCodeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a746d9a9-32de-485b-b565-888ca038ee85" ChangeDateTime="11/03/2014 03:21:44">
+    <Property Name="ElementName" Value="[dbo].[tblICCategoryLocation].[intConvertPaidOut]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCategoryLocation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intConvertPaidOutId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="852a3b60-7104-486a-a7b9-b672217778a9" ChangeDateTime="11/03/2014 03:23:37">
+    <Property Name="ElementName" Value="[dbo].[tblICCategoryLocation].[ysnIDRequiredLiquor]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCategoryLocation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnIdRequiredLiquor" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9cfbf563-d528-4f14-b08b-21aa294f1bf0" ChangeDateTime="11/03/2014 03:40:11">
+    <Property Name="ElementName" Value="[dbo].[tblICCategoryVendor].[intStoreId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCategoryVendor]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intLocationId" />
+  </Operation>
 </Operations>

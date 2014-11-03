@@ -53,6 +53,12 @@ BEGIN
 			RETURN;
 		END
 
+		IF(@UserId <= 0)
+		BEGIN
+			RAISERROR(''You cannot import without user.'', 16, 1);
+			RETURN;
+		END
+
 		--Payment variable
 		DECLARE @bankAccount INT,
 					@paymentMethod INT,

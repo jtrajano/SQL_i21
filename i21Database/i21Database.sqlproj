@@ -649,7 +649,7 @@
     <Build Include="dbo\Tables\tblICCatalog.sql" />
     <Build Include="dbo\Tables\tblICCategory.sql" />
     <Build Include="dbo\Tables\tblICCategoryAccount.sql" />
-    <Build Include="dbo\Tables\tblICCategoryStore.sql" />
+    <Build Include="dbo\Tables\tblICCategoryLocation.sql" />
     <Build Include="dbo\Tables\tblICCategoryVendor.sql" />
     <Build Include="dbo\Tables\tblICClass.sql" />
     <Build Include="dbo\Tables\tblICCommodity.sql" />
@@ -664,7 +664,7 @@
     <Build Include="dbo\Tables\tblICRinFeedStock.sql" />
     <Build Include="dbo\Tables\tblICRinFeedStockUOM.sql" />
     <Build Include="dbo\Tables\tblICRinFuel.sql" />
-    <Build Include="dbo\Tables\tblICRinFuelType.sql" />
+    <Build Include="dbo\Tables\tblICRinFuelCategory.sql" />
     <Build Include="dbo\Tables\tblICRinProcess.sql" />
     <Build Include="dbo\Tables\tblICTag.sql" />
     <Build Include="dbo\Tables\tblICUnitMeasure.sql" />
@@ -724,7 +724,7 @@
     <Build Include="dbo\Tables\tblICInventoryReceiptItemTax.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCosting.sql" />
     <Build Include="dbo\Functions\fnGetCostingMethod.sql" />
-    <Build Include="dbo\Functions\fnGetItemGLAccounts.sql" />
+    <Build Include="dbo\Functions\fnGetItemGLAccount.sql" />
     <Build Include="dbo\Functions\fnGetNegativeInventoryOption.sql" />
     <Build Include="dbo\Tables\tblICLotStatus.sql" />
     <Build Include="dbo\Views\vyuEntityEFTInformation.sql" />
@@ -765,6 +765,10 @@
     <Build Include="dbo\Functions\fnGetItemsToUnpost.sql" />
     <Build Include="dbo\Functions\fnGetItemCostingOnUnpostErrors.sql" />
     <Build Include="dbo\Views\vyuAPRptVendorHistory.sql" />
+    <Build Include="dbo\Views\vyuSMOriginTable.sql" />
+    <Build Include="dbo\User Defined Types\ItemGLAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRAccountMonitor.sql" />
+    <Build Include="dbo\Views\vyuSMOriginColumn.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -785,6 +789,7 @@
     <None Include="dbo\Views\vyuPREmployee.sql" />
     <None Include="Scripts\Post-Deployment\IC\2_MaterialNMFC.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillBatch.sql" />
+    <Build Include="dbo\Tables\tblFRAccountMonitor.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
