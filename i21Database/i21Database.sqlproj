@@ -649,7 +649,7 @@
     <Build Include="dbo\Tables\tblICCatalog.sql" />
     <Build Include="dbo\Tables\tblICCategory.sql" />
     <Build Include="dbo\Tables\tblICCategoryAccount.sql" />
-    <Build Include="dbo\Tables\tblICCategoryStore.sql" />
+    <Build Include="dbo\Tables\tblICCategoryLocation.sql" />
     <Build Include="dbo\Tables\tblICCategoryVendor.sql" />
     <Build Include="dbo\Tables\tblICClass.sql" />
     <Build Include="dbo\Tables\tblICCommodity.sql" />

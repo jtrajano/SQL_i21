@@ -18,7 +18,6 @@ BEGIN
 	SELECT	@intGLAccountId = intAccountId
 	FROM	tblICItemAccount
 	WHERE	tblICItemAccount.intItemId = @intItemId
-			--AND tblICItemAccount.intLocationId = @intLocationId
 			AND tblICItemAccount.strAccountDescription = @strAccountDescription 
 
 	IF @intGLAccountId IS NOT NULL 
@@ -31,7 +30,6 @@ BEGIN
 			INNER JOIN tblICCategoryAccount CatGLAccounts
 				ON Cat.intCategoryId = CatGLAccounts.intCategoryId
 	WHERE	Item.intItemId = @intItemId
-			--AND CatGLAccounts.intLocationId = @intLocationId
 			AND CatGLAccounts.strAccountDescription = @strAccountDescription 
 
 	IF @intGLAccountId IS NOT NULL 
