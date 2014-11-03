@@ -108,7 +108,6 @@ namespace iRely.Inventory.Model
         //public bool ysnAutomaticCashDepositEntries { get; set; }
 
         public ICollection<tblICItemNote> tblICItemNotes { get; set; }
-        public ICollection<tblICItemAccount> tblICItemAccounts { get; set; }
         public ICollection<tblICItemCustomerXref> tblICItemCustomerXrefs { get; set; }
         public ICollection<tblICItemVendorXref> tblICItemVendorXrefs { get; set; }
         public ICollection<tblICItemContract> tblICItemContracts { get; set; }

@@ -15,7 +15,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intAccountId).HasColumnName("intAccountId");
             this.Property(t => t.intItemAccountId).HasColumnName("intItemAccountId");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
-            this.Property(t => t.intLocationId).HasColumnName("intLocationId");
             this.Property(t => t.intProfitCenterId).HasColumnName("intProfitCenterId");
             this.Property(t => t.intSort).HasColumnName("intSort");
             this.Property(t => t.strAccountDescription).HasColumnName("strAccountDescription");
@@ -26,9 +25,6 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.ProfitCenter)
                 .WithMany(p => p.tblICItemAccountProfitCenters)
                 .HasForeignKey(p => p.intProfitCenterId);
-            this.HasOptional(p => p.tblSMCompanyLocation)
-                .WithMany(p => p.tblICItemAccounts)
-                .HasForeignKey(p => p.intLocationId);
         }
     }
 }

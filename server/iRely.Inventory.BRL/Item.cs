@@ -71,9 +71,7 @@ namespace iRely.Inventory.BRL
                     .Include("tblICItemVendorXrefs.tblICUnitMeasure")
                     .Include("tblICItemContracts.tblSMCompanyLocation")
                     .Include("tblICItemContracts.tblSMCountry")
-
                     .Include("tblICItemContracts.tblICItemContractDocuments.tblICDocument")
-
                     .Include("tblICItemCertifications.tblICCertification")
                     .Include("tblICItemPricings.tblSMCompanyLocation")
                     .Include("tblICItemPricingLevels.tblSMCompanyLocation")
@@ -85,15 +83,12 @@ namespace iRely.Inventory.BRL
                     .Include("tblICItemStocks.tblICCountGroup")
                     .Include("tblICItemAccounts.tblGLAccount")
                     .Include("tblICItemAccounts.ProfitCenter")
-                    .Include("tblICItemAccounts.tblSMCompanyLocation")
-
                     .Include("tblICItemAssemblies.AssemblyItem")
                     .Include("tblICItemAssemblies.tblICUnitMeasure")
                     .Include("tblICItemBundles.BundleItem")
                     .Include("tblICItemBundles.tblICUnitMeasure")
                     .Include("tblICItemKits.tblICItemKitDetails.tblICItem")
                     .Include("tblICItemKits.tblICItemKitDetails.tblICUnitMeasure")
-
                     .Include("tblICItemNotes.tblSMCompanyLocation")
                     .Where(w => query.Where(predicate).Any(a => a.intItemId == w.intItemId)) //Filter the Main DataSource Based on Search Query
                     .OrderBySelector(sortSelector)
