@@ -17,7 +17,7 @@ StartTest (function (t) {
         .checkScreenShown ('fuelcategory').wait(100)
         .checkScreenWindow({alias: 'fuelcategory', title: 'Fuel Category', collapse: true, maximize: true, minimize: false, restore: false, close: true })
         .checkToolbarButton({new: false, save: true, search: false, delete: false, undo: true, close: true})
-        .checkControlVisible(['#colFuelTypeCode', '#colDescription', '#colEquivalanceValue'], true)/*change to #colFuelCategoryCode, #colEquivalenceValue*/
+        .checkControlVisible(['#colRinFuelCategoryCode', '#colDescription', '#colEquivalenceValue'], true)
         .checkControlVisible('#btnDeleteFuelCategory', true)
         .checkControlVisible(['#btnHelp', '#btnSupport', '#btnFieldName'], true)
         .checkStatusBar()
@@ -26,10 +26,12 @@ StartTest (function (t) {
 
             /* 2. Multiple Data entry */
         .addFunction(function(next){t.diag("Scenario 1. Add new records > 2. Multiple Data entry"); next();}).wait(100)
-        .enterGridData('#grdFuelCategory', 0, 'colFuelTypeCode', 'fcc01').wait(100)
-        .enterGridData('#grdFuelCategory', 0, 'colDescription', 'fuel category 01').wait(100)
-        .enterGridData('#grdFuelCategory', 1, 'colFuelTypeCode', 'fcc02').wait(100)
-        .enterGridData('#grdFuelCategory', 1, 'colDescription', 'fuel category 02').wait(100)
+        .enterGridData('#grdGridTemplate', 0, 'colRinFuelCategoryCode', 'fcc01').wait(100)
+        .enterGridData('#grdGridTemplate', 0, 'colDescription', 'fuel category 01').wait(100)
+        .enterGridData('#grdGridTemplate', 0, 'colEquivalenceValue', '1.0 Test EV').wait(100)
+        .enterGridData('#grdGridTemplate', 1, 'colRinFuelCategoryCode', 'fcc02').wait(100)
+        .enterGridData('#grdGridTemplate', 1, 'colDescription', 'fuel category 02').wait(100)
+        .enterGridData('#grdGridTemplate', 1, 'colEquivalenceValue', '2.25 Test EV').wait(100)
         .checkStatusMessage('Edited')
         .clickButton('#btnSave').wait(100)
         .checkStatusMessage('Saved').wait(100)
@@ -41,10 +43,10 @@ StartTest (function (t) {
         .addFunction(function(next){t.diag("Scenario 1. Add new records > 3. Verify record added"); next();}).wait(100)
         .openScreen('Fuel Category').wait(200)
         .checkScreenShown ('fuelcategory').wait(100)
-        .checkGridData('#grdFuelCategory', 0, 'colFuelTypeCode','fcc01')
-        .checkGridData('#grdFuelCategory', 0, 'colDescription','fuel category 01')
-        .checkGridData('#grdFuelCategory', 1, 'colFuelTypeCode','fcc02')
-        .checkGridData('#grdFuelCategory', 1, 'colDescription','fuel category 02')
+        .checkGridData('#grdGridTemplate', 0, 'colRinFuelCategoryCode','fcc01')
+        .checkGridData('#grdGridTemplate', 0, 'colDescription','fuel category 01')
+        .checkGridData('#grdGridTemplate', 1, 'colRinFuelCategoryCode','fcc02')
+        .checkGridData('#grdGridTemplate', 1, 'colDescription','fuel category 02')
 
 
         /* Scenario 2. Add another record, click Close button, do NOT save the changes */
@@ -52,8 +54,9 @@ StartTest (function (t) {
         .addFunction(function(next){t.diag("Scenario 2. Add another record, click Close button, do NOT save the changes"); next();}).wait(100)
         .openScreen('Fuel Category').wait(200)
         .checkScreenShown ('fuelcategory').wait(100)
-        .enterGridData('#grdFuelCategory', 2, 'colFuelTypeCode', 'fcc03').wait(100)
-        .enterGridData('#grdFuelCategory', 2, 'colDescription', 'fuel category 03').wait(100)
+        .enterGridData('#grdGridTemplate', 2, 'colRinFuelCategoryCode', 'fcc03').wait(100)
+        .enterGridData('#grdGridTemplate', 2, 'colDescription', 'fuel category 03').wait(100)
+        .enterGridData('#grdGridTemplate', 2, 'colEquivalenceValue', '3.5 Test EV').wait(100)
         .clickButton('#btnClose').wait(100)
         .checkMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel', 'question')
         .clickMessageBoxButton('no').wait(10)
@@ -67,8 +70,9 @@ StartTest (function (t) {
         .addFunction(function(next){t.diag("Scenario 3. Add another record, click Close button, Cancel"); next();}).wait(100)
         .openScreen('Fuel Category').wait(200)
         .checkScreenShown ('fuelcategory').wait(100)
-        .enterGridData('#grdFuelCategory', 2, 'colFuelTypeCode', 'fcc03').wait(100)
-        .enterGridData('#grdFuelCategory', 2, 'colDescription', 'fuel category 03').wait(100)
+        .enterGridData('#grdGridTemplate', 2, 'colRinFuelCategoryCode', 'fcc03').wait(100)
+        .enterGridData('#grdGridTemplate', 2, 'colDescription', 'fuel category 03').wait(100)
+        .enterGridData('#grdGridTemplate', 2, 'colEquivalenceValue', '3.5 Test EV').wait(100)
         .clickButton('#btnClose').wait(100)
         .checkMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel', 'question')
         .clickMessageBoxButton('cancel').wait(10)
@@ -85,8 +89,8 @@ StartTest (function (t) {
         .addFunction(function(next){t.diag("Scenario 2. Add another record, click Close button, do NOT save the changes > 2. Verify record added"); next();}).wait(100)
         .openScreen('Fuel Category').wait(200)
         .checkScreenShown ('fuelcategory').wait(100)
-        .checkGridData('#grdFuelCategory', 2, 'colFuelTypeCode','fcc03')
-        .checkGridData('#grdFuelCategory', 2, 'colDescription','fuel category 03')
+        .checkGridData('#grdGridTemplate', 2, 'colRinFuelCategoryCode','fcc03')
+        .checkGridData('#grdGridTemplate', 2, 'colDescription','fuel category 03')
 
 
 
@@ -94,15 +98,16 @@ StartTest (function (t) {
         .addFunction(function(next){t.diag("Scenario 5. Add duplicate record > FuelTypeCode"); next();}).wait(100)
         .openScreen('Fuel Category').wait(200)
         .checkScreenShown ('fuelcategory').wait(100)
-        .enterGridData('#grdFuelCategory', 3, 'colFuelTypeCode', 'fcc03').wait(100)
-        .enterGridData('#grdFuelCategory', 3, 'colDescription', 'fuel category 04').wait(100)
+        .enterGridData('#grdGridTemplate', 3, 'colRinFuelCategoryCode', 'fcc03').wait(100)
+        .enterGridData('#grdGridTemplate', 3, 'colDescription', 'fuel category 04').wait(100)
+        .enterGridData('#grdGridTemplate', 3, 'colEquivalenceValue', '4 Test EV').wait(100)
         .clickButton('#btnSave').wait(100)
         .checkMessageBox('iRely i21','Fuel Category already exists.','ok','error') /*issue - IC-84 */
         .clickMessageBoxButton('ok').wait(10)
 
         /*Scenario 6. Modify duplicate FuelTypeCode to correct it*/
         .addFunction(function(next){t.diag("Scenario 6. Modify duplicate FuelTypeCode to correct it"); next();}).wait(100)
-        .enterGridData('#grdFuelCategory', 3, 'colFuelTypeCode', 'fcc04').wait(100) /*issue - IC-81 */
+        .enterGridData('#grdGridTemplate', 3, 'colRinFuelCategoryCode', 'fcc04').wait(100) /*issue - IC-81 */
         .clickButton('#closeButton').wait(100)
         .checkMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel', 'question')
         .clickMessageBoxButton('yes').wait(500) /*issue - FRM-1562 */
