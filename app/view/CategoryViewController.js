@@ -42,7 +42,10 @@ Ext.define('Inventory.view.CategoryViewController', {
                 value: '{current.intCostingMethod}',
                 store: '{costingMethods}'
             },
-            cboInventoryTracking: '{current.strInventoryTracking}',
+            cboInventoryTracking: {
+                value: '{current.strInventoryTracking}',
+                store: '{inventoryTrackings}'
+            },
             txtStandardQty: '{current.dblStandardQty}',
             cboStandardUom: {
                 value: '{current.intUOMId}',
@@ -85,6 +88,30 @@ Ext.define('Inventory.view.CategoryViewController', {
                         store: '{glAccount}'
                     }
                 }
+            },
+
+            grdVendorCategoryXref: {
+                colVendorLocation: {
+                    dataIndex: 'strLocationName',
+                    editor: {
+                        store: '{location}'
+                    }
+                },
+                colVendorId: {
+                    dataIndex: 'strVendorId',
+                    editor: {
+                        store: '{vendor}'
+                    }
+                },
+                colVendorDepartment: '',
+                colVendorAddOrderUPC: '',
+                colVendorUpdateExisting: '',
+                colVendorAddNew: '',
+                colVendorUpdatePrice: '',
+                colVendorFamily: '',
+                colVendorSellClass: '',
+                colVendorOrderClass: '',
+                colVendorComments: ''
             },
 
             txtERPItemClass: '{current.strERPItemClass}',

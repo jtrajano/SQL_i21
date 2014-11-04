@@ -20,7 +20,9 @@ Ext.define('Inventory.view.CategoryViewModel', {
     requires: [
         'Inventory.store.BufferedUnitMeasure',
         'Inventory.store.BufferedCompactItem',
-        'GeneralLedger.store.BufAccountId'
+        'GeneralLedger.store.BufAccountId',
+        //'AccountsPayable.store.VendorBuffered',
+        'i21.store.CompanyLocation'
     ],
 
     stores: {
@@ -111,6 +113,22 @@ Ext.define('Inventory.view.CategoryViewModel', {
                 }
             ]
         },
+        inventoryTrackings: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Item Level'
+                },
+                {
+                    strDescription: 'Category Level'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
         unitMeasures:{
             type: 'inventorybuffereduom'
         },
@@ -122,7 +140,13 @@ Ext.define('Inventory.view.CategoryViewModel', {
         },
         glAccount: {
             type: 'bufAccountid'
+        },
+        location: {
+            type: 'companylocation'
         }
+//        vendor: {
+//            type: 'vendorbuffered'
+//        }
     }
 
 });

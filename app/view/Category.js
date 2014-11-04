@@ -20,6 +20,7 @@ Ext.define('Inventory.view.Category', {
     requires: [
         'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
+        'Inventory.view.Statusbar1',
         'Ext.toolbar.Separator',
         'Ext.form.Panel',
         'Ext.tab.Panel',
@@ -627,60 +628,153 @@ Ext.define('Inventory.view.Category', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colVendorLocation',
                                                         width: 110,
                                                         dataIndex: 'string',
-                                                        text: 'Location'
+                                                        text: 'Location',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intCompanyLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strLocationName',
+                                                                    dataType: 'string',
+                                                                    text: 'Location Name',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strLocationType',
+                                                                    dataType: 'string',
+                                                                    text: 'Location Type',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboVendorLocation',
+                                                            displayField: 'strLocationName',
+                                                            valueField: 'strLocationName'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colVendorId',
                                                         dataIndex: 'string',
-                                                        text: 'Vendor'
+                                                        text: 'Vendor',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intVendorId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Vendor Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strVendorId',
+                                                                    dataType: 'string',
+                                                                    text: 'Vendor No',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strVendorName',
+                                                                    dataType: 'string',
+                                                                    text: 'Vendor Name',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboVendorId',
+                                                            displayField: 'strVendorId',
+                                                            valueField: 'strVendorId'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colVendorDepartment',
                                                         width: 105,
                                                         dataIndex: 'string',
-                                                        text: 'Vendor<br>Department'
+                                                        text: 'Vendor<br>Department',
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',
-                                                        text: 'Add Ordering<br>UPC to Pricebook'
+                                                        itemId: 'colVendorAddOrderUPC',
+                                                        text: 'Add Ordering<br>UPC to Pricebook',
+                                                        editor: {
+                                                            xtype: 'checkboxfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',
-                                                        text: 'Update<br>Existing Records'
+                                                        itemId: 'colVendorUpdateExisting',
+                                                        text: 'Update<br>Existing Records',
+                                                        editor: {
+                                                            xtype: 'checkboxfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',
+                                                        itemId: 'colVendorAddNew',
                                                         width: 86,
-                                                        text: 'Add<br>New Records'
+                                                        text: 'Add<br>New Records',
+                                                        editor: {
+                                                            xtype: 'checkboxfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',
+                                                        itemId: 'colVendorUpdatePrice',
                                                         width: 67,
-                                                        text: 'Update<br>Price'
+                                                        text: 'Update<br>Price',
+                                                        editor: {
+                                                            xtype: 'checkboxfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colVendorFamily',
                                                         dataIndex: 'string',
-                                                        text: 'Default<br>Family'
+                                                        text: 'Default<br>Family',
+                                                        editor: {
+                                                            xtype: 'combobox',
+                                                            itemId: 'cboVendorFamily'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colVendorSellClass',
                                                         dataIndex: 'string',
-                                                        text: 'Default<br>Sell Class'
+                                                        text: 'Default<br>Sell Class',
+                                                        editor: {
+                                                            xtype: 'combobox',
+                                                            itemId: 'cboVendorSellClass'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colVendorOrderClass',
                                                         width: 105,
                                                         dataIndex: 'string',
-                                                        text: 'Default order class'
+                                                        text: 'Default order class',
+                                                        editor: {
+                                                            xtype: 'combobox',
+                                                            itemId: 'cboVendorOrderClass'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colVendorComments',
                                                         width: 400,
                                                         dataIndex: 'string',
-                                                        text: 'Comments'
+                                                        text: 'Comments',
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
                                                     }
                                                 ],
                                                 viewConfig: {
@@ -688,7 +782,14 @@ Ext.define('Inventory.view.Category', {
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'
-                                                })
+                                                }),
+                                                plugins: [
+                                                    {
+                                                        ptype: 'cellediting',
+                                                        pluginId: 'cepVendor',
+                                                        clicksToEdit: 1
+                                                    }
+                                                ]
                                             }
                                         ]
                                     },
@@ -1012,6 +1113,11 @@ Ext.define('Inventory.view.Category', {
                             {
                                 xtype: 'ipagingstatusbar',
                                 itemId: 'tlbStatusbarPaging',
+                                flex: 1,
+                                dock: 'bottom'
+                            },
+                            {
+                                xtype: 'statusbar1',
                                 flex: 1,
                                 dock: 'bottom'
                             }
