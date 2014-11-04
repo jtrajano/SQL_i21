@@ -79,4 +79,93 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strCountry).HasColumnName("strCountry");   
         }
     }
+
+    public class tblSTStoreMap : EntityTypeConfiguration<tblSTStore>
+    {
+        public tblSTStoreMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intStoreId);
+
+            // Table & Column Mappings
+            this.ToTable("tblSTStore");
+            this.Property(t => t.intStoreId).HasColumnName("intStoreId");
+            this.Property(t => t.intStoreNo).HasColumnName("intStoreNo");
+            this.Property(t => t.StrDescription).HasColumnName("StrDescription");
+            this.Property(t => t.strDestrict).HasColumnName("strDestrict");
+            this.Property(t => t.strRegion).HasColumnName("strRegion");
+            this.Property(t => t.strStoreName).HasColumnName("strStoreName");
+        }
+    }
+
+    public class tblSTSubcategoryClassMap : EntityTypeConfiguration<tblSTSubcategoryClass>
+    {
+        public tblSTSubcategoryClassMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intClassId);
+
+            // Table & Column Mappings
+            this.ToTable("tblSTSubcategoryClass");
+            this.Property(t => t.intClassId).HasColumnName("intClassId");
+            this.Property(t => t.intConcurrencyID).HasColumnName("intConcurrencyID");
+            this.Property(t => t.strClassComment).HasColumnName("strClassComment");
+            this.Property(t => t.strClassDesc).HasColumnName("strClassDesc");
+            this.Property(t => t.strClassId).HasColumnName("strClassId");
+        }
+    }
+
+    public class tblSTSubcategoryFamilyMap : EntityTypeConfiguration<tblSTSubcategoryFamily>
+    {
+        public tblSTSubcategoryFamilyMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intFamilyId);
+
+            // Table & Column Mappings
+            this.ToTable("tblSTSubcategoryFamily");
+            this.Property(t => t.intConcurrencyID).HasColumnName("intConcurrencyID");
+            this.Property(t => t.intFamilyId).HasColumnName("intFamilyId");
+            this.Property(t => t.strFamilyComment).HasColumnName("strFamilyComment");
+            this.Property(t => t.strFamilyDesc).HasColumnName("strFamilyDesc");
+            this.Property(t => t.strFamilyId).HasColumnName("strFamilyId");
+        }
+    }
+
+    public class tblSTSubcategoryRegProdMap : EntityTypeConfiguration<tblSTSubcategoryRegProd>
+    {
+        public tblSTSubcategoryRegProdMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intRegProdId);
+
+            // Table & Column Mappings
+            this.ToTable("tblSTSubcategoryRegProd");
+            this.Property(t => t.intConcurrencyID).HasColumnName("intConcurrencyID");
+            this.Property(t => t.intRegProdId).HasColumnName("intRegProdId");
+            this.Property(t => t.intStoreId).HasColumnName("intStoreId");
+            this.Property(t => t.strRegProdCode).HasColumnName("strRegProdCode");
+            this.Property(t => t.strRegProdComment).HasColumnName("strRegProdComment ");
+            this.Property(t => t.strRegProdDesc).HasColumnName("strRegProdDesc");
+        }
+    }
+
+    public class tblSTPaidOutMap : EntityTypeConfiguration<tblSTPaidOut>
+    {
+        public tblSTPaidOutMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intPaidOutId);
+
+            // Table & Column Mappings
+            this.ToTable("tblSTPaidOut");
+            this.Property(t => t.intAccountId).HasColumnName("intAccountId");
+            this.Property(t => t.intPaidOutId).HasColumnName("intPaidOutId");
+            this.Property(t => t.intPaymentMethodId).HasColumnName("intPaymentMethodId");
+            this.Property(t => t.intStoreId).HasColumnName("intStoreId");
+            this.Property(t => t.strDescription).HasColumnName("strDescription");
+            this.Property(t => t.strPaidOutId).HasColumnName("strPaidOutId");
+        }
+    }
+
 }

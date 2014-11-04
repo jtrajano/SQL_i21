@@ -165,4 +165,54 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICItemContract> tblICItemContracts { get; set; }
     }
+
+    public class tblSTStore : BaseEntity
+    {
+        public int intStoreId { get; set; }
+        public int intStoreNo { get; set; }
+        public bool strStoreName { get; set; }
+        public bool StrDescription { get; set; }
+        public bool strRegion { get; set; }
+        public bool strDestrict { get; set; }
+    }
+
+    public class tblSTSubcategoryClass : BaseEntity
+    {
+        public int intClassId { get; set; }
+        public bool strClassId { get; set; }
+        public bool strClassDesc { get; set; }
+        public bool strClassComment { get; set; }
+        public int intConcurrencyID { get; set; }
+    }
+
+    public class tblSTSubcategoryFamily : BaseEntity
+    {
+        public int intFamilyId { get; set; }
+        public bool strFamilyId { get; set; }
+        public bool strFamilyDesc { get; set; }
+        public bool strFamilyComment { get; set; }
+        public int intConcurrencyID { get; set; }
+    }
+
+    public class tblSTSubcategoryRegProd : BaseEntity
+    {
+        public int intRegProdId { get; set; }
+        public int intStoreId { get; set; }
+        public bool strRegProdCode { get; set; }
+        public bool strRegProdDesc { get; set; }
+        public bool strRegProdComment { get; set; }
+        public int intConcurrencyID { get; set; }
+    }
+
+    public class tblSTPaidOut : BaseEntity
+    {
+        public int intPaidOutId { get; set; }
+        public int intStoreId { get; set; }
+        public bool strPaidOutId { get; set; }
+        public bool strDescription { get; set; }
+        public int intAccountId { get; set; }
+        public int intPaymentMethodId { get; set; }
+    }
+
+   
 }

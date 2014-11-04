@@ -167,6 +167,12 @@ namespace iRely.Inventory.Model
 
         public DbSet<tblICLineOfBusiness> tblICLineOfBusinesses { get; set; }
         public DbSet<tblICLotStatus> tblICLotStatuses { get; set; }
+
+        public DbSet<tblSTPaidOut> tblSTPaidOut { get; set; }
+        public DbSet<tblSTStore> tblSTStore { get; set; }
+        public DbSet<tblSTSubcategoryClass> tblSTSubcategoryClasses { get; set; }
+        public DbSet<tblSTSubcategoryFamily> tblSTSubcategoryFamilies { get; set; }
+        public DbSet<tblSTSubcategoryRegProd> tblSTSubcategoryRegProds { get; set; }
         
         protected override void OnModelCreating(DbModelBuilder modelBuilder) 
         {
@@ -247,6 +253,12 @@ namespace iRely.Inventory.Model
 
             modelBuilder.Configurations.Add(new tblICLineOfBusinessMap());
             modelBuilder.Configurations.Add(new tblICLotStatusMap());
+
+            modelBuilder.Configurations.Add(new tblSTPaidOutMap());
+            modelBuilder.Configurations.Add(new tblSTStoreMap());
+            modelBuilder.Configurations.Add(new tblSTSubcategoryClassMap());
+            modelBuilder.Configurations.Add(new tblSTSubcategoryFamilyMap());
+            modelBuilder.Configurations.Add(new tblSTSubcategoryRegProdMap());
 
         }
     }
