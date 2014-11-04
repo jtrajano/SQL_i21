@@ -27,7 +27,7 @@ BEGIN
 		DECLARE @intTransactionTypeId AS INT = 10;
 		
 		-- Add 3 items (Wet, Sticky, and Premium Grains) for the 1st transaction. 
-		INSERT INTO tblICInventoryTransaction (intTransactionId, strTransactionId, strBatchId, dtmDate, intItemId, intItemLocationId, dblUnitQty, dblUOMQty, dblCost, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionTypeId)
+		INSERT INTO tblICInventoryTransaction (intTransactionId, strTransactionId, strBatchId, dtmDate, intItemId, intItemLocationId, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionTypeId)
 		SELECT	intTransactionId = @intTransactionId
 				, strTransactionId = @strTransactionId
 				, strBatchId = @strBatchId
@@ -35,8 +35,8 @@ BEGIN
 				, intItemId = @WetGrains
 				, intItemLocationId = @NewHaven
 				, dblUnitQty = 1
-				, dblUOMQty = 1
 				, dblCost = 100
+				, dblValue = NULL
 				, dblSalesPrice = 2000
 				, intCurrencyId = @BaseCurrencyId
 				, dblExchangeRate = @dblExchangeRate
@@ -49,8 +49,8 @@ BEGIN
 				, intItemId = @StickyGrains
 				, intItemLocationId = @NewHaven
 				, dblUnitQty = 2
-				, dblUOMQty = 1
 				, dblCost = 100
+				, dblValue = NULL
 				, dblSalesPrice = 2000
 				, intCurrencyId = @BaseCurrencyId
 				, dblExchangeRate = @dblExchangeRate
@@ -63,8 +63,8 @@ BEGIN
 				, intItemId = @PremiumGrains
 				, intItemLocationId = @NewHaven
 				, dblUnitQty = 2
-				, dblUOMQty = 1
 				, dblCost = 100
+				, dblValue = NULL
 				, dblSalesPrice = 2000
 				, intCurrencyId = @BaseCurrencyId
 				, dblExchangeRate = @dblExchangeRate
@@ -79,7 +79,7 @@ BEGIN
 		SET @dtmDate = '10/11/2014';
 		SET @intTransactionTypeId = 11;
 
-		INSERT INTO tblICInventoryTransaction (intTransactionId, strTransactionId, strBatchId, dtmDate, intItemId, intItemLocationId, dblUnitQty, dblUOMQty, dblCost, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionTypeId)
+		INSERT INTO tblICInventoryTransaction (intTransactionId, strTransactionId, strBatchId, dtmDate, intItemId, intItemLocationId, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionTypeId)
 		SELECT	intTransactionId = @intTransactionId
 				, strTransactionId = @strTransactionId
 				, strBatchId = @strBatchId
@@ -87,8 +87,8 @@ BEGIN
 				, intItemId = @ColdGrains
 				, intItemLocationId = @BetterHaven
 				, dblUnitQty = 1
-				, dblUOMQty = 1
 				, dblCost = 100
+				, dblValue = NULL
 				, dblSalesPrice = 2000
 				, intCurrencyId = @BaseCurrencyId
 				, dblExchangeRate = @dblExchangeRate
@@ -101,8 +101,8 @@ BEGIN
 				, intItemId = @HotGrains
 				, intItemLocationId = @BetterHaven
 				, dblUnitQty = 2
-				, dblUOMQty = 1
 				, dblCost = 15.11
+				, dblValue = NULL
 				, dblSalesPrice = 781.20
 				, intCurrencyId = @BaseCurrencyId
 				, dblExchangeRate = @dblExchangeRate

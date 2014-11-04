@@ -236,6 +236,9 @@
     <Build Include="testi21Database\Functions\test fnGetItemBaseGLAccount function for category level.sql" />
     <Build Include="testi21Database\Functions\test fnGetItemBaseGLAccount function for location level.sql" />
     <Build Include="testi21Database\Functions\test fnGetItemBaseGLAccount function for another location.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessMovingAverageCost for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessMovingAverageCost, Jan 1. Purchase 20 stocks @ 20 dollars each.sql" />
+    <Build Include="testi21Database\Stored Procedures\Fake data for item stock.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

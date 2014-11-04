@@ -8,7 +8,6 @@ BEGIN
 			,intItemLocationId INT
 			,dtmDate  DATETIME
 			,dblUnitQty NUMERIC(18,6)
-			,dblUOMQty NUMERIC(18,6)
 			,dblCost NUMERIC(18,6)
 			,dblSalesPrice NUMERIC(18,6)
 			,intCurrencyId INT 
@@ -24,7 +23,6 @@ BEGIN
 			,intItemLocationId INT
 			,dtmDate  DATETIME
 			,dblUnitQty NUMERIC(18,6)
-			,dblUOMQty NUMERIC(18,6)
 			,dblCost NUMERIC(18,6)
 			,dblSalesPrice NUMERIC(18,6)
 			,intCurrencyId INT 
@@ -58,7 +56,6 @@ BEGIN
 			,intItemLocationId
 			,dtmDate
 			,dblUnitQty
-			,dblUOMQty
 			,dblCost
 			,dblSalesPrice
 			,intCurrencyId
@@ -73,7 +70,6 @@ BEGIN
 			,intItemLocationId = @BetterHaven
 			,dtmDate = '10/11/2014'
 			,dblUnitQty = 1
-			,dblUOMQty = 1
 			,dblCost = 100
 			,dblSalesPrice = 2000
 			,intCurrencyId = 1
@@ -88,7 +84,6 @@ BEGIN
 			,intItemLocationId = @BetterHaven
 			,dtmDate = '10/11/2014'
 			,dblUnitQty = 2
-			,dblUOMQty = 1
 			,dblCost = 15.11
 			,dblSalesPrice = 781.20
 			,intCurrencyId = 1
@@ -106,7 +101,6 @@ BEGIN
 			,intItemLocationId
 			,dtmDate
 			,dblUnitQty
-			,dblUOMQty
 			,dblCost
 			,dblSalesPrice
 			,intCurrencyId
@@ -121,7 +115,6 @@ BEGIN
 			,intItemLocationId
 			,dtmDate
 			,dblUnitQty
-			,dblUOMQty
 			,dblCost
 			,dblSalesPrice
 			,intCurrencyId
