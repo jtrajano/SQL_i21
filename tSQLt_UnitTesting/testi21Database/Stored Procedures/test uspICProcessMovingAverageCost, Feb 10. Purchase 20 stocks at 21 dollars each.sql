@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [testi21Database].[test uspICProcessMovingAverageCost, Jan 1. Purchase 20 stocks @ 20 dollars each]
+﻿CREATE PROCEDURE [testi21Database].[test uspICProcessMovingAverageCost, Feb 10. Purchase 20 stocks at 21 dollars each]
 AS
 BEGIN
 	-- Arrange 
@@ -54,23 +53,6 @@ BEGIN
 		DECLARE @dblAverageCost_Expected AS NUMERIC(18,6)
 		DECLARE @dblAverageCost_Actual AS NUMERIC(18,6)
 
-		SET	@intItemId = @WetGrains
-		SET @intItemLocationId = @NewHaven
-		SET @dtmDate = 'January 1, 2014'
-		SET @dblUnitQty = 20
-		SET @dblUOMQty = @EACH 
-		SET @dblCost = 20.00
-		SET @dblSalesPrice = 0
-		SET @intCurrencyId = @USD
-		SET @dblExchangeRate = 1
-		SET @intTransactionId = 1
-		SET @strTransactionId = 'PURCHASE-00001'
-		SET @strBatchId = 'BATCH-00001'
-		SET @intTransactionTypeId = @PurchaseTransactionType
-		SET @intUserId = 1
-
-		SET @dblAverageCost_Expected = @dblCost
-
 		CREATE TABLE expected (
 			[intInventoryTransactionId] INT NOT NULL, 
 			[intItemId] INT NOT NULL,
@@ -111,42 +93,163 @@ BEGIN
 			[intConcurrencyId] INT NOT NULL DEFAULT 1, 	
 		)
 
-		INSERT INTO expected (
-				[intInventoryTransactionId]
-				,[intItemId]
-				,[intItemLocationId]
-				,[dtmDate]
-				,[dblUnitQty]
-				,[dblCost]
-				,[dblValue]
-				,[dblSalesPrice]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[intTransactionId]
-				,[strTransactionId]
-				,[strBatchId]
-				,[intTransactionTypeId]
-				,[intLotId]
-				,[intCreatedUserId]
-				,[intConcurrencyId]
-		)
-		SELECT	[intInventoryTransactionId] = 1
-				,[intItemId] = @intItemId
-				,[intItemLocationId] = @NewHaven
-				,[dtmDate] = @dtmDate
-				,[dblUnitQty] = (@dblUnitQty * @dblUOMQty)
-				,[dblCost] = @dblCost
-				,[dblValue] = NULL 
-				,[dblSalesPrice] = @dblSalesPrice
-				,[intCurrencyId] = @USD
-				,[dblExchangeRate] = 1
-				,[intTransactionId] = @intTransactionId
-				,[strTransactionId] = @strTransactionId
-				,[strBatchId] = @strBatchId
-				,[intTransactionTypeId] = @PurchaseTransactionType
-				,[intLotId] = NULL 
-				,[intCreatedUserId] = @intUserId
-				,[intConcurrencyId]	= 1
+		-- 1. Expected data from Jan 1. Purchase 20 stocks @ 20 dollars each
+		BEGIN 
+			SET	@intItemId = @WetGrains
+			SET @intItemLocationId = @NewHaven
+			SET @dtmDate = 'January 1, 2014'
+			SET @dblUnitQty = 20
+			SET @dblUOMQty = @EACH 
+			SET @dblCost = 20.00
+			SET @dblSalesPrice = 0
+			SET @intCurrencyId = @USD
+			SET @dblExchangeRate = 1
+			SET @intTransactionId = 1
+			SET @strTransactionId = 'PURCHASE-00001'
+			SET @strBatchId = 'BATCH-00001'
+			SET @intTransactionTypeId = @PurchaseTransactionType
+			SET @intUserId = 1
+
+			SET @dblAverageCost_Expected = @dblCost
+
+			INSERT INTO expected (
+					[intInventoryTransactionId]
+					,[intItemId]
+					,[intItemLocationId]
+					,[dtmDate]
+					,[dblUnitQty]
+					,[dblCost]
+					,[dblValue]
+					,[dblSalesPrice]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[intTransactionId]
+					,[strTransactionId]
+					,[strBatchId]
+					,[intTransactionTypeId]
+					,[intLotId]
+					,[intCreatedUserId]
+					,[intConcurrencyId]
+			)
+			SELECT	[intInventoryTransactionId] = 1
+					,[intItemId] = @intItemId
+					,[intItemLocationId] = @NewHaven
+					,[dtmDate] = @dtmDate
+					,[dblUnitQty] = (@dblUnitQty * @dblUOMQty)
+					,[dblCost] = @dblCost
+					,[dblValue] = NULL 
+					,[dblSalesPrice] = @dblSalesPrice
+					,[intCurrencyId] = @USD
+					,[dblExchangeRate] = 1
+					,[intTransactionId] = @intTransactionId
+					,[strTransactionId] = @strTransactionId
+					,[strBatchId] = @strBatchId
+					,[intTransactionTypeId] = @PurchaseTransactionType
+					,[intLotId] = NULL 
+					,[intCreatedUserId] = @intUserId
+					,[intConcurrencyId]	= 1
+			
+			-- Re-insert the expected data in tblICInventoryTransaction
+			INSERT INTO tblICInventoryTransaction (
+					[intItemId]
+					,[intItemLocationId]
+					,[dtmDate]
+					,[dblUnitQty]
+					,[dblCost]
+					,[dblValue]
+					,[dblSalesPrice]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[intTransactionId]
+					,[strTransactionId]
+					,[strBatchId]
+					,[intTransactionTypeId]
+					,[intLotId]
+					,[intCreatedUserId]
+					,[intConcurrencyId]
+			)
+			SELECT	[intItemId] = @intItemId
+					,[intItemLocationId] = @NewHaven
+					,[dtmDate] = @dtmDate
+					,[dblUnitQty] = (@dblUnitQty * @dblUOMQty)
+					,[dblCost] = @dblCost
+					,[dblValue] = NULL 
+					,[dblSalesPrice] = @dblSalesPrice
+					,[intCurrencyId] = @USD
+					,[dblExchangeRate] = 1
+					,[intTransactionId] = @intTransactionId
+					,[strTransactionId] = @strTransactionId
+					,[strBatchId] = @strBatchId
+					,[intTransactionTypeId] = @PurchaseTransactionType
+					,[intLotId] = NULL 
+					,[intCreatedUserId] = @intUserId
+					,[intConcurrencyId]	= 1
+			
+			-- Update expected data in tblICItemStock
+			UPDATE	tblICItemStock
+			SET		dblAverageCost = 20
+					,dblUnitOnHand = 20
+			WHERE	intItemId = @intItemId
+					AND intLocationId = @intItemLocationId
+			
+		END 
+
+		-- 1. Feb 10. Purchase 20 stocks at 21 dollars each
+		BEGIN 
+			SET	@intItemId = @WetGrains
+			SET @intItemLocationId = @NewHaven
+			SET @dtmDate = 'February 10, 2014'
+			SET @dblUnitQty = 20
+			SET @dblUOMQty = @EACH 
+			SET @dblCost = 21.00
+			SET @dblSalesPrice = 0
+			SET @intCurrencyId = @USD
+			SET @dblExchangeRate = 1
+			SET @intTransactionId = 1
+			SET @strTransactionId = 'PURCHASE-00002'
+			SET @strBatchId = 'BATCH-00002'
+			SET @intTransactionTypeId = @PurchaseTransactionType
+			SET @intUserId = 2
+
+			SET @dblAverageCost_Expected = 20.50
+
+			INSERT INTO expected (
+					[intInventoryTransactionId]
+					,[intItemId]
+					,[intItemLocationId]
+					,[dtmDate]
+					,[dblUnitQty]
+					,[dblCost]
+					,[dblValue]
+					,[dblSalesPrice]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[intTransactionId]
+					,[strTransactionId]
+					,[strBatchId]
+					,[intTransactionTypeId]
+					,[intLotId]
+					,[intCreatedUserId]
+					,[intConcurrencyId]
+			)
+			SELECT	[intInventoryTransactionId] = 2
+					,[intItemId] = @intItemId
+					,[intItemLocationId] = @NewHaven
+					,[dtmDate] = @dtmDate
+					,[dblUnitQty] = (@dblUnitQty * @dblUOMQty)
+					,[dblCost] = @dblCost
+					,[dblValue] = NULL 
+					,[dblSalesPrice] = @dblSalesPrice
+					,[intCurrencyId] = @USD
+					,[dblExchangeRate] = 1
+					,[intTransactionId] = @intTransactionId
+					,[strTransactionId] = @strTransactionId
+					,[strBatchId] = @strBatchId
+					,[intTransactionTypeId] = @PurchaseTransactionType
+					,[intLotId] = NULL 
+					,[intCreatedUserId] = @intUserId
+					,[intConcurrencyId]	= 1
+		END 
 	END 
 	
 	-- Act 
@@ -210,7 +313,7 @@ BEGIN
 				,[intConcurrencyId]	
 		FROM	tblICInventoryTransaction
 		WHERE	intItemId = @intItemId
-			AND intItemLocationId = @intItemLocationId		
+				AND intItemLocationId = @intItemLocationId
 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 

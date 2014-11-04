@@ -197,16 +197,7 @@ END
 -- 2. Adjust the average cost and units on hand. 
 BEGIN 
 	UPDATE	Stock
-	SET		Stock.dblAverageCost =		-- If increasing the stock, adjust the average cost. 
-								CASE	WHEN (@dblUnitQty * @dblUOMQty) > 0 THEN 
-												CASE	-- If stock goes to positive, compute the new avarege cost. 
-														WHEN (@dblUnitQty * @dblUOMQty) + Stock.dblUnitOnHand > 0 THEN (((@dblUnitQty * @dblUOMQty) * @dblCost) + (Stock.dblUnitOnHand * Stock.dblAverageCost)) / ((@dblUnitQty * @dblUOMQty) + Stock.dblUnitOnHand)
-														-- If stock remains negative, use the purchase cost as the new average cost. 
-														ELSE @dblCost
-												END 
-										-- If transaction is decreasing stock, no change on the average cost. 
-										ELSE dblAverageCost
-								END 
+	SET		Stock.dblAverageCost =	[dbo].[fnCalculateAverageCost]((@dblUnitQty * @dblUOMQty), @dblCost, Stock.dblUnitOnHand, Stock.dblAverageCost)
 			,Stock.dblUnitOnHand = (@dblUnitQty * @dblUOMQty) + Stock.dblUnitOnHand
 	FROM	[dbo].[tblICItemStock] Stock
 	WHERE	Stock.intItemId = @intItemId

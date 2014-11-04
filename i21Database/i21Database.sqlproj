@@ -772,6 +772,7 @@
     <Build Include="dbo\Stored Procedures\uspICProcessMovingAverageCost.sql" />
     <Build Include="dbo\Functions\fnGetItemAverageCost.sql" />
     <Build Include="dbo\Functions\fnGetItemTotalValueFromTransactions.sql" />
+    <Build Include="dbo\Functions\fnCalculateAverageCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
