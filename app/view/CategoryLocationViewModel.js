@@ -18,12 +18,28 @@ Ext.define('Inventory.view.CategoryLocationViewModel', {
     alias: 'viewmodel.categorylocation',
 
     requires: [
-        'i21.store.CompanyLocation'
+        'i21.store.CompanyLocation',
+        'Inventory.store.PaidOut',
+        'Inventory.store.Class',
+        'Inventory.store.Family',
+        'Inventory.store.Product'
     ],
 
     stores: {
         location: {
             type: 'companylocation'
+        },
+        paidout: {
+            type: 'storepaidout'
+        },
+        class: {
+            type: 'storeclass'
+        },
+        family: {
+            type: 'storefamily'
+        },
+        product: {
+            type: 'storeproduct'
         }
     }
 

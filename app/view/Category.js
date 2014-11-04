@@ -20,7 +20,6 @@ Ext.define('Inventory.view.Category', {
     requires: [
         'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
-        'Inventory.view.Statusbar1',
         'Ext.toolbar.Separator',
         'Ext.form.Panel',
         'Ext.tab.Panel',
@@ -224,7 +223,9 @@ Ext.define('Inventory.view.Category', {
                                                                 xtype: 'combobox',
                                                                 itemId: 'cboInventoryTracking',
                                                                 fieldLabel: 'Inventory Tracking',
-                                                                labelWidth: 130
+                                                                labelWidth: 130,
+                                                                displayField: 'strDescription',
+                                                                valueField: 'strDescription'
                                                             },
                                                             {
                                                                 xtype: 'numberfield',
@@ -1113,11 +1114,6 @@ Ext.define('Inventory.view.Category', {
                             {
                                 xtype: 'ipagingstatusbar',
                                 itemId: 'tlbStatusbarPaging',
-                                flex: 1,
-                                dock: 'bottom'
-                            },
-                            {
-                                xtype: 'statusbar1',
                                 flex: 1,
                                 dock: 'bottom'
                             }

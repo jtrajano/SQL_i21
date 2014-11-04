@@ -666,14 +666,49 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "columns": [
+                                            "[",
+                                            "\t{",
+                                            "\t\tdataIndex: 'intPaidOutId',",
+                                            "\t\tdataType: 'numeric',",
+                                            "\t\ttext: 'Paid Out Id',",
+                                            "\t\thidden: true",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strPaidOutId',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Paid Out',",
+                                            "\t\tflex: 1",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strDescription',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Description',",
+                                            "\t\tflex: 1",
+                                            "\t}",
+                                            "]"
+                                        ],
+                                        "designer|createAlias": "gridcombobox",
+                                        "displayField": "strPaidOutId",
                                         "fieldLabel": "Convert to Paidout",
                                         "itemId": "cboConvertToPaidout",
                                         "labelWidth": 175,
                                         "layout|flex": 1,
-                                        "layout|margins": null
+                                        "layout|margins": null,
+                                        "valueField": "intPaidOutId"
                                     },
                                     "name": "MyComboBox59",
-                                    "designerId": "d91a876a-885f-44c1-9863-84827cabae45"
+                                    "configAlternates": {
+                                        "columns": "array"
+                                    },
+                                    "designerId": "d91a876a-885f-44c1-9863-84827cabae45",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "columns",
+                                            "type": "string"
+                                        }
+                                    ]
                                 },
                                 {
                                     "type": "Ext.form.field.Checkbox",
@@ -717,14 +752,49 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "columns": [
+                                            "[",
+                                            "\t{",
+                                            "\t\tdataIndex: 'intRegProdId',",
+                                            "\t\tdataType: 'numeric',",
+                                            "\t\ttext: 'Product Id',",
+                                            "\t\thidden: true",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strRegProdCode',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Product',",
+                                            "\t\tflex: 1",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strRegProdDesc',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Description',",
+                                            "\t\tflex: 1",
+                                            "\t}",
+                                            "]"
+                                        ],
+                                        "designer|createAlias": "gridcombobox",
+                                        "displayField": "strRegProdCode",
                                         "fieldLabel": "Default Product Code",
                                         "itemId": "cboDefaultProductCode",
                                         "labelWidth": 175,
                                         "layout|flex": null,
-                                        "layout|margins": null
+                                        "layout|margins": null,
+                                        "valueField": "intRegProdId"
                                     },
                                     "name": "MyComboBox60",
-                                    "designerId": "c11e30ae-8aaa-451f-98e5-9b24f032b53f"
+                                    "configAlternates": {
+                                        "columns": "array"
+                                    },
+                                    "designerId": "c11e30ae-8aaa-451f-98e5-9b24f032b53f",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "columns",
+                                            "type": "string"
+                                        }
+                                    ]
                                 },
                                 {
                                     "type": "Ext.form.field.ComboBox",
@@ -734,14 +804,50 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "columns": [
+                                            "[",
+                                            "\t{",
+                                            "\t\tdataIndex: 'intFamilyId',",
+                                            "\t\tdataType: 'numeric',",
+                                            "\t\ttext: 'Family Id',",
+                                            "\t\thidden: true",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strFamilyId',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Family',",
+                                            "\t\tflex: 1",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strFamilyDesc',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Description',",
+                                            "\t\tflex: 1",
+                                            "\t}",
+                                            "]",
+                                            ""
+                                        ],
+                                        "designer|createAlias": "gridcombobox",
+                                        "displayField": "strFamilyId",
                                         "fieldLabel": "Default Family",
                                         "itemId": "cboDefaultFamily",
                                         "labelWidth": 175,
                                         "layout|flex": null,
-                                        "layout|margins": null
+                                        "layout|margins": null,
+                                        "valueField": "intFamilyId"
                                     },
                                     "name": "MyComboBox61",
-                                    "designerId": "57907fa0-2429-466b-9207-b5a9451863c7"
+                                    "configAlternates": {
+                                        "columns": "array"
+                                    },
+                                    "designerId": "57907fa0-2429-466b-9207-b5a9451863c7",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "columns",
+                                            "type": "string"
+                                        }
+                                    ]
                                 },
                                 {
                                     "type": "Ext.form.field.ComboBox",
@@ -751,14 +857,49 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "columns": [
+                                            "[",
+                                            "\t{",
+                                            "\t\tdataIndex: 'intClassId',",
+                                            "\t\tdataType: 'numeric',",
+                                            "\t\ttext: 'Class Id',",
+                                            "\t\thidden: true",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strClassId',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Class',",
+                                            "\t\tflex: 1",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strClassDesc',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Description',",
+                                            "\t\tflex: 1",
+                                            "\t}",
+                                            "]"
+                                        ],
+                                        "designer|createAlias": "gridcombobox",
+                                        "displayField": "strClassId",
                                         "fieldLabel": "Default Class",
                                         "itemId": "cboDefaultClass",
                                         "labelWidth": 175,
                                         "layout|flex": null,
-                                        "layout|margins": null
+                                        "layout|margins": null,
+                                        "valueField": "intClassId"
                                     },
                                     "name": "MyComboBox62",
-                                    "designerId": "5fb1ad2d-612d-44d3-b945-55d42380dfcd"
+                                    "configAlternates": {
+                                        "columns": "array"
+                                    },
+                                    "designerId": "5fb1ad2d-612d-44d3-b945-55d42380dfcd",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "columns",
+                                            "type": "string"
+                                        }
+                                    ]
                                 },
                                 {
                                     "type": "Ext.form.field.Checkbox",
@@ -900,7 +1041,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging17",
                     "designerId": "61a83781-4c49-4581-8dd0-248eb965f747",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

@@ -318,11 +318,33 @@ Ext.define('Inventory.view.CategoryLocation', {
                                     labelWidth: 175
                                 },
                                 {
-                                    xtype: 'combobox',
+                                    xtype: 'gridcombobox',
                                     flex: 1,
+                                    columns: [
+                                        {
+                                            dataIndex: 'intPaidOutId',
+                                            dataType: 'numeric',
+                                            text: 'Paid Out Id',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strPaidOutId',
+                                            dataType: 'string',
+                                            text: 'Paid Out',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strDescription',
+                                            dataType: 'string',
+                                            text: 'Description',
+                                            flex: 1
+                                        }
+                                    ],
                                     itemId: 'cboConvertToPaidout',
                                     fieldLabel: 'Convert to Paidout',
-                                    labelWidth: 175
+                                    labelWidth: 175,
+                                    displayField: 'strPaidOutId',
+                                    valueField: 'intPaidOutId'
                                 },
                                 {
                                     xtype: 'checkboxfield',
@@ -337,22 +359,88 @@ Ext.define('Inventory.view.CategoryLocation', {
                                     labelWidth: 175
                                 },
                                 {
-                                    xtype: 'combobox',
+                                    xtype: 'gridcombobox',
+                                    columns: [
+                                        {
+                                            dataIndex: 'intRegProdId',
+                                            dataType: 'numeric',
+                                            text: 'Product Id',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strRegProdCode',
+                                            dataType: 'string',
+                                            text: 'Product',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strRegProdDesc',
+                                            dataType: 'string',
+                                            text: 'Description',
+                                            flex: 1
+                                        }
+                                    ],
                                     itemId: 'cboDefaultProductCode',
                                     fieldLabel: 'Default Product Code',
-                                    labelWidth: 175
+                                    labelWidth: 175,
+                                    displayField: 'strRegProdCode',
+                                    valueField: 'intRegProdId'
                                 },
                                 {
-                                    xtype: 'combobox',
+                                    xtype: 'gridcombobox',
+                                    columns: [
+                                        {
+                                            dataIndex: 'intFamilyId',
+                                            dataType: 'numeric',
+                                            text: 'Family Id',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strFamilyId',
+                                            dataType: 'string',
+                                            text: 'Family',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strFamilyDesc',
+                                            dataType: 'string',
+                                            text: 'Description',
+                                            flex: 1
+                                        }
+                                    ],
                                     itemId: 'cboDefaultFamily',
                                     fieldLabel: 'Default Family',
-                                    labelWidth: 175
+                                    labelWidth: 175,
+                                    displayField: 'strFamilyId',
+                                    valueField: 'intFamilyId'
                                 },
                                 {
-                                    xtype: 'combobox',
+                                    xtype: 'gridcombobox',
+                                    columns: [
+                                        {
+                                            dataIndex: 'intClassId',
+                                            dataType: 'numeric',
+                                            text: 'Class Id',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strClassId',
+                                            dataType: 'string',
+                                            text: 'Class',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strClassDesc',
+                                            dataType: 'string',
+                                            text: 'Description',
+                                            flex: 1
+                                        }
+                                    ],
                                     itemId: 'cboDefaultClass',
                                     fieldLabel: 'Default Class',
-                                    labelWidth: 175
+                                    labelWidth: 175,
+                                    displayField: 'strClassId',
+                                    valueField: 'intClassId'
                                 },
                                 {
                                     xtype: 'checkboxfield',

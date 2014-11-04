@@ -41,12 +41,24 @@ Ext.define('Inventory.view.CategoryLocationViewController', {
             chkNonRetailUseDepartment: '{current.ysnNonRetailUseDepartment}',
             chkReportInNetOrGross: '{current.ysnReportNetGross}',
             chkDepartmentForPumps: '{current.ysnDepartmentForPumps}',
-            cboConvertToPaidout: '{current.intConvertPaidOutId}',
+            cboConvertToPaidout: {
+                value: '{current.intConvertPaidOutId}',
+                store: '{paidout}'
+            },
             chkDeleteFromRegister: '{current.ysnDeleteFromRegister}',
             chkDepartmentKeyTaxed: '{current.ysnDeptKeyTaxed}',
-            cboDefaultProductCode: '{current.intProductCodeId}',
-            cboDefaultFamily: '{current.intFamilyId}',
-            cboDefaultClass: '{current.intClassId}',
+            cboDefaultProductCode: {
+                value: '{current.intProductCodeId}',
+                store: '{product}'
+            },
+            cboDefaultFamily: {
+                value: '{current.intFamilyId}',
+                store: '{family}'
+            },
+            cboDefaultClass: {
+                value: '{current.intClassId}',
+                store: '{class}'
+            },
             chkDefaultFoodStampable: '{current.ysnFoodStampable}',
             chkDefaultReturnable: '{current.ysnReturnable}',
             chkDefaultSaleable: '{current.ysnSaleable}',

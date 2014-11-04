@@ -399,11 +399,13 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "displayField": "strDescription",
                                                         "fieldLabel": "Inventory Tracking",
                                                         "itemId": "cboInventoryTracking",
                                                         "labelWidth": 130,
                                                         "layout|flex": null,
-                                                        "layout|margins": null
+                                                        "layout|margins": null,
+                                                        "valueField": "strDescription"
                                                     },
                                                     "name": "MyComboBox47",
                                                     "designerId": "37e7f1d0-03b3-4119-bb62-22ead8e21bd3"
@@ -2560,21 +2562,6 @@
                     "name": "statusbarpaging1",
                     "designerId": "0ca3c6d6-785e-4ad8-ac4f-3eaa2d75593b",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
-                },
-                {
-                    "type": "linkedinstance",
-                    "reference": {
-                        "name": "dockedItems",
-                        "type": "array"
-                    },
-                    "codeClass": null,
-                    "userConfig": {
-                        "dock": "bottom",
-                        "layout|flex": 1
-                    },
-                    "name": "statusbar11",
-                    "designerId": "c130a639-eafa-4b1d-bb40-88acdd652b21",
-                    "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
                 }
             ]
         }
