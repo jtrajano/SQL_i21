@@ -18,7 +18,8 @@
             "InventoryUOM",
             "QAProperties",
             "Catalog",
-            "LineOfBusiness"
+            "LineOfBusiness",
+            "EditCatalog"
         ]
     },
     "name": "Application",

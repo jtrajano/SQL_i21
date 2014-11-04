@@ -15,5 +15,140 @@
 
 Ext.define('Inventory.view.CatalogViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.catalog'
+    alias: 'controller.catalog',
+
+    show : function(config) {
+        "use strict";
+
+        var me = this,
+            win = this.getView();
+
+        if (config) {
+            win.show();
+
+            me.catalogStore = Ext.create('Inventory.store.Catalog');
+
+            var proxy  = me.catalogStore.getProxy(),
+                writer = Ext.create('iRely.writer.JsonBatch', {
+                    allowSingle: false,
+                    nameProperty: 'mapping'
+                });
+
+            proxy.setWriter(writer);
+            proxy.batchActions = true;
+
+            var callback = function(store, node, records, successful) {
+                me.catalogStore.un('load', callback);
+
+//                var rootNode = me.catalogStore.getRootNode();
+//                rootNode.on('append', i21.ModuleMgr.SystemManager.onTreeAppend);
+//
+//                basemenu.store = null;
+//                basemenu.bindStore(me.MasterMenuStore);
+//
+//                win.setLoading(false);
+            };
+
+            me.catalogStore.on('load', callback);
+            me.catalogStore.load();
+
+            var grdCatalog = win.down('#grdCatalog');
+            grdCatalog.store = null;
+            grdCatalog.bindStore(me.catalogStore);
+        }
+    },
+
+    onbtnAddCatalogClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var treePanel = win.down('#grdCatalog');
+        var store = treePanel.getStore();
+        var node;
+        var record = treePanel.getSelectionModel().getSelection();
+
+
+        if (record.length === 0) {
+            this.openEditCatalogScreen('addroot', null, win);
+        }
+        else {
+            this.openEditCatalogScreen('add', null, win);
+        }
+//                this.dirty = true;
+
+    },
+
+    onbtnDeleteCatalogClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var treePanel = win.down('#grdCatalog');
+        var store = treePanel.getStore();
+        var record = treePanel.getSelectionModel().getSelection();
+
+        var me = this;
+        var action = function (e) {
+            if (e == 'yes') {
+//                        GlobalSM.manipulateMenus("Delete",treePanel,store);
+//                        me.dirty = true;
+//                        GlobalSM.setFormStatus(win,'edited');
+            }
+        };
+        i21.functions.showDeleteDialog(button, action, 'Are you sure you want to delete this record?');
+
+    },
+
+    openEditCatalogScreen: function(action, record, win) {
+        var me = win.controller;
+        var screenName = 'Inventory.view.EditCatalog';
+
+        Ext.require([
+            screenName,
+                screenName + 'ViewModel',
+                screenName + 'ViewController',
+        ], function() {
+            var screen = screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
+            var view = Ext.create(screenName, { controller: screen.toLowerCase(), viewModel : { type: screen.toLowerCase() } });
+            view.on('destroy', me.onDestroyCatalogScreen, me, { window: win });
+
+            var controller = view.getController();
+            switch (action) {
+                case 'add':
+                    controller.show({ action: action, record: record });
+                    break;
+                case 'addroot':
+                    controller.show({ action: action });
+                    break;
+                case 'edit':
+                    controller.show({ action: action, record: record });
+                    break;
+            }
+        });
+    },
+
+    onDestroyCatalogScreen: function(win, eOpts) {
+//        var me = eOpts.window.getController();
+//        var win = eOpts.window;
+//        var grdLocation = win.down('#grdLocation');
+//
+//        grdLocation.store.reload();
+    },
+
+    onTreePanelBeforeLoad: function(store, operation){
+        if (!store.getProxy().api) {
+            return;
+        }
+
+        store.getProxy().api.read = '../Inventory/api/Catalog/GetCatalogsByParentId?ParentId=' + operation.config.node.get('intCatalogId') + '';
+    },
+
+    init: function(application) {
+        this.control({
+            "#btnAddCatalog": {
+                click: this.onbtnAddCatalogClick
+            },
+            "#btnDeleteCatalog": {
+                click: this.onbtnDeleteCatalogClick
+            },
+            "#grdCatalog": {
+                beforeload: this.onTreePanelBeforeLoad
+            }
+        });
+    }
 });
