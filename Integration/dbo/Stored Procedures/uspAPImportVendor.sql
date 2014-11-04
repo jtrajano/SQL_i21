@@ -181,44 +181,45 @@ BEGIN
 	DECLARE @originVendor NVARCHAR(50)
 
 	--Entities
-	DECLARE @strName			NVARCHAR (MAX)
-	DECLARE	@strWebsite			NVARCHAR (MAX)
-	DECLARE	@strInternalNotes	NVARCHAR (MAX)
+	DECLARE @strName			NVARCHAR (255)
+	DECLARE	@strWebsite			NVARCHAR (255)
+	DECLARE	@strInternalNotes	NVARCHAR (255)
 	DECLARE @str1099Name        NVARCHAR (100) 
 	DECLARE @ysnPrint1099       BIT     
 	DECLARE @dtmW9Signed		DATETIME
-	DECLARE	@str1099Form        NVARCHAR (MAX) 
-	DECLARE @strFederalTaxId    NVARCHAR (MAX) 
+	DECLARE	@str1099Form        NVARCHAR (255) 
+	DECLARE @strFederalTaxId    NVARCHAR (255) 
 
 	--Contacts
-	DECLARE	@strTitle           NVARCHAR (MAX) 
-	DECLARE	@strContactName     NVARCHAR (MAX) 
-	DECLARE	@strDepartment      NVARCHAR (MAX) 
-	DECLARE	@strMobile          NVARCHAR (MAX) 
-	DECLARE	@strPhone           NVARCHAR (MAX) 
-	DECLARE	@strPhone2          NVARCHAR (MAX) 
-	DECLARE	@strEmail           NVARCHAR (MAX) 
-	DECLARE	@strEmail2          NVARCHAR (MAX) 
-	DECLARE	@strFax             NVARCHAR (MAX) 
-	DECLARE	@strNotes           NVARCHAR (MAX) 
-	DECLARE	@strContactMethod   NVARCHAR (MAX) 
-	DECLARE	@strPassword        NVARCHAR (MAX) 
-	DECLARE	@strUserType        NVARCHAR (MAX) 
-	DECLARE	@strTimezone        NVARCHAR (MAX) 
+	DECLARE	@strTitle           NVARCHAR (255) 
+	DECLARE	@strContactName     NVARCHAR (255) 
+	DECLARE	@strContactNumber   NVARCHAR (255) 
+	DECLARE	@strDepartment      NVARCHAR (255) 
+	DECLARE	@strMobile          NVARCHAR (255) 
+	DECLARE	@strPhone           NVARCHAR (255) 
+	DECLARE	@strPhone2          NVARCHAR (255) 
+	DECLARE	@strEmail           NVARCHAR (255) 
+	DECLARE	@strEmail2          NVARCHAR (255) 
+	DECLARE	@strFax             NVARCHAR (255) 
+	DECLARE	@strNotes           NVARCHAR (255) 
+	DECLARE	@strContactMethod   NVARCHAR (255) 
+	DECLARE	@strPassword        NVARCHAR (255) 
+	DECLARE	@strUserType        NVARCHAR (255) 
+	DECLARE	@strTimezone        NVARCHAR (255) 
 	DECLARE @ysnPortalAccess	BIT
 	DECLARE @imgContactPhoto	varbinary(MAX)
 
 	--Locations
 	DECLARE	@strLocationName     NVARCHAR (50) 
-	DECLARE	@strLocationContactName      NVARCHAR (MAX)
-	DECLARE	@strAddress          NVARCHAR (MAX)
-	DECLARE	@strCity             NVARCHAR (MAX)
-	DECLARE	@strCountry          NVARCHAR (MAX)
-	DECLARE	@strState            NVARCHAR (MAX)
-	DECLARE	@strZipCode          NVARCHAR (MAX)
-	DECLARE	@strLocationEmail            NVARCHAR (MAX)
-	DECLARE	@strLocationNotes            NVARCHAR (MAX)
-	DECLARE	@strW9Name           NVARCHAR (MAX)
+	DECLARE	@strLocationContactName      NVARCHAR (255)
+	DECLARE	@strAddress          NVARCHAR (255)
+	DECLARE	@strCity             NVARCHAR (255)
+	DECLARE	@strCountry          NVARCHAR (255)
+	DECLARE	@strState            NVARCHAR (255)
+	DECLARE	@strZipCode          NVARCHAR (255)
+	DECLARE	@strLocationEmail            NVARCHAR (255)
+	DECLARE	@strLocationNotes            NVARCHAR (255)
+	DECLARE	@strW9Name           NVARCHAR (255)
 	DECLARE	@intLocationShipViaId        INT           
 	DECLARE	@intTaxCodeId        INT           
 	DECLARE	@intTermsId          INT           
@@ -234,7 +235,7 @@ BEGIN
     DECLARE @intShipViaId              INT            
     DECLARE @intVendorTaxCodeId			INT            
     DECLARE @intGLAccountExpenseId     INT            
-    DECLARE @intVendorTermsId                NVARCHAR (MAX) 
+    --DECLARE @intVendorTermsId                NVARCHAR (MAX) 
     DECLARE @intVendorType             INT            
     DECLARE @strVendorId               NVARCHAR (50)  
     DECLARE @strVendorAccountNum       NVARCHAR (15)  
