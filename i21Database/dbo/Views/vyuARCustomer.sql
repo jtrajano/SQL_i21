@@ -2,6 +2,7 @@
 AS
 SELECT     
  Entity.intEntityId
+,Cus.intCustomerId
 ,Entity.strName
 ,Cus.strCustomerNumber
 ,Con.strPhone
