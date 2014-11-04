@@ -87,7 +87,7 @@ DECLARE @Contacts TABLE
 
 				insert @Entity
 				select top 1 
-					rtrim(ltrim(sscon_last_name)) + ', ' + rtrim(ltrim(sscon_first_name)), sscon_email, '', '' , 0, '', '', '', '', null, null
+					rtrim(ltrim(sscon_last_name)) + ', ' + rtrim(ltrim(sscon_first_name)), rtrim(ltrim(sscon_email)), '', '' , 0, '', '', '', '', null, null
 				from @Contacts where id = @id
 				--select * from @Entity
 					declare @intEntityId int
