@@ -797,6 +797,7 @@
     <None Include="Scripts\Post-Deployment\IC\2_MaterialNMFC.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillBatch.sql" />
     <Build Include="dbo\Tables\tblFRAccountMonitor.sql" />
+    <None Include="Scripts\Post-Deployment\AP\FixPaymentRecordStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

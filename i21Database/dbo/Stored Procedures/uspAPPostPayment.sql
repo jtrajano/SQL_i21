@@ -714,8 +714,7 @@ END
 
 		--update payment record based on record from tblCMBankTransaction
 		UPDATE tblAPPayment
-			SET ysnVoid = CASE WHEN A.ysnPrinted = 1 AND ISNULL(A.strPaymentInfo,'') <> '' THEN 1 ELSE 0 END
-			,strPaymentInfo = CASE WHEN A.ysnPrinted = 1 AND ISNULL(A.strPaymentInfo,'') <> '' THEN B.strReferenceNo ELSE A.strPaymentInfo END
+			SET strPaymentInfo = CASE WHEN B.dtmCheckPrinted IS NOT NULL AND ISNULL(A.strPaymentInfo,'') <> '' THEN B.strReferenceNo ELSE A.strPaymentInfo END
 		FROM tblAPPayment A 
 			INNER JOIN tblCMBankTransaction B
 				ON A.strPaymentRecordNum = B.strTransactionId
