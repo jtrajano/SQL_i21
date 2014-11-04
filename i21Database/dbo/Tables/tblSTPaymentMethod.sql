@@ -1,7 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblSTPaymentMethod]
 (
-	[intPaymentMethodId] INT NOT NULL , 
-    [intConcurrencyId] INT NOT NULL, 
+	[intPaymentMethodId] INT NOT NULL IDENTITY,
     [intStoreId] INT NOT NULL, 
     [intPaymentMethodNo] INT NOT NULL, 
     [strDescription] NCHAR(25) NULL, 
@@ -23,6 +22,7 @@
     [ysnAllowSafeDrop] BIT NULL, 
     [ysnAllowMoneyOrders] BIT NULL, 
     [ysnForceTicketPrint] BIT NULL, 
+    [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTPaymentMethod_intPaymentMethodId] PRIMARY KEY CLUSTERED ([intPaymentMethodId] ASC), 
     CONSTRAINT [AK_tblSTPaymentMethod_intPaymentMethodNo] UNIQUE NONCLUSTERED ([intStoreId],[intPaymentMethodNo] ASC), 
     CONSTRAINT [FK_tblSTPaymentMethod_tblSTStore] FOREIGN KEY ([intStoreId]) REFERENCES [tblSTStore]([intStoreId]), 

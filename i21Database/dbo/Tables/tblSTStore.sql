@@ -1,7 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblSTStore]
 (
-	[intStoreId] INT NOT NULL , 
-    [intConcurrencyId] INT NOT NULL, 
+	[intStoreId] INT NOT NULL IDENTITY,
     [intStoreNo] INT NOT NULL, 
     [strStoreName] NCHAR(10) NOT NULL, 
     [StrDescription] NCHAR(30) NULL, 
@@ -73,6 +72,7 @@
     [ysnUpdateCaseCost] BIT NULL, 
     [dtmInvoiceCloseDate] DATETIME NULL, 
     [strTaxIdPassword] NCHAR(8) NULL, 
+    [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTStore] PRIMARY KEY CLUSTERED ([intStoreId] ASC),
     CONSTRAINT [AK_tblSTStore_intStoreNo] UNIQUE NONCLUSTERED ([intStoreNo] ASC),
 	CONSTRAINT [AK_tblSTStore_strStoreName] UNIQUE NONCLUSTERED ([strStoreName] ASC)

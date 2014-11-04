@@ -1071,4 +1071,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intLocationId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="2799119b-e067-4f6f-9fab-1ab44cdbb2ef" ChangeDateTime="11/04/2014 05:54:23">
+    <Property Name="ElementName" Value="[dbo].[tblSTPaidOut].[dblGLAcct]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTPaidOut]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intAccountId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="6b036f07-6ec5-4a7f-b9c8-68cafcadda3c" ChangeDateTime="11/04/2014 05:56:18">
+    <Property Name="ElementName" Value="[dbo].[tblSTPaymentMethod].[dblGlAcct]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTPaymentMethod]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intAccountId" />
+  </Operation>
 </Operations>
