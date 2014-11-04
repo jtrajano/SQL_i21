@@ -182,6 +182,7 @@ BEGIN
 	--Contacts
 	DECLARE	@strTitle           NVARCHAR (MAX) 
 	DECLARE	@strContactName     NVARCHAR (MAX) 
+	DECLARE	@strContactNumber   NVARCHAR (MAX) 
 	DECLARE	@strDepartment      NVARCHAR (MAX) 
 	DECLARE	@strMobile          NVARCHAR (MAX) 
 	DECLARE	@strPhone           NVARCHAR (MAX) 
@@ -456,8 +457,8 @@ BEGIN
 		BEGIN
 			SET @ContactEntityId = SCOPE_IDENTITY()
 		
-			INSERT [dbo].[tblEntityContact] ([intEntityId], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
-			VALUES							 (@ContactEntityId, @strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
+			INSERT [dbo].[tblEntityContact] ([intEntityId], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes],[strContactNumber])
+			VALUES							 (@ContactEntityId, @strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes,[@strContactName])
 
 		END
 		
