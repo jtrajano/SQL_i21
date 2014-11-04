@@ -3,7 +3,7 @@
 	[intStoreId] INT NOT NULL IDENTITY,
     [intStoreNo] INT NOT NULL, 
     [strStoreName] NCHAR(10) NOT NULL, 
-    [StrDescription] NCHAR(30) NULL, 
+    [strDescription] NCHAR(30) NULL, 
     [strRegion] NCHAR(6) NULL, 
     [strDestrict] NCHAR(6) NULL, 
     [strAddress1] NCHAR(30) NULL, 
