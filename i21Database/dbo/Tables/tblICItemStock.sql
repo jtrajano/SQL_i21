@@ -5,6 +5,7 @@
     [intLocationId] INT NOT NULL, 
     [strWarehouse] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intUnitMeasureId] INT NULL, 
+	[dblAverageCost] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblUnitOnHand] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblOrderCommitted] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblOnOrder] NUMERIC(18, 6) NULL DEFAULT ((0)), 

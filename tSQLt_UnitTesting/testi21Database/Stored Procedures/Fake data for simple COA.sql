@@ -8,6 +8,7 @@ BEGIN
 		DROP VIEW vyuAPPayablesAgingSummary
 		DROP VIEW vyuAPPaymentDetail
 		DROP VIEW vyuAPVendor
+		DROP VIEW vyuAPRecapTransaction
 
 		-- Create the fake table		
 		EXEC tSQLt.FakeTable 'dbo.tblGLAccountStructure';

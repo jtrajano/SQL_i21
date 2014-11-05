@@ -693,7 +693,6 @@
     <Build Include="dbo\Tables\tblICInventoryCostingBucket.sql" />
     <Build Include="dbo\Tables\tblPRPaycheckDeductionTax.sql" />
     <Build Include="dbo\Tables\tblPRPaycheckEarningTax.sql" />
-    <Build Include="dbo\Tables\tblICInventoryAveCost.sql" />
     <Build Include="dbo\Tables\tblICItemUOM.sql" />
     <Build Include="dbo\Tables\tblICItemPOSCategory.sql" />
     <Build Include="dbo\Tables\tblICItemPOSSLA.sql" />
@@ -770,12 +769,18 @@
     <Build Include="dbo\Stored Procedures\uspFRAccountMonitor.sql" />
     <Build Include="dbo\Views\vyuSMOriginColumn.sql" />
     <Build Include="dbo\Views\vyuAPRecapTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspICProcessMovingAverageCost.sql" />
+    <Build Include="dbo\Functions\fnGetItemAverageCost.sql" />
+    <Build Include="dbo\Functions\fnGetItemTotalValueFromTransactions.sql" />
+    <Build Include="dbo\Functions\fnCalculateAverageCost.sql" />
     <Build Include="dbo\Tables\tblSTPaidOut.sql" />
     <Build Include="dbo\Tables\tblSTPaymentMethod.sql" />
     <Build Include="dbo\Tables\tblSTStore.sql" />
     <Build Include="dbo\Tables\tblSTSubcategoryClass.sql" />
     <Build Include="dbo\Tables\tblSTSubcategoryFamily.sql" />
     <Build Include="dbo\Tables\tblSTSubcategoryRegProd.sql" />
+    <Build Include="dbo\Stored Procedures\uspICProcessFIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReduceStockInFIFO.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

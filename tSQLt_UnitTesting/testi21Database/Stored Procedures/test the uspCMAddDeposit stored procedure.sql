@@ -1,6 +1,11 @@
 ﻿CREATE PROCEDURE [testi21Database].[test the uspCMAddDeposit stored procedure]
 AS
 BEGIN
+
+	-- Drop these views. It has dependencies with tblCMBankTransaction table. Can't do fake table if these exists. 
+	-- note: when tSQLt do the rollback, the views are rolled back as well. 
+	DROP VIEW vyuAPPayments
+
 	-- Arrange the fake table 
 	EXEC tSQLt.FakeTable 'dbo.tblCMBankTransaction', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblCMBankTransactionDetail';
