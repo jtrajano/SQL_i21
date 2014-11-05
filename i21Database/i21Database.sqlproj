@@ -773,6 +773,12 @@
     <Build Include="dbo\Functions\fnGetItemAverageCost.sql" />
     <Build Include="dbo\Functions\fnGetItemTotalValueFromTransactions.sql" />
     <Build Include="dbo\Functions\fnCalculateAverageCost.sql" />
+    <Build Include="dbo\Tables\tblSTPaidOut.sql" />
+    <Build Include="dbo\Tables\tblSTPaymentMethod.sql" />
+    <Build Include="dbo\Tables\tblSTStore.sql" />
+    <Build Include="dbo\Tables\tblSTSubcategoryClass.sql" />
+    <Build Include="dbo\Tables\tblSTSubcategoryFamily.sql" />
+    <Build Include="dbo\Tables\tblSTSubcategoryRegProd.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -794,6 +800,7 @@
     <None Include="Scripts\Post-Deployment\IC\2_MaterialNMFC.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillBatch.sql" />
     <Build Include="dbo\Tables\tblFRAccountMonitor.sql" />
+    <None Include="Scripts\Post-Deployment\AP\FixPaymentRecordStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

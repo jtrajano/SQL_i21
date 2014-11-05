@@ -1071,4 +1071,46 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intLocationId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="2799119b-e067-4f6f-9fab-1ab44cdbb2ef" ChangeDateTime="11/04/2014 05:54:23">
+    <Property Name="ElementName" Value="[dbo].[tblSTPaidOut].[dblGLAcct]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTPaidOut]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intAccountId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="6b036f07-6ec5-4a7f-b9c8-68cafcadda3c" ChangeDateTime="11/04/2014 05:56:18">
+    <Property Name="ElementName" Value="[dbo].[tblSTPaymentMethod].[dblGlAcct]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTPaymentMethod]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intAccountId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="51ddc8a2-a86e-4c17-9198-ac97805d7b49" ChangeDateTime="11/04/2014 11:44:30">
+    <Property Name="ElementName" Value="[dbo].[tblSTStore].[StrDescription]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTStore]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strDescription" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="fdd3d450-b0b6-4ec9-9e08-122620b7d0bf" ChangeDateTime="11/04/2014 11:45:14">
+    <Property Name="ElementName" Value="[dbo].[tblSTSubcategoryClass].[intConcurrencyID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTSubcategoryClass]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intConcurrencyId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d7f80050-2e06-43ff-8665-41597875928b" ChangeDateTime="11/04/2014 11:45:19">
+    <Property Name="ElementName" Value="[dbo].[tblSTSubcategoryFamily].[intConcurrencyID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTSubcategoryFamily]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intConcurrencyId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d1ef12ed-f4e4-4c57-8b3d-3273f3d75aba" ChangeDateTime="11/04/2014 11:45:24">
+    <Property Name="ElementName" Value="[dbo].[tblSTSubcategoryRegProd].[intConcurrencyID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTSubcategoryRegProd]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intConcurrencyId" />
+  </Operation>
 </Operations>
