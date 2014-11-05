@@ -257,6 +257,7 @@ BEGIN
 		FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
 	)
 	INSERT INTO tblGLDetail (
+			[strTransactionId],
 			[intTransactionId], 
 			[intAccountId],
 			[strDescription],
@@ -282,6 +283,7 @@ BEGIN
 	OUTPUT INSERTED.dtmDate, INSERTED.intAccountId, INSERTED.dblDebit, INSERTED.dblCredit, INSERTED.dblDebitUnit, INSERTED.dblCreditUnit  INTO #tmpGLDetail
 		--CREDIT
 		SELECT	
+			[strTransactionId] = A.strBillId,
 			[intTransactionId] = A.intBillId, 
 			[intAccountId] = A.intAccountId,
 			[strDescription] = A.strDescription,
@@ -314,6 +316,7 @@ BEGIN
 		--DEBIT
 		UNION ALL 
 		SELECT	
+			[strTransactionId] = A.strBillId,
 			[intTransactionId] = A.intBillId, 
 			[intAccountId] = B.intAccountId,
 			[strDescription] = A.strDescription,
@@ -502,7 +505,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 
 		UPDATE tblGLDetail
 			SET ysnIsUnposted = 1
-		WHERE strTransactionId IN (SELECT strBillId FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData))
+		WHERE intTransactionId IN (SELECT intBillId FROM #tmpPostBillData)
 
 		--Insert Successfully unposted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -644,10 +647,6 @@ ELSE
 	END
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
-
---=====================================================================================================================================
--- 	RETURN TOTAL NUMBER OF VALID JOURNALS
----------------------------------------------------------------------------------------------------------------------------------------
 
 --=====================================================================================================================================
 -- 	FINALIZING STAGE
