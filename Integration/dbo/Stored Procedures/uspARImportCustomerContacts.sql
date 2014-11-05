@@ -101,7 +101,7 @@ DECLARE @Contacts TABLE
 				select top 1
 					@intEntityId
 					, rtrim(ltrim(sscon_contact_id))
-					, rtrim(ltrim(sscon_contact_title))
+					, substring((rtrim(ltrim(sscon_contact_title))), 1,35)
 					, ''
 					, rtrim(ltrim(sscon_cell_no)) + ' x' + rtrim(ltrim(sscon_cell_ext))
 					, rtrim(ltrim(sscon_work_no)) + ' x' + rtrim(ltrim(sscon_work_ext))
