@@ -21,7 +21,7 @@ Ext.define('Inventory.view.LotStatusViewModel', {
         primaryStatus: {
             data: [
                 { strDescription: 'Active' },
-                { strDescription: 'On Hole' },
+                { strDescription: 'On Hold' },
                 { strDescription: 'Quarantine' }
             ],
             fields: [
