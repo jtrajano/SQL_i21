@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICProcessMovingAverageCost, Feb 15. Purchase 20 stocks at 21.75 dollars each]
+﻿CREATE PROCEDURE [testi21Database].[test uspICProcessMovingAverageCost, Mar 1. Sold 40 stocks]
 AS
 BEGIN
 	-- Arrange 
@@ -30,6 +30,7 @@ BEGIN
 
 		-- Declare the variables for the transaction types
 		DECLARE @PurchaseTransactionType AS INT = 1;
+		DECLARE @SalesTransactionType AS INT = 2;
 
 		-- Declare the variables used in uspICProcessMovingAverageCost
 		DECLARE 
@@ -349,6 +350,106 @@ BEGIN
 					,[intLotId] = NULL 
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId]	= 1
+
+			-- Re-insert the expected data in tblICInventoryTransaction
+			INSERT INTO tblICInventoryTransaction (
+					[intItemId]
+					,[intItemLocationId]
+					,[dtmDate]
+					,[dblUnitQty]
+					,[dblCost]
+					,[dblValue]
+					,[dblSalesPrice]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[intTransactionId]
+					,[strTransactionId]
+					,[strBatchId]
+					,[intTransactionTypeId]
+					,[intLotId]
+					,[intCreatedUserId]
+					,[intConcurrencyId]
+			)
+			SELECT	[intItemId] = @intItemId
+					,[intItemLocationId] = @NewHaven
+					,[dtmDate] = @dtmDate
+					,[dblUnitQty] = (@dblUnitQty * @dblUOMQty)
+					,[dblCost] = @dblCost
+					,[dblValue] = NULL 
+					,[dblSalesPrice] = @dblSalesPrice
+					,[intCurrencyId] = @USD
+					,[dblExchangeRate] = 1
+					,[intTransactionId] = @intTransactionId
+					,[strTransactionId] = @strTransactionId
+					,[strBatchId] = @strBatchId
+					,[intTransactionTypeId] = @PurchaseTransactionType
+					,[intLotId] = NULL 
+					,[intCreatedUserId] = @intUserId
+					,[intConcurrencyId]	= 1
+			
+			-- Update expected data in tblICItemStock
+			UPDATE	tblICItemStock
+			SET		dblAverageCost = 20.916667
+					,dblUnitOnHand = 60
+			WHERE	intItemId = @intItemId
+					AND intLocationId = @intItemLocationId
+		END
+
+		-- 4. Mar 1. Sold 40 stocks. 
+		BEGIN 
+			SET	@intItemId = @WetGrains
+			SET @intItemLocationId = @NewHaven
+			SET @dtmDate = 'March 1, 2014'
+			SET @dblUnitQty = -40
+			SET @dblUOMQty = @EACH 
+			SET @dblCost = 0
+			SET @dblSalesPrice = 50.00
+			SET @intCurrencyId = @USD
+			SET @dblExchangeRate = 1
+			SET @intTransactionId = 1
+			SET @strTransactionId = 'SALES-00001'
+			SET @strBatchId = 'BATCH-00004'
+			SET @intTransactionTypeId = @SalesTransactionType
+			SET @intUserId = 3
+
+			SET @dblAverageCost_Expected = 20.916667
+
+			INSERT INTO expected (
+					[intInventoryTransactionId]
+					,[intItemId]
+					,[intItemLocationId]
+					,[dtmDate]
+					,[dblUnitQty]
+					,[dblCost]
+					,[dblValue]
+					,[dblSalesPrice]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[intTransactionId]
+					,[strTransactionId]
+					,[strBatchId]
+					,[intTransactionTypeId]
+					,[intLotId]
+					,[intCreatedUserId]
+					,[intConcurrencyId]
+			)
+			SELECT	[intInventoryTransactionId] = 4
+					,[intItemId] = @intItemId
+					,[intItemLocationId] = @NewHaven
+					,[dtmDate] = @dtmDate
+					,[dblUnitQty] = (@dblUnitQty * @dblUOMQty)
+					,[dblCost] = @dblAverageCost_Expected
+					,[dblValue] = NULL 
+					,[dblSalesPrice] = @dblSalesPrice
+					,[intCurrencyId] = @USD
+					,[dblExchangeRate] = 1
+					,[intTransactionId] = @intTransactionId
+					,[strTransactionId] = @strTransactionId
+					,[strBatchId] = @strBatchId
+					,[intTransactionTypeId] = @intTransactionTypeId
+					,[intLotId] = NULL 
+					,[intCreatedUserId] = @intUserId
+					,[intConcurrencyId]	= 1
 		END
 	END 
 	
@@ -429,7 +530,7 @@ BEGIN
 		DECLARE @dblUnitOnHand_Expected AS NUMERIC(18,6);
 		DECLARE @dblUnitOnHand_Actual AS NUMERIC(18,6);
 
-		SET @dblUnitOnHand_Expected = 60;
+		SET @dblUnitOnHand_Expected = 20;
 
 		SELECT	@dblUnitOnHand_Actual = Stock.dblUnitOnHand
 		FROM	[dbo].[tblICItemStock] Stock

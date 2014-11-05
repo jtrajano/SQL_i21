@@ -241,6 +241,11 @@
     <Build Include="testi21Database\Stored Procedures\Fake data for item stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICProcessMovingAverageCost, Feb 10. Purchase 20 stocks at 21 dollars each.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICProcessMovingAverageCost, Feb 15. Purchase 20 stocks at 21.75 dollars each.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessMovingAverageCost, Mar 1. Sold 40 stocks.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessMovingAverageCost, Mar 15. Sold 50 stocks.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessMovingAverageCost, Apr 7. Sold 60 stocks.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessMovingAverageCost, Apr 12. Purchase 75 stocks at 19 dollars each.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessMovingAverageCost, May 15. Purchase 15 stocks at 27 dollars each.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

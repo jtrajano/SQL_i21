@@ -199,6 +199,7 @@ BEGIN
 	UPDATE	Stock
 	SET		Stock.dblAverageCost =	[dbo].[fnCalculateAverageCost]((@dblUnitQty * @dblUOMQty), @dblCost, Stock.dblUnitOnHand, Stock.dblAverageCost)
 			,Stock.dblUnitOnHand = (@dblUnitQty * @dblUOMQty) + Stock.dblUnitOnHand
+			,Stock.intConcurrencyId = ISNULL(Stock.intConcurrencyId, 0) + 1 
 	FROM	[dbo].[tblICItemStock] Stock
 	WHERE	Stock.intItemId = @intItemId
 			AND Stock.intLocationId = @intItemLocationId
