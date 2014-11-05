@@ -79,12 +79,45 @@ Ext.define('Inventory.view.InventoryUOM', {
                                         xtype: 'button',
                                         tabIndex: -1,
                                         height: 57,
+                                        itemId: 'btnNew',
+                                        width: 45,
+                                        iconAlign: 'top',
+                                        iconCls: 'large-new',
+                                        scale: 'large',
+                                        text: 'New'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        height: 57,
                                         itemId: 'btnSave',
                                         width: 45,
                                         iconAlign: 'top',
                                         iconCls: 'large-save',
                                         scale: 'large',
                                         text: 'Save'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        height: 57,
+                                        itemId: 'btnSearch',
+                                        width: 45,
+                                        iconAlign: 'top',
+                                        iconCls: 'large-search',
+                                        scale: 'large',
+                                        text: 'Search'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        height: 57,
+                                        itemId: 'btnDelete',
+                                        width: 45,
+                                        iconAlign: 'top',
+                                        iconCls: 'large-delete',
+                                        scale: 'large',
+                                        text: 'Delete'
                                     },
                                     {
                                         xtype: 'button',
