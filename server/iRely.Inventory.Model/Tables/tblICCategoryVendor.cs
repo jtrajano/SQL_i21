@@ -12,6 +12,7 @@ namespace iRely.Inventory.Model
     {
         public int intCategoryVendorId { get; set; }
         public int intCategoryId { get; set; }
+        public int intLocationId { get; set; }
         public int intVendorId { get; set; }
         public string strVendorDepartment { get; set; }
         public bool ysnAddOrderingUPC { get; set; }
@@ -25,9 +26,10 @@ namespace iRely.Inventory.Model
 
         public vyuAPVendor vyuAPVendor { get; set; }
         public tblICCategory tblICCategory { get; set; }
-        public tblICFamily tblICFamily { get; set; }
-        public tblICClass SellClass { get; set; }
-        public tblICClass OrderClass { get; set; }
+        public tblSTSubcategoryFamily Family { get; set; }
+        public tblSTSubcategoryClass SellClass { get; set; }
+        public tblSTSubcategoryClass OrderClass { get; set; }
+        public tblSMCompanyLocation tblSMCompanyLocation { get; set; }
 
     }
 }

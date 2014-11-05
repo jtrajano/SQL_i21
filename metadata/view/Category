@@ -1601,10 +1601,45 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "itemId": "cboVendorFamily"
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intFamilyId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Family Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strFamilyId',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Family',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strFamilyDesc',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Description',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strFamilyId",
+                                                        "itemId": "cboVendorFamily",
+                                                        "valueField": "strFamilyId"
                                                     },
                                                     "name": "MyComboBox4",
-                                                    "designerId": "d595b3a7-6fa9-4fbb-b8b0-af8005c02347"
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "d595b3a7-6fa9-4fbb-b8b0-af8005c02347",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -1632,10 +1667,45 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "itemId": "cboVendorSellClass"
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intClassId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Class Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strClassId',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Class',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strClassDesc',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Description',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strClassId",
+                                                        "itemId": "cboVendorSellClass",
+                                                        "valueField": "strClassId"
                                                     },
                                                     "name": "MyComboBox5",
-                                                    "designerId": "9048c955-737e-4815-aac2-fc3490d529a4"
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "9048c955-737e-4815-aac2-fc3490d529a4",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -1650,7 +1720,7 @@
                                                 "dataIndex": "string",
                                                 "flex": null,
                                                 "itemId": "colVendorOrderClass",
-                                                "text": "Default order class",
+                                                "text": "Default Order Class",
                                                 "width": 105
                                             },
                                             "name": "MyColumn110",
@@ -1664,10 +1734,45 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "itemId": "cboVendorOrderClass"
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intClassId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Class Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strClassId',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Class',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strClassDesc',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Description',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strClassId",
+                                                        "itemId": "cboVendorOrderClass",
+                                                        "valueField": "strClassId"
                                                     },
                                                     "name": "MyComboBox6",
-                                                    "designerId": "6f0399bb-74a2-4c34-ab8c-6ac09f48bf8c"
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "6f0399bb-74a2-4c34-ab8c-6ac09f48bf8c",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },

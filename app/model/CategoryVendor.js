@@ -26,19 +26,21 @@ Ext.define('Inventory.model.CategoryVendor', {
                     }
                 }
             }},
-        { name: 'intVendorId', type: 'int'},
+        { name: 'intLocationId', type: 'int', allowNull: true },
+        { name: 'intVendorId', type: 'int', allowNull: true },
         { name: 'strVendorDepartment', type: 'string'},
         { name: 'ysnAddOrderingUPC', type: 'boolean'},
         { name: 'ysnUpdateExistingRecords', type: 'boolean'},
         { name: 'ysnAddNewRecords', type: 'boolean'},
         { name: 'ysnUpdatePrice', type: 'boolean'},
-        { name: 'intFamilyId', type: 'int'},
-        { name: 'intSellClassId', type: 'int'},
-        { name: 'intOrderClassId', type: 'int'},
+        { name: 'intFamilyId', type: 'int', allowNull: true },
+        { name: 'intSellClassId', type: 'int', allowNull: true },
+        { name: 'intOrderClassId', type: 'int', allowNull: true },
         { name: 'strComments', type: 'string'},
     ],
 
     validators: [
+        {type: 'presence', field: 'intLocationId'},
         {type: 'presence', field: 'intVendorId'}
     ]
 });

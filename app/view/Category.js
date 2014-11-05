@@ -742,8 +742,30 @@ Ext.define('Inventory.view.Category', {
                                                         dataIndex: 'string',
                                                         text: 'Default<br>Family',
                                                         editor: {
-                                                            xtype: 'combobox',
-                                                            itemId: 'cboVendorFamily'
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intFamilyId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Family Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strFamilyId',
+                                                                    dataType: 'string',
+                                                                    text: 'Family',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strFamilyDesc',
+                                                                    dataType: 'string',
+                                                                    text: 'Description',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboVendorFamily',
+                                                            displayField: 'strFamilyId',
+                                                            valueField: 'strFamilyId'
                                                         }
                                                     },
                                                     {
@@ -752,8 +774,30 @@ Ext.define('Inventory.view.Category', {
                                                         dataIndex: 'string',
                                                         text: 'Default<br>Sell Class',
                                                         editor: {
-                                                            xtype: 'combobox',
-                                                            itemId: 'cboVendorSellClass'
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intClassId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Class Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strClassId',
+                                                                    dataType: 'string',
+                                                                    text: 'Class',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strClassDesc',
+                                                                    dataType: 'string',
+                                                                    text: 'Description',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboVendorSellClass',
+                                                            displayField: 'strClassId',
+                                                            valueField: 'strClassId'
                                                         }
                                                     },
                                                     {
@@ -761,10 +805,32 @@ Ext.define('Inventory.view.Category', {
                                                         itemId: 'colVendorOrderClass',
                                                         width: 105,
                                                         dataIndex: 'string',
-                                                        text: 'Default order class',
+                                                        text: 'Default Order Class',
                                                         editor: {
-                                                            xtype: 'combobox',
-                                                            itemId: 'cboVendorOrderClass'
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intClassId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Class Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strClassId',
+                                                                    dataType: 'string',
+                                                                    text: 'Class',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strClassDesc',
+                                                                    dataType: 'string',
+                                                                    text: 'Description',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboVendorOrderClass',
+                                                            displayField: 'strClassId',
+                                                            valueField: 'strClassId'
                                                         }
                                                     },
                                                     {

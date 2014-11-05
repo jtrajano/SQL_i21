@@ -103,15 +103,30 @@ Ext.define('Inventory.view.CategoryViewController', {
                         store: '{vendor}'
                     }
                 },
-                colVendorDepartment: '',
-                colVendorAddOrderUPC: '',
-                colVendorUpdateExisting: '',
-                colVendorAddNew: '',
-                colVendorUpdatePrice: '',
-                colVendorFamily: '',
-                colVendorSellClass: '',
-                colVendorOrderClass: '',
-                colVendorComments: ''
+                colVendorDepartment: 'strVendorDepartment',
+                colVendorAddOrderUPC: 'ysnAddOrderingUPC',
+                colVendorUpdateExisting: 'ysnUpdateExistingRecords',
+                colVendorAddNew: 'ysnAddNewRecords',
+                colVendorUpdatePrice: 'ysnUpdatePrice',
+                colVendorFamily: {
+                    dataIndex: 'intFamilyId',
+                    editor: {
+                        store: '{vendorFamily}'
+                    }
+                },
+                colVendorSellClass: {
+                    dataIndex: 'intSellClassId',
+                    editor: {
+                        store: '{vendorSellClass}'
+                    }
+                },
+                colVendorOrderClass: {
+                    dataIndex: 'intOrderClassId',
+                    editor: {
+                        store: '{vendorOrderClass}'
+                    }
+                },
+                colVendorComments: 'strComments'
             },
 
             txtERPItemClass: '{current.strERPItemClass}',

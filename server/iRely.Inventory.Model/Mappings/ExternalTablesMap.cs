@@ -91,7 +91,7 @@ namespace iRely.Inventory.Model
             this.ToTable("tblSTStore");
             this.Property(t => t.intStoreId).HasColumnName("intStoreId");
             this.Property(t => t.intStoreNo).HasColumnName("intStoreNo");
-            this.Property(t => t.StrDescription).HasColumnName("StrDescription");
+            this.Property(t => t.strDescription).HasColumnName("strDescription");
             this.Property(t => t.strDestrict).HasColumnName("strDestrict");
             this.Property(t => t.strRegion).HasColumnName("strRegion");
             this.Property(t => t.strStoreName).HasColumnName("strStoreName");
@@ -108,7 +108,6 @@ namespace iRely.Inventory.Model
             // Table & Column Mappings
             this.ToTable("tblSTSubcategoryClass");
             this.Property(t => t.intClassId).HasColumnName("intClassId");
-            this.Property(t => t.intConcurrencyID).HasColumnName("intConcurrencyID");
             this.Property(t => t.strClassComment).HasColumnName("strClassComment");
             this.Property(t => t.strClassDesc).HasColumnName("strClassDesc");
             this.Property(t => t.strClassId).HasColumnName("strClassId");
@@ -124,7 +123,6 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblSTSubcategoryFamily");
-            this.Property(t => t.intConcurrencyID).HasColumnName("intConcurrencyID");
             this.Property(t => t.intFamilyId).HasColumnName("intFamilyId");
             this.Property(t => t.strFamilyComment).HasColumnName("strFamilyComment");
             this.Property(t => t.strFamilyDesc).HasColumnName("strFamilyDesc");
@@ -141,7 +139,6 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblSTSubcategoryRegProd");
-            this.Property(t => t.intConcurrencyID).HasColumnName("intConcurrencyID");
             this.Property(t => t.intRegProdId).HasColumnName("intRegProdId");
             this.Property(t => t.intStoreId).HasColumnName("intStoreId");
             this.Property(t => t.strRegProdCode).HasColumnName("strRegProdCode");

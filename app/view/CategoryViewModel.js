@@ -21,8 +21,10 @@ Ext.define('Inventory.view.CategoryViewModel', {
         'Inventory.store.BufferedUnitMeasure',
         'Inventory.store.BufferedCompactItem',
         'GeneralLedger.store.BufAccountId',
-        //'AccountsPayable.store.VendorBuffered',
-        'i21.store.CompanyLocation'
+        'AccountsPayable.store.VendorBuffered',
+        'i21.store.CompanyLocation',
+        'Inventory.store.Class',
+        'Inventory.store.Family'
     ],
 
     stores: {
@@ -143,10 +145,19 @@ Ext.define('Inventory.view.CategoryViewModel', {
         },
         location: {
             type: 'companylocation'
+        },
+        vendorSellClass: {
+            type: 'storeclass'
+        },
+        vendorOrderClass: {
+            type: 'storeclass'
+        },
+        vendorFamily: {
+            type: 'storefamily'
+        },
+        vendor: {
+            type: 'vendorbuffered'
         }
-//        vendor: {
-//            type: 'vendorbuffered'
-//        }
     }
 
 });

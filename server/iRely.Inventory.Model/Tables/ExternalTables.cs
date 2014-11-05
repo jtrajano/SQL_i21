@@ -120,6 +120,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICManufacturingCell> tblICManufacturingCells { get; set; }
         public ICollection<tblICCommodityAccount> tblICCommodityAccounts { get; set; }
         public ICollection<tblICCategoryLocation> tblICCategoryLocations { get; set; }
+        public ICollection<tblICCategoryVendor> tblICCategoryVendors { get; set; }
     }
 
     public class tblGLAccount : BaseEntity
@@ -171,7 +172,7 @@ namespace iRely.Inventory.Model
         public int intStoreId { get; set; }
         public int intStoreNo { get; set; }
         public bool strStoreName { get; set; }
-        public bool StrDescription { get; set; }
+        public bool strDescription { get; set; }
         public bool strRegion { get; set; }
         public bool strDestrict { get; set; }
     }
@@ -182,7 +183,9 @@ namespace iRely.Inventory.Model
         public bool strClassId { get; set; }
         public bool strClassDesc { get; set; }
         public bool strClassComment { get; set; }
-        public int intConcurrencyID { get; set; }
+
+        public ICollection<tblICCategoryVendor> tblICCategoryVendorSellClasses { get; set; }
+        public ICollection<tblICCategoryVendor> tblICCategoryVendorOrderClasses { get; set; }
     }
 
     public class tblSTSubcategoryFamily : BaseEntity
@@ -191,7 +194,8 @@ namespace iRely.Inventory.Model
         public bool strFamilyId { get; set; }
         public bool strFamilyDesc { get; set; }
         public bool strFamilyComment { get; set; }
-        public int intConcurrencyID { get; set; }
+
+        public ICollection<tblICCategoryVendor> tblICCategoryVendors { get; set; }
     }
 
     public class tblSTSubcategoryRegProd : BaseEntity
@@ -201,7 +205,6 @@ namespace iRely.Inventory.Model
         public bool strRegProdCode { get; set; }
         public bool strRegProdDesc { get; set; }
         public bool strRegProdComment { get; set; }
-        public int intConcurrencyID { get; set; }
     }
 
     public class tblSTPaidOut : BaseEntity
