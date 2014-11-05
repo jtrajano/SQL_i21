@@ -313,7 +313,7 @@ BEGIN
 		INNER JOIN [dbo].tblGLAccount GLAccnt
 			ON A.intAccountId = GLAccnt.intAccountId
 		INNER JOIN tblARCustomer C
-			ON A.intEntityId = C.intEntityId
+			ON A.intCustomerId = C.intCustomerId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
 		--GROUP BY A.strRecordNumber,
 		--A.intPaymentId,
@@ -352,7 +352,7 @@ BEGIN
 				INNER JOIN [dbo].tblGLAccount GLAccnt
 					ON A.intAccountId = GLAccnt.intAccountId
 				INNER JOIN tblARCustomer C
-					ON A.intEntityId = C.intEntityId
+					ON A.intCustomerId = C.intCustomerId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
 		AND B.dblAmountDue = (B.dblPayment + B.dblDiscount) --fully paid
 		AND B.dblDiscount <> 0
@@ -403,7 +403,7 @@ BEGIN
 		FROM	[dbo].tblARPayment A 
 				INNER JOIN tblARPaymentDetail B ON A.intPaymentId = B.intPaymentId
 				--INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
-				INNER JOIN tblARCustomer D ON A.intEntityId = D.intEntityId 
+				INNER JOIN tblARCustomer D ON A.intCustomerId = D.intCustomerId 
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
 		AND B.dblPayment <> 0
 		GROUP BY A.[strRecordNumber],
@@ -440,7 +440,7 @@ BEGIN
 				INNER JOIN tblARPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblARCustomer C
-					ON A.intEntityId = C.intEntityId
+					ON A.intCustomerId = C.intCustomerId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
 		AND B.dblAmountDue = (B.dblPayment + B.dblDiscount) --fully paid
 		AND B.dblDiscount <> 0
@@ -703,7 +703,7 @@ ELSE
 		INNER JOIN [dbo].tblGLAccount GLAccnt
 			ON A.intAccountId = GLAccnt.intAccountId
 		INNER JOIN tblARCustomer C
-			ON A.intEntityId = C.intEntityId
+			ON A.intCustomerId = C.intCustomerId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
 		GROUP BY A.[strRecordNumber],
 		A.intPaymentId,
@@ -740,7 +740,7 @@ ELSE
 				INNER JOIN tblARPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblARCustomer C
-					ON A.intEntityId = C.intEntityId
+					ON A.intCustomerId = C.intCustomerId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
 		AND 1 = (CASE WHEN @post = 1 AND B.dblAmountDue = (B.dblPayment + B.dblDiscount) THEN  1--fully paid when unposted
 					  WHEN  @post = 0 AND B.dblAmountDue = 0 THEN 1 --fully paid when posted
@@ -786,7 +786,7 @@ ELSE
 		FROM	[dbo].tblARPayment A 
 				INNER JOIN tblARPaymentDetail B ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblARInvoice C ON B.intInvoiceId = C.intInvoiceId
-				INNER JOIN tblARCustomer D ON A.intEntityId = D.intEntityId
+				INNER JOIN tblARCustomer D ON A.intCustomerId = D.intCustomerId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
 		AND B.dblPayment <> 0
 		GROUP BY A.[strRecordNumber],
@@ -828,7 +828,7 @@ ELSE
 				INNER JOIN tblARPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblARCustomer C
-					ON A.intEntityId = C.intEntityId
+					ON A.intCustomerId = C.intCustomerId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
 		AND 1 = (CASE WHEN @post = 1 AND B.dblAmountDue = (B.dblPayment + B.dblDiscount) THEN  1--fully paid when unposted
 					  WHEN  @post = 0 AND B.dblAmountDue = 0 THEN 1 --fully paid when posted
