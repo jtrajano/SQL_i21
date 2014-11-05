@@ -25,12 +25,12 @@ Ext.define('Inventory.view.FeedStockCodeViewController', {
             store: Ext.create('Inventory.store.FeedStockCode'),
             singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
                 grid: win.down('grid'),
-                title: 'Feed Stock Code',
+                title: 'Feed Stock',
                 columns: [
                     {
                         itemId: 'colRinFeedStockCode',
                         dataIndex: 'strRinFeedStockCode',
-                        text: 'Feed Stock Code',
+                        text: 'Code',
                         flex: 1,
                         editor: {
                             xtype: 'textfield'

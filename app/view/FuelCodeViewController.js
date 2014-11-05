@@ -30,7 +30,7 @@ Ext.define('Inventory.view.FuelCodeViewController', {
                     {
                         itemId: 'colRinFuelCode',
                         dataIndex: 'strRinFuelCode',
-                        text: 'Fuel Code',
+                        text: 'Code',
                         flex: 1,
                         editor: {
                             xtype: 'textfield'

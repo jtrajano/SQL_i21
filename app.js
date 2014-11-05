@@ -31,7 +31,8 @@ Ext.application({
         'InventoryUOM',
         'QAProperties',
         'Catalog',
-        'LineOfBusiness'
+        'LineOfBusiness',
+        'EditCatalog'
     ],
     name: 'Inventory',
 

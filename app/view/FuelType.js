@@ -163,15 +163,15 @@ Ext.define('Inventory.view.FuelType', {
                             xtype: 'gridcombobox',
                             columns: [
                                 {
-                                    dataIndex: 'intRinFuelTypeId',
+                                    dataIndex: 'intRinFuelCategoryId',
                                     dataType: 'int',
                                     text: 'Fuel Category Id',
                                     hidden: true
                                 },
                                 {
-                                    dataIndex: 'strRinFuelTypeCode',
+                                    dataIndex: 'strRinFuelCategoryCode',
                                     dataType: 'string',
-                                    text: 'Fuel Category Id',
+                                    text: 'Fuel Category',
                                     flex: 1
                                 },
                                 {
@@ -181,8 +181,8 @@ Ext.define('Inventory.view.FuelType', {
                                     flex: 1
                                 }
                             ],
-                            itemId: 'cboFuelType',
-                            fieldLabel: 'Fuel Type',
+                            itemId: 'cboFuelCategory',
+                            fieldLabel: 'Fuel Category',
                             labelWidth: 165,
                             displayField: 'strRinFuelTypeCode',
                             valueField: 'intRinFuelTypeId'
@@ -199,7 +199,7 @@ Ext.define('Inventory.view.FuelType', {
                                 {
                                     dataIndex: 'strRinFeedStockCode',
                                     dataType: 'string',
-                                    text: 'Feed Stock Id',
+                                    text: 'Code',
                                     flex: 1
                                 },
                                 {
@@ -240,13 +240,13 @@ Ext.define('Inventory.view.FuelType', {
                                 {
                                     dataIndex: 'intRinFuelId',
                                     dataType: 'int',
-                                    text: 'Feed Code Id',
+                                    text: 'Fuel Code Id',
                                     hidden: true
                                 },
                                 {
                                     dataIndex: 'strRinFuelCode',
                                     dataType: 'string',
-                                    text: 'Feed Code',
+                                    text: 'Code',
                                     flex: 1
                                 },
                                 {
@@ -258,7 +258,7 @@ Ext.define('Inventory.view.FuelType', {
                             ],
                             itemId: 'cboFuelCode',
                             width: 170,
-                            fieldLabel: 'Fuel Code',
+                            fieldLabel: 'Fuel',
                             labelWidth: 165,
                             displayField: 'strRinFuelCode',
                             valueField: 'intRinFuelId'
@@ -275,7 +275,7 @@ Ext.define('Inventory.view.FuelType', {
                                 {
                                     dataIndex: 'strRinProcessCode',
                                     dataType: 'string',
-                                    text: 'Process Id',
+                                    text: 'Code',
                                     flex: 1
                                 },
                                 {
@@ -285,9 +285,9 @@ Ext.define('Inventory.view.FuelType', {
                                     flex: 1
                                 }
                             ],
-                            itemId: 'cboProcessCode',
+                            itemId: 'cboProductionProcess',
                             width: 170,
-                            fieldLabel: 'Process Code',
+                            fieldLabel: 'Production Process',
                             labelWidth: 165,
                             displayField: 'strRinProcessCode',
                             valueField: 'intRinProcessId'

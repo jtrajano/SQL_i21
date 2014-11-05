@@ -25,12 +25,12 @@ Ext.define('Inventory.view.ProcessCodeViewController', {
             store: Ext.create('Inventory.store.ProcessCode'),
             singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
                 grid: win.down('grid'),
-                title: 'Process Code',
+                title: 'Production Process',
                 columns: [
                     {
                         itemId: 'colRinProcessCode',
                         dataIndex: 'strRinProcessCode',
-                        text: 'Process Code',
+                        text: 'Code',
                         flex: 1,
                         editor: {
                             xtype: 'textfield'
