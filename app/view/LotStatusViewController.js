@@ -29,6 +29,7 @@ Ext.define('Inventory.view.LotStatusViewController', {
                 title: 'Lot Status',
                 columns: [
                     {
+                        itemId: 'colSecondaryStatus',
                         dataIndex: 'strSecondaryStatus',
                         text: 'Secondary Status',
                         flex: 1,
@@ -37,6 +38,7 @@ Ext.define('Inventory.view.LotStatusViewController', {
                         }
                     },
                     {
+                        itemId: 'colDescription',
                         dataIndex: 'strDescription',
                         text: 'Description',
                         flex: 1,
@@ -45,6 +47,7 @@ Ext.define('Inventory.view.LotStatusViewController', {
                         }
                     },
                     {
+                        itemId: 'colPrimaryStatus',
                         dataIndex: 'strPrimaryStatus',
                         text: 'Primary Status',
                         flex: 1,
