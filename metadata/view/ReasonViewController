@@ -6,8 +6,8 @@
     },
     "codeClass": null,
     "userConfig": {
-        "designer|userAlias": "reasoncode",
-        "designer|userClassName": "ReasonCodeViewController"
+        "designer|userAlias": "reason",
+        "designer|userClassName": "ReasonViewController"
     },
     "name": "FuelTaxClassViewController1",
     "designerId": "5730c87d-3d0f-47df-905f-24fee775b69b"

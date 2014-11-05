@@ -6,8 +6,8 @@
     },
     "codeClass": null,
     "userConfig": {
-        "designer|userAlias": "reasoncode",
-        "designer|userClassName": "ReasonCodeViewModel"
+        "designer|userAlias": "reason",
+        "designer|userClassName": "ReasonViewModel"
     },
     "name": "FuelTaxClassViewModel1",
     "designerId": "edc72bc6-2893-4a3b-ac24-cc7683ce8c62"

@@ -8,8 +8,8 @@
     "userConfig": {
         "collapsible": true,
         "defaultFocus": null,
-        "designer|userAlias": "reasoncode",
-        "designer|userClassName": "ReasonCode",
+        "designer|userAlias": "reason",
+        "designer|userClassName": "Reason",
         "height": 335,
         "hidden": false,
         "icon": null,
@@ -20,7 +20,7 @@
         "minWidth": 520,
         "minimizable": null,
         "reference": null,
-        "title": "Reason Codes",
+        "title": "Reasons",
         "width": 520
     },
     "name": "FuelTaxClass1",
@@ -44,7 +44,7 @@
                 "frame": null,
                 "header": false,
                 "height": 350,
-                "itemId": "frmFuelTaxClass",
+                "itemId": "frmReason",
                 "layout": "vbox",
                 "margin": -1,
                 "title": null,
@@ -236,7 +236,7 @@
                     "codeClass": null,
                     "userConfig": {
                         "activeTab": 0,
-                        "itemId": "tabReasonCode",
+                        "itemId": "tabReason",
                         "layout|flex": 1,
                         "plain": true
                     },
@@ -519,7 +519,7 @@
                                             "userConfig": {
                                                 "container|padding": "0 0 0 1",
                                                 "dock": "top",
-                                                "itemId": "tlbGridOptions1"
+                                                "itemId": "tlbGridOptions"
                                             },
                                             "name": "MyToolbar12",
                                             "designerId": "acdfbba6-6bfe-40f1-99b7-99696254dedf",
@@ -584,7 +584,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter151",
+                                                    "name": "filter14",
                                                     "designerId": "cbc3d1e3-0a16-459a-a5d5-96b049143686",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -650,7 +650,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging123",
+                    "name": "statusbarpaging11",
                     "designerId": "ef3325fc-949c-4d8a-b81c-1b8eeaac6a57",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

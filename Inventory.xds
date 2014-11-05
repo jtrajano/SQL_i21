@@ -32,6 +32,7 @@
     "framework": "ext50",
     "viewOrderMap": {
         "view": [
+            "5df681df-b631-494d-8bbf-457bcc6f4e9b",
             "b6b8ef41-1eb1-4854-99ef-98f5a7167844",
             "4e81f799-6980-4efd-a2ee-8e17055d2f96",
             "a35270da-22af-41fa-b006-dae28ad44b5e",
@@ -72,7 +73,6 @@
             "fc1a597a-48be-45d3-9d1c-e325c5a5ce41",
             "d55cecac-0f56-47d4-a630-50b94482506b",
             "a1a8a499-7187-4654-8d46-cd34d1b5ab3a",
-            "add52c86-1f29-4e24-a14c-b919f1d45f0f",
             "e78124b2-bf6f-4cc2-8808-b574443ebe6d",
             "c18355f3-a777-48dc-b22f-22e16cf54fbf",
             "6433b229-a40e-4200-b219-0327eb980b46",
@@ -85,7 +85,6 @@
             "edc72bc6-2893-4a3b-ac24-cc7683ce8c62",
             "423369f8-5b15-4402-93aa-1f98c1a76b13",
             "075e6e7b-e41c-4f51-8a5c-a2bdc1a27e0c",
-            "273008ec-b113-4cdc-a71b-cd545b4cc195",
             "fa8b1930-4496-4c91-99b2-ba538c8b93c3",
             "908f5ec7-fb50-405b-ae3b-3d004de7ba62",
             "929051d1-eb84-488c-9897-46db8a02d800",
