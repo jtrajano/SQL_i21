@@ -439,6 +439,7 @@ GO
 	/* ---------------------------------- */
 	DELETE FROM tblSMMasterMenu WHERE strModuleName = 'Customer Portal'
 GO
+	
 	/* ---------------------------------- */
 	/* -- Create Inventory Module Menu -- */
 	/* ---------------------------------- */
@@ -552,29 +553,29 @@ GO
 		SET strCommand = 'Inventory.view.FuelCategory', intSort = 1
 		WHERE strMenuName = 'Fuel Category' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fuel Code' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId)
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fuel' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId)
 		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-		VALUES ('Fuel Code', 'Inventory', @InventoryRINId, 'Fuel Code', 'Screen', 'Inventory.view.FuelCode', 'small-screen', 1, 1, 0, 1, 2, 0)
+		VALUES ('Fuel', 'Inventory', @InventoryRINId, 'Fuel', 'Screen', 'Inventory.view.FuelCode', 'small-screen', 1, 1, 0, 1, 2, 0)
 	ELSE
 		UPDATE tblSMMasterMenu
 		SET strCommand = 'Inventory.view.FuelCode', intSort = 2
-		WHERE strMenuName = 'Fuel Code' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId
+		WHERE strMenuName = 'Fuel' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Process Code' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId)
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Production Process' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId)
 		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-		VALUES ('Process Code', 'Inventory', @InventoryRINId, 'Process Code', 'Screen', 'Inventory.view.ProcessCode', 'small-screen', 1, 1, 0, 1, 3, 0)
+		VALUES ('Production Process', 'Inventory', @InventoryRINId, 'Production Process', 'Screen', 'Inventory.view.ProcessCode', 'small-screen', 1, 1, 0, 1, 3, 0)
 	ELSE
 		UPDATE tblSMMasterMenu
 		SET strCommand = 'Inventory.view.ProcessCode', intSort = 3
-		WHERE strMenuName = 'Process Code' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId
+		WHERE strMenuName = 'Production Process' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Feed Stock Code' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId)
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Feed Stock' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId)
 		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-		VALUES ('Feed Stock Code', 'Inventory', @InventoryRINId, 'Feed Stock Code', 'Screen', 'Inventory.view.FeedStockCode', 'small-screen', 1, 1, 0, 1, 4, 0)
+		VALUES ('Feed Stock', 'Inventory', @InventoryRINId, 'Feed Stock', 'Screen', 'Inventory.view.FeedStockCode', 'small-screen', 1, 1, 0, 1, 4, 0)
 	ELSE
 		UPDATE tblSMMasterMenu
 		SET strCommand = 'Inventory.view.FeedStockCode', intSort = 4
-		WHERE strMenuName = 'Feed Stock Code' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId
+		WHERE strMenuName = 'Feed Stock' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Feed Stock UOM' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId)
 		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)

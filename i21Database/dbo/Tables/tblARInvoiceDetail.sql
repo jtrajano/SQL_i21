@@ -2,6 +2,7 @@
     [intInvoiceDetailId] INT             IDENTITY (1, 1) NOT NULL,
     [intInvoiceId]       INT             NOT NULL,
     [intItemId]          INT             NOT NULL,
+	[strItemDescription] NVARCHAR(250)   NULL,
     [dblQtyOrdered]      NUMERIC (18, 6) NOT NULL,
     [dblQtyShipped]      NUMERIC (18, 6) NOT NULL,
     [dblPrice]           NUMERIC (18, 6) NOT NULL,
