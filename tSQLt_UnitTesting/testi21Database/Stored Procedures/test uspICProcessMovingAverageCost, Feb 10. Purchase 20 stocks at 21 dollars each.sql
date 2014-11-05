@@ -47,7 +47,6 @@ BEGIN
 			,@strBatchId AS NVARCHAR(20)
 			,@intTransactionTypeId AS INT
 			,@intUserId AS INT
-			,@GLAccounts AS ItemGLAccount 
 
 		-- Declare the variables to check the average cost. 
 		DECLARE @dblAverageCost_Expected AS NUMERIC(18,6)
@@ -269,7 +268,6 @@ BEGIN
 			,@strBatchId
 			,@intTransactionTypeId
 			,@intUserId
-			,@GLAccounts 
 	END 
 
 	-- Assert
@@ -317,26 +315,26 @@ BEGIN
 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 
-		-- Check the average cost
-		SELECT	@dblAverageCost_Actual = Stock.dblAverageCost
-		FROM	[dbo].[tblICItemStock] Stock
-		WHERE	Stock.intItemId = @intItemId
-				AND Stock.intLocationId = @intItemLocationId
+		---- Check the average cost
+		--SELECT	@dblAverageCost_Actual = Stock.dblAverageCost
+		--FROM	[dbo].[tblICItemStock] Stock
+		--WHERE	Stock.intItemId = @intItemId
+		--		AND Stock.intLocationId = @intItemLocationId
 
-		EXEC tSQLt.AssertEquals @dblAverageCost_Expected, @dblAverageCost_Actual;
+		--EXEC tSQLt.AssertEquals @dblAverageCost_Expected, @dblAverageCost_Actual;
 
-		-- Check the stock on hand
-		DECLARE @dblUnitOnHand_Expected AS NUMERIC(18,6);
-		DECLARE @dblUnitOnHand_Actual AS NUMERIC(18,6);
+		---- Check the stock on hand
+		--DECLARE @dblUnitOnHand_Expected AS NUMERIC(18,6);
+		--DECLARE @dblUnitOnHand_Actual AS NUMERIC(18,6);
 
-		SET @dblUnitOnHand_Expected = 40;
+		--SET @dblUnitOnHand_Expected = 40;
 
-		SELECT	@dblUnitOnHand_Actual = Stock.dblUnitOnHand
-		FROM	[dbo].[tblICItemStock] Stock
-		WHERE	Stock.intItemId = @intItemId
-				AND Stock.intLocationId = @intItemLocationId
+		--SELECT	@dblUnitOnHand_Actual = Stock.dblUnitOnHand
+		--FROM	[dbo].[tblICItemStock] Stock
+		--WHERE	Stock.intItemId = @intItemId
+		--		AND Stock.intLocationId = @intItemLocationId
 
-		EXEC tSQLt.AssertEquals @dblUnitOnHand_Expected, @dblUnitOnHand_Actual;
+		--EXEC tSQLt.AssertEquals @dblUnitOnHand_Expected, @dblUnitOnHand_Actual;
 	END 
 
 	-- Clean-up: remove the tables used in the unit test

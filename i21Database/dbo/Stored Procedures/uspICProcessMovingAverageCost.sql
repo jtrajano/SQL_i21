@@ -6,17 +6,29 @@
 
 	@intItemLocationId - The location where the item is being process. 
 	
+	@dtmDate - The date used in the transaction and posting. 
+
+	@dblUnitQty - A positive qty indicates an increase of stock. A negative qty indicates a decrease in stock. 
+
+	@dblUOMQty - The base qty associated with a UOM. For example, a box may have 10 pieces of an item. In this case, UOM qty will be 10. 
+
+	@dblCost - The cost per base qty of the item. 
+
+	@dblSalesPrice - The sales price of an item sold to the customer. 
+
+	@intCurrencyId - The foreign currency associated with the transaction. 
+
+	@dblExchangeRate - The conversion factor between the base currency and the foreign currency. 
+
+	@intTransactionId - The primary key id used in a transaction. 
+
+	@strTransactionId - The string value of a transaction id. 
+
+	@strBatchId - The batch id to use in generating the g/l entries. 
+
+	@intUserId - The user who initiated or called this stored procedure. 
+
 	@GLAccounts - The g/l accounts used when it generates the g/l entries for the costing. 
-
-	@dblQty -	A positive qty indicates an increase of stock. A negative qty indicates a decrease in stock. 
-				It uses the base qty. Any other unit of measure must be converted to base UOM. 
-				
-				For example: 				
-				An item has a base unit of measure of PIECE. It also support BOX. A BOX cotains 10 PIECES.
-				If receiving 7 BOXES, the qty is converted to PIECE which translates into 70 PIECES. 
-				(7 BOXES x 10 PIECES per BOX). 
-
-	@dblCost - The cost per @dblQty of the item. 
 */
 
 CREATE PROCEDURE [dbo].[uspICProcessMovingAverageCost]
@@ -34,7 +46,7 @@ CREATE PROCEDURE [dbo].[uspICProcessMovingAverageCost]
 	,@strBatchId AS NVARCHAR(20)
 	,@intTransactionTypeId AS INT
 	,@intUserId AS INT
-	,@GLAccounts AS ItemGLAccount READONLY 
+	-- ,@GLAccounts AS ItemGLAccount READONLY 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -43,7 +55,12 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
--- 1. Create the transaction record. 
+-- Create the variables for the internal transaction types used by costing. 
+DECLARE @WRITE_OFF_SOLD AS INT = -1
+DECLARE @REVALUE_SOLD AS INT = -2
+DECLARE @AUTO_NEGATIVE AS INT = -3
+
+-- 1. Create the transaction record/s for moving average cost 
 BEGIN 
 	INSERT INTO tblICInventoryTransaction (
 			[intItemId] 
@@ -102,7 +119,7 @@ BEGIN
 			,[intConcurrencyId] = 1
 	WHERE	(@dblUnitQty * @dblUOMQty) < 0 
 
-	-- Add Write-Off Cost (Use purchase cost)
+	-- Add Write-Off Sold (Use purchase cost)
 	UNION ALL 
 	SELECT	[intItemId] = @intItemId
 			,[intItemLocationId] = @intItemLocationId
@@ -116,7 +133,7 @@ BEGIN
 			,[intTransactionId] = @intTransactionId
 			,[strTransactionId] = @strTransactionId
 			,[strBatchId] = @strBatchId
-			,[intTransactionTypeId] = @intTransactionTypeId
+			,[intTransactionTypeId] = @WRITE_OFF_SOLD
 			,[dtmCreated] = GETDATE()
 			,[intCreatedUserId] = @intUserId
 			,[intConcurrencyId] = 1
@@ -126,7 +143,7 @@ BEGIN
 			AND Stock.intItemId = @intItemId
 			AND Stock.intLocationId = @intItemLocationId
 		
-	-- Add Revalue Cost (Use current average cost)
+	-- Add Revalue Sold (Use current average cost)
 	UNION ALL 
 	SELECT	[intItemId] = @intItemId
 			,[intItemLocationId] = @intItemLocationId
@@ -140,7 +157,7 @@ BEGIN
 			,[intTransactionId] = @intTransactionId
 			,[strTransactionId] = @strTransactionId
 			,[strBatchId] = @strBatchId
-			,[intTransactionTypeId] = @intTransactionTypeId
+			,[intTransactionTypeId] = @REVALUE_SOLD
 			,[dtmCreated] = GETDATE()
 			,[intCreatedUserId] = @intUserId
 			,[intConcurrencyId] = 1
@@ -183,7 +200,7 @@ BEGIN
 			,[intTransactionId] = @intTransactionId
 			,[strTransactionId] = @strTransactionId
 			,[strBatchId] = @strBatchId
-			,[intTransactionTypeId] = @intTransactionTypeId
+			,[intTransactionTypeId] = @AUTO_NEGATIVE
 			,[dtmCreated] = GETDATE()
 			,[intCreatedUserId] = @intUserId
 			,[intConcurrencyId] = 1
@@ -193,16 +210,3 @@ BEGIN
 			AND Stock.intItemId = @intItemId
 			AND Stock.intLocationId = @intItemLocationId
 END
-
--- 2. Adjust the average cost and units on hand. 
-BEGIN 
-	UPDATE	Stock
-	SET		Stock.dblAverageCost =	[dbo].[fnCalculateAverageCost]((@dblUnitQty * @dblUOMQty), @dblCost, Stock.dblUnitOnHand, Stock.dblAverageCost)
-			,Stock.dblUnitOnHand = (@dblUnitQty * @dblUOMQty) + Stock.dblUnitOnHand
-			,Stock.intConcurrencyId = ISNULL(Stock.intConcurrencyId, 0) + 1 
-	FROM	[dbo].[tblICItemStock] Stock
-	WHERE	Stock.intItemId = @intItemId
-			AND Stock.intLocationId = @intItemLocationId
-END 
-
-

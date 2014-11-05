@@ -23,6 +23,7 @@ CREATE PROCEDURE [dbo].[uspICPostCosting]
 	@ItemsToProcess AS ItemCostingTableType READONLY
 	,@strBatchId AS NVARCHAR(20)
 	,@strAccountDescription AS NVARCHAR(255) = 'Cost of Goods'
+	,@intUserId AS INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -49,6 +50,13 @@ DECLARE @intItemId AS INT
 DECLARE @CostingMethod AS INT 
 DECLARE @NegativeInventoryOption AS INT
 DECLARE @GLAccounts AS ItemGLAccount
+
+-- Create the CONSTANT variables for the costing methods
+DECLARE @AVERAGECOST AS INT = 1
+		,@FIFO AS INT = 2
+		,@LIFO AS INT = 3
+		,@STANDARDCOST AS INT = 4 	
+
 
 -- Create the cursor
 -- Use LOCAL. It specifies that the scope of the cursor is local to the stored procedure where it was created. The cursor name is only valid within this scope. 
@@ -87,9 +95,15 @@ BEGIN
 	SELECT @CostingMethod = dbo.fnGetCostingMethod(@intItemId, @intItemLocationId)
 			,@NegativeInventoryOption = dbo.fnGetNegativeInventoryOptions(@intItemId, @intItemLocationId);
 
+	-------------------------------------------------	
 	-- Get the g/l accounts id to use. 
-	-- 1. Internal values: Retrieve Inventory, RevalueSold, WriteOffSold, and AutoNegative. 
-	-- 2. Defined value: retrieve the contra-g/l account id (ContraInventory). 
+	-----------------------------------------------
+	-- Note: 
+	-- 1. Inventory, RevalueSold, WriteOffSold, and AutoNegative are retreived from the default accounts
+	-- 2. ContraInventory is defined by the calling code. It is the g/l account used as contra of an inventory 
+	--		in a t-account. It can be COGS, A/P Clearing, or any type of expense, revenue, or liability account. 
+	--		Each module may use a diffent contra account. Say AP uses A/P Clearing and while a sales transaction
+	--		may use Cost of Goods. 
 	INSERT INTO @GLAccounts (
 		Inventory
 		,ContraInventory
@@ -99,18 +113,56 @@ BEGIN
 	)
 	SELECT	Inventory = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, 'Inventory')
 			,ContraInventory = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, @strAccountDescription)
-			,RevalueSold = NULL -- TODO
-			,WriteOffSold = NULL -- TODO
-			,AutoNegative = NULL -- TODO
+			,RevalueSold = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, 'RevalueSold') -- TODO: need to confirm this
+			,WriteOffSold = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, 'WriteOffSold') -- TODO: need to confirm this
+			,AutoNegative = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, 'AutoNegative') -- TODO: need to confirm this
 
+	--------------------------------------------------------------------------------
+	-- Determine the costing method and create the inventory transaction records
+	--------------------------------------------------------------------------------
 	-- Moving Average Cost
+	IF (@CostingMethod = @AVERAGECOST)
+	BEGIN 
+		EXEC [dbo].[uspICProcessMovingAverageCost]
+			@intItemId
+			,@intItemLocationId
+			,@dtmDate
+			,@dblUnitQty
+			,@dblUOMQty
+			,@dblCost
+			,@dblSalesPrice
+			,@intCurrencyId
+			,@dblExchangeRate
+			,@intTransactionId
+			,@strTransactionId
+			,@strBatchId
+			,@intTransactionTypeId
+			,@intUserId
+	END
 
-	-- FIFO
+	-- FIFO -- TODO
 
-	-- LIFO
+	-- LIFO -- TODO
 
+	--------------------------------------------------------------------------------------
 	-- Generate the G/L entries by reading the data from tblICInventoryTransaction
+	--------------------------------------------------------------------------------------
+	-- TODO
 
+	--------------------------------------------------
+	-- Adjust the average cost and units on hand. 
+	--------------------------------------------------
+	BEGIN 
+		UPDATE	Stock
+		SET		Stock.dblAverageCost =	[dbo].[fnCalculateAverageCost]((@dblUnitQty * @dblUOMQty), @dblCost, Stock.dblUnitOnHand, Stock.dblAverageCost)
+				,Stock.dblUnitOnHand = (@dblUnitQty * @dblUOMQty) + Stock.dblUnitOnHand
+				,Stock.intConcurrencyId = ISNULL(Stock.intConcurrencyId, 0) + 1 
+		FROM	[dbo].[tblICItemStock] Stock
+		WHERE	Stock.intItemId = @intItemId
+				AND Stock.intLocationId = @intItemLocationId			
+	END 
+
+	-- Generate the g/l entries from the tblICInventoryTransactoin Table
 
 	-- Attempt to fetch the next row from cursor. 
 	FETCH NEXT FROM loopItems INTO @intItemId, @intItemLocationId, @dtmDate, @dblUnitQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId;
@@ -118,31 +170,3 @@ END;
 
 CLOSE loopItems;
 DEALLOCATE loopItems;
-
-
--- Generate the GL entries
---SELECT	[strTransactionId		= A.strTransactionId
---		,@intTransactionId		= A.intTransactionId
---		,@dtmDate				= A.dtmDate
---		,@strBatchId			= @strBatchId
---		,@intAccountId			= 
---		,@dblDebit				= 
---		,@dblCredit			= 
---		,@dblDebitUnit			= 
---		,@dblCreditUnit		= 
---		,@strDescription		= 
---		,@strCode				= 
---		,@strReference			= 
---		,@intCurrencyId		= 
---		,@dblExchangeRate		= 
---		,@dtmDateEntered		= GETDATE()
---		,@dtmTransactionDate	= A.dtmDate
---		,@strJournalLineDescription = NULL 
---		,@ysnIsUnposted		= 0 
---		,@intConcurrencyId		= 1
---		,@intUserId			= 
---		,@strTransactionForm	= @TRANSACTION_FORM
---		,@strModuleName		= @MODULE_NAME
---		,@intEntityId			= A.intEntityId
---FROM	tblICInventoryTransaction A INNER JOIN @ItemsForProcessing B
---			ON A.intTransactionId = B.intTransactionId

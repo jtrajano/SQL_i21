@@ -22,7 +22,6 @@ BEGIN
 			,@strBatchId AS NVARCHAR(20)
 			,@intTransactionTypeId AS INT
 			,@intUserId AS INT
-			,@GLAccounts AS ItemGLAccount 
 
 		CREATE TABLE expected (
 			[intInventoryTransactionId] INT NOT NULL, 
@@ -85,7 +84,6 @@ BEGIN
 			,@strBatchId
 			,@intTransactionTypeId
 			,@intUserId
-			,@GLAccounts 
 
 		INSERT INTO actual (
 				[intInventoryTransactionId]
