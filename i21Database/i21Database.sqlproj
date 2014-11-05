@@ -779,6 +779,8 @@
     <Build Include="dbo\Tables\tblSTSubcategoryClass.sql" />
     <Build Include="dbo\Tables\tblSTSubcategoryFamily.sql" />
     <Build Include="dbo\Tables\tblSTSubcategoryRegProd.sql" />
+    <Build Include="dbo\Stored Procedures\uspICProcessFIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReduceStockInFIFO.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

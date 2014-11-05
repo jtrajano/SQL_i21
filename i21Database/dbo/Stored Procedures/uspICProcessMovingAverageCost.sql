@@ -27,8 +27,6 @@
 	@strBatchId - The batch id to use in generating the g/l entries. 
 
 	@intUserId - The user who initiated or called this stored procedure. 
-
-	@GLAccounts - The g/l accounts used when it generates the g/l entries for the costing. 
 */
 
 CREATE PROCEDURE [dbo].[uspICProcessMovingAverageCost]
@@ -46,7 +44,6 @@ CREATE PROCEDURE [dbo].[uspICProcessMovingAverageCost]
 	,@strBatchId AS NVARCHAR(20)
 	,@intTransactionTypeId AS INT
 	,@intUserId AS INT
-	-- ,@GLAccounts AS ItemGLAccount READONLY 
 AS
 
 SET QUOTED_IDENTIFIER OFF
