@@ -23,5 +23,9 @@ Ext.define('Inventory.model.Catalog', {
         { name: 'strDescription', type: 'string'},
         { name: 'intSort', type: 'int'},
         { name: 'ysnLeaf', type: 'boolean'}
+    ],
+
+    validators: [
+        {type: 'presence', field: 'strCatalogName'}
     ]
 });

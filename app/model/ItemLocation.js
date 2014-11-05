@@ -92,5 +92,9 @@ Ext.define('Inventory.model.ItemLocation', {
         { name: 'strVendorId', type: 'string'},
         { name: 'strCategory', type: 'string'},
         { name: 'strUnitMeasure', type: 'string'},
+    ],
+
+    validators: [
+        {type: 'presence', field: 'intLocationId'}
     ]
 });

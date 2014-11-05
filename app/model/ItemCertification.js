@@ -31,5 +31,9 @@ Ext.define('Inventory.model.ItemCertification', {
         { name: 'intSort', type: 'int'},
 
         { name: 'strCertificationName', type: 'string'}
+    ],
+
+    validators: [
+        { type: 'presence', field: 'intCertificationId' }
     ]
 });

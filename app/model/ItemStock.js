@@ -41,5 +41,9 @@ Ext.define('Inventory.model.ItemStock', {
         { name: 'intInventoryGroupId', type: 'int', allowNull: true},
         { name: 'ysnCountedDaily', type: 'boolean'},
         { name: 'intSort', type: 'int'}
+    ],
+
+    validators: [
+        {type: 'presence', field: 'intLocationId'}
     ]
 });

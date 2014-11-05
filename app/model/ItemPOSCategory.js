@@ -31,5 +31,9 @@ Ext.define('Inventory.model.ItemPOSCategory', {
         { name: 'intSort', type: 'int'},
 
         { name: 'strCategory', type: 'string'}
+    ],
+
+    validators: [
+        {type: 'presence', field: 'intCategoryId'}
     ]
 });

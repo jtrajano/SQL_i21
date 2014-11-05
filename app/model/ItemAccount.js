@@ -29,10 +29,14 @@ Ext.define('Inventory.model.ItemAccount', {
         },
         { name: 'strAccountDescription', type: 'string'},
         { name: 'intAccountId', type: 'int'},
-        { name: 'intProfitCenterId', type: 'int'},
         { name: 'intSort', type: 'int'},
 
         { name: 'strAccountId', type: 'string'},
         { name: 'strProfitCenter', type: 'string'}
+    ],
+
+    validators: [
+        { type: 'presence', field: 'strAccountDescription' },
+        { type: 'presence', field: 'intAccountId' }
     ]
 });

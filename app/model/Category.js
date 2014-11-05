@@ -49,5 +49,9 @@ Ext.define('Inventory.model.Category', {
         { name: 'strCostDistributionMethod', type: 'string'},
         { name: 'ysnSellable', type: 'boolean'},
         { name: 'ysnYieldAdjustment', type: 'boolean'},
+    ],
+
+    validators: [
+        {type: 'presence', field: 'strCategoryCode'}
     ]
 });

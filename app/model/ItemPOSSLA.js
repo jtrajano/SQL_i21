@@ -30,5 +30,9 @@ Ext.define('Inventory.model.ItemPOSSLA', {
         { name: 'strSLAContract', type: 'string'},
         { name: 'dblContractPrice', type: 'float'},
         { name: 'ysnServiceWarranty', type: 'boolean'}
+    ],
+
+    validators: [
+        {type: 'presence', field: 'strSLAContract'}
     ]
 });

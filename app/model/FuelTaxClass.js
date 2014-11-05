@@ -32,5 +32,9 @@ Ext.define('Inventory.model.FuelTaxClass', {
                 }
             }
         }
+    ],
+
+    validators: [
+        { type: 'presence', field: 'strTaxClassCode' }
     ]
 });

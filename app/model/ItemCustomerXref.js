@@ -28,7 +28,6 @@ Ext.define('Inventory.model.ItemCustomerXref', {
             }
         },
         { name: 'intLocationId', type: 'int'},
-        { name: 'strStoreName', type: 'string'},
         { name: 'intCustomerId', type: 'int'},
         { name: 'strCustomerProduct', type: 'string'},
         { name: 'strProductDescription', type: 'string'},
@@ -37,5 +36,10 @@ Ext.define('Inventory.model.ItemCustomerXref', {
 
         { name: 'strLocationName', type: 'string'},
         { name: 'strCustomerNumber', type: 'string'}
+    ],
+
+    validators: [
+        {type: 'presence', field: 'intLocationId'},
+        {type: 'presence', field: 'intCustomerId'}
     ]
 });

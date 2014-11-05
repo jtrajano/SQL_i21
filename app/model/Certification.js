@@ -32,5 +32,9 @@ Ext.define('Inventory.model.Certification', {
                 property: 'intSort'
             }
         }
-    }
+    },
+
+    validators: [
+        {type: 'presence', field: 'strCertificationName'}
+    ]
 });

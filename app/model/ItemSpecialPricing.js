@@ -42,5 +42,9 @@ Ext.define('Inventory.model.ItemSpecialPricing', {
 
         { name: 'strLocationName', type: 'string'},
         { name: 'strUnitMeasure', type: 'string'}
+    ],
+
+    validators: [
+        {type: 'presence', field: 'intLocationId'}
     ]
 });

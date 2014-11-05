@@ -18,6 +18,7 @@ Ext.define('Inventory.model.ItemContractDocument', {
                 inverse: {
                     role: 'tblICItemContractDocuments',
                     storeConfig: {
+                        complete: true,
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',
@@ -31,5 +32,9 @@ Ext.define('Inventory.model.ItemContractDocument', {
         { name: 'intSort', type: 'int'},
 
         { name: 'strDocumentName', type: 'string'}
+    ],
+
+    validators: [
+        { type: 'presence', field: 'intDocumentId' }
     ]
 });

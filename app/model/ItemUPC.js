@@ -31,5 +31,9 @@ Ext.define('Inventory.model.ItemUPC', {
         { name: 'dblUnitQty', type: 'float'},
         { name: 'strUPCCode', type: 'string'},
         { name: 'intSort', type: 'int'}
+    ],
+
+    validators: [
+        {type: 'presence', field: 'intUnitMeasureId'}
     ]
 });

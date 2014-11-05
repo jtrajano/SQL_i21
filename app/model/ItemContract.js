@@ -29,7 +29,6 @@ Ext.define('Inventory.model.ItemContract', {
             }
         },
         { name: 'intLocationId', type: 'int'},
-        { name: 'strStoreName', type: 'string'},
         { name: 'strContractItemName', type: 'string'},
         { name: 'intCountryId', type: 'int'},
         { name: 'strGrade', type: 'string'},
@@ -42,5 +41,9 @@ Ext.define('Inventory.model.ItemContract', {
 
         { name: 'strLocationName', type: 'string'},
         { name: 'strCountry', type: 'string'}
+    ],
+
+    validators: [
+        { type: 'presence', field: 'intLocationId' }
     ]
 });

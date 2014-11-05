@@ -26,20 +26,6 @@ Ext.define('Inventory.model.Manufacturer', {
         { name: 'strNotes', type: 'string'}
     ],
 
-//    hasMany: {
-//        model: 'GlobalComponentEngine.model.CustomFieldDetail',
-//        name: 'tblSMCustomFieldDetails',
-//        foreignKey: 'intCustomFieldId',
-//        primaryKey: 'intCustomFieldId',
-//        storeConfig: {
-//            sortOnLoad: true,
-//            sorters: {
-//                direction: 'ASC',
-//                property: 'intSort'
-//            }
-//        }
-//    },
-
     validators: [
         {type: 'presence', field: 'strManufacturer'}
     ]

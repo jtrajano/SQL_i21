@@ -16,5 +16,9 @@ Ext.define('Inventory.model.FuelTaxClassProductCode', {
         { name: 'strState', type: 'string'},
         { name: 'strProductCode', type: 'string'},
         { name: 'intSort', type: 'int'}
+    ],
+
+    validators: [
+        { type: 'presence', field: 'strState' }
     ]
 });

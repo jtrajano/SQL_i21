@@ -14,5 +14,9 @@ Ext.define('Inventory.model.CountGroup', {
         { name: 'intCountGroupId', type: 'int'},
         { name: 'strCountGroup', type: 'string'},
         { name: 'intSort', type: 'int'}
+    ],
+
+    validators: [
+        {type: 'presence', field: 'strCountGroup'}
     ]
 });

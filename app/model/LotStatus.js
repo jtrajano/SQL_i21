@@ -16,5 +16,9 @@ Ext.define('Inventory.model.LotStatus', {
         { name: 'strDescription', type: 'string'},
         { name: 'strPrimaryStatus', type: 'string'},
         { name: 'intSort', type: 'int'},
+    ],
+
+    validators: [
+        {type: 'presence', field: 'strSecondaryStatus'}
     ]
 });

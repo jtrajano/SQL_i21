@@ -14,5 +14,9 @@ Ext.define('Inventory.model.LineOfBusiness', {
         { name: 'intLineOfBusinessId', type: 'int'},
         { name: 'strLineOfBusiness', type: 'string'},
         { name: 'intSort', type: 'int'},
+    ],
+
+    validators: [
+        {type: 'presence', field: 'strLineOfBusiness'}
     ]
 });

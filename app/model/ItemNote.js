@@ -31,5 +31,9 @@ Ext.define('Inventory.model.ItemNote', {
         { name: 'strCommentType', type: 'string'},
         { name: 'strComments', type: 'string'},
         { name: 'intSort', type: 'int'}
+    ],
+
+    validators: [
+        {type: 'presence', field: 'intLocationId'}
     ]
 });

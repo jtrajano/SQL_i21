@@ -53,5 +53,9 @@ Ext.define('Inventory.model.ItemPricing', {
         { name: 'intSort', type: 'int'},
 
         { name: 'strLocationName', type: 'string'}
+    ],
+
+    validators: [
+        {type: 'presence', field: 'intLocationId'}
     ]
 });

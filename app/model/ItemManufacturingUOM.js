@@ -29,5 +29,9 @@ Ext.define('Inventory.model.ItemManufacturingUOM', {
         },
         { name: 'intUnitMeasureId', type: 'int'},
         { name: 'intSort', type: 'int'},
+    ],
+
+    validators: [
+        {type: 'presence', field: 'intUnitMeasureId'}
     ]
 });

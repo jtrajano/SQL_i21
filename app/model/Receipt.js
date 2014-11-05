@@ -85,5 +85,9 @@ Ext.define('Inventory.model.Receipt', {
                 }
             }
         }
+    ],
+
+    validators: [
+        {type: 'presence', field: 'strReceiptNumber'}
     ]
 });

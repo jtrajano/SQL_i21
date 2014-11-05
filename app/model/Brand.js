@@ -18,5 +18,9 @@ Ext.define('Inventory.model.Brand', {
         { name: 'intSort', type: 'int'},
 
         { name: 'strManufacturer', type: 'string'}
+    ],
+
+    validators: [
+        {type: 'presence', field: 'strBrandCode'}
     ]
 });

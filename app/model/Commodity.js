@@ -42,5 +42,9 @@ Ext.define('Inventory.model.Commodity', {
         { name: 'dblMaxOver', type: 'float'},
         { name: 'intPatronageCategoryId', type: 'int', allowNull: true},
         { name: 'intPatronageCategoryDirectId', type: 'int', allowNull: true}
+    ],
+
+    validators: [
+        {type: 'presence', field: 'strCommodityCode'}
     ]
 });
