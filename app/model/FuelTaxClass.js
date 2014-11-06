@@ -18,22 +18,6 @@ Ext.define('Inventory.model.FuelTaxClass', {
         { name: 'strIRSTaxCode', type: 'string'}
     ],
 
-    hasMany: [
-        {
-            model: 'Inventory.model.FuelTaxClassProductCode',
-            name: 'tblICFuelTaxClassProductCodes',
-            foreignKey: 'intFuelTaxClassId',
-            primaryKey: 'intFuelTaxClassId',
-            storeConfig: {
-                sortOnLoad: true,
-                sorters: {
-                    direction: 'ASC',
-                    property: 'intSort'
-                }
-            }
-        }
-    ],
-
     validators: [
         { type: 'presence', field: 'strTaxClassCode' }
     ]
