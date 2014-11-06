@@ -230,6 +230,7 @@ Ext.define('Inventory.view.ManufacturingCell', {
                                                                 }
                                                             ],
                                                             flex: 1.4,
+                                                            disabled: true,
                                                             itemId: 'cboLocationName',
                                                             fieldLabel: 'Location Name',
                                                             labelWidth: 160,
@@ -397,7 +398,7 @@ Ext.define('Inventory.view.ManufacturingCell', {
                                             xtype: 'gridcolumn',
                                             itemId: 'colPackTypeName',
                                             dataIndex: 'string',
-                                            text: 'PackType Name',
+                                            text: 'Pack Type Name',
                                             flex: 1,
                                             editor: {
                                                 xtype: 'gridcombobox',
@@ -411,7 +412,7 @@ Ext.define('Inventory.view.ManufacturingCell', {
                                                     {
                                                         dataIndex: 'strPackName',
                                                         dataType: 'string',
-                                                        text: 'Pack Name',
+                                                        text: 'Pack Type Name',
                                                         flex: 1
                                                     },
                                                     {
@@ -433,7 +434,7 @@ Ext.define('Inventory.view.ManufacturingCell', {
                                             xtype: 'gridcolumn',
                                             itemId: 'colPackTypeDescription',
                                             dataIndex: 'string',
-                                            text: 'PackType Description',
+                                            text: 'Pack Type Description',
                                             flex: 1
                                         },
                                         {

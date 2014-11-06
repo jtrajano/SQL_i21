@@ -18,6 +18,7 @@ Ext.define('Inventory.model.ManufacturingCellPackType', {
                 inverse: {
                     role: 'tblICManufacturingCellPackTypes',
                     storeConfig: {
+                        complete: true,
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',
