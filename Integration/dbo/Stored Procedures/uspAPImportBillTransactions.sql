@@ -254,13 +254,14 @@ BEGIN
 
 				SELECT TOP 1 @BillId = intBillId, @IsPosted = ysnPosted, @IsPaid = ysnPaid FROM @InsertedData
 
-				INSERT INTO tblAPBillBatch(intAccountId, ysnPosted, dblTotal, intEntityId)
+				INSERT INTO tblAPBillBatch(intAccountId, ysnPosted, dblTotal, intEntityId, dtmBatchDate)
 				--OUTPUT inserted.intBillBatchId, @BillId INTO @insertedBillBatch
 				SELECT 
 					A.intAccountId,
 					@IsPosted,
 					A.dblTotal,
-					@UserId
+					@UserId,
+					GETDATE()
 				FROM tblAPBill A
 				WHERE A.intBillId = @BillId
 
@@ -619,13 +620,14 @@ BEGIN
 
 				SELECT TOP 1 @BillId = intBillId, @IsPosted = ysnPosted, @IsPaid = ysnPaid FROM @InsertedData
 
-				INSERT INTO tblAPBillBatch(intAccountId, ysnPosted, dblTotal, intEntityId)
+				INSERT INTO tblAPBillBatch(intAccountId, ysnPosted, dblTotal, intEntityId, dtmBatchDate)
 				--OUTPUT inserted.intBillBatchId, @BillId INTO @insertedBillBatch
 				SELECT 
 					A.intAccountId,
 					@IsPosted,
 					A.dblTotal,
-					@UserId
+					@UserId,
+					GETDATE()
 				FROM tblAPBill A
 				WHERE A.intBillId = @BillId
 
