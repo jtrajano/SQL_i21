@@ -25,7 +25,7 @@ Ext.define('Inventory.view.FuelCodeViewController', {
             store: Ext.create('Inventory.store.FuelCode'),
             singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
                 grid: win.down('grid'),
-                title: 'Fuel',
+                title: 'Fuel Code',
                 columns: [
                     {
                         itemId: 'colRinFuelCode',
