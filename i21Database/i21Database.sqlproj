@@ -781,6 +781,7 @@
     <Build Include="dbo\Tables\tblSTSubcategoryRegProd.sql" />
     <Build Include="dbo\Stored Procedures\uspICProcessFIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInFIFO.sql" />
+    <Build Include="dbo\Tables\tblGRStorageType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

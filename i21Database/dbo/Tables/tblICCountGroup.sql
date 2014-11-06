@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblICCountGroup]
 (
 	[intCountGroupId] INT NOT NULL IDENTITY, 
-    [strCountGroup] NVARCHAR(50) NOT NULL, 
+    [strCountGroup] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICCountGroup] PRIMARY KEY ([intCountGroupId]), 
