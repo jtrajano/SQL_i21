@@ -18,6 +18,7 @@ Ext.define('Inventory.model.ItemUPC', {
                 inverse: {
                     role: 'tblICItemUPCs',
                     storeConfig: {
+                        complete: true,
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',

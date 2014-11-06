@@ -18,7 +18,7 @@ Ext.define('Inventory.view.override.ItemViewModel', {
         'Inventory.store.Commodity',
         'Inventory.store.CommodityAttribute',
 //        'AccountsPayable.store.VendorBuffered',
-        'AccountsReceivable.store.Customer',
+        'AccountsReceivable.store.CustomerBuffered',
         'i21.store.CompanyLocation',
         'i21.store.Country',
         'GeneralLedger.store.BufAccountId'
@@ -505,7 +505,7 @@ Ext.define('Inventory.view.override.ItemViewModel', {
 //            type: 'vendorbuffered'
 //        },
         Customer: {
-            type: 'customer'
+            type: 'customerbuffered'
         },
         CompanyLocation: {
             type: 'companylocation'

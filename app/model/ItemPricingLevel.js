@@ -18,6 +18,7 @@ Ext.define('Inventory.model.ItemPricingLevel', {
                 inverse: {
                     role: 'tblICItemPricingLevels',
                     storeConfig: {
+                        complete: true,
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',

@@ -18,6 +18,7 @@ Ext.define('Inventory.model.ItemCustomerXref', {
                 inverse: {
                     role: 'tblICItemCustomerXrefs',
                     storeConfig: {
+                        complete: true,
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',

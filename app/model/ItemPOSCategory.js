@@ -18,6 +18,7 @@ Ext.define('Inventory.model.ItemPOSCategory', {
                 inverse: {
                     role: 'tblICItemPOSCategories',
                     storeConfig: {
+                        complete: true,
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',

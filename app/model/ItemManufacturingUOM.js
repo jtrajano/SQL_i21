@@ -18,6 +18,7 @@ Ext.define('Inventory.model.ItemManufacturingUOM', {
                 inverse: {
                     role: 'tblICItemManufacturingUOMs',
                     storeConfig: {
+                        complete: true,
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',

@@ -18,6 +18,7 @@ Ext.define('Inventory.model.ItemNote', {
                 inverse: {
                     role: 'tblICItemNotes',
                     storeConfig: {
+                        complete: true,
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',

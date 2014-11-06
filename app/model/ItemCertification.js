@@ -18,6 +18,7 @@ Ext.define('Inventory.model.ItemCertification', {
                 inverse: {
                     role: 'tblICItemCertifications',
                     storeConfig: {
+                        complete: true,
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',

@@ -18,6 +18,7 @@ Ext.define('Inventory.model.ItemSpecialPricing', {
                 inverse: {
                     role: 'tblICItemSpecialPricings',
                     storeConfig: {
+                        complete: true,
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',

@@ -18,6 +18,7 @@ Ext.define('Inventory.model.ItemBundle', {
                 inverse: {
                     role: 'tblICItemBundles',
                     storeConfig: {
+                        complete: true,
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',

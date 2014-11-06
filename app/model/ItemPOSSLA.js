@@ -18,6 +18,7 @@ Ext.define('Inventory.model.ItemPOSSLA', {
                 inverse: {
                     role: 'tblICItemPOSSLAs',
                     storeConfig: {
+                        complete: true,
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',

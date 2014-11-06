@@ -19,6 +19,7 @@ Ext.define('Inventory.model.ItemUOM', {
                 inverse: {
                     role: 'tblICItemUOMs',
                     storeConfig: {
+                        complete: true,
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',

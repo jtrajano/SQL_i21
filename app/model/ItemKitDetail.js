@@ -18,6 +18,7 @@ Ext.define('Inventory.model.ItemKitDetail', {
                 inverse: {
                     role: 'tblICItemKitDetails',
                     storeConfig: {
+                        complete: true,
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',
