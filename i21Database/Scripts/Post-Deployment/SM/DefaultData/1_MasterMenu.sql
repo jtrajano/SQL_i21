@@ -553,13 +553,13 @@ GO
 		SET strCommand = 'Inventory.view.FuelCategory', intSort = 1
 		WHERE strMenuName = 'Fuel Category' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fuel' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId)
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fuel Code' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId)
 		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-		VALUES ('Fuel', 'Inventory', @InventoryRINId, 'Fuel', 'Screen', 'Inventory.view.FuelCode', 'small-screen', 1, 1, 0, 1, 2, 0)
+		VALUES ('Fuel Code', 'Inventory', @InventoryRINId, 'Fuel Code', 'Screen', 'Inventory.view.FuelCode', 'small-screen', 1, 1, 0, 1, 2, 0)
 	ELSE
 		UPDATE tblSMMasterMenu
 		SET strCommand = 'Inventory.view.FuelCode', intSort = 2
-		WHERE strMenuName = 'Fuel' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId
+		WHERE strMenuName = 'Fuel Code' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Production Process' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryRINId)
 		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
