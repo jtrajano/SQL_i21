@@ -7,7 +7,7 @@
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICFuelTaxClassProductCode] PRIMARY KEY ([intFuelTaxClassProductCodeId]), 
-    CONSTRAINT [FK_tblICFuelTaxClassProductCode_tblICFuelTaxClass] FOREIGN KEY ([intFuelTaxClassId]) REFERENCES [tblICFuelTaxClass]([intFuelTaxClassId])
+    CONSTRAINT [FK_tblICFuelTaxClassProductCode_tblICFuelTaxClass] FOREIGN KEY ([intFuelTaxClassId]) REFERENCES [tblICFuelTaxClass]([intFuelTaxClassId]) ON DELETE CASCADE
 )
 
 GO
