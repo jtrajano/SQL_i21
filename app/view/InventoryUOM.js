@@ -18,7 +18,6 @@ Ext.define('Inventory.view.InventoryUOM', {
     alias: 'widget.inventoryuom',
 
     requires: [
-        'Inventory.view.InventoryUOMViewModel',
         'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
@@ -35,9 +34,6 @@ Ext.define('Inventory.view.InventoryUOM', {
         'Ext.toolbar.Paging'
     ],
 
-    viewModel: {
-        type: 'inventoryuom'
-    },
     height: 542,
     hidden: false,
     minHeight: 500,
@@ -255,8 +251,9 @@ Ext.define('Inventory.view.InventoryUOM', {
                                                     flex: 1
                                                 }
                                             ],
+                                            itemId: 'cboStockUom',
                                             displayField: 'strUnitMeasure',
-                                            valueField: 'intUnitMeasureId',
+                                            valueField: 'strUnitMeasure',
                                             bind: {
                                                 store: '{UnitMeasure}'
                                             }
@@ -269,7 +266,8 @@ Ext.define('Inventory.view.InventoryUOM', {
                                         dataIndex: 'string',
                                         text: 'Conversion<br>to Stock UOM',
                                         editor: {
-                                            xtype: 'numberfield'
+                                            xtype: 'numberfield',
+                                            itemId: 'txtConvertToStock'
                                         }
                                     },
                                     {
@@ -279,7 +277,8 @@ Ext.define('Inventory.view.InventoryUOM', {
                                         dataIndex: 'string',
                                         text: 'Conversion from<br>Stock UOM',
                                         editor: {
-                                            xtype: 'numberfield'
+                                            xtype: 'numberfield',
+                                            itemId: 'txtConvertFromStock'
                                         }
                                     }
                                 ],

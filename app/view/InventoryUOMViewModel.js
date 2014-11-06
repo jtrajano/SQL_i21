@@ -18,7 +18,34 @@ Ext.define('Inventory.view.InventoryUOMViewModel', {
     alias: 'viewmodel.inventoryuom',
 
     requires: [
-        'Inventory.view.override.InventoryUOMViewModel'
-    ]
+        'Inventory.store.BufferedUnitMeasure'
+    ],
+
+    stores: {
+        unitTypes: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Area'
+                },{
+                    strDescription: 'Length'
+                },{
+                    strDescription: 'Quantity'
+                },{
+                    strDescription: 'Time'
+                },{
+                    strDescription: 'Volume'
+                },{
+                    strDescription: 'Weight'
+                },
+            ],
+            fields: {
+                name: 'strDescription'
+            }
+        },
+        unitMeasure: {
+            type: 'inventorybuffereduom'
+        }
+    }
 
 });

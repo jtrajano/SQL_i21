@@ -383,7 +383,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter14",
+                                    "name": "filter16",
                                     "designerId": "f6d3603a-325f-4715-8aae-53dd182f6038",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -444,10 +444,11 @@
                                         ],
                                         "designer|createAlias": "gridcombobox",
                                         "displayField": "strUnitMeasure",
+                                        "itemId": "cboStockUom",
                                         "store": [
                                             "{UnitMeasure}"
                                         ],
-                                        "valueField": "intUnitMeasureId"
+                                        "valueField": "strUnitMeasure"
                                     },
                                     "name": "MyComboBox",
                                     "configAlternates": {
@@ -489,6 +490,9 @@
                                         "type": "object"
                                     },
                                     "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "txtConvertToStock"
+                                    },
                                     "name": "MyNumberField",
                                     "designerId": "10387d1c-7339-49cb-8056-b7c7553dc68b"
                                 }
@@ -518,6 +522,9 @@
                                         "type": "object"
                                     },
                                     "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "txtConvertFromStock"
+                                    },
                                     "name": "MyNumberField1",
                                     "designerId": "3816c14f-dfa1-4f99-a542-6bd88dcafc5b"
                                 }
