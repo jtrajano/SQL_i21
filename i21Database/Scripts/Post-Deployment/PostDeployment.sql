@@ -80,6 +80,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\FixVendorGLAccountExpense.sql
 :r .\AP\UpdateBillBatch.sql
 :r .\AP\FixPaymentRecordStatus.sql
+:r .\AP\FixstrBillId.sql
 
 -- Inventory 
 :r .\IC\1_InventoryTransactionTypes.sql 

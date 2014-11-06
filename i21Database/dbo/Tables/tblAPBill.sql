@@ -31,6 +31,7 @@
 	[strPONumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
     [intShipFromId] INT NULL , 
 	[intShipToId] INT NULL , 
+	[intShipViaId] INT NULL , 
     [intStoreLocationId] INT NULL , 
     [intContactId] INT NULL , 
     [intOrderById] INT NULL , 
@@ -72,7 +73,7 @@ BEGIN
 	IF @type = 1
 		EXEC uspSMGetStartingNumber 9, @BillId OUT
 	ELSE IF @type = 3
-		EXEC uspSMGetStartingNumber 17, @BillId OUT
+		EXEC uspSMGetStartingNumber 18, @BillId OUT
 	ELSE IF @type = 2
 		EXEC uspSMGetStartingNumber 20, @BillId OUT
 	
