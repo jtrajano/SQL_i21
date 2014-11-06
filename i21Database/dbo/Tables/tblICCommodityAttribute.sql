@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblICCommodityAttribute]
 (
-	[intCommodityAttributeId] INT NOT NULL , 
+	[intCommodityAttributeId] INT NOT NULL IDENTITY, 
 	[intCommodityId] INT NOT NULL , 
     [strType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
