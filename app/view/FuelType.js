@@ -18,7 +18,6 @@ Ext.define('Inventory.view.FuelType', {
     alias: 'widget.fueltype',
 
     requires: [
-        'Inventory.view.FuelTypeViewModel',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
         'Ext.button.Button',
@@ -28,9 +27,6 @@ Ext.define('Inventory.view.FuelType', {
         'Ext.toolbar.Paging'
     ],
 
-    viewModel: {
-        type: 'fueltype'
-    },
     height: 465,
     hidden: false,
     maxHeight: 465,
@@ -184,8 +180,8 @@ Ext.define('Inventory.view.FuelType', {
                             itemId: 'cboFuelCategory',
                             fieldLabel: 'Fuel Category',
                             labelWidth: 165,
-                            displayField: 'strRinFuelTypeCode',
-                            valueField: 'intRinFuelTypeId'
+                            displayField: 'strRinFuelCategoryCode',
+                            valueField: 'intRinFuelCategoryId'
                         },
                         {
                             xtype: 'gridcombobox',

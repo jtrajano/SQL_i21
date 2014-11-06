@@ -279,7 +279,7 @@
                                 ],
                                 "designer|createAlias": "gridcombobox",
                                 "designer|displayName": null,
-                                "displayField": "strRinFuelTypeCode",
+                                "displayField": "strRinFuelCategoryCode",
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Fuel Category",
                                 "itemId": "cboFuelCategory",
@@ -291,7 +291,7 @@
                                 "maxLength": null,
                                 "name": null,
                                 "tabIndex": null,
-                                "valueField": "intRinFuelTypeId",
+                                "valueField": "intRinFuelCategoryId",
                                 "width": null
                             },
                             "name": "MyComboBox63",
