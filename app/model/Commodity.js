@@ -6,6 +6,14 @@ Ext.define('Inventory.model.Commodity', {
 
     requires: [
         'Inventory.model.CommodityUnitMeasure',
+        'Inventory.model.CommodityAccount',
+        'Inventory.model.CommodityClass',
+        'Inventory.model.CommodityGrade',
+        'Inventory.model.CommodityOrigin',
+        'Inventory.model.CommodityProductLine',
+        'Inventory.model.CommodityProductType',
+        'Inventory.model.CommodityRegion',
+        'Inventory.model.CommoditySeason',
         'Ext.data.Field'
     ],
 

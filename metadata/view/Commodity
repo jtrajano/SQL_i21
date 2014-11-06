@@ -1802,10 +1802,23 @@
                                                     "userConfig": {
                                                         "dataIndex": "string",
                                                         "flex": 1,
+                                                        "itemId": "colOrigin",
                                                         "text": "Origin"
                                                     },
                                                     "name": "MyColumn72",
-                                                    "designerId": "61661144-d429-47f3-a7a7-d2c52638c640"
+                                                    "designerId": "61661144-d429-47f3-a7a7-d2c52638c640",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.field.Text",
+                                                            "reference": {
+                                                                "name": "editor",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": null,
+                                                            "name": "MyTextField10",
+                                                            "designerId": "27708727-a6b3-4f97-8ac4-f8da80fccb89"
+                                                        }
+                                                    ]
                                                 },
                                                 {
                                                     "type": "Ext.grid.View",
@@ -1829,6 +1842,21 @@
                                                     "codeClass": "Ext.selection.CheckboxModel",
                                                     "name": "MyCheckboxSelectionModel11",
                                                     "designerId": "b8ec6dc5-692e-4d86-9ee3-ea91dd30e2ad"
+                                                },
+                                                {
+                                                    "type": "Ext.grid.plugin.CellEditing",
+                                                    "reference": {
+                                                        "name": "plugins",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "clicksToEdit": 1,
+                                                        "designer|displayName": "cepOrigin",
+                                                        "pluginId": "cepOrigin"
+                                                    },
+                                                    "name": "MyCellEditingPlugin5",
+                                                    "designerId": "eda05d5c-695b-41c1-a507-6afb086fb695"
                                                 }
                                             ]
                                         },
@@ -1945,10 +1973,23 @@
                                                     "userConfig": {
                                                         "dataIndex": "string",
                                                         "flex": 1,
+                                                        "itemId": "colProductType",
                                                         "text": "Product Type"
                                                     },
                                                     "name": "MyColumn73",
-                                                    "designerId": "5490abbf-f996-4592-9566-8a61d09dc047"
+                                                    "designerId": "5490abbf-f996-4592-9566-8a61d09dc047",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.field.Text",
+                                                            "reference": {
+                                                                "name": "editor",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": null,
+                                                            "name": "MyTextField11",
+                                                            "designerId": "50bd6979-7e9d-4461-a182-3c228b6544d9"
+                                                        }
+                                                    ]
                                                 },
                                                 {
                                                     "type": "Ext.grid.View",
@@ -1972,6 +2013,21 @@
                                                     "codeClass": "Ext.selection.CheckboxModel",
                                                     "name": "MyCheckboxSelectionModel12",
                                                     "designerId": "9aedef34-bc68-419d-8e3c-9f7076e7e7d6"
+                                                },
+                                                {
+                                                    "type": "Ext.grid.plugin.CellEditing",
+                                                    "reference": {
+                                                        "name": "plugins",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "clicksToEdit": 1,
+                                                        "designer|displayName": "cepProductType",
+                                                        "pluginId": "cepProductType"
+                                                    },
+                                                    "name": "MyCellEditingPlugin6",
+                                                    "designerId": "93a09328-e9f3-4ab9-af6e-a51bb84c16f8"
                                                 }
                                             ]
                                         },
@@ -2088,10 +2144,23 @@
                                                     "userConfig": {
                                                         "dataIndex": "string",
                                                         "flex": 1,
+                                                        "itemId": "colRegion",
                                                         "text": "Region"
                                                     },
                                                     "name": "MyColumn74",
-                                                    "designerId": "90a6c40d-e2f2-471a-95cf-8070df2ea54f"
+                                                    "designerId": "90a6c40d-e2f2-471a-95cf-8070df2ea54f",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.field.Text",
+                                                            "reference": {
+                                                                "name": "editor",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": null,
+                                                            "name": "MyTextField12",
+                                                            "designerId": "31c6140e-e91c-4588-834f-bce0f21c9131"
+                                                        }
+                                                    ]
                                                 },
                                                 {
                                                     "type": "Ext.grid.View",
@@ -2115,6 +2184,21 @@
                                                     "codeClass": "Ext.selection.CheckboxModel",
                                                     "name": "MyCheckboxSelectionModel13",
                                                     "designerId": "13127aef-da13-4bf8-a901-c2cb9e88b206"
+                                                },
+                                                {
+                                                    "type": "Ext.grid.plugin.CellEditing",
+                                                    "reference": {
+                                                        "name": "plugins",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "clicksToEdit": 1,
+                                                        "designer|displayName": "cepRegion",
+                                                        "pluginId": "cepRegion"
+                                                    },
+                                                    "name": "MyCellEditingPlugin7",
+                                                    "designerId": "746d28a5-369b-42c7-95cc-f1544a073ec4"
                                                 }
                                             ]
                                         },
@@ -2231,10 +2315,23 @@
                                                     "userConfig": {
                                                         "dataIndex": "string",
                                                         "flex": 1,
+                                                        "itemId": "colClassVarient",
                                                         "text": "Class/Varient"
                                                     },
                                                     "name": "MyColumn75",
-                                                    "designerId": "4ce27ed3-ff3f-4cf6-820e-61654dd5f42b"
+                                                    "designerId": "4ce27ed3-ff3f-4cf6-820e-61654dd5f42b",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.field.Text",
+                                                            "reference": {
+                                                                "name": "editor",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": null,
+                                                            "name": "MyTextField13",
+                                                            "designerId": "05594856-1446-47d0-8bee-838e63f6f42f"
+                                                        }
+                                                    ]
                                                 },
                                                 {
                                                     "type": "Ext.grid.View",
@@ -2258,6 +2355,21 @@
                                                     "codeClass": "Ext.selection.CheckboxModel",
                                                     "name": "MyCheckboxSelectionModel14",
                                                     "designerId": "f1e44192-51c8-4336-8fad-db4cb4a254e2"
+                                                },
+                                                {
+                                                    "type": "Ext.grid.plugin.CellEditing",
+                                                    "reference": {
+                                                        "name": "plugins",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "clicksToEdit": 1,
+                                                        "designer|displayName": "cepClass",
+                                                        "pluginId": "cepClass"
+                                                    },
+                                                    "name": "MyCellEditingPlugin8",
+                                                    "designerId": "33cd76f2-5b18-4c75-9172-a9625a682c8a"
                                                 }
                                             ]
                                         }
@@ -2393,10 +2505,23 @@
                                                     "userConfig": {
                                                         "dataIndex": "string",
                                                         "flex": 1,
+                                                        "itemId": "colSeason",
                                                         "text": "Season"
                                                     },
                                                     "name": "MyColumn76",
-                                                    "designerId": "e5d9dcfe-edef-45e3-b3ed-b8391e018225"
+                                                    "designerId": "e5d9dcfe-edef-45e3-b3ed-b8391e018225",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.field.Text",
+                                                            "reference": {
+                                                                "name": "editor",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": null,
+                                                            "name": "MyTextField14",
+                                                            "designerId": "7ac45b1a-a9f7-42ed-8d74-f0e5afc99637"
+                                                        }
+                                                    ]
                                                 },
                                                 {
                                                     "type": "Ext.grid.View",
@@ -2420,6 +2545,21 @@
                                                     "codeClass": "Ext.selection.CheckboxModel",
                                                     "name": "MyCheckboxSelectionModel15",
                                                     "designerId": "4b060572-5676-4a21-86ad-69537ea53522"
+                                                },
+                                                {
+                                                    "type": "Ext.grid.plugin.CellEditing",
+                                                    "reference": {
+                                                        "name": "plugins",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "clicksToEdit": 1,
+                                                        "designer|displayName": "cepSeason",
+                                                        "pluginId": "cepSeason"
+                                                    },
+                                                    "name": "MyCellEditingPlugin9",
+                                                    "designerId": "93efe1e4-42e7-403d-977f-7dedd60edd88"
                                                 }
                                             ]
                                         },
@@ -2536,10 +2676,23 @@
                                                     "userConfig": {
                                                         "dataIndex": "string",
                                                         "flex": 1,
+                                                        "itemId": "colGrade",
                                                         "text": "Grade"
                                                     },
                                                     "name": "MyColumn77",
-                                                    "designerId": "3387d028-b380-40b7-9369-46777365410e"
+                                                    "designerId": "3387d028-b380-40b7-9369-46777365410e",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.field.Text",
+                                                            "reference": {
+                                                                "name": "editor",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": null,
+                                                            "name": "MyTextField15",
+                                                            "designerId": "05e16cf6-5e58-44aa-92bc-2d47a90dd8cd"
+                                                        }
+                                                    ]
                                                 },
                                                 {
                                                     "type": "Ext.grid.View",
@@ -2563,6 +2716,21 @@
                                                     "codeClass": "Ext.selection.CheckboxModel",
                                                     "name": "MyCheckboxSelectionModel16",
                                                     "designerId": "9d26f6ef-bc60-485a-a1e4-5e80972ee5b2"
+                                                },
+                                                {
+                                                    "type": "Ext.grid.plugin.CellEditing",
+                                                    "reference": {
+                                                        "name": "plugins",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "clicksToEdit": 1,
+                                                        "designer|displayName": "cepGrade",
+                                                        "pluginId": "cepGrade"
+                                                    },
+                                                    "name": "MyCellEditingPlugin10",
+                                                    "designerId": "50e1992d-e757-44da-9140-28d7ead50e8d"
                                                 }
                                             ]
                                         },
@@ -2679,10 +2847,23 @@
                                                     "userConfig": {
                                                         "dataIndex": "string",
                                                         "flex": 1,
+                                                        "itemId": "colProductLine",
                                                         "text": "Product Line"
                                                     },
                                                     "name": "MyColumn78",
-                                                    "designerId": "16c02d35-3716-4306-a369-7a201500ba36"
+                                                    "designerId": "16c02d35-3716-4306-a369-7a201500ba36",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.field.Text",
+                                                            "reference": {
+                                                                "name": "editor",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": null,
+                                                            "name": "MyTextField16",
+                                                            "designerId": "8ca5db06-b70e-40f5-aeea-a968cf37bc35"
+                                                        }
+                                                    ]
                                                 },
                                                 {
                                                     "type": "Ext.grid.View",
@@ -2706,6 +2887,21 @@
                                                     "codeClass": "Ext.selection.CheckboxModel",
                                                     "name": "MyCheckboxSelectionModel17",
                                                     "designerId": "ae3eda2d-a2de-4d4f-9168-7d29994cefc1"
+                                                },
+                                                {
+                                                    "type": "Ext.grid.plugin.CellEditing",
+                                                    "reference": {
+                                                        "name": "plugins",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "clicksToEdit": 1,
+                                                        "designer|displayName": "cepProductLine",
+                                                        "pluginId": "cepProductLine"
+                                                    },
+                                                    "name": "MyCellEditingPlugin11",
+                                                    "designerId": "074668ee-5cc6-4a68-a786-0f8b8c64e656"
                                                 }
                                             ]
                                         },
@@ -4032,7 +4228,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging11",
                     "designerId": "fca9ca25-ac5c-43f8-9dd2-ce604fae6ecb",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

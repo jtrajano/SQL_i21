@@ -53,13 +53,32 @@ namespace iRely.Inventory.Model
             this.HasMany(p => p.tblICCommodityAccounts)
                 .WithRequired(p => p.tblICCommodity)
                 .HasForeignKey(p => p.intCommodityId);
-            this.HasMany(p => p.tblICCommodityAttributes)
-                .WithRequired(p => p.tblICCommodity)
-                .HasForeignKey(p => p.intCommodityId);
             this.HasMany(p => p.tblICCommodityGroups)
                 .WithRequired(p => p.tblICCommodity)
                 .HasForeignKey(p => p.intCommodityId);
             this.HasMany(p => p.tblICCommodityUnitMeasures)
+                .WithRequired(p => p.tblICCommodity)
+                .HasForeignKey(p => p.intCommodityId);
+
+            this.HasMany(p => p.tblICCommodityClassVariants)
+                .WithRequired(p => p.tblICCommodity)
+                .HasForeignKey(p => p.intCommodityId);
+            this.HasMany(p => p.tblICCommodityGrades)
+                .WithRequired(p => p.tblICCommodity)
+                .HasForeignKey(p => p.intCommodityId);
+            this.HasMany(p => p.tblICCommodityOrigins)
+                .WithRequired(p => p.tblICCommodity)
+                .HasForeignKey(p => p.intCommodityId);
+            this.HasMany(p => p.tblICCommodityProductLines)
+                .WithRequired(p => p.tblICCommodity)
+                .HasForeignKey(p => p.intCommodityId);
+            this.HasMany(p => p.tblICCommodityProductTypes)
+                .WithRequired(p => p.tblICCommodity)
+                .HasForeignKey(p => p.intCommodityId);
+            this.HasMany(p => p.tblICCommodityRegions)
+                .WithRequired(p => p.tblICCommodity)
+                .HasForeignKey(p => p.intCommodityId);
+            this.HasMany(p => p.tblICCommoditySeasons)
                 .WithRequired(p => p.tblICCommodity)
                 .HasForeignKey(p => p.intCommodityId);
         }

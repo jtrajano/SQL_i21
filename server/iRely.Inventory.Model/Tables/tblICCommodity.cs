@@ -15,7 +15,14 @@ namespace iRely.Inventory.Model
             this.tblICCommodityGroups = new List<tblICCommodityGroup>();
             this.tblICCommodityUnitMeasures = new List<tblICCommodityUnitMeasure>();
             this.tblICCommodityAccounts = new List<tblICCommodityAccount>();
-            this.tblICCommodityAttributes = new List<tblICCommodityAttribute>();
+
+            this.tblICCommodityClassVariants = new List<tblICCommodityClassVariant>();
+            this.tblICCommodityGrades = new List<tblICCommodityGrade>();
+            this.tblICCommodityOrigins = new List<tblICCommodityOrigin>();
+            this.tblICCommodityProductLines = new List<tblICCommodityProductLine>();
+            this.tblICCommodityProductTypes = new List<tblICCommodityProductType>();
+            this.tblICCommodityRegions = new List<tblICCommodityRegion>();
+            this.tblICCommoditySeasons = new List<tblICCommoditySeason>();
         }
 
         public int intCommodityId { get; set; }
@@ -55,7 +62,14 @@ namespace iRely.Inventory.Model
         public ICollection<tblICCommodityGroup> tblICCommodityGroups { get; set; }
         public ICollection<tblICCommodityUnitMeasure> tblICCommodityUnitMeasures { get; set; }
         public ICollection<tblICCommodityAccount> tblICCommodityAccounts { get; set; }
-        public ICollection<tblICCommodityAttribute> tblICCommodityAttributes { get; set; }
+
+        public ICollection<tblICCommodityClassVariant> tblICCommodityClassVariants { get; set; }
+        public ICollection<tblICCommodityGrade> tblICCommodityGrades { get; set; }
+        public ICollection<tblICCommodityOrigin> tblICCommodityOrigins { get; set; }
+        public ICollection<tblICCommodityProductLine> tblICCommodityProductLines { get; set; }
+        public ICollection<tblICCommodityProductType> tblICCommodityProductTypes { get; set; }
+        public ICollection<tblICCommodityRegion> tblICCommodityRegions { get; set; }
+        public ICollection<tblICCommoditySeason> tblICCommoditySeasons { get; set; }
 
     }
 }

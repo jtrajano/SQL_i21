@@ -541,7 +541,6 @@ Ext.define('Inventory.view.Commodity', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcombobox',
-                                                                        flex: 1,
                                                                         columns: [
                                                                             {
                                                                                 dataIndex: 'intPatronageCategoryId',
@@ -574,6 +573,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                                 flex: 1
                                                                             }
                                                                         ],
+                                                                        flex: 1,
                                                                         itemId: 'cboPatronageCategoryDirect',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'Direct',
@@ -855,9 +855,13 @@ Ext.define('Inventory.view.Commodity', {
                                                         columns: [
                                                             {
                                                                 xtype: 'gridcolumn',
+                                                                itemId: 'colOrigin',
                                                                 dataIndex: 'string',
                                                                 text: 'Origin',
-                                                                flex: 1
+                                                                flex: 1,
+                                                                editor: {
+                                                                    xtype: 'textfield'
+                                                                }
                                                             }
                                                         ],
                                                         viewConfig: {
@@ -865,7 +869,14 @@ Ext.define('Inventory.view.Commodity', {
                                                         },
                                                         selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                             selType: 'checkboxmodel'
-                                                        })
+                                                        }),
+                                                        plugins: [
+                                                            {
+                                                                ptype: 'cellediting',
+                                                                pluginId: 'cepOrigin',
+                                                                clicksToEdit: 1
+                                                            }
+                                                        ]
                                                     },
                                                     {
                                                         xtype: 'advancefiltergrid',
@@ -913,9 +924,13 @@ Ext.define('Inventory.view.Commodity', {
                                                         columns: [
                                                             {
                                                                 xtype: 'gridcolumn',
+                                                                itemId: 'colProductType',
                                                                 dataIndex: 'string',
                                                                 text: 'Product Type',
-                                                                flex: 1
+                                                                flex: 1,
+                                                                editor: {
+                                                                    xtype: 'textfield'
+                                                                }
                                                             }
                                                         ],
                                                         viewConfig: {
@@ -923,7 +938,14 @@ Ext.define('Inventory.view.Commodity', {
                                                         },
                                                         selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                             selType: 'checkboxmodel'
-                                                        })
+                                                        }),
+                                                        plugins: [
+                                                            {
+                                                                ptype: 'cellediting',
+                                                                pluginId: 'cepProductType',
+                                                                clicksToEdit: 1
+                                                            }
+                                                        ]
                                                     },
                                                     {
                                                         xtype: 'advancefiltergrid',
@@ -971,9 +993,13 @@ Ext.define('Inventory.view.Commodity', {
                                                         columns: [
                                                             {
                                                                 xtype: 'gridcolumn',
+                                                                itemId: 'colRegion',
                                                                 dataIndex: 'string',
                                                                 text: 'Region',
-                                                                flex: 1
+                                                                flex: 1,
+                                                                editor: {
+                                                                    xtype: 'textfield'
+                                                                }
                                                             }
                                                         ],
                                                         viewConfig: {
@@ -981,7 +1007,14 @@ Ext.define('Inventory.view.Commodity', {
                                                         },
                                                         selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                             selType: 'checkboxmodel'
-                                                        })
+                                                        }),
+                                                        plugins: [
+                                                            {
+                                                                ptype: 'cellediting',
+                                                                pluginId: 'cepRegion',
+                                                                clicksToEdit: 1
+                                                            }
+                                                        ]
                                                     },
                                                     {
                                                         xtype: 'advancefiltergrid',
@@ -1029,9 +1062,13 @@ Ext.define('Inventory.view.Commodity', {
                                                         columns: [
                                                             {
                                                                 xtype: 'gridcolumn',
+                                                                itemId: 'colClassVarient',
                                                                 dataIndex: 'string',
                                                                 text: 'Class/Varient',
-                                                                flex: 1
+                                                                flex: 1,
+                                                                editor: {
+                                                                    xtype: 'textfield'
+                                                                }
                                                             }
                                                         ],
                                                         viewConfig: {
@@ -1039,7 +1076,14 @@ Ext.define('Inventory.view.Commodity', {
                                                         },
                                                         selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                             selType: 'checkboxmodel'
-                                                        })
+                                                        }),
+                                                        plugins: [
+                                                            {
+                                                                ptype: 'cellediting',
+                                                                pluginId: 'cepClass',
+                                                                clicksToEdit: 1
+                                                            }
+                                                        ]
                                                     }
                                                 ]
                                             },
@@ -1097,9 +1141,13 @@ Ext.define('Inventory.view.Commodity', {
                                                         columns: [
                                                             {
                                                                 xtype: 'gridcolumn',
+                                                                itemId: 'colSeason',
                                                                 dataIndex: 'string',
                                                                 text: 'Season',
-                                                                flex: 1
+                                                                flex: 1,
+                                                                editor: {
+                                                                    xtype: 'textfield'
+                                                                }
                                                             }
                                                         ],
                                                         viewConfig: {
@@ -1107,7 +1155,14 @@ Ext.define('Inventory.view.Commodity', {
                                                         },
                                                         selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                             selType: 'checkboxmodel'
-                                                        })
+                                                        }),
+                                                        plugins: [
+                                                            {
+                                                                ptype: 'cellediting',
+                                                                pluginId: 'cepSeason',
+                                                                clicksToEdit: 1
+                                                            }
+                                                        ]
                                                     },
                                                     {
                                                         xtype: 'advancefiltergrid',
@@ -1155,9 +1210,13 @@ Ext.define('Inventory.view.Commodity', {
                                                         columns: [
                                                             {
                                                                 xtype: 'gridcolumn',
+                                                                itemId: 'colGrade',
                                                                 dataIndex: 'string',
                                                                 text: 'Grade',
-                                                                flex: 1
+                                                                flex: 1,
+                                                                editor: {
+                                                                    xtype: 'textfield'
+                                                                }
                                                             }
                                                         ],
                                                         viewConfig: {
@@ -1165,7 +1224,14 @@ Ext.define('Inventory.view.Commodity', {
                                                         },
                                                         selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                             selType: 'checkboxmodel'
-                                                        })
+                                                        }),
+                                                        plugins: [
+                                                            {
+                                                                ptype: 'cellediting',
+                                                                pluginId: 'cepGrade',
+                                                                clicksToEdit: 1
+                                                            }
+                                                        ]
                                                     },
                                                     {
                                                         xtype: 'advancefiltergrid',
@@ -1213,9 +1279,13 @@ Ext.define('Inventory.view.Commodity', {
                                                         columns: [
                                                             {
                                                                 xtype: 'gridcolumn',
+                                                                itemId: 'colProductLine',
                                                                 dataIndex: 'string',
                                                                 text: 'Product Line',
-                                                                flex: 1
+                                                                flex: 1,
+                                                                editor: {
+                                                                    xtype: 'textfield'
+                                                                }
                                                             }
                                                         ],
                                                         viewConfig: {
@@ -1223,7 +1293,14 @@ Ext.define('Inventory.view.Commodity', {
                                                         },
                                                         selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                             selType: 'checkboxmodel'
-                                                        })
+                                                        }),
+                                                        plugins: [
+                                                            {
+                                                                ptype: 'cellediting',
+                                                                pluginId: 'cepProductLine',
+                                                                clicksToEdit: 1
+                                                            }
+                                                        ]
                                                     },
                                                     {
                                                         xtype: 'container',

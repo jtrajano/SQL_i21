@@ -260,6 +260,21 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblSTSubcategoryFamilyMap());
             modelBuilder.Configurations.Add(new tblSTSubcategoryRegProdMap());
 
+            modelBuilder.Entity<tblICCommodityAttribute>().Map<tblICCommodityClassVariant>(p => p.Requires("strType").HasValue("Class"));
+            modelBuilder.Entity<tblICCommodityAttribute>().Map<tblICCommodityGrade>(p => p.Requires("strType").HasValue("Grade"));
+            modelBuilder.Entity<tblICCommodityAttribute>().Map<tblICCommodityOrigin>(p => p.Requires("strType").HasValue("Origin"));
+            modelBuilder.Entity<tblICCommodityAttribute>().Map<tblICCommodityProductLine>(p => p.Requires("strType").HasValue("ProductLine"));
+            modelBuilder.Entity<tblICCommodityAttribute>().Map<tblICCommodityProductType>(p => p.Requires("strType").HasValue("ProductType"));
+            modelBuilder.Entity<tblICCommodityAttribute>().Map<tblICCommodityRegion>(p => p.Requires("strType").HasValue("Region"));
+            modelBuilder.Entity<tblICCommodityAttribute>().Map<tblICCommoditySeason>(p => p.Requires("strType").HasValue("Season"));
+
+            modelBuilder.Configurations.Add(new tblICCommodityClassVariantMap());
+            modelBuilder.Configurations.Add(new tblICCommodityGradeMap());
+            modelBuilder.Configurations.Add(new tblICCommodityOriginMap());
+            modelBuilder.Configurations.Add(new tblICCommodityProductLineMap());
+            modelBuilder.Configurations.Add(new tblICCommodityProductTypeMap());
+            modelBuilder.Configurations.Add(new tblICCommodityRegionMap());
+            modelBuilder.Configurations.Add(new tblICCommoditySeasonMap());
         }
     }
 }

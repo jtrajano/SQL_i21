@@ -13,21 +13,7 @@ Ext.define('Inventory.model.CommodityAttribute', {
 
     fields: [
         { name: 'intCommodityAttributeId', type: 'int'},
-        { name: 'intCommodityId', type: 'int',
-            reference: {
-                type: 'Inventory.model.Commodity',
-                inverse: {
-                    role: 'tblICCommodityAttributes',
-                    storeConfig: {
-                        sortOnLoad: true,
-                        sorters: {
-                            direction: 'ASC',
-                            property: 'intSort'
-                        }
-                    }
-                }
-            }
-        },
+        { name: 'intCommodityId', type: 'int' },
         { name: 'strType', type: 'string'},
         { name: 'strDescription', type: 'string'},
         { name: 'intSort', type: 'int'}
