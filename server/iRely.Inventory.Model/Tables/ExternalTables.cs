@@ -217,5 +217,13 @@ namespace iRely.Inventory.Model
         public int intPaymentMethodId { get; set; }
     }
 
+    public class tblGRStorageType : BaseEntity
+    {
+        public int intStorageTypeId { get; set; }
+        public string strStorageType { get; set; }
+        public string strDescription { get; set; }
+        public int intSort { get; set; }
+    }
+
    
 }

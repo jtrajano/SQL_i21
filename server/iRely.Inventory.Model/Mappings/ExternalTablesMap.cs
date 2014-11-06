@@ -165,4 +165,20 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class tblGRStorageTypeMap : EntityTypeConfiguration<tblGRStorageType>
+    {
+        public tblGRStorageTypeMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intStorageTypeId);
+
+            // Table & Column Mappings
+            this.ToTable("tblGRStorageType");
+            this.Property(t => t.intStorageTypeId).HasColumnName("intStorageTypeId");
+            this.Property(t => t.strStorageType).HasColumnName("strStorageType");
+            this.Property(t => t.strDescription).HasColumnName("strDescription");
+            this.Property(t => t.intSort).HasColumnName("intSort");
+        }
+    }
+
 }

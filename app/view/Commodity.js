@@ -221,6 +221,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'Decimals on DPR',
                                                                         labelWidth: 95,
+                                                                        fieldStyle: 'text-align:right',
                                                                         hideTrigger: true
                                                                     }
                                                                 ]
@@ -239,6 +240,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                         width: 280,
                                                                         fieldLabel: 'Consolidate Factor',
                                                                         labelWidth: 140,
+                                                                        fieldStyle: 'text-align:right',
                                                                         hideTrigger: true
                                                                     },
                                                                     {
@@ -264,6 +266,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                         width: 280,
                                                                         fieldLabel: 'Price Checks - Min',
                                                                         labelWidth: 140,
+                                                                        fieldStyle: 'text-align:right',
                                                                         hideTrigger: true
                                                                     },
                                                                     {
@@ -273,6 +276,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'Max',
                                                                         labelWidth: 60,
+                                                                        fieldStyle: 'text-align:right',
                                                                         hideTrigger: true
                                                                     }
                                                                 ]
@@ -298,7 +302,9 @@ Ext.define('Inventory.view.Commodity', {
                                                                         itemId: 'cboCheckoffTaxAllStates',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'All States',
-                                                                        labelWidth: 60
+                                                                        labelWidth: 60,
+                                                                        displayField: 'strState',
+                                                                        valueField: 'strState'
                                                                     }
                                                                 ]
                                                             },
@@ -323,7 +329,9 @@ Ext.define('Inventory.view.Commodity', {
                                                                         itemId: 'cboInsuranceTaxAllStates',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'All States',
-                                                                        labelWidth: 60
+                                                                        labelWidth: 60,
+                                                                        displayField: 'strState',
+                                                                        valueField: 'strState'
                                                                     }
                                                                 ]
                                                             },
@@ -414,6 +422,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                         itemId: 'txtTextFees',
                                                                         fieldLabel: 'Text Fees',
                                                                         labelWidth: 60,
+                                                                        fieldStyle: 'text-align:right',
                                                                         hideTrigger: true
                                                                     }
                                                                 ]
@@ -477,6 +486,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                         margin: '0 0 0 15',
                                                                         fieldLabel: 'Max Under',
                                                                         labelWidth: 65,
+                                                                        fieldStyle: 'text-align:right',
                                                                         hideTrigger: true
                                                                     },
                                                                     {
@@ -486,6 +496,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'Max Over',
                                                                         labelWidth: 55,
+                                                                        fieldStyle: 'text-align:right',
                                                                         hideTrigger: true
                                                                     }
                                                                 ]

@@ -18,6 +18,7 @@ Ext.define('Inventory.model.CommodityProductType', {
                 inverse: {
                     role: 'tblICCommodityProductTypes',
                     storeConfig: {
+                        complete: true,
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',

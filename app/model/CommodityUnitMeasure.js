@@ -18,6 +18,7 @@ Ext.define('Inventory.model.CommodityUnitMeasure', {
                 inverse: {
                     role: 'tblICCommodityUnitMeasures',
                     storeConfig: {
+                        complete: true,
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',

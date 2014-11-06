@@ -18,6 +18,7 @@ Ext.define('Inventory.model.CommoditySeason', {
                 inverse: {
                     role: 'tblICCommoditySeasons',
                     storeConfig: {
+                        complete: true,
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',

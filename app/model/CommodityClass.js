@@ -18,6 +18,7 @@ Ext.define('Inventory.model.CommodityClass', {
                 inverse: {
                     role: 'tblICCommodityClassVariants',
                     storeConfig: {
+                        complete: true,
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',

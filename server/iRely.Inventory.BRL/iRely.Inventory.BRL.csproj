@@ -68,6 +68,7 @@
     <Compile Include="CommodityAttribute.cs" />
     <Compile Include="CategoryLocation.cs" />
     <Compile Include="Catalog.cs" />
+    <Compile Include="StorageType.cs" />
     <Compile Include="StoreTables.cs" />
     <Compile Include="LotStatus.cs" />
     <Compile Include="LineOfBusiness.cs" />

@@ -41,11 +41,13 @@ Ext.define('Inventory.view.CommodityViewController', {
             txtPriceChecksMax: '{current.dblPriceCheckMax}',
             txtCheckoffTaxDesc: '{current.strCheckoffTaxDesc}',
             cboCheckoffTaxAllStates: {
-                value: '{current.strCheckoffAllState}'
+                value: '{current.strCheckoffAllState}',
+                store: '{states}'
             },
             txtInsuranceTaxDesc: '{current.strInsuranceTaxDesc}',
             cboInsuranceTaxAllStates: {
-                value: '{current.strInsuranceAllState}'
+                value: '{current.strInsuranceAllState}',
+                store: '{states}'
             },
             dtmCropEndDateCurrent: '{current.dtmCropEndDateCurrent}',
             dtmCropEndDateNew: '{current.dtmCropEndDateNew}',
@@ -57,7 +59,8 @@ Ext.define('Inventory.view.CommodityViewController', {
             txtTextFees: '{current.strTextFees}',
             txtAgItemNumber: '{current.strAGItemNumber}',
             cboScaleAutoDistDefault: {
-                value: '{current.strScaleAutoDist}'
+                value: '{current.strScaleAutoDist}',
+                store: '{autoScaleDist}'
             },
             chkRequireLoadNoAtKiosk: '{current.ysnRequireLoadNumber}',
             chkAllowVariety: '{current.ysnAllowVariety}',

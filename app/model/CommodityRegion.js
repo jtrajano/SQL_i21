@@ -18,6 +18,7 @@ Ext.define('Inventory.model.CommodityRegion', {
                 inverse: {
                     role: 'tblICCommodityRegions',
                     storeConfig: {
+                        complete: true,
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',
