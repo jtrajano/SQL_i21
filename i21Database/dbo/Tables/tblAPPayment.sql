@@ -14,7 +14,7 @@
     [dblWithheld]   DECIMAL (18, 6) NOT NULL DEFAULT 0,
     [intUserId]           INT             NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
-    [intEntityId] INT NULL,
+    [intEntityId] INT NOT NULL,
     [intVendorId] INT NOT NULL,
     [ysnOrigin] BIT NOT NULL DEFAULT 0,
     CONSTRAINT [PK_dbo.tblAPPayments] PRIMARY KEY CLUSTERED ([intPaymentId] ASC), 
