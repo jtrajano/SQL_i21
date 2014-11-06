@@ -1031,7 +1031,7 @@ ELSE
 												ELSE B.dblPayment END END)
 				,[dblCredit]			= SUM(CASE WHEN @post = 0 THEN CASE WHEN (B.dblAmountDue = 0)
 												THEN B.dblPayment + B.dblDiscount
-												ELSE B.dblAmountDue END
+												ELSE B.dblPayment END
 											ELSE 0 END)
 				,[dblDebitUnit]			= ISNULL(A.dblAmountPaid, 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
 				,[dblCreditUnit]		= ISNULL(A.dblAmountPaid, 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
