@@ -18,6 +18,7 @@ Ext.define('Inventory.model.PackTypeDetail', {
                 inverse: {
                     role: 'tblICPackTypeDetails',
                     storeConfig: {
+                        complete: true,
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',
