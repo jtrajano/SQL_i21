@@ -287,6 +287,12 @@
     <Build Include="testi21Database\Stored Procedures\test uspICProcessMovingAverageCost, May 15. Purchase 15 stocks at 27 dollars each.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInFIFO for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInFIFO from zero to negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInFIFO from positive stock to zero stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInFIFO from positive stock to negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInFIFO from positive stock to positive stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInFIFO from negative to negative stock.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

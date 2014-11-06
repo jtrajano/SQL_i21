@@ -1,0 +1,118 @@
+﻿CREATE PROCEDURE [testi21Database].[test uspICReduceStockInFIFO from zero to negative stock]
+AS
+BEGIN
+	-- Arrange 
+	BEGIN 
+		-- Fake the table 
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;		
+
+		-- Create the expected and actual tables 
+		CREATE TABLE expected (
+			[intItemId] INT 
+			,[intItemLocationId] INT 
+			,[dtmDate] DATETIME
+			,[dblStockIn] NUMERIC(18,6)
+			,[dblStockOut] NUMERIC(18,6)
+			,[dblCost] NUMERIC(18,6)
+			,[intCreatedUserId] INT 
+			,[intConcurrencyId]	INT
+		)
+
+		CREATE TABLE actual (
+			[intItemId] INT 
+			,[intItemLocationId] INT 
+			,[dtmDate] DATETIME
+			,[dblStockIn] NUMERIC(18,6)
+			,[dblStockOut] NUMERIC(18,6)
+			,[dblCost] NUMERIC(18,6)
+			,[intCreatedUserId] INT 
+			,[intConcurrencyId]	INT
+		)
+
+		-- Create the variables used by uspICReduceStockInFIFO
+		DECLARE @intItemId AS INT = 1
+				,@intItemLocationId AS INT = 1
+				,@dtmDate AS DATETIME = GETDATE()
+				,@dblSoldQty NUMERIC(18,6) = -10
+				,@dblCost AS NUMERIC(18,6) = 33.19
+				,@intUserId AS INT = 1
+				,@dtmCreated AS DATETIME
+				,@dblReduceQty AS NUMERIC(18,6)
+				,@RemainingQty AS NUMERIC(18,6) 			
+
+		-- Setup the expected values 
+		INSERT INTO expected (
+				[intItemId] 
+				,[intItemLocationId] 
+				,[dtmDate] 
+				,[dblStockIn] 
+				,[dblStockOut]
+				,[dblCost] 
+				,[intCreatedUserId] 
+				,[intConcurrencyId]
+		)
+		SELECT	[intItemId] = @intItemId
+				,[intItemLocationId] = @intItemLocationId
+				,[dtmDate] = @dtmDate
+				,[dblStockIn] = 0
+				,[dblStockOut] = ABS(@dblSoldQty)
+				,[dblCost] = @dblCost
+				,[intCreatedUserId] = @intUserId
+				,[intConcurrencyId] = 1
+	END 
+	
+	-- Act
+	BEGIN 
+		SET @dblReduceQty = @dblSoldQty
+
+		-- Repeat call on uspICReduceStockInFIFO until @dblReduceQty is completely distributed to all the available fifo buckets
+		WHILE (ISNULL(@dblReduceQty, 0) < 0)
+		BEGIN 					
+			EXEC [dbo].[uspICReduceStockInFIFO]
+				@intItemId
+				,@intItemLocationId
+				,@dtmDate
+				,@dblReduceQty
+				,@dblCost
+				,@intUserId
+				,@RemainingQty OUTPUT
+
+			SET @dblReduceQty = @RemainingQty;
+		END 
+
+		INSERT INTO actual (
+				[intItemId] 
+				,[intItemLocationId] 
+				,[dtmDate] 
+				,[dblStockIn] 
+				,[dblStockOut]
+				,[dblCost] 
+				,[intCreatedUserId] 
+				,[intConcurrencyId]
+		)
+		SELECT
+				[intItemId] 
+				,[intItemLocationId] 
+				,[dtmDate] 
+				,[dblStockIn] 
+				,[dblStockOut]
+				,[dblCost] 
+				,[intCreatedUserId] 
+				,[intConcurrencyId]
+		FROM	dbo.tblICInventoryFIFO
+		WHERE	intItemId = @intItemId
+				AND intItemLocationId = @intItemLocationId
+	END 
+
+	-- Assert
+	BEGIN 
+		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
+	END
+
+	-- Clean-up: remove the tables used in the unit test
+	IF OBJECT_ID('actual') IS NOT NULL 
+		DROP TABLE actual
+
+	IF OBJECT_ID('expected') IS NOT NULL 
+		DROP TABLE dbo.expected
+END 

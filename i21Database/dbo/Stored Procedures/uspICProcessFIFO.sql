@@ -59,55 +59,95 @@ DECLARE @dblReduceQty AS NUMERIC(18,6)
 -------------------------------------------------
 -- 1. Process the Fifo Cost buckets
 -------------------------------------------------
-
--- Process reduce stock in the fifo bucket table
-IF (@dblUnitQty < 0)
 BEGIN 
-	SET @dblReduceQty = ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0)
-
-	-- Repeat call on uspICReduceStockInFIFO until @dblReduceQty is completed assigned to the fifo buckets
-	WHILE (ISNULL(@dblReduceQty, 0) < 0)
+	-- Reduce stock 
+	IF (@dblUnitQty < 0)
 	BEGIN 
-		EXEC [dbo].[uspICReduceStockInFIFO]
+		SET @dblReduceQty = ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0)
+
+		-- Repeat call on uspICReduceStockInFIFO until @dblReduceQty is completed distributed to the all available fifo buckets
+		WHILE (ISNULL(@dblReduceQty, 0) < 0)
+		BEGIN 
+			EXEC [dbo].[uspICReduceStockInFIFO]
+				@intItemId
+				,@intItemLocationId
+				,@dtmDate
+				,@dblReduceQty
+				,@dblCost
+				,@intUserId
+				,@RemainingQty OUTPUT
+
+			SET @dblReduceQty = @RemainingQty;
+		END 
+	END
+
+	-- Add stock 
+	ELSE IF (@dblUnitQty > 0)
+	BEGIN 
+		INSERT [dbo].[tblICInventoryFIFO] (
+			[intItemId]
+			,[intItemLocationId]
+			,[dtmDate]
+			,[dblStockIn]
+			,[dblStockOut]
+			,[dblCost]
+			,[dtmCreated]
+			,[intCreatedUserId]
+			,[intConcurrencyId]
+		)
+		VALUES (
 			@intItemId
 			,@intItemLocationId
 			,@dtmDate
-			,@dblReduceQty
+			,ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0)
+			,0
 			,@dblCost
+			,GETDATE()
 			,@intUserId
-			,@RemainingQty OUTPUT
-
-		SET @dblReduceQty = @RemainingQty;
+			,1	
+		)
 	END 
-END
-
--- Add new cost bucket if unit quantity is positive
-ELSE IF (@dblUnitQty > 0)
-BEGIN 
-	INSERT [dbo].[tblICInventoryFIFO] (
-		[intItemId]
-		,[intItemLocationId]
-		,[dtmDate]
-		,[dblStockIn]
-		,[dblStockOut]
-		,[dblCost]
-		,[dtmCreated]
-		,[intCreatedUserId]
-		,[intConcurrencyId]
-	)
-	VALUES (
-		@intItemId
-		,@intItemLocationId
-		,@dtmDate
-		,ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0)
-		,0
-		,@dblCost
-		,GETDATE()
-		,@intUserId
-		,1	
-	)
 END 
 
 -------------------------------------------------
--- 2. Process the inventory transaction records -- TODO
+-- 2. Process the inventory transaction records 
 -------------------------------------------------
+BEGIN 
+	INSERT INTO tblICInventoryTransaction (
+			[intItemId] 
+			,[intItemLocationId] 
+			,[dtmDate] 
+			,[dblUnitQty] 
+			,[dblCost] 
+			,[dblValue]
+			,[dblSalesPrice] 
+			,[intCurrencyId] 
+			,[dblExchangeRate] 
+			,[intTransactionId] 
+			,[strTransactionId] 
+			,[strBatchId] 
+			,[intTransactionTypeId] 
+			,[dtmCreated] 
+			,[intCreatedUserId] 
+			,[intConcurrencyId] 
+	)
+	-- If positive qty, add stock 
+	SELECT	[intItemId] = @intItemId
+			,[intItemLocationId] = @intItemLocationId
+			,[dtmDate] = @dtmDate
+			,[dblUnitQty] = @dblUnitQty * @dblUOMQty
+			,[dblCost] = @dblCost
+			,[dblValue] = NULL 
+			,[dblSalesPrice] = @dblSalesPrice
+			,[intCurrencyId] = @intCurrencyId
+			,[dblExchangeRate] = @dblExchangeRate
+			,[intTransactionId] = @intTransactionId
+			,[strTransactionId] = @strTransactionId
+			,[strBatchId] = @strBatchId
+			,[intTransactionTypeId] = @intTransactionTypeId
+			,[dtmCreated] = GETDATE()
+			,[intCreatedUserId] = @intUserId
+			,[intConcurrencyId] = 1
+	WHERE	(@dblUnitQty * @dblUOMQty) > 0  
+
+END
