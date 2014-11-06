@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblARPayment] (
     [intPaymentId]       INT             IDENTITY (1, 1) NOT NULL,
-    [intEntityId]        INT             NOT NULL,
+    [intCustomerId]        INT             NOT NULL,
     [intCurrencyId]      INT             NOT NULL,
     [dtmDatePaid]        DATETIME        NULL,
     [intAccountId]       INT             NOT NULL,
@@ -16,7 +16,7 @@
     [ysnPosted]          BIT             CONSTRAINT [DF_tblARPayment_ysnPosted] DEFAULT ((0)) NOT NULL,
     [intConcurrencyId]   INT             CONSTRAINT [DF_tblARPayment_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARPayment] PRIMARY KEY CLUSTERED ([intPaymentId] ASC),
-    CONSTRAINT [FK_tblARPayment_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId])
+    CONSTRAINT [FK_tblARPayment_tblEntity] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblEntity] ([intEntityId])
 );
 
 

@@ -17,8 +17,6 @@
     [intEntityId] INT NULL,
     [intVendorId] INT NOT NULL,
     [ysnOrigin] BIT NOT NULL DEFAULT 0,
-    [ysnVoid] BIT NOT NULL DEFAULT 0, 
-    [ysnPrinted] BIT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_dbo.tblAPPayments] PRIMARY KEY CLUSTERED ([intPaymentId] ASC), 
     CONSTRAINT [FK_tblAPPayment_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intVendorId]),
 	CONSTRAINT [FK_dbo.tblAPPayment_dbo.tblEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEntity(intEntityId),

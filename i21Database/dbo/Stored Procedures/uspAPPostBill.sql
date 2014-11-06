@@ -477,7 +477,7 @@ BEGIN
 
 		UPDATE tblGLDetail
 			SET ysnIsUnposted = 1
-		WHERE strTransactionId IN (SELECT strBillId FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData))
+		WHERE intTransactionId IN (SELECT intBillId FROM #tmpPostBillData)
 
 		--Insert Successfully unposted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)

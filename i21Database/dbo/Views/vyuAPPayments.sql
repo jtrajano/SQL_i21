@@ -20,11 +20,12 @@ SELECT
 	A.strPaymentRecordNum ,
 	A.ysnOrigin ,
 	A.ysnPosted ,
-	A.ysnPrinted ,
-	A.ysnVoid ,
+	CAST(CASE WHEN E.dtmCheckPrinted IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS ysnPrinted,
+	ISNULL(E.ysnCheckVoid,0) AS ysnVoid,
 	C.strBankName,
 	B.strBankAccountNo,
-	D.strVendorId
+	D.strVendorId,
+	ISNULL(E.ysnClr,0) AS ysnClear
 	FROM dbo.tblAPPayment A
 		LEFT JOIN dbo.tblCMBankAccount B
 			ON A.intBankAccountId = B.intBankAccountId
@@ -32,3 +33,5 @@ SELECT
 			ON B.intBankId = C.intBankId
 		LEFT JOIN dbo.tblAPVendor D
 			ON A.intVendorId = D.intVendorId
+		LEFT JOIN dbo.tblCMBankTransaction E
+			ON A.strPaymentRecordNum = E.strTransactionId

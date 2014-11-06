@@ -16,8 +16,8 @@ RETURN
 			,intItemLocationId
 			,dtmDate
 			,dblUnitQty
-			,dblUOMQty
 			,dblCost
+			,dblValue 
 			,dblSalesPrice
 			,intCurrencyId
 			,dblExchangeRate
