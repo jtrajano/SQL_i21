@@ -18,7 +18,6 @@ Ext.define('Inventory.view.FuelTaxClass', {
     alias: 'widget.fueltaxclass',
 
     requires: [
-        'Inventory.view.FuelTaxClassViewModel',
         'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
@@ -33,9 +32,6 @@ Ext.define('Inventory.view.FuelTaxClass', {
         'Ext.toolbar.Paging'
     ],
 
-    viewModel: {
-        type: 'fueltaxclass'
-    },
     height: 525,
     hidden: false,
     minHeight: 525,
@@ -235,11 +231,9 @@ Ext.define('Inventory.view.FuelTaxClass', {
                                                 flex: 1,
                                                 editor: {
                                                     xtype: 'combobox',
+                                                    itemId: 'cboState',
                                                     displayField: 'strState',
-                                                    valueField: 'strState',
-                                                    bind: {
-                                                        store: '{States}'
-                                                    }
+                                                    valueField: 'strState'
                                                 }
                                             },
                                             {
