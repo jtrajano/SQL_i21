@@ -42,7 +42,8 @@ BEGIN
 			NextDeliveryDegreeDay = B.intNextDeliveryDegreeDay,
 			isDispatched = A.ysnDispatched,
 			RouteName = E.strRouteId,
-			RouteID = E.intRouteId
+			RouteID = E.intRouteId,
+			intConcurrencyId = 0
 			FROM tblTMDispatch A
 			INNER JOIN tblTMSite B ON A.intSiteID = B.intSiteID
 			INNER JOIN tblTMCustomer C ON B.intCustomerID = C.intCustomerID
