@@ -723,6 +723,7 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "fieldLabel": "Default Schedule Store",
+                                                                "fieldStyle": "text-align:right",
                                                                 "hideTrigger": true,
                                                                 "itemId": "txtDefaultScheduleStore",
                                                                 "labelWidth": 140,
@@ -741,6 +742,7 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "fieldLabel": "Discount",
+                                                                "fieldStyle": "text-align:right",
                                                                 "hideTrigger": true,
                                                                 "itemId": "txtDefaultScheduleDiscount",
                                                                 "labelWidth": 60,
@@ -853,14 +855,49 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intStorageTypeId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Storage Type Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strStorageType',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Storage Type',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strDescription',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Description',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strStorageType",
                                                         "fieldLabel": "Scale Auto Dist Default",
                                                         "itemId": "cboScaleAutoDistDefault",
                                                         "labelWidth": 140,
                                                         "layout|flex": 1,
-                                                        "layout|margins": null
+                                                        "layout|margins": null,
+                                                        "valueField": "intStorageTypeId"
                                                     },
                                                     "name": "MyComboBox53",
-                                                    "designerId": "f6f23f0f-1b97-4117-a0fd-cac15c4336c5"
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "f6f23f0f-1b97-4117-a0fd-cac15c4336c5",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 },
                                                 {
                                                     "type": "Ext.container.Container",

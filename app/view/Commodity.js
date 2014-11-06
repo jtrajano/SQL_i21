@@ -380,6 +380,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                         width: 280,
                                                                         fieldLabel: 'Default Schedule Store',
                                                                         labelWidth: 140,
+                                                                        fieldStyle: 'text-align:right',
                                                                         hideTrigger: true
                                                                     },
                                                                     {
@@ -389,6 +390,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'Discount',
                                                                         labelWidth: 60,
+                                                                        fieldStyle: 'text-align:right',
                                                                         hideTrigger: true
                                                                     }
                                                                 ]
@@ -435,11 +437,33 @@ Ext.define('Inventory.view.Commodity', {
                                                                 labelWidth: 140
                                                             },
                                                             {
-                                                                xtype: 'combobox',
+                                                                xtype: 'gridcombobox',
                                                                 flex: 1,
+                                                                columns: [
+                                                                    {
+                                                                        dataIndex: 'intStorageTypeId',
+                                                                        dataType: 'numeric',
+                                                                        text: 'Storage Type Id',
+                                                                        hidden: true
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strStorageType',
+                                                                        dataType: 'string',
+                                                                        text: 'Storage Type',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strDescription',
+                                                                        dataType: 'string',
+                                                                        text: 'Description',
+                                                                        flex: 1
+                                                                    }
+                                                                ],
                                                                 itemId: 'cboScaleAutoDistDefault',
                                                                 fieldLabel: 'Scale Auto Dist Default',
-                                                                labelWidth: 140
+                                                                labelWidth: 140,
+                                                                displayField: 'strStorageType',
+                                                                valueField: 'intStorageTypeId'
                                                             },
                                                             {
                                                                 xtype: 'container',
