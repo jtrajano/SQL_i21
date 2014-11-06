@@ -24,21 +24,71 @@ Ext.define('Inventory.view.EditCatalogViewController', {
             win = this.getView();
 
         if (config) {
-            win.show();
 
-            var context = me.setupContext( { window : win } );
-            me.intCategoryId = config.id;
-            if (config.action === 'new') {
-                context.data.addRecord();
-            } else {
-                var filter = [{
-                    column: 'intCategoryId',
-                    value: config.id
-                }];
-                context.data.load({
-                    filters: filter
-                });
+            switch(config.action){
+                case 'add':
+
+                    break;
+                case 'addroot':
+
+                    break;
+                case 'edit':
+                    var form = win.down('form');
+                    form.loadRecord(config.record);
+                    break;
             }
+
+            win.show();
         }
+    },
+
+    onbtnSaveClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var form = win.down('form');
+
+        var controller = win.getController();
+        if (controller.isDirty){
+            controller.catalog = form.getValues();
+        }
+        win.close();
+    },
+
+    onbtnUndoClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var form = win.down('form');
+        form.reset();
+    },
+
+    onbtnCloseClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        win.close();
+    },
+
+    onDirtyChange: function(component, isDirty, eOpts) {
+        if (isDirty)
+        {
+            var controller = component.up('window').getController();
+            controller.isDirty = true;
+        }
+    },
+
+    init: function(application) {
+        this.control({
+            "#btnSave": {
+                click: this.onbtnSaveClick
+            },
+            "#btnUndo": {
+                click: this.onbtnUndoClick
+            },
+            "#btnClose": {
+                click: this.onbtnCloseClick
+            },
+            "#txtCatalogName": {
+                dirtychange: this.onDirtyChange
+            },
+            "#txtDescription": {
+                dirtychange: this.onDirtyChange
+            }
+        });
     }
 });

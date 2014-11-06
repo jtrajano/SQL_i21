@@ -20,6 +20,7 @@
         "minHeight": 200,
         "minWidth": 425,
         "minimizable": null,
+        "modal": true,
         "reference": null,
         "title": "Edit Catalog",
         "width": 425
@@ -185,7 +186,8 @@
                             "userConfig": {
                                 "fieldLabel": "Catalog Name",
                                 "itemId": "txtCatalogName",
-                                "layout|flex": null
+                                "layout|flex": null,
+                                "name": "strCatalogName"
                             },
                             "name": "MyTextField3",
                             "designerId": "7c90db1b-3319-4047-ac9c-a53f786d9622"
@@ -200,7 +202,8 @@
                             "userConfig": {
                                 "fieldLabel": "Description",
                                 "itemId": "txtDescription",
-                                "layout|flex": null
+                                "layout|flex": null,
+                                "name": "strDescription"
                             },
                             "name": "MyTextField2",
                             "designerId": "a33a8f50-6f0f-41e5-ad32-68ed64e69ce1"

@@ -114,6 +114,7 @@ Ext.define('Inventory.view.Catalog', {
                     height: 250,
                     itemId: 'grdCatalog',
                     width: 400,
+                    allowDeselect: true,
                     rootVisible: false,
                     dockedItems: [
                         {
@@ -131,6 +132,13 @@ Ext.define('Inventory.view.Catalog', {
                                     itemId: 'btnAddCatalog',
                                     iconCls: 'small-add',
                                     text: 'Add'
+                                },
+                                {
+                                    xtype: 'button',
+                                    tabIndex: -1,
+                                    itemId: 'btnEditCatalog',
+                                    iconCls: 'small-edit',
+                                    text: 'Edit'
                                 },
                                 {
                                     xtype: 'button',

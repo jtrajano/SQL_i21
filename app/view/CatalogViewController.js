@@ -39,14 +39,6 @@ Ext.define('Inventory.view.CatalogViewController', {
 
             var callback = function(store, node, records, successful) {
                 me.catalogStore.un('load', callback);
-
-//                var rootNode = me.catalogStore.getRootNode();
-//                rootNode.on('append', i21.ModuleMgr.SystemManager.onTreeAppend);
-//
-//                basemenu.store = null;
-//                basemenu.bindStore(me.MasterMenuStore);
-//
-//                win.setLoading(false);
             };
 
             me.catalogStore.on('load', callback);
@@ -58,13 +50,27 @@ Ext.define('Inventory.view.CatalogViewController', {
         }
     },
 
+    onbtnSaveClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var controller = win.getController();
+        controller.catalogStore.sync();
+    },
+
+    onbtnUndoClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var form = win.down('form');
+        form.reset();
+    },
+
+    onbtnCloseClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        win.close();
+    },
+
     onbtnAddCatalogClick: function(button, e, eOpts) {
         var win = button.up('window');
         var treePanel = win.down('#grdCatalog');
-        var store = treePanel.getStore();
-        var node;
         var record = treePanel.getSelectionModel().getSelection();
-
 
         if (record.length === 0) {
             this.openEditCatalogScreen('addroot', null, win);
@@ -72,26 +78,43 @@ Ext.define('Inventory.view.CatalogViewController', {
         else {
             this.openEditCatalogScreen('add', null, win);
         }
-//                this.dirty = true;
+    },
 
+    onbtnEditCatalogClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var treePanel = win.down('#grdCatalog');
+        var record = treePanel.getSelectionModel().getSelection();
+
+        if (record.length === 0) {
+            iRely.functions.showErrorDialog('Please select a Catalog to edit.');
+        }
+        else {
+            this.openEditCatalogScreen('edit', record[0], win);
+        }
     },
 
     onbtnDeleteCatalogClick: function(button, e, eOpts) {
         var win = button.up('window');
         var treePanel = win.down('#grdCatalog');
-        var store = treePanel.getStore();
         var record = treePanel.getSelectionModel().getSelection();
 
-        var me = this;
-        var action = function (e) {
-            if (e == 'yes') {
-//                        GlobalSM.manipulateMenus("Delete",treePanel,store);
-//                        me.dirty = true;
-//                        GlobalSM.setFormStatus(win,'edited');
-            }
-        };
-        i21.functions.showDeleteDialog(button, action, 'Are you sure you want to delete this record?');
 
+        if (record.length > 0){
+            var currentNode = record[0];
+            var action = function (e) {
+                if (e == 'yes') {
+                    var parentNode = currentNode.parentNode;
+                    parentNode.removeChild(currentNode);
+                    if (parentNode.childNodes === null || parentNode.childNodes.length <= 0)
+                    {
+                        parentNode.collapse();
+                        parentNode.set('ysnLeaf', true);
+                        parentNode.set('leaf', true);
+                    }
+                }
+            };
+            i21.functions.showDeleteDialog(button, action, 'Are you sure you want to delete this record?');
+        }
     },
 
     openEditCatalogScreen: function(action, record, win) {
@@ -101,11 +124,11 @@ Ext.define('Inventory.view.CatalogViewController', {
         Ext.require([
             screenName,
                 screenName + 'ViewModel',
-                screenName + 'ViewController',
+                screenName + 'ViewController'
         ], function() {
             var screen = screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
             var view = Ext.create(screenName, { controller: screen.toLowerCase(), viewModel : { type: screen.toLowerCase() } });
-            view.on('destroy', me.onDestroyCatalogScreen, me, { window: win });
+            view.on('beforedestroy', me.onDestroyCatalogScreen, view, { window: win, currentRecord: record, action: action});
 
             var controller = view.getController();
             switch (action) {
@@ -123,18 +146,66 @@ Ext.define('Inventory.view.CatalogViewController', {
     },
 
     onDestroyCatalogScreen: function(win, eOpts) {
-//        var me = eOpts.window.getController();
-//        var win = eOpts.window;
-//        var grdLocation = win.down('#grdLocation');
-//
-//        grdLocation.store.reload();
+        var editController = this.getController();
+        var editCatalog = editController.catalog;
+        var win = eOpts.window;
+        var grdCatalog = win.down('#grdCatalog');
+        var action = eOpts.action;
+        var selectedNodes = grdCatalog.getSelectionModel().getSelection();
+        var currentNode;
+
+        if (selectedNodes.length > 0) {
+            currentNode = selectedNodes[0];
+        }
+        switch (action) {
+            case 'add':
+                if (currentNode) {
+                    var appendNode = function () {
+                        var detailStore = currentNode['children']();
+                        var newRecord = Ext.create('Inventory.model.Catalog', editCatalog);
+                        detailStore.add(newRecord);
+                        newRecord.set('intParentCatalogId', currentNode.data.intCatalogId);
+                        newRecord.set('ysnLeaf', true);
+                        newRecord.set('leaf', true);
+                        newRecord.set('iconCls', 'small-folder');
+                        editCatalog.intParentCatalogId = currentNode.data.intCatalogId;
+                        currentNode.appendChild(newRecord);
+                    };
+
+                    if (currentNode.get('ysnLeaf') === false) {
+                        currentNode.expand(false, function () {
+                            appendNode();
+                        });
+                    }
+                    else {
+                        currentNode.set('ysnLeaf', false);
+                        appendNode();
+                        currentNode.expand();
+                    }
+                }
+                break;
+            case 'addroot':
+                currentNode = grdCatalog.getRootNode();
+                editCatalog.intParentCatalogId = 0;
+                editCatalog.ysnLeaf = true;
+                editCatalog.leaf = true;
+                editCatalog.iconCls = 'small-folder';
+                currentNode.appendChild(editCatalog);
+                break;
+            case 'edit':
+                if (editCatalog)
+                {
+                    currentNode.set('strCatalogName', editCatalog.strCatalogName);
+                    currentNode.set('strDescription', editCatalog.strDescription);
+                }
+                break;
+        }
     },
 
     onTreePanelBeforeLoad: function(store, operation){
         if (!store.getProxy().api) {
             return;
         }
-
         store.getProxy().api.read = '../Inventory/api/Catalog/GetCatalogsByParentId?ParentId=' + operation.config.node.get('intCatalogId') + '';
     },
 
@@ -143,11 +214,23 @@ Ext.define('Inventory.view.CatalogViewController', {
             "#btnAddCatalog": {
                 click: this.onbtnAddCatalogClick
             },
+            "#btnEditCatalog": {
+                click: this.onbtnEditCatalogClick
+            },
             "#btnDeleteCatalog": {
                 click: this.onbtnDeleteCatalogClick
             },
             "#grdCatalog": {
                 beforeload: this.onTreePanelBeforeLoad
+            },
+            "#btnSave": {
+                click: this.onbtnSaveClick
+            },
+            "#btnUndo": {
+                click: this.onbtnUndoClick
+            },
+            "#btnClose": {
+                click: this.onbtnCloseClick
             }
         });
     }

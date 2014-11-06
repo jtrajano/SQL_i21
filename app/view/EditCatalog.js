@@ -37,6 +37,7 @@ Ext.define('Inventory.view.EditCatalog', {
     iconCls: 'small-icon-i21',
     title: 'Edit Catalog',
     maximizable: true,
+    modal: true,
 
     items: [
         {
@@ -118,12 +119,14 @@ Ext.define('Inventory.view.EditCatalog', {
                         {
                             xtype: 'textfield',
                             itemId: 'txtCatalogName',
-                            fieldLabel: 'Catalog Name'
+                            fieldLabel: 'Catalog Name',
+                            name: 'strCatalogName'
                         },
                         {
                             xtype: 'textfield',
                             itemId: 'txtDescription',
-                            fieldLabel: 'Description'
+                            fieldLabel: 'Description',
+                            name: 'strDescription'
                         }
                     ]
                 }
