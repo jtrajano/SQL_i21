@@ -50,4 +50,19 @@ BEGIN
 		ADD CONSTRAINT[UK_dbo.tblAPBill_strBillId] UNIQUE(strBillId);
 
 END
+
+--Updating GL Detail Bill Id
+IF EXISTS(SELECT 1 FROM tblGLDetail A
+			INNER JOIN tblAPBill B ON A.intTransactionId = B.intBillId
+				WHERE ISNULL(A.strTransactionId,'') = '')
+BEGIN
+
+	UPDATE A
+		SET A.strTransactionId = B.strBillId
+	FROM tblGLDetail A
+	INNER JOIN tblAPBill B ON A.intTransactionId = B.intBillId
+				WHERE ISNULL(A.strTransactionId,'') = ''
+
+END
+
 PRINT 'END Fixing strBillId'

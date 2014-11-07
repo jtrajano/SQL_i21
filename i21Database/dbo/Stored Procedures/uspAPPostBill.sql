@@ -211,6 +211,18 @@ BEGIN
 			INNER JOIN tblAPBill C
 				ON B.intBillId = C.intBillId
 		WHERE  C.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData)
+
+		INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		SELECT 
+			'Unable to find an open fiscal year period to match the transaction date.',
+			'Bill',
+			A.strBillId,
+			@batchId,
+			A.intBillId
+		FROM tblAPBill A 
+		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
+			0 = ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0)
+
 	END
 
 	DECLARE @totalInvalid INT = 0

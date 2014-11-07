@@ -128,7 +128,8 @@ BEGIN
 				,@intUserId AS INT = 1
 				,@dtmCreated AS DATETIME
 				,@dblReduceQty AS NUMERIC(18,6)
-				,@RemainingQty AS NUMERIC(18,6) 			
+				,@RemainingQty AS NUMERIC(18,6) 
+				,@CostUsed AS NUMERIC(18,6)
 
 		-- Setup the expected values 
 		INSERT INTO expected (
@@ -199,10 +200,13 @@ BEGIN
 	-- Act
 	BEGIN 
 		SET @dblReduceQty = @dblSoldQty
+		DECLARE @intIterationCounter AS INT = 0;
 
 		-- Repeat call on uspICReduceStockInFIFO until @dblReduceQty is completely distributed to all the available fifo buckets
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)
-		BEGIN 					
+		BEGIN
+			SET @intIterationCounter += 1;
+
 			EXEC [dbo].[uspICReduceStockInFIFO]
 				@intItemId
 				,@intItemLocationId
@@ -211,6 +215,49 @@ BEGIN
 				,@dblCost
 				,@intUserId
 				,@RemainingQty OUTPUT
+				,@CostUsed OUTPUT
+
+			-- Assert on 1st pass, the cost used is 10.00 and remaining qty is 450
+			IF @intIterationCounter = 1 
+			BEGIN 
+				EXEC tSQLt.AssertEquals 10.00, @CostUsed; 
+				EXEC tSQLt.AssertEquals -450, @RemainingQty; 
+			END
+
+			-- Assert on 2nd pass, the cost used is 11.00 and remaining qty is 350
+			IF @intIterationCounter = 2
+			BEGIN 
+				EXEC tSQLt.AssertEquals 11.00, @CostUsed; 
+				EXEC tSQLt.AssertEquals -350, @RemainingQty; 
+			END
+
+			-- Assert on 3rd pass, the cost used is 12.00 and remaining qty is 250
+			IF @intIterationCounter = 3 
+			BEGIN 
+				EXEC tSQLt.AssertEquals 12.00, @CostUsed; 
+				EXEC tSQLt.AssertEquals -250, @RemainingQty; 
+			END
+
+			-- Assert on 4th pass, the cost used is 13.00 and remaining qty is 150
+			IF @intIterationCounter = 4 
+			BEGIN 
+				EXEC tSQLt.AssertEquals 13.00, @CostUsed; 
+				EXEC tSQLt.AssertEquals -150, @RemainingQty; 
+			END
+
+			-- Assert on 5th pass, the cost used is 14.00 and remaining qty is 50
+			IF @intIterationCounter = 5 
+			BEGIN 
+				EXEC tSQLt.AssertEquals 14.00, @CostUsed; 
+				EXEC tSQLt.AssertEquals -50, @RemainingQty; 
+			END
+
+			-- Assert on 6th pass, the cost used is 15.00 and remaining qty is 0
+			IF @intIterationCounter = 6 
+			BEGIN 
+				EXEC tSQLt.AssertEquals 15.00, @CostUsed; 
+				EXEC tSQLt.AssertEquals 0, @RemainingQty; 
+			END
 
 			SET @dblReduceQty = @RemainingQty;
 		END 

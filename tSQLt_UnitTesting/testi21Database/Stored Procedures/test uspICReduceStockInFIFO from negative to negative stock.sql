@@ -77,7 +77,8 @@ BEGIN
 				,@intUserId AS INT = 1
 				,@dtmCreated AS DATETIME
 				,@dblReduceQty AS NUMERIC(18,6)
-				,@RemainingQty AS NUMERIC(18,6) 			
+				,@RemainingQty AS NUMERIC(18,6)
+				,@CostUsed AS NUMERIC(18,6) 
 
 		-- Setup the expected values 
 		INSERT INTO expected (
@@ -124,6 +125,10 @@ BEGIN
 				,@dblCost
 				,@intUserId
 				,@RemainingQty OUTPUT
+				,@CostUsed OUTPUT
+
+				-- Cost used must be NULL since stock is already negative
+				EXEC tSQLt.AssertEquals NULL, @CostUsed;
 
 			SET @dblReduceQty = @RemainingQty;
 		END 

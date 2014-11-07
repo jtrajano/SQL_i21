@@ -73,7 +73,8 @@ BEGIN
 				,@intUserId AS INT = 1
 				,@dtmCreated AS DATETIME
 				,@dblReduceQty AS NUMERIC(18,6)
-				,@RemainingQty AS NUMERIC(18,6) 			
+				,@RemainingQty AS NUMERIC(18,6) 
+				,@CostUsed AS NUMERIC(18,6) 
 
 		-- Setup the expected values 
 		INSERT INTO expected (
@@ -108,10 +109,13 @@ BEGIN
 	-- Act
 	BEGIN 
 		SET @dblReduceQty = @dblSoldQty
+		DECLARE @intIterationCounter AS INT = 0;
 
-		-- Repeat call on uspICReduceStockInFIFO until @dblReduceQty is completely distributed to all the available fifo buckets
+		-- Repeat call on uspICReduceStockInFIFO until @dblReduceQty is completely distributed to all of the available fifo buckets
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)
-		BEGIN 					
+		BEGIN 	
+			SET @intIterationCounter += 1;
+						
 			EXEC [dbo].[uspICReduceStockInFIFO]
 				@intItemId
 				,@intItemLocationId
@@ -120,6 +124,19 @@ BEGIN
 				,@dblCost
 				,@intUserId
 				,@RemainingQty OUTPUT
+				,@CostUsed OUTPUT 
+
+			-- Assert on first pass, the cost used is 11.44. 
+			IF (@intIterationCounter = 1) 
+			BEGIN 
+				EXEC tSQLt.AssertEquals 11.44, @CostUsed
+			END 
+				
+			-- Assert on 2nd pass, there is no cost used is NULL (no cost used).
+			IF (@intIterationCounter = 2) 
+			BEGIN 
+				EXEC tSQLt.AssertEquals NULL, @CostUsed
+			END 
 
 			SET @dblReduceQty = @RemainingQty;
 		END 

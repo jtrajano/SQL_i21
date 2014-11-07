@@ -1,11 +1,12 @@
 ﻿CREATE TABLE [dbo].[tblICFuelTaxClass]
 (
 	[intFuelTaxClassId] INT NOT NULL IDENTITY, 
-    [strTaxClassCode] NVARCHAR(50) NOT NULL, 
-    [strDescription] NVARCHAR(50) NULL, 
-    [strIRSTaxCode] NVARCHAR(50) NULL, 
+    [strTaxClassCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strIRSTaxCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
-    CONSTRAINT [PK_tblICFuelTaxClass] PRIMARY KEY ([intFuelTaxClassId])
+    CONSTRAINT [PK_tblICFuelTaxClass] PRIMARY KEY ([intFuelTaxClassId]), 
+    CONSTRAINT [AK_tblICFuelTaxClass_strTaxClassCode] UNIQUE ([strTaxClassCode])
 )
 
 GO

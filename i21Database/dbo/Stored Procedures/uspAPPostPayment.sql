@@ -249,6 +249,19 @@ BEGIN
 						ON A.strPaymentRecordNum = B.strTransactionId
 						AND intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 					CROSS APPLY dbo.fnGetBankTransactionReversalErrors(B.intTransactionId) C
+
+		--Fiscal Year
+		INSERT INTO #tmpPayableInvalidData
+			SELECT 
+				'Unable to find an open fiscal year period to match the transaction date.',
+				'Payable',
+				A.strPaymentRecordNum,
+				@batchId,
+				A.intPaymentId
+			FROM tblAPPayment A 
+			WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
+				0 = ISNULL([dbo].isOpenAccountingDate(A.[dtmDatePaid]), 0)
+
 	END
 
 	DECLARE @totalInvalid INT

@@ -11,8 +11,10 @@
     [intSort]                INT            NULL,
     [intConcurrencyId]       INT            NOT NULL,
     CONSTRAINT [PK_tblSMMappingDictionary] PRIMARY KEY CLUSTERED ([intMappingDictionaryId] ASC),
-    CONSTRAINT [FK_tblSMMappingDictionary_tblSMColumnDictionary] FOREIGN KEY ([intColumnDictionaryId]) REFERENCES [dbo].[tblSMColumnDictionary] ([intColumnDictionaryId])
+    CONSTRAINT [FK_tblSMMappingDictionary_tblSMColumnDictionary] FOREIGN KEY ([intColumnDictionaryId]) REFERENCES [dbo].[tblSMColumnDictionary] ([intColumnDictionaryId]) ON DELETE CASCADE
 );
+
+
 
 
 

@@ -55,6 +55,7 @@ SET ANSI_WARNINGS OFF
 -- Create the variables 
 DECLARE @RemainingQty AS NUMERIC(18,6)
 DECLARE @dblReduceQty AS NUMERIC(18,6)
+DECLARE @CostUsed AS NUMERIC(18,6)
 
 -------------------------------------------------
 -- 1. Process the Fifo Cost buckets
@@ -76,6 +77,7 @@ BEGIN
 				,@dblCost
 				,@intUserId
 				,@RemainingQty OUTPUT
+				,@CostUsed OUTPUT 
 
 			SET @dblReduceQty = @RemainingQty;
 		END 

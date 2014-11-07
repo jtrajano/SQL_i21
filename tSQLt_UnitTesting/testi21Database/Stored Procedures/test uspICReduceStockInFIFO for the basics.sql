@@ -39,6 +39,7 @@ BEGIN
 				,@dblCost AS NUMERIC(18,6)
 				,@intUserId AS INT
 				,@RemainingQty AS NUMERIC(18,6) 
+				,@CostUsed AS NUMERIC(18,6) 
 	END 
 	
 	-- Act
@@ -51,6 +52,7 @@ BEGIN
 			,@dblCost 
 			,@intUserId 
 			,@RemainingQty OUTPUT 
+			,@CostUsed OUTPUT
 
 		INSERT INTO actual (
 				[intItemId] 

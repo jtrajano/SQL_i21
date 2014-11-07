@@ -135,9 +135,6 @@
     <None Include="Scripts\Pre-Deployment\8_AP\FixEntityId.sql" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scripts\Pre-Deployment\8_AP\FixstrBillId.sql" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Scripts\Pre-Deployment\11_IC\Drop_References_to_ItemCostingTableType.sql" />
   </ItemGroup>
   <ItemGroup>

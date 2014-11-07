@@ -3,7 +3,7 @@
 	[intCommodityAccountId] INT NOT NULL IDENTITY, 
     [intCommodityId] INT NOT NULL, 
     [intLocationId] INT NOT NULL, 
-    [strAccountDescription] NVARCHAR(50) NULL, 
+    [strAccountDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intAccountId] INT NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 

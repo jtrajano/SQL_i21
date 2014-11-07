@@ -71,7 +71,8 @@ BEGIN
 				,@intUserId AS INT = 1
 				,@dtmCreated AS DATETIME
 				,@dblReduceQty AS NUMERIC(18,6)
-				,@RemainingQty AS NUMERIC(18,6) 			
+				,@RemainingQty AS NUMERIC(18,6)
+				,@CostUsed AS NUMERIC(18,6)
 
 		-- Setup the expected values 
 		INSERT INTO expected (
@@ -109,8 +110,12 @@ BEGIN
 				,@dblCost
 				,@intUserId
 				,@RemainingQty OUTPUT
+				,@CostUsed OUTPUT
 
 			SET @dblReduceQty = @RemainingQty;
+
+			-- Assert that the cost used is 11.44
+			EXEC tSQLt.AssertEquals 11.44, @CostUsed;
 		END 
 
 		INSERT INTO actual (

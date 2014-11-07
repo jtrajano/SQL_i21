@@ -5,7 +5,10 @@
     [intManagerId]         INT            NOT NULL,
     [strLink]              NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strDescription]       NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [ysnCreated]           BIT            NULL,
     [intConcurrencyId]     INT            NOT NULL,
     CONSTRAINT [PK__tblSMTableDictionary] PRIMARY KEY CLUSTERED ([intTableDictionaryId] ASC)
 );
+
+
 

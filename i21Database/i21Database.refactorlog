@@ -1113,4 +1113,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intConcurrencyId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="66499738-bfa2-4176-a125-6c16eda613e3" ChangeDateTime="11/06/2014 12:02:53">
+    <Property Name="ElementName" Value="[dbo].[tblGRStorageType].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intStorageTypeId" />
+  </Operation>
 </Operations>
