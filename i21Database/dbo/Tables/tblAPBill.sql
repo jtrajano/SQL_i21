@@ -46,7 +46,10 @@
 GO
 CREATE NONCLUSTERED INDEX [IX_intBillBatchId]
     ON [dbo].[tblAPBill]([intBillBatchId] ASC);
-
+GO
+CREATE NONCLUSTERED INDEX [IX_intVendorId]
+    ON [dbo].[tblAPBill]([intVendorId] ASC)
+	INCLUDE ([intBillId], [strVendorOrderNumber]) WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 
 GO
 CREATE TRIGGER trgBillRecordNumber

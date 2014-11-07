@@ -19,7 +19,7 @@
     [strETrackerURL]                   NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
     [ysnUseDeliveryTermOnCS]           BIT             DEFAULT 1 NULL,
     [ysnEnableLeaseBillingAboveMinUse] BIT             DEFAULT 0 NULL,
-    [ysnOriginDataImported] BIT NOT NULL DEFAULT 0, 
+    [ysnOriginDataImported] BIT NOT NULL DEFAULT 1, 
     CONSTRAINT [PK_tblTMPreferenceCompany] PRIMARY KEY CLUSTERED ([intPreferenceCompanyID] ASC)
 );
 

@@ -190,6 +190,19 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			INNER JOIN tblEntityContact Con ON CusToCon.intContactId = Con.intContactId
 			INNER JOIN tblEntityLocation Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId
 			WHERE strCustomerNumber = @CustomerId
+
+			-- INSERT Contact to ssonmst
+			DECLARE @ContactNumber nvarchar(20)
+			
+			select top 1 @ContactNumber = substring(isnull((SELECT top 1 strName FROM tblEntity WHERE intEntityId = Con.intEntityId), ''''), 1,20)
+			FROM tblEntity Ent
+			INNER JOIN tblARCustomer Cus ON Ent.intEntityId = Cus.intEntityId
+			INNER JOIN tblARCustomerToContact CusToCon ON Cus.intDefaultContactId = CusToCon.intARCustomerToContactId
+			INNER JOIN tblEntityContact Con ON CusToCon.intContactId = Con.intContactId
+			INNER JOIN tblEntityLocation Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId
+			WHERE strCustomerNumber = @CustomerId
+
+			EXEC uspARContactOriginSync @ContactNumber
 		
 
 	RETURN;
@@ -488,9 +501,12 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 		
 			SET @ContactEntityId = SCOPE_IDENTITY()
 	
-			INSERT [dbo].[tblEntityContact] ([intEntityId], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
-			VALUES							 (@ContactEntityId, @strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
-			
+			-- RULE: when creating a default contact from agcusmst.agcus_contact, trim tblEntityContact.strContactNumber to 20 characters
+			INSERT [dbo].[tblEntityContact] ([intEntityId], [strContactNumber], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
+			SELECT							 @ContactEntityId, 
+											UPPER(CASE WHEN @strContactName IS NOT NULL THEN SUBSTRING(@strContactName, 1, 20) ELSE SUBSTRING(@strName, 1, 20) END)
+											,@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes
+						
 			--Get intContactId
 			SELECT @intContactId = intContactId FROM tblEntityContact WHERE intEntityId = @ContactEntityId
 		
@@ -543,8 +559,8 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 	IF(@Update = 1 AND @CustomerId IS NULL) 
 	BEGIN
 		SELECT @Total = COUNT(agcus_key) from tblARTempCustomer
-	END'
-)
+	END
+	')
 END
 
 IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1
@@ -892,7 +908,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				@intSalespersonId		= (SELECT intSalespersonId FROM tblARSalesperson WHERE strSalespersonId COLLATE Latin1_General_CI_AS = ptcus_slsmn_id COLLATE Latin1_General_CI_AS),		
     			@strPricing				= NULL, --agcus_prc_lvl					
 				@ysnActive				= CASE WHEN ptcus_active_yn = ''Y'' THEN 1 ELSE 0 END,					
-				--@ysnPORequired			= CASE WHEN agcus_req_po_yn = ''Y'' THEN 1 ELSE 0 END,									
+				@ysnPORequired			= 0, --there is no source field for PT  --CASE WHEN ptcus_req_po_yn = ''Y'' THEN 1 ELSE 0 END,									
 				@ysnStatementDetail		= CASE WHEN ptcus_prt_stmnt_dtl_yn = ''Y'' THEN 1 ELSE 0 END,			
 				@strStatementFormat		= CASE WHEN ptcus_stmt_fmt = ''O'' THEN ''Open Item'' WHEN ptcus_stmt_fmt = ''B'' THEN ''Balance Forward'' WHEN ptcus_stmt_fmt = ''R'' THEN ''Budget Reminder'' WHEN ptcus_stmt_fmt = ''N'' THEN ''None'' WHEN ptcus_stmt_fmt IS NULL THEN Null Else '''' END ,			
 				@intCreditStopDays		= ptcus_crd_stop_days,			
@@ -1021,8 +1037,11 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			
 			SET @ContactEntityId = SCOPE_IDENTITY()
 		
-			INSERT [dbo].[tblEntityContact] ([intEntityId], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
-			VALUES							 (@ContactEntityId, @strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
+			-- RULE: when creating a default contact from agcusmst.agcus_contact, trim tblEntityContact.strContactNumber to 20 characters
+			INSERT [dbo].[tblEntityContact] ([intEntityId], [strContactNumber], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
+			SELECT							 @ContactEntityId, 
+											CASE WHEN @strContactName IS NOT NULL THEN SUBSTRING(@strContactName, 1, 20) ELSE SUBSTRING(@strName, 1, 20) END
+											,@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes
 				
 			--Get intContactId
 			SELECT @intContactId = intContactId FROM tblEntityContact WHERE intEntityId = @ContactEntityId

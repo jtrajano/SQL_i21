@@ -39,37 +39,40 @@ BEGIN
 			[intBalanceDue],
 			[intDiscountDay],
 			[dblAPR],
+			[strTermCode],
 			[ysnAllowEFT],
 			[intDayofMonthDue],
 			[intDueNextMonth],
 			[ysnActive],
-			[intSort],
-			[strTermCode])
-		SELECT * 
-		,[strTermCode] = [strTerm] + ''-'' + CAST((ROW_NUMBER() OVER(ORDER BY [strTerm])) AS NVARCHAR(10))
-		FROM (
-				SELECT DISTINCT *
-				FROM (
-					SELECT
-						[strTerm] = CASE WHEN ISNULL(RTRIM(LTRIM(ISNULL(ssvnd_terms_desc,''''))),'''') = '''' THEN ssvnd_vnd_no ELSE RTRIM(LTRIM(ISNULL(ssvnd_terms_desc,''''))) END,
-						[strType] = CASE WHEN ssvnd_terms_type = ''P'' THEN ''Date Driven'' ELSE ''Standard'' END,
-						[dblDiscountEP] = ssvnd_terms_disc_pct,
-						[intBalanceDue] = ssvnd_terms_due_day,
-						[intDiscountDay] = ssvnd_terms_disc_day,
-						[dblAPR] = 0,
-						[ysnAllowEFT] = 1,
-						[intDayofMonthDue] = ssvnd_terms_cutoff_day,
-						[intDueNextMonth] = 0,
-						[ysnActive] = 1,
-						[intSort] = 0
-					FROM ssvndmst
-					--Insert vendor terms when all setup does not equal to 0
-					WHERE 1 = CASE WHEN ISNULL(ssvnd_terms_disc_pct, 0) = 0 
-									AND ISNULL(ssvnd_terms_due_day, 0) = 0
-									AND ISNULL(ssvnd_terms_disc_day, 0) = 0
-									AND ISNULL(ssvnd_terms_cutoff_day, 0) = 0 THEN 0 ELSE 1 END
-				) DistinctTerms
-			) Terms
+			[intSort])
+		SELECT
+			CASE WHEN ISNULL(RTRIM(LTRIM(ISNULL(ssvnd_terms_desc,''''))),'''') = '''' THEN ssvnd_vnd_no ELSE RTRIM(LTRIM(ISNULL(ssvnd_terms_desc,''''))) END,
+			CASE WHEN ssvnd_terms_type = ''P'' THEN ''Date Driven'' ELSE ''Standard'' END,
+			ssvnd_terms_disc_pct,
+			ssvnd_terms_due_day,
+			ssvnd_terms_disc_day,
+			0,
+			''None-'' + CAST((ROW_NUMBER() OVER(ORDER BY ssvnd_terms_desc)) AS NVARCHAR(10)),
+			1,
+			ssvnd_terms_cutoff_day,
+			0,
+			1,
+			0
+		FROM ssvndmst
+		--Insert vendor terms when all setup does not equal to 0
+		WHERE 1 = CASE WHEN ISNULL(ssvnd_terms_disc_pct, 0) = 0 
+						AND ISNULL(ssvnd_terms_due_day, 0) = 0
+						AND ISNULL(ssvnd_terms_disc_day, 0) = 0
+						AND ISNULL(ssvnd_terms_cutoff_day, 0) = 0 THEN 0 ELSE 1 END
+	
+		GROUP BY
+			ssvnd_vnd_no,
+			ssvnd_terms_desc,
+			ssvnd_terms_type,
+			ssvnd_terms_disc_pct,
+			ssvnd_terms_due_day,
+			ssvnd_terms_disc_day,
+			ssvnd_terms_cutoff_day
 		
 		--SELECT * FROM @tblAPTempTerms
 		
@@ -97,7 +100,7 @@ BEGIN
 			SELECT
 				CASE WHEN EXISTS(SELECT TOP 1 1 FROM tblSMTerm A
 									WHERE A.strTerm = tmpTerms.strTerm)
-					THEN tmpTerms.strTerm + '' - '' + (CAST(tmpTerms.intTermID AS NVARCHAR(50)))
+					THEN tmpTerms.strTerm + '' - '' + tmpTerms.strTermCode
 					ELSE 
 						(CASE WHEN ISNULL(tmpTerms.strTerm,'''') = '''' 
 							THEN ''NONAME'' + tmpTerms.strTermCode

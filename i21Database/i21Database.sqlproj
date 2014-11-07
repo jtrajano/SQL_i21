@@ -789,6 +789,14 @@
     <Build Include="dbo\Functions\fnDateLessThanEquals.sql" />
     <Build Include="dbo\Functions\fnDateGreaterThan.sql" />
     <Build Include="dbo\Functions\fnDateEquals.sql" />
+    <Build Include="dbo\Tables\tblARCustomerProductVersion.sql" />
+    <None Include="Scripts\Post-Deployment\AP\FixVendorGLAccountExpense.sql" />
+    <Build Include="dbo\Views\vyuHDGroupUser.sql" />
+    <Build Include="dbo\Stored Procedures\uspEntityCreateEntity.sql" />
+    <Build Include="dbo\User Defined Types\Entity.sql" />
+    <Build Include="dbo\User Defined Types\EntityContact.sql" />
+    <Build Include="dbo\Stored Procedures\uspEntityCreateEntityContact.sql" />
+    <Build Include="dbo\Stored Procedures\uspARContactOriginSync.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -815,6 +823,7 @@
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
+    <None Include="Scripts\Post-Deployment\AP\UpdateBillBatch.sql" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">

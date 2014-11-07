@@ -258,6 +258,7 @@ BEGIN
 END
 GO
 
+
 PRINT N'BEGIN Update of data in tblTMCustomer Populate strOriginCustomerKey'
 GO
 
@@ -276,9 +277,4 @@ GO
 
 PRINT N'END Update of data in tblTMCustomer Populate strOriginCustomerKey'
 GO
-
-
-
-
-
 
