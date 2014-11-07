@@ -226,17 +226,17 @@ BEGIN
 	IF(ISNULL(@post,0) = 0)
 	BEGIN
 
-		--Already cleared/reconciled
-		INSERT INTO #tmpPayableInvalidData
-			SELECT 
-				'The transaction is already cleared.',
-				'Payable',
-				A.strPaymentRecordNum,
-				@batchId,
-				A.intPaymentId
-			FROM tblAPPayment A 
-				INNER JOIN tblCMBankTransaction B ON A.strPaymentRecordNum = B.strTransactionId
-			WHERE B.ysnClr = 1 AND intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		----Already cleared/reconciled
+		--INSERT INTO #tmpPayableInvalidData
+		--	SELECT 
+		--		'The transaction is already cleared.',
+		--		'Payable',
+		--		A.strPaymentRecordNum,
+		--		@batchId,
+		--		A.intPaymentId
+		--	FROM tblAPPayment A 
+		--		INNER JOIN tblCMBankTransaction B ON A.strPaymentRecordNum = B.strTransactionId
+		--	WHERE B.ysnClr = 1 AND intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		--CM Voiding Validation
 		INSERT INTO #tmpPayableInvalidData
