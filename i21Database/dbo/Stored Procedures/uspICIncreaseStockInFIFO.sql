@@ -43,6 +43,7 @@ USING (
 	AND fifo_bucket.intItemLocationId = Source_Query.intItemLocationId
 	-- Update an existing negative stock 
 	AND fifo_bucket.dblStockIn < fifo_bucket.dblStockOut
+	AND dbo.fnDateGreaterThanEquals(@dtmDate, fifo_bucket.dtmDate) = 1
 
 -- Update an existing negative stock fifo bucket
 WHEN MATCHED THEN 

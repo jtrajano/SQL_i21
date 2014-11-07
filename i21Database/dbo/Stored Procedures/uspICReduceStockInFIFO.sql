@@ -32,7 +32,7 @@ SET @CostUsed = NULL
 MERGE	TOP(1)
 INTO	dbo.tblICInventoryFIFO 
 WITH	(HOLDLOCK) 
-AS		fifo_bucket
+AS		fifo_bucket	
 USING (
 	SELECT	intItemId = @intItemId
 			,intItemLocationId = @intItemLocationId	
@@ -40,6 +40,7 @@ USING (
 	ON fifo_bucket.intItemId = Source_Query.intItemId
 	AND fifo_bucket.intItemLocationId = Source_Query.intItemLocationId
 	AND (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) > 0 
+	AND dbo.fnDateGreaterThanEquals(@dtmDate, fifo_bucket.dtmDate) = 1
 
 -- Update an existing cost bucket
 WHEN MATCHED THEN 
