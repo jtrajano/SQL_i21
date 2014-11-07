@@ -14,8 +14,8 @@
 		BEGIN
 			UPDATE ssconmst
 				SET 
-				sscon_first_name = (CASE WHEN CHARINDEX(', ', E.strName) > 0 THEN SUBSTRING(SUBSTRING(E.strName,1,30), 0, CHARINDEX(', ',E.strName)) ELSE SUBSTRING(E.strName,1,30)END),
-				sscon_last_name = (CASE WHEN CHARINDEX(', ', E.strName) > 0 THEN SUBSTRING(SUBSTRING(E.strName,1,30),CHARINDEX(', ',E.strName) + 2, LEN(E.strName))END),
+				sscon_last_name = SUBSTRING((CASE WHEN CHARINDEX(', ', E.strName) > 0 THEN SUBSTRING(SUBSTRING(E.strName,1,30), 0, CHARINDEX(', ',E.strName)) ELSE SUBSTRING(E.strName,1,30)END), 1, 20),
+				sscon_first_name = SUBSTRING((CASE WHEN CHARINDEX(', ', E.strName) > 0 THEN SUBSTRING(SUBSTRING(E.strName,1,30),CHARINDEX(', ',E.strName) + 2, LEN(E.strName))END), 1, 20),
 				sscon_contact_title = Contact.strTitle,
 				sscon_work_no = (CASE WHEN CHARINDEX('x', Contact.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Contact.strPhone,1,30), 0, CHARINDEX('x',Contact.strPhone)) ELSE SUBSTRING(Contact.strPhone,1,30)END),
 				sscon_work_ext = (CASE WHEN CHARINDEX('x', Contact.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Contact.strPhone,1,30),CHARINDEX('x',Contact.strPhone) + 1, LEN(Contact.strPhone))END),
@@ -27,7 +27,8 @@
 				sscon_email = E.strEmail
 			FROM tblEntityContact Contact
 				INNER JOIN tblEntity E ON E.intEntityId = Contact.intEntityId
-				WHERE Contact.strContactNumber = @ContactNumber AND sscon_contact_id = @ContactNumber
+				WHERE UPPER(Contact.strContactNumber) = UPPER(@ContactNumber) AND UPPER(sscon_contact_id) = UPPER(@ContactNumber)
+
 		END
 		--INSERT IF NOT EXIST IN THE ORIGIN
 		ELSE

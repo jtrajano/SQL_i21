@@ -135,6 +135,8 @@
     <Folder Include="Scripts\Post-Deployment\CM\Reports\SubReports" />
     <Folder Include="Scripts\Post-Deployment\HD" />
     <Folder Include="Scripts\Post-Deployment\HD\DefaultData" />
+    <Folder Include="Scripts\Post-Deployment\IC" />
+    <Folder Include="Scripts\Post-Deployment\Optional Run\Reports" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -354,7 +356,6 @@
     <Build Include="dbo\Stored Procedures\uspCMPostBankTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspCMPostBankTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspCMPostMiscChecks.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMPostMessages.sql" />
     <Build Include="dbo\Stored Procedures\uspCMPostRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspCMReconcileBankRecords.sql" />
     <Build Include="dbo\Stored Procedures\uspCMReverseGLEntries.sql" />
@@ -371,8 +372,6 @@
     <Build Include="dbo\Stored Procedures\uspAPPostBillBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspRMInsertDynamicParameterFields.sql" />
     <Build Include="dbo\User Defined Types\RecapTableType.sql" />
-    <None Include="Script.PreDeployment1.sql" />
-    <None Include="Script.PostDeployment1.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\1_SM\1_ZipCodeData.sql" />
     <None Include="Scripts\Post-Deployment\Reports\1_ReportDisableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Reports\2_ReportDeleteOldData.sql" />
@@ -598,7 +597,6 @@
     <Build Include="dbo\Views\vyuFRMColumnDescription.sql" />
     <Build Include="dbo\Stored Procedures\uspFRMColumnDescription.sql" />
     <None Include="i21Database.publish.xml" />
-    <None Include="i1410AG.local.publish.xml" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\7_EULA.sql" />
     <None Include="Scripts\Post-Deployment\SM\SMDataMigrations.sql" />
     <None Include="Scripts\Post-Deployment\AR\EntityTableDataFix.sql" />
@@ -606,7 +604,6 @@
     <None Include="Scripts\Post-Deployment\GL\GLEntryDataFix.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\1_PreferenceCompany.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\2_EventType.sql" />
-    <None Include="i1420AG.local.publish.xml" />
     <None Include="Scripts\Post-Deployment\CM\3_PopulateSourceSystemData.sql" />
     <Build Include="dbo\Views\vyuCPContactMenu.sql" />
     <Build Include="dbo\Views\vyuARCustomerContacts.sql" />
@@ -619,12 +616,19 @@
     <Build Include="dbo\Tables\tblRMDefaultFilter.sql" />
     <Build Include="dbo\Tables\tblRMDefaultOption.sql" />
     <Build Include="dbo\Tables\tblRMDefaultSort.sql" />
+    <None Include="Scripts\Post-Deployment\IC\1_InventoryTransactionTypes.sql" />
+    <None Include="Scripts\Post-Deployment\Optional Run\Reports\1_ReportDisableConstraints.sql" />
+    <None Include="Scripts\Post-Deployment\Optional Run\Reports\2_ReportDeleteOldData.sql" />
+    <None Include="Scripts\Post-Deployment\Optional Run\Reports\3_ReportEnableConstraints.sql" />
+    <None Include="Scripts\Post-Deployment\Optional Run\Reports\4_ReportData.sql" />
     <Build Include="dbo\Tables\tblARCustomerProductVersion.sql" />
+    <None Include="Scripts\Post-Deployment\AP\FixVendorGLAccountExpense.sql" />
     <Build Include="dbo\Views\vyuHDGroupUser.sql" />
     <Build Include="dbo\Stored Procedures\uspEntityCreateEntity.sql" />
     <Build Include="dbo\User Defined Types\Entity.sql" />
     <Build Include="dbo\User Defined Types\EntityContact.sql" />
     <Build Include="dbo\Stored Procedures\uspEntityCreateEntityContact.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMPostMessages.sql" />
     <Build Include="dbo\Stored Procedures\uspARContactOriginSync.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -640,14 +644,22 @@
     <Build Include="dbo\Views\vyuARCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Scripts\Post-Deployment\HD\DefaultData\1_StatusData.sql" />
+    <None Include="Scripts\Post-Deployment\HD\HDEntryDataFix.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\11_FreightTerms.sql" />
+    <None Include="Scripts\Post-Deployment\IC\2_MaterialNMFC.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdateBillBatch.sql" />
+  </ItemGroup>
+  <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
       <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac</HintPath>
       <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
       <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
     </ArtifactReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Post-Deployment\HD\DefaultData\1_StatusData.sql" />
-    <None Include="Scripts\Post-Deployment\HD\HDEntryDataFix.sql" />
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
+    </ArtifactReference>
   </ItemGroup>
 </Project>
