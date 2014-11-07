@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE testi21Database.[test fnDateEquals date 1 higher than date 2]
+﻿CREATE PROCEDURE testi21Database.[test fnDateNotEquals date 1 higher than date 2]
 AS 
 BEGIN
 	-- Arrange
@@ -9,10 +9,10 @@ BEGIN
 		DECLARE @result AS BIT
 
 		-- Act
-		SELECT @result = dbo.fnDateEquals(@date1, @date2);
+		SELECT @result = dbo.fnDateNotEquals(@date1, @date2);
 
-		-- Assert the result is false
-		EXEC tSQLt.AssertEquals 0, @result;
+		-- Assert the result is true
+		EXEC tSQLt.AssertEquals 1, @result;
 	END 
 
 	BEGIN 
@@ -22,10 +22,10 @@ BEGIN
 		SET @result = NULL 
 
 		-- Act
-		SELECT @result = dbo.fnDateEquals(@date1, @date2);
+		SELECT @result = dbo.fnDateNotEquals(@date1, @date2);
 
-		-- Assert the result is false
-		EXEC tSQLt.AssertEquals 0, @result;
+		-- Assert the result is true
+		EXEC tSQLt.AssertEquals 1, @result;
 	END
 
 	BEGIN 
@@ -35,10 +35,10 @@ BEGIN
 		SET @result = NULL 
 
 		-- Act
-		SELECT @result = dbo.fnDateEquals(@date1, @date2);
+		SELECT @result = dbo.fnDateNotEquals(@date1, @date2);
 
-		-- Assert the result is true
+		-- Assert the result is false
 		-- Time is ignored in the date
-		EXEC tSQLt.AssertEquals 1, @result;
+		EXEC tSQLt.AssertEquals 0, @result;
 	END
 END 

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE testi21Database.[test fnDateEquals date 1 higher than date 2]
+﻿CREATE PROCEDURE testi21Database.[test fnDateLessThanEquals date 1 higher than date 2]
 AS 
 BEGIN
 	-- Arrange
@@ -9,7 +9,7 @@ BEGIN
 		DECLARE @result AS BIT
 
 		-- Act
-		SELECT @result = dbo.fnDateEquals(@date1, @date2);
+		SELECT @result = dbo.fnDateLessThanEquals(@date1, @date2);
 
 		-- Assert the result is false
 		EXEC tSQLt.AssertEquals 0, @result;
@@ -22,7 +22,7 @@ BEGIN
 		SET @result = NULL 
 
 		-- Act
-		SELECT @result = dbo.fnDateEquals(@date1, @date2);
+		SELECT @result = dbo.fnDateLessThanEquals(@date1, @date2);
 
 		-- Assert the result is false
 		EXEC tSQLt.AssertEquals 0, @result;
@@ -35,7 +35,7 @@ BEGIN
 		SET @result = NULL 
 
 		-- Act
-		SELECT @result = dbo.fnDateEquals(@date1, @date2);
+		SELECT @result = dbo.fnDateLessThanEquals(@date1, @date2);
 
 		-- Assert the result is true
 		-- Time is ignored in the date

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE testi21Database.[test fnDateEquals date 1 invalid and date 1 is valid]
+﻿CREATE PROCEDURE testi21Database.[test fnDateEquals date 1 is valid and date 2 is valid]
 AS 
 BEGIN
 	

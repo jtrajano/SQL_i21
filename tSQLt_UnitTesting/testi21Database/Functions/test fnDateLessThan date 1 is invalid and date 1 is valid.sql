@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE testi21Database.[test fnDateEquals date 1 is invalid and date 1 is valid]
+﻿CREATE PROCEDURE testi21Database.[test fnDateLessThan date 1 is invalid and date 1 is valid]
 AS 
 BEGIN
 	
@@ -11,7 +11,7 @@ BEGIN
 
 
 		-- Act
-		SELECT @result = dbo.fnDateEquals(@date1, @date2);
+		SELECT @result = dbo.fnDateLessThan(@date1, @date2);
 
 		-- Assert the result is false
 		EXEC tSQLt.AssertEquals 0, @result;
@@ -24,7 +24,7 @@ BEGIN
 		SET @result = NULL
 
 		-- Act
-		SELECT @result = dbo.fnDateEquals(@date1, @date2);
+		SELECT @result = dbo.fnDateLessThan(@date1, @date2);
 
 		-- Assert the result is false
 		EXEC tSQLt.AssertEquals 0, @result;
