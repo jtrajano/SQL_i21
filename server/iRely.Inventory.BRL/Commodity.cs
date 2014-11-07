@@ -21,12 +21,17 @@ namespace iRely.Inventory.BRL
             _db = new Repository(new Inventory.Model.InventoryEntities());
         }
 
-        public IQueryable<tblICCommodity> GetSearchQuery()
+        public IQueryable<CommodityVM> GetSearchQuery()
         {
-            return _db.GetQuery<tblICCommodity>();
+            return _db.GetQuery<tblICCommodity>()
+                .Select(p => new CommodityVM { 
+                    intCommodityId = p.intCommodityId,
+                    strCommodityCode = p.strCommodityCode,
+                    strDescription = p.strDescription
+                });
         }
 
-        public object GetSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<tblICCommodity, bool>> predicate)
+        public object GetSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<CommodityVM, bool>> predicate)
         {
             return GetSearchQuery()
                 .Where(predicate)
@@ -37,12 +42,12 @@ namespace iRely.Inventory.BRL
                 .AsNoTracking();
         }
 
-        public int GetCount(Expression<Func<tblICCommodity, bool>> predicate)
+        public int GetCount(Expression<Func<CommodityVM, bool>> predicate)
         {
             return GetSearchQuery().Where(predicate).Count();
         }
 
-        public IQueryable<tblICCommodity> GetCommodities(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<tblICCommodity, bool>> predicate)
+        public IQueryable<tblICCommodity> GetCommodities(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<CommodityVM, bool>> predicate)
         {
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICCommodity>()
@@ -62,6 +67,22 @@ namespace iRely.Inventory.BRL
                 .Skip(start)
                 .Take(limit)
                 .AsNoTracking();
+        }
+
+        public object GetCompactCommodities(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<CommodityVM, bool>> predicate)
+        {
+            var query = GetSearchQuery(); //Get Search Query
+            return _db.GetQuery<tblICCommodity>()
+                .Where(w => query.Where(predicate).Any(a => a.intCommodityId == w.intCommodityId)) //Filter the Main DataSource Based on Search Query
+                .OrderBySelector(sortSelector)
+                .Skip(start)
+                .Take(limit)
+                .AsNoTracking()
+                .Select(p=> new {
+                    intCommodityId = p.intCommodityId,
+                    strCommodityCode= p.strCommodityCode,
+                    strDescription = p.strDescription
+                });
         }
 
         public void AddCommodity(tblICCommodity commodity)

@@ -18,7 +18,13 @@ Ext.define('Inventory.view.ContractDocumentViewModel', {
     alias: 'viewmodel.contractdocument',
 
     requires: [
-        'Inventory.view.override.ContractDocumentViewModel'
-    ]
+        'Inventory.store.BufferedCommodity'
+    ],
+
+    stores: {
+        commodity: {
+            type: 'inventorybufferedcommodity'
+        }
+    }
 
 });

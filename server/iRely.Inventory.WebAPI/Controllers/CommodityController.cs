@@ -25,13 +25,13 @@ namespace iRely.Invetory.WebAPI.Controllers
         {
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
-            var predicate = ExpressionBuilder.True<tblICCommodity>();
+            var predicate = ExpressionBuilder.True<CommodityVM>();
             var selector = ExpressionBuilder.GetSelector(columns);
 
             var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts);
 
             if (searchFilters != null)
-                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICCommodity>(searchFilters);
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<CommodityVM>(searchFilters);
 
             var data = _CommodityBRL.GetSearchQuery(page, start, limit, selector, sortSelector, predicate);
 
@@ -51,11 +51,11 @@ namespace iRely.Invetory.WebAPI.Controllers
 
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
-            var predicate = ExpressionBuilder.True<tblICCommodity>();
+            var predicate = ExpressionBuilder.True<CommodityVM>();
             var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intCommodityId", "DESC");
 
             if (searchFilters != null)
-                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICCommodity>(searchFilters, true);
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<CommodityVM>(searchFilters, true);
 
             var total = _CommodityBRL.GetCount(predicate);
             var data = _CommodityBRL.GetCommodities(page, start, page == 0 ? total : limit, sortSelector, predicate);
@@ -63,6 +63,30 @@ namespace iRely.Invetory.WebAPI.Controllers
             return Request.CreateResponse(HttpStatusCode.OK, new
             {
                 data = data.ToList(),
+                total = total
+            });
+        }
+
+        [HttpGet]
+        [ActionName("GetCompactCommodities")]
+        public HttpResponseMessage GetCompactCommodities(int start = 0, int limit = 1, int page = 0, string sort = "", string filter = "")
+        {
+            filter = string.IsNullOrEmpty(filter) ? "" : filter;
+
+            var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
+            var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
+            var predicate = ExpressionBuilder.True<CommodityVM>();
+            var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intCommodityId", "DESC");
+
+            if (searchFilters != null)
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<CommodityVM>(searchFilters, true);
+
+            var total = _CommodityBRL.GetCount(predicate);
+            var data = _CommodityBRL.GetCompactCommodities(page, start, page == 0 ? total : limit, sortSelector, predicate);
+
+            return Request.CreateResponse(HttpStatusCode.OK, new
+            {
+                data = data,
                 total = total
             });
         }
