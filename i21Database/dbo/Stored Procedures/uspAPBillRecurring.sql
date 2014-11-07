@@ -76,7 +76,7 @@ INSERT INTO tblAPBill(
 		[dblBillTax],
 		0,
 		[dblInterest],
-		[intTransactionType],
+		1,
 		[intPurchaseOrderId],
 		[intShipFromId],
 		[intShipToId],

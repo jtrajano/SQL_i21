@@ -49,7 +49,7 @@ BEGIN
 		[dblUnapplied],
 		[ysnPosted],
 		[dblWithheld],
-		[intUserId],
+		[intEntityId],
 		[intConcurrencyId])
 	SELECT
 		[intAccountId]			= (SELECT TOP 1 intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = @bankAccount ),
@@ -61,10 +61,10 @@ BEGIN
 		[strNotes]				= @notes,
 		[dtmDatePaid]			= ISNULL(@datePaid, GETDATE()),
 		[dblAmountPaid]			= @payment,
-		[dblUnapplied]	= 0,
+		[dblUnapplied]			= 0,
 		[ysnPosted]				= @isPost,
-		[dblWithheld]		= 0,
-		[intUserId]				= @userId,
+		[dblWithheld]			= 0,
+		[intEntityId]			= @userId,
 		[intConcurrencyId]		= 0
 	
 	SELECT @paymentId = SCOPE_IDENTITY()'
