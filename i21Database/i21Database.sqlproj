@@ -135,7 +135,6 @@
     <Folder Include="Scripts\Post-Deployment\CM\Reports\SubReports" />
     <Folder Include="Scripts\Post-Deployment\HD" />
     <Folder Include="Scripts\Post-Deployment\HD\DefaultData" />
-    <Folder Include="Scripts\Post-Deployment\IC" />
     <Folder Include="Scripts\Post-Deployment\Optional Run\Reports" />
   </ItemGroup>
   <ItemGroup>
@@ -592,7 +591,6 @@
     <Build Include="dbo\Functions\fnHDDecodeComment.sql" />
     <Build Include="dbo\Tables\tblARCustomerToContact.sql" />
     <Build Include="dbo\Tables\tblAPVendorToContact.sql" />
-    <Build Include="dbo\Tables\tblICItem.sql" />
     <Build Include="dbo\Tables\tblCMBankFileAudit.sql" />
     <Build Include="dbo\Views\vyuFRMColumnDescription.sql" />
     <Build Include="dbo\Stored Procedures\uspFRMColumnDescription.sql" />
@@ -616,7 +614,6 @@
     <Build Include="dbo\Tables\tblRMDefaultFilter.sql" />
     <Build Include="dbo\Tables\tblRMDefaultOption.sql" />
     <Build Include="dbo\Tables\tblRMDefaultSort.sql" />
-    <None Include="Scripts\Post-Deployment\IC\1_InventoryTransactionTypes.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\1_ReportDisableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\2_ReportDeleteOldData.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\3_ReportEnableConstraints.sql" />
@@ -647,7 +644,6 @@
     <None Include="Scripts\Post-Deployment\HD\DefaultData\1_StatusData.sql" />
     <None Include="Scripts\Post-Deployment\HD\HDEntryDataFix.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\11_FreightTerms.sql" />
-    <None Include="Scripts\Post-Deployment\IC\2_MaterialNMFC.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillBatch.sql" />
   </ItemGroup>
   <ItemGroup>
