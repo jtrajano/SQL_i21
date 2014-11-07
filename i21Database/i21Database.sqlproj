@@ -783,6 +783,12 @@
     <Build Include="dbo\Stored Procedures\uspICReduceStockInFIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInFIFO.sql" />
     <Build Include="dbo\Tables\tblGRStorageType.sql" />
+    <Build Include="dbo\Functions\fnDateNotEquals.sql" />
+    <Build Include="dbo\Functions\fnDateLessThan.sql" />
+    <Build Include="dbo\Functions\fnDateGreaterThanEquals.sql" />
+    <Build Include="dbo\Functions\fnDateLessThanEquals.sql" />
+    <Build Include="dbo\Functions\fnDateGreaterThan.sql" />
+    <Build Include="dbo\Functions\fnDateEquals.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
