@@ -118,3 +118,4 @@
 :r "..\dbo\Stored Procedures\uspARImportSalesperson.sql"
 :r "..\dbo\Stored Procedures\uspARImportMarketZone.sql"
 :r "..\dbo\Stored Procedures\uspARImportServiceCharge.sql"
+:r "..\dbo\Stored Procedures\uspARImportCustomerContacts.sql"

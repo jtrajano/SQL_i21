@@ -14,16 +14,32 @@
     [dblWithheld]   DECIMAL (18, 6) NOT NULL DEFAULT 0,
     [intUserId]           INT             NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
-    [intEntityId] INT NOT NULL,
-    [intVendorId] INT NOT NULL,
+    [intEntityId] INT NOT NULL DEFAULT 0,
+    [intVendorId] INT NULL,
     [ysnOrigin] BIT NOT NULL DEFAULT 0,
+    [ysnVoid] BIT NOT NULL DEFAULT 0, 
+    [ysnPrinted] BIT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_dbo.tblAPPayments] PRIMARY KEY CLUSTERED ([intPaymentId] ASC), 
     CONSTRAINT [FK_tblAPPayment_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intVendorId]),
-	CONSTRAINT [FK_dbo.tblAPPayment_dbo.tblEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEntity(intEntityId),
-	CONSTRAINT [FK_dbo.tblAPPayment_dbo.tblGLAccount_intAccountId] FOREIGN KEY (intAccountId) REFERENCES tblGLAccount(intAccountId)
+	--CONSTRAINT [FK_tblAPPayment_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
+	CONSTRAINT [FK_tblAPPayment_tblCMBankAccount] FOREIGN KEY ([intBankAccountId]) REFERENCES [tblCMBankAccount]([intBankAccountId])
 );
 GO
 
+CREATE NONCLUSTERED INDEX [IX_tblAPPayment_intVendorId_intPaymentId] ON [dbo].[tblAPPayment] 
+(
+	[intVendorId] ASC,
+	[intPaymentId] ASC
+)
+WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+
+
+GO
+
+ALTER TABLE dbo.tblAPPayment
+NOCHECK CONSTRAINT[FK_tblAPPayment_tblAPVendor];
+
+GO
 CREATE TRIGGER trgPaymentRecordNumber
 ON tblAPPayment
 AFTER INSERT

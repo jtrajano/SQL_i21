@@ -2,17 +2,16 @@
     [intBillBatchId]     INT             IDENTITY (1, 1) NOT NULL,
     [intAccountId]       INT             NOT NULL,
     [ysnPosted]          BIT             DEFAULT ((0)) NULL,
-	[dtmBatchDate]		DATETIME NULL ,
     [strBillBatchNumber] NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strReference]       NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [dblTotal]           DECIMAL (18, 2) NOT NULL,
     [intUserId] INT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
-    [intEntityId] INT NOT NULL, 
+    [intEntityId] INT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_dbo.tblAPBillBatches] PRIMARY KEY CLUSTERED ([intBillBatchId] ASC),
-	CONSTRAINT [FK_dbo.tblAPBillBatch_dbo.tblEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEntity(intEntityId),
-	CONSTRAINT [FK_dbo.tblAPBillBatch_dbo.tblGLAccount_intAccountId] FOREIGN KEY (intAccountId) REFERENCES tblGLAccount(intAccountId)
+	--CONSTRAINT [FK_tblAPBillBatch_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId])
 );
+
 
 GO
 CREATE TRIGGER trgBillBatchRecordNumber
@@ -51,3 +50,11 @@ END
 GO
 
 CREATE INDEX [IX_tblAPBillBatch_strBillBatchNumber] ON [dbo].[tblAPBillBatch] ([strBillBatchNumber])
+
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblAPBillBatch_intBillBatchId] ON [dbo].[tblAPBillBatch] 
+(
+	[intBillBatchId] ASC
+)WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+

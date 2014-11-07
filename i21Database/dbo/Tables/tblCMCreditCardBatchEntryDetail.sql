@@ -13,7 +13,8 @@
     [dtmLastModified]                 DATETIME       NULL,
     [intConcurrencyId]                INT            DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblCMCreditCardBatchEntryDetail] PRIMARY KEY CLUSTERED ([intCreditCardBatchEntryDetailId] ASC),
-    CONSTRAINT [FK_tblCMCreditCardBatchEntrytblCMCreditCardBatchEntryDetail] FOREIGN KEY ([intCreditCardBatchEntryId]) REFERENCES [dbo].[tblCMCreditCardBatchEntry] ([intCreditCardBatchEntryId])
+    CONSTRAINT [FK_tblCMCreditCardBatchEntrytblCMCreditCardBatchEntryDetail] FOREIGN KEY ([intCreditCardBatchEntryId]) REFERENCES [dbo].[tblCMCreditCardBatchEntry] ([intCreditCardBatchEntryId]),
+	CONSTRAINT [FK_tblGLAccounttblCMCreditCardBatchEntryDetail] FOREIGN KEY ([intGLAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 );
 
 

@@ -3,13 +3,12 @@
     [intBillBatchId]       INT             NULL ,
     [strVendorOrderNumber] NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [intTermsId]           INT             NOT NULL DEFAULT 0,
-    [intTaxId]				INT             NULL ,
+    [intTaxId]         INT             NULL ,
     [dtmDate]              DATETIME        NOT NULL DEFAULT GETDATE(),
     [dtmDueDate]           DATETIME        NOT NULL DEFAULT GETDATE(),
     [intAccountId]         INT             NOT NULL DEFAULT 0,
     [strDescription]       NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [dblTotal]             DECIMAL (18, 6) NOT NULL DEFAULT 0,
-	[dblSubtotal]          DECIMAL (18, 6) NOT NULL DEFAULT 0,
+    [dblTotal]             DECIMAL (18, 2) NOT NULL DEFAULT 0,
     [ysnPosted]            BIT             NOT NULL DEFAULT 0,
     [ysnPaid]              BIT             NOT NULL DEFAULT 0,
     [strBillId]            NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
@@ -19,34 +18,36 @@
     [intUserId]            INT             NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     [dtmBillDate] DATETIME NOT NULL DEFAULT GETDATE(), 
-    [intEntityId] INT NOT NULL , 
+    [intEntityId] INT NULL , 
     [intVendorId] INT NOT NULL  , 
     [dblWithheld] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
     [dblDiscount] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblBillTax] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
-	[dblPayment] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
-	[dblInterest] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
     [intTransactionType] INT NOT NULL DEFAULT 0, 
     [intPurchaseOrderId] INT NULL, 
-	[strPONumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
     [intShipFromId] INT NULL , 
 	[intShipToId] INT NULL , 
-	[intShipViaId] INT NULL , 
     [intStoreLocationId] INT NULL , 
     [intContactId] INT NULL , 
     [intOrderById] INT NULL , 
     [intCurrencyId] INT NOT NULL DEFAULT 0,
     [ysnOrigin] BIT NOT NULL DEFAULT 0,
-    CONSTRAINT [PK_dbo.tblAPBill] PRIMARY KEY CLUSTERED ([intBillId] ASC),
-    CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPBillBatch_intBillBatchId] FOREIGN KEY ([intBillBatchId]) REFERENCES [dbo].[tblAPBillBatch] ([intBillBatchId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblSMTerm_intTermId] FOREIGN KEY ([intTermsId]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),
-	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEntity(intEntityId),
-	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblGLAccount_intAccountId] FOREIGN KEY (intAccountId) REFERENCES tblGLAccount(intAccountId)
+    CONSTRAINT [PK_tblAPBill] PRIMARY KEY CLUSTERED ([intBillId] ASC),
+	CONSTRAINT [FK_tblAPBill_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intVendorId]),
+    CONSTRAINT [FK_tblAPBill_tblAPBillBatch_intBillBatchId] FOREIGN KEY ([intBillBatchId]) REFERENCES [dbo].[tblAPBillBatch] ([intBillBatchId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblAPBill_tblSMTerm_intTermId] FOREIGN KEY ([intTermsId]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),
+	--CONSTRAINT [FK_tblAPBill_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId])
 );
+
+
 GO
 CREATE NONCLUSTERED INDEX [IX_intBillBatchId]
     ON [dbo].[tblAPBill]([intBillBatchId] ASC);
 
+GO
+
+ALTER TABLE dbo.tblAPBill
+NOCHECK CONSTRAINT [FK_tblAPBill_tblAPVendor];
 
 GO
 CREATE TRIGGER trgBillRecordNumber
@@ -73,7 +74,7 @@ BEGIN
 	IF @type = 1
 		EXEC uspSMGetStartingNumber 9, @BillId OUT
 	ELSE IF @type = 3
-		EXEC uspSMGetStartingNumber 18, @BillId OUT
+		EXEC uspSMGetStartingNumber 17, @BillId OUT
 	ELSE IF @type = 2
 		EXEC uspSMGetStartingNumber 20, @BillId OUT
 	

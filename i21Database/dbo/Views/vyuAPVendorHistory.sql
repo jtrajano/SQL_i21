@@ -2,9 +2,9 @@
 WITH SCHEMABINDING
 AS
 SELECT 
-	strVendorId = tblAPVendor.strVendorId
-	,tblAPVendor.intEntityId
-	,tblAPVendor.intVendorId
+	tblAPVendor.intEntityId
+	,intVendorId = tblAPVendor.intVendorId
+	,strVendorId = tblAPVendor.strVendorId
 	,A.dtmDate
 	,intTransactionId = A.intBillId 
 	,strTransactionType = 'Bill'
@@ -16,6 +16,7 @@ SELECT
 	,dblAmountPaid = CASE WHEN A.ysnPaid = 1 THEN A.dblTotal ELSE ISNULL(SUM(B.dblPayment),0) END
 	,A.ysnPaid
 	,A.dblAmountDue
+
 FROM dbo.tblAPBill A
 		LEFT JOIN (dbo.tblAPPayment B1 INNER JOIN dbo.tblAPPaymentDetail B ON B1.intPaymentId = B.intPaymentId)
 		 ON A.intBillId = B.intBillId
@@ -27,6 +28,7 @@ GROUP BY A.intBillId,
 	A.dblTotal,
 	A.dblDiscount,
 	A.dblWithheld,
+	tblAPVendor.intVendorId,
 	tblAPVendor.strVendorId,
 	tblAPVendor.intEntityId,
 	tblAPVendor.intVendorId,

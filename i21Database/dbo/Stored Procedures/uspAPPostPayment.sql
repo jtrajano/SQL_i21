@@ -68,16 +68,7 @@ IF (@param IS NOT NULL)
 BEGIN
 	IF(@param = 'all')
 	BEGIN
-		IF(@post = 0)
-		BEGIN
-			INSERT INTO #tmpPayablePostData SELECT intPaymentId FROM tblAPPayment WHERE ysnPosted = 0
-		END
-		ELSE IF(@post = 1)
-		BEGIN
-			INSERT INTO #tmpPayablePostData 
-			SELECT intPaymentId FROM tblAPPayment WHERE ysnPosted = 1
-			AND NOT EXISTS (SELECT 1 FROM tblCMBankTransaction WHERE strTransactionId = tblAPPayment.strPaymentRecordNum AND ysnClr = 1)
-		END
+		INSERT INTO #tmpPayablePostData SELECT intPaymentId FROM tblAPPayment WHERE ysnPosted = 0
 	END
 	ELSE
 	BEGIN
@@ -108,20 +99,6 @@ BEGIN
 	--POST VALIDATIONS
 	IF(ISNULL(@post,0) = 1)
 		BEGIN
-
-			--Make sure it has setup for default withhold account if vendor is set for withholding
-			INSERT INTO #tmpPayableInvalidData
-				SELECT 
-					'There is no account setup for withholding.',
-					'Payable',
-					A.strPaymentRecordNum,
-					@batchId,
-					A.intPaymentId
-				FROM tblAPPayment A 
-				INNER JOIN tblAPVendor B
-					ON A.intVendorId = B.intVendorId AND B.ysnWithholding = 1
-				WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData)
-				AND 1 = (CASE WHEN (SELECT intWithholdAccountId FROM tblAPPreference) IS NULL THEN 1 ELSE 0 END)
 
 			--Payment without payment on detail
 			INSERT INTO #tmpPayableInvalidData
@@ -226,17 +203,17 @@ BEGIN
 	IF(ISNULL(@post,0) = 0)
 	BEGIN
 
-		----Already cleared/reconciled
-		--INSERT INTO #tmpPayableInvalidData
-		--	SELECT 
-		--		'The transaction is already cleared.',
-		--		'Payable',
-		--		A.strPaymentRecordNum,
-		--		@batchId,
-		--		A.intPaymentId
-		--	FROM tblAPPayment A 
-		--		INNER JOIN tblCMBankTransaction B ON A.strPaymentRecordNum = B.strTransactionId
-		--	WHERE B.ysnClr = 1 AND intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		--Already cleared/reconciled
+		INSERT INTO #tmpPayableInvalidData
+			SELECT 
+				'The transaction is already cleared.',
+				'Payable',
+				A.strPaymentRecordNum,
+				@batchId,
+				A.intPaymentId
+			FROM tblAPPayment A 
+				INNER JOIN tblCMBankTransaction B ON A.strPaymentRecordNum = B.strTransactionId
+			WHERE B.ysnClr = 1 AND intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		--CM Voiding Validation
 		INSERT INTO #tmpPayableInvalidData
@@ -249,19 +226,6 @@ BEGIN
 						ON A.strPaymentRecordNum = B.strTransactionId
 						AND intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 					CROSS APPLY dbo.fnGetBankTransactionReversalErrors(B.intTransactionId) C
-
-		--Fiscal Year
-		INSERT INTO #tmpPayableInvalidData
-			SELECT 
-				'Unable to find an open fiscal year period to match the transaction date.',
-				'Payable',
-				A.strPaymentRecordNum,
-				@batchId,
-				A.intPaymentId
-			FROM tblAPPayment A 
-			WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
-				0 = ISNULL([dbo].isOpenAccountingDate(A.[dtmDatePaid]), 0)
-
 	END
 
 	DECLARE @totalInvalid INT
@@ -355,7 +319,7 @@ BEGIN
 			,[dblCredit]			= CASE WHEN @post = 1 THEN A.dblAmountPaid ELSE 0 END
 			,[dblDebitUnit]			= CASE WHEN @post = 1 THEN ISNULL(A.[dblAmountPaid], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0) ELSE 0 END
 			,[dblCreditUnit]		= CASE WHEN @post = 1 THEN ISNULL(A.[dblAmountPaid], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0) ELSE 0 END
-			,A.[dtmDatePaid]
+			,DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0)
 			,CASE WHEN @post = 1 THEN 0 ELSE 1 END
 			,1
 			,[dblExchangeRate]		= 1
@@ -389,7 +353,7 @@ BEGIN
 			,[dblCredit]			= CASE WHEN @post = 1 THEN A.dblWithheld ELSE 0 END
 			,[dblDebitUnit]			= CASE WHEN @post = 1 THEN ISNULL(A.dblWithheld, 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0) ELSE 0 END
 			,[dblCreditUnit]		= CASE WHEN @post = 1 THEN ISNULL(A.dblWithheld, 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0) ELSE 0 END
-			,A.[dtmDatePaid]
+			,DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0)
 			,CASE WHEN @post = 1 THEN 0 ELSE 1 END
 			,1
 			,[dblExchangeRate]		= 1
@@ -402,7 +366,7 @@ BEGIN
 			,[strTransactionForm]	= @SCREEN_NAME
 			,[strTransactionType]	= @TRAN_TYPE
 		FROM	[dbo].tblAPPayment A INNER JOIN [dbo].tblGLAccount GLAccnt
-					ON A.intAccountId = GLAccnt.intAccountId
+					ON A.intBankAccountId = GLAccnt.intAccountId
 				INNER JOIN tblAPVendor B
 					ON A.intVendorId = B.intVendorId AND B.ysnWithholding = 1
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
@@ -420,7 +384,7 @@ BEGIN
 			,[dblCredit]			= SUM(CASE WHEN @post = 1 THEN B.dblDiscount ELSE 0 END)
 			,[dblDebitUnit]			= CASE WHEN @post = 1 THEN SUM(ISNULL(B.dblDiscount, 0))  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @DiscountAccount), 0) ELSE 0 END
 			,[dblCreditUnit]		= CASE WHEN @post = 1 THEN SUM(ISNULL(B.dblDiscount, 0)) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @DiscountAccount), 0) ELSE 0 END
-			,A.[dtmDatePaid]
+			,DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0)
 			,CASE WHEN @post = 1 THEN 0 ELSE 1 END
 			,1
 			,[dblExchangeRate]		= 1
@@ -470,7 +434,7 @@ BEGIN
 												THEN B.dblPayment + B.dblDiscount
 												ELSE B.dblPayment END) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = B.[intAccountId]), 0)
 										  ELSE 0 END
-				,A.[dtmDatePaid]
+				,DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0)
 				,CASE WHEN @post = 1 THEN 0 ELSE 1 END
 				,1
 				,[dblExchangeRate]		= 1
@@ -493,51 +457,6 @@ BEGIN
 		D.strVendorId,
 		A.dtmDatePaid,
 		B.intAccountId;
-
---=====================================================================================================================================
--- 	UPDATE GL SUMMARY RECORDS
----------------------------------------------------------------------------------------------------------------------------------------
-		WITH Units
-		AS
-		(
-			SELECT	A.[dblLbsPerUnit], B.[intAccountId]
-			FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
-		),
-		PaymentDetail
-		AS
-		(
-			SELECT   [dtmDate]			= ISNULL(A.[dtmDate], GETDATE())
-					,[intAccountId]		= A.[intAccountId]
-					,[dblDebit]			= CASE	WHEN [dblCredit] < 0 THEN ABS([dblCredit])
-												WHEN [dblDebit] < 0 THEN 0
-												ELSE [dblDebit] END
-					,[dblCredit]		= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
-												WHEN [dblCredit] < 0 THEN 0
-												ELSE [dblCredit] END
-					,[dblDebitUnit]		= ISNULL([dblDebitUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
-					,[dblCreditUnit]	= ISNULL([dblCreditUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
-			FROM #tmpGLDetail A
-		)
-		UPDATE	tblGLSummary
-		SET		 [dblDebit]			= ISNULL(tblGLSummary.[dblDebit], 0) + ISNULL(GLDetailGrouped.[dblDebit], 0)
-				,[dblCredit]		= ISNULL(tblGLSummary.[dblCredit], 0) + ISNULL(GLDetailGrouped.[dblCredit], 0)
-				,[dblDebitUnit]		= ISNULL(tblGLSummary.[dblDebitUnit], 0) + ISNULL(GLDetailGrouped.[dblDebitUnit], 0)
-				,[dblCreditUnit]	= ISNULL(tblGLSummary.[dblCreditUnit], 0) + ISNULL(GLDetailGrouped.[dblCreditUnit], 0)
-				,[intConcurrencyId] = ISNULL([intConcurrencyId], 0) + 1
-		FROM	(
-					SELECT	 [dblDebit]			= SUM(ISNULL(B.[dblDebit], 0))
-							,[dblCredit]		= SUM(ISNULL(B.[dblCredit], 0))
-							,[dblDebitUnit]		= SUM(ISNULL(B.[dblDebitUnit], 0))
-							,[dblCreditUnit]	= SUM(ISNULL(B.[dblCreditUnit], 0))
-							,[intAccountId]		= A.[intAccountId]
-							,[dtmDate]			= ISNULL(CONVERT(DATE, A.[dtmDate]), '')
-					FROM tblGLSummary A
-							INNER JOIN PaymentDetail B
-							ON CONVERT(DATE, A.[dtmDate]) = CONVERT(DATE, B.[dtmDate]) AND A.[intAccountId] = B.[intAccountId] AND A.[strCode] = 'AP'
-					GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountId]
-				) AS GLDetailGrouped
-		WHERE tblGLSummary.[intAccountId] = GLDetailGrouped.[intAccountId] AND tblGLSummary.[strCode] = 'AP' AND
-			  ISNULL(CONVERT(DATE, tblGLSummary.[dtmDate]), '') = ISNULL(CONVERT(DATE, GLDetailGrouped.[dtmDate]), '');
 
 --=====================================================================================================================================
 -- 	UPDATE GL SUMMARY RECORDS
@@ -676,7 +595,7 @@ BEGIN
 
 END
 
-		IF @@ERROR <> 0	GOTO Post_Rollback;
+IF @@ERROR <> 0	GOTO Post_Rollback;
 
 	IF(ISNULL(@post,0) = 0)
 	BEGIN
@@ -727,7 +646,8 @@ END
 
 		--update payment record based on record from tblCMBankTransaction
 		UPDATE tblAPPayment
-			SET strPaymentInfo = CASE WHEN B.dtmCheckPrinted IS NOT NULL AND ISNULL(A.strPaymentInfo,'') <> '' THEN B.strReferenceNo ELSE A.strPaymentInfo END
+			SET ysnVoid = CASE WHEN A.ysnPrinted = 1 AND ISNULL(A.strPaymentInfo,'') <> '' THEN 1 ELSE 0 END
+			,strPaymentInfo = CASE WHEN A.ysnPrinted = 1 AND ISNULL(A.strPaymentInfo,'') <> '' THEN B.strReferenceNo ELSE A.strPaymentInfo END
 		FROM tblAPPayment A 
 			INNER JOIN tblCMBankTransaction B
 				ON A.strPaymentRecordNum = B.strTransactionId
@@ -843,7 +763,7 @@ END
 			[strAmountInWords] = dbo.fnConvertNumberToWord(A.dblAmountPaid),
 			[strMemo] = '',
 			[strReferenceNo] = CASE WHEN (SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId) = 'Cash' THEN 'Cash' ELSE '' END,
-			[ysnCheckToBePrinted] = 1,
+			[ysnCheckToBePrinted] = 0,
 			[ysnCheckVoid] = 0,
 			[ysnPosted] = 1,
 			[strLink] = @batchId,
@@ -932,7 +852,7 @@ ELSE
 			,[dblDebitUnit]			= SUM(ISNULL(A.[dblAmountPaid], 0))  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
 			,[dblCreditUnit]		= SUM(ISNULL(A.[dblAmountPaid], 0)) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
 			,A.[dtmDatePaid]
-			,CASE WHEN @post = 1 THEN 0 ELSE 1 END
+			,0
 			,1
 			,[dblExchangeRate]		= 1
 			,[intUserId]			= @userId
@@ -972,7 +892,7 @@ ELSE
 			,[dblDebitUnit]			= ISNULL(A.dblWithheld, 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0)
 			,[dblCreditUnit]		= ISNULL(A.dblWithheld, 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @WithholdAccount), 0)
 			,A.[dtmDatePaid]
-			,CASE WHEN @post = 1 THEN 0 ELSE 1 END
+			,0
 			,1
 			,[dblExchangeRate]		= 1
 			,[intUserId]			= @userId
@@ -1000,7 +920,7 @@ ELSE
 			,[dblDebitUnit]			= ISNULL(A.dblWithheld, 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @DiscountAccount), 0)
 			,[dblCreditUnit]		= ISNULL(A.dblWithheld, 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = @DiscountAccount), 0)
 			,A.[dtmDatePaid]
-			,CASE WHEN @post = 1 THEN 0 ELSE 1 END
+			,0
 			,1
 			,[dblExchangeRate]		= 1
 			,[intUserId]			= @userId
@@ -1044,12 +964,12 @@ ELSE
 												ELSE B.dblPayment END END)
 				,[dblCredit]			= SUM(CASE WHEN @post = 0 THEN CASE WHEN (B.dblAmountDue = 0)
 												THEN B.dblPayment + B.dblDiscount
-												ELSE B.dblPayment END
+												ELSE B.dblAmountDue END
 											ELSE 0 END)
 				,[dblDebitUnit]			= ISNULL(A.dblAmountPaid, 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
 				,[dblCreditUnit]		= ISNULL(A.dblAmountPaid, 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
 				,A.[dtmDatePaid]
-				,CASE WHEN @post = 1 THEN 0 ELSE 1 END
+				,0
 				,1
 				,[dblExchangeRate]		= 1
 				,[intUserId]			= @userId
@@ -1082,7 +1002,92 @@ ELSE
 		GOTO Post_Commit;
 	END
 
+--=====================================================================================================================================
+-- 	UPDATE STARTING NUMBERS
+---------------------------------------------------------------------------------------------------------------------------------------
+--UPDATE tblSMStartingNumber
+--SET [intNumber] = ISNULL([intNumber], 0) + 1
+--WHERE [strTransactionType] = 'Batch Post';
+
 IF @@ERROR <> 0	GOTO Post_Rollback;
+
+--=====================================================================================================================================
+-- 	UPDATE GL SUMMARY RECORDS
+---------------------------------------------------------------------------------------------------------------------------------------
+
+--UPDATE	tblGLSummary 
+--SET		 [dblDebit] = ISNULL(tblGLSummary.[dblDebit], 0) + ISNULL(GLDetailGrouped.[dblDebit], 0)
+--		,[dblCredit] = ISNULL(tblGLSummary.[dblCredit], 0) + ISNULL(GLDetailGrouped.[dblCredit], 0)
+--		,[intConcurrencyId] = ISNULL([intConcurrencyId], 0) + 1
+--FROM	(
+--			SELECT	 [dblDebit]		= SUM(ISNULL(B.[dblDebit], 0))
+--					,[dblCredit]	= SUM(ISNULL(B.[dblCredit], 0))
+--					,[intAccountId] = A.[intAccountId]
+--					,[dtmDate]		= ISNULL(CONVERT(DATE, A.[dtmDate]), '') 								
+--			FROM tblGLSummary A 
+--					INNER JOIN JournalDetail B 
+--					ON CONVERT(DATE, A.[dtmDate]) = CONVERT(DATE, B.[dtmDate]) AND A.[intAccountId] = B.[intAccountId]			
+--			GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountId]
+--		) AS GLDetailGrouped
+--WHERE tblGLSummary.[intAccountId] = GLDetailGrouped.[intAccountId] AND 
+--	  ISNULL(CONVERT(DATE, tblGLSummary.[dtmDate]), '') = ISNULL(CONVERT(DATE, GLDetailGrouped.[dtmDate]), '');
+
+--IF @@ERROR <> 0	GOTO Post_Rollback;
+
+--=====================================================================================================================================
+-- 	INSERT TO GL SUMMARY RECORDS
+---------------------------------------------------------------------------------------------------------------------------------------
+--WITH Units
+--AS 
+--(
+--	SELECT	A.[dblLbsPerUnit], B.[intAccountId] 
+--	FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
+--),
+--JournalDetail 
+--AS
+--(
+--	SELECT [dtmDate]		= ISNULL(B.[dtmDate], GETDATE())
+--		,[intAccountId]		= A.[intAccountId]
+--		,[dblDebit]			= CASE	WHEN [dblCredit] < 0 THEN ABS([dblCredit])
+--									WHEN [dblDebit] < 0 THEN 0
+--									ELSE [dblDebit] END 
+--		,[dblCredit]		= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
+--									WHEN [dblCredit] < 0 THEN 0
+--									ELSE [dblCredit] END	
+--		,[dblDebitUnit]		= ISNULL(A.[dblDebitUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
+--		,[dblCreditUnit]	= ISNULL(A.[dblCreditUnit], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0)
+--	FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B ON A.[intJournalID] = B.[intJournalID]
+--	WHERE B.intJournalID IN (SELECT [intJournalID] FROM #tmpValidJournals)
+--)
+--INSERT INTO tblGLSummary (
+--	 [intAccountId]
+--	,[dtmDate]
+--	,[dblDebit]
+--	,[dblCredit]
+--	,[dblDebitUnit]
+--	,[dblCreditUnit]
+--	,[intConcurrencyId]
+--)
+--SELECT	
+--	 [intAccountId]		= A.[intAccountId]
+--	,[dtmDate]			= ISNULL(CONVERT(DATE, A.[dtmDate]), '')
+--	,[dblDebit]			= SUM(A.[dblDebit])
+--	,[dblCredit]		= SUM(A.[dblCredit])
+--	,[dblDebitUnit]		= SUM(A.[dblDebitUnit])
+--	,[dblCreditUnit]	= SUM(A.[dblCreditUnit])
+--	,[intConcurrencyId] = 1
+--FROM JournalDetail A
+--WHERE NOT EXISTS 
+--		(
+--			SELECT TOP 1 1
+--			FROM tblGLSummary B
+--			WHERE ISNULL(CONVERT(DATE, A.[dtmDate]), '') = ISNULL(CONVERT(DATE, B.[dtmDate]), '') AND 
+--				  A.[intAccountId] = B.[intAccountId]
+--		)
+--GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountId];
+
+--IF @@ERROR <> 0	GOTO Post_Rollback;
+
 
 --=====================================================================================================================================
 -- 	FINALIZING STAGE
@@ -1103,33 +1108,29 @@ Post_Rollback:
 Post_Cleanup:
 	IF(ISNULL(@recap,0) = 0)
 	BEGIN
-		----DELETE PAYMENT DETAIL WITH PAYMENT AMOUNT
+		--DELETE PAYMENT DETAIL WITH PAYMENT AMOUNT
+		--DELETE FROM tblAPPaymentDetail
+		--WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		--AND dblPayment = 0
 
-		IF(@post = 1)
-		BEGIN		
-			DELETE FROM tblAPPaymentDetail
-			WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-			AND dblPayment = 0
-		END
+		--IF(@post = 1)
+		--BEGIN
 
-		----IF(@post = 1)
-		----BEGIN
-
-		----	----clean gl detail recap after posting
-		----	--DELETE FROM tblGLDetailRecap
-		----	--FROM tblGLDetailRecap A
-		----	--INNER JOIN #tmpPayablePostData B ON A.intTransactionId = B.intPaymentId 
+		--	----clean gl detail recap after posting
+		--	--DELETE FROM tblGLDetailRecap
+		--	--FROM tblGLDetailRecap A
+		--	--INNER JOIN #tmpPayablePostData B ON A.intTransactionId = B.intPaymentId 
 
 		
-		----	----removed from tblAPInvalidTransaction the successful records
-		----	--DELETE FROM tblAPInvalidTransaction
-		----	--FROM tblAPInvalidTransaction A
-		----	--INNER JOIN #tmpPayablePostData B ON A.intTransactionId = B.intPaymentId 
+		--	----removed from tblAPInvalidTransaction the successful records
+		--	--DELETE FROM tblAPInvalidTransaction
+		--	--FROM tblAPInvalidTransaction A
+		--	--INNER JOIN #tmpPayablePostData B ON A.intTransactionId = B.intPaymentId 
 
-		----END
-
+		--END
+		SET @success = 1
 	END
 
 Post_Exit:
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpPayablePostData')) DROP TABLE #tmpPayablePostData
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..##tmpPayableInvalidData')) DROP TABLE #tmpPayableInvalidData
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE ID = OBJECT_ID('tempdb..#tmpPayablePostData')) DROP TABLE #tmpPayablePostData
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE ID = OBJECT_ID('tempdb..##tmpPayableInvalidData')) DROP TABLE #tmpPayableInvalidData
