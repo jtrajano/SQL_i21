@@ -16,7 +16,7 @@
     [ysnPymtCtrlEFTActive]      BIT            DEFAULT 0 NOT NULL,
     [ysnPymtCtrlHold]           BIT            DEFAULT 0 NOT NULL,
     [ysnWithholding]            BIT            NOT NULL,
-    [dblCreditLimit]            FLOAT (53)     NOT NULL,
+    [dblCreditLimit]            NUMERIC(18, 6)     NOT NULL,
     [intCreatedUserId]          INT            NULL,
     [intLastModifiedUserId]     INT            NULL,
     [dtmLastModified]           DATETIME       NULL,
@@ -41,12 +41,17 @@ ALTER TABLE [dbo].[tblAPVendor] CHECK CONSTRAINT [FK_dbo.tblAPVendor_dbo.tblEnti
 
 
 GO
+CREATE NONCLUSTERED INDEX [IX_intVendorId]
+    ON [dbo].[tblAPVendor]([intVendorId] ASC);
 CREATE NONCLUSTERED INDEX [IX_tblAPVendor_intVendorId_strVendorId] ON [dbo].[tblAPVendor] 
 (
 	[intVendorId] ASC
 )
 INCLUDE ( [strVendorId]) WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 
+CREATE NONCLUSTERED INDEX [IX_intVendorId]
+    ON [dbo].[tblAPVendor]([intVendorId] ASC, [strVendorId] ASC)
+	WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
