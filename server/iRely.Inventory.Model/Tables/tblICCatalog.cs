@@ -18,5 +18,8 @@ namespace iRely.Inventory.Model
         public int? intSort { get; set; }
 
         public ICollection<tblICCategory> tblICCategories { get; set; }
+
+        public tblICCatalog ParentCatalog { get; set; }
+        public ICollection<tblICCatalog> children { get; set; }
     }
 }

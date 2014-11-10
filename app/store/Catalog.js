@@ -33,18 +33,8 @@ Ext.define('Inventory.store.Catalog', {
                 writer: {
                     type: 'json',
                     allowSingle: false
-                },
-                listeners: {
-                    nodebeforeappend: {
-                        fn: me.onTreeStoreNodeBeforeAppend,
-                        scope: me
-                    }
                 }
             }
         }, cfg)]);
-    },
-
-    onTreeStoreNodeBeforeAppend: function(nodeinterface, node, eOpts) {
-        console.log('test');
     }
 });
