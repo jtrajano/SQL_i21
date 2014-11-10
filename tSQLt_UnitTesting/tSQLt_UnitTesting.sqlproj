@@ -335,6 +335,7 @@
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInFIFO from zero to positive.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInFIFO from negative to negative.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInFIFO from negative to zero.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInFIFO from negative to positive _with partial in_.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

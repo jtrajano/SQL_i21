@@ -14,10 +14,11 @@ CREATE PROCEDURE dbo.uspICIncreaseStockInFIFO
 	,@dblQty NUMERIC(18,6) 
 	,@dblCost AS NUMERIC(18,6)
 	,@intUserId AS INT
-	,@PurchasedQty AS NUMERIC(18,6) 
-	,@NegativeOffSetQty AS NUMERIC(18,6)
+	,@FullQty AS NUMERIC(18,6) 
+	,@TotalQtyOffset AS NUMERIC(18,6)
 	,@RemainingQty AS NUMERIC(18,6) OUTPUT
 	,@CostUsed AS NUMERIC(18,6) OUTPUT 
+	,@QtyOffset AS NUMERIC(18,6) OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -32,6 +33,7 @@ SET @dblQty = ABS(@dblQty);
 -- Initialize the remaining qty to NULL
 SET @RemainingQty = NULL;
 SET @CostUsed = NULL;
+SET @QtyOffset = NULL;
 
 -- Upsert (update or insert) a record into the cost bucket.
 MERGE	TOP(1)
@@ -64,8 +66,14 @@ WHEN MATCHED THEN
 		-- retrieve the cost from the cost bucket. 
 		,@CostUsed = fifo_bucket.dblCost
 
+		-- retrieve the negative qty that was offset by the incoming stock 
+		,@QtyOffset = 
+					CASE	WHEN (fifo_bucket.dblStockOut - fifo_bucket.dblStockIn) >= @dblQty THEN @dblQty
+							ELSE (fifo_bucket.dblStockOut - fifo_bucket.dblStockIn) 
+					END 
+
 -- Insert a new fifo bucket if there is no negative stock to offset. 
-WHEN NOT MATCHED AND @PurchasedQty > 0 THEN 
+WHEN NOT MATCHED AND @FullQty > 0 THEN 
 	INSERT (
 		[intItemId]
 		,[intItemLocationId]
@@ -81,8 +89,8 @@ WHEN NOT MATCHED AND @PurchasedQty > 0 THEN
 		@intItemId
 		,@intItemLocationId
 		,@dtmDate
-		,@PurchasedQty
-		,@NegativeOffSetQty
+		,@FullQty
+		,@TotalQtyOffset
 		,@dblCost
 		,GETDATE()
 		,@intUserId
@@ -91,7 +99,11 @@ WHEN NOT MATCHED AND @PurchasedQty > 0 THEN
 ;
 
 -- If the incoming stock was fully consumed by the negative stock, the "WHEN NOT MATCHED AND @PurchasedQty > 0 THEN" is not triggered.
--- Thus if remaining qty is zero (note, it is important that it is not null), then add a new stock bucket. 
+-- Thus if remaining qty is zero (not null*),  then add a new stock bucket. 
+--
+-- Note: 
+-- *	Why null in "remaining qty" is important? A null in "remaining qty" means update was not performed in the above statement. 
+--      A follow-up insert statement is needed to complete the fifo buckets. 
 IF @RemainingQty = 0 
 BEGIN 
 	INSERT dbo.tblICInventoryFIFO (
@@ -109,8 +121,8 @@ BEGIN
 		@intItemId
 		,@intItemLocationId
 		,@dtmDate
-		,@PurchasedQty
-		,@PurchasedQty
+		,@FullQty
+		,@FullQty
 		,@dblCost
 		,GETDATE()
 		,@intUserId

@@ -53,15 +53,18 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 -- Create the variables for the internal transaction types used by costing. 
-DECLARE @WRITE_OFF_SOLD AS INT = -1
-DECLARE @REVALUE_SOLD AS INT = -2
-DECLARE @AUTO_NEGATIVE AS INT = -3
+DECLARE @WRITE_OFF_SOLD AS INT = -1;
+DECLARE @REVALUE_SOLD AS INT = -2;
+DECLARE @AUTO_NEGATIVE AS INT = -3;
 
 -- Create the variables 
-DECLARE @RemainingQty AS NUMERIC(18,6)
-DECLARE @dblReduceQty AS NUMERIC(18,6)
-DECLARE @dblAddQty AS NUMERIC(18,6)
-DECLARE @CostUsed AS NUMERIC(18,6)
+DECLARE @RemainingQty AS NUMERIC(18,6);
+DECLARE @dblReduceQty AS NUMERIC(18,6);
+DECLARE @dblAddQty AS NUMERIC(18,6);
+DECLARE @CostUsed AS NUMERIC(18,6);
+
+DECLARE @dblIncreaseQty AS NUMERIC(18,6);
+DECLARE @NegativeOffSetQty AS NUMERIC(18,6);
 
 -------------------------------------------------
 -- 1. Process the Fifo Cost buckets
@@ -131,6 +134,45 @@ BEGIN
 
 		SET @dblAddQty = ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0)
 
+		-- Insert the inventory transaction record
+		INSERT INTO tblICInventoryTransaction (
+			[intItemId] 
+			,[intItemLocationId] 
+			,[dtmDate] 
+			,[dblUnitQty] 
+			,[dblCost] 
+			,[dblValue]
+			,[dblSalesPrice] 
+			,[intCurrencyId] 
+			,[dblExchangeRate] 
+			,[intTransactionId] 
+			,[strTransactionId] 
+			,[strBatchId] 
+			,[intTransactionTypeId] 
+			,[dtmCreated] 
+			,[intCreatedUserId] 
+			,[intConcurrencyId] 
+		)			
+		SELECT	[intItemId] = @intItemId
+				,[intItemLocationId] = @intItemLocationId
+				,[dtmDate] = @dtmDate
+				,[dblUnitQty] = @dblAddQty
+				,[dblCost] = @dblCost
+				,[dblValue] = NULL 
+				,[dblSalesPrice] = @dblSalesPrice
+				,[intCurrencyId] = @intCurrencyId
+				,[dblExchangeRate] = @dblExchangeRate
+				,[intTransactionId] = @intTransactionId
+				,[strTransactionId] = @strTransactionId
+				,[strBatchId] = @strBatchId
+				,[intTransactionTypeId] = @intTransactionTypeId 
+				,[dtmCreated] = GETDATE()
+				,[intCreatedUserId] = @intUserId
+				,[intConcurrencyId] = 1
+
+		SET @dblIncreaseQty = @dblAddQty;
+		SET @NegativeOffSetQty = 0;
+
 		-- Repeat call on uspICIncreaseStockInFIFO until @dblAddQty is completely distributed to the negative cost fifo buckets or added as a new bucket. 
 		WHILE (ISNULL(@dblAddQty, 0) < 0)
 		BEGIN 
@@ -138,11 +180,16 @@ BEGIN
 				@intItemId
 				,@intItemLocationId
 				,@dtmDate
-				,@dblAddQty
+				,@dblIncreaseQty
 				,@dblCost
 				,@intUserId
+				,@dblAddQty
+				,@NegativeOffSetQty
 				,@RemainingQty OUTPUT
-				,@CostUsed OUTPUT 
+				,@CostUsed OUTPUT
+
+			SET @dblIncreaseQty = @RemainingQty;
+			SET @NegativeOffSetQty = ISNULL(@dblAddQty - @RemainingQty, @NegativeOffSetQty);
 
 			-- Insert the inventory transaction record
 			INSERT INTO tblICInventoryTransaction (
@@ -162,27 +209,8 @@ BEGIN
 				,[dtmCreated] 
 				,[intCreatedUserId] 
 				,[intConcurrencyId] 
-			)			
-			SELECT	[intItemId] = @intItemId
-					,[intItemLocationId] = @intItemLocationId
-					,[dtmDate] = @dtmDate
-					,[dblUnitQty] = @dblAddQty - ISNULL(@RemainingQty, 0) 
-					,[dblCost] = @dblCost
-					,[dblValue] = NULL 
-					,[dblSalesPrice] = @dblSalesPrice
-					,[intCurrencyId] = @intCurrencyId
-					,[dblExchangeRate] = @dblExchangeRate
-					,[intTransactionId] = @intTransactionId
-					,[strTransactionId] = @strTransactionId
-					,[strBatchId] = @strBatchId
-					,[intTransactionTypeId] = @intTransactionTypeId 
-					,[dtmCreated] = GETDATE()
-					,[intCreatedUserId] = @intUserId
-					,[intConcurrencyId] = 1
-			WHERE	@RemainingQty IS NULL 
-			
+			)				
 			-- Add Write-Off Sold
-			UNION ALL 
 			SELECT	[intItemId] = @intItemId
 					,[intItemLocationId] = @intItemLocationId
 					,[dtmDate] = @dtmDate

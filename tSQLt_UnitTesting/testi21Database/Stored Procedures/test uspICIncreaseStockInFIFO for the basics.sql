@@ -33,12 +33,14 @@ BEGIN
 		DECLARE @intItemId AS INT
 				,@intItemLocationId AS INT
 				,@dtmDate AS DATETIME
-				,@dblPurchaseQty NUMERIC(18,6) 
+				,@dblQty NUMERIC(18,6) 
 				,@dblCost AS NUMERIC(18,6)
 				,@intUserId AS INT
-				,@NegativeOffSetQty AS NUMERIC(18,6)					
+				,@TotalQtyOffset AS NUMERIC(18,6)					
 				,@RemainingQty AS NUMERIC(18,6) 
 				,@CostUsed AS NUMERIC(18,6) 
+				,@FullQty AS NUMERIC(18,6)
+				,@QtyOffset AS NUMERIC(18,6) 
 	END 
 	
 	-- Act
@@ -47,13 +49,14 @@ BEGIN
 			@intItemId
 			,@intItemLocationId
 			,@dtmDate
-			,@dblPurchaseQty
+			,@dblQty
 			,@dblCost
 			,@intUserId
-			,@dblPurchaseQty
-			,@NegativeOffSetQty
+			,@FullQty
+			,@TotalQtyOffset
 			,@RemainingQty OUTPUT
 			,@CostUsed OUTPUT
+			,@QtyOffset OUTPUT 
 
 		INSERT INTO actual (
 				[intItemId] 

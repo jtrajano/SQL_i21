@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICIncreaseStockInFIFO from negative to positive]
+﻿CREATE PROCEDURE [testi21Database].[test uspICIncreaseStockInFIFO from negative to positive (with partial in)]
 AS
 BEGIN
 	-- Arrange 
@@ -27,9 +27,10 @@ BEGIN
 			The initial data in tblICInventoryFIFO
 			intItemId   intItemLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
 			----------- ----------------- ----------------------- --------------------------------------- --------------------------------------- --------------------------------------- ---------------- ----------------
-			3           3                 2014-01-13 00:00:00.000 0.000000                                77.000000                               13.000000                               1                1
+			3           3                 2014-01-13 00:00:00.000 77.000000                               25.000000                               13.000000                               1                1
 			3           3                 2014-01-14 00:00:00.000 0.000000								  56.000000                               14.000000                               1                1
 			3           3                 2014-01-15 00:00:00.000 0.000000                                30.000000                               15.000000                               1                1
+			3           3                 2014-01-15 00:00:00.000 25.000000                               25.000000                               14.750000                               1                1
 			***************************************************************************************************************************************************************************************************************/
 		INSERT INTO dbo.tblICInventoryFIFO (
 			[intItemId]
@@ -42,6 +43,16 @@ BEGIN
 			,[intCreatedUserId]
 			,[intConcurrencyId]
 		)
+		SELECT	[intItemId] = @PremiumGrains
+				,[intItemLocationId] = @BetterHaven
+				,[dtmDate] = 'January 15, 2014'
+				,[dblStockIn] = 25
+				,[dblStockOut] = 25
+				,[dblCost] = 14.75
+				,[dtmCreated] = GETDATE()
+				,[intCreatedUserId] = 1
+				,[intConcurrencyId] = 2
+		UNION ALL 		
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
 				,[dtmDate] = 'January 15, 2014'
@@ -65,7 +76,7 @@ BEGIN
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
 				,[dtmDate] = 'January 13, 2014'
-				,[dblStockIn] = 0
+				,[dblStockIn] = 25
 				,[dblStockOut] = 77
 				,[dblCost] = 13.00
 				,[dtmCreated] = GETDATE()
@@ -147,12 +158,21 @@ BEGIN
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
+				,[dtmDate] = 'January 15, 2014'
+				,[dblStockIn] = 25
+				,[dblStockOut] = 25
+				,[dblCost] = 14.75
+				,[intCreatedUserId] = 1
+				,[intConcurrencyId] = 2
+		UNION ALL 		
+		SELECT	[intItemId] = @PremiumGrains
+				,[intItemLocationId] = @BetterHaven
 				,[dtmDate] = 'January 16, 2014'
 				,[dblStockIn] = 200
-				,[dblStockOut] = 163
+				,[dblStockOut] = 138
 				,[dblCost] = 22
 				,[intCreatedUserId] = 1
-				,[intConcurrencyId] = 1	
+				,[intConcurrencyId] = 1
 
 				/***************************************************************************************************************************************************************************************************************
 				The following are the expected records to be affected. Here is how it should look like: 
@@ -161,8 +181,10 @@ BEGIN
 		upt		3           3                 2014-01-13 00:00:00.000 77.000000                               77.000000                               13.000000                               1                2
 		upt		3           3                 2014-01-14 00:00:00.000 56.000000                               56.000000                               14.000000                               1                2
 		upt		3           3                 2014-01-15 00:00:00.000 30.000000                               30.000000                               15.000000                               1                2
-		new		3           3                 2014-01-16 00:00:00.000 200.000000                              163.000000                              22.000000                               1                1
-				***************************************************************************************************************************************************************************************************************/
+				3           3                 2014-01-15 00:00:00.000 25.000000                               25.000000                               14.750000                               1                2
+		new		3           3                 2014-01-16 00:00:00.000 200.000000                              138.000000                              22.000000                               1                1
+				***************************************************************************************************************************************************************************************************************/								
+
 	END 
 	
 	-- Act
@@ -172,7 +194,7 @@ BEGIN
 
 		DECLARE @intIterationCounter AS INT = 0;
 
-		-- Repeat call on uspICReduceStockInFIFO until @dblIncreaseQty is completely distributed to all the available fifo buckets
+		-- Repeat call on uspICReduceStockInFIFO until @dblQty is completely distributed to all the available fifo buckets
 		WHILE (ISNULL(@dblQty, 0) > 0)
 		BEGIN 		
 			SET @intIterationCounter += 1;
@@ -192,16 +214,16 @@ BEGIN
 
 			-- Assert on first pass
 			-- the cost to offset is $13
-			-- the qty offset is 77
+			-- the qty offset is 52
 			IF (@intIterationCounter = 1) 
 			BEGIN 
 				EXEC tSQLt.AssertEquals 13.00, @CostUsed
-				EXEC tSQLt.AssertEquals 77.00, @QtyOffset
+				EXEC tSQLt.AssertEquals 52.00, @QtyOffset
 			END 
 				
 			-- Assert on 2nd pass
 			-- the cost to offset is $14
-			-- the qty offset is 56
+			-- the qty offset is 56.00
 			IF (@intIterationCounter = 2) 
 			BEGIN 
 				EXEC tSQLt.AssertEquals 14.00, @CostUsed
@@ -220,6 +242,7 @@ BEGIN
 			-- Assert on 4th pass
 			-- the cost to offset is NULL 
 			-- the qty offset is NULL 
+
 			IF (@intIterationCounter = 4) 
 			BEGIN 
 				EXEC tSQLt.AssertEquals NULL, @CostUsed
