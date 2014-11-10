@@ -35,7 +35,7 @@ Ext.define('Inventory.view.FuelTypeViewController', {
         binding: {
             txtBatchNo: '{current.intBatchNumber}',
             txtEndingRinGallonsForBatch: '{current.intEndingRinGallons}',
-            txtEquivalenceValue: '{current.intEquivalenceValue}',
+            txtEquivalenceValue: '{current.strEquivalenceValue}',
             txtFeedStockFactor: '{current.dblFeedStockFactor}',
             chkRenewableBiomass: '{current.ysnRenewableBiomass}',
             txtPercentOfDenaturant: '{current.dblPercentDenaturant}',
@@ -104,5 +104,24 @@ Ext.define('Inventory.view.FuelTypeViewController', {
                 });
             }
         }
+    },
+
+    oncboFuelCategorySelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window')
+        var current = win.getViewModel().data.current;
+
+        if (current)
+            current.set('strEquivalenceValue', records[0].get('strEquivalenceValue'));
+    },
+
+    init: function(application) {
+        this.control({
+            "#cboFuelCategory": {
+                select: this.oncboFuelCategorySelect
+            }
+        });
     }
 });
