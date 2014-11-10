@@ -18,7 +18,16 @@ Ext.define('Inventory.view.PackTypeViewModel', {
     alias: 'viewmodel.packtype',
 
     requires: [
-        'Inventory.view.override.PackTypeViewModel'
-    ]
+        'Inventory.store.BufferedUnitMeasure'
+    ],
+
+    stores: {
+        sourceUnitMeasure: {
+            type: 'inventorybuffereduom'
+        },
+        targetUnitMeasure: {
+            type: 'inventorybuffereduom'
+        }
+    }
 
 });

@@ -8,7 +8,7 @@ Ext.define('Inventory.model.PackTypeDetail', {
         'Ext.data.Field'
     ],
 
-    idProperty: 'intPackTypeId',
+    idProperty: 'intPackTypeDetailId',
 
     fields: [
         { name: 'intPackTypeDetailId', type: 'int'},

@@ -18,7 +18,6 @@ Ext.define('Inventory.view.PackType', {
     alias: 'widget.packtype',
 
     requires: [
-        'Inventory.view.PackTypeViewModel',
         'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
@@ -34,9 +33,6 @@ Ext.define('Inventory.view.PackType', {
         'Ext.toolbar.Paging'
     ],
 
-    viewModel: {
-        type: 'packtype'
-    },
     height: 525,
     hidden: false,
     minHeight: 525,
@@ -240,11 +236,9 @@ Ext.define('Inventory.view.PackType', {
                                         flex: 1
                                     }
                                 ],
+                                itemId: 'cboSourceUOM',
                                 displayField: 'strUnitMeasure',
-                                valueField: 'strUnitMeasure',
-                                bind: {
-                                    store: '{sourceUnitMeasure}'
-                                }
+                                valueField: 'strUnitMeasure'
                             }
                         },
                         {
@@ -281,11 +275,9 @@ Ext.define('Inventory.view.PackType', {
                                         flex: 1
                                     }
                                 ],
+                                itemId: 'cboTargetUOM',
                                 displayField: 'strUnitMeasure',
-                                valueField: 'strUnitMeasure',
-                                bind: {
-                                    store: '{targetUnitMeasure}'
-                                }
+                                valueField: 'strUnitMeasure'
                             }
                         },
                         {
