@@ -62,16 +62,16 @@ DECLARE @RemainingQty AS NUMERIC(18,6);
 DECLARE @dblReduceQty AS NUMERIC(18,6);
 DECLARE @dblAddQty AS NUMERIC(18,6);
 DECLARE @CostUsed AS NUMERIC(18,6);
-
-DECLARE @dblIncreaseQty AS NUMERIC(18,6);
-DECLARE @NegativeOffSetQty AS NUMERIC(18,6);
+DECLARE @FullQty AS NUMERIC(18,6);
+DECLARE @QtyOffset AS NUMERIC(18,6);
+DECLARE @TotalQtyOffset AS NUMERIC(18,6);
 
 -------------------------------------------------
 -- 1. Process the Fifo Cost buckets
 -------------------------------------------------
 BEGIN 
 	-- Reduce stock 
-	IF (@dblUnitQty < 0)
+	IF (ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0) < 0)
 	BEGIN 
 		SET @dblReduceQty = ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0)
 
@@ -129,10 +129,12 @@ BEGIN
 	END
 
 	-- Add stock 
-	ELSE IF (ISNULL(@dblUnitQty, 0) > 0)
+	ELSE IF (ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0) > 0)
 	BEGIN 
 
 		SET @dblAddQty = ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0)
+		SET @FullQty = @dblAddQty
+		SET @TotalQtyOffset = 0;
 
 		-- Insert the inventory transaction record
 		INSERT INTO tblICInventoryTransaction (
@@ -156,7 +158,7 @@ BEGIN
 		SELECT	[intItemId] = @intItemId
 				,[intItemLocationId] = @intItemLocationId
 				,[dtmDate] = @dtmDate
-				,[dblUnitQty] = @dblAddQty
+				,[dblUnitQty] = @FullQty
 				,[dblCost] = @dblCost
 				,[dblValue] = NULL 
 				,[dblSalesPrice] = @dblSalesPrice
@@ -168,28 +170,26 @@ BEGIN
 				,[intTransactionTypeId] = @intTransactionTypeId 
 				,[dtmCreated] = GETDATE()
 				,[intCreatedUserId] = @intUserId
-				,[intConcurrencyId] = 1
-
-		SET @dblIncreaseQty = @dblAddQty;
-		SET @NegativeOffSetQty = 0;
+				,[intConcurrencyId] = 1		
 
 		-- Repeat call on uspICIncreaseStockInFIFO until @dblAddQty is completely distributed to the negative cost fifo buckets or added as a new bucket. 
-		WHILE (ISNULL(@dblAddQty, 0) < 0)
+		WHILE (ISNULL(@dblAddQty, 0) > 0)
 		BEGIN 
 			EXEC dbo.uspICIncreaseStockInFIFO
 				@intItemId
 				,@intItemLocationId
 				,@dtmDate
-				,@dblIncreaseQty
+				,@dblAddQty
 				,@dblCost
 				,@intUserId
-				,@dblAddQty
-				,@NegativeOffSetQty
+				,@FullQty
+				,@TotalQtyOffset
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT
+				,@QtyOffset OUTPUT 
 
-			SET @dblIncreaseQty = @RemainingQty;
-			SET @NegativeOffSetQty = ISNULL(@dblAddQty - @RemainingQty, @NegativeOffSetQty);
+			SET @dblAddQty = @RemainingQty;
+			SET @TotalQtyOffset += ISNULL(@QtyOffset, 0)
 
 			-- Insert the inventory transaction record
 			INSERT INTO tblICInventoryTransaction (
@@ -214,7 +214,7 @@ BEGIN
 			SELECT	[intItemId] = @intItemId
 					,[intItemLocationId] = @intItemLocationId
 					,[dtmDate] = @dtmDate
-					,[dblUnitQty] = (@dblAddQty - ISNULL(@RemainingQty, 0)) * -1
+					,[dblUnitQty] = @QtyOffset * -1
 					,[dblCost] = @dblCost
 					,[dblValue] = NULL 
 					,[dblSalesPrice] = @dblSalesPrice
@@ -227,14 +227,14 @@ BEGIN
 					,[dtmCreated] = GETDATE()
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId] = 1
-			WHERE	@RemainingQty IS NOT NULL 
+			WHERE	@QtyOffset IS NOT NULL 
 
 			-- Add Revalue Sold
 			UNION ALL 
 			SELECT	[intItemId] = @intItemId
 					,[intItemLocationId] = @intItemLocationId
 					,[dtmDate] = @dtmDate
-					,[dblUnitQty] = @dblAddQty - ISNULL(@RemainingQty, 0)
+					,[dblUnitQty] = @QtyOffset 
 					,[dblCost] = @CostUsed
 					,[dblValue] = NULL 
 					,[dblSalesPrice] = @dblSalesPrice
@@ -247,7 +247,7 @@ BEGIN
 					,[dtmCreated] = GETDATE()
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId] = 1
-			WHERE	@RemainingQty IS NOT NULL 
+			WHERE	@QtyOffset IS NOT NULL 
 
 
 			SET @dblAddQty = @RemainingQty;
