@@ -21,7 +21,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
--- Ensure the sold qty is a positive number
+-- Ensure the qty is a positive number
 SET @dblQty = ABS(@dblQty)
 
 -- Initialize the remaining qty and cost used to NULL

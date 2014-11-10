@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICIncreaseStockInFIFO from negative to positive]
+﻿CREATE PROCEDURE [testi21Database].[test uspICIncreaseStockInFIFO from negative to negative]
 AS
 BEGIN
 	-- Arrange 
@@ -34,6 +34,7 @@ BEGIN
 			,[intCreatedUserId]
 			,[intConcurrencyId]
 		)
+		-- Sold to negative
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
 				,[dtmDate] = 'January 15, 2014'
@@ -43,6 +44,7 @@ BEGIN
 				,[dtmCreated] = GETDATE()
 				,[intCreatedUserId] = 1
 				,[intConcurrencyId] = 1
+		-- Sold to negative
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
@@ -53,6 +55,7 @@ BEGIN
 				,[dtmCreated] = GETDATE()
 				,[intCreatedUserId] = 1
 				,[intConcurrencyId] = 1
+		-- Sold to negative
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
@@ -90,7 +93,7 @@ BEGIN
 		DECLARE @intItemId AS INT				= @PremiumGrains
 				,@intItemLocationId AS INT		= @BetterHaven
 				,@dtmDate AS DATETIME			= 'January 16, 2014'
-				,@dblPurchaseQty NUMERIC(18,6)	= 200
+				,@dblPurchaseQty NUMERIC(18,6)	= 100
 				,@dblCost AS NUMERIC(18,6)		= $22
 				,@intUserId AS INT				= 1
 				,@NegativeOffSetQty AS NUMERIC(18,6)				
@@ -109,6 +112,7 @@ BEGIN
 				,[intCreatedUserId] 
 				,[intConcurrencyId]
 		)
+		-- There is an offset to the negative stock
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
 				,[dtmDate] = 'January 13, 2014'
@@ -117,30 +121,33 @@ BEGIN
 				,[dblCost] = 13.00
 				,[intCreatedUserId] = 1
 				,[intConcurrencyId] = 2
+		-- There is a partial offset to the negative stock
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
 				,[dtmDate] = 'January 14, 2014'
-				,[dblStockIn] = 56
+				,[dblStockIn] = 23
 				,[dblStockOut] = 56
 				,[dblCost] = 14.00
 				,[intCreatedUserId] = 1
 				,[intConcurrencyId] = 2
+		-- Incoming stock can't offset this negative stock
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
 				,[dtmDate] = 'January 15, 2014'
-				,[dblStockIn] = 30
+				,[dblStockIn] = 0
 				,[dblStockOut] = 30
 				,[dblCost] = 15.00
 				,[intCreatedUserId] = 1
-				,[intConcurrencyId] = 2
+				,[intConcurrencyId] = 1
+		-- Incoming stock is fully consumed by the negative stocks
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
 				,[dtmDate] = 'January 16, 2014'
-				,[dblStockIn] = 200
-				,[dblStockOut] = 163
+				,[dblStockIn] = 100
+				,[dblStockOut] = 100
 				,[dblCost] = 22
 				,[intCreatedUserId] = 1
 				,[intConcurrencyId] = 1				
@@ -182,14 +189,8 @@ BEGIN
 				EXEC tSQLt.AssertEquals 14.00, @CostUsed
 			END 
 
-			-- Assert on 3rd pass, the cost to offset is $15
+			-- Assert on 3rd pass, the cost to offset is NULL
 			IF (@intIterationCounter = 3) 
-			BEGIN 
-				EXEC tSQLt.AssertEquals 15.00, @CostUsed
-			END
-
-			-- Assert on 4th pass, the cost to offset is NULL 
-			IF (@intIterationCounter = 4) 
 			BEGIN 
 				EXEC tSQLt.AssertEquals NULL, @CostUsed
 			END
@@ -233,5 +234,4 @@ BEGIN
 
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
-
 END

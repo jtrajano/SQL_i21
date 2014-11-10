@@ -1,6 +1,4 @@
-﻿
-
-CREATE PROCEDURE [testi21Database].[test uspICIncreaseStockInFIFO for the basics]
+﻿CREATE PROCEDURE [testi21Database].[test uspICIncreaseStockInFIFO for the basics]
 AS
 BEGIN
 	-- Arrange 
@@ -38,6 +36,7 @@ BEGIN
 				,@dblPurchaseQty NUMERIC(18,6) 
 				,@dblCost AS NUMERIC(18,6)
 				,@intUserId AS INT
+				,@NegativeOffSetQty AS NUMERIC(18,6)					
 				,@RemainingQty AS NUMERIC(18,6) 
 				,@CostUsed AS NUMERIC(18,6) 
 	END 
@@ -45,13 +44,15 @@ BEGIN
 	-- Act
 	BEGIN 
 		EXEC dbo.uspICIncreaseStockInFIFO
-			@intItemId 
-			,@intItemLocationId 
-			,@dtmDate 
-			,@dblPurchaseQty 
-			,@dblCost 
-			,@intUserId 
-			,@RemainingQty OUTPUT 
+			@intItemId
+			,@intItemLocationId
+			,@dtmDate
+			,@dblPurchaseQty
+			,@dblCost
+			,@intUserId
+			,@dblPurchaseQty
+			,@NegativeOffSetQty
+			,@RemainingQty OUTPUT
 			,@CostUsed OUTPUT
 
 		INSERT INTO actual (

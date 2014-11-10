@@ -7,13 +7,15 @@
 
 */
 
-CREATE PROCEDURE [dbo].[uspICIncreaseStockInFIFO]
+CREATE PROCEDURE dbo.uspICIncreaseStockInFIFO
 	@intItemId AS INT
 	,@intItemLocationId AS INT
 	,@dtmDate AS DATETIME
 	,@dblQty NUMERIC(18,6) 
 	,@dblCost AS NUMERIC(18,6)
 	,@intUserId AS INT
+	,@PurchasedQty AS NUMERIC(18,6) 
+	,@NegativeOffSetQty AS NUMERIC(18,6)
 	,@RemainingQty AS NUMERIC(18,6) OUTPUT
 	,@CostUsed AS NUMERIC(18,6) OUTPUT 
 AS
@@ -24,13 +26,14 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
--- Ensure the sold qty is a positive number
-SET @dblQty = ABS(@dblQty)
+-- Ensure the qty is a positive number
+SET @dblQty = ABS(@dblQty);
 
 -- Initialize the remaining qty to NULL
-SET @RemainingQty = NULL 
+SET @RemainingQty = NULL;
+SET @CostUsed = NULL;
 
--- Upsert (update or insert) a record in the cost bucket.
+-- Upsert (update or insert) a record into the cost bucket.
 MERGE	TOP(1)
 INTO	dbo.tblICInventoryFIFO 
 WITH	(HOLDLOCK) 
@@ -43,7 +46,6 @@ USING (
 	AND fifo_bucket.intItemLocationId = Source_Query.intItemLocationId
 	-- Update an existing negative stock 
 	AND fifo_bucket.dblStockIn < fifo_bucket.dblStockOut
-	AND dbo.fnDateGreaterThanEquals(@dtmDate, fifo_bucket.dtmDate) = 1
 
 -- Update an existing negative stock fifo bucket
 WHEN MATCHED THEN 
@@ -62,8 +64,8 @@ WHEN MATCHED THEN
 		-- retrieve the cost from the cost bucket. 
 		,@CostUsed = fifo_bucket.dblCost
 
--- Insert a new fifo bucket
-WHEN NOT MATCHED THEN 
+-- Insert a new fifo bucket if there is no negative stock to offset. 
+WHEN NOT MATCHED AND @PurchasedQty > 0 THEN 
 	INSERT (
 		[intItemId]
 		,[intItemLocationId]
@@ -79,11 +81,39 @@ WHEN NOT MATCHED THEN
 		@intItemId
 		,@intItemLocationId
 		,@dtmDate
-		,@dblQty
-		,0
+		,@PurchasedQty
+		,@NegativeOffSetQty
 		,@dblCost
 		,GETDATE()
 		,@intUserId
 		,1	
 	)
 ;
+
+-- If the incoming stock was fully consumed by the negative stock, the "WHEN NOT MATCHED AND @PurchasedQty > 0 THEN" is not triggered.
+-- Thus if remaining qty is zero (note, it is important that it is not null), then add a new stock bucket. 
+IF @RemainingQty = 0 
+BEGIN 
+	INSERT dbo.tblICInventoryFIFO (
+		[intItemId]
+		,[intItemLocationId]
+		,[dtmDate]
+		,[dblStockIn]
+		,[dblStockOut]
+		,[dblCost]
+		,[dtmCreated]
+		,[intCreatedUserId]
+		,[intConcurrencyId]
+	)
+	VALUES (
+		@intItemId
+		,@intItemLocationId
+		,@dtmDate
+		,@PurchasedQty
+		,@PurchasedQty
+		,@dblCost
+		,GETDATE()
+		,@intUserId
+		,1	
+	)
+END 

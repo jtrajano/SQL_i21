@@ -123,7 +123,7 @@ BEGIN
 	-- Moving Average Cost
 	IF (@CostingMethod = @AVERAGECOST)
 	BEGIN 
-		EXEC [dbo].[uspICProcessMovingAverageCost]
+		EXEC dbo.uspICProcessMovingAverageCost
 			@intItemId
 			,@intItemLocationId
 			,@dtmDate

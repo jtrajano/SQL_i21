@@ -51,6 +51,7 @@ BEGIN
 				,@dblPurchaseQty NUMERIC(18,6)	= 40
 				,@dblCost AS NUMERIC(18,6)		= 88.77
 				,@intUserId AS INT				= 1
+				,@NegativeOffSetQty AS NUMERIC(18,6)					
 				,@RemainingQty AS NUMERIC(18,6) 
 				,@CostUsed AS NUMERIC(18,6) 
 				,@dblIncreaseQty AS NUMERIC(18,6)
@@ -78,11 +79,16 @@ BEGIN
 	
 	-- Act
 	BEGIN 
-		SET @dblIncreaseQty = @dblPurchaseQty
+		SET @dblIncreaseQty = @dblPurchaseQty;
+		SET @NegativeOffSetQty = 0;
+		
+		DECLARE @intIterationCounter AS INT = 0;	
 
 		-- Repeat call on uspICReduceStockInFIFO until @dblIncreaseQty is completely distributed to all the available fifo buckets
 		WHILE (ISNULL(@dblIncreaseQty, 0) > 0)
-		BEGIN 					
+		BEGIN 	
+			SET @intIterationCounter += 1;				
+						
 			EXEC dbo.uspICIncreaseStockInFIFO
 				@intItemId
 				,@intItemLocationId
@@ -90,10 +96,13 @@ BEGIN
 				,@dblIncreaseQty
 				,@dblCost
 				,@intUserId
+				,@dblPurchaseQty
+				,@NegativeOffSetQty
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT
-
+				
 			SET @dblIncreaseQty = @RemainingQty;
+			SET @NegativeOffSetQty = ISNULL(@dblPurchaseQty - @RemainingQty, @NegativeOffSetQty);
 
 			-- Assert that the cost used must be NULL because we are adding a new fifo cost bucket
 			EXEC tSQLt.AssertEquals NULL, @CostUsed;
@@ -138,4 +147,4 @@ BEGIN
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
 
-END 
+END

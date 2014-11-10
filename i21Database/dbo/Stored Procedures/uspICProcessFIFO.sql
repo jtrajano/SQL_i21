@@ -52,9 +52,15 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+-- Create the variables for the internal transaction types used by costing. 
+DECLARE @WRITE_OFF_SOLD AS INT = -1
+DECLARE @REVALUE_SOLD AS INT = -2
+DECLARE @AUTO_NEGATIVE AS INT = -3
+
 -- Create the variables 
 DECLARE @RemainingQty AS NUMERIC(18,6)
 DECLARE @dblReduceQty AS NUMERIC(18,6)
+DECLARE @dblAddQty AS NUMERIC(18,6)
 DECLARE @CostUsed AS NUMERIC(18,6)
 
 -------------------------------------------------
@@ -66,10 +72,10 @@ BEGIN
 	BEGIN 
 		SET @dblReduceQty = ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0)
 
-		-- Repeat call on uspICReduceStockInFIFO until @dblReduceQty is completed distributed to the all available fifo buckets
+		-- Repeat call on uspICReduceStockInFIFO until @dblReduceQty is completely distributed to all available fifo buckets or added a new negative bucket. 
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)
 		BEGIN 
-			EXEC [dbo].[uspICReduceStockInFIFO]
+			EXEC dbo.uspICReduceStockInFIFO
 				@intItemId
 				,@intItemLocationId
 				,@dtmDate
@@ -79,77 +85,144 @@ BEGIN
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT 
 
+			-- Insert the inventory transaction record
+			INSERT INTO tblICInventoryTransaction (
+				[intItemId] 
+				,[intItemLocationId] 
+				,[dtmDate] 
+				,[dblUnitQty] 
+				,[dblCost] 
+				,[dblValue]
+				,[dblSalesPrice] 
+				,[intCurrencyId] 
+				,[dblExchangeRate] 
+				,[intTransactionId] 
+				,[strTransactionId] 
+				,[strBatchId] 
+				,[intTransactionTypeId] 
+				,[dtmCreated] 
+				,[intCreatedUserId] 
+				,[intConcurrencyId] 
+			)			
+			SELECT	[intItemId] = @intItemId
+					,[intItemLocationId] = @intItemLocationId
+					,[dtmDate] = @dtmDate
+					,[dblUnitQty] = @dblReduceQty - ISNULL(@RemainingQty, 0) 
+					,[dblCost] = ISNULL(@CostUsed, @dblCost)
+					,[dblValue] = NULL 
+					,[dblSalesPrice] = @dblSalesPrice
+					,[intCurrencyId] = @intCurrencyId
+					,[dblExchangeRate] = @dblExchangeRate
+					,[intTransactionId] = @intTransactionId
+					,[strTransactionId] = @strTransactionId
+					,[strBatchId] = @strBatchId
+					,[intTransactionTypeId] = @intTransactionTypeId
+					,[dtmCreated] = GETDATE()
+					,[intCreatedUserId] = @intUserId
+					,[intConcurrencyId] = 1
+
 			SET @dblReduceQty = @RemainingQty;
 		END 
 	END
 
 	-- Add stock 
-	ELSE IF (@dblUnitQty > 0)
+	ELSE IF (ISNULL(@dblUnitQty, 0) > 0)
 	BEGIN 
-		INSERT [dbo].[tblICInventoryFIFO] (
-			[intItemId]
-			,[intItemLocationId]
-			,[dtmDate]
-			,[dblStockIn]
-			,[dblStockOut]
-			,[dblCost]
-			,[dtmCreated]
-			,[intCreatedUserId]
-			,[intConcurrencyId]
-		)
-		VALUES (
-			@intItemId
-			,@intItemLocationId
-			,@dtmDate
-			,ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0)
-			,0
-			,@dblCost
-			,GETDATE()
-			,@intUserId
-			,1	
-		)
+
+		SET @dblAddQty = ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0)
+
+		-- Repeat call on uspICIncreaseStockInFIFO until @dblAddQty is completely distributed to the negative cost fifo buckets or added as a new bucket. 
+		WHILE (ISNULL(@dblAddQty, 0) < 0)
+		BEGIN 
+			EXEC dbo.uspICIncreaseStockInFIFO
+				@intItemId
+				,@intItemLocationId
+				,@dtmDate
+				,@dblAddQty
+				,@dblCost
+				,@intUserId
+				,@RemainingQty OUTPUT
+				,@CostUsed OUTPUT 
+
+			-- Insert the inventory transaction record
+			INSERT INTO tblICInventoryTransaction (
+				[intItemId] 
+				,[intItemLocationId] 
+				,[dtmDate] 
+				,[dblUnitQty] 
+				,[dblCost] 
+				,[dblValue]
+				,[dblSalesPrice] 
+				,[intCurrencyId] 
+				,[dblExchangeRate] 
+				,[intTransactionId] 
+				,[strTransactionId] 
+				,[strBatchId] 
+				,[intTransactionTypeId] 
+				,[dtmCreated] 
+				,[intCreatedUserId] 
+				,[intConcurrencyId] 
+			)			
+			SELECT	[intItemId] = @intItemId
+					,[intItemLocationId] = @intItemLocationId
+					,[dtmDate] = @dtmDate
+					,[dblUnitQty] = @dblAddQty - ISNULL(@RemainingQty, 0) 
+					,[dblCost] = @dblCost
+					,[dblValue] = NULL 
+					,[dblSalesPrice] = @dblSalesPrice
+					,[intCurrencyId] = @intCurrencyId
+					,[dblExchangeRate] = @dblExchangeRate
+					,[intTransactionId] = @intTransactionId
+					,[strTransactionId] = @strTransactionId
+					,[strBatchId] = @strBatchId
+					,[intTransactionTypeId] = @intTransactionTypeId 
+					,[dtmCreated] = GETDATE()
+					,[intCreatedUserId] = @intUserId
+					,[intConcurrencyId] = 1
+			WHERE	@RemainingQty IS NULL 
+			
+			-- Add Write-Off Sold
+			UNION ALL 
+			SELECT	[intItemId] = @intItemId
+					,[intItemLocationId] = @intItemLocationId
+					,[dtmDate] = @dtmDate
+					,[dblUnitQty] = (@dblAddQty - ISNULL(@RemainingQty, 0)) * -1
+					,[dblCost] = @dblCost
+					,[dblValue] = NULL 
+					,[dblSalesPrice] = @dblSalesPrice
+					,[intCurrencyId] = @intCurrencyId
+					,[dblExchangeRate] = @dblExchangeRate
+					,[intTransactionId] = @intTransactionId
+					,[strTransactionId] = @strTransactionId
+					,[strBatchId] = @strBatchId
+					,[intTransactionTypeId] = @WRITE_OFF_SOLD				
+					,[dtmCreated] = GETDATE()
+					,[intCreatedUserId] = @intUserId
+					,[intConcurrencyId] = 1
+			WHERE	@RemainingQty IS NOT NULL 
+
+			-- Add Revalue Sold
+			UNION ALL 
+			SELECT	[intItemId] = @intItemId
+					,[intItemLocationId] = @intItemLocationId
+					,[dtmDate] = @dtmDate
+					,[dblUnitQty] = @dblAddQty - ISNULL(@RemainingQty, 0)
+					,[dblCost] = @CostUsed
+					,[dblValue] = NULL 
+					,[dblSalesPrice] = @dblSalesPrice
+					,[intCurrencyId] = @intCurrencyId
+					,[dblExchangeRate] = @dblExchangeRate
+					,[intTransactionId] = @intTransactionId
+					,[strTransactionId] = @strTransactionId
+					,[strBatchId] = @strBatchId
+					,[intTransactionTypeId] = @REVALUE_SOLD
+					,[dtmCreated] = GETDATE()
+					,[intCreatedUserId] = @intUserId
+					,[intConcurrencyId] = 1
+			WHERE	@RemainingQty IS NOT NULL 
+
+
+			SET @dblAddQty = @RemainingQty;
+		END 
 	END 
 END 
-
--------------------------------------------------
--- 2. Process the inventory transaction records 
--------------------------------------------------
-BEGIN 
-	INSERT INTO tblICInventoryTransaction (
-			[intItemId] 
-			,[intItemLocationId] 
-			,[dtmDate] 
-			,[dblUnitQty] 
-			,[dblCost] 
-			,[dblValue]
-			,[dblSalesPrice] 
-			,[intCurrencyId] 
-			,[dblExchangeRate] 
-			,[intTransactionId] 
-			,[strTransactionId] 
-			,[strBatchId] 
-			,[intTransactionTypeId] 
-			,[dtmCreated] 
-			,[intCreatedUserId] 
-			,[intConcurrencyId] 
-	)
-	-- If positive qty, add stock 
-	SELECT	[intItemId] = @intItemId
-			,[intItemLocationId] = @intItemLocationId
-			,[dtmDate] = @dtmDate
-			,[dblUnitQty] = @dblUnitQty * @dblUOMQty
-			,[dblCost] = @dblCost
-			,[dblValue] = NULL 
-			,[dblSalesPrice] = @dblSalesPrice
-			,[intCurrencyId] = @intCurrencyId
-			,[dblExchangeRate] = @dblExchangeRate
-			,[intTransactionId] = @intTransactionId
-			,[strTransactionId] = @strTransactionId
-			,[strBatchId] = @strBatchId
-			,[intTransactionTypeId] = @intTransactionTypeId
-			,[dtmCreated] = GETDATE()
-			,[intCreatedUserId] = @intUserId
-			,[intConcurrencyId] = 1
-	WHERE	(@dblUnitQty * @dblUOMQty) > 0  
-
-END
