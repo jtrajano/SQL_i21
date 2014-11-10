@@ -807,6 +807,8 @@
     <Build Include="dbo\Tables\tblNRScheduleTransaction.sql" />
     <Build Include="dbo\Tables\tblNRUCC.sql" />
     <Build Include="dbo\Stored Procedures\uspARValidations.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCreateImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMBuildTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
