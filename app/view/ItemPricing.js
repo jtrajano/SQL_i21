@@ -18,7 +18,6 @@ Ext.define('Inventory.view.ItemPricing', {
     alias: 'widget.itempricing',
 
     requires: [
-        'Inventory.view.ItemPricingViewModel',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
         'Ext.button.Button',
@@ -29,9 +28,6 @@ Ext.define('Inventory.view.ItemPricing', {
         'Ext.toolbar.Paging'
     ],
 
-    viewModel: {
-        type: 'itempricing'
-    },
     height: 315,
     hidden: false,
     maxHeight: 315,

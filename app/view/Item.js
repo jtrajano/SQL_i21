@@ -18,7 +18,6 @@ Ext.define('Inventory.view.Item', {
     alias: 'widget.item',
 
     requires: [
-        'Inventory.view.ItemViewModel',
         'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.toolbar.Separator',
@@ -42,9 +41,6 @@ Ext.define('Inventory.view.Item', {
         'Inventory.store.Category'
     ],
 
-    viewModel: {
-        type: 'item'
-    },
     height: 650,
     hidden: false,
     minHeight: 650,
@@ -4474,8 +4470,8 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
                                                         width: 74,
+                                                        dataIndex: 'string',
                                                         text: 'Quantity'
                                                     },
                                                     {
@@ -4485,9 +4481,9 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
                                                         width: 98,
                                                         align: 'right',
+                                                        dataIndex: 'string',
                                                         text: 'Price'
                                                     },
                                                     {

@@ -18,7 +18,6 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
     alias: 'viewmodel.itemlocation',
 
     requires: [
-        'Inventory.view.override.ItemLocationViewModel',
         'Ext.data.Store',
         'Ext.data.field.Integer',
         'i21.store.CompanyLocation',

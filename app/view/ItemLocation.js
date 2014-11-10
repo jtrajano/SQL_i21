@@ -18,7 +18,6 @@ Ext.define('Inventory.view.ItemLocation', {
     alias: 'widget.itemlocation',
 
     requires: [
-        'Inventory.view.ItemLocationViewModel',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
         'Ext.button.Button',
@@ -29,9 +28,6 @@ Ext.define('Inventory.view.ItemLocation', {
         'Ext.toolbar.Paging'
     ],
 
-    viewModel: {
-        type: 'itemlocation'
-    },
     height: 689,
     hidden: false,
     minHeight: 660,
@@ -159,7 +155,6 @@ Ext.define('Inventory.view.ItemLocation', {
                     items: [
                         {
                             xtype: 'gridcombobox',
-                            flex: 1.4,
                             columns: [
                                 {
                                     dataIndex: 'intCompanyLocationId',
@@ -180,6 +175,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                     flex: 1
                                 }
                             ],
+                            flex: 1.4,
                             itemId: 'cboLocation',
                             fieldLabel: 'Location',
                             labelWidth: 105,
@@ -191,7 +187,6 @@ Ext.define('Inventory.view.ItemLocation', {
                         },
                         {
                             xtype: 'combobox',
-                            flex: 1,
                             columns: [
                                 {
                                     dataIndex: 'intVendorId',
@@ -212,6 +207,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                     flex: 1
                                 }
                             ],
+                            flex: 1,
                             itemId: 'cboDefaultVendor',
                             margin: '0 5',
                             fieldLabel: 'Vendor',
@@ -231,7 +227,6 @@ Ext.define('Inventory.view.ItemLocation', {
                         },
                         {
                             xtype: 'gridcombobox',
-                            flex: 1,
                             columns: [
                                 {
                                     dataIndex: 'intCategoryId',
@@ -252,6 +247,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                     flex: 1
                                 }
                             ],
+                            flex: 1,
                             itemId: 'cboCategory',
                             margin: '0 0 0 5',
                             fieldLabel: 'Category',
