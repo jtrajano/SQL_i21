@@ -9,7 +9,7 @@ BEGIN
 				SET strOriginCustomerKey = ISNULL(A.vwcus_key,'''')
 				FROM vwcusmst A
 				WHERE tblTMCustomer.intCustomerNumber = A.A4GLIdentity
-				AND tblTMCustomer.strOriginCustomerKey IS NULL OR tblTMCustomer.strOriginCustomerKey = ''''
+				AND (tblTMCustomer.strOriginCustomerKey IS NULL OR tblTMCustomer.strOriginCustomerKey = '''')
 			  ')
 END
 GO
