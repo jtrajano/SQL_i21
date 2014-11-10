@@ -926,14 +926,10 @@
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strUnitMeasure",
                                                         "itemId": "cboCapacityUOM",
-                                                        "store": [
-                                                            "{packTypeCapacityUOM}"
-                                                        ],
                                                         "valueField": "strUnitMeasure"
                                                     },
                                                     "name": "MyComboBox5",
                                                     "configAlternates": {
-                                                        "store": "binding",
                                                         "columns": "array"
                                                     },
                                                     "designerId": "13b2b24b-bf69-492a-b0d8-df09682d319a",
@@ -1003,14 +999,10 @@
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strUnitMeasure",
                                                         "itemId": "cboCapacityRateUOM",
-                                                        "store": [
-                                                            "{packTypeCapacityRateUOM}"
-                                                        ],
                                                         "valueField": "strUnitMeasure"
                                                     },
                                                     "name": "MyComboBox6",
                                                     "configAlternates": {
-                                                        "store": "binding",
                                                         "columns": "array"
                                                     },
                                                     "designerId": "7090ccb1-afa0-4390-bb1c-44cba5e5e15f",

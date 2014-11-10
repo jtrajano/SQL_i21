@@ -483,10 +483,7 @@ Ext.define('Inventory.view.ManufacturingCell', {
                                                 ],
                                                 itemId: 'cboCapacityUOM',
                                                 displayField: 'strUnitMeasure',
-                                                valueField: 'strUnitMeasure',
-                                                bind: {
-                                                    store: '{packTypeCapacityUOM}'
-                                                }
+                                                valueField: 'strUnitMeasure'
                                             }
                                         },
                                         {
@@ -525,10 +522,7 @@ Ext.define('Inventory.view.ManufacturingCell', {
                                                 ],
                                                 itemId: 'cboCapacityRateUOM',
                                                 displayField: 'strUnitMeasure',
-                                                valueField: 'strUnitMeasure',
-                                                bind: {
-                                                    store: '{packTypeCapacityRateUOM}'
-                                                }
+                                                valueField: 'strUnitMeasure'
                                             }
                                         },
                                         {
