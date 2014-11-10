@@ -47,6 +47,7 @@ namespace iRely.Inventory.BRL
         {
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICFuelTaxClass>()
+                .Include(p => p.tblICFuelTaxClassProductCodes)
                 .Where(w => query.Where(predicate).Any(a => a.intFuelTaxClassId == w.intFuelTaxClassId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)
                 .Skip(start)
