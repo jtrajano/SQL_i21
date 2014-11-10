@@ -781,7 +781,31 @@
     <Build Include="dbo\Tables\tblSTSubcategoryRegProd.sql" />
     <Build Include="dbo\Stored Procedures\uspICProcessFIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInFIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseStockInFIFO.sql" />
     <Build Include="dbo\Tables\tblGRStorageType.sql" />
+    <Build Include="dbo\Functions\fnDateNotEquals.sql" />
+    <Build Include="dbo\Functions\fnDateLessThan.sql" />
+    <Build Include="dbo\Functions\fnDateGreaterThanEquals.sql" />
+    <Build Include="dbo\Functions\fnDateLessThanEquals.sql" />
+    <Build Include="dbo\Functions\fnDateGreaterThan.sql" />
+    <Build Include="dbo\Functions\fnDateEquals.sql" />
+    <Build Include="dbo\Tables\tblARCustomerProductVersion.sql" />
+    <None Include="Scripts\Post-Deployment\AP\FixVendorGLAccountExpense.sql" />
+    <Build Include="dbo\Views\vyuHDGroupUser.sql" />
+    <Build Include="dbo\Stored Procedures\uspEntityCreateEntity.sql" />
+    <Build Include="dbo\User Defined Types\Entity.sql" />
+    <Build Include="dbo\User Defined Types\EntityContact.sql" />
+    <Build Include="dbo\Stored Procedures\uspEntityCreateEntityContact.sql" />
+    <Build Include="dbo\Stored Procedures\uspARContactOriginSync.sql" />
+    <Build Include="dbo\Tables\tblNRAdjustmentType.sql" />
+    <Build Include="dbo\Tables\tblNRNote.sql" />
+    <Build Include="dbo\Tables\tblNRNoteDescription.sql" />
+    <Build Include="dbo\Tables\tblNRNoteFutureTransaction.sql" />
+    <Build Include="dbo\Tables\tblNRNoteSchedule.sql" />
+    <Build Include="dbo\Tables\tblNRNoteTransaction.sql" />
+    <Build Include="dbo\Tables\tblNRNoteTransType.sql" />
+    <Build Include="dbo\Tables\tblNRScheduleTransaction.sql" />
+    <Build Include="dbo\Tables\tblNRUCC.sql" />
     <Build Include="dbo\Stored Procedures\uspARValidations.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -809,6 +833,7 @@
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
+    <None Include="Scripts\Post-Deployment\AP\UpdateBillBatch.sql" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
