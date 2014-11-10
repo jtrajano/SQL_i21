@@ -2,7 +2,7 @@
 (
 	[intNoteId] [int] IDENTITY(1,1) NOT NULL,
 	[strNoteNumber] [nvarchar](10) COLLATE Latin1_General_CI_AS NOT NULL,
-	[intCustomerId] INT COLLATE Latin1_General_CI_AS NOT NULL,
+	[intCustomerId] INT NOT NULL,
 	[strNoteType] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intDescriptionId] [int] NOT NULL,
 	[dblCreditLimit] [numeric](18, 6) NOT NULL,
