@@ -797,6 +797,15 @@
     <Build Include="dbo\User Defined Types\EntityContact.sql" />
     <Build Include="dbo\Stored Procedures\uspEntityCreateEntityContact.sql" />
     <Build Include="dbo\Stored Procedures\uspARContactOriginSync.sql" />
+    <Build Include="dbo\Tables\tblNRAdjustmentType.sql" />
+    <Build Include="dbo\Tables\tblNRNote.sql" />
+    <Build Include="dbo\Tables\tblNRNoteDescription.sql" />
+    <Build Include="dbo\Tables\tblNRNoteFutureTransaction.sql" />
+    <Build Include="dbo\Tables\tblNRNoteSchedule.sql" />
+    <Build Include="dbo\Tables\tblNRNoteTransaction.sql" />
+    <Build Include="dbo\Tables\tblNRNoteTransType.sql" />
+    <Build Include="dbo\Tables\tblNRScheduleTransaction.sql" />
+    <Build Include="dbo\Tables\tblNRUCC.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
