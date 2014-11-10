@@ -458,7 +458,7 @@ BEGIN
 			SET @ContactEntityId = SCOPE_IDENTITY()
 		
 			INSERT [dbo].[tblEntityContact] ([intEntityId], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes],[strContactNumber])
-			VALUES							 (@ContactEntityId, @strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes, @strContactName)
+			VALUES							 (@ContactEntityId, @strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes, CAST(@strContactName AS NVARCHAR(20)))
 
 		END
 		

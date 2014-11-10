@@ -37,8 +37,10 @@ BEGIN
 	--Check if there is a payment method with a type of ''Check''
 	IF NOT EXISTS(SELECT 1 FROM tblSMPaymentMethod WHERE strPaymentMethod = ''Check'')
 	BEGIN
-		RAISERROR(''Please create Check payment method before importing bills.'', 16, 1);
-		RETURN;
+		--RAISERROR(''Please create Check payment method before importing bills.'', 16, 1);
+		--RETURN;
+		INSERT INTO tblSMPaymentMethod(strPaymentMethod, ysnActive)
+			SELECT ''Check'', 1
 	END
 
 	--Check if there is check book that was not exists on tblCMBankAccount
