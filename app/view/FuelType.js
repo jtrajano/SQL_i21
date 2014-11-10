@@ -175,6 +175,12 @@ Ext.define('Inventory.view.FuelType', {
                                     dataType: 'string',
                                     text: 'Description',
                                     flex: 1
+                                },
+                                {
+                                    dataIndex: 'strEquivalenceValue',
+                                    dataType: 'string',
+                                    text: 'Equivalence Value',
+                                    flex: 1
                                 }
                             ],
                             itemId: 'cboFuelCategory',
@@ -254,7 +260,7 @@ Ext.define('Inventory.view.FuelType', {
                             ],
                             itemId: 'cboFuelCode',
                             width: 170,
-                            fieldLabel: 'Fuel',
+                            fieldLabel: 'Fuel Code',
                             labelWidth: 165,
                             displayField: 'strRinFuelCode',
                             valueField: 'intRinFuelId'
