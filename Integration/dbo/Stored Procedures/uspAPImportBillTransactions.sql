@@ -253,8 +253,24 @@ BEGIN
 		END;
 
 		--CREATE PAYMENT
+		
+		CREATE TABLE #tmpBillsPayment
+		(
+			[id] INT IDENTITY(1,1),
+			[strCheckBookNo] NVARCHAR(4),
+			[strVendorId] NVARCHAR(10),
+			[dblAmount] DECIMAL(18,6),
+			[dtmDate] DATETIME,
+			[strCheckNo] NVARCHAR(16),
+			[dblDiscount] DECIMAL(18,6),
+			[strPaymentMethod] NVARCHAR(20),
+			[strBills] NVARCHAR(MAX),
+			CONSTRAINT [PK_dbo.tblAPBill] PRIMARY KEY CLUSTERED ([id] ASC)
+		);
+		
+		CREATE NONCLUSTERED INDEX [IX_tmpBillsPayment_strVendorId] ON #tmpBillsPayment([strVendorId]);
 
-		WITH CTE (apchk_cbk_no, apchk_vnd_no, apchk_chk_amt, apchk_rev_dt, apchk_chk_no, apchk_disc_amt, intBillId)
+		WITH CTE (apchk_cbk_no, apchk_vnd_no, apchk_chk_amt, apchk_rev_dt, apchk_chk_no, apchk_disc_amt, tranType, intBillId)
 		AS (
 			SELECT
 			A.apchk_cbk_no
@@ -263,27 +279,43 @@ BEGIN
 			,A.apchk_rev_dt
 			,A.apchk_chk_no
 			,A.apchk_disc_amt
+			,CASE
+				WHEN A.apchk_chk_amt > 0 THEN 
+					CASE 
+						WHEN LEFT(A.apchk_chk_no, 1) = ''E'' THEN 1
+						WHEN LEFT(A.apchk_chk_no, 1) = ''W'' THEN 2
+						WHEN A.apchk_trx_ind = ''C'' THEN 3
+						ELSE 4
+					END
+				WHEN A.apchk_chk_amt < 0 THEN 5
+			END
 			,C.intBillId
-			--,B.apivc_orig_amt
 			FROM apchkmst A
 			LEFT JOIN apivcmst B
 			ON A.apchk_vnd_no = B.apivc_vnd_no
 			AND A.apchk_chk_no = B.apivc_chk_no
 			AND A.apchk_rev_dt = B.apivc_chk_rev_dt
 			AND A.apchk_cbk_no = B.apivc_cbk_no
-		AND A.apchk_trx_ind <> ''O''
+		AND A.apchk_trx_ind <> ''O'' AND A.apchk_chk_amt <> 0
 			INNER JOIN (tblAPBill C INNER JOIN tblAPVendor D ON C.intVendorId = D.intVendorId)
 				ON B.apivc_ivc_no = C.strVendorOrderNumber COLLATE Latin1_General_CS_AS
 				AND B.apivc_vnd_no = D.strVendorId COLLATE Latin1_General_CS_AS
-			--ORDER BY A.apchk_rev_dt, A.apchk_cbk_no, A.apchk_chk_no
 		)
+		INSERT INTO #tmpBillsPayment
 		SELECT
 			A.apchk_cbk_no
 			,A.apchk_vnd_no
 			,A.apchk_chk_amt
-			,A.apchk_rev_dt
+			,CASE WHEN ISDATE(A.apchk_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apchk_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END
 			,A.apchk_chk_no
 			,A.apchk_disc_amt
+			,CASE
+				WHEN A.tranType = 1 THEN ''EFT''
+				WHEN A.tranType = 2 THEN ''Wire''
+				WHEN A.tranType = 3 THEN ''Check''
+				WHEN A.tranType = 4 THEN ''Withdrawal''
+				WHEN A.tranType = 5 THEN ''Deposit''	
+			END
 			,STUFF((SELECT '', '' + CAST(B.intBillId AS VARCHAR(10))
 				   FROM CTE B
 				   WHERE A.apchk_vnd_no = B.apchk_vnd_no
@@ -292,7 +324,6 @@ BEGIN
 					AND A.apchk_cbk_no = B.apchk_cbk_no
 				   --ORDER BY B.apchk_rev_dt, B.apchk_cbk_no, B.apchk_chk_no
 				  FOR XML PATH('''')), 1, 2, '''') AS BillIds
-		INTO #tmpBillsPayment
 		FROM CTE A
 		GROUP BY A.apchk_cbk_no
 			,A.apchk_vnd_no
@@ -300,8 +331,18 @@ BEGIN
 			,A.apchk_rev_dt
 			,A.apchk_chk_no
 			,A.apchk_disc_amt
+			,A.tranType
 		--ORDER BY A.apchk_rev_dt, A.apchk_cbk_no, A.apchk_chk_no
 
+		--Create Payment Method if not yet exists		
+		INSERT INTO tblSMPaymentMethod(strPaymentMethod, ysnActive)
+		SELECT 
+			DISTINCT
+			strPaymentMethod,
+			1
+		FROM #tmpBillsPayment A
+			WHERE NOT EXISTS(SELECT * FROM tblSMPaymentMethod B WHERE B.strPaymentMethod = A.strPaymentMethod COLLATE Latin1_General_CS_AS)
+	
 		DECLARE @paymentId INT
 
 		WHILE EXISTS(SELECT 1 FROM #tmpBillsPayment)
@@ -310,16 +351,16 @@ BEGIN
 			SELECT TOP 1
 				@bankAccount = C.intBankAccountId,
 				@intVendorId = B.intVendorId,
-				@paymentInfo = A.apchk_chk_no,
-				@payment = A.apchk_chk_amt,
-				@datePaid = CASE WHEN ISDATE(A.apchk_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apchk_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-				@paymentMethod = (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = ''Check''),
-				@billIds = A.BillIds
+				@paymentInfo = A.strCheckNo,
+				@payment = A.dblAmount,
+				@datePaid = A.dtmDate,
+				@paymentMethod = (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = A.strPaymentMethod COLLATE Latin1_General_CS_AS),
+				@billIds = A.strBills
 			FROM #tmpBillsPayment A
 				INNER JOIN tblAPVendor B
-					ON A.apchk_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
+					ON A.strVendorId = B.strVendorId COLLATE Latin1_General_CS_AS
 				INNER JOIN tblCMBankAccount C
-					ON A.apchk_cbk_no = C.strCbkNo COLLATE Latin1_General_CS_AS
+					ON A.strCheckBookNo = C.strCbkNo COLLATE Latin1_General_CS_AS
 
 			EXEC uspAPCreatePayment @userId = @UserId,
 					@bankAccount = @bankAccount,
@@ -337,9 +378,7 @@ BEGIN
 		UPDATE tblAPPayment
 		SET ysnOrigin = 1
 		WHERE intPaymentId = @paymentId
-
 			DELETE TOP(1) FROM #tmpBillsPayment
-
 		END
 
 		--backup data from aptrxmst on one time synchronization
@@ -384,7 +423,7 @@ BEGIN
 			intPayeeId = C.intEntityId
 		FROM tblCMBankTransaction A
 		INNER JOIN tblAPPayment B
-			ON A.dblAmount = B.dblAmountPaid
+			ON A.dblAmount = (CASE WHEN A.intBankTransactionTypeId = 11 THEN (B.dblAmountPaid) * -1 ELSE B.dblAmountPaid END)
 			AND A.dtmDate = B.dtmDatePaid
 			AND A.intBankAccountId = B.intBankAccountId
 			AND A.strReferenceNo = B.strPaymentInfo
