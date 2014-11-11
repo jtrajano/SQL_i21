@@ -33,14 +33,6 @@ BEGIN
 	DECLARE @IsPosted BIT
 	DECLARE @IsPaid BIT
 
-	--Validation
-	--Check if there is a payment method with a type of ''Check''
-	IF NOT EXISTS(SELECT 1 FROM tblSMPaymentMethod WHERE strPaymentMethod = ''Check'')
-	BEGIN
-		RAISERROR(''Please create Check payment method before importing bills.'', 16, 1);
-		RETURN;
-	END
-
 	--Check if there is check book that was not exists on tblCMBankAccount
 	IF EXISTS(SELECT 1 FROM apchkmst A 
 				LEFT JOIN tblCMBankAccount B
