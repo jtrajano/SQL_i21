@@ -356,7 +356,13 @@
     </Build>
     <Build Include="testi21Database\Stored Procedures\test uspICProcessMovingAverageCost, Apr 7. Sold 60 stocks.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>      
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessFIFO, Apr 7. Sold 60 stocks.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessFIFO, May 15. Purchase 15 stocks at 27 dollars each.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
