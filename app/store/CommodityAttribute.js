@@ -17,7 +17,6 @@ Ext.define('Inventory.store.CommodityAttribute', {
             storeId: 'CommodityAttribute',
             pageSize: 50,
             batchActions: true,
-            remoteFilter: true,
             proxy: {
                 type: 'rest',
                 api: {

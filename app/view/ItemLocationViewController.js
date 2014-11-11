@@ -21,39 +21,50 @@ Ext.define('Inventory.view.ItemLocationViewController', {
         binding: {
             cboLocation: {
                 value: '{current.intLocationId}',
-                store: '{Location}'
+                store: '{location}'
             },
             cboDefaultVendor: {
                 value: '{current.intVendorId}',
-                store: '{Vendor}'
+                store: '{vendor}'
             },
             cboCostingMethod: {
                 value: '{current.intCostingMethod}',
-                store: '{CostingMethods}'
+                store: '{costingMethods}'
             },
             cboCategory: {
                 value: '{current.intCategoryId}',
-                store: '{Category}'
+                store: '{category}'
             },
             txtDescription: '{current.strDescription}',
             txtRow: '{current.strRow}',
-            txtBon: '{current.strBin}',
+            txtBin: '{current.strBin}',
             cboDefaultUom: {
                 value: '{current.intDefaultUOMId}',
-                store: '{UnitMeasure}'
+                store: '{defaultUOM}'
             },
             cboIssueUom: {
                 value: '{current.intIssueUOMId}',
-                store: '{UnitMeasure}'
+                store: '{issueUOM}'
             },
             cboReceiveUom: {
                 value: '{current.intReceiveUOMId}',
-                store: '{UnitMeasure}'
+                store: '{receiveUOM}'
             },
-            cboFamily: '{current.intFamilyId}',
-            cboClass: '{current.intClassId}',
-            cboProductCode: '{current.intProductCodeId}',
-            cboFuelTankNo: '{current.intFuelTankId}',
+            cboFamily: {
+                value: '{current.intFamilyId}',
+                store: '{family}'
+            },
+            cboClass: {
+                value: '{current.intClassId}',
+                store: '{class}'
+            },
+            cboProductCode: {
+                value: '{current.intProductCodeId}',
+                store: '{productCode}'
+            },
+
+
+//            cboFuelTankNo: '{current.intFuelTankId}',
             txtPassportFuelId1: '{current.strPassportFuelId1}',
             txtPassportFuelId2: '{current.strPassportFuelId2}',
             txtPassportFuelId3: '{current.strPassportFuelId3}',
@@ -82,15 +93,35 @@ Ext.define('Inventory.view.ItemLocationViewController', {
             txtMinimumAge: '{current.intMinimumAge}',
             chkApplyBlueLaw1: '{current.ysnApplyBlueLaw1}',
             chkApplyBlueLaw2: '{current.ysnApplyBlueLaw2}',
-            cboItemTypeCode: '{current.intItemTypeCode}',
-            txtItemTypeSubcode: '{current.intItemTypeSubCode}',
+//            cboItemTypeCode: '{current.intItemTypeCode}',
+//            txtItemTypeSubcode: '{current.intItemTypeSubCode}',
             chkAutoCalculateFreight: '{current.ysnAutoCalculateFreight}',
-            cboFreightMethod: '{current.intFreightMethodId}',
+            cboFreightMethod: {
+                value: '{current.intFreightMethodId}',
+                store: '{freightTerm}'
+            },
             txtFreightRate: '{current.dblFreightRate}',
             cboFreightVendor: {
                 value: '{current.intFreightVendorId}',
-                store: '{Vendor}'
-            }
+                store: '{freightVendor}'
+            },
+            cboNegativeInventory: {
+                value: '{current.intNegativeInventory}',
+                store: '{negativeInventory}'
+            },
+            txtReorderPoint: '{current.dblReorderPoint}',
+            txtMinOrder: '{current.dblMinOrder}',
+            txtSuggestedQty: '{current.dblSuggestedQty}',
+            txtLeadTime: '{current.dblLeadTime}',
+            cboCounted: {
+                value: '{current.strCounted}',
+                store: '{counteds}'
+            },
+            cboInventoryGroupField: {
+                value: '{current.intCountGroupId}',
+                store: '{countGroup}'
+            },
+            chkCountedDaily: '{current.ysnCountedDaily}'
         }
     },
 

@@ -25,6 +25,7 @@ Ext.define('Inventory.view.ItemLocation', {
         'Ext.form.field.ComboBox',
         'Ext.form.field.TextArea',
         'Ext.form.field.Checkbox',
+        'Ext.form.field.Number',
         'Ext.toolbar.Paging'
     ],
 
@@ -180,13 +181,10 @@ Ext.define('Inventory.view.ItemLocation', {
                             fieldLabel: 'Location',
                             labelWidth: 105,
                             displayField: 'strLocationName',
-                            valueField: 'intCompanyLocationId',
-                            bind: {
-                                store: '{Location}'
-                            }
+                            valueField: 'intCompanyLocationId'
                         },
                         {
-                            xtype: 'combobox',
+                            xtype: 'gridcombobox',
                             columns: [
                                 {
                                     dataIndex: 'intVendorId',
@@ -211,7 +209,9 @@ Ext.define('Inventory.view.ItemLocation', {
                             itemId: 'cboDefaultVendor',
                             margin: '0 5',
                             fieldLabel: 'Vendor',
-                            labelWidth: 50
+                            labelWidth: 50,
+                            displayField: 'strVendorId',
+                            valueField: 'intVendorId'
                         },
                         {
                             xtype: 'combobox',
@@ -220,10 +220,7 @@ Ext.define('Inventory.view.ItemLocation', {
                             fieldLabel: 'Costing Method',
                             labelWidth: 95,
                             displayField: 'strDescription',
-                            valueField: 'intCostingMethodId',
-                            bind: {
-                                store: '{CostingMethods}'
-                            }
+                            valueField: 'intCostingMethodId'
                         },
                         {
                             xtype: 'gridcombobox',
@@ -253,10 +250,7 @@ Ext.define('Inventory.view.ItemLocation', {
                             fieldLabel: 'Category',
                             labelWidth: 55,
                             displayField: 'strCategoryCode',
-                            valueField: 'intCategoryId',
-                            bind: {
-                                store: '{Category}'
-                            }
+                            valueField: 'intCategoryId'
                         }
                     ]
                 },
@@ -328,10 +322,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                     fieldLabel: 'Default UOM',
                                     labelWidth: 105,
                                     displayField: 'strUnitMeasure',
-                                    valueField: 'intUnitMeasureId',
-                                    bind: {
-                                        store: '{UnitMeasure}'
-                                    }
+                                    valueField: 'intUnitMeasureId'
                                 },
                                 {
                                     xtype: 'gridcombobox',
@@ -365,10 +356,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                     fieldLabel: 'Issue UOM',
                                     labelWidth: 105,
                                     displayField: 'strUnitMeasure',
-                                    valueField: 'intUnitMeasureId',
-                                    bind: {
-                                        store: '{UnitMeasure}'
-                                    }
+                                    valueField: 'intUnitMeasureId'
                                 },
                                 {
                                     xtype: 'gridcombobox',
@@ -402,31 +390,95 @@ Ext.define('Inventory.view.ItemLocation', {
                                     fieldLabel: 'Receive UOM',
                                     labelWidth: 105,
                                     displayField: 'strUnitMeasure',
-                                    valueField: 'intUnitMeasureId',
-                                    bind: {
-                                        store: '{UnitMeasure}'
-                                    }
+                                    valueField: 'intUnitMeasureId'
                                 },
                                 {
-                                    xtype: 'combobox',
+                                    xtype: 'gridcombobox',
+                                    columns: [
+                                        {
+                                            dataIndex: 'intFamilyId',
+                                            dataType: 'numeric',
+                                            text: 'Family Id',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strFamilyId',
+                                            dataType: 'string',
+                                            text: 'Family',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strFamilyDesc',
+                                            dataType: 'string',
+                                            text: 'Description',
+                                            flex: 1
+                                        }
+                                    ],
                                     itemId: 'cboFamily',
                                     fieldLabel: 'Family',
-                                    labelWidth: 105
+                                    labelWidth: 105,
+                                    displayField: 'strFamilyId',
+                                    valueField: 'intFamilyId'
                                 },
                                 {
-                                    xtype: 'combobox',
+                                    xtype: 'gridcombobox',
+                                    columns: [
+                                        {
+                                            dataIndex: 'intClassId',
+                                            dataType: 'numeric',
+                                            text: 'Class Id',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strClassId',
+                                            dataType: 'string',
+                                            text: 'Class',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strClassDesc',
+                                            dataType: 'string',
+                                            text: 'Description',
+                                            flex: 1
+                                        }
+                                    ],
                                     itemId: 'cboClass',
                                     fieldLabel: 'Class',
-                                    labelWidth: 105
+                                    labelWidth: 105,
+                                    displayField: 'strClassId',
+                                    valueField: 'intClassId'
                                 },
                                 {
-                                    xtype: 'combobox',
+                                    xtype: 'gridcombobox',
+                                    columns: [
+                                        {
+                                            dataIndex: 'intRegProdId',
+                                            dataType: 'numeric',
+                                            text: 'Product Id',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strRegProdCode',
+                                            dataType: 'string',
+                                            text: 'Product',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strRegProdDesc',
+                                            dataType: 'string',
+                                            text: 'Description',
+                                            flex: 1
+                                        }
+                                    ],
                                     itemId: 'cboProductCode',
                                     fieldLabel: 'Product Code',
-                                    labelWidth: 105
+                                    labelWidth: 105,
+                                    displayField: 'strRegProdCode',
+                                    valueField: 'intRegProdId'
                                 },
                                 {
                                     xtype: 'combobox',
+                                    disabled: true,
                                     itemId: 'cboFuelTankNo',
                                     fieldLabel: 'Fuel Tank No',
                                     labelWidth: 105
@@ -603,10 +655,12 @@ Ext.define('Inventory.view.ItemLocation', {
                             },
                             items: [
                                 {
-                                    xtype: 'textfield',
+                                    xtype: 'numberfield',
                                     itemId: 'txtMinimumAge',
                                     fieldLabel: 'Minimum Age',
-                                    labelWidth: 140
+                                    labelWidth: 140,
+                                    fieldStyle: 'text-align:right',
+                                    hideTrigger: true
                                 },
                                 {
                                     xtype: 'checkboxfield',
@@ -622,12 +676,14 @@ Ext.define('Inventory.view.ItemLocation', {
                                 },
                                 {
                                     xtype: 'combobox',
+                                    disabled: true,
                                     itemId: 'cboItemTypeCode',
                                     fieldLabel: 'Item Type Code',
                                     labelWidth: 140
                                 },
                                 {
                                     xtype: 'textfield',
+                                    disabled: true,
                                     itemId: 'txtItemTypeSubcode',
                                     fieldLabel: 'Item Type Subcode',
                                     labelWidth: 140
@@ -639,19 +695,49 @@ Ext.define('Inventory.view.ItemLocation', {
                                     labelWidth: 140
                                 },
                                 {
-                                    xtype: 'combobox',
+                                    xtype: 'gridcombobox',
+                                    columns: [
+                                        {
+                                            dataIndex: 'intFreightTermId',
+                                            dataType: 'numeric',
+                                            text: 'Freight Term Id',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strFreightTerm',
+                                            dataType: 'string',
+                                            text: 'Freight Term',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strFobPoint',
+                                            dataType: 'string',
+                                            text: 'FOB Point',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'ysnActive',
+                                            dataType: 'boolean',
+                                            text: 'Active',
+                                            flex: 1
+                                        }
+                                    ],
                                     itemId: 'cboFreightMethod',
                                     fieldLabel: 'Freight Method',
-                                    labelWidth: 140
+                                    labelWidth: 140,
+                                    displayField: 'strFreightTerm',
+                                    valueField: 'intFreightTermId'
                                 },
                                 {
-                                    xtype: 'textfield',
+                                    xtype: 'numberfield',
                                     itemId: 'txtFreightRate',
                                     fieldLabel: 'Freight Rate',
-                                    labelWidth: 140
+                                    labelWidth: 140,
+                                    fieldStyle: 'text-align:right',
+                                    hideTrigger: true
                                 },
                                 {
-                                    xtype: 'combobox',
+                                    xtype: 'gridcombobox',
                                     columns: [
                                         {
                                             dataIndex: 'intVendorId',
@@ -682,50 +768,73 @@ Ext.define('Inventory.view.ItemLocation', {
                                     fieldLabel: 'Negative Inventory',
                                     labelWidth: 140,
                                     displayField: 'strDescription',
-                                    valueField: 'strDescription',
-                                    bind: {
-                                        store: '{NegativeInventory}'
-                                    }
+                                    valueField: 'intNegativeInventoryId'
                                 },
                                 {
-                                    xtype: 'textfield',
+                                    xtype: 'numberfield',
                                     itemId: 'txtReorderPoint',
                                     fieldLabel: 'Reorder Point',
-                                    labelWidth: 140
+                                    labelWidth: 140,
+                                    fieldStyle: 'text-align:right',
+                                    hideTrigger: true
                                 },
                                 {
-                                    xtype: 'textfield',
+                                    xtype: 'numberfield',
                                     itemId: 'txtMinOrder',
                                     fieldLabel: 'Min Order',
-                                    labelWidth: 140
+                                    labelWidth: 140,
+                                    fieldStyle: 'text-align:right',
+                                    hideTrigger: true
                                 },
                                 {
-                                    xtype: 'textfield',
+                                    xtype: 'numberfield',
                                     itemId: 'txtSuggestedQty',
                                     fieldLabel: 'Suggested Qty',
-                                    labelWidth: 140
+                                    labelWidth: 140,
+                                    fieldStyle: 'text-align:right',
+                                    hideTrigger: true
                                 },
                                 {
-                                    xtype: 'textfield',
+                                    xtype: 'numberfield',
                                     itemId: 'txtLeadTime',
                                     fieldLabel: 'Lead Time',
-                                    labelWidth: 140
+                                    labelWidth: 140,
+                                    fieldStyle: 'text-align:right',
+                                    hideTrigger: true
                                 },
                                 {
-                                    xtype: 'textfield',
-                                    itemId: 'txtCounted',
+                                    xtype: 'combobox',
+                                    itemId: 'cboCounted',
                                     fieldLabel: 'Counted',
-                                    labelWidth: 140
+                                    labelWidth: 140,
+                                    displayField: 'strDescription',
+                                    valueField: 'strDescription'
                                 },
                                 {
-                                    xtype: 'textfield',
-                                    itemId: 'txtInventoryGroupField',
+                                    xtype: 'gridcombobox',
+                                    columns: [
+                                        {
+                                            dataIndex: 'intCountGroupId',
+                                            dataType: 'numeric',
+                                            text: 'Count Group Id',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strCountGroup',
+                                            dataType: 'string',
+                                            text: 'Count Group',
+                                            flex: 1
+                                        }
+                                    ],
+                                    itemId: 'cboInventoryGroupField',
                                     fieldLabel: 'Inventory Group Field',
-                                    labelWidth: 140
+                                    labelWidth: 140,
+                                    displayField: 'strCountGroup',
+                                    valueField: 'intCountGroupId'
                                 },
                                 {
-                                    xtype: 'textfield',
-                                    itemId: 'txtCountedDaily',
+                                    xtype: 'checkboxfield',
+                                    itemId: 'chkCountedDaily',
                                     fieldLabel: 'Counted Daily',
                                     labelWidth: 140
                                 }

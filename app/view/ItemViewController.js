@@ -899,10 +899,11 @@ Ext.define('Inventory.view.ItemViewController', {
 
         Ext.require([
             screenName,
-                screenName + 'ViewController',
+                screenName + 'ViewModel',
+                screenName + 'ViewController'
         ], function() {
             var screen = screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
-            var view = Ext.create(screenName, { controller: screen.toLowerCase() });
+            var view = Ext.create(screenName, { controller: screen.toLowerCase(), viewModel: screen.toLowerCase() });
             view.on('destroy', me.onDestroyItemLocationScreen, me, { window: win });
 
             var controller = view.getController();
@@ -1114,10 +1115,11 @@ Ext.define('Inventory.view.ItemViewController', {
 
         Ext.require([
             screenName,
-                screenName + 'ViewController',
+                screenName + 'ViewModel',
+                screenName + 'ViewController'
         ], function() {
             var screen = screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
-            var view = Ext.create(screenName, { controller: screen.toLowerCase() });
+            var view = Ext.create(screenName, { controller: screen.toLowerCase(), viewModel: screen.toLowerCase() });
             view.on('destroy', me.onDestroyItemPricingScreen, me, { window: win });
 
             var controller = view.getController();

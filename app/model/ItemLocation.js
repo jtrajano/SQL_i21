@@ -86,12 +86,20 @@ Ext.define('Inventory.model.ItemLocation', {
         { name: 'intFreightMethodId', type: 'int', allowNull: true},
         { name: 'dblFreightRate', type: 'float'},
         { name: 'intFreightVendorId', type: 'int', allowNull: true},
+        { name: 'intNegativeInventory', type: 'int', allowNull: true},
+        { name: 'dblReorderPoint', type: 'float'},
+        { name: 'dblMinOrder', type: 'float'},
+        { name: 'dblSuggestedQty', type: 'float'},
+        { name: 'dblLeadTime', type: 'float'},
+        { name: 'strCounted', type: 'string'},
+        { name: 'intCountGroupId', type: 'int', allowNull: true},
+        { name: 'ysnCountedDaily', type: 'boolean'},
         { name: 'intSort', type: 'int'},
 
         { name: 'strLocationName', type: 'string'},
         { name: 'strVendorId', type: 'string'},
         { name: 'strCategory', type: 'string'},
-        { name: 'strUnitMeasure', type: 'string'},
+        { name: 'strUnitMeasure', type: 'string'}
     ],
 
     validators: [
