@@ -1127,4 +1127,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intCustomerId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="af2670ee-41ff-4bd7-acc4-af011be77381" ChangeDateTime="11/11/2014 08:51:20">
+    <Property Name="ElementName" Value="[dbo].[tblICItemLocation].[strNegativeInventory]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemLocation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intNegativeInventory" />
+  </Operation>
 </Operations>
