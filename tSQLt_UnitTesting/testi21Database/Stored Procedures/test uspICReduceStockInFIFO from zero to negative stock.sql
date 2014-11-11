@@ -4,7 +4,11 @@ BEGIN
 	-- Arrange 
 	BEGIN 
 		-- Fake the table 
-		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;		
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
+
+		-- Re-add the clustered index. This is critical for the FIFO table because it arranges the data physically by that order. 
+		CREATE CLUSTERED INDEX [Fake_IDX_tblICInventoryFIFO]
+			ON [dbo].[tblICInventoryFIFO]([dtmDate] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intInventoryFIFOId] ASC);
 
 		-- Create the expected and actual tables 
 		CREATE TABLE expected (
