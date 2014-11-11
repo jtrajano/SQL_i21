@@ -40,39 +40,46 @@ Ext.define('Inventory.view.ItemViewController', {
             txtModelNo: '{current.strModelNo}',
             cboType: {
                 value: '{current.strType}',
-                store: '{ItemTypes}'
+                store: '{itemTypes}'
             },
             cboManufacturer: {
                 value: '{current.intManufacturerId}',
-                store: '{Manufacturer}'
+                store: '{manufacturer}'
             },
             cboBrand: {
                 value: '{current.intBrandId}',
-                store: '{Brand}'
+                store: '{brand}'
             },
             cboStatus: {
                 value: '{current.strStatus}',
-                store: '{ItemStatuses}'
+                store: '{itemStatuses}'
             },
             cboLotTracking: {
                 value: '{current.strLotTracking}',
-                store: '{LotTrackings}'
+                store: '{lotTrackings}'
             },
             cboTracking: {
                 value: '{current.intTrackingId}',
-                store: '{Category}'
+                store: '{tracking}'
             },
-            //UOM Grid Columns
-            colDetailUnitMeasure: 'intUnitMeasureId',
-            colDetailUnitQty: 'dblUnitQty',
-            colDetailSellQty: 'dblSellQty',
-            colDetailWeight: 'dblWeight',
-            colDetailDescription: 'strDescription',
-            colDetailLength: 'dblLength',
-            colDetailWidth: 'dblWidth',
-            colDetailHeight: 'dblHeight',
-            colDetailVolume: 'dblVolume',
-            colDetailMaxQty: 'dblMaxQty',
+
+            grdUnitOfMeasure: {
+                colDetailUnitMeasure: {
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        store: '{uomUnitMeasure}'
+                    }
+                },
+                colDetailUnitQty: 'dblUnitQty',
+                colDetailSellQty: 'dblSellQty',
+                colDetailWeight: 'dblWeight',
+                colDetailDescription: 'strDescription',
+                colDetailLength: 'dblLength',
+                colDetailWidth: 'dblWidth',
+                colDetailHeight: 'dblHeight',
+                colDetailVolume: 'dblVolume',
+                colDetailMaxQty: 'dblMaxQty'
+            },
 
             //----------//
             //Setup Tab//
@@ -81,35 +88,49 @@ Ext.define('Inventory.view.ItemViewController', {
             //------------------//
             //Location Store Tab//
             //------------------//
-            colLocationLocation: 'strLocationName',
-            colLocationPOSDescription: 'strDescription',
-            colLocationCategory: 'strCategory',
-            colLocationVendor: 'strVendorId',
-            colLocationCostingMethod: 'intCostingMethod',
-            colLocationUOM: 'strUnitMeasure',
+            grdLocationStore: {
+                colLocationLocation: 'strLocationName',
+                colLocationPOSDescription: 'strDescription',
+                colLocationCategory: 'strCategory',
+                colLocationVendor: 'strVendorId',
+                colLocationCostingMethod: 'intCostingMethod',
+                colLocationUOM: 'strUnitMeasure'
+            },
 
             //--------------//
             //GL Account Tab//
             //--------------//
-            colGLAccountDescription: 'strAccountDescription',
-            colGLAccountId: 'intAccountId',
+            grdGlAccounts: {
+                colGLAccountDescription: {
+                    dataIndex: 'strAccountDescription',
+                    editor: {
+                        store: '{accountDescriptions}'
+                    }
+                },
+                colGLAccountId: {
+                    dataIndex: 'strAccountId',
+                    editor: {
+                        store: '{glAccountId}'
+                    }
+                }
+            },
 
             //---------//
             //Sales Tab//
             //---------//
             cboPatronage: {
                 value: '{current.intPatronageCategoryId}',
-                store: '{PatronageCategory}'
+                store: '{patronage}'
             },
             cboTaxClass: {
                 value: '{current.intTaxClassId}',
-                store: '{FuelTaxClass}'
+                store: '{taxClass}'
             },
             chkStockedItem: '{current.ysnStockedItem}',
             chkDyedFuel: '{current.ysnDyedFuel}',
             cboBarcodePrint: {
                 value: '{current.strBarcodePrint}',
-                store: '{BarcodePrints}'
+                store: '{barcodePrints}'
             },
             chkMsdsRequired: '{current.ysnMSDSRequired}',
             txtEpaNumber: '{current.strEPANumber}',
@@ -121,15 +142,15 @@ Ext.define('Inventory.view.ItemViewController', {
             txtDefaultPercentFull: '{current.dblDefaultFull}',
             cboFuelInspectionFee: {
                 value: '{current.strFuelInspectFee}',
-                store: '{FuelInspectionFees}'
+                store: '{fuelInspectFees}'
             },
             cboRinRequired: {
                 value: '{current.strRINRequired}',
-                store: '{RinRequires}'
+                store: '{rinRequires}'
             },
-            cboRinFuelType: {
+            cboFuelCategory: {
                 value: '{current.intRINFuelTypeId}',
-                store: '{FuelCategory}'
+                store: '{fuelCategory}'
             },
             txtPercentDenaturant: '{current.dblDenaturantPercent}',
             chkTonnageTax: '{current.ysnTonnageTax}',
@@ -138,16 +159,16 @@ Ext.define('Inventory.view.ItemViewController', {
             chkHandAddIngredients: '{current.ysnHandAddIngredient}',
             cboMedicationTag: {
                 value: '{current.intMedicationTag}',
-                store: '{InventoryTag}'
+                store: '{medicationTag}'
             },
             cboIngredientTag: {
                 value: '{current.intIngredientTag}',
-                store: '{InventoryTag}'
+                store: '{ingredientTag}'
             },
             txtVolumeRebateGroup: '{current.strVolumeRebateGroup}',
             cboPhysicalItem: {
                 value: '{current.intPhysicalItem}',
-                store: '{Item}'
+                store: '{physicalItem}'
             },
             chkExtendOnPickTicket: '{current.ysnExtendPickTicket}',
             chkExportEdi: '{current.ysnExportEDI}',
@@ -160,21 +181,21 @@ Ext.define('Inventory.view.ItemViewController', {
             txtOrderUpcNo: '{current.strUPCNo}',
             cboCaseUom: {
                 value: '{current.intCaseUOM}',
-                store: '{UnitMeasure}'
+                store: '{posUom}'
             },
             txtNacsCategory: '{current.strNACSCategory}',
             cboWicCode: {
                 value: '{current.strWICCode}',
-                store: '{WICCodes}'
+                store: '{wicCodes}'
             },
             cboAgCategory: {
                 value: '{current.intAGCategory}',
-                store: '{Category}'
+                store: '{agCategory}'
             },
             chkReceiptCommentReq: '{current.ysnReceiptCommentRequired}',
             cboCountCode: {
                 value: '{current.strCountCode}',
-                store: '{CountCodes}'
+                store: '{countCodes}'
             },
             chkLandedCost: '{current.ysnLandedCost}',
             txtLeadTime: '{current.strLeadTime}',
@@ -187,11 +208,21 @@ Ext.define('Inventory.view.ItemViewController', {
             chkCommissionable: '{current.ysnCommisionable}',
             chkSpecialCommission: '{current.ysnSpecialCommission}',
 
-            colPOSCategoryName: 'intCategoryId',
+            grdCategory: {
+                colPOSCategoryName: {
+                    dataIndex: 'strCategoryCode',
+                    editor: {
+                        store: '{posCategory}'
+                    }
+                }
+            },
 
-            colPOSSLAContract: 'strSLAContract',
-            colPOSSLAPrice: 'dblContractPrice',
-            colPOSSLAWarranty: 'ysnServiceWarranty',
+            grdServiceLevelAgreement: {
+                colPOSSLAContract: 'strSLAContract',
+                colPOSSLAPrice: 'dblContractPrice',
+                colPOSSLAWarranty: 'ysnServiceWarranty'
+            },
+
 
             //-----------------//
             //Manufacturing Tab//
@@ -202,17 +233,17 @@ Ext.define('Inventory.view.ItemViewController', {
             txtLifeTime: '{current.intLifeTime}',
             cboLifetimeType: {
                 value: '{current.strLifeTimeType}',
-                store: '{LifeTimes}'
+                store: '{lifeTimeTypes}'
             },
             txtReceiveLife: '{current.intReceiveLife}',
             txtGTIN: '{current.strGTIN}',
             cboRotationType: {
                 value: '{current.strRotationType}',
-                store: '{RotationTypes}'
+                store: '{rotationTypes}'
             },
             cboNFMC: {
                 value: '{current.intNMFCId}',
-                store: '{MaterialNMFC}'
+                store: '{materialNMFC}'
             },
             chkStrictFIFO: '{current.ysnStrictFIFO}',
             txtHeight: '{current.dblHeight}',
@@ -220,11 +251,11 @@ Ext.define('Inventory.view.ItemViewController', {
             txtDepth: '{current.dblDepth}',
             cboDimensionUOM: {
                 value: '{current.intDimensionUOMId}',
-                store: '{UnitMeasure}'
+                store: '{mfgDimensionUom}'
             },
             cboWeightUOM: {
                 value: '{current.intWeightUOMId}',
-                store: '{UnitMeasure}'
+                store: '{mfgWeightUom}'
             },
             txtWeight: '{current.dblWeight}',
             txtMaterialPack: '{current.intMaterialPackTypeId}',
@@ -237,166 +268,335 @@ Ext.define('Inventory.view.ItemViewController', {
             txtMask2: '{current.strMask2}',
             txtMask3: '{current.strMask3}',
 
-            colManufacturingUOM: 'intUnitMeasureId',
+            //colManufacturingUOM: 'intUnitMeasureId',
 
             //-------//
             //UPC Tab//
             //-------//
-            colUPCUnitMeasure: 'intUnitMeasureId',
-            colUPCUnitQty: 'dblUnitQty',
-            colUPCCode: 'strUPCCode',
+            grdUPC: {
+                colUPCUnitMeasure: {
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        store: '{upcUom}'
+                    }
+                },
+                colUPCUnitQty: 'dblUnitQty',
+                colUPCCode: 'strUPCCode'
+            },
 
             //-------------------//
             //Cross Reference Tab//
             //-------------------//
-            colCustomerXrefLocation: 'intLocationId',
-            colCustomerXrefCustomer: 'intCustomerId',
-            colCustomerXrefProduct: 'strCustomerProduct',
-            colCustomerXrefDescription: 'strProductDescription',
-            colCustomerXrefPickTicketNotes: 'strPickTicketNotes',
+            grdCustomerXref: {
+                colCustomerXrefLocation: {
+                    dataIndex: 'strLocationName',
+                    editor: {
+                        store: '{custXrefLocation}'
+                    }
+                },
+                colCustomerXrefCustomer: {
+                    dataIndex: 'strCustomerNumber',
+                    editor: {
+                        store: '{custXrefCustomer}'
+                    }
+                },
+                colCustomerXrefProduct: 'strCustomerProduct',
+                colCustomerXrefDescription: 'strProductDescription',
+                colCustomerXrefPickTicketNotes: 'strPickTicketNotes'
+            },
 
-            colVendorXrefLocation: 'intLocationId',
-            colVendorXrefVendor: 'intVendorId',
-            colVendorXrefProduct: 'strVendorProduct',
-            colVendorXrefDescription: 'strProductDescription',
-            colVendorXrefConversionFactor: 'dblConversionFactor',
-            colVendorXrefUnitMeasure: 'intUnitMeasureId',
+            grdVendorXref: {
+                colVendorXrefLocation: {
+                    dataIndex: 'strLocationName',
+                    editor: {
+                        store: '{vendorXrefLocation}'
+                    }
+                },
+                colVendorXrefVendor: {
+                    dataIndex: 'strVendorId',
+                    editor: {
+                        store: '{vendorXrefVendor}'
+                    }
+                },
+                colVendorXrefProduct: 'strVendorProduct',
+                colVendorXrefDescription: 'strProductDescription',
+                colVendorXrefConversionFactor: 'dblConversionFactor',
+                colVendorXrefUnitMeasure: {
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        store: '{vendorXrefUom}'
+                    }
+                }
+            },
 
             //-----------------//
             //Contract Item Tab//
             //-----------------//
-            colContractLocation: 'intLocationId',
-            colContractItemName: 'strContractItemName',
-            colContractOrigin: 'intCountryId',
-            colContractGrade: 'strGrade',
-            colContractGarden: 'strGarden',
-            colContractGradeType: 'strGradeType',
-            colContractYield: 'dblYieldPercent',
-            colContractTolerance: 'dblTolerancePercent',
-            colContractFranchise: 'dblFranchisePercent',
+            grdContractItem: {
+                colContractLocation: {
+                    dataIndex: 'strLocationName',
+                    editor: {
+                        store: '{contractLocation}'
+                    }
+                },
+                colContractItemName: 'strContractItemName',
+                colContractOrigin: {
+                    dataIndex: 'strCountry',
+                    editor: {
+                        store: '{origin}'
+                    }
+                },
+                colContractGrade: 'strGrade',
+                colContractGarden: 'strGarden',
+                colContractGradeType: 'strGradeType',
+                colContractYield: 'dblYieldPercent',
+                colContractTolerance: 'dblTolerancePercent',
+                colContractFranchise: 'dblFranchisePercent'
+            },
 
-            colDocument: 'intDocumentId',
+            grdDocumentAssociation: {
+                colDocument:  {
+                    dataIndex: 'strDocumentName',
+                    editor: {
+                        store: '{document}'
+                    }
+                }
+            },
 
-            colCertification: 'intCertificationId',
+            grdCertification: {
+                colCertification:  {
+                    dataIndex: 'strCertificationName',
+                    editor: {
+                        store: '{certification}'
+                    }
+                }
+            },
 
             //-----------//
             //Pricing Tab//
             //-----------//
-            colPricingLocation: 'intLocationId',
-            colPricingSalePrice: 'dblSalePrice',
-            colPricingRetailPrice: 'dblRetailPrice',
-            colPricingWholesalePrice: 'dblWholesalePrice',
-            colPricingLargeVolumePrice: 'dblLargeVolumePrice',
-            colPricingMSRP: 'dblMSRPPrice',
-            colPricingMethod: 'strPricingMethod',
-            colPricingLastCost: 'dblLastCost',
-            colPricingStandardCost: 'dblStandardCost',
-            colPricingAverageCost: 'dblMovingAverageCost',
-            colPricingEOMCost: 'dblEndMonthCost',
-            colPricingActive: 'ysnActive',
+            grdPricing: {
+                colPricingLocation: 'strLocationName',
+                colPricingSalePrice: 'dblSalePrice',
+                colPricingRetailPrice: 'dblRetailPrice',
+                colPricingWholesalePrice: 'dblWholesalePrice',
+                colPricingLargeVolumePrice: 'dblLargeVolumePrice',
+                colPricingMSRP: 'dblMSRPPrice',
+                colPricingMethod: 'strPricingMethod',
+                colPricingLastCost: 'dblLastCost',
+                colPricingStandardCost: 'dblStandardCost',
+                colPricingAverageCost: 'dblMovingAverageCost',
+                colPricingEOMCost: 'dblEndMonthCost',
+                colPricingActive: 'ysnActive'
+            },
 
-            colPricingLevelLocation: 'intLocationId',
-            colPricingLevelPriceLevel: 'strPriceLevel',
-            colPricingLevelUOM: 'intUnitMeasureId',
-            colPricingLevelUnits: 'dblUnit',
-            colPricingLevelMin: 'dblMin',
-            colPricingLevelMax: 'dblMax',
-            colPricingLevelMethod: 'strPricingMethod',
-            colPricingLevelCommissionOn: 'strCommissionOn',
-            colPricingLevelCommissionRate: 'dblCommissionRate',
-            colPricingLevelAmount: '',
-            colPricingLevelUnitPrice: 'dblUnitPrice',
-            colPricingLevelActive: 'ysnActive',
+            grdPricingLevel: {
+                colPricingLevelLocation: {
+                    dataIndex: 'strLocationName',
+                    editor: {
+                        store: '{pricingLevelLocation}'
+                    }
+                },
+                colPricingLevelPriceLevel: 'strPriceLevel',
+                colPricingLevelUOM: {
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        store: '{pricingLevelUOM}'
+                    }
+                },
+                colPricingLevelUnits: 'dblUnit',
+                colPricingLevelMin: 'dblMin',
+                colPricingLevelMax: 'dblMax',
+                colPricingLevelMethod: {
+                    dataIndex: 'strPricingMethod',
+                    editor: {
+                        store: '{pricingMethods}'
+                    }
+                },
+                colPricingLevelCommissionOn: {
+                    dataIndex: 'strCommissionOn',
+                    editor: {
+                        store: '{commissionsOn}'
+                    }
+                },
+                colPricingLevelCommissionRate: 'dblCommissionRate',
+                colPricingLevelAmount: '',
+                colPricingLevelUnitPrice: 'dblUnitPrice',
+                colPricingLevelActive: 'ysnActive'
+            },
 
-            colSpecialPricingLocation: 'intLocationId',
-            colSpecialPricingPromotionType: 'strPromotionType',
-            colSpecialPricingBeginDate: 'dtmBeginDate',
-            colSpecialPricingEndDate: 'dtmEndDate',
-            colSpecialPricingUnit: 'intUnitMeasureId',
-            colSpecialPricingQty: 'dblUnit',
-            colSpecialPricingDiscountBy: 'strDiscountBy',
-            colSpecialPricingDiscountRate: 'dblDiscount',
-            colSpecialPricingUnitPrice: 'dblUnitAfterDiscount',
-            colSpecialPricingAccumQty: 'dblAccumulatedQty',
-            colSpecialPricingAccumAmount: 'dblAccumulatedAmount',
+            grdSpecialPricing: {
+                colSpecialPricingLocation: {
+                    dataIndex: 'strLocationName',
+                    editor: {
+                        store: '{specialPricingLocation}'
+                    }
+                },
+                colSpecialPricingPromotionType: {
+                    dataIndex: 'strPromotionType',
+                    editor: {
+                        store: '{promotionTypes}'
+                    }
+                },
+                colSpecialPricingBeginDate: 'dtmBeginDate',
+                colSpecialPricingEndDate: 'dtmEndDate',
+                colSpecialPricingUnit: {
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        store: '{specialPricingUOM}'
+                    }
+                },
+                colSpecialPricingQty: 'dblUnit',
+                colSpecialPricingDiscountBy: {
+                    dataIndex: 'strDiscountBy',
+                    editor: {
+                        store: '{discountsBy}'
+                    }
+                },
+                colSpecialPricingDiscountRate: 'dblDiscount',
+                colSpecialPricingUnitPrice: 'dblUnitAfterDiscount',
+                colSpecialPricingAccumQty: 'dblAccumulatedQty',
+                colSpecialPricingAccumAmount: 'dblAccumulatedAmount'
+            },
 
             //---------//
             //Stock Tab//
             //---------//
-            colStockLocation: 'intLocationId',
-            colStockSubLocation: 'strWarehouse',
-            colStockUOM: 'intUnitMeasureId',
-            colStockOnHand: 'dblUnitOnHand',
-            colStockCommitted: 'dblOrderCommitted',
-            colStockOnOrder: 'dblOnOrder',
+            grdStock: {
+                colStockLocation: {
+                    dataIndex: 'strLocationName',
+                    editor: {
+                        store: '{stockLocation}'
+                    }
+                },
+                colStockSubLocation: 'strWarehouse',
+                colStockUOM: {
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        store: '{stockUOM}'
+                    }
+                },
+                colStockOnHand: 'dblUnitOnHand',
+                colStockCommitted: 'dblOrderCommitted',
+                colStockOnOrder: 'dblOnOrder'
+            },
 
             //-------------//
             //Commodity Tab//
             //-------------//
             cboCommodity: {
                 value: '{current.intCommodityId}',
-                store: '{Commodity}'
+                store: '{commodity}'
             },
             txtGaShrinkFactor: '{current.dblGAShrinkFactor}',
             cboOrigin: {
                 value: '{current.intOriginId}',
-                store: '{Origin}'
+                store: '{originAttribute}'
             },
             cboProductType: {
                 value: '{current.intProductTypeId}',
-                store: '{ProductType}'
+                store: '{productTypeAttribute}'
             },
             cboRegion: {
                 value: '{current.intRegionId}',
-                store: '{Region}'
+                store: '{regionAttribute}'
             },
             cboSeason: {
                 value: '{current.intSeasonId}',
-                store: '{Season}'
+                store: '{seasonAttribute}'
             },
             cboClass: {
                 value: '{current.intClassVarietyId}',
-                store: '{Class}'
+                store: '{classAttribute}'
             },
             cboProductLine: {
                 value: '{current.intProductLineId}',
-                store: '{ProductLine}'
+                store: '{productLineAttribute}'
             },
             cboMarketValuation: {
                 value: '{current.strMarketValuation}',
-                store: '{MarketValuations}'
+                store: '{marketValuations}'
             },
 
             //------------//
             //Assembly Tab//
             //------------//
-            colAssemblyComponent: 'intAssemblyItemId',
-            colAssemblyQuantity: 'dblQuantity',
+            grdAssembly: {
+                colAssemblyComponent: {
+                    dataIndex: 'strItemNo',
+                    editor: {
+                        store: '{assemblyItem}'
+                    }
+                },
+                colAssemblyQuantity: 'dblQuantity',
 //            colAssemblyStock: '',
-            colAssemblyDescription: 'strDescription',
-            colAssemblyUOM: 'intUnitMeasureId',
-            colAssemblyUnit: 'dblUnit',
-            colAssemblyCost: 'dblCost',
-//            colAssemblyTotal: '',
+                colAssemblyDescription: 'strDescription',
+                colAssemblyUOM: {
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        store: '{assemblyUOM}'
+                    }
+                },
+                colAssemblyUnit: 'dblUnit',
+                colAssemblyCost: 'dblCost'
+//            colAssemblyTotal: ''
+            },
 
             //------------------//
             //Bundle Details Tab//
             //------------------//
-            colBundleItem: 'intBundleItemId',
-            colBundleQuantity: 'dblQuantity',
+            grdBundle: {
+                colBundleItem: {
+                    dataIndex: 'strItemNo',
+                    editor: {
+                        store: '{bundleItem}'
+                    }
+                },
+                colBundleQuantity: 'dblQuantity',
 //            colBundleStock: '',
-            colBundleDescription: 'strDescription',
-            colBundleUOM: 'intUnitMeasureId',
-            colBundleUnit: 'dblUnit',
-            colBundlePrice: 'dblPrice',
-//            colBundleSubTotal: '',
+                colBundleDescription: 'strDescription',
+                colBundleUOM: {
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        store: '{bundleUOM}'
+                    }
+                },
+                colBundleUnit: 'dblUnit',
+                colBundlePrice: 'dblPrice'
+//            colBundleSubTotal: ''
+            },
 
             //---------------//
             //Kit Details Tab//
             //---------------//
-            colKitComponent: 'strComponent',
-            colKitInputType: 'strInputType',
+            grdKit: {
+                colKitComponent: 'strComponent',
+                colKitInputType: {
+                    dataIndex: 'strInputType',
+                    editor: {
+                        store: '{inputTypes}'
+                    }
+                }
+            },
 
+            grdKitDetails: {
+                colKitItem: {
+                    dataIndex: 'strItemNo',
+                    editor: {
+                        store: '{kitItem}'
+                    }
+                },
+                colKitItemDescription: '',
+                colKitItemQuantity: '',
+                colKitItemUOM: {
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        store: '{kitUOM}'
+                    }
+                },
+                colKitItemPrice: '',
+                colKitItemSelected: ''
+            },
             //-------------------//
             //Factory & Lines Tab//
             //-------------------//
@@ -405,9 +605,22 @@ Ext.define('Inventory.view.ItemViewController', {
             //---------//
             //Notes Tab//
             //---------//
-            colNoteLocation: 'intLocationId',
-            colNoteCommentType: 'strCommentType',
-            colNoteComment: 'strComments'
+            grdNotes: {
+                colNoteLocation: {
+                    dataIndex: 'strLocationName',
+                    editor: {
+                        store: '{noteLocation}'
+                    }
+                },
+                colNoteCommentType: {
+                    dataIndex: 'strCommentType',
+                    editor: {
+                        store: '{commentTypes}'
+                    }
+                },
+                colNoteComment: 'strComments'
+            }
+
         }
     },
 
@@ -435,6 +648,7 @@ Ext.define('Inventory.view.ItemViewController', {
             grdAssembly = win.down('#grdAssembly'),
             grdBundle = win.down('#grdBundle'),
             grdKit = win.down('#grdKit'),
+            grdKitDetails = win.down('#grdKitDetails'),
 
             grdNotes = win.down('#grdNotes');
 
@@ -583,176 +797,27 @@ Ext.define('Inventory.view.ItemViewController', {
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdKit,
                         deleteButton : grdKit.down('#btnDeleteKit')
-                    })
-//                    ,
-//                    details: [
-//                        {
-//                            key: 'tblICItemKitDetails',
-//                            component: Ext.create('iRely.mvvm.grid.Manager', {
-//                                grid: grdDocumentAssociation,
-//                                deleteButton : grdDocumentAssociation.down('#btnDeleteDocumentAssociation')
-//                            })
-//                        }
-//                    ]
+                    }),
+                    details: [
+                        {
+                            key: 'tblICItemKitDetails',
+                            component: Ext.create('iRely.mvvm.grid.Manager', {
+                                grid: grdKitDetails,
+                                deleteButton : grdKitDetails.down('#btnDeleteKitDetail')
+                            })
+                        }
+                    ]
                 }
             ]
         });
 
         me.subscribeLocationEvents(grdLocationStore, me);
 
-        me.subscribeCommodityEvents(win, me);
-
 
         var btnAddPricing = grdPricing.down('#btnAddPricing');
         btnAddPricing.on('click', me.onAddPricingClick);
         var btnEditPricing = grdPricing.down('#btnEditPricing');
         btnEditPricing.on('click', me.onEditPricingClick);
-
-        // <editor-fold desc="Subscribe to Renderers and Cell Editing Plugins">
-
-
-        var colDetailUOM = grdUOM.columns[0];
-        colDetailUOM.renderer = me.UOMRenderer;
-        var cepDetailUOM = grdUOM.getPlugin('cepDetailUOM');
-        cepDetailUOM.on({
-            edit: me.onGridUOMEdit,
-            scope: me
-        });
-
-        var colCategory = grdCategory.columns[0];
-        colCategory.renderer = me.CategoryRenderer;
-        var cepPOSCategory = grdCategory.getPlugin('cepPOSCategory');
-        cepPOSCategory.on({
-            edit: me.onGridCategoryEdit,
-            scope: me
-        });
-
-        var colUPUom = grdUPC.columns[0];
-        colUPUom.renderer = me.UOMRenderer;
-        var cepUPC = grdUPC.getPlugin('cepUPC');
-        cepUPC.on({
-            edit: me.onGridUOMEdit,
-            scope: me
-        });
-
-        var colNoteLocation = grdNotes.columns[0];
-        colNoteLocation.renderer = me.LocationRenderer;
-        var cepNotes = grdNotes.getPlugin('cepNotes');
-        cepNotes.on({
-            edit: me.onGridLocationEdit,
-            scope: me
-        });
-
-        var colAccountId = grdGlAccounts.columns[1];
-        colAccountId.renderer = me.AccountRenderer;
-        var cepAccount = grdGlAccounts.getPlugin('cepAccount');
-        cepAccount.on({
-            edit: me.onGridAccountEdit,
-            scope: me
-        });
-
-
-        var colCustomerLocation = grdCustomerXref.columns[0];
-        colCustomerLocation.renderer = me.LocationRenderer;
-        var colCustomerXref = grdCustomerXref.columns[1];
-        colCustomerXref.renderer = me.CustomerRenderer;
-        var cepCustomerXref = grdCustomerXref.getPlugin('cepCustomerXref');
-        cepCustomerXref.on({
-            edit: me.onGridCustomerXrefEdit,
-            scope: me
-        });
-
-        var colVendorLocation = grdVendorXref.columns[0];
-        colVendorLocation.renderer = me.LocationRenderer;
-        var colVendorXref = grdVendorXref.columns[1];
-        colVendorXref.renderer = me.VendorRenderer;
-        var colVendorUom = grdVendorXref.columns[5];
-        colVendorUom.renderer = me.UOMRenderer;
-        var cepVendorXref = grdVendorXref.getPlugin('cepVendorXref');
-        cepVendorXref.on({
-            edit: me.onGridVendorXrefEdit,
-            scope: me
-        });
-
-        var colContractLocation = grdContractItem.columns[0];
-        colContractLocation.renderer = me.LocationRenderer;
-        var colContractCountry = grdContractItem.columns[2];
-        colContractCountry.renderer = me.CountryRenderer;
-        var cepContractItem = grdContractItem.getPlugin('cepContractItem');
-        cepContractItem.on({
-            edit: me.onGridContractEdit,
-            scope: me
-        });
-
-        var colDocument = grdDocumentAssociation.columns[0];
-        colDocument.renderer = me.DocumentRenderer;
-        var cepDocument = grdDocumentAssociation.getPlugin('cepDocument');
-        cepDocument.on({
-            edit: me.onGridDocumentEdit,
-            scope: me
-        });
-
-        var colCertification = grdCertification.columns[0];
-        colCertification.renderer = me.CertificationRenderer;
-        var cepCertification = grdCertification.getPlugin('cepCertification');
-        cepCertification.on({
-            edit: me.onGridCertificationEdit,
-            scope: me
-        });
-
-        var colStockLocation = grdStock.columns[0];
-        colStockLocation.renderer = me.LocationRenderer;
-        var colStockUOM = grdStock.columns[2];
-        colStockUOM.renderer = me.UOMRenderer;
-        var cepStock = grdStock.getPlugin('cepStock');
-        cepStock.on({
-            edit: me.onGridStockEdit,
-            scope: me
-        });
-
-        var colPricingLocation = grdPricing.columns[0];
-        colPricingLocation.renderer = me.LocationRenderer;
-        var colPricingLevelLocation = grdPricingLevel.columns[0];
-        colPricingLevelLocation.renderer = me.LocationRenderer;
-        var colPricingLevelUOM = grdPricingLevel.columns[2];
-        colPricingLevelUOM.renderer = me.UOMRenderer;
-        var cepPricingLevel = grdPricingLevel.getPlugin('cepPricingLevel');
-        cepPricingLevel.on({
-            edit: me.onGridPricingLevelEdit,
-            scope: me
-        });
-
-        var colPricingLevelLocation = grdSpecialPricing.columns[0];
-        colPricingLevelLocation.renderer = me.LocationRenderer;
-        var colPricingLevelUOM = grdSpecialPricing.columns[4];
-        colPricingLevelUOM.renderer = me.UOMRenderer;
-        var cepSpecialPricing = grdSpecialPricing.getPlugin('cepSpecialPricing');
-        cepSpecialPricing   .on({
-            edit: me.onGridSpecialPricingEdit,
-            scope: me
-        });
-
-        var colAssemblyItem = grdAssembly.columns[0];
-        colAssemblyItem.renderer = me.ItemRenderer;
-        var colAssemblyUOM = grdAssembly.columns[4];
-        colAssemblyUOM.renderer = me.UOMRenderer;
-        var cepAssembly = grdAssembly.getPlugin('cepAssembly');
-        cepAssembly.on({
-            edit: me.onGridAssemblyEdit,
-            scope: me
-        });
-
-        var colBundleItem = grdBundle.columns[0];
-        colBundleItem.renderer = me.ItemRenderer;
-        var colBundleUOM = grdBundle.columns[4];
-        colBundleUOM.renderer = me.UOMRenderer;
-        var cepBundle = grdBundle.getPlugin('cepBundle');
-        cepBundle.on({
-            edit: me.onGridBundleEdit,
-            scope: me
-        });
-        // </editor-fold>
-
 
         return win.context;
     },
@@ -784,97 +849,19 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    // <editor-fold desc="Grid Combo Box Renderers">
-
-    CategoryRenderer: function (value, metadata, record) {
-        var category = record.get('strCategory');
-        return category;
-    },
-
-    UOMRenderer: function (value, metadata, record) {
-        var unitmeasure = record.get('strUnitMeasure');
-        return unitmeasure;
-    },
-
-    LocationRenderer: function (value, metadata, record) {
-        var location = record.get('strLocationName');
-        return location;
-    },
-
-    AccountRenderer: function (value, metadata, record) {
-        var account = record.get('strAccountId');
-        return account;
-    },
-
-    CustomerRenderer: function (value, metadata, record) {
-        var customer = record.get('strCustomerNumber');
-        return customer;
-    },
-
-    VendorRenderer: function (value, metadata, record) {
-        var vendor = record.get('strVendorId');
-        return vendor;
-    },
-
-    CountryRenderer: function (value, metadata, record) {
-        var country = record.get('strCountry');
-        return country;
-    },
-
-    DocumentRenderer: function (value, metadata, record) {
-        var document = record.get('strDocumentName');
-        return document;
-    },
-
-    CertificationRenderer: function (value, metadata, record) {
-        var certification = record.get('strCertificationName');
-        return certification;
-    },
-
-    ItemRenderer: function (value, metadata, record) {
-        var item = record.get('strItemNo');
-        return item;
-    },
-
-    CostingMethodRenderer: function (value, metadata, record) {
-        var intMethod = record.get('intCostingMethod');
-        var costingMethod = '';
-        switch (intMethod) {
-            case 1:
-                costingMethod = 'AVG';
-                break;
-            case 2:
-                costingMethod = 'FIFO';
-                break;
-            case 3:
-                costingMethod = 'LIFO';
-                break;
-        }
-        return costingMethod;
-    },
-
-    // </editor-fold>
-
     // <editor-fold desc="Details Tab Methods and Event Handlers">
 
-    onGridUOMEdit: function(editor, e, eOpts){
-        var me = this;
-        var record = e.record
-        var column = e.column;
-
-        if (column.itemId !== 'colUPCUnitMeasure' &&
-            column.itemId !== 'colDetailUnitMeasure')
+    onUOMUnitMeasureSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
             return;
 
-        var grid = column.up('grid');
-        var view = grid.view;
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepDetailUOM');
+        var current = plugin.getActiveRecord();
 
-        var cboUOM = column.getEditor();
-        if (cboUOM.getSelectedRecord())
+        if (combo.column.itemId === 'colDetailUnitMeasure')
         {
-            var strUnitMeasure = cboUOM.getSelectedRecord().get('strUnitMeasure');
-            record.set('strUnitMeasure', strUnitMeasure);
-            view.refresh();
+            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
         }
     },
 
@@ -891,26 +878,6 @@ Ext.define('Inventory.view.ItemViewController', {
 
         var colLocationCostingMethod = grid.columns[4];
         if (colLocationCostingMethod) colLocationCostingMethod.renderer = me.CostingMethodRenderer;
-    },
-
-    onGridLocationEdit: function(editor, e, eOpts){
-        var me = this;
-        var record = e.record
-        var column = e.column;
-
-        if (column.itemId !== 'colNoteLocation')
-            return;
-
-        var grid = column.up('grid');
-        var view = grid.view;
-
-        var cboLocation = column.getEditor();
-        if (cboLocation.getSelectedRecord())
-        {
-            var strLocationName = cboLocation.getSelectedRecord().get('strLocationName');
-            record.set('strLocationName', strLocationName);
-            view.refresh();
-        }
     },
 
     onAddLocationClick: function(button, e, eOpts) {
@@ -956,23 +923,17 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // <editor-fold desc="GL Accounts Tab Methods and Event Handlers">
 
-    onGridAccountEdit: function(editor, e, eOpts){
-        var me = this;
-        var record = e.record
-        var column = e.column;
+    onGLAccountSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
 
-        var grid = column.up('grid');
-        var view = grid.view;
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepAccount');
+        var current = plugin.getActiveRecord();
 
-        if (column.itemId === 'colGLAccountId')
+        if (combo.column.itemId === 'colGLAccountId')
         {
-            var cboAccount = column.getEditor();
-            if (cboAccount.getSelectedRecord())
-            {
-                var strAccountId = cboAccount.getSelectedRecord().get('strAccountId');
-                record.set('strAccountId', strAccountId);
-                view.refresh();
-            }
+            current.set('intAccountId', records[0].get('intAccountId'));
         }
     },
 
@@ -980,23 +941,35 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // <editor-fold desc="Point Of Sale Tab Methods and Event Handlers">
 
-    onGridCategoryEdit: function(editor, e, eOpts){
-        var me = this;
-        var record = e.record
-        var column = e.column;
+    onPOSCategorySelect: function(combo, records, eOpts) {
+    if (records.length <= 0)
+        return;
 
-        if (column.itemId !== 'colPOSCategoryName')
+    var grid = combo.up('grid');
+    var plugin = grid.getPlugin('cepPOSCategory');
+    var current = plugin.getActiveRecord();
+
+    if (combo.column.itemId === 'colPOSCategoryName')
+    {
+        current.set('intCategoryId', records[0].get('intCategoryId'));
+    }
+},
+
+    // </editor-fold>
+
+    // <editor-fold desc="UPC Tab Methods and Event Handlers">
+
+    onUpcUOMSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
             return;
 
-        var grid = column.up('grid');
-        var view = grid.view;
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepUPC');
+        var current = plugin.getActiveRecord();
 
-        var cboCategory = column.getEditor();
-        if (cboCategory.getSelectedRecord())
+        if (combo.column.itemId === 'colUPCUnitMeasure')
         {
-            var strCategory = cboCategory.getSelectedRecord().get('strCategory');
-            record.set('strCategory', strCategory);
-            view.refresh();
+            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
         }
     },
 
@@ -1004,73 +977,39 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // <editor-fold desc="Cross Reference Tab Methods and Event Handlers">
 
-    onGridCustomerXrefEdit: function(editor, e, eOpts){
-        var me = this;
-        var record = e.record
-        var column = e.column;
+    onCustomerXrefSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
 
-        var grid = column.up('grid');
-        var view = grid.view;
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepCustomerXref');
+        var current = plugin.getActiveRecord();
 
-        if (column.itemId === 'colCustomerXrefLocation')
+        if (combo.column.itemId === 'colCustomerXrefLocation')
         {
-            var cboLocation = column.getEditor();
-            if (cboLocation.getSelectedRecord())
-            {
-                var strLocationName = cboLocation.getSelectedRecord().get('strLocationName');
-                record.set('strLocationName', strLocationName);
-                view.refresh();
-            }
+            current.set('intLocationId', records[0].get('intCompanyLocationId'));
         }
-        else if (column.itemId === 'colCustomerXrefCustomer')
-        {
-            var cboCustomer = column.getEditor();
-            if (cboCustomer.getSelectedRecord())
-            {
-                var strCustomerNumber = cboCustomer.getSelectedRecord().get('strCustomerNumber');
-                record.set('strCustomerNumber', strCustomerNumber);
-                view.refresh();
-            }
+        else if (combo.column.itemId === 'colCustomerXrefCustomer') {
+            current.set('intCustomerId', records[0].get('intCustomerId'));
         }
     },
 
-    onGridVendorXrefEdit: function(editor, e, eOpts){
-        var me = this;
-        var record = e.record
-        var column = e.column;
+    onVendorXrefSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
 
-        var grid = column.up('grid');
-        var view = grid.view;
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepCustomerXref');
+        var current = plugin.getActiveRecord();
 
-        if (column.itemId === 'colVendorXrefLocation')
-        {
-            var cboLocation = column.getEditor();
-            if (cboLocation.getSelectedRecord())
-            {
-                var strLocationName = cboLocation.getSelectedRecord().get('strLocationName');
-                record.set('strLocationName', strLocationName);
-                view.refresh();
-            }
+        if (combo.column.itemId === 'colVendorXrefLocation'){
+            current.set('intLocationId', records[0].get('intCompanyLocationId'));
         }
-        else if (column.itemId === 'colVendorXrefVendor')
-        {
-            var cboVendor = column.getEditor();
-            if (cboVendor.getSelectedRecord())
-            {
-                var strVendorId = cboVendor.getSelectedRecord().get('strVendorId');
-                record.set('strVendorId', strVendorId);
-                view.refresh();
-            }
+        else if (combo.column.itemId === 'colVendorXrefVendor') {
+            current.set('intVendorId', records[0].get('intVendorId'));
         }
-        else if (column.itemId === 'colVendorXrefUnitMeasure')
-        {
-            var cboUom = column.getEditor();
-            if (cboUom.getSelectedRecord())
-            {
-                var strUnitMeasure = cboUom.getSelectedRecord().get('strUnitMeasure');
-                record.set('strUnitMeasure', strUnitMeasure);
-                view.refresh();
-            }
+        else if (combo.column.itemId === 'colVendorXrefUnitMeasure') {
+            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
         }
     },
 
@@ -1078,73 +1017,45 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // <editor-fold desc="Contract Item Tab Methods and Event Handlers">
 
-    onGridContractEdit: function(editor, e, eOpts){
-        var me = this;
-        var record = e.record
-        var column = e.column;
+    onContractItemSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
 
-        var grid = column.up('grid');
-        var view = grid.view;
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepContractItem');
+        var current = plugin.getActiveRecord();
 
-        if (column.itemId === 'colContractLocation')
-        {
-            var cboLocation = column.getEditor();
-            if (cboLocation.getSelectedRecord())
-            {
-                var strLocationName = cboLocation.getSelectedRecord().get('strLocationName');
-                record.set('strLocationName', strLocationName);
-                view.refresh();
-            }
+        if (combo.column.itemId === 'colContractLocation'){
+            current.set('intLocationId', records[0].get('intCompanyLocationId'));
         }
-        else if (column.itemId === 'colContractOrigin')
-        {
-            var cboCountry = column.getEditor();
-            if (cboCountry.getSelectedRecord())
-            {
-                var strCountry = cboCountry.getSelectedRecord().get('strCountry');
-                record.set('strCountry', strCountry);
-                view.refresh();
-            }
+        else if (combo.column.itemId === 'colContractOrigin') {
+            current.set('intCountryId', records[0].get('intCountryID'));
         }
     },
 
-    onGridDocumentEdit: function(editor, e, eOpts){
-        var me = this;
-        var record = e.record
-        var column = e.column;
-
-        if (column.itemId !== 'colCertification')
+    onDocumentSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
             return;
 
-        var grid = column.up('grid');
-        var view = grid.view;
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepDocument');
+        var current = plugin.getActiveRecord();
 
-        var cboCertification = column.getEditor();
-        if (cboCertification.getSelectedRecord())
-        {
-            var strDocumentName = cboCertification.getSelectedRecord().get('strDocumentName');
-            record.set('strDocumentName', strDocumentName);
-            view.refresh();
+        if (combo.column.itemId === 'colDocument'){
+            current.set('intDocumentId', records[0].get('intDocumentId'));
         }
     },
 
-    onGridCertificationEdit: function(editor, e, eOpts){
-        var me = this;
-        var record = e.record
-        var column = e.column;
-
-        if (column.itemId !== 'colDocument')
+    onCertificationSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
             return;
 
-        var grid = column.up('grid');
-        var view = grid.view;
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepCertification');
+        var current = plugin.getActiveRecord();
 
-        var cboDocument = column.getEditor();
-        if (cboDocument.getSelectedRecord())
-        {
-            var strCertificationName = cboDocument.getSelectedRecord().get('strCertificationName');
-            record.set('strCertificationName', strCertificationName);
-            view.refresh();
+        if (combo.column.itemId === 'colCertification'){
+            current.set('intCertificationId', records[0].get('intCertificationId'));
         }
     },
 
@@ -1152,63 +1063,35 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // <editor-fold desc="Pricing Tab Methods and Event Handlers">
 
-    onGridPricingLevelEdit: function(editor, e, eOpts){
-        var me = this;
-        var record = e.record
-        var column = e.column;
+    onPricingLevelSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
 
-        var grid = column.up('grid');
-        var view = grid.view;
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepPricingLevel');
+        var current = plugin.getActiveRecord();
 
-        if (column.itemId === 'colPricingLevelLocation')
-        {
-            var cboLocation = column.getEditor();
-            if (cboLocation.getSelectedRecord())
-            {
-                var strLocationName = cboLocation.getSelectedRecord().get('strLocationName');
-                record.set('strLocationName', strLocationName);
-                view.refresh();
-            }
+        if (combo.column.itemId === 'colPricingLevelLocation'){
+            current.set('intLocationId', records[0].get('intCompanyLocationId'));
         }
-        else if (column.itemId === 'colPricingLevelUOM')
-        {
-            var cboUOM = column.getEditor();
-            if (cboUOM.getSelectedRecord())
-            {
-                var strUnitMeasure = cboUOM.getSelectedRecord().get('strUnitMeasure');
-                record.set('strUnitMeasure', strUnitMeasure);
-                view.refresh();
-            }
+        else if (combo.column.itemId === 'colPricingLevelUOM') {
+            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
         }
     },
 
-    onGridSpecialPricingEdit: function(editor, e, eOpts){
-        var me = this;
-        var record = e.record
-        var column = e.column;
+    onSpecialPricingSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
 
-        var grid = column.up('grid');
-        var view = grid.view;
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepSpecialPricing');
+        var current = plugin.getActiveRecord();
 
-        if (column.itemId === 'colSpecialPricingLocation')
-        {
-            var cboLocation = column.getEditor();
-            if (cboLocation.getSelectedRecord())
-            {
-                var strLocationName = cboLocation.getSelectedRecord().get('strLocationName');
-                record.set('strLocationName', strLocationName);
-                view.refresh();
-            }
+        if (combo.column.itemId === 'colSpecialPricingLocation'){
+            current.set('intLocationId', records[0].get('intCompanyLocationId'));
         }
-        else if (column.itemId === 'colSpecialPricingUnit')
-        {
-            var cboUOM = column.getEditor();
-            if (cboUOM.getSelectedRecord())
-            {
-                var strUnitMeasure = cboUOM.getSelectedRecord().get('strUnitMeasure');
-                record.set('strUnitMeasure', strUnitMeasure);
-                view.refresh();
-            }
+        else if (combo.column.itemId === 'colSpecialPricingUnit') {
+            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
         }
     },
 
@@ -1255,43 +1138,19 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // <editor-fold desc="Stock Tab Methods and Event Handlers">
 
-    onGridStockEdit: function(editor, e, eOpts){
-        var me = this;
-        var record = e.record
-        var column = e.column;
+    onStockSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
 
-        var grid = column.up('grid');
-        var view = grid.view;
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepStock');
+        var current = plugin.getActiveRecord();
 
-        if (column.itemId === 'colStockLocation')
-        {
-            var cboLocation = column.getEditor();
-            if (cboLocation.getSelectedRecord())
-            {
-                var strLocationName = cboLocation.getSelectedRecord().get('strLocationName');
-                record.set('strLocationName', strLocationName);
-                view.refresh();
-            }
+        if (combo.column.itemId === 'colStockLocation'){
+            current.set('intLocationId', records[0].get('intCompanyLocationId'));
         }
-        else if (column.itemId === 'colStockUOM')
-        {
-            var cboUOM = column.getEditor();
-            if (cboUOM.getSelectedRecord())
-            {
-                var strUnitMeasure = cboUOM.getSelectedRecord().get('strUnitMeasure');
-                record.set('strUnitMeasure', strUnitMeasure);
-                view.refresh();
-            }
-        }
-        else if (column.itemId === 'colStockInventoryGroup')
-        {
-            var cboCountGroup = column.getEditor();
-            if (cboCountGroup.getSelectedRecord())
-            {
-                var strCountGroup = cboCountGroup.getSelectedRecord().get('strCountGroup');
-                record.set('strCountGroup', strCountGroup);
-                view.refresh();
-            }
+        else if (combo.column.itemId === 'colStockUOM') {
+            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
         }
     },
 
@@ -1299,21 +1158,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // <editor-fold desc="Commodity Tab Methods and Event Handlers">
 
-    subscribeCommodityEvents: function(win, scope) {
-        var me = scope;
-        var tabItem = win.down('#tabItem');
-        var pnlCommodity = tabItem.items.items[4];
-
-        if (tabItem.items.items[4].title !== 'Commodity')
-            return;
-
-        var cboCommodity = pnlCommodity.down('#cboCommodity');
-
-
-        cboCommodity.on('select', me.onCboCommoditySelect);
-    },
-
-    onCboCommoditySelect: function (combo, records, eOpts) {
+    onCommoditySelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
@@ -1328,59 +1173,33 @@ Ext.define('Inventory.view.ItemViewController', {
         var cboClass = pnlCommodity.down('#cboClass');
         var cboProductLine = pnlCommodity.down('#cboProductLine');
 
+        var filter = [{ dataIndex: 'intCommodityId', value: intCommodityId, condition: 'eq' }];
 
-        cboOrigin.defaultFilters =
-            [{ dataIndex: 'intCommodityId', value: intCommodityId, condition: 'eq' }
-                , { dataIndex: 'strType', value: 'Origin', condition: 'eq', conjunction: 'and'}];
-        cboProductType.defaultFilters =
-            [{ dataIndex: 'intCommodityId', value: intCommodityId, condition: 'eq' }
-                , { dataIndex: 'strType', value: 'ProductType', condition: 'eq' , conjunction: 'and'}];
-        cboRegion.defaultFilters =
-            [{ dataIndex: 'intCommodityId', value: intCommodityId, condition: 'eq' }
-                , { dataIndex: 'strType', value: 'Region', condition: 'eq' , conjunction: 'and'}];
-        cboSeason.defaultFilters =
-            [{ dataIndex: 'intCommodityId', value: intCommodityId, condition: 'eq' }
-                , { dataIndex: 'strType', value: 'Season', condition: 'eq' , conjunction: 'and'}];
-        cboClass.defaultFilters =
-            [{ dataIndex: 'intCommodityId', value: intCommodityId, condition: 'eq' }
-                , { dataIndex: 'strType', value: 'Class', condition: 'eq' , conjunction: 'and'}];
-        cboProductLine.defaultFilters =
-            [{ dataIndex: 'intCommodityId', value: intCommodityId, condition: 'eq' }
-                , { dataIndex: 'strType', value: 'ProductLine', condition: 'eq' , conjunction: 'and'}];
-
+        cboOrigin.defaultFilters = filter;
+        cboProductType.defaultFilters = filter;
+        cboRegion.defaultFilters = filter;
+        cboSeason.defaultFilters = filter;
+        cboClass.defaultFilters = filter;
+        cboProductLine.defaultFilters = filter;
     },
 
     // </editor-fold>
 
     // <editor-fold desc="Assembly Tab Methods and Event Handlers">
 
-    onGridAssemblyEdit: function(editor, e, eOpts){
-        var me = this;
-        var record = e.record
-        var column = e.column;
+    onAssemblySelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
 
-        var grid = column.up('grid');
-        var view = grid.view;
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepAssembly');
+        var current = plugin.getActiveRecord();
 
-        if (column.itemId === 'colAssemblyComponent')
-        {
-            var cboItem = column.getEditor();
-            if (cboItem.getSelectedRecord())
-            {
-                var strItemNo = cboItem.getSelectedRecord().get('strItemNo');
-                record.set('strItemNo', strItemNo);
-                view.refresh();
-            }
+        if (combo.column.itemId === 'colAssemblyComponent'){
+            current.set('intItemId', records[0].get('intItemId'));
         }
-        else if (column.itemId === 'colAssemblyUOM')
-        {
-            var cboUOM = column.getEditor();
-            if (cboUOM.getSelectedRecord())
-            {
-                var strUnitMeasure = cboUOM.getSelectedRecord().get('strUnitMeasure');
-                record.set('strUnitMeasure', strUnitMeasure);
-                view.refresh();
-            }
+        else if (combo.column.itemId === 'colAssemblyUOM') {
+            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
         }
     },
 
@@ -1388,41 +1207,159 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // <editor-fold desc="Bundle Details Tab Methods and Event Handlers">
 
-    onGridBundleEdit: function(editor, e, eOpts){
-        var me = this;
-        var record = e.record
-        var column = e.column;
+    onBundleSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
 
-        var grid = column.up('grid');
-        var view = grid.view;
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepBundle');
+        var current = plugin.getActiveRecord();
 
-        if (column.itemId === 'colBundleItem')
-        {
-            var cboItem = column.getEditor();
-            if (cboItem.getSelectedRecord())
-            {
-                var strItemNo = cboItem.getSelectedRecord().get('strItemNo');
-                record.set('strItemNo', strItemNo);
-                view.refresh();
-            }
+        if (combo.column.itemId === 'colBundleItem'){
+            current.set('intItemId', records[0].get('intItemId'));
         }
-        else if (column.itemId === 'colBundleUOM')
-        {
-            var cboUOM = column.getEditor();
-            if (cboUOM.getSelectedRecord())
-            {
-                var strUnitMeasure = cboUOM.getSelectedRecord().get('strUnitMeasure');
-                record.set('strUnitMeasure', strUnitMeasure);
-                view.refresh();
-            }
+        else if (combo.column.itemId === 'colBundleUOM') {
+            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
         }
-    }
+    },
 
     // </editor-fold>
 
     // <editor-fold desc="Kit Details Tab Methods and Event Handlers">
 
+    onKitSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
 
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepKitDetail');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colKitItem'){
+            current.set('intItemId', records[0].get('intItemId'));
+        }
+        else if (combo.column.itemId === 'colKitItemUOM') {
+            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
+        }
+    },
 
     // </editor-fold>
+
+    // <editor-fold desc="Kit Details Tab Methods and Event Handlers">
+
+    onNoteSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepNote');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colNoteLocation'){
+            current.set('intLocationId', records[0].get('intCompanyLocationId'));
+        }
+    },
+
+    // </editor-fold>
+
+    init: function(application) {
+        this.control({
+            "#cboDetailUnitMeasure": {
+                select: this.onUOMUnitMeasureSelect
+            },
+            "#cboGLAccountId": {
+                select: this.onGLAccountSelect
+            },
+            "#cboPOSCategoryId": {
+                select: this.onPOSCategorySelect
+            },
+            "#cboUpcUOM": {
+                select: this.onUpcUOMSelect
+            },
+            "#cboCustXrefLocation": {
+                select: this.onCustomerXrefSelect
+            },
+            "#cboCustXrefCustomer": {
+                select: this.onCustomerXrefSelect
+            },
+            "#cboVendorXrefLocation": {
+                select: this.onVendorXrefSelect
+            },
+            "#cboVendorXrefVendor": {
+                select: this.onVendorXrefSelect
+            },
+            "#cboVendorXrefUOM": {
+                select: this.onVendorXrefSelect
+            },
+            "#cboContractLocation": {
+                select: this.onContractItemSelect
+            },
+            "#cboContractOrigin": {
+                select: this.onContractItemSelect
+            },
+            "#cboDocumentId": {
+                select: this.onDocumentSelect
+            },
+            "#cboCertificationId": {
+                select: this.onCertificationSelect
+            },
+            "#cboPricingLevelLocation": {
+                select: this.onPricingLevelSelect
+            },
+//            "#cboPricingLevelLevel": {
+//                select: this.onPricingLevelSelect
+//            },
+            "#cboPricingLevelUOM": {
+                select: this.onPricingLevelSelect
+            },
+            "#cboPricingLevelMethod": {
+                select: this.onPricingLevelSelect
+            },
+            "#cboPricingLevelCommissionOn": {
+                select: this.onPricingLevelSelect
+            },
+            "#cboSpecialPricingLocation": {
+                select: this.onSpecialPricingSelect
+            },
+            "#cboSpecialPricingPromotionType": {
+                select: this.onSpecialPricingSelect
+            },
+            "#cboSpecialPricingUOM": {
+                select: this.onSpecialPricingSelect
+            },
+            "#cboSpecialPricingDiscountBy": {
+                select: this.onSpecialPricingSelect
+            },
+            "#cboStockLocation": {
+                select: this.onStockSelect
+            },
+            "#cboStockUOM": {
+                select: this.onStockSelect
+            },
+            "#cboCommodity": {
+                select: this.onCommoditySelect
+            },
+            "#cboAssemblyItem": {
+                select: this.onAssemblySelect
+            },
+            "#cboAssemblyUOM": {
+                select: this.onAssemblySelect
+            },
+            "#cboBundleItem": {
+                select: this.onBundleSelect
+            },
+            "#cboBundleUOM": {
+                select: this.onBundleSelect
+            },
+            "#cboKitDetailItem": {
+                select: this.onKitSelect
+            },
+            "#cboKitDetailUOM": {
+                select: this.onKitSelect
+            },
+            "#cboNoteLocation": {
+                select: this.onNoteSelect
+            }
+        });
+    }
 });

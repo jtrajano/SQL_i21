@@ -28,9 +28,9 @@ Ext.define('Inventory.model.ItemCustomerXref', {
                 }
             }
         },
-        { name: 'intLocationId', type: 'int'},
-        { name: 'intCustomerId', type: 'int'},
-        { name: 'strCustomerProduct', type: 'string'},
+        { name: 'intLocationId', type: 'int', allowNull: true},
+        { name: 'intCustomerId', type: 'int', allowNull: true},
+        { name: 'strCustomerProduct', type: 'string', allowNull: true},
         { name: 'strProductDescription', type: 'string'},
         { name: 'strPickTicketNotes', type: 'string'},
         { name: 'intSort', type: 'int'},
@@ -41,6 +41,7 @@ Ext.define('Inventory.model.ItemCustomerXref', {
 
     validators: [
         {type: 'presence', field: 'intLocationId'},
-        {type: 'presence', field: 'intCustomerId'}
+        {type: 'presence', field: 'intCustomerId'},
+        {type: 'presence', field: 'strCustomerProduct'}
     ]
 });

@@ -111,7 +111,7 @@ namespace iRely.Inventory.Model
         public DbSet<tblICItemContract> tblICItemContracts { get; set; }
         public DbSet<tblICItemContractDocument> tblICItemContractDocuments { get; set; }
         public DbSet<tblICItemCustomerXref> tblICItemCustomerXrefs { get; set; }
-        public DbSet<tblICItemLocation> tblICItemLocationStores { get; set; }
+        public DbSet<tblICItemLocation> tblICItemLocations { get; set; }
         public DbSet<tblICItemManufacturingUOM> tblICItemManufacturingUOMs { get; set; }
         public DbSet<tblICItemNote> tblICItemNotes { get; set; }
         public DbSet<tblICItemPOSCategory> tblICItemPOSCategorys { get; set; }

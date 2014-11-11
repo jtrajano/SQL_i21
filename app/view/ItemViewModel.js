@@ -18,12 +18,12 @@ Ext.define('Inventory.view.ItemViewModel', {
     alias: 'viewmodel.item',
 
     requires: [
-        'Inventory.store.CompactItem',
+        'Inventory.store.BufferedCompactItem',
         'Inventory.store.Manufacturer',
         'Inventory.store.Category',
         'Inventory.store.PatronageCategory',
         'Inventory.store.InventoryTag',
-        'Inventory.store.UnitMeasure',
+        'Inventory.store.BufferedUnitMeasure',
         'Inventory.store.Brand',
         'Inventory.store.FuelCategory',
         'Inventory.store.FuelTaxClass',
@@ -31,8 +31,13 @@ Ext.define('Inventory.view.ItemViewModel', {
         'Inventory.store.Certification',
         'Inventory.store.MaterialNMFC',
         'Inventory.store.CountGroup',
-        'Inventory.store.Commodity',
-        'Inventory.store.CommodityAttribute',
+        'Inventory.store.BufferedCommodity',
+        'Inventory.store.BufferedClassAttribute',
+        'Inventory.store.BufferedRegionAttribute',
+        'Inventory.store.BufferedOriginAttribute',
+        'Inventory.store.BufferedProductLineAttribute',
+        'Inventory.store.BufferedProductTypeAttribute',
+        'Inventory.store.BufferedSeasonAttribute',
         'AccountsPayable.store.VendorBuffered',
         'AccountsReceivable.store.CustomerBuffered',
         'i21.store.CompanyLocation',
@@ -41,7 +46,7 @@ Ext.define('Inventory.view.ItemViewModel', {
     ],
 
     stores: {
-        ItemTypes: {
+        itemTypes: {
             autoLoad: true,
             data: [
                 {
@@ -90,7 +95,13 @@ Ext.define('Inventory.view.ItemViewModel', {
                 }
             ]
         },
-        ItemStatuses: {
+        manufacturer: {
+            type: 'inventorymanufacturer'
+        },
+        brand: {
+            type: 'inventorybrand'
+        },
+        itemStatuses: {
             autoLoad: true,
             data: [
                 {
@@ -109,7 +120,7 @@ Ext.define('Inventory.view.ItemViewModel', {
                 }
             ]
         },
-        LotTrackings: {
+        lotTrackings: {
             autoLoad: true,
             data: [
                 {
@@ -131,178 +142,15 @@ Ext.define('Inventory.view.ItemViewModel', {
                 }
             ]
         },
-        CostingMethods: {
-            autoLoad: true,
-            data: [
-                {
-                    intCostingMethodId: '1',
-                    strDescription: 'AVG'
-                },
-                {
-                    intCostingMethodId: '2',
-                    strDescription: 'FIFO'
-                },
-                {
-                    intCostingMethodId: '3',
-                    strDescription: 'LIFO'
-                }
-            ],
-            fields: [
-                {
-                    name: 'intCostingMethodId',
-                    type: 'int'
-                },
-                {
-                    name: 'strDescription'
-                }
-            ]
+        tracking: {
+            type: 'inventorycategory'
         },
-        BarcodePrints: {
-            autoLoad: true,
-            data: [
-                {
-                    strDescription: 'UPC'
-                },
-                {
-                    strDescription: 'Item'
-                },
-                {
-                    strDescription: 'None'
-                }
-            ],
-            fields: [
-                {
-                    name: 'strDescription'
-                }
-            ]
+        uomUnitMeasure: {
+            type: 'inventorybuffereduom'
         },
-        FuelInspectionFees: {
-            autoLoad: true,
-            data: [
-                {
-                    strDescription: 'Yes (Fuel Item)'
-                },
-                {
-                    strDescription: 'No (Not Fuel Item)'
-                },
-                {
-                    strDescription: 'No (Fuel Item)'
-                }
-            ],
-            fields: [
-                {
-                    name: 'strDescription'
-                }
-            ]
-        },
-        RinRequires: {
-            autoLoad: true,
-            data: [
-                {
-                    strDescription: 'No RIN'
-                },
-                {
-                    strDescription: 'Resell RIN Only'
-                },
-                {
-                    strDescription: 'Issued'
-                }
-            ],
-            fields: [
-                {
-                    name: 'strDescription'
-                }
-            ]
-        },
-        WICCodes: {
-            autoLoad: true,
-            data: [
-                {
-                    strDescription: 'Woman'
-                },
-                {
-                    strDescription: 'Infant'
-                },
-                {
-                    strDescription: 'Child'
-                }
-            ],
-            fields: [
-                {
-                    name: 'strDescription'
-                }
-            ]
-        },
-        RotationTypes: {
-            autoLoad: true,
-            data: [
-                {
-                    strDescription: 'FIFO'
-                },
-                {
-                    strDescription: 'LIFO'
-                },
-                {
-                    strDescription: 'NONE'
-                }
-            ],
-            fields: [
-                {
-                    name: 'strDescription'
-                }
-            ]
-        },
-        PricingMethods: {
-            autoLoad: true,
-            data: [
-                {
-                    strDescription: 'None'
-                },
-                {
-                    strDescription: 'Fixed Dollar Amount'
-                },
-                {
-                    strDescription: 'Markup Standard Cost'
-                },
-                {
-                    strDescription: 'Percent of Margin'
-                }
-            ],
-            fields: [
-                {
-                    name: 'strDescription'
-                }
-            ]
-        },
-        Counteds: {
-            autoLoad: true,
-            data: [
-                {
-                    strDescription: 'Counted'
-                },
-                {
-                    strDescription: 'Not Counted'
-                },
-                {
-                    strDescription: 'Obsolete'
-                },
-                {
-                    strDescription: 'Blended'
-                },
-                {
-                    strDescription: 'Automatic Blend'
-                },
-                {
-                    strDescription: 'Special Order'
-                }
-            ],
-            fields: [
-                {
-                    name: 'strDescription'
-                }
-            ]
-        },
-        AccountDescriptions: {
+
+
+        accountDescriptions: {
             autoLoad: true,
             data: [
                 {
@@ -327,7 +175,114 @@ Ext.define('Inventory.view.ItemViewModel', {
                 }
             ]
         },
-        CountCodes: {
+        glAccountId: {
+            type: 'bufAccountid'
+        },
+
+
+        patronage: {
+            type: 'inventorypatronagecategory'
+        },
+        taxClass: {
+            type: 'inventoryfueltaxclass'
+        },
+        barcodePrints: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'UPC'
+                },
+                {
+                    strDescription: 'Item'
+                },
+                {
+                    strDescription: 'None'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        fuelInspectFees: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Yes (Fuel Item)'
+                },
+                {
+                    strDescription: 'No (Not Fuel Item)'
+                },
+                {
+                    strDescription: 'No (Fuel Item)'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        rinRequires: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'No RIN'
+                },
+                {
+                    strDescription: 'Resell RIN Only'
+                },
+                {
+                    strDescription: 'Issued'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        fuelCategory: {
+            type: 'inventoryfuelcategory'
+        },
+        medicationTag: {
+            type: 'inventorytag'
+        },
+        ingredientTag: {
+            type: 'inventorytag'
+        },
+        physicalItem: {
+            type: 'inventorybufferedcompactitem'
+        },
+
+
+        posUom: {
+            type: 'inventorybuffereduom'
+        },
+        wicCodes: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Woman'
+                },
+                {
+                    strDescription: 'Infant'
+                },
+                {
+                    strDescription: 'Child'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        agCategory: {
+            type: 'inventorycategory'
+        },
+        countCodes: {
             autoLoad: true,
             data: [
                 {
@@ -344,24 +299,12 @@ Ext.define('Inventory.view.ItemViewModel', {
                 }
             ]
         },
-        CommentTypes: {
-            autoLoad: true,
-            data: [
-                {
-                    strDescription: 'Invoice'
-                },{
-                    strDescription: 'Pick Ticket'
-                },{
-                    strDescription: 'Others'
-                }
-            ],
-            fields: [
-                {
-                    name: 'strDescription'
-                }
-            ]
+        posCategory: {
+            type: 'inventorycategory'
         },
-        LifeTimes: {
+
+
+        lifeTimeTypes: {
             autoLoad: true,
             data: [
                 {
@@ -382,17 +325,17 @@ Ext.define('Inventory.view.ItemViewModel', {
                 }
             ]
         },
-        PromotionTypes:{
+        rotationTypes: {
             autoLoad: true,
             data: [
                 {
-                    strDescription: 'Rebate'
-                },{
-                    strDescription: 'Discount'
-                },{
-                    strDescription: 'Vendor Discount'
-                },{
-                    strDescription: 'Customer Discount'
+                    strDescription: 'FIFO'
+                },
+                {
+                    strDescription: 'LIFO'
+                },
+                {
+                    strDescription: 'NONE'
                 }
             ],
             fields: [
@@ -401,36 +344,73 @@ Ext.define('Inventory.view.ItemViewModel', {
                 }
             ]
         },
-        DiscountsBy:{
-            autoLoad: true,
-            data: [
-                {
-                    strDescription: 'Percent'
-                },{
-                    strDescription: 'Amount'
-                }
-            ],
-            fields: [
-                {
-                    name: 'strDescription'
-                }
-            ]
+        materialNMFC: {
+            type: 'inventorymaterialnmfc'
         },
-        PricingMethods:{
+        mfgDimensionUom: {
+            type: 'inventorybuffereduom'
+        },
+        mfgWeightUom: {
+            type: 'inventorybuffereduom'
+        },
+
+
+        upcUom: {
+            type: 'inventorybuffereduom'
+        },
+
+
+        custXrefLocation: {
+            type: 'companylocation'
+        },
+        custXrefCustomer: {
+            type: 'customerbuffered'
+        },
+        vendorXrefLocation: {
+            type: 'companylocation'
+        },
+        vendorXrefVendor: {
+            type: 'vendorbuffered'
+        },
+        vendorXrefUom: {
+            type: 'inventorybuffereduom'
+        },
+
+
+        contractLocation: {
+            type: 'companylocation'
+        },
+        origin: {
+            type: 'country'
+        },
+        document: {
+            type: 'inventorydocument'
+        },
+        certification: {
+            type: 'inventorycertification'
+        },
+
+
+        pricingLevelLocation: {
+            type: 'companylocation'
+        },
+        pricingLevelUOM: {
+            type: 'inventorybuffereduom'
+        },
+        pricingMethods: {
             autoLoad: true,
             data: [
+                {
+                    strDescription: 'None'
+                },
                 {
                     strDescription: 'Fixed Dollar Amount'
-                },{
+                },
+                {
                     strDescription: 'Markup Standard Cost'
-                },{
+                },
+                {
                     strDescription: 'Percent of Margin'
-                },{
-                    strDescription: 'Discount Sales Price'
-                },{
-                    strDescription: 'MSRP Discount'
-                },{
-                    strDescription: 'Percent of Margin (MSRP)'
                 }
             ],
             fields: [
@@ -439,7 +419,7 @@ Ext.define('Inventory.view.ItemViewModel', {
                 }
             ]
         },
-        CommissionsOn:{
+        commissionsOn:{
             autoLoad: true,
             data: [
                 {
@@ -458,7 +438,111 @@ Ext.define('Inventory.view.ItemViewModel', {
                 }
             ]
         },
-        InputTypes:{
+        specialPricingLocation: {
+            type: 'companylocation'
+        },
+        promotionTypes:{
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Rebate'
+                },{
+                    strDescription: 'Discount'
+                },{
+                    strDescription: 'Vendor Discount'
+                },{
+                    strDescription: 'Customer Discount'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        specialPricingUOM: {
+            type: 'inventorybuffereduom'
+        },
+        discountsBy:{
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Percent'
+                },{
+                    strDescription: 'Amount'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+
+
+        stockLocation: {
+            type: 'companylocation'
+        },
+        stockUOM: {
+            type: 'inventorybuffereduom'
+        },
+
+
+        commodity: {
+            type: 'inventorybufferedcommodity'
+        },
+        originAttribute: {
+            type: 'inventorybufferedoriginattribute'
+        },
+        productTypeAttribute: {
+            type: 'inventorybufferedproducttypeattribute'
+        },
+        regionAttribute: {
+            type: 'inventorybufferedregionattribute'
+        },
+        seasonAttribute: {
+            type: 'inventorybufferedseasonattribute'
+        },
+        classAttribute: {
+            type: 'inventorybufferedclassattribute'
+        },
+        productLineAttribute: {
+            type: 'inventorybufferedproductlineattribute'
+        },
+        marketValuations:{
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Outright Price'
+                },{
+                    strDescription: 'Futures + Basis/Differential/Premium Price'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+
+
+        assemblyItem: {
+            type: 'inventorybufferedcompactitem'
+        },
+        assemblyUOM: {
+            type: 'inventorybuffereduom'
+        },
+
+
+        bundleItem: {
+            type: 'inventorybufferedcompactitem'
+        },
+        bundleUOM: {
+            type: 'inventorybuffereduom'
+        },
+
+
+        inputTypes:{
             autoLoad: true,
             data: [
                 {
@@ -479,13 +563,26 @@ Ext.define('Inventory.view.ItemViewModel', {
                 }
             ]
         },
-        MarketValuations:{
+        kitItem: {
+            type: 'inventorybufferedcompactitem'
+        },
+        kitUOM: {
+            type: 'inventorybuffereduom'
+        },
+
+
+        noteLocation: {
+            type: 'companylocation'
+        },
+        commentTypes: {
             autoLoad: true,
             data: [
                 {
-                    strDescription: 'Outright Price'
+                    strDescription: 'Invoice'
                 },{
-                    strDescription: 'Futures + Basis/Differential/Premium Price'
+                    strDescription: 'Pick Ticket'
+                },{
+                    strDescription: 'Others'
                 }
             ],
             fields: [
@@ -493,84 +590,8 @@ Ext.define('Inventory.view.ItemViewModel', {
                     name: 'strDescription'
                 }
             ]
-        },
-
-
-        Manufacturer: {
-            type: 'inventorymanufacturer'
-        },
-        Category: {
-            type: 'inventorycategory'
-        },
-        PatronageCategory: {
-            type: 'inventorypatronagecategory'
-        },
-        InventoryTag: {
-            type: 'inventorytag'
-        },
-        UnitMeasure: {
-            type: 'inventoryuom'
-        },
-        Brand: {
-            type: 'inventorybrand'
-        },
-        FuelCategory: {
-            type: 'inventoryfuelcategory'
-        },
-        Vendor: {
-            type: 'vendorbuffered'
-        },
-        Customer: {
-            type: 'customerbuffered'
-        },
-        CompanyLocation: {
-            type: 'companylocation'
-        },
-        Country: {
-            type: 'country'
-        },
-        FuelTaxClass: {
-            type: 'inventoryfueltaxclass'
-        },
-        Item: {
-            type: 'inventorycompactitem'
-        },
-        GLAccount: {
-            type: 'bufAccountid'
-        },
-        Document: {
-            type: 'inventorydocument'
-        },
-        Certification: {
-            type: 'inventorycertification'
-        },
-        MaterialNMFC: {
-            type: 'inventorymaterialnmfc'
-        },
-        CountGroup: {
-            type: 'inventorycountgroup'
-        },
-        Commodity: {
-            type: 'inventorycommodity'
-        },
-        Origin: {
-            type: 'inventorycommodityattribute'
-        },
-        ProductType: {
-            type: 'inventorycommodityattribute'
-        },
-        Region: {
-            type: 'inventorycommodityattribute'
-        },
-        Season: {
-            type: 'inventorycommodityattribute'
-        },
-        Class: {
-            type: 'inventorycommodityattribute'
-        },
-        ProductLine: {
-            type: 'inventorycommodityattribute'
         }
+
     }
 
 });
