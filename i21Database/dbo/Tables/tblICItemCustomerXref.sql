@@ -3,7 +3,6 @@
 	[intItemCustomerXrefId] INT NOT NULL IDENTITY , 
     [intItemId] INT NOT NULL, 
     [intLocationId] INT NOT NULL, 
-    [strStoreName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intCustomerId] INT NOT NULL, 
     [strCustomerProduct] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strProductDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
@@ -44,14 +43,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'intLocationId'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Store Name',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICItemCustomerXref',
-    @level2type = N'COLUMN',
-    @level2name = N'strStoreName'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Customer Id',
