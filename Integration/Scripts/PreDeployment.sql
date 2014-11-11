@@ -120,4 +120,3 @@
 :r "..\dbo\Stored Procedures\uspARImportServiceCharge.sql"
 :r "..\dbo\Stored Procedures\uspARImportCustomerContacts.sql"
 :r "..\dbo\Stored Procedures\uspARImportInvoice.sql"
-:r "..\dbo\Stored Procedures\uspARImportTaxAuthortity.sql"

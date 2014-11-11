@@ -812,7 +812,6 @@
     <Build Include="dbo\Tables\tblICInventoryFIFOOut.sql" />
     <Build Include="dbo\Tables\tblSTPromotionItemList.sql" />
     <Build Include="dbo\Tables\tblSTPromotionSalesList.sql" />
-    <Build Include="dbo\Tables\tblARTaxAuthority.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
