@@ -29,6 +29,11 @@
     [intTransactionType] INT NOT NULL DEFAULT 0, 
     [intPurchaseOrderId] INT NULL, 
 	[strPONumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
+	[strAddress] NVARCHAR (200) COLLATE Latin1_General_CI_AS NULL, 
+	[strCity] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
+	[strState] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
+	[strZipCode] NVARCHAR (12) COLLATE Latin1_General_CI_AS NULL, 
+	[strCountry] NVARCHAR (25) COLLATE Latin1_General_CI_AS NULL, 
     [intShipFromId] INT NULL , 
 	[intShipToId] INT NULL , 
 	[intShipViaId] INT NULL , 
@@ -46,6 +51,9 @@
 GO
 CREATE NONCLUSTERED INDEX [IX_intBillBatchId]
     ON [dbo].[tblAPBill]([intBillBatchId] ASC);
+GO
+CREATE NONCLUSTERED INDEX [IX_strBillId]
+    ON [dbo].[tblAPBill]([strBillId] ASC);
 GO
 CREATE NONCLUSTERED INDEX [IX_intVendorId]
     ON [dbo].[tblAPBill]([intVendorId] ASC)
