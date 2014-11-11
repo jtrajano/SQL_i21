@@ -91,6 +91,13 @@ BEGIN
 			[intConcurrencyId] INT NOT NULL DEFAULT 1, 	
 		)
 
+		CREATE TABLE ExpectedInventoryFIFOOut (
+			Id INT IDENTITY 
+			,intInventoryFIFOId INT 
+			,intInventoryTransactionId INT
+			,dblQty NUMERIC(18,6)
+		)
+
 		-- 1. Expected data from Jan 1. Purchase 20 stocks @ 20 dollars each
 		BEGIN 
 			SET	@intItemId = @WetGrains
@@ -580,6 +587,34 @@ BEGIN
 					,intConcurrencyId += 1
 			WHERE	intItemId = @intItemId
 					AND intLocationId = @intItemLocationId
+
+			-- Insert expected data for tblICInventoryFIFOOut
+			INSERT INTO ExpectedInventoryFIFOOut (
+				intInventoryTransactionId 
+				,intInventoryFIFOId
+				,dblQty
+			)
+			SELECT	intInventoryTransactionId = 4
+					,intInventoryFIFOId = 1
+					,dblQty = 20
+			UNION ALL 
+			SELECT	intInventoryTransactionId = 5
+					,intInventoryFIFOId = 2
+					,dblQty = 20
+					
+			-- Re-insert the fake data totblICInventoryFIFOOut
+			INSERT INTO dbo.tblICInventoryFIFOOut (
+				intInventoryTransactionId 
+				,intInventoryFIFOId
+				,dblQty
+			)
+			SELECT	intInventoryTransactionId = 4
+					,intInventoryFIFOId = 1
+					,dblQty = 20
+			UNION ALL 
+			SELECT	intInventoryTransactionId = 5
+					,intInventoryFIFOId = 2
+					,dblQty = 20
 		END
 
 		-- 5. Mar 15. Sold 50 stocks. 
@@ -653,6 +688,16 @@ BEGIN
 					,[intLotId] = NULL 
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId]	= 1
+
+			-- Insert expected data for tblICInventoryFIFOOut
+			INSERT INTO ExpectedInventoryFIFOOut (
+				intInventoryTransactionId 
+				,intInventoryFIFOId
+				,dblQty
+			)
+			SELECT	intInventoryTransactionId = 6
+					,intInventoryFIFOId = 3
+					,dblQty = 20
 		END
 	END 
 	
@@ -717,13 +762,12 @@ BEGIN
 		FROM	tblICInventoryTransaction
 		WHERE	intItemId = @intItemId
 				AND intItemLocationId = @intItemLocationId
-				
-		SELECT * FROM expected
-		SELECT * FROM actual
-		
-		select * from dbo.tblICInventoryFIFO
 
+		-- Assert the expected data for tblICInventoryTransaction is built correctly. 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
+		
+		-- Assert the expected data for tblICInventoryFIFOOut is built correctly. 
+		EXEC tSQLt.AssertEqualsTable 'ExpectedInventoryFIFOOut', 'tblICInventoryFIFOOut'
 	END 
 
 	-- Clean-up: remove the tables used in the unit test
@@ -732,4 +776,7 @@ BEGIN
 
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
+		
+	IF OBJECT_ID('ExpectedInventoryFIFOOut') IS NOT NULL 
+		DROP TABLE dbo.ExpectedInventoryFIFOOut
 END

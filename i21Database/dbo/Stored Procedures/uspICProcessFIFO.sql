@@ -40,7 +40,9 @@ DECLARE @QtyOffset AS NUMERIC(18,6);
 DECLARE @TotalQtyOffset AS NUMERIC(18,6);
 
 DECLARE @InventoryTransactionIdentityId AS INT
-DECLARE @FifoId AS INT
+
+DECLARE @NewFifoId AS INT
+DECLARE @UpdatedFifoId AS INT 
 
 -------------------------------------------------
 -- 1. Process the Fifo Cost buckets
@@ -50,8 +52,6 @@ BEGIN
 	IF (ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0) < 0)
 	BEGIN 
 		SET @dblReduceQty = ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0)
-		SET @FifoId = NULL
-		SET @InventoryTransactionIdentityId = NULL 
 
 		-- Repeat call on uspICReduceStockInFIFO until @dblReduceQty is completely distributed to all available fifo buckets or added a new negative bucket. 
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)
@@ -66,7 +66,7 @@ BEGIN
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT 
 				,@QtyOffset OUTPUT 
-				,@FifoId OUTPUT 
+				,@UpdatedFifoId OUTPUT 
 
 			-- Insert the inventory transaction record
 			INSERT INTO tblICInventoryTransaction (
@@ -114,10 +114,10 @@ BEGIN
 					,dblQty
 			)
 			SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
-					,intInventoryFIFOId = @FifoId
+					,intInventoryFIFOId = @UpdatedFifoId
 					,dblQty = @QtyOffset
 			WHERE	@InventoryTransactionIdentityId IS NOT NULL
-					AND @FifoId IS NOT NULL 
+					AND @UpdatedFifoId IS NOT NULL 
 					AND @QtyOffset IS NOT NULL 
 			
 			-- Reduce the remaining qty
@@ -132,8 +132,6 @@ BEGIN
 		SET @dblAddQty = ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0)
 		SET @FullQty = @dblAddQty
 		SET @TotalQtyOffset = 0;
-		SET @FifoId = NULL
-		SET @InventoryTransactionIdentityId = NULL 
 
 		-- Insert the inventory transaction record
 		INSERT INTO tblICInventoryTransaction (
@@ -186,7 +184,8 @@ BEGIN
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT
 				,@QtyOffset OUTPUT 
-				,@FifoId OUTPUT 
+				,@NewFifoId OUTPUT 
+				,@UpdatedFifoId OUTPUT 
 
 			SET @dblAddQty = @RemainingQty;
 			SET @TotalQtyOffset += ISNULL(@QtyOffset, 0)
@@ -258,13 +257,25 @@ BEGIN
 					,dblQty
 			)
 			SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
-					,intInventoryFIFOId = @FifoId
+					,intInventoryFIFOId = NULL 
 					,dblQty = @QtyOffset
 			WHERE	@InventoryTransactionIdentityId IS NOT NULL
-					AND @FifoId IS NOT NULL 
+					AND @UpdatedFifoId IS NOT NULL 
 					AND @QtyOffset IS NOT NULL 
 
 			SET @dblAddQty = @RemainingQty;
 		END 
+
+		-- Update the fifo out table and assign the correct fifo id. 
+		UPDATE	FifoOut
+		SET		FifoOut.intInventoryFIFOId = @NewFifoId
+		FROM	tblICInventoryFIFOOut FifoOut INNER JOIN tblICInventoryTransaction TRANS
+					ON FifoOut.intInventoryTransactionId = TRANS.intInventoryTransactionId 
+					AND FifoOut.intInventoryFIFOId IS NULL 
+					AND TRANS.intItemId = @intItemId
+					AND TRANS.intItemLocationId = @intItemLocationId
+					AND TRANS.intTransactionId = @intTransactionId
+					AND TRANS.strBatchId = @strBatchId
+		WHERE	@NewFifoId IS NOT NULL 
 	END 
 END 

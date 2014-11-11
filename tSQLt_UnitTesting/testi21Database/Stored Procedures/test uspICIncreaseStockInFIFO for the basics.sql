@@ -41,7 +41,8 @@ BEGIN
 				,@CostUsed AS NUMERIC(18,6) 
 				,@FullQty AS NUMERIC(18,6)
 				,@QtyOffset AS NUMERIC(18,6)
-				,@FifoId AS INT 
+				,@NewFifoId AS INT 
+				,@UpdatedFifoId AS INT 
 	END 
 	
 	-- Act
@@ -58,7 +59,8 @@ BEGIN
 			,@RemainingQty OUTPUT
 			,@CostUsed OUTPUT
 			,@QtyOffset OUTPUT 
-			,@FifoId OUTPUT 
+			,@NewFifoId OUTPUT 
+			,@UpdatedFifoId OUTPUT 
 
 		INSERT INTO actual (
 				[intItemId] 

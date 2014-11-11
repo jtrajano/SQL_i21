@@ -27,9 +27,9 @@ BEGIN
 			The initial data in tblICInventoryFIFO
 			intItemId   intItemLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
 			----------- ----------------- ----------------------- --------------------------------------- --------------------------------------- --------------------------------------- ---------------- ----------------
-			3           3                 2014-01-13 00:00:00.000 77.000000                               0.000000                               13.000000                               1                1
-			3           3                 2014-01-14 00:00:00.000 23.000000                               0.000000                               14.000000                               1                1
-			3           3                 2014-01-15 00:00:00.000 0.000000                                0.000000                               15.000000                               1                1
+			3           3                 2014-01-13 00:00:00.000 0.000000                                77.000000                               13.000000                               1                1
+			3           3                 2014-01-14 00:00:00.000 0.000000                                56.000000                               14.000000                               1                1
+			3           3                 2014-01-15 00:00:00.000 0.000000                                30.000000                               15.000000                               1                1
 			***************************************************************************************************************************************************************************************************************/
 		INSERT INTO dbo.tblICInventoryFIFO (
 			[intItemId]
@@ -109,7 +109,8 @@ BEGIN
 				,@RemainingQty AS NUMERIC(18,6) 
 				,@CostUsed AS NUMERIC(18,6) 
 				,@QtyOffset AS NUMERIC(18,6)
-				,@FifoId AS INT 
+				,@NewFifoId AS INT 
+				,@UpdatedFifoId AS INT 
 
 		-- Setup the expected values 
 		INSERT INTO expected (
@@ -197,7 +198,8 @@ BEGIN
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT
 				,@QtyOffset OUTPUT 
-				,@FifoId OUTPUT 
+				,@NewFifoId OUTPUT 
+				,@UpdatedFifoId OUTPUT 
 
 			-- Assert on first pass:
 			-- the cost to offset is $13
@@ -206,7 +208,7 @@ BEGIN
 			BEGIN 
 				EXEC tSQLt.AssertEquals 13.00, @CostUsed
 				EXEC tSQLt.AssertEquals 77, @QtyOffset
-				EXEC tSQLt.AssertEquals 3, @FifoId
+				EXEC tSQLt.AssertEquals 3, @UpdatedFifoId
 			END 
 				
 			-- Assert on 2nd pass
@@ -216,12 +218,15 @@ BEGIN
 			BEGIN 
 				EXEC tSQLt.AssertEquals 14.00, @CostUsed
 				EXEC tSQLt.AssertEquals 23, @QtyOffset
-				EXEC tSQLt.AssertEquals 2, @FifoId
+				EXEC tSQLt.AssertEquals 2, @UpdatedFifoId			
 			END 
 
 			SET @dblQty = @RemainingQty;
 			SET @TotalQtyOffset += ISNULL(@QtyOffset, 0)
 		END 
+
+		-- Assert that the new id generated for fifo is 4
+		EXEC tSQLt.AssertEquals 4, @NewFifoId
 
 		-- Assert that it only takes 2 iterations to complete the stock increase 
 		EXEC tSQLt.AssertEquals 2, @intIterationCounter;
