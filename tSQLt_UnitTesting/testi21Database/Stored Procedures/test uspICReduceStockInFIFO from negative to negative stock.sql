@@ -6,7 +6,7 @@ BEGIN
 		-- Fake the table 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;		
 
-		-- Re-add the clustered index. This is critical for the FIFO table because this arranged the data physically in the order specified. 
+		-- Re-add the clustered index. This is critical for the FIFO table because it arranges the data physically by that order. 
 		CREATE CLUSTERED INDEX [Fake_IDX_tblICInventoryFIFO]
 			ON [dbo].[tblICInventoryFIFO]([dtmDate] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intInventoryFIFOId] ASC);
 
@@ -24,6 +24,12 @@ BEGIN
 				,@BetterHaven AS INT = 3
 
 		-- Create a fake data for tblICInventoryFIFO
+			/***************************************************************************************************************************************************************************************************************
+			The initial data in tblICInventoryFIFO
+			intItemId   intItemLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
+			----------- ----------------- ----------------------- --------------------------------------- --------------------------------------- --------------------------------------- ---------------- ----------------
+			1           1                 2014-01-15 00:00:00.000 0.000000                                60.000000                               15.000000                               1                1
+			***************************************************************************************************************************************************************************************************************/
 		INSERT INTO dbo.tblICInventoryFIFO (
 			[intItemId]
 			,[intItemLocationId]
@@ -79,6 +85,8 @@ BEGIN
 				,@dblReduceQty AS NUMERIC(18,6)
 				,@RemainingQty AS NUMERIC(18,6)
 				,@CostUsed AS NUMERIC(18,6) 
+				,@QtyOffset AS NUMERIC(18,6)
+				,@FifoId AS INT 
 
 		-- Setup the expected values 
 		INSERT INTO expected (
@@ -108,6 +116,14 @@ BEGIN
 				,[dblCost] =  33.19
 				,[intCreatedUserId] = @intUserId
 				,[intConcurrencyId] = 1
+
+				/***************************************************************************************************************************************************************************************************************
+				The following are the expected records to be affected. Here is how it should look like:  
+		_m_		intItemId   intItemLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
+		-----	----------- ----------------- ----------------------- --------------------------------------- --------------------------------------- --------------------------------------- ---------------- ----------------
+				1           1                 2014-01-15 00:00:00.000 0.000000                                60.000000                               15.000000                               1                2
+		new		1           1                 2014-01-18 00:00:00.000 0.000000                                10.000000                               33.190000                               1                2
+				***************************************************************************************************************************************************************************************************************/
 	END 
 	
 	-- Act
@@ -117,7 +133,7 @@ BEGIN
 		-- Repeat call on uspICReduceStockInFIFO until @dblReduceQty is completely distributed to all the available fifo buckets
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)
 		BEGIN 					
-			EXEC [dbo].[uspICReduceStockInFIFO]
+			EXEC dbo.uspICReduceStockInFIFO
 				@intItemId
 				,@intItemLocationId
 				,@dtmDate
@@ -126,9 +142,17 @@ BEGIN
 				,@intUserId
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT
+				,@QtyOffset OUTPUT 
+				,@FifoId OUTPUT 
 
 				-- Cost used must be NULL since stock is already negative
 				EXEC tSQLt.AssertEquals NULL, @CostUsed;
+
+				-- Qty offset must be NULL 
+				EXEC tSQLt.AssertEquals NULL, @QtyOffset;
+
+				-- Fifo id must be NULL since stock is negative
+				EXEC tSQLt.AssertEquals NULL, @FifoId;
 
 			SET @dblReduceQty = @RemainingQty;
 		END 

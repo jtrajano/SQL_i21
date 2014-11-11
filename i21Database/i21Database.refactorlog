@@ -1127,11 +1127,67 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intCustomerId" />
   </Operation>
-  <Operation Name="Rename Refactor" Key="af2670ee-41ff-4bd7-acc4-af011be77381" ChangeDateTime="11/11/2014 08:51:20">
-    <Property Name="ElementName" Value="[dbo].[tblICItemLocation].[strNegativeInventory]" />
+  <Operation Name="Rename Refactor" Key="eff8f33d-810c-4c63-8ded-421208ea8bf8" ChangeDateTime="11/11/2014 09:29:10">
+    <Property Name="ElementName" Value="[dbo].[tblSTPromotionItemList].[Id]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />
-    <Property Name="ParentElementName" Value="[dbo].[tblICItemLocation]" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTPromotionItemList]" />
     <Property Name="ParentElementType" Value="SqlTable" />
-    <Property Name="NewName" Value="intNegativeInventory" />
+    <Property Name="NewName" Value="intPromoItemListId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c8495a03-b31b-439f-95fe-a6ff0b5d3cd8" ChangeDateTime="11/11/2014 09:39:26">
+    <Property Name="ElementName" Value="[dbo].[AK_tblSTPromotionItemList_]" />
+    <Property Name="ElementType" Value="SqlUniqueConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTPromotionItemList]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[AK_tblSTPromotionItemList_intPromoItemListNo]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9e55c17e-e975-47db-85d0-7a4923922c8d" ChangeDateTime="11/11/2014 09:54:58">
+    <Property Name="ElementName" Value="[dbo].[tblSTPromotionSalesList].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTPromotionSalesList]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intPromoSalesListId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="efa9b11e-8f72-4b89-a55d-1489f39dafa5" ChangeDateTime="11/11/2014 10:05:50">
+    <Property Name="ElementName" Value="[dbo].[tblSTPromotionSalesList].[strPromoType]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTPromotionSalesList]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intStoreId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="30d14e45-c683-4fe6-a465-d9e7a1a97d1d" ChangeDateTime="11/11/2014 10:06:00">
+    <Property Name="ElementName" Value="[dbo].[tblSTPromotionSalesList].[intStoreId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTPromotionSalesList]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strPromoType" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ce3df994-d4d1-4f24-9f3c-48aadba97130" ChangeDateTime="11/11/2014 10:08:18">
+    <Property Name="ElementName" Value="[dbo].[tblSTPromotionSalesList].[  intConcurrencyId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTPromotionSalesList]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intConcurrencyId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5326cb99-c568-4f6e-aadb-9ef876b9c407" ChangeDateTime="11/11/2014 10:13:57">
+    <Property Name="ElementName" Value="[dbo].[tblSTPromotionSalesList].[intPromoId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTPromotionSalesList]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intPromoSalesId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="40383a8e-9f47-4464-bf33-8b0db929f62a" ChangeDateTime="11/11/2014 10:44:29">
+    <Property Name="ElementName" Value="[dbo].[tblSTPromotionSalesList].[intPromoItemListId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTPromotionSalesList]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intPromoItemListId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5a90e15c-e973-4f79-934c-46b1e4729de6" ChangeDateTime="11/11/2014 10:46:01">
+    <Property Name="ElementName" Value="[dbo].[tblSTPromotionSalesList].[[intPromoItemListId]]]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTPromotionSalesList]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intPromoItemListId" />
   </Operation>
 </Operations>

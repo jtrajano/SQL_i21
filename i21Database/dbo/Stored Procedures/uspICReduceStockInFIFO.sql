@@ -13,6 +13,8 @@ CREATE PROCEDURE [dbo].[uspICReduceStockInFIFO]
 	,@intUserId AS INT
 	,@RemainingQty AS NUMERIC(18,6) OUTPUT
 	,@CostUsed AS NUMERIC(18,6) OUTPUT 
+	,@QtyOffset AS NUMERIC(18,6) OUTPUT 
+	,@FifoId AS INT OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -24,9 +26,11 @@ SET ANSI_WARNINGS OFF
 -- Ensure the qty is a positive number
 SET @dblQty = ABS(@dblQty)
 
--- Initialize the remaining qty and cost used to NULL
-SET @RemainingQty = NULL 
-SET @CostUsed = NULL 
+-- Initialize the remaining qty, cost used, fifo id to NULL
+SET @RemainingQty = NULL;
+SET @CostUsed = NULL;
+SET @QtyOffset = NULL;
+SET @FifoId = NULL;
 
 -- Upsert (update or insert) a record in the cost bucket.
 MERGE	TOP(1)
@@ -51,13 +55,24 @@ WHEN MATCHED THEN
 					END 
 
 		,fifo_bucket.intConcurrencyId = ISNULL(fifo_bucket.intConcurrencyId, 0) + 1
+
 		-- update the remaining qty
 		,@RemainingQty = 
 					CASE	WHEN (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) >= @dblQty THEN 0
 							ELSE (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) - @dblQty
 					END
-		-- retrieve the cost from the cost bucket. 
+
+		-- retrieve the cost from the fifo bucket. 
 		,@CostUsed = fifo_bucket.dblCost
+
+		-- retrieve the	qty reduced from a fifo bucket 
+		,@QtyOffset = 
+					CASE	WHEN (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) >= @dblQty THEN @dblQty
+							ELSE (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) 
+					END
+
+		-- retrieve the id of the matching fifo bucket 
+		,@FifoId = fifo_bucket.intInventoryFIFOId
 
 -- Insert a new fifo bucket
 WHEN NOT MATCHED THEN 

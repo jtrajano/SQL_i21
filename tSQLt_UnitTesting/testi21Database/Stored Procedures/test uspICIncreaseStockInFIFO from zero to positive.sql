@@ -56,6 +56,8 @@ BEGIN
 				,@RemainingQty AS NUMERIC(18,6) 
 				,@CostUsed AS NUMERIC(18,6) 
 				,@QtyOffset AS NUMERIC(18,6)
+				,@NewFifoId AS INT 
+				,@UpdatedFifoId AS INT 
 
 		-- Setup the expected values 
 		INSERT INTO expected (
@@ -109,6 +111,8 @@ BEGIN
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT
 				,@QtyOffset OUTPUT 
+				,@NewFifoId OUTPUT 
+				,@UpdatedFifoId OUTPUT 
 
 			SET @dblQty = @RemainingQty;
 			SET @TotalQtyOffset += ISNULL(@QtyOffset, 0)
@@ -118,6 +122,10 @@ BEGIN
 
 			-- Assert that the remaining qty is NULL
 			EXEC tSQLt.AssertEquals NULL, @RemainingQty;
+
+			-- Assert the fifo ids
+			EXEC tSQLt.AssertEquals 1, @NewFifoId;
+			EXEC tSQLt.AssertEquals NULL, @UpdatedFifoId;
 		END 
 
 		INSERT INTO actual (

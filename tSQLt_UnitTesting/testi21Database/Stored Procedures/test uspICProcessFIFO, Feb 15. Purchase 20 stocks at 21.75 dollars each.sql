@@ -8,6 +8,7 @@ BEGIN
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOOut', @Identity = 1;
 				
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -87,6 +88,13 @@ BEGIN
 			[intLotId] INT NULL, 
 			[intCreatedUserId] INT NULL, 
 			[intConcurrencyId] INT NOT NULL DEFAULT 1, 	
+		)
+
+		CREATE TABLE ExpectedInventoryFIFOOut (
+			Id INT
+			,intInventoryFIFOId INT 
+			,intInventoryTransactionId INT
+			,dblQty NUMERIC(18,6)
 		)
 
 		-- 1. Expected data from Jan 1. Purchase 20 stocks @ 20 dollars each
@@ -443,7 +451,11 @@ BEGIN
 		WHERE	intItemId = @intItemId
 				AND intItemLocationId = @intItemLocationId
 
+		-- Assert the expected data for tblICInventoryTransaction is built correctly. 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
+		
+		-- Assert the expected data for tblICInventoryFIFOOut is built correctly. 
+		EXEC tSQLt.AssertEqualsTable 'ExpectedInventoryFIFOOut', 'tblICInventoryFIFOOut'
 	END 
 
 	-- Clean-up: remove the tables used in the unit test
@@ -452,4 +464,7 @@ BEGIN
 
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
+		
+	IF OBJECT_ID('ExpectedInventoryFIFOOut') IS NOT NULL 
+		DROP TABLE dbo.ExpectedInventoryFIFOOut
 END

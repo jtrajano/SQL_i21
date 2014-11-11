@@ -7,7 +7,8 @@
     [dtmDate]              DATETIME        NOT NULL DEFAULT GETDATE(),
     [dtmDueDate]           DATETIME        NOT NULL DEFAULT GETDATE(),
     [intAccountId]         INT             NOT NULL DEFAULT 0,
-    [strDescription]       NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strDescription]       NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
+	[strComment]			NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
     [dblTotal]             DECIMAL (18, 6) NOT NULL DEFAULT 0,
 	[dblSubtotal]          DECIMAL (18, 6) NOT NULL DEFAULT 0,
     [ysnPosted]            BIT             NOT NULL DEFAULT 0,
@@ -29,6 +30,11 @@
     [intTransactionType] INT NOT NULL DEFAULT 0, 
     [intPurchaseOrderId] INT NULL, 
 	[strPONumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
+	[strAddress] NVARCHAR (200) COLLATE Latin1_General_CI_AS NULL, 
+	[strCity] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
+	[strState] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
+	[strZipCode] NVARCHAR (12) COLLATE Latin1_General_CI_AS NULL, 
+	[strCountry] NVARCHAR (25) COLLATE Latin1_General_CI_AS NULL, 
     [intShipFromId] INT NULL , 
 	[intShipToId] INT NULL , 
 	[intShipViaId] INT NULL , 
@@ -46,6 +52,9 @@
 GO
 CREATE NONCLUSTERED INDEX [IX_intBillBatchId]
     ON [dbo].[tblAPBill]([intBillBatchId] ASC);
+GO
+CREATE NONCLUSTERED INDEX [IX_strBillId]
+    ON [dbo].[tblAPBill]([strBillId] ASC);
 GO
 CREATE NONCLUSTERED INDEX [IX_intVendorId]
     ON [dbo].[tblAPBill]([intVendorId] ASC)

@@ -117,6 +117,8 @@ BEGIN
 				,@RemainingQty AS NUMERIC(18,6) 
 				,@CostUsed AS NUMERIC(18,6) 
 				,@QtyOffset AS NUMERIC(18,6)
+				,@NewFifoId AS INT 
+				,@UpdatedFifoId AS INT 
 
 		-- Setup the expected values 
 		INSERT INTO expected (
@@ -211,6 +213,8 @@ BEGIN
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT
 				,@QtyOffset OUTPUT 
+				,@NewFifoId OUTPUT 
+				,@UpdatedFifoId OUTPUT 
 
 			-- Assert on first pass
 			-- the cost to offset is $13
@@ -219,6 +223,7 @@ BEGIN
 			BEGIN 
 				EXEC tSQLt.AssertEquals 13.00, @CostUsed
 				EXEC tSQLt.AssertEquals 52.00, @QtyOffset
+				EXEC tSQLt.AssertEquals 4, @UpdatedFifoId
 			END 
 				
 			-- Assert on 2nd pass
@@ -228,6 +233,7 @@ BEGIN
 			BEGIN 
 				EXEC tSQLt.AssertEquals 14.00, @CostUsed
 				EXEC tSQLt.AssertEquals 56.00, @QtyOffset
+				EXEC tSQLt.AssertEquals 3, @UpdatedFifoId
 			END 
 
 			-- Assert on 3rd pass
@@ -237,21 +243,28 @@ BEGIN
 			BEGIN 
 				EXEC tSQLt.AssertEquals 15.00, @CostUsed
 				EXEC tSQLt.AssertEquals 30.00, @QtyOffset
+				EXEC tSQLt.AssertEquals 2, @UpdatedFifoId
 			END
-
+			
 			-- Assert on 4th pass
-			-- the cost to offset is NULL 
+			-- the cost to offset is NULL
 			-- the qty offset is NULL 
-
 			IF (@intIterationCounter = 4) 
 			BEGIN 
 				EXEC tSQLt.AssertEquals NULL, @CostUsed
 				EXEC tSQLt.AssertEquals NULL, @QtyOffset
-			END
+				EXEC tSQLt.AssertEquals NULL, @UpdatedFifoId
+			END			
 
 			SET @dblQty = @RemainingQty;
 			SET @TotalQtyOffset += ISNULL(@QtyOffset, 0)
 		END 
+
+		-- Assert the new fifo id is 5
+		EXEC tSQLt.AssertEquals 5, @NewFifoId
+		
+		-- Assert that it only takes 4 iterations to complete the job
+		EXEC tSQLt.AssertEquals 4, @intIterationCounter;
 
 		INSERT INTO actual (
 				[intItemId] 

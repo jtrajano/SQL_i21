@@ -8,7 +8,6 @@
     [strDescription]        NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [ysnKey]                BIT            NULL,
     [ysnAllowNull]          BIT            NULL,
-    [ysnCreated]            BIT            NULL,
     [ysnModified]           BIT            NULL,
     [intConcurrencyId]      INT            NOT NULL,
     CONSTRAINT [PK_tblSMColumnDictionary] PRIMARY KEY CLUSTERED ([intColumnDictionaryId] ASC),

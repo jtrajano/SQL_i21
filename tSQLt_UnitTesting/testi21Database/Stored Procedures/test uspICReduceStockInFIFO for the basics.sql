@@ -39,7 +39,9 @@ BEGIN
 				,@dblCost AS NUMERIC(18,6)
 				,@intUserId AS INT
 				,@RemainingQty AS NUMERIC(18,6) 
-				,@CostUsed AS NUMERIC(18,6) 
+				,@CostUsed AS NUMERIC(18,6)
+				,@QtyOffset AS NUMERIC(18,6)
+				,@FifoId AS INT 
 	END 
 	
 	-- Act
@@ -53,6 +55,8 @@ BEGIN
 			,@intUserId 
 			,@RemainingQty OUTPUT 
 			,@CostUsed OUTPUT
+			,@QtyOffset OUTPUT 
+			,@FifoId OUTPUT 
 
 		INSERT INTO actual (
 				[intItemId] 

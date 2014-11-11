@@ -1,32 +1,5 @@
 ﻿/*
-	This is the stored procedure that handles the moving average costing method. 
-	
-	Parameters: 
-	@intItemId - The item to process
-
-	@intItemLocationId - The location where the item is being process. 
-	
-	@dtmDate - The date used in the transaction and posting. 
-
-	@dblUnitQty - A positive qty indicates an increase of stock. A negative qty indicates a decrease in stock. 
-
-	@dblUOMQty - The base qty associated with a UOM. For example, a box may have 10 pieces of an item. In this case, UOM qty will be 10. 
-
-	@dblCost - The cost per base qty of the item. 
-
-	@dblSalesPrice - The sales price of an item sold to the customer. 
-
-	@intCurrencyId - The foreign currency associated with the transaction. 
-
-	@dblExchangeRate - The conversion factor between the base currency and the foreign currency. 
-
-	@intTransactionId - The primary key id used in a transaction. 
-
-	@strTransactionId - The string value of a transaction id. 
-
-	@strBatchId - The batch id to use in generating the g/l entries. 
-
-	@intUserId - The user who initiated or called this stored procedure. 
+	Write the description of the stored procedure here 
 */
 
 CREATE PROCEDURE [dbo].[uspICProcessFIFO]
@@ -66,6 +39,11 @@ DECLARE @FullQty AS NUMERIC(18,6);
 DECLARE @QtyOffset AS NUMERIC(18,6);
 DECLARE @TotalQtyOffset AS NUMERIC(18,6);
 
+DECLARE @InventoryTransactionIdentityId AS INT
+
+DECLARE @NewFifoId AS INT
+DECLARE @UpdatedFifoId AS INT 
+
 -------------------------------------------------
 -- 1. Process the Fifo Cost buckets
 -------------------------------------------------
@@ -87,6 +65,8 @@ BEGIN
 				,@intUserId
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT 
+				,@QtyOffset OUTPUT 
+				,@UpdatedFifoId OUTPUT 
 
 			-- Insert the inventory transaction record
 			INSERT INTO tblICInventoryTransaction (
@@ -124,6 +104,23 @@ BEGIN
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId] = 1
 
+			-- Get the id used in the inventory transaction insert 
+			SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
+			
+			-- Insert the record the the fifo-out table
+			INSERT INTO tblICInventoryFIFOOut (
+					intInventoryTransactionId
+					,intInventoryFIFOId
+					,dblQty
+			)
+			SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
+					,intInventoryFIFOId = @UpdatedFifoId
+					,dblQty = @QtyOffset
+			WHERE	@InventoryTransactionIdentityId IS NOT NULL
+					AND @UpdatedFifoId IS NOT NULL 
+					AND @QtyOffset IS NOT NULL 
+			
+			-- Reduce the remaining qty
 			SET @dblReduceQty = @RemainingQty;
 		END 
 	END
@@ -187,6 +184,8 @@ BEGIN
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT
 				,@QtyOffset OUTPUT 
+				,@NewFifoId OUTPUT 
+				,@UpdatedFifoId OUTPUT 
 
 			SET @dblAddQty = @RemainingQty;
 			SET @TotalQtyOffset += ISNULL(@QtyOffset, 0)
@@ -209,7 +208,26 @@ BEGIN
 				,[dtmCreated] 
 				,[intCreatedUserId] 
 				,[intConcurrencyId] 
-			)				
+			)
+			-- Add Revalue Sold			
+			SELECT	[intItemId] = @intItemId
+					,[intItemLocationId] = @intItemLocationId
+					,[dtmDate] = @dtmDate
+					,[dblUnitQty] = @QtyOffset 
+					,[dblCost] = @CostUsed
+					,[dblValue] = NULL 
+					,[dblSalesPrice] = @dblSalesPrice
+					,[intCurrencyId] = @intCurrencyId
+					,[dblExchangeRate] = @dblExchangeRate
+					,[intTransactionId] = @intTransactionId
+					,[strTransactionId] = @strTransactionId
+					,[strBatchId] = @strBatchId
+					,[intTransactionTypeId] = @REVALUE_SOLD
+					,[dtmCreated] = GETDATE()
+					,[intCreatedUserId] = @intUserId
+					,[intConcurrencyId] = 1
+			WHERE	@QtyOffset IS NOT NULL 
+			UNION ALL 
 			-- Add Write-Off Sold
 			SELECT	[intItemId] = @intItemId
 					,[intItemLocationId] = @intItemLocationId
@@ -229,28 +247,35 @@ BEGIN
 					,[intConcurrencyId] = 1
 			WHERE	@QtyOffset IS NOT NULL 
 
-			-- Add Revalue Sold
-			UNION ALL 
-			SELECT	[intItemId] = @intItemId
-					,[intItemLocationId] = @intItemLocationId
-					,[dtmDate] = @dtmDate
-					,[dblUnitQty] = @QtyOffset 
-					,[dblCost] = @CostUsed
-					,[dblValue] = NULL 
-					,[dblSalesPrice] = @dblSalesPrice
-					,[intCurrencyId] = @intCurrencyId
-					,[dblExchangeRate] = @dblExchangeRate
-					,[intTransactionId] = @intTransactionId
-					,[strTransactionId] = @strTransactionId
-					,[strBatchId] = @strBatchId
-					,[intTransactionTypeId] = @REVALUE_SOLD
-					,[dtmCreated] = GETDATE()
-					,[intCreatedUserId] = @intUserId
-					,[intConcurrencyId] = 1
-			WHERE	@QtyOffset IS NOT NULL 
-
+			-- Get the id used in the inventory transaction insert 
+			SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
+			
+			-- Insert the record the the fifo-out table
+			INSERT INTO tblICInventoryFIFOOut (
+					intInventoryTransactionId
+					,intInventoryFIFOId
+					,dblQty
+			)
+			SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
+					,intInventoryFIFOId = NULL 
+					,dblQty = @QtyOffset
+			WHERE	@InventoryTransactionIdentityId IS NOT NULL
+					AND @UpdatedFifoId IS NOT NULL 
+					AND @QtyOffset IS NOT NULL 
 
 			SET @dblAddQty = @RemainingQty;
 		END 
+
+		-- Update the fifo out table and assign the correct fifo id. 
+		UPDATE	FifoOut
+		SET		FifoOut.intInventoryFIFOId = @NewFifoId
+		FROM	tblICInventoryFIFOOut FifoOut INNER JOIN tblICInventoryTransaction TRANS
+					ON FifoOut.intInventoryTransactionId = TRANS.intInventoryTransactionId 
+					AND FifoOut.intInventoryFIFOId IS NULL 
+					AND TRANS.intItemId = @intItemId
+					AND TRANS.intItemLocationId = @intItemLocationId
+					AND TRANS.intTransactionId = @intTransactionId
+					AND TRANS.strBatchId = @strBatchId
+		WHERE	@NewFifoId IS NOT NULL 
 	END 
 END 
