@@ -6,6 +6,7 @@ BEGIN
 	BEGIN 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOOut', @Identity = 1;
 		
 		DECLARE 
 			@intItemId AS INT

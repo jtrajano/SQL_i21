@@ -6,7 +6,6 @@
 	Parameters: 
 
 */
-
 CREATE PROCEDURE dbo.uspICIncreaseStockInFIFO
 	@intItemId AS INT
 	,@intItemLocationId AS INT
@@ -19,6 +18,7 @@ CREATE PROCEDURE dbo.uspICIncreaseStockInFIFO
 	,@RemainingQty AS NUMERIC(18,6) OUTPUT
 	,@CostUsed AS NUMERIC(18,6) OUTPUT 
 	,@QtyOffset AS NUMERIC(18,6) OUTPUT 
+	,@FifoId AS INT OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -34,6 +34,7 @@ SET @dblQty = ABS(@dblQty);
 SET @RemainingQty = NULL;
 SET @CostUsed = NULL;
 SET @QtyOffset = NULL;
+SET @FifoId = NULL;
 
 -- Upsert (update or insert) a record into the cost bucket.
 MERGE	TOP(1)
@@ -71,6 +72,9 @@ WHEN MATCHED THEN
 					CASE	WHEN (fifo_bucket.dblStockOut - fifo_bucket.dblStockIn) >= @dblQty THEN @dblQty
 							ELSE (fifo_bucket.dblStockOut - fifo_bucket.dblStockIn) 
 					END 
+
+		-- retrieve the id of the matching fifo bucket 
+		,@FifoId = fifo_bucket.intInventoryFIFOId
 
 -- Insert a new fifo bucket if there is no negative stock to offset. 
 WHEN NOT MATCHED AND @FullQty > 0 THEN 

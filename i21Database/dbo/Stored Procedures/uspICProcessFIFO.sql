@@ -186,6 +186,7 @@ BEGIN
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT
 				,@QtyOffset OUTPUT 
+				,@FifoId OUTPUT 
 
 			SET @dblAddQty = @RemainingQty;
 			SET @TotalQtyOffset += ISNULL(@QtyOffset, 0)
@@ -208,7 +209,26 @@ BEGIN
 				,[dtmCreated] 
 				,[intCreatedUserId] 
 				,[intConcurrencyId] 
-			)				
+			)
+			-- Add Revalue Sold			
+			SELECT	[intItemId] = @intItemId
+					,[intItemLocationId] = @intItemLocationId
+					,[dtmDate] = @dtmDate
+					,[dblUnitQty] = @QtyOffset 
+					,[dblCost] = @CostUsed
+					,[dblValue] = NULL 
+					,[dblSalesPrice] = @dblSalesPrice
+					,[intCurrencyId] = @intCurrencyId
+					,[dblExchangeRate] = @dblExchangeRate
+					,[intTransactionId] = @intTransactionId
+					,[strTransactionId] = @strTransactionId
+					,[strBatchId] = @strBatchId
+					,[intTransactionTypeId] = @REVALUE_SOLD
+					,[dtmCreated] = GETDATE()
+					,[intCreatedUserId] = @intUserId
+					,[intConcurrencyId] = 1
+			WHERE	@QtyOffset IS NOT NULL 
+			UNION ALL 
 			-- Add Write-Off Sold
 			SELECT	[intItemId] = @intItemId
 					,[intItemLocationId] = @intItemLocationId
@@ -228,26 +248,21 @@ BEGIN
 					,[intConcurrencyId] = 1
 			WHERE	@QtyOffset IS NOT NULL 
 
-			-- Add Revalue Sold
-			UNION ALL 
-			SELECT	[intItemId] = @intItemId
-					,[intItemLocationId] = @intItemLocationId
-					,[dtmDate] = @dtmDate
-					,[dblUnitQty] = @QtyOffset 
-					,[dblCost] = @CostUsed
-					,[dblValue] = NULL 
-					,[dblSalesPrice] = @dblSalesPrice
-					,[intCurrencyId] = @intCurrencyId
-					,[dblExchangeRate] = @dblExchangeRate
-					,[intTransactionId] = @intTransactionId
-					,[strTransactionId] = @strTransactionId
-					,[strBatchId] = @strBatchId
-					,[intTransactionTypeId] = @REVALUE_SOLD
-					,[dtmCreated] = GETDATE()
-					,[intCreatedUserId] = @intUserId
-					,[intConcurrencyId] = 1
-			WHERE	@QtyOffset IS NOT NULL 
-
+			-- Get the id used in the inventory transaction insert 
+			SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
+			
+			-- Insert the record the the fifo-out table
+			INSERT INTO tblICInventoryFIFOOut (
+					intInventoryTransactionId
+					,intInventoryFIFOId
+					,dblQty
+			)
+			SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
+					,intInventoryFIFOId = @FifoId
+					,dblQty = @QtyOffset
+			WHERE	@InventoryTransactionIdentityId IS NOT NULL
+					AND @FifoId IS NOT NULL 
+					AND @QtyOffset IS NOT NULL 
 
 			SET @dblAddQty = @RemainingQty;
 		END 

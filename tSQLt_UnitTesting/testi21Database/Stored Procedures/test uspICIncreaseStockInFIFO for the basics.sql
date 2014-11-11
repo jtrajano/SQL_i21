@@ -40,7 +40,8 @@ BEGIN
 				,@RemainingQty AS NUMERIC(18,6) 
 				,@CostUsed AS NUMERIC(18,6) 
 				,@FullQty AS NUMERIC(18,6)
-				,@QtyOffset AS NUMERIC(18,6) 
+				,@QtyOffset AS NUMERIC(18,6)
+				,@FifoId AS INT 
 	END 
 	
 	-- Act
@@ -57,6 +58,7 @@ BEGIN
 			,@RemainingQty OUTPUT
 			,@CostUsed OUTPUT
 			,@QtyOffset OUTPUT 
+			,@FifoId OUTPUT 
 
 		INSERT INTO actual (
 				[intItemId] 
