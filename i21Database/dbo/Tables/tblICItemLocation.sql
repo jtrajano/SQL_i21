@@ -51,6 +51,14 @@
     [intFreightMethodId] INT NULL, 
     [dblFreightRate] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [intFreightVendorId] INT NULL, 
+    [intNegativeInventory] INT NULL DEFAULT ((3)), 
+    [dblReorderPoint] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+    [dblMinOrder] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+    [dblSuggestedQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+    [dblLeadTime] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+    [strCounted] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [intCountGroupId] INT NULL, 
+    [ysnCountedDaily] BIT NULL DEFAULT ((0)), 
 	[intSort] INT NULL,
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [FK_tblICItemLocation_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
@@ -61,7 +69,8 @@
     CONSTRAINT [PK_tblICItemLocation] PRIMARY KEY ([intItemLocationId]), 
     CONSTRAINT [FK_tblICItemLocation_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intVendorId]), 
     CONSTRAINT [FK_tblICItemLocation_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]),
-	CONSTRAINT [FK_tblICItemLocation_tblAPVendorFreight] FOREIGN KEY ([intFreightVendorId]) REFERENCES [tblAPVendor]([intVendorId])
+	CONSTRAINT [FK_tblICItemLocation_tblAPVendorFreight] FOREIGN KEY ([intFreightVendorId]) REFERENCES [tblAPVendor]([intVendorId]), 
+    CONSTRAINT [FK_tblICItemLocation_tblICCountGroup] FOREIGN KEY ([intCountGroupId]) REFERENCES [tblICCountGroup]([intCountGroupId])
 )
 
 GO
@@ -541,3 +550,75 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICItemLocation',
     @level2type = N'COLUMN',
     @level2name = N'intAllowNegativeInventory'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Negative Inventory',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemLocation',
+    @level2type = N'COLUMN',
+    @level2name = N'intNegativeInventory'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Reorder Point',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemLocation',
+    @level2type = N'COLUMN',
+    @level2name = N'dblReorderPoint'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Minimum Order',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemLocation',
+    @level2type = N'COLUMN',
+    @level2name = N'dblMinOrder'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Suggested Quantity',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemLocation',
+    @level2type = N'COLUMN',
+    @level2name = N'dblSuggestedQty'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Lead Time',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemLocation',
+    @level2type = N'COLUMN',
+    @level2name = N'dblLeadTime'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Counted',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemLocation',
+    @level2type = N'COLUMN',
+    @level2name = N'strCounted'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Inventory Count Group',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemLocation',
+    @level2type = N'COLUMN',
+    @level2name = N'intCountGroupId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Counted Daily',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemLocation',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnCountedDaily'
