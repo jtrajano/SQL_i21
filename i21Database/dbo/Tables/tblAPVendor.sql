@@ -38,17 +38,7 @@
 
 GO
 ALTER TABLE [dbo].[tblAPVendor] CHECK CONSTRAINT [FK_dbo.tblAPVendor_dbo.tblEntities_intEntityId];
-
-
 GO
-CREATE NONCLUSTERED INDEX [IX_intVendorId]
-    ON [dbo].[tblAPVendor]([intVendorId] ASC);
-CREATE NONCLUSTERED INDEX [IX_tblAPVendor_intVendorId_strVendorId] ON [dbo].[tblAPVendor] 
-(
-	[intVendorId] ASC
-)
-INCLUDE ( [strVendorId]) WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
-
 CREATE NONCLUSTERED INDEX [IX_intVendorId]
     ON [dbo].[tblAPVendor]([intVendorId] ASC, [strVendorId] ASC)
 	WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
