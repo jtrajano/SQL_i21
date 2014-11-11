@@ -20,6 +20,12 @@ BEGIN
 				,@BetterHaven AS INT = 3
 
 		-- Create a fake data for tblICInventoryFIFO
+			/***************************************************************************************************************************************************************************************************************
+			The initial data in tblICInventoryFIFO
+			intItemId   intItemLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
+			----------- ----------------- ----------------------- --------------------------------------- --------------------------------------- --------------------------------------- ---------------- ----------------
+			1           1                 2014-01-01 00:00:00.000 100.000000                              0.000000                                11.440000                               1                1
+			***************************************************************************************************************************************************************************************************************/
 		INSERT INTO dbo.tblICInventoryFIFO (
 			[intItemId]
 			,[intItemLocationId]
@@ -75,6 +81,8 @@ BEGIN
 				,@dblReduceQty AS NUMERIC(18,6)
 				,@RemainingQty AS NUMERIC(18,6) 
 				,@CostUsed AS NUMERIC(18,6) 
+				,@QtyOffset AS NUMERIC(18,6)
+				,@FifoId AS INT 
 
 		-- Setup the expected values 
 		INSERT INTO expected (
@@ -104,6 +112,14 @@ BEGIN
 				,[dblCost] = 45.66
 				,[intCreatedUserId] = 1
 				,[intConcurrencyId] = 1
+
+				/***************************************************************************************************************************************************************************************************************
+				The following are the expected records to be affected. Here is how it should look like:  
+		_m_		intItemId   intItemLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
+		-----	----------- ----------------- ----------------------- --------------------------------------- --------------------------------------- --------------------------------------- ---------------- ----------------
+		upt		1           1                 2014-01-01 00:00:00.000 100.000000                              100.000000                              11.440000                               1                1
+		new		1           1                 2014-01-12 00:00:00.000 0.000000                                25.000000                               45.660000                               1                1
+				***************************************************************************************************************************************************************************************************************/
 	END 
 	
 	-- Act
@@ -116,7 +132,7 @@ BEGIN
 		BEGIN 	
 			SET @intIterationCounter += 1;
 						
-			EXEC [dbo].[uspICReduceStockInFIFO]
+			EXEC dbo.uspICReduceStockInFIFO
 				@intItemId
 				,@intItemLocationId
 				,@dtmDate
@@ -125,17 +141,33 @@ BEGIN
 				,@intUserId
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT 
+				,@QtyOffset OUTPUT 
+				,@FifoId OUTPUT 
 
-			-- Assert on first pass, the cost used is 11.44. 
+			-- Assert on first pass
 			IF (@intIterationCounter = 1) 
 			BEGIN 
+				-- the cost used is 11.44. 
 				EXEC tSQLt.AssertEquals 11.44, @CostUsed
+
+				-- the qty offset is 100
+				EXEC tSQLt.AssertEquals 100, @QtyOffset
+
+				-- the fifo id used is 1
+				EXEC tSQLt.AssertEquals 1, @FifoId
 			END 
 				
-			-- Assert on 2nd pass, there is no cost used is NULL (no cost used).
+			-- Assert on 2nd pass
 			IF (@intIterationCounter = 2) 
 			BEGIN 
+				-- there is no cost used is NULL (no cost used).
 				EXEC tSQLt.AssertEquals NULL, @CostUsed
+
+				-- the qty offset is also NULL 
+				EXEC tSQLt.AssertEquals NULL, @QtyOffset
+
+				-- the fifo id used is also NULL 
+				EXEC tSQLt.AssertEquals NULL, @FifoId
 			END 
 
 			SET @dblReduceQty = @RemainingQty;
