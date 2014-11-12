@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICProcessMovingAverageCost, Feb 15. Purchase 20 stocks at 21.75 dollars each]
+﻿CREATE PROCEDURE [testi21Database].[test uspICProcessAverageCosting, Mar 1. Sold 40 stocks]
 AS
 BEGIN
 	-- Arrange 
@@ -7,6 +7,8 @@ BEGIN
 		EXEC [testi21Database].[Fake data for item stock]
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOOut', @Identity = 1;
 		
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -30,8 +32,9 @@ BEGIN
 
 		-- Declare the variables for the transaction types
 		DECLARE @PurchaseTransactionType AS INT = 1;
+		DECLARE @SalesTransactionType AS INT = 2;
 
-		-- Declare the variables used in uspICProcessMovingAverageCost
+		-- Declare the variables used in uspICProcessAverageCosting
 		DECLARE 
 			@intItemId AS INT
 			,@intItemLocationId AS INT
@@ -92,6 +95,13 @@ BEGIN
 			[intConcurrencyId] INT NOT NULL DEFAULT 1, 	
 		)
 
+		CREATE TABLE ExpectedInventoryFIFOOut (
+			Id INT IDENTITY 
+			,intInventoryFIFOId INT 
+			,intInventoryTransactionId INT
+			,dblQty NUMERIC(18,6)
+		)
+		
 		-- 1. Expected data from Jan 1. Purchase 20 stocks @ 20 dollars each
 		BEGIN 
 			SET	@intItemId = @WetGrains
@@ -190,7 +200,26 @@ BEGIN
 					,dblUnitOnHand = 20
 			WHERE	intItemId = @intItemId
 					AND intLocationId = @intItemLocationId
-			
+					
+			-- Add the fake data for tblICInventoryFIFO
+			INSERT INTO tblICInventoryFIFO (
+					intItemId
+					,intItemLocationId
+					,dtmDate
+					,dblStockIn
+					,dblStockOut
+					,dblCost
+					,intCreatedUserId
+					,intConcurrencyId
+			)
+			SELECT	intItemId = @WetGrains
+					,intItemLocationId = @NewHaven
+					,dtmDate = 'January 1, 2014'
+					,dblStockIn = 20
+					,dblStockOut = 0
+					,dblCost = 20 
+					,intCreatedUserId = @intUserId
+					,intConcurrencyId = 2			
 		END 
 
 		-- 2. Feb 10. Purchase 20 stocks at 21 dollars each
@@ -289,8 +318,29 @@ BEGIN
 			UPDATE	tblICItemStock
 			SET		dblAverageCost = 20.50
 					,dblUnitOnHand = 40
+					,intConcurrencyId += 1
 			WHERE	intItemId = @intItemId
 					AND intLocationId = @intItemLocationId
+					
+			-- Add the fake data for tblICInventoryFIFO
+			INSERT INTO tblICInventoryFIFO (
+					intItemId
+					,intItemLocationId
+					,dtmDate
+					,dblStockIn
+					,dblStockOut
+					,dblCost
+					,intCreatedUserId
+					,intConcurrencyId
+			)
+			SELECT	intItemId = @WetGrains
+					,intItemLocationId = @NewHaven
+					,dtmDate = 'February 10, 2014'
+					,dblStockIn = 20
+					,dblStockOut = 0
+					,dblCost = 21 
+					,intCreatedUserId = @intUserId
+					,intConcurrencyId = 2
 		END 
 
 		-- 3. Feb 15. Purchase 20 stocks at $21.75 each
@@ -348,12 +398,147 @@ BEGIN
 					,[intLotId] = NULL 
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId]	= 1
+
+			-- Re-insert the expected data in tblICInventoryTransaction
+			INSERT INTO tblICInventoryTransaction (
+					[intItemId]
+					,[intItemLocationId]
+					,[dtmDate]
+					,[dblUnitQty]
+					,[dblCost]
+					,[dblValue]
+					,[dblSalesPrice]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[intTransactionId]
+					,[strTransactionId]
+					,[strBatchId]
+					,[intTransactionTypeId]
+					,[intLotId]
+					,[intCreatedUserId]
+					,[intConcurrencyId]
+			)
+			SELECT	[intItemId] = @intItemId
+					,[intItemLocationId] = @NewHaven
+					,[dtmDate] = @dtmDate
+					,[dblUnitQty] = (@dblUnitQty * @dblUOMQty)
+					,[dblCost] = @dblCost
+					,[dblValue] = NULL 
+					,[dblSalesPrice] = @dblSalesPrice
+					,[intCurrencyId] = @USD
+					,[dblExchangeRate] = 1
+					,[intTransactionId] = @intTransactionId
+					,[strTransactionId] = @strTransactionId
+					,[strBatchId] = @strBatchId
+					,[intTransactionTypeId] = @PurchaseTransactionType
+					,[intLotId] = NULL 
+					,[intCreatedUserId] = @intUserId
+					,[intConcurrencyId]	= 1
+			
+			-- Update expected data in tblICItemStock
+			UPDATE	tblICItemStock
+			SET		dblAverageCost = 20.916667
+					,dblUnitOnHand = 60
+					,intConcurrencyId += 1
+			WHERE	intItemId = @intItemId
+					AND intLocationId = @intItemLocationId
+					
+			-- Add the fake data for tblICInventoryFIFO
+			INSERT INTO tblICInventoryFIFO (
+					intItemId
+					,intItemLocationId
+					,dtmDate
+					,dblStockIn
+					,dblStockOut
+					,dblCost
+					,intCreatedUserId
+					,intConcurrencyId
+			)
+			SELECT	intItemId = @WetGrains
+					,intItemLocationId = @NewHaven
+					,dtmDate = 'February 15, 2014'
+					,dblStockIn = 20
+					,dblStockOut = 0
+					,dblCost = 21.75 
+					,intCreatedUserId = @intUserId
+					,intConcurrencyId = 2
+		END
+
+		-- 4. Mar 1. Sold 40 stocks. 
+		BEGIN 
+			SET	@intItemId = @WetGrains
+			SET @intItemLocationId = @NewHaven
+			SET @dtmDate = 'March 1, 2014'
+			SET @dblUnitQty = -40
+			SET @dblUOMQty = @EACH 
+			SET @dblCost = dbo.fnGetItemAverageCost(@intItemId, @intItemLocationId)
+			SET @dblSalesPrice = 50.00
+			SET @intCurrencyId = @USD
+			SET @dblExchangeRate = 1
+			SET @intTransactionId = 1
+			SET @strTransactionId = 'SALES-00001'
+			SET @strBatchId = 'BATCH-00004'
+			SET @intTransactionTypeId = @SalesTransactionType
+			SET @intUserId = 3
+
+			SET @dblAverageCost_Expected = 20.916667
+
+			INSERT INTO expected (
+					[intInventoryTransactionId]
+					,[intItemId]
+					,[intItemLocationId]
+					,[dtmDate]
+					,[dblUnitQty]
+					,[dblCost]
+					,[dblValue]
+					,[dblSalesPrice]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[intTransactionId]
+					,[strTransactionId]
+					,[strBatchId]
+					,[intTransactionTypeId]
+					,[intLotId]
+					,[intCreatedUserId]
+					,[intConcurrencyId]
+			)
+			SELECT	[intInventoryTransactionId] = 4
+					,[intItemId] = @intItemId
+					,[intItemLocationId] = @NewHaven
+					,[dtmDate] = @dtmDate
+					,[dblUnitQty] = (@dblUnitQty * @dblUOMQty)
+					,[dblCost] = @dblAverageCost_Expected
+					,[dblValue] = NULL 
+					,[dblSalesPrice] = @dblSalesPrice
+					,[intCurrencyId] = @USD
+					,[dblExchangeRate] = 1
+					,[intTransactionId] = @intTransactionId
+					,[strTransactionId] = @strTransactionId
+					,[strBatchId] = @strBatchId
+					,[intTransactionTypeId] = @intTransactionTypeId
+					,[intLotId] = NULL 
+					,[intCreatedUserId] = @intUserId
+					,[intConcurrencyId]	= 1
+					
+			-- Insert expected data for tblICInventoryFIFOOut
+			INSERT INTO ExpectedInventoryFIFOOut (
+				intInventoryTransactionId 
+				,intInventoryFIFOId
+				,dblQty
+			)
+			SELECT	intInventoryTransactionId = 4
+					,intInventoryFIFOId = 1
+					,dblQty = 20
+			UNION ALL 
+			SELECT	intInventoryTransactionId = 4
+					,intInventoryFIFOId = 2
+					,dblQty = 20					
 		END
 	END 
 	
 	-- Act 
 	BEGIN 
-		EXEC dbo.uspICProcessMovingAverageCost
+		EXEC dbo.uspICProcessAverageCosting
 			@intItemId
 			,@intItemLocationId
 			,@dtmDate
@@ -413,28 +598,11 @@ BEGIN
 		WHERE	intItemId = @intItemId
 				AND intItemLocationId = @intItemLocationId
 
+		-- Assert the expected data for tblICInventoryTransaction is built correctly. 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
-
-		---- Check the average cost
-		--SELECT	@dblAverageCost_Actual = Stock.dblAverageCost
-		--FROM	[dbo].[tblICItemStock] Stock
-		--WHERE	Stock.intItemId = @intItemId
-		--		AND Stock.intLocationId = @intItemLocationId
-
-		--EXEC tSQLt.AssertEquals @dblAverageCost_Expected, @dblAverageCost_Actual;
-
-		---- Check the stock on hand
-		--DECLARE @dblUnitOnHand_Expected AS NUMERIC(18,6);
-		--DECLARE @dblUnitOnHand_Actual AS NUMERIC(18,6);
-
-		--SET @dblUnitOnHand_Expected = 60;
-
-		--SELECT	@dblUnitOnHand_Actual = Stock.dblUnitOnHand
-		--FROM	[dbo].[tblICItemStock] Stock
-		--WHERE	Stock.intItemId = @intItemId
-		--		AND Stock.intLocationId = @intItemLocationId
-
-		--EXEC tSQLt.AssertEquals @dblUnitOnHand_Expected, @dblUnitOnHand_Actual;
+		
+		-- Assert the expected data for tblICInventoryFIFOOut is built correctly. 
+		EXEC tSQLt.AssertEqualsTable 'ExpectedInventoryFIFOOut', 'tblICInventoryFIFOOut'
 	END 
 
 	-- Clean-up: remove the tables used in the unit test
@@ -443,4 +611,7 @@ BEGIN
 
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
+		
+	IF OBJECT_ID('ExpectedInventoryFIFOOut') IS NOT NULL 
+		DROP TABLE dbo.ExpectedInventoryFIFOOut
 END

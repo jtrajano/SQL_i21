@@ -680,17 +680,13 @@
     <None Include="Scripts\Post-Deployment\IC\1_InventoryTransactionTypes.sql" />
     <Build Include="dbo\Tables\tblPREmployeeDeductionTax.sql" />
     <Build Include="dbo\Tables\tblPREmployeeEarningTax.sql" />
-    <Build Include="dbo\Tables\tblICInventoryTransactionFIFO.sql" />
-    <Build Include="dbo\Tables\tblICInventoryTransactionLIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateCostingOnPost.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateCostingOnUnpost.sql" />
-    <Build Include="dbo\Tables\tblICInventoryCostingResult.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostCosting.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\1_ReportDisableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\2_ReportDeleteOldData.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\3_ReportEnableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\4_ReportData.sql" />
-    <Build Include="dbo\Tables\tblICInventoryCostingBucket.sql" />
     <Build Include="dbo\Tables\tblPRPaycheckDeductionTax.sql" />
     <Build Include="dbo\Tables\tblPRPaycheckEarningTax.sql" />
     <Build Include="dbo\Tables\tblICItemUOM.sql" />
@@ -769,7 +765,6 @@
     <Build Include="dbo\Stored Procedures\uspFRAccountMonitor.sql" />
     <Build Include="dbo\Views\vyuSMOriginColumn.sql" />
     <Build Include="dbo\Views\vyuAPRecapTransaction.sql" />
-    <Build Include="dbo\Stored Procedures\uspICProcessMovingAverageCost.sql" />
     <Build Include="dbo\Functions\fnGetItemAverageCost.sql" />
     <Build Include="dbo\Functions\fnGetItemTotalValueFromTransactions.sql" />
     <Build Include="dbo\Functions\fnCalculateAverageCost.sql" />
@@ -812,6 +807,7 @@
     <Build Include="dbo\Tables\tblICInventoryFIFOOut.sql" />
     <Build Include="dbo\Tables\tblSTPromotionItemList.sql" />
     <Build Include="dbo\Tables\tblSTPromotionSalesList.sql" />
+    <Build Include="dbo\Stored Procedures\uspICProcessAverageCosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

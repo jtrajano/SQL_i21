@@ -970,55 +970,35 @@ BEGIN
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId]	= 1
 
-			-- 2ND Expected: The Revalue Cost
+			-- 2ND Expected: Write-Off Sold
 			UNION ALL 
 			SELECT	[intInventoryTransactionId] = 10
 					,[intItemId] = @WetGrains
 					,[intItemLocationId] = @NewHaven
 					,[dtmDate] = @dtmDate
-					,[dblUnitQty] = 30
-					,[dblCost] = 20.50
-					,[dblValue] = NULL 
+					,[dblUnitQty] = 0
+					,[dblCost] = 0
+					,[dblValue] = (30 * 20.50)
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
 					,[intTransactionId] = @intTransactionId
 					,[strTransactionId] = @strTransactionId
 					,[strBatchId] = @strBatchId
-					,[intTransactionTypeId] = @REVALUE_SOLD
+					,[intTransactionTypeId] = @WRITE_OFF_SOLD
 					,[intLotId] = NULL 
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId]	= 1
 
-			-- 3RD Expected: The Write-Off cost
+			-- 3RD Expected: Revalue Sold
 			UNION ALL 
 			SELECT	[intInventoryTransactionId] = 11
 					,[intItemId] = @WetGrains
 					,[intItemLocationId] = @NewHaven
 					,[dtmDate] = @dtmDate
-					,[dblUnitQty] = -30
-					,[dblCost] = @dblCost
-					,[dblValue] = NULL 
-					,[dblSalesPrice] = @dblSalesPrice
-					,[intCurrencyId] = @USD
-					,[dblExchangeRate] = 1
-					,[intTransactionId] = @intTransactionId
-					,[strTransactionId] = @strTransactionId
-					,[strBatchId] = @strBatchId
-					,[intTransactionTypeId] = @WRITE_OFF_SOLD
-					,[intLotId] = NULL 
-					,[intCreatedUserId] = @intUserId
-					,[intConcurrencyId]	= 1
-
-			-- 4TH Expected: The Revalue Cost
-			UNION ALL 
-			SELECT	[intInventoryTransactionId] = 12
-					,[intItemId] = @WetGrains
-					,[intItemLocationId] = @NewHaven
-					,[dtmDate] = @dtmDate
-					,[dblUnitQty] = 45
-					,[dblCost] = 20.50
-					,[dblValue] = NULL 
+					,[dblUnitQty] = 0
+					,[dblCost] = 0
+					,[dblValue] = (30 * @dblCost * -1)
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
@@ -1030,15 +1010,15 @@ BEGIN
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId]	= 1
 
-			-- 5TH Expected: The Write-Off cost
+			-- 4TH Expected: Write-Off Sold
 			UNION ALL 
-			SELECT	[intInventoryTransactionId] = 13
+			SELECT	[intInventoryTransactionId] = 12
 					,[intItemId] = @WetGrains
 					,[intItemLocationId] = @NewHaven
 					,[dtmDate] = @dtmDate
-					,[dblUnitQty] = -45
-					,[dblCost] = @dblCost
-					,[dblValue] = NULL 
+					,[dblUnitQty] = 0
+					,[dblCost] = 0
+					,[dblValue] = (45 * 20.50)
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
@@ -1050,6 +1030,25 @@ BEGIN
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId]	= 1
 
+			-- 5TH Expected: Revalue Sold
+			UNION ALL 
+			SELECT	[intInventoryTransactionId] = 13
+					,[intItemId] = @WetGrains
+					,[intItemLocationId] = @NewHaven
+					,[dtmDate] = @dtmDate
+					,[dblUnitQty] = 0
+					,[dblCost] = 0
+					,[dblValue] = (45 * @dblCost * -1)
+					,[dblSalesPrice] = @dblSalesPrice
+					,[intCurrencyId] = @USD
+					,[dblExchangeRate] = 1
+					,[intTransactionId] = @intTransactionId
+					,[strTransactionId] = @strTransactionId
+					,[strBatchId] = @strBatchId
+					,[intTransactionTypeId] = @REVALUE_SOLD
+					,[intLotId] = NULL 
+					,[intCreatedUserId] = @intUserId
+					,[intConcurrencyId]	= 1
 
 			-- Re-insert the expected data in tblICInventoryTransaction
 			INSERT INTO tblICInventoryTransaction (
@@ -1088,33 +1087,14 @@ BEGIN
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId]	= 1
 
-			-- 2ND Expected: The Revalue Cost
+			-- 2ND Expected: Write-Off Sold
 			UNION ALL 
 			SELECT	[intItemId] = @WetGrains
 					,[intItemLocationId] = @NewHaven
 					,[dtmDate] = @dtmDate
-					,[dblUnitQty] = 30
-					,[dblCost] = 20.50
-					,[dblValue] = NULL 
-					,[dblSalesPrice] = @dblSalesPrice
-					,[intCurrencyId] = @USD
-					,[dblExchangeRate] = 1
-					,[intTransactionId] = @intTransactionId
-					,[strTransactionId] = @strTransactionId
-					,[strBatchId] = @strBatchId
-					,[intTransactionTypeId] = @REVALUE_SOLD
-					,[intLotId] = NULL 
-					,[intCreatedUserId] = @intUserId
-					,[intConcurrencyId]	= 1
-
-			-- 3RD Expected: The Write-Off cost
-			UNION ALL 
-			SELECT	[intItemId] = @WetGrains
-					,[intItemLocationId] = @NewHaven
-					,[dtmDate] = @dtmDate
-					,[dblUnitQty] = -30
-					,[dblCost] = @dblCost
-					,[dblValue] = NULL 
+					,[dblUnitQty] = 0
+					,[dblCost] = 0
+					,[dblValue] = (30 * 20.50)
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
@@ -1126,14 +1106,14 @@ BEGIN
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId]	= 1
 
-			-- 4TH Expected: The Revalue Cost
+			-- 3RD Expected: Revalue Sold
 			UNION ALL 
 			SELECT	[intItemId] = @WetGrains
 					,[intItemLocationId] = @NewHaven
 					,[dtmDate] = @dtmDate
-					,[dblUnitQty] = 45
-					,[dblCost] = 20.50
-					,[dblValue] = NULL 
+					,[dblUnitQty] = 0
+					,[dblCost] = 0
+					,[dblValue] = (30 * @dblCost * -1)
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
@@ -1145,14 +1125,14 @@ BEGIN
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId]	= 1
 
-			-- 5TH Expected: The Write-Off cost
+			-- 4TH Expected: Write-Off Sold
 			UNION ALL 
 			SELECT	[intItemId] = @WetGrains
 					,[intItemLocationId] = @NewHaven
 					,[dtmDate] = @dtmDate
-					,[dblUnitQty] = -45
-					,[dblCost] = @dblCost
-					,[dblValue] = NULL 
+					,[dblUnitQty] = 0
+					,[dblCost] = 0
+					,[dblValue] = (45 * 20.50)
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
@@ -1164,6 +1144,25 @@ BEGIN
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId]	= 1
 
+			-- 5TH Expected: Revalue Sold
+			UNION ALL 
+			SELECT	[intItemId] = @WetGrains
+					,[intItemLocationId] = @NewHaven
+					,[dtmDate] = @dtmDate
+					,[dblUnitQty] = 0
+					,[dblCost] = 0
+					,[dblValue] = (45 * @dblCost * -1)
+					,[dblSalesPrice] = @dblSalesPrice
+					,[intCurrencyId] = @USD
+					,[dblExchangeRate] = 1
+					,[intTransactionId] = @intTransactionId
+					,[strTransactionId] = @strTransactionId
+					,[strBatchId] = @strBatchId
+					,[intTransactionTypeId] = @REVALUE_SOLD
+					,[intLotId] = NULL 
+					,[intCreatedUserId] = @intUserId
+					,[intConcurrencyId]	= 1
+					
 			-- Add the fake data for tblICInventoryFIFO
 			INSERT INTO tblICInventoryFIFO (
 					intItemId
@@ -1268,35 +1267,15 @@ BEGIN
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId]	= 1
 
-			-- 2ND Expected: The Revalue Cost
+			-- 2ND Expected: Write-Off Sold
 			UNION ALL 
 			SELECT	[intInventoryTransactionId] = 15
 					,[intItemId] = @WetGrains
 					,[intItemLocationId] = @NewHaven
 					,[dtmDate] = 'May 15, 2014'
-					,[dblUnitQty] = 15
-					,[dblCost] = 20.50
-					,[dblValue] = NULL 
-					,[dblSalesPrice] = @dblSalesPrice
-					,[intCurrencyId] = @USD
-					,[dblExchangeRate] = 1
-					,[intTransactionId] = @intTransactionId
-					,[strTransactionId] = @strTransactionId
-					,[strBatchId] = @strBatchId
-					,[intTransactionTypeId] = @REVALUE_SOLD
-					,[intLotId] = NULL 
-					,[intCreatedUserId] = @intUserId
-					,[intConcurrencyId]	= 1
-
-			-- 3RD Expected: The Write-Off cost
-			UNION ALL 
-			SELECT	[intInventoryTransactionId] = 16
-					,[intItemId] = @WetGrains
-					,[intItemLocationId] = @NewHaven
-					,[dtmDate] = 'May 15, 2014'
-					,[dblUnitQty] = -15
-					,[dblCost] = 27.00
-					,[dblValue] = NULL 
+					,[dblUnitQty] = 0
+					,[dblCost] = 0
+					,[dblValue] = 15 * 20.50
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
@@ -1304,6 +1283,26 @@ BEGIN
 					,[strTransactionId] = @strTransactionId
 					,[strBatchId] = @strBatchId
 					,[intTransactionTypeId] = @WRITE_OFF_SOLD
+					,[intLotId] = NULL 
+					,[intCreatedUserId] = @intUserId
+					,[intConcurrencyId]	= 1
+
+			-- 3RD Expected: Revalue Sold
+			UNION ALL 
+			SELECT	[intInventoryTransactionId] = 16
+					,[intItemId] = @WetGrains
+					,[intItemLocationId] = @NewHaven
+					,[dtmDate] = 'May 15, 2014'
+					,[dblUnitQty] = 0
+					,[dblCost] = 0
+					,[dblValue] = 15 * 27.00 * -1
+					,[dblSalesPrice] = @dblSalesPrice
+					,[intCurrencyId] = @USD
+					,[dblExchangeRate] = 1
+					,[intTransactionId] = @intTransactionId
+					,[strTransactionId] = @strTransactionId
+					,[strBatchId] = @strBatchId
+					,[intTransactionTypeId] = @REVALUE_SOLD
 					,[intLotId] = NULL 
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId]	= 1
@@ -1381,7 +1380,7 @@ BEGIN
 		FROM	tblICInventoryTransaction
 		WHERE	intItemId = @intItemId
 				AND intItemLocationId = @intItemLocationId
-
+				
 		-- Assert the expected data for tblICInventoryTransaction is built correctly. 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 		

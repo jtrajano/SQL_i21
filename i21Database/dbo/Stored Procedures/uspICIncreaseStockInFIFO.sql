@@ -133,7 +133,10 @@ BEGIN
 		,@intUserId
 		,1	
 	)
+
+	-- Do a follow-up retrieval of the new fifo id.
+	SELECT @NewFifoId = SCOPE_IDENTITY() WHERE @UpdatedFifoId IS NOT NULL; 
 END 
 
--- Retreive the fifo id for the new inserts
-SELECT @NewFifoId = SCOPE_IDENTITY();
+-- If Update was not performed, assume an insert was done. 
+SELECT @NewFifoId = SCOPE_IDENTITY() WHERE @UpdatedFifoId IS NULL; 
