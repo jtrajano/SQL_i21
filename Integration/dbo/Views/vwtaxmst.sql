@@ -89,6 +89,8 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 		, vwtax_user_id   = agtax_user_id  
 		, vwtax_user_rev_dt  = agtax_user_rev_dt  
 		, A4GLIdentity   = CAST(A4GLIdentity   AS INT)
+		, dblSalesTaxRate = ISNULL(agtax_sst_rt,0.0)/100
+		, dtmEffectiveDate = NULL
 		FROM [agtaxmst]
 		')
 GO
@@ -177,6 +179,13 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 		, vwtax_user_id   = CAST(NULL AS CHAR(16))
 		, vwtax_user_rev_dt  = NULL  
 		, A4GLIdentity   = CAST(A4GLIdentity   AS INT)
+		, dblSalesTaxRate = ISNULL(pttax_sst_rt ,0.0)
+		, dtmEffectiveDate = (CASE WHEN pttax_eff_rev_dt = 0 THEN NULL 
+								ELSE
+									CONVERT(DATETIME, SUBSTRING(CAST(pttax_eff_rev_dt AS NVARCHAR(8)),1,4) + ''/'' 
+											+ SUBSTRING(CAST(pttax_eff_rev_dt AS NVARCHAR(8)),5,2) + ''/'' 
+											+  SUBSTRING(CAST(pttax_eff_rev_dt AS NVARCHAR(8)),7,2), 101) -- yyy/mm/dd
+								END)
 		FROM [pttaxmst]
 		')
 GO
