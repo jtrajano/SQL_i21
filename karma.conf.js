@@ -1,6 +1,34 @@
 /**
  * Created by LZabala on 9/10/2014.
  */
+var ExternalModuleFiles = [
+    {pattern: '../i21_SystemManager/app/model/Country.js', watched: false},
+    {pattern: '../i21_SystemManager/app/store/CountryBuffered.js', watched: false},
+    {pattern: '../i21_SystemManager/app/model/ZipCode.js', watched: false},
+    {pattern: '../i21_SystemManager/app/store/ZipCodeBuffered.js', watched: false},
+    {pattern: '../i21_SystemManager/app/model/CompanyLocation.js', watched: false},
+    {pattern: '../i21_SystemManager/app/store/CompanyLocationBuffered.js', watched: false},
+    {pattern: '../i21_SystemManager/app/model/FreightTerm.js', watched: false},
+    {pattern: '../i21_SystemManager/app/store/FreightTermsBuffered.js', watched: false},
+
+    {pattern: '../i21_accountsreceivable/app/model/CustomerBuffered.js', watched: false},
+    {pattern: '../i21_accountsreceivable/app/store/CustomerBuffered.js', watched: false},
+
+
+    {pattern: '../i21_accountspayable/app/Util.js', watched: false},
+    {pattern: '../i21_accountspayable/app/Configurations.js', watched: false},
+    {pattern: '../i21_accountspayable/app/rest/RestBufferedBase.js', watched: false},
+    {pattern: '../i21_accountspayable/app/common/Filter.js', watched: false},
+    {pattern: '../i21_accountspayable/app/model/VendorToContact.js', watched: false},
+    {pattern: '../i21_accountspayable/app/model/VendorHistory.js', watched: false},
+    {pattern: '../i21_accountspayable/app/model/Vendor.js', watched: false},
+    {pattern: '../i21_accountspayable/app/store/BufferedBase.js', watched: false},
+    {pattern: '../i21_accountspayable/app/store/VendorBuffered.js', watched: false},
+
+    {pattern: '../i21_generalledger/app/model/AccountId.js', watched: false},
+    {pattern: '../i21_generalledger/app/store/BufAccountId.js', watched: false},
+];
+
 var InventoryFiles = [
 //    // Load the mock data and config.
 //    {pattern: 'test/json/*.json', included: false, watched: false, served: true},
@@ -8,21 +36,37 @@ var InventoryFiles = [
 //
     // Load the Inventory dependencies
 
-    {pattern: '../i21_SystemManager/app/model/Country.js', watched: false},
-    {pattern: '../i21_SystemManager/app/store/Country*.js', watched: false},
-    {pattern: '../i21_SystemManager/app/model/ZipCode.js', watched: false},
-    {pattern: '../i21_SystemManager/app/store/ZipCode*.js', watched: false},
-
-    {pattern: 'app/view/FilterViewModel.js', watched: false},
+    {pattern: 'app/view/Filter1ViewModel.js', watched: false},
     {pattern: 'app/view/StatusBar1ViewModel.js', watched: false},
     {pattern: 'app/view/StatusBarPaging1ViewModel.js', watched: false},
-    {pattern: 'app/view/Filter.js', watched: false},
+    {pattern: 'app/view/Filter1.js', watched: false},
     {pattern: 'app/view/StatusBar1.js', watched: false},
     {pattern: 'app/view/StatusBarPaging1.js', watched: false},
 
-    {pattern: 'app/model/CertificationCommodity.js', watched: false},
-    {pattern: 'app/model/Certification.js', watched: false},
-    {pattern: 'app/model/Document.js', watched: false},
+    {pattern: 'app/model/CommodityAccount.js', watched: false},
+    {pattern: 'app/model/CommodityClass.js', watched: false},
+    {pattern: 'app/model/CommodityGrade.js', watched: false},
+    {pattern: 'app/model/CommodityOrigin.js', watched: false},
+    {pattern: 'app/model/CommodityProductType.js', watched: false},
+    {pattern: 'app/model/CommodityProductLine.js', watched: false},
+    {pattern: 'app/model/CommodityRegion.js', watched: false},
+    {pattern: 'app/model/CommoditySeason.js', watched: false},
+    {pattern: 'app/model/CommodityUnitMeasure.js', watched: false},
+
+    {pattern: 'app/model/CategoryLocation.js', watched: false},
+    {pattern: 'app/model/CategoryAccount.js', watched: false},
+    {pattern: 'app/model/CategoryVendor.js', watched: false},
+
+    {pattern: 'app/model/ItemKitDetail.js', watched: false},
+    {pattern: 'app/model/ItemKit.js', watched: false},
+    {pattern: 'app/model/ItemAccount.js', watched: false},
+    {pattern: 'app/model/ItemPricing.js', watched: false},
+    {pattern: 'app/model/ItemPricingLevel.js', watched: false},
+    {pattern: 'app/model/ItemSpecialPricing.js', watched: false},
+    {pattern: 'app/model/ItemStock.js', watched: false},
+    {pattern: 'app/model/ItemAssembly.js', watched: false},
+    {pattern: 'app/model/ItemBundle.js', watched: false},
+    {pattern: 'app/model/ItemNote.js', watched: false},
     {pattern: 'app/model/ItemCertification.js', watched: false},
     {pattern: 'app/model/ItemContractDocument.js', watched: false},
     {pattern: 'app/model/ItemContract.js', watched: false},
@@ -35,32 +79,43 @@ var InventoryFiles = [
     {pattern: 'app/model/ItemVendorXref.js', watched: false},
     {pattern: 'app/model/ItemCustomerXref.js', watched: false},
 
-    {pattern: 'app/model/CategoryAccount.js', watched: false},
-    {pattern: 'app/model/CategoryStore.js', watched: false},
-    {pattern: 'app/model/CategoryVendor.js', watched: false},
-    {pattern: 'app/model/CommodityUnitMeasure.js', watched: false},
+    {pattern: 'app/model/ReceiptItemLot.js', watched: false},
+    {pattern: 'app/model/ReceiptItemTax.js', watched: false},
+    {pattern: 'app/model/ReceiptItem.js', watched: false},
+    {pattern: 'app/model/ReceiptInspection.js', watched: false},
+    {pattern: 'app/model/ReceiptItemLot.js', watched: false},
+    {pattern: 'app/model/ReceiptItemTax.js', watched: false},
 
+    {pattern: 'app/model/UnitMeasureConversion.js', watched: false},
+    {pattern: 'app/model/FuelTaxClassProductCode.js', watched: false},
+    {pattern: 'app/model/ManufacturingCellPackType.js', watched: false},
+    {pattern: 'app/model/PackTypeDetail.js', watched: false},
+    {pattern: 'app/model/CertificationCommodity.js', watched: false},
+    {pattern: 'app/model/Certification.js', watched: false},
+    {pattern: 'app/model/Document.js', watched: false},
 
     {pattern: 'app/model/*.js', watched: false},
     {pattern: 'app/store/*.js', watched: false},
-    {pattern: 'app/view/override/*ViewModel.js', watched: false},
-    {pattern: 'app/view/override/*.js', watched: false},
+//    {pattern: 'app/view/override/*ViewModel.js', watched: false},
+//    {pattern: 'app/view/override/*.js', watched: false},
     {pattern: 'app/view/*ViewModel.js', watched: false},
+    {pattern: 'app/view/*ViewController.js', watched: false},
     {pattern: 'app/view/*.js', watched: false},
-
 
     // Load the test/app.js (similar to how we call it in SM's app.js)
     {pattern: 'test/app.js', watched: false},
 
     // Load the Unit test files
-    {pattern: 'test/view/override/*.js', watched: false}
+    {pattern: 'test/view/*.js', watched: false}
 
 ];
 
 var resources = require('../resources/karma.dependencies.js');
 var dependencyFiles = resources.getDependencyFiles();
 
-var files = dependencyFiles.concat(InventoryFiles);
+var externalFiles = dependencyFiles.concat(ExternalModuleFiles);
+
+var files = externalFiles.concat(InventoryFiles);
 
 module.exports = function(config) {
     "use strict";
