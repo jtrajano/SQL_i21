@@ -2,11 +2,17 @@
 	DROP PROCEDURE uspARImportCustomerContacts
 GO
 
+
+
 CREATE PROCEDURE [dbo].[uspARImportCustomerContacts]
+	@Checking BIT = 0,
+	@Total INT = 0 OUTPUT
 AS 
 
 BEGIN
 
+IF(@Checking = 0)
+BEGIN
 -- Temp Table with Autonumber to hold the Contacts to be imported
 DECLARE @Contacts TABLE
 (
@@ -152,6 +158,21 @@ DECLARE @Contacts TABLE
 
 		END
 END
+
+IF(@Checking = 1)
+BEGIN
+	SELECT @Total =  count(sscon_contact_id) 
+	FROM ssconmst
+	LEFT JOIN tblEntityContact Con ON ssconmst.sscon_contact_id COLLATE Latin1_General_CI_AS = Con.strContactNumber COLLATE Latin1_General_CI_AS
+	WHERE Con.strContactNumber IS NULL AND ssconmst.sscon_contact_id  = UPPER(ssconmst.sscon_contact_id ) COLLATE Latin1_General_CS_AS
+	AND rtrim(ltrim(sscon_last_name)) + ', ' + rtrim(ltrim(sscon_first_name))
+	NOT IN (select strName COLLATE SQL_Latin1_General_CP1_CS_AS from tblEntity E inner join tblEntityContact EC on E.intEntityId = EC.intEntityId)
+	
+END
+END
+	
+	
+
 	
 
 GO
