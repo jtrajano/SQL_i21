@@ -47,9 +47,14 @@ DECLARE @intItemId AS INT
 		,@intTransactionTypeId AS INT 
 		,@intLotId AS INT
 
+-- Create the variables for the internal transaction types used by costing. 
+DECLARE @WRITE_OFF_SOLD AS INT = -1;
+DECLARE @REVALUE_SOLD AS INT = -2;
+DECLARE @AUTO_NEGATIVE AS INT = -3;
+
 DECLARE @CostingMethod AS INT 
 DECLARE @NegativeInventoryOption AS INT
-DECLARE @GLAccounts AS ItemGLAccount
+--DECLARE @GLAccounts AS ItemGLAccount
 
 -- Create the CONSTANT variables for the costing methods
 DECLARE @AVERAGECOST AS INT = 1
@@ -89,7 +94,7 @@ BEGIN
 	-- Initialize the costing method and negative inventory option. 
 	SET @CostingMethod = NULL;
 	SET @NegativeInventoryOption = NULL;
-	DELETE FROM @GLAccounts;
+	--DELETE FROM @GLAccounts;
 
 	-- Get the costing method of an item and the negative stock option
 	SELECT @CostingMethod = dbo.fnGetCostingMethod(@intItemId, @intItemLocationId)
@@ -104,21 +109,21 @@ BEGIN
 	--		in a t-account. It can be COGS, A/P Clearing, or any type of expense, revenue, or liability account. 
 	--		Each module may use a diffent contra account. Say AP uses A/P Clearing and while a sales transaction
 	--		may use Cost of Goods. 
-	INSERT INTO @GLAccounts (
-		Inventory
-		,ContraInventory
-		,RevalueSold
-		,WriteOffSold
-		,AutoNegative
-	)
-	SELECT	Inventory = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, 'Inventory')
-			,ContraInventory = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, @strAccountDescription)
-			,RevalueSold = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, 'RevalueSold') -- TODO: need to confirm this
-			,WriteOffSold = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, 'WriteOffSold') -- TODO: need to confirm this
-			,AutoNegative = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, 'AutoNegative') -- TODO: need to confirm this
+	--INSERT INTO @GLAccounts (
+	--	Inventory
+	--	,ContraInventory
+	--	,RevalueSold
+	--	,WriteOffSold
+	--	,AutoNegative
+	--)
+	--SELECT	Inventory = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, 'Inventory')
+	--		,ContraInventory = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, @strAccountDescription)
+	--		,RevalueSold = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, 'RevalueSold') -- TODO: need to confirm this
+	--		,WriteOffSold = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, 'WriteOffSold') -- TODO: need to confirm this
+	--		,AutoNegative = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, 'AutoNegative') -- TODO: need to confirm this
 
 	--------------------------------------------------------------------------------
-	-- Determine the costing method and create the inventory transaction records
+	-- Call the SP that can process the item's costing method
 	--------------------------------------------------------------------------------
 	-- Moving Average Cost
 	IF (@CostingMethod = @AVERAGECOST)
@@ -140,14 +145,27 @@ BEGIN
 			,@intUserId
 	END
 
-	-- FIFO -- TODO
+	-- FIFO 
+	IF (@CostingMethod = @FIFO)
+	BEGIN 
+		EXEC dbo.uspICProcessFIFO
+			@intItemId
+			,@intItemLocationId
+			,@dtmDate
+			,@dblUnitQty
+			,@dblUOMQty
+			,@dblCost
+			,@dblSalesPrice
+			,@intCurrencyId
+			,@dblExchangeRate
+			,@intTransactionId
+			,@strTransactionId
+			,@strBatchId
+			,@intTransactionTypeId
+			,@intUserId
+	END
 
 	-- LIFO -- TODO
-
-	--------------------------------------------------------------------------------------
-	-- Generate the G/L entries by reading the data from tblICInventoryTransaction
-	--------------------------------------------------------------------------------------
-	-- TODO
 
 	--------------------------------------------------
 	-- Adjust the average cost and units on hand. 
@@ -162,11 +180,327 @@ BEGIN
 				AND Stock.intLocationId = @intItemLocationId			
 	END 
 
-	-- Generate the g/l entries from the tblICInventoryTransactoin Table
-
 	-- Attempt to fetch the next row from cursor. 
 	FETCH NEXT FROM loopItems INTO @intItemId, @intItemLocationId, @dtmDate, @dblUnitQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId;
 END;
 
 CLOSE loopItems;
 DEALLOCATE loopItems;
+
+--------------------------------------------------------------------------------------
+-- Generate the G/L entries by reading the data from tblICInventoryTransaction
+--------------------------------------------------------------------------------------
+	--INSERT INTO #tmpGLDetail (
+	--		[strTransactionId]
+	--		,[intTransactionId]
+	--		,[dtmDate]
+	--		,[strBatchId]
+	--		,[intAccountId]
+	--		,[dblDebit]
+	--		,[dblCredit]
+	--		,[dblDebitUnit]
+	--		,[dblCreditUnit]
+	--		,[strDescription]
+	--		,[strCode]
+	--		,[strReference]
+	--		,[intCurrencyId]
+	--		,[dblExchangeRate]
+	--		,[dtmDateEntered]
+	--		,[dtmTransactionDate]
+	--		,[strJournalLineDescription]
+	--		,[ysnIsUnposted]
+	--		,[intConcurrencyId]
+	--		,[intUserId]
+	--		,[strTransactionForm]
+	--		,[strModuleName]
+	--		,[intEntityId]
+	--)
+WITH ForGLEntries_CTE (dtmDate, intItemId, intItemLocationId, intTransactionId, strTransactionId, dblUnitQty, dblCost, dblValue, intTransactionTypeId, intCurrencyId, dblExchangeRate)
+AS 
+(
+	SELECT	TRANS.dtmDate
+			,TRANS.intItemId
+			,TRANS.intItemLocationId
+			,TRANS.intTransactionId
+			,TRANS.strTransactionId
+			,TRANS.dblUnitQty
+			,TRANS.dblCost
+			,TRANS.dblValue
+			,TRANS.intTransactionTypeId
+			,TRANS.intCurrencyId
+			,TRANS.dblExchangeRate
+	FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN @ItemsToProcess JOB
+				ON TRANS.intItemId = JOB.intItemId
+				AND TRANS.intItemLocationId = JOB.intItemLocationId
+				AND TRANS.intTransactionId = JOB.intTransactionId
+				AND TRANS.strTransactionId = JOB.strTransactionId
+)
+
+-----------------------------------------------------------------------------------
+-- Regular G/L entries for Inventory Account and its contra account 
+-----------------------------------------------------------------------------------
+-- GL entries for the Inventory Account  
+SELECT	strTransactionId = ForGL.strTransactionId
+		,intTransactionId = ForGL.intTransactionId
+		,dtmDate = ForGL.dtmDate
+		,strBatchId = @strBatchId
+		,intAccountId = dbo.fnGetItemGLAccount(ForGL.intItemId, ForGL.intItemLocationId, 'Inventory')
+		,dblDebit = CASE	WHEN ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0) > 0 THEN ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0) 
+							ELSE 0
+					END
+		,dblCredit = CASE	WHEN ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0) < 0 THEN 0
+							ELSE ABS(ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0))
+					END
+		,dblDebitUnit = 0
+		,dblCreditUnit = 0
+		,strDescription = '' -- TODO
+		,strCode = '' -- TODO
+		,strReference = '' -- TODO
+		,intCurrencyId = ForGL.intCurrencyId
+		,dblExchangeRate = ForGL.dblExchangeRate
+		,dtmDateEntered = GETDATE()
+		,dtmTransactionDate = ForGL.dtmDate
+		,strJournalLineDescription = '' -- TODO
+		,intJournalLineNo = NULL -- TODO
+		,ysnIsUnposted = 0
+		,intUserId = @intUserId -- TODO 
+		,intEntityId = @intUserId -- TODO
+		,strTransactionForm = '' -- TODO 
+		,strModuleName = '' -- TODO 
+		,intConcurrencyId = 1
+FROM	ForGLEntries_CTE ForGL
+WHERE	ForGL.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE)
+-- GL entries for the Contra-Inventory Account 
+UNION ALL 
+SELECT	strTransactionId = ForGL.strTransactionId
+		,intTransactionId = ForGL.intTransactionId
+		,dtmDate = ForGL.dtmDate
+		,strBatchId = @strBatchId
+		,intAccountId = dbo.fnGetItemGLAccount(ForGL.intItemId, ForGL.intItemLocationId, @strAccountDescription)
+		,dblDebit = CASE	WHEN ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0) > 0 THEN 0
+							ELSE ABS(ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0))
+					END
+		,dblCredit = CASE	WHEN ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0) < 0 THEN ABS(ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0))
+							ELSE 0
+					END
+		,dblDebitUnit = 0
+		,dblCreditUnit = 0
+		,strDescription = '' -- TODO
+		,strCode = '' -- TODO
+		,strReference = '' -- TODO
+		,intCurrencyId = ForGL.intCurrencyId
+		,dblExchangeRate = ForGL.dblExchangeRate
+		,dtmDateEntered = GETDATE()
+		,dtmTransactionDate = ForGL.dtmDate
+		,strJournalLineDescription = '' -- TODO
+		,intJournalLineNo = NULL -- TODO
+		,ysnIsUnposted = 0
+		,intUserId = @intUserId -- TODO 
+		,intEntityId = @intUserId -- TODO
+		,strTransactionForm = '' -- TODO 
+		,strModuleName = '' -- TODO 
+		,intConcurrencyId = 1
+FROM	ForGLEntries_CTE ForGL
+WHERE	ForGL.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE)
+
+-----------------------------------------------------------------------------------
+-- Write-Off Sold GL Etnries
+-----------------------------------------------------------------------------------
+UNION ALL  
+SELECT	strTransactionId = ForGL.strTransactionId
+		,intTransactionId = ForGL.intTransactionId
+		,dtmDate = ForGL.dtmDate
+		,strBatchId = @strBatchId
+		,intAccountId = dbo.fnGetItemGLAccount(ForGL.intItemId, ForGL.intItemLocationId, 'Inventory')
+		,dblDebit = CASE	WHEN ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0) > 0 THEN ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0) 
+							ELSE 0
+					END
+		,dblCredit = CASE	WHEN ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0) < 0 THEN 0
+							ELSE ABS(ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0))
+					END
+		,dblDebitUnit = 0
+		,dblCreditUnit = 0
+		,strDescription = '' -- TODO
+		,strCode = '' -- TODO
+		,strReference = '' -- TODO
+		,intCurrencyId = ForGL.intCurrencyId
+		,dblExchangeRate = ForGL.dblExchangeRate
+		,dtmDateEntered = GETDATE()
+		,dtmTransactionDate = ForGL.dtmDate
+		,strJournalLineDescription = '' -- TODO
+		,intJournalLineNo = NULL -- TODO
+		,ysnIsUnposted = 0
+		,intUserId = @intUserId -- TODO 
+		,intEntityId = @intUserId -- TODO
+		,strTransactionForm = '' -- TODO 
+		,strModuleName = '' -- TODO 
+		,intConcurrencyId = 1
+FROM	ForGLEntries_CTE ForGL
+WHERE	ForGL.intTransactionTypeId = @WRITE_OFF_SOLD
+-- GL entries for the Contra-Inventory Account 
+UNION ALL 
+SELECT	strTransactionId = ForGL.strTransactionId
+		,intTransactionId = ForGL.intTransactionId
+		,dtmDate = ForGL.dtmDate
+		,strBatchId = @strBatchId
+		,intAccountId = dbo.fnGetItemGLAccount(ForGL.intItemId, ForGL.intItemLocationId, 'WriteOffSold')
+		,dblDebit = CASE	WHEN ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0) > 0 THEN 0
+							ELSE ABS(ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0))
+					END
+		,dblCredit = CASE	WHEN ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0) < 0 THEN ABS(ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0))
+							ELSE 0
+					END
+		,dblDebitUnit = 0
+		,dblCreditUnit = 0
+		,strDescription = '' -- TODO
+		,strCode = '' -- TODO
+		,strReference = '' -- TODO
+		,intCurrencyId = ForGL.intCurrencyId
+		,dblExchangeRate = ForGL.dblExchangeRate
+		,dtmDateEntered = GETDATE()
+		,dtmTransactionDate = ForGL.dtmDate
+		,strJournalLineDescription = '' -- TODO
+		,intJournalLineNo = NULL -- TODO
+		,ysnIsUnposted = 0
+		,intUserId = @intUserId -- TODO 
+		,intEntityId = @intUserId -- TODO
+		,strTransactionForm = '' -- TODO 
+		,strModuleName = '' -- TODO 
+		,intConcurrencyId = 1
+FROM	ForGLEntries_CTE ForGL
+WHERE	ForGL.intTransactionTypeId  = @WRITE_OFF_SOLD
+-- TODO Revalue Sold GL Entries
+
+-----------------------------------------------------------------------------------
+-- Revalue Sold GL Etnries
+-----------------------------------------------------------------------------------
+UNION ALL  
+SELECT	strTransactionId = ForGL.strTransactionId
+		,intTransactionId = ForGL.intTransactionId
+		,dtmDate = ForGL.dtmDate
+		,strBatchId = @strBatchId
+		,intAccountId = dbo.fnGetItemGLAccount(ForGL.intItemId, ForGL.intItemLocationId, 'Inventory')
+		,dblDebit = CASE	WHEN ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0) > 0 THEN ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0) 
+							ELSE 0
+					END
+		,dblCredit = CASE	WHEN ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0) < 0 THEN 0
+							ELSE ABS(ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0))
+					END
+		,dblDebitUnit = 0
+		,dblCreditUnit = 0
+		,strDescription = '' -- TODO
+		,strCode = '' -- TODO
+		,strReference = '' -- TODO
+		,intCurrencyId = ForGL.intCurrencyId
+		,dblExchangeRate = ForGL.dblExchangeRate
+		,dtmDateEntered = GETDATE()
+		,dtmTransactionDate = ForGL.dtmDate
+		,strJournalLineDescription = '' -- TODO
+		,intJournalLineNo = NULL -- TODO
+		,ysnIsUnposted = 0
+		,intUserId = @intUserId -- TODO 
+		,intEntityId = @intUserId -- TODO
+		,strTransactionForm = '' -- TODO 
+		,strModuleName = '' -- TODO 
+		,intConcurrencyId = 1
+FROM	ForGLEntries_CTE ForGL
+WHERE	ForGL.intTransactionTypeId = @REVALUE_SOLD
+-- GL entries for the Contra-Inventory Account 
+UNION ALL 
+SELECT	strTransactionId = ForGL.strTransactionId
+		,intTransactionId = ForGL.intTransactionId
+		,dtmDate = ForGL.dtmDate
+		,strBatchId = @strBatchId
+		,intAccountId = dbo.fnGetItemGLAccount(ForGL.intItemId, ForGL.intItemLocationId, 'RevalueSold')
+		,dblDebit = CASE	WHEN ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0) > 0 THEN 0
+							ELSE ABS(ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0))
+					END
+		,dblCredit = CASE	WHEN ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0) < 0 THEN ABS(ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0))
+							ELSE 0
+					END
+		,dblDebitUnit = 0
+		,dblCreditUnit = 0
+		,strDescription = '' -- TODO
+		,strCode = '' -- TODO
+		,strReference = '' -- TODO
+		,intCurrencyId = ForGL.intCurrencyId
+		,dblExchangeRate = ForGL.dblExchangeRate
+		,dtmDateEntered = GETDATE()
+		,dtmTransactionDate = ForGL.dtmDate
+		,strJournalLineDescription = '' -- TODO
+		,intJournalLineNo = NULL -- TODO
+		,ysnIsUnposted = 0
+		,intUserId = @intUserId -- TODO 
+		,intEntityId = @intUserId -- TODO
+		,strTransactionForm = '' -- TODO 
+		,strModuleName = '' -- TODO 
+		,intConcurrencyId = 1
+FROM	ForGLEntries_CTE ForGL
+WHERE	ForGL.intTransactionTypeId  = @REVALUE_SOLD
+
+-----------------------------------------------------------------------------------
+-- Auto-Negative GL Etnries
+-----------------------------------------------------------------------------------
+UNION ALL  
+SELECT	strTransactionId = ForGL.strTransactionId
+		,intTransactionId = ForGL.intTransactionId
+		,dtmDate = ForGL.dtmDate
+		,strBatchId = @strBatchId
+		,intAccountId = dbo.fnGetItemGLAccount(ForGL.intItemId, ForGL.intItemLocationId, 'Inventory')
+		,dblDebit = CASE	WHEN ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0) > 0 THEN ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0) 
+							ELSE 0
+					END
+		,dblCredit = CASE	WHEN ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0) < 0 THEN 0
+							ELSE ABS(ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0))
+					END
+		,dblDebitUnit = 0
+		,dblCreditUnit = 0
+		,strDescription = '' -- TODO
+		,strCode = '' -- TODO
+		,strReference = '' -- TODO
+		,intCurrencyId = ForGL.intCurrencyId
+		,dblExchangeRate = ForGL.dblExchangeRate
+		,dtmDateEntered = GETDATE()
+		,dtmTransactionDate = ForGL.dtmDate
+		,strJournalLineDescription = '' -- TODO
+		,intJournalLineNo = NULL -- TODO
+		,ysnIsUnposted = 0
+		,intUserId = @intUserId -- TODO 
+		,intEntityId = @intUserId -- TODO
+		,strTransactionForm = '' -- TODO 
+		,strModuleName = '' -- TODO 
+		,intConcurrencyId = 1
+FROM	ForGLEntries_CTE ForGL
+WHERE	ForGL.intTransactionTypeId = @AUTO_NEGATIVE
+-- GL entries for the Contra-Inventory Account 
+UNION ALL 
+SELECT	strTransactionId = ForGL.strTransactionId
+		,intTransactionId = ForGL.intTransactionId
+		,dtmDate = ForGL.dtmDate
+		,strBatchId = @strBatchId
+		,intAccountId = dbo.fnGetItemGLAccount(ForGL.intItemId, ForGL.intItemLocationId, 'AutoNegative')
+		,dblDebit = CASE	WHEN ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0) > 0 THEN 0
+							ELSE ABS(ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0))
+					END
+		,dblCredit = CASE	WHEN ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0) < 0 THEN ABS(ISNULL(ForGL.dblUnitQty, 0) * ISNULL(ForGL.dblCost, 0) + ISNULL(ForGL.dblValue, 0))
+							ELSE 0
+					END
+		,dblDebitUnit = 0
+		,dblCreditUnit = 0
+		,strDescription = '' -- TODO
+		,strCode = '' -- TODO
+		,strReference = '' -- TODO
+		,intCurrencyId = ForGL.intCurrencyId
+		,dblExchangeRate = ForGL.dblExchangeRate
+		,dtmDateEntered = GETDATE()
+		,dtmTransactionDate = ForGL.dtmDate
+		,strJournalLineDescription = '' -- TODO
+		,intJournalLineNo = NULL -- TODO
+		,ysnIsUnposted = 0
+		,intUserId = @intUserId -- TODO 
+		,intEntityId = @intUserId -- TODO
+		,strTransactionForm = '' -- TODO 
+		,strModuleName = '' -- TODO 
+		,intConcurrencyId = 1
+FROM	ForGLEntries_CTE ForGL
+WHERE	ForGL.intTransactionTypeId  = @AUTO_NEGATIVE
