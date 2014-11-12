@@ -16,3 +16,10 @@
 
 
 
+
+
+
+GO
+CREATE NONCLUSTERED INDEX [PIndex]
+    ON [dbo].[tblARInvoiceDetail]([intInvoiceId] ASC, [intItemId] ASC, [strItemDescription] ASC, [dblQtyOrdered] ASC, [dblQtyShipped] ASC, [dblPrice] ASC, [dblTotal] ASC);
+

@@ -220,5 +220,7 @@
     <None Include="dbo\Stored Procedures\uspARImportInvoice.sql" />
     <None Include="dbo\Stored Procedures\uspARImportMarketZone.sql" />
     <None Include="dbo\Stored Procedures\uspARImportServiceCharge.sql" />
+    <None Include="dbo\Stored Procedures\uspARImportCustomerContacts.sql" />
+    <None Include="dbo\Stored Procedures\uspARImportTaxAuthority.sql" />
   </ItemGroup>
 </Project>

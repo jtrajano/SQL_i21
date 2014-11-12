@@ -54,6 +54,8 @@
 
 
 
+
+
 GO
 CREATE TRIGGER trgInvoiceNumber
 ON dbo.tblARInvoice
@@ -89,3 +91,12 @@ BEGIN
 	WHERE intInvoiceId = @intInvoiceId
 
 END
+GO
+CREATE NONCLUSTERED INDEX [PIndex2]
+    ON [dbo].[tblARInvoice]([dblInvoiceSubtotal] ASC, [dblShipping] ASC, [dblTax] ASC, [dblInvoiceTotal] ASC, [dblDiscount] ASC, [dblAmountDue] ASC, [dblPayment] ASC, [strTransactionType] ASC, [intPaymentMethodId] ASC, [strComments] ASC, [intAccountId] ASC, [ysnPosted] ASC, [ysnPaid] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [PIndex]
+    ON [dbo].[tblARInvoice]([strInvoiceNumber] ASC, [intCustomerId] ASC, [dtmDate] ASC, [dtmDueDate] ASC, [intCurrencyId] ASC, [intCompanyLocationId] ASC, [intSalespersonId] ASC, [dtmShipDate] ASC, [intShipViaId] ASC, [strPONumber] ASC, [intTermId] ASC);
+
