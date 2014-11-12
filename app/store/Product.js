@@ -2,7 +2,7 @@
  * Created by LZabala on 11/4/2014.
  */
 Ext.define('Inventory.store.Product', {
-    extend: 'Ext.data.Store',
+    extend: 'Ext.data.BufferedStore',
     alias: 'store.storeproduct',
 
     constructor: function(cfg) {
@@ -20,6 +20,8 @@ Ext.define('Inventory.store.Product', {
             storeId: 'Product',
             pageSize: 50,
             batchActions: true,
+            remoteFilter: true,
+            remoteSort: true,
             proxy: {
                 type: 'rest',
                 api: {

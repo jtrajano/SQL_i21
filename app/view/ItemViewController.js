@@ -1000,7 +1000,7 @@ Ext.define('Inventory.view.ItemViewController', {
             return;
 
         var grid = combo.up('grid');
-        var plugin = grid.getPlugin('cepCustomerXref');
+        var plugin = grid.getPlugin('cepVendorXref');
         var current = plugin.getActiveRecord();
 
         if (combo.column.itemId === 'colVendorXrefLocation'){

@@ -18,9 +18,7 @@ Ext.define('Inventory.view.ItemPricingViewModel', {
     alias: 'viewmodel.itempricing',
 
     requires: [
-        'Ext.data.Store',
-        'Ext.data.field.Field',
-        'i21.store.CompanyLocation'
+        'i21.store.CompanyLocationBuffered'
     ],
 
     stores: {
@@ -46,7 +44,7 @@ Ext.define('Inventory.view.ItemPricingViewModel', {
             ]
         },
         Location: {
-            type: 'companylocation'
+            type: 'companylocationbuffered'
         }
     }
 

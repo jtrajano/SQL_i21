@@ -19,18 +19,18 @@ Ext.define('Inventory.view.ItemViewModel', {
 
     requires: [
         'Inventory.store.BufferedCompactItem',
-        'Inventory.store.Manufacturer',
-        'Inventory.store.Category',
-        'Inventory.store.PatronageCategory',
-        'Inventory.store.InventoryTag',
+        'Inventory.store.BufferedManufacturer',
+        'Inventory.store.BufferedCategory',
+        'Inventory.store.BufferedPatronageCategory',
+        'Inventory.store.BufferedInventoryTag',
         'Inventory.store.BufferedUnitMeasure',
-        'Inventory.store.Brand',
-        'Inventory.store.FuelCategory',
-        'Inventory.store.FuelTaxClass',
-        'Inventory.store.Document',
-        'Inventory.store.Certification',
-        'Inventory.store.MaterialNMFC',
-        'Inventory.store.CountGroup',
+        'Inventory.store.BufferedBrand',
+        'Inventory.store.BufferedFuelCategory',
+        'Inventory.store.BufferedFuelTaxClass',
+        'Inventory.store.BufferedDocument',
+        'Inventory.store.BufferedCertification',
+        'Inventory.store.BufferedMaterialNMFC',
+        'Inventory.store.BufferedCountGroup',
         'Inventory.store.BufferedCommodity',
         'Inventory.store.BufferedClassAttribute',
         'Inventory.store.BufferedRegionAttribute',
@@ -40,8 +40,8 @@ Ext.define('Inventory.view.ItemViewModel', {
         'Inventory.store.BufferedSeasonAttribute',
         'AccountsPayable.store.VendorBuffered',
         'AccountsReceivable.store.CustomerBuffered',
-        'i21.store.CompanyLocation',
-        'i21.store.Country',
+        'i21.store.CompanyLocationBuffered',
+        'i21.store.CountryBuffered',
         'GeneralLedger.store.BufAccountId'
     ],
 
@@ -96,10 +96,10 @@ Ext.define('Inventory.view.ItemViewModel', {
             ]
         },
         manufacturer: {
-            type: 'inventorymanufacturer'
+            type: 'inventorybufferedmanufacturer'
         },
         brand: {
-            type: 'inventorybrand'
+            type: 'inventorybufferedbrand'
         },
         itemStatuses: {
             autoLoad: true,
@@ -143,7 +143,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             ]
         },
         tracking: {
-            type: 'inventorycategory'
+            type: 'inventorybufferedcategory'
         },
         uomUnitMeasure: {
             type: 'inventorybuffereduom'
@@ -181,10 +181,10 @@ Ext.define('Inventory.view.ItemViewModel', {
 
 
         patronage: {
-            type: 'inventorypatronagecategory'
+            type: 'inventorybufferedpatronagecategory'
         },
         taxClass: {
-            type: 'inventoryfueltaxclass'
+            type: 'inventorybufferedfueltaxclass'
         },
         barcodePrints: {
             autoLoad: true,
@@ -244,13 +244,13 @@ Ext.define('Inventory.view.ItemViewModel', {
             ]
         },
         fuelCategory: {
-            type: 'inventoryfuelcategory'
+            type: 'inventorybufferedfuelcategory'
         },
         medicationTag: {
-            type: 'inventorytag'
+            type: 'inventorybufferedtag'
         },
         ingredientTag: {
-            type: 'inventorytag'
+            type: 'inventorybufferedtag'
         },
         physicalItem: {
             type: 'inventorybufferedcompactitem'
@@ -280,7 +280,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             ]
         },
         agCategory: {
-            type: 'inventorycategory'
+            type: 'inventorybufferedcategory'
         },
         countCodes: {
             autoLoad: true,
@@ -300,7 +300,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             ]
         },
         posCategory: {
-            type: 'inventorycategory'
+            type: 'inventorybufferedcategory'
         },
 
 
@@ -345,7 +345,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             ]
         },
         materialNMFC: {
-            type: 'inventorymaterialnmfc'
+            type: 'inventorybufferedmaterialnmfc'
         },
         mfgDimensionUom: {
             type: 'inventorybuffereduom'
@@ -361,13 +361,13 @@ Ext.define('Inventory.view.ItemViewModel', {
 
 
         custXrefLocation: {
-            type: 'companylocation'
+            type: 'companylocationbuffered'
         },
         custXrefCustomer: {
             type: 'customerbuffered'
         },
         vendorXrefLocation: {
-            type: 'companylocation'
+            type: 'companylocationbuffered'
         },
         vendorXrefVendor: {
             type: 'vendorbuffered'
@@ -378,21 +378,21 @@ Ext.define('Inventory.view.ItemViewModel', {
 
 
         contractLocation: {
-            type: 'companylocation'
+            type: 'companylocationbuffered'
         },
         origin: {
-            type: 'country'
+            type: 'countrybuffered'
         },
         document: {
-            type: 'inventorydocument'
+            type: 'inventorybuffereddocument'
         },
         certification: {
-            type: 'inventorycertification'
+            type: 'inventorybufferedcertification'
         },
 
 
         pricingLevelLocation: {
-            type: 'companylocation'
+            type: 'companylocationbuffered'
         },
         pricingLevelUOM: {
             type: 'inventorybuffereduom'
@@ -439,7 +439,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             ]
         },
         specialPricingLocation: {
-            type: 'companylocation'
+            type: 'companylocationbuffered'
         },
         promotionTypes:{
             autoLoad: true,
@@ -481,7 +481,7 @@ Ext.define('Inventory.view.ItemViewModel', {
 
 
         stockLocation: {
-            type: 'companylocation'
+            type: 'companylocationbuffered'
         },
         stockUOM: {
             type: 'inventorybuffereduom'
@@ -572,7 +572,7 @@ Ext.define('Inventory.view.ItemViewModel', {
 
 
         noteLocation: {
-            type: 'companylocation'
+            type: 'companylocationbuffered'
         },
         commentTypes: {
             autoLoad: true,

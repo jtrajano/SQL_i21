@@ -477,13 +477,6 @@ Ext.define('Inventory.view.ItemLocation', {
                                     valueField: 'intRegProdId'
                                 },
                                 {
-                                    xtype: 'combobox',
-                                    disabled: true,
-                                    itemId: 'cboFuelTankNo',
-                                    fieldLabel: 'Fuel Tank No',
-                                    labelWidth: 105
-                                },
-                                {
                                     xtype: 'textfield',
                                     itemId: 'txtPassportFuelId1',
                                     fieldLabel: 'Passport Fuel ID 1',

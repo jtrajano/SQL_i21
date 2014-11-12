@@ -1029,7 +1029,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 fieldLabel: 'Fuel Category',
                                                                                 labelWidth: 125,
                                                                                 displayField: 'strRinFuelCategoryCode',
-                                                                                valueField: 'strRinFuelCategoryCode'
+                                                                                valueField: 'intRinFuelCategoryId'
                                                                             },
                                                                             {
                                                                                 xtype: 'textfield',

@@ -62,9 +62,6 @@ Ext.define('Inventory.view.ItemLocationViewController', {
                 value: '{current.intProductCodeId}',
                 store: '{productCode}'
             },
-
-
-//            cboFuelTankNo: '{current.intFuelTankId}',
             txtPassportFuelId1: '{current.strPassportFuelId1}',
             txtPassportFuelId2: '{current.strPassportFuelId2}',
             txtPassportFuelId3: '{current.strPassportFuelId3}',

@@ -18,11 +18,11 @@ Ext.define('Inventory.view.CommodityViewModel', {
     alias: 'viewmodel.commodity',
 
     requires: [
-        'Inventory.store.PatronageCategory',
+        'Inventory.store.BufferedPatronageCategory',
         'Inventory.store.BufferedUnitMeasure',
         'Inventory.store.BufferedStorageType',
         'GeneralLedger.store.BufAccountId',
-        'i21.store.CompanyLocation'
+        'i21.store.CompanyLocationBuffered'
     ],
 
     stores: {
@@ -115,10 +115,10 @@ Ext.define('Inventory.view.CommodityViewModel', {
             ]
         },
         patronageCategory: {
-            type: 'inventorypatronagecategory'
+            type: 'inventorybufferedpatronagecategory'
         },
         directPatronageCategory: {
-            type: 'inventorypatronagecategory'
+            type: 'inventorybufferedpatronagecategory'
         },
         unitMeasure: {
             type: 'inventorybuffereduom'
@@ -127,7 +127,7 @@ Ext.define('Inventory.view.CommodityViewModel', {
             type: 'bufAccountid'
         },
         location: {
-            type: 'companylocation'
+            type: 'companylocationbuffered'
         },
         autoScaleDist: {
             type: 'inventorybufferedstoragetype'

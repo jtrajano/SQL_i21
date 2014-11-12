@@ -14,7 +14,7 @@ Ext.define('Inventory.store.FuelType', {
         cfg = cfg || {};
         me.callParent([Ext.apply({
             model: 'Inventory.model.FuelType',
-            storeId: 'Tag',
+            storeId: 'FuelType',
             pageSize: 50,
             batchActions: true,
             proxy: {

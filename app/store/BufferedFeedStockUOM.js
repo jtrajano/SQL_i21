@@ -1,22 +1,20 @@
 /**
- * Created by LZabala on 11/4/2014.
+ * Created by LZabala on 11/12/2014.
  */
-Ext.define('Inventory.store.Store', {
+Ext.define('Inventory.store.BufferedFeedStockUom', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.storestore',
+    alias: 'store.inventorybufferedfeedstockuom',
+
+    requires: [
+        'Inventory.model.FeedStockUom'
+    ],
 
     constructor: function(cfg) {
         var me = this;
         cfg = cfg || {};
         me.callParent([Ext.apply({
-            fields: [
-                { name: 'intStoreId', type: 'int'},
-                { name: 'intStoreNo', type: 'int'},
-                { name: 'strStoreName', type: 'boolean'},
-                { name: 'StrDescription', type: 'boolean'},
-                { name: 'strRegion', type: 'boolean'}
-            ],
-            storeId: 'Store',
+            model: 'Inventory.model.FeedStockUom',
+            storeId: 'BufferedFeedStockUom',
             pageSize: 50,
             batchActions: true,
             remoteFilter: true,
@@ -24,7 +22,7 @@ Ext.define('Inventory.store.Store', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Store/GetStores'
+                    read: '../Inventory/api/RinFeedStockUOM/GetRinFeedStockUOMs'
                 },
                 reader: {
                     type: 'json',

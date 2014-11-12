@@ -18,21 +18,21 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
     alias: 'viewmodel.itemlocation',
 
     requires: [
-        'i21.store.CompanyLocation',
-        'i21.store.FreightTerms',
+        'i21.store.CompanyLocationBuffered',
+        'i21.store.FreightTermsBuffered',
         'AccountsPayable.store.VendorBuffered',
         'Inventory.store.BufferedUnitMeasure',
-        'Inventory.store.Category',
+        'Inventory.store.BufferedCategory',
         'Inventory.store.Product',
         'Inventory.store.Class',
         'Inventory.store.Family',
-        'Inventory.store.CountGroup'
+        'Inventory.store.BufferedCountGroup'
     ],
 
     stores: {
 
         location: {
-            type: 'companylocation'
+            type: 'companylocationbuffered'
         },
         vendor: {
             type: 'vendorbuffered'
@@ -63,7 +63,7 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
             ]
         },
         category: {
-            type: 'inventorycategory'
+            type: 'inventorybufferedcategory'
         },
         defaultUOM: {
             type: 'inventorybuffereduom'
@@ -86,7 +86,7 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
 
 
         freightTerm: {
-            type: 'freightterms'
+            type: 'FreightTermsBuffered'
         },
         freightVendor: {
             type: 'vendorbuffered'
@@ -144,7 +144,7 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
             ]
         },
         countGroup: {
-            type: 'inventorycountgroup'
+            type: 'inventorybufferedcountgroup'
         }
     }
 
