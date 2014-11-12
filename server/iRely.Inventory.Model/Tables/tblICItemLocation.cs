@@ -27,7 +27,6 @@ namespace iRely.Inventory.Model
         public int? intFamilyId { get; set; }
         public int? intClassId { get; set; }
         public int? intProductCodeId { get; set; }
-        public int? intFuelTankId { get; set; }
         public string strPassportFuelId1 { get; set; }
         public string strPassportFuelId2 { get; set; }
         public string strPassportFuelId3 { get; set; }

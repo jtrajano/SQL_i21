@@ -51,7 +51,6 @@ Ext.define('Inventory.model.ItemLocation', {
         { name: 'intFamilyId', type: 'int', allowNull: true},
         { name: 'intClassId', type: 'int', allowNull: true},
         { name: 'intProductCodeId', type: 'int', allowNull: true},
-        { name: 'intFuelTankId', type: 'int', allowNull: true},
         { name: 'strPassportFuelId1', type: 'string'},
         { name: 'strPassportFuelId2', type: 'string'},
         { name: 'strPassportFuelId3', type: 'string'},

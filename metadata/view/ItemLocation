@@ -833,23 +833,6 @@
                                     ]
                                 },
                                 {
-                                    "type": "Ext.form.field.ComboBox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "disabled": true,
-                                        "fieldLabel": "Fuel Tank No",
-                                        "itemId": "cboFuelTankNo",
-                                        "labelWidth": 105,
-                                        "layout|flex": null
-                                    },
-                                    "name": "MyComboBox46",
-                                    "designerId": "1123fe5d-cd68-4bc9-a48b-5b7be62bf011"
-                                },
-                                {
                                     "type": "Ext.form.field.Text",
                                     "reference": {
                                         "name": "items",
