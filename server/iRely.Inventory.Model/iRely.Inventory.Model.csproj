@@ -93,11 +93,9 @@
     <Compile Include="Mappings\tblICCategoryMap.cs" />
     <Compile Include="Mappings\tblICCategoryStoreMap.cs" />
     <Compile Include="Mappings\tblICCategoryVendorMap.cs" />
-    <Compile Include="Mappings\tblICClassMap.cs" />
     <Compile Include="Mappings\tblICCommodityGroupMap.cs" />
     <Compile Include="Mappings\tblICCommodityMap.cs" />
     <Compile Include="Mappings\tblICCommodityUnitMeasureMap.cs" />
-    <Compile Include="Mappings\tblICFamilyMap.cs" />
     <Compile Include="Mappings\tblICFuelTypeMap.cs" />
     <Compile Include="Mappings\tblICItemMap.cs" />
     <Compile Include="Mappings\tblICManufacturerMap.cs" />
@@ -151,11 +149,9 @@
     <Compile Include="Tables\tblICCategoryAccount.cs" />
     <Compile Include="Tables\tblICCategoryLocation.cs" />
     <Compile Include="Tables\tblICCategoryVendor.cs" />
-    <Compile Include="Tables\tblICClass.cs" />
     <Compile Include="Tables\tblICCommodity.cs" />
     <Compile Include="Tables\tblICCommodityGroup.cs" />
     <Compile Include="Tables\tblICCommodityUnitMeasure.cs" />
-    <Compile Include="Tables\tblICFamily.cs" />
     <Compile Include="Tables\tblICFuelType.cs" />
     <Compile Include="Tables\tblICItem.cs" />
     <Compile Include="Tables\tblICItemUPC.cs" />

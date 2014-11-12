@@ -44,6 +44,14 @@ namespace iRely.Invetory.WebAPI.Controllers
         }
 
         [HttpGet]
+        [ActionName("GetEmpty")]
+        public HttpResponseMessage GetEmpty()
+        {
+            var empty = _ItemBRL.GetEmpty();
+            return Request.CreateResponse(HttpStatusCode.OK, empty);
+        }
+
+        [HttpGet]
         [ActionName("GetItems")]
         public HttpResponseMessage GetItems(int start = 0, int limit = 1, int page = 0, string sort = "", string filter = "")
         {

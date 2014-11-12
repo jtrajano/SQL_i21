@@ -152,13 +152,13 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemAssembly> tblICItemAssemblies { get; set; }
         public ICollection<tblICItemAssembly> AssemblyItems { get; set; }
 
-        public tblICCommodity tblICCommodity { get; set; }
-        public tblICCommodityAttribute CommodityOrigin { get; set; }
-        public tblICCommodityAttribute CommodityProductType { get; set; }
-        public tblICCommodityAttribute CommodityRegion { get; set; }
-        public tblICCommodityAttribute CommoditySeason { get; set; }
-        public tblICCommodityAttribute CommodityClassVariety { get; set; }
-        public tblICCommodityAttribute CommodityProductLine { get; set; }
+        //public tblICCommodity tblICCommodity { get; set; }
+        //public tblICCommodityAttribute CommodityOrigin { get; set; }
+        //public tblICCommodityAttribute CommodityProductType { get; set; }
+        //public tblICCommodityAttribute CommodityRegion { get; set; }
+        //public tblICCommodityAttribute CommoditySeason { get; set; }
+        //public tblICCommodityAttribute CommodityClassVariety { get; set; }
+        //public tblICCommodityAttribute CommodityProductLine { get; set; }
         
     }
 
