@@ -22,11 +22,7 @@
         "minimizable": null,
         "mixins": null,
         "reference": null,
-        "requires": [
-            "Inventory.store.UnitMeasure",
-            "Inventory.store.Category"
-        ],
-        "title": "Item: 000000015 - Ultralow Sulfur #2 Diesel",
+        "title": "Item",
         "width": 950
     },
     "designerId": "d7ef9c4d-9fa7-40a9-ac40-8922ff13c54c",

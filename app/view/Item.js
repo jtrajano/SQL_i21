@@ -36,9 +36,7 @@ Ext.define('Inventory.view.Item', {
         'Ext.form.field.Date',
         'Ext.grid.column.Check',
         'Ext.grid.column.Date',
-        'Ext.toolbar.Paging',
-        'Inventory.store.UnitMeasure',
-        'Inventory.store.Category'
+        'Ext.toolbar.Paging'
     ],
 
     height: 650,
@@ -49,7 +47,7 @@ Ext.define('Inventory.view.Item', {
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
-    title: 'Item: 000000015 - Ultralow Sulfur #2 Diesel',
+    title: 'Item',
     maximizable: true,
 
     dockedItems: [
