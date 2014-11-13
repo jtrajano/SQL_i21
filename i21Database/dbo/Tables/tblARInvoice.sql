@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblARInvoice] (
     [intInvoiceId]         INT             IDENTITY (1, 1) NOT NULL,
     [strInvoiceNumber]     NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,
+    [strInvoiceOriginId]   NVARCHAR (8)    NULL,
     [intCustomerId]        INT             NOT NULL,
     [dtmDate]              DATETIME        NOT NULL,
     [dtmDueDate]           DATETIME        NOT NULL,
@@ -38,6 +39,8 @@
     CONSTRAINT [PK_tblARInvoice] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
     CONSTRAINT [FK_tblARInvoice_tblEntity] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intCustomerId])
 );
+
+
 
 
 

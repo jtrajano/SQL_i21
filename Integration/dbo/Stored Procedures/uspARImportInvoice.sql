@@ -13,6 +13,17 @@ BEGIN
 	--================================================
 	IF(@Checking = 0) 
 	BEGIN
+
+		--Validation
+		DECLARE @Sucess BIT
+		DECLARE @Message NVARCHAR(100)
+		EXEC uspARValidations @Sucess OUT, @Message OUT
+		
+		IF(@Sucess = 0)
+		BEGIN
+			RAISERROR(@Message,16,1)
+			RETURN
+		END
 	
 		--1 Time synchronization here
 		PRINT '1 Time Invoice Synchronization'
