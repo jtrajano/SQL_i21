@@ -27,6 +27,8 @@ var ExternalModuleFiles = [
 
     {pattern: '../i21_generalledger/app/model/AccountId.js', watched: false},
     {pattern: '../i21_generalledger/app/store/BufAccountId.js', watched: false},
+
+    {pattern: '../GlobalComponentEngine/irely/container/ImageContainer.js', watched: false},
 ];
 
 var InventoryFiles = [

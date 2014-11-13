@@ -1,14 +1,14 @@
 /**
  * Created by LZabala on 9/11/2014.
  */
-describe("Reason Code View Controller", function() {
+describe("Reason View Controller", function() {
     "use strict";
 
     var controller;
     var view;
 
     beforeEach(function() {
-        view = Ext.create('Inventory.view.ReasonCode', { controller : 'reasoncode' });
+        view = Ext.create('Inventory.view.Reason', { controller : 'reason' });
         controller = view.getController();
     });
 
