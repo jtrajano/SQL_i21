@@ -350,47 +350,56 @@ GO
 	SET strMenuName = 'Pay Bills'
 	WHERE strModuleName = 'Accounts Payable' AND strMenuName = 'Pay Bills (Multi-Vendor)' AND strType = 'Screen' AND strCommand = 'AccountsPayable.controller.PayBill'
 GO
-	DECLARE @rootParentId INT;
-	DECLARE @activitiesId INT;
+	/* ---------------------------------------------- */
+	/* -- Add Accounts Receivable Activities Menus -- */
+	/* ---------------------------------------------- */
+	
+	DECLARE @rootParentId INT
+	DECLARE @activitiesId INT
+	DECLARE @maintenanceId INT
 	SELECT @rootParentId = intMenuID FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable'  AND intParentMenuID = 0;
-
-	IF NOT EXISTS (SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Activities')
+	
+	IF NOT EXISTS (SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Activities' and intParentMenuID = @rootParentId)
 	BEGIN
 		INSERT dbo.tblSMMasterMenu(strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon,ysnVisible, ysnExpanded,ysnIsLegacy,ysnLeaf,intSort,intConcurrencyId)
 		VALUES ('Activities','Accounts Receivable',@rootParentId,'Activities','Folder','','small-folder',1,0,0,0,1,1)
 	
 		UPDATE dbo.tblSMMasterMenu 
 		SET intSort = 2
-		WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Maintenance'
-	END;
-
-	SELECT @activitiesId = intMenuID FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Activities';
-
-	IF NOT EXISTS (SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Invoice')
-	BEGIN
-		INSERT dbo.tblSMMasterMenu(strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon,ysnVisible, ysnExpanded,ysnIsLegacy,ysnLeaf,intSort,intConcurrencyId)
-		VALUES ('Invoice','Accounts Receivable',@activitiesId,'Invoice','Screen','AccountsReceivable.view.Invoice','small-folder',1,0,0,1,1,1)
+		WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Maintenance' and intParentMenuID = @rootParentId
 	END
 
-	IF NOT EXISTS (SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Receive Payments')
+	SELECT @activitiesId = intMenuID FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Activities' AND intParentMenuID = @rootParentId
+
+	IF NOT EXISTS (SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Invoice' AND intParentMenuID = @activitiesId)
 	BEGIN
 		INSERT dbo.tblSMMasterMenu(strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon,ysnVisible, ysnExpanded,ysnIsLegacy,ysnLeaf,intSort,intConcurrencyId)
-		VALUES ('Receive Payments','Accounts Receivable',@activitiesId,'Receive Payments','Screen','AccountsReceivable.view.ReceivePayments','small-folder',1,0,0,1,2,1)
+		VALUES ('Invoice','Accounts Receivable',@activitiesId,'Invoice','Screen','AccountsReceivable.view.Invoice','small-screen',1,0,0,1,1,1)
 	END
 
-	IF NOT EXISTS (SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Receive Payment Detail')
+	IF NOT EXISTS (SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Receive Payments' AND intParentMenuID = @activitiesId)
 	BEGIN
 		INSERT dbo.tblSMMasterMenu(strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon,ysnVisible, ysnExpanded,ysnIsLegacy,ysnLeaf,intSort,intConcurrencyId)
-		VALUES ('Receive Payment Detail','Accounts Receivable',@activitiesId,'Receive Payment Detail','Screen','AccountsReceivable.view.ReceivePaymentsDetail','small-folder',1,0,0,1,3,1)
+		VALUES ('Receive Payments','Accounts Receivable',@activitiesId,'Receive Payments','Screen','AccountsReceivable.view.ReceivePayments','small-screen',1,0,0,1,2,1)
 	END
-GO
-	--UPDATE tblSMMasterMenu
-	--SET strMenuName = 'Receive Payment Detail'
-	--WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Receive Payments' AND strType = 'Screen' AND strCommand = 'AccountsReceivable.controller.ReceivePaymentsDetail'
 
-	--UPDATE tblSMMasterMenu
-	--SET strMenuName = 'Receive Payments'
-	--WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Receive Payments (Multi Customer)' AND strType = 'Screen' AND strCommand = 'AccountsReceivable.controller.ReceivePayments'
+	IF NOT EXISTS (SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Receive Payment Detail' AND intParentMenuID = @activitiesId)
+	BEGIN
+		INSERT dbo.tblSMMasterMenu(strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon,ysnVisible, ysnExpanded,ysnIsLegacy,ysnLeaf,intSort,intConcurrencyId)
+		VALUES ('Receive Payment Detail','Accounts Receivable',@activitiesId,'Receive Payment Detail','Screen','AccountsReceivable.view.ReceivePaymentsDetail','small-screen',1,0,0,1,3,1)
+	END
+
+	SELECT @maintenanceId = intMenuID FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Maintenance' AND intParentMenuID = @rootParentId
+
+	IF NOT EXISTS (SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Tax Authority' AND intParentMenuID = @maintenanceId)
+	BEGIN
+		INSERT dbo.tblSMMasterMenu(strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon,ysnVisible, ysnExpanded,ysnIsLegacy,ysnLeaf,intSort,intConcurrencyId)
+		VALUES ('Tax Authority','Accounts Receivable',@maintenanceId,'Tax Authority','Screen','AccountsReceivable.view.TaxAuthority','small-screen',1,0,0,1,8,1)
+	END
+
+	/* -------------------------------------------------- */
+	/* -- End Add Accounts Receivable Activities Menus -- */
+	/* -------------------------------------------------- */
 GO
 	DECLARE @intParent INT
 	SELECT @intParent = intMenuID FROM tblSMMasterMenu
@@ -446,15 +455,6 @@ GO
 							
 	IF NOT EXISTS(SELECT * FROM tblSMMasterMenu WHERE strMenuName = 'Device Lease Detail' AND strCommand = 'Device Lease Detail' AND strType = 'Report' AND strModuleName = 'Tank Management' AND intParentMenuID = @intParent)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Device Lease Detail', N'Tank Management', @intParent, N'Device Lease Detail', N'Report', N'Device Lease Detail', N'small-report', 0, 0, 0, 1, 0, 1)
-GO
-	DECLARE @intParent INT
-	SELECT @intParent = intMenuID FROM tblSMMasterMenu
-	WHERE strMenuName = 'Activities'
-	AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu Main 
-							WHERE strMenuName = 'Accounts Receivable' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 0)
-							
-	DELETE FROM tblSMMasterMenu WHERE intParentMenuID = @intParent
-	DELETE FROM tblSMMasterMenu WHERE intMenuID = @intParent
 GO
 	DELETE FROM tblSMMasterMenu
 	WHERE intParentMenuID NOT IN (SELECT intMenuID FROM tblSMMasterMenu)
