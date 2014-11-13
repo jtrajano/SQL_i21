@@ -102,6 +102,7 @@ BEGIN
 		FROM tblSMMappingDictionary 
 		WHERE intColumnDictionaryId IN (SELECT intColumnDictionaryId FROM  #tmpColumnDictionary) AND
 			  strSourceTable = @sourceTable
+			 
 			  
 	SET @insertScript = 'INSERT INTO dbo.' + @tableName + '(' + CHAR(13) + CHAR(10)
 	SET @selectScript = 'SELECT' + CHAR(13) + CHAR(10)
@@ -133,8 +134,9 @@ BEGIN
 															FROM sys.tables 
 															WHERE name = @tableName COLLATE Latin1_General_CI_AS) AND 
 											   name = @fieldName COLLATE Latin1_General_CI_AS), 0)
-													
-		IF (@fieldExisting = 0)
+						
+		-- Check if the field is existing in the database OR the import is just for generating script before composing the script 					   										
+		IF (@fieldExisting = 1 OR @executeImport = 0)
 			BEGIN		
 				SELECT @selectValue = @selectValue + ISNULL('[' + A.strFieldName + '] ' + '+ ''' + ISNULL(strDelimeter, '') + ''' + ', ''),
 					   @delimeter	= ISNULL(strDelimeter, ''),
@@ -146,9 +148,9 @@ BEGIN
 												FROM sys.tables 
 												WHERE name = @sourceTable COLLATE Latin1_General_CI_AS)) B
 				ON A.strFieldName = B.strFieldName COLLATE Latin1_General_CI_AS
-				WHERE intColumnDictionaryId = @columnId ORDER BY intSort			
+				WHERE intColumnDictionaryId = @columnId ORDER BY intSort		
 				
-				IF @selectValue <> '' OR @allowNull = 1
+				IF @selectValue <> '' OR @allowNull = 0
 					BEGIN
 						SET @insertScript = @insertScript + @addCommaValue + '[' + @fieldName + '] ' + CHAR(13) + CHAR(10)									
 						
@@ -180,16 +182,18 @@ BEGIN
 	SET @insertScript = @insertScript + ')'
 	SET @selectScript = @selectScript + 'FROM dbo.' + @sourceTable
 	
-	SET @executeScript = @insertScript + CHAR(13) + CHAR(10) + @selectScript + CHAR(13) + CHAR(10)
+	SET @executeScript = CASE WHEN @insertCount > 0 THEN	
+							@insertScript + CHAR(13) + CHAR(10) + @selectScript + CHAR(13) + CHAR(10)
+						 ELSE '' END
 	
 	INSERT INTO #tmpInsertScripts
 		SELECT @counter, @executeScript, ''
 		
-	IF @executeImport = 1
+	IF @executeImport = 1 AND @executeScript <> ''
 	BEGIN
 		BEGIN TRANSACTION
-		----
-		--EXEC(@executeScript)
+
+		EXEC(@executeScript)
 		--
 		--UPDATE #tmpInsertScripts
 		--SET strMessage = ''

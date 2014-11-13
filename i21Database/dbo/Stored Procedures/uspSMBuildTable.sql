@@ -1,7 +1,7 @@
 ﻿--=====================================================================================================================================
 -- 	CREATE THE STORED PROCEDURE AFTER DELETING IT
 ---------------------------------------------------------------------------------------------------------------------------------------
-CREATE PROCEDURE uspSMBuildTable
+ALTER PROCEDURE uspSMBuildTable
 	@id				AS INT = 0,
 	@executeBuild	AS BIT = 0
 AS
@@ -73,8 +73,9 @@ BEGIN
 
 	SELECT TOP 1 
 		@fieldName = strFieldName,
-		@fieldType = CASE WHEN strFieldType = 'nvarchar'	THEN 'NVARCHAR(' + CASE WHEN CAST(intSize AS NVARCHAR(25)) = -1 THEN 'MAX' ELSE CAST(intSize AS NVARCHAR(25)) END + ') COLLATE Latin1_General_CI_AS'
-						  WHEN strFieldType = 'numeric'		THEN 'DECIMAL(18,' + CAST(intSize AS NVARCHAR(25)) + ')'
+		@fieldType = CASE WHEN strFieldType = 'nvarchar'	THEN 'NVARCHAR(' + CASE WHEN CAST(ISNULL(intSize, -1) AS NVARCHAR(25)) = -1 THEN 'MAX' ELSE CAST(ISNULL(intSize, -1) AS NVARCHAR(25)) END + ') COLLATE Latin1_General_CI_AS'
+						  WHEN strFieldType = 'numeric'		THEN 'NUMERIC(18,' + CAST(ISNULL(intSize, 6) AS NVARCHAR(25)) + ')'
+						  WHEN strFieldType = 'decimal'		THEN 'NUMERIC(18,' + CAST(ISNULL(intSize, 6) AS NVARCHAR(25)) + ')'
 						  WHEN strFieldType = 'varbinary'	THEN 'VARBINARY(MAX)'
 						  ELSE UPPER(strFieldType)
 					 END + 
