@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICCreateGLEntries for the basics]
+﻿CREATE PROCEDURE [testi21Database].[test uspICCreateGLEntries for one transaction]
 AS
 BEGIN
 	-- Arrange 
