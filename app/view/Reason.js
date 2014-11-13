@@ -18,7 +18,6 @@ Ext.define('Inventory.view.Reason', {
     alias: 'widget.reason',
 
     requires: [
-        'Inventory.view.ReasonViewModel',
         'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
@@ -34,9 +33,6 @@ Ext.define('Inventory.view.Reason', {
         'Ext.toolbar.Paging'
     ],
 
-    viewModel: {
-        type: 'reason'
-    },
     height: 335,
     hidden: false,
     minHeight: 335,
