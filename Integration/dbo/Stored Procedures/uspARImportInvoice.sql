@@ -51,7 +51,7 @@ BEGIN
 			   ,[ysnPaid]
 			   ,[strShipToAddress] --just for insertion of identity field from origin in format LTRIM(RTRIM(agivc_ivc_no)) + LTRIM(RTRIM(agivc_bill_to_cus))
 			   )
-			SELECT 	TOP 10
+			SELECT
 				agivc_ivc_no,		
 				Cus.intCustomerId,		
 				(CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),
