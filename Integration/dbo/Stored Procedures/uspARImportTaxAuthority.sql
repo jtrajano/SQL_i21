@@ -1,13 +1,13 @@
-﻿
+﻿GO
 IF EXISTS(select top 1 1 from sys.procedures where name = 'uspARImportTaxAuthority')
 	DROP PROCEDURE uspARImportTaxAuthority
 GO
-CREATE PROCEDURE [dbo].[uspARImportTaxAuthority]
+CREATE PROCEDURE uspARImportTaxAuthority
     @Checking BIT = 0,
     @Total INT = 0 OUTPUT
 
     AS
-    
+ BEGIN 
     --================================================
     --     ONE TIME TAX AUTHORITY SYNCHRONIZATION    
     --================================================
@@ -41,4 +41,4 @@ CREATE PROCEDURE [dbo].[uspARImportTaxAuthority]
         ELSE
             Set @Total = @originTaxAuthorityCount
     END
-
+END

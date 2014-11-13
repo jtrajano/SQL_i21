@@ -9,6 +9,7 @@
 	@endDate			AS DATE				= NULL,
 	@beginTransaction	AS NVARCHAR(50)		= NULL,
 	@endTransaction		AS NVARCHAR(50)		= NULL,
+	@exclude			AS NVARCHAR(MAX)	= NULL,
 	@successfulCount	AS INT				= 0 OUTPUT,
 	@invalidCount		AS INT				= 0 OUTPUT,
 	@success			AS BIT				= 0 OUTPUT,
@@ -53,7 +54,7 @@ INSERT INTO #tmpPostBillBatchData SELECT [intID] FROM [dbo].fnGetRowsFromDelimit
 
 SELECT TOP 1 @BillBatchId = intBillBatchId FROM #tmpPostBillBatchData
 
-EXEC uspAPPostBill  @batchId = @batchId, @billBatchId = @BillBatchId, @post = @post, @recap = @recap, @userId = @userId, @success = @success OUTPUT, @successfulCount = @successfulCount OUTPUT, @invalidCount = @invalidCount OUTPUT
+EXEC uspAPPostBill  @batchId = @batchId, @billBatchId = @BillBatchId, @post = @post, @recap = @recap, @userId = @userId, @exclude = @exclude, @success = @success OUTPUT, @successfulCount = @successfulCount OUTPUT, @invalidCount = @invalidCount OUTPUT
 		
 SET @batchIdUsed = @batchId
 

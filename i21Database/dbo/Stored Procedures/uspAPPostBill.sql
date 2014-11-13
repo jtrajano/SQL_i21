@@ -10,6 +10,7 @@
 	@endDate			AS DATE				= NULL,
 	@beginTransaction	AS NVARCHAR(50)		= NULL,
 	@endTransaction		AS NVARCHAR(50)		= NULL,
+	@exclude			AS NVARCHAR(MAX)	= NULL,
 	@successfulCount	AS INT				= 0 OUTPUT,
 	@invalidCount		AS INT				= 0 OUTPUT,
 	@success			AS BIT				= 0 OUTPUT,
@@ -95,6 +96,15 @@ BEGIN
 	INSERT INTO #tmpPostBillData
 	SELECT intBillId FROM tblAPBill
 	WHERE intBillId BETWEEN @beginTransaction AND @endTransaction AND ysnPosted = 0
+END
+
+--Removed excluded bills to post/unpost
+IF(@exclude IS NOT NULL)
+BEGIN
+	SELECT [intID] INTO #tmpBillsExclude FROM [dbo].fnGetRowsFromDelimitedValues(@exclude)
+	DELETE FROM A
+	FROM #tmpPostBillData A
+	WHERE EXISTS(SELECT * FROM #tmpBillsExclude B WHERE A.intBillId = B.intID)
 END
 
 --=====================================================================================================================================
@@ -190,7 +200,7 @@ BEGIN
 		SELECT
 			A.strPaymentRecordNum + ' payment was already made on this bill.',
 			'Bill',
-			C.intBillId,
+			C.strBillId,
 			@batchId,
 			C.intBillId
 		FROM tblAPPayment A
