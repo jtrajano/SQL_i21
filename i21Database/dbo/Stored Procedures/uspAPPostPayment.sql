@@ -9,6 +9,7 @@
 	@endDate			AS DATE				= NULL,
 	@beginTransaction	AS NVARCHAR(50)		= NULL,
 	@endTransaction		AS NVARCHAR(50)		= NULL,
+	@exclude			AS NVARCHAR(MAX)	= NULL,
 	@successfulCount	AS INT				= 0 OUTPUT,
 	@invalidCount		AS INT				= 0 OUTPUT,
 	@success			AS BIT				= 0 OUTPUT,
@@ -88,6 +89,15 @@ BEGIN
 	INSERT INTO #tmpPayablePostData
 	SELECT intPaymentId FROM tblAPPayment
 	WHERE intPaymentId BETWEEN @beginTransaction AND @endTransaction
+END
+
+--Removed excluded bills to post/unpost
+IF(@exclude IS NOT NULL)
+BEGIN
+	SELECT [intID] INTO #tmpPaymentsExclude FROM [dbo].fnGetRowsFromDelimitedValues(@exclude)
+	DELETE FROM A
+	FROM #tmpPayablePostData A
+	WHERE EXISTS(SELECT * FROM #tmpPaymentsExclude B WHERE A.intPaymentId = B.intID)
 END
 
 --=====================================================================================================================================
@@ -1108,10 +1118,13 @@ Post_Rollback:
 Post_Cleanup:
 	IF(ISNULL(@recap,0) = 0)
 	BEGIN
-		--DELETE PAYMENT DETAIL WITH PAYMENT AMOUNT
-		--DELETE FROM tblAPPaymentDetail
-		--WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-		--AND dblPayment = 0
+		--DELETE PAYMENT DETAIL WITH PAYMENT AMOUNT EQUAL TO 0
+		IF(@post = 1)
+		BEGIN
+			DELETE FROM tblAPPaymentDetail
+			WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+			AND dblPayment = 0
+		END
 
 		--IF(@post = 1)
 		--BEGIN

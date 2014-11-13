@@ -174,12 +174,18 @@ BEGIN
 			[intBillId],
 			[strDescription],
 			[intAccountId],
+			[dblCost],
+			[dblQtyOrdered],
+			[dblQtyReceived],
 			[dblTotal]
 		)
 		SELECT 
 			A.intBillId,
 			A.strDescription,
 			ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.apegl_gl_acct), 0),
+			C.apegl_gl_amt,
+			1,
+			1,
 			C.apegl_gl_amt
 		FROM tblAPBill A
 			INNER JOIN tblAPVendor B
@@ -197,12 +203,18 @@ BEGIN
 			[intBillId],
 			[strDescription],
 			[intAccountId],
+			[dblCost],
+			[dblQtyOrdered],
+			[dblQtyReceived],
 			[dblTotal]
 		)
 		SELECT 
 			A.intBillId,
 			A.strDescription,
 			ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.aphgl_gl_acct), 0),
+			C.aphgl_gl_amt,
+			1,
+			1,
 			C.aphgl_gl_amt
 			FROM tblAPBill A
 			INNER JOIN tblAPVendor B
@@ -533,12 +545,18 @@ BEGIN
 			[intBillId],
 			[strDescription],
 			[intAccountId],
+			[dblCost],
+			[dblQtyOrdered],
+			[dblQtyReceived],
 			[dblTotal]
 		)
 		SELECT 
 			A.intBillId,
 			A.strDescription,
 			ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.apegl_gl_acct), 0),
+			C.apegl_gl_amt,
+			1,
+			1,
 			C.apegl_gl_amt
 			FROM tblAPBill A
 				INNER JOIN tblAPVendor B
