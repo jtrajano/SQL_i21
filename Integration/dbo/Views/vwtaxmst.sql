@@ -11,10 +11,10 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 		AS  
 		SELECT  
 		  
-		 vwtax_itm_no   = agtax_itm_no  
-		, vwtax_state    = agtax_state  
-		, vwtax_auth_id1   = agtax_auth_id1  
-		, vwtax_auth_id2   = agtax_auth_id2  
+		 vwtax_itm_no   = ISNULL(agtax_itm_no ,'''') 
+		, vwtax_state    = ISNULL(agtax_state ,'''')  
+		, vwtax_auth_id1   = ISNULL(agtax_auth_id1 ,'''') 
+		, vwtax_auth_id2   = ISNULL(agtax_auth_id2 ,'''')  
 		, vwtax_if_rt    = agtax_if_rt  
 		, vwtax_if_gl_acct  = agtax_if_gl_acct  
 		, vwtax_fet_rt   = CAST(agtax_fet_rt AS DECIMAL(18,6))  
@@ -90,7 +90,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 		, vwtax_user_rev_dt  = agtax_user_rev_dt  
 		, A4GLIdentity   = CAST(A4GLIdentity   AS INT)
 		, dblSalesTaxRate = ISNULL(agtax_sst_rt,0.0)/100
-		, dtmEffectiveDate = NULL
+		, dtmEffectiveDate = CONVERT(DATETIME,''1900/01/01'' , 101) -- yyy/mm/dd
 		FROM [agtaxmst]
 		')
 GO
