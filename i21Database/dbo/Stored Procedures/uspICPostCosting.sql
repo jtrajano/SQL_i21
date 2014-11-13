@@ -98,7 +98,7 @@ BEGIN
 
 	-- Get the costing method of an item and the negative stock option
 	SELECT @CostingMethod = dbo.fnGetCostingMethod(@intItemId, @intItemLocationId)
-			,@NegativeInventoryOption = dbo.fnGetNegativeInventoryOptions(@intItemId, @intItemLocationId);
+			,@NegativeInventoryOption = dbo.fnGetNegativeInventoryOption(@intItemId, @intItemLocationId);
 
 	-------------------------------------------------	
 	-- Get the g/l accounts id to use. 

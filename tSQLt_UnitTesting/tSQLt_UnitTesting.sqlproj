@@ -212,7 +212,7 @@
     <Build Include="testi21Database\Stored Procedures\Fake data for simple COA.sql" />
     <Build Include="testi21Database\Stored Procedures\Fake data for multiple segments COA.sql" />
     <Build Include="testi21Database\Stored Procedures\Fake data for simple Items.sql" />
-    <Build Include="testi21Database\Functions\test the fnGetNegativeInventoryOptions function.sql" />
+    <Build Include="testi21Database\Functions\test the fnGetNegativeInventoryOption function.sql" />
     <Build Include="testi21Database\Stored Procedures\test the basics of uspICProcessCosting stored procedure.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICProcessCosting for errors thrown by uspICValidateCostingOnPost.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
@@ -363,6 +363,12 @@
     <Build Include="testi21Database\Stored Procedures\test uspICProcessAverageCosting, May 15. Purchase 15 stocks at 27 dollars each.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Functions\test fnCalculateAverageCost for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateAverageCost, use the current average cost when reducing stock.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateAverageCost, compute a new average cost when increasing stock.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateAverageCost, use new cost when increasing stock but aggregate result is still negative.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateAverageCost, use the current average cost when reducing stock and on hand qty is negative.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateAverageCost, use new cost when increasing stock but aggregate result is zero.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

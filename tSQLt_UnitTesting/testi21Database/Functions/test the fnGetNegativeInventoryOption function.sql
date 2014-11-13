@@ -21,7 +21,7 @@ BEGIN
 		-- Act
 		SET @intItemId = 1
 		SET @intLocationId = 1
-		SELECT @actual = [dbo].[fnGetNegativeInventoryOptions](@intItemId, @intLocationId);
+		SELECT @actual = [dbo].[fnGetNegativeInventoryOption](@intItemId, @intLocationId);
 
 		-- Assert
 		EXEC tSQLt.AssertEquals @Yes, @actual;
@@ -32,7 +32,7 @@ BEGIN
 		-- Act
 		SET @intItemId = 1
 		SET @intLocationId = 2
-		SELECT @actual = [dbo].[fnGetNegativeInventoryOptions](@intItemId, @intLocationId);
+		SELECT @actual = [dbo].[fnGetNegativeInventoryOption](@intItemId, @intLocationId);
 
 		-- Assert
 		EXEC tSQLt.AssertEquals @YesWithAutoWriteOff, @actual;
@@ -43,7 +43,7 @@ BEGIN
 		-- Act
 		SET @intItemId = 1
 		SET @intLocationId = 3
-		SELECT @actual = [dbo].[fnGetNegativeInventoryOptions](@intItemId, @intLocationId);
+		SELECT @actual = [dbo].[fnGetNegativeInventoryOption](@intItemId, @intLocationId);
 
 		-- Assert
 		EXEC tSQLt.AssertEquals @No, @actual;
@@ -54,7 +54,7 @@ BEGIN
 		-- Act
 		SET @intItemId = 1
 		SET @intLocationId = NULL 
-		SELECT @actual = [dbo].[fnGetNegativeInventoryOptions](@intItemId, @intLocationId);
+		SELECT @actual = [dbo].[fnGetNegativeInventoryOption](@intItemId, @intLocationId);
 
 		-- Assert
 		EXEC tSQLt.AssertEquals NULL, @actual;

@@ -6,7 +6,7 @@
 -- 2 > Yes with Auto Write-Off (Inventory is allowed to go negative. However as soon as it does, the system automatically adjusts the inventory back to 0 resulting in a  debit to inventory  and a credit to P&L (gain). )
 -- 3 > No (The system will block any transaction that would result in inventory going into the negative)
 --------------------------------------------------------------------------------------------------------------------------------------------------
-CREATE FUNCTION [dbo].[fnGetNegativeInventoryOptions] (
+CREATE FUNCTION [dbo].[fnGetNegativeInventoryOption] (
 	@intItemId INT
 	,@intLocationId INT 
 )
