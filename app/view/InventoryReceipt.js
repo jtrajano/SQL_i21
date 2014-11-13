@@ -18,7 +18,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
     alias: 'widget.inventoryreceipt',
 
     requires: [
-        'Inventory.view.InventoryReceiptViewModel',
         'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
@@ -40,9 +39,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
         'Ext.toolbar.Paging'
     ],
 
-    viewModel: {
-        type: 'inventoryreceipt'
-    },
     height: 700,
     hidden: false,
     minHeight: 510,
