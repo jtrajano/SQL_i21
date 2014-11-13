@@ -369,6 +369,14 @@
     <Build Include="testi21Database\Functions\test fnCalculateAverageCost, use new cost when increasing stock but aggregate result is still negative.sql" />
     <Build Include="testi21Database\Functions\test fnCalculateAverageCost, use the current average cost when reducing stock and on hand qty is negative.sql" />
     <Build Include="testi21Database\Functions\test fnCalculateAverageCost, use new cost when increasing stock but aggregate result is zero.sql" />
+    <Build Include="testi21Database\Functions\test fnGetDebit for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnGetDebit for positive value.sql" />
+    <Build Include="testi21Database\Functions\test fnGetDebit for negative value.sql" />
+    <Build Include="testi21Database\Functions\test fnGetCredit for negative value.sql" />
+    <Build Include="testi21Database\Functions\test fnGetCredit for positive value.sql" />
+    <Build Include="testi21Database\Functions\test fnGetCredit for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\Fake data for COA used for Items.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
