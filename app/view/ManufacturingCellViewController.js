@@ -143,7 +143,7 @@ Ext.define('Inventory.view.ManufacturingCellViewController', {
 
         if (combo.column.itemId === 'colPackTypeName')
         {
-            current.set('intSourceUnitMeasureId', records[0].get('intPackTypeId'));
+            current.set('intPackTypeId', records[0].get('intPackTypeId'));
             current.set('strDescription', records[0].get('strDescription'));
         }
         else if (combo.column.itemId === 'colLineCapacityUOM')
