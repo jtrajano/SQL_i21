@@ -12,5 +12,5 @@ Inv.ysnPosted,
 Inv.ysnPaid
 FROM dbo.tblARInvoice AS Inv INNER JOIN
     dbo.tblARCustomer AS Cus ON Inv.intCustomerId = Cus.intCustomerId INNER JOIN
-    dbo.tblEntity AS NTT ON Cus.intEntityId = NTT.intEntityId INNER JOIN
+    dbo.tblEntity AS NTT ON Cus.intEntityId = NTT.intEntityId LEFT OUTER JOIN
     dbo.tblSMTerm AS Term ON Inv.intTermId = Term.intTermID
