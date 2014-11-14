@@ -1868,7 +1868,8 @@ Ext.define('Inventory.view.Item', {
                                                                                                         dataIndex: 'strDisplayMember',
                                                                                                         dataType: 'string',
                                                                                                         text: 'Display Member',
-                                                                                                        flex: 2
+                                                                                                        flex: 2,
+                                                                                                        minWidth: 500
                                                                                                     }
                                                                                                 ],
                                                                                                 flex: 1,

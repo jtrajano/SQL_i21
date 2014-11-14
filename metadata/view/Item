@@ -4000,7 +4000,8 @@
                                                                                             "\t\tdataIndex: 'strDisplayMember',",
                                                                                             "\t\tdataType: 'string',",
                                                                                             "\t\ttext: 'Display Member',",
-                                                                                            "\t\tflex: 2",
+                                                                                            "\t\tflex: 2,",
+                                                                                            "        minWidth: 500",
                                                                                             "\t}",
                                                                                             "]",
                                                                                             ""
