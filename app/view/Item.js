@@ -588,7 +588,10 @@ Ext.define('Inventory.view.Item', {
                                                         pluginId: 'cepDetailUOM',
                                                         clicksToEdit: 1
                                                     }
-                                                ]
+                                                ],
+                                                selModel: {
+                                                    selType: 'checkboxmodel'
+                                                }
                                             }
                                         ]
                                     },

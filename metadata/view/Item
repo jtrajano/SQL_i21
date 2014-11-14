@@ -1181,6 +1181,16 @@
                                             },
                                             "name": "MyCellEditingPlugin",
                                             "designerId": "15297927-f0fa-485d-be8e-4469e0465713"
+                                        },
+                                        {
+                                            "type": "Ext.selection.CheckboxModel",
+                                            "reference": {
+                                                "name": "selModel",
+                                                "type": "object"
+                                            },
+                                            "codeClass": null,
+                                            "name": "MyCheckboxSelectionModel26",
+                                            "designerId": "cc3975eb-4e67-41ea-832c-277e30d4006f"
                                         }
                                     ]
                                 }
