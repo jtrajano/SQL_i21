@@ -44,8 +44,8 @@ Ext.define('Inventory.view.Commodity', {
     height: 635,
     hidden: false,
     minHeight: 635,
-    minWidth: 950,
-    width: 950,
+    minWidth: 1000,
+    width: 1000,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
@@ -180,7 +180,7 @@ Ext.define('Inventory.view.Commodity', {
                                                 items: [
                                                     {
                                                         xtype: 'container',
-                                                        flex: 1.1,
+                                                        flex: 1,
                                                         margin: '0 5 0 0 ',
                                                         layout: {
                                                             type: 'vbox',
@@ -359,7 +359,18 @@ Ext.define('Inventory.view.Commodity', {
                                                                         labelWidth: 60
                                                                     }
                                                                 ]
-                                                            },
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        xtype: 'container',
+                                                        flex: 1,
+                                                        margin: '0 1 0 10',
+                                                        layout: {
+                                                            type: 'vbox',
+                                                            align: 'stretch'
+                                                        },
+                                                        items: [
                                                             {
                                                                 xtype: 'textfield',
                                                                 itemId: 'txtEdiCode',
@@ -414,7 +425,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                         xtype: 'textfield',
                                                                         itemId: 'txtTextSales',
                                                                         margin: '0 5',
-                                                                        width: 135,
+                                                                        width: 125,
                                                                         fieldLabel: 'Text Sales',
                                                                         labelWidth: 65
                                                                     },
@@ -619,15 +630,6 @@ Ext.define('Inventory.view.Commodity', {
                                                                 ]
                                                             }
                                                         ]
-                                                    },
-                                                    {
-                                                        xtype: 'container',
-                                                        flex: 1,
-                                                        margin: '0 1 0 5',
-                                                        layout: {
-                                                            type: 'vbox',
-                                                            align: 'stretch'
-                                                        }
                                                     }
                                                 ]
                                             }

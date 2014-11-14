@@ -17,12 +17,12 @@
         "layout": "fit",
         "maximizable": true,
         "minHeight": 635,
-        "minWidth": 950,
+        "minWidth": 1000,
         "minimizable": null,
         "mixins": null,
         "reference": null,
         "title": "Commodity",
-        "width": 950
+        "width": 1000
     },
     "designerId": "3a59fc7a-16c2-4a32-9f9e-da6a3b7a75c7",
     "viewControllerInstanceId": "62333b7e-d018-4e8f-b89a-73550c399a78",
@@ -294,7 +294,7 @@
                                                 "container|align": "stretch",
                                                 "designer|displayName": "container",
                                                 "layout": "vbox",
-                                                "layout|flex": 1.1,
+                                                "layout|flex": 1,
                                                 "layout|margins": null,
                                                 "margin": "0 5 0 0 "
                                             },
@@ -679,7 +679,27 @@
                                                             "designerId": "65cde855-6dec-41bf-ba74-bdc3a9c7419e"
                                                         }
                                                     ]
-                                                },
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.container.Container",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "container|align": "stretch",
+                                                "designer|displayName": "container",
+                                                "layout": "vbox",
+                                                "layout|flex": 1,
+                                                "layout|margins": null,
+                                                "margin": "0 1 0 10"
+                                            },
+                                            "name": "MyContainer42",
+                                            "designerId": "58d50895-ad8d-4633-a5cf-5d5562fa3af6",
+                                            "cn": [
                                                 {
                                                     "type": "Ext.form.field.Text",
                                                     "reference": {
@@ -804,7 +824,7 @@
                                                                 "layout|flex": null,
                                                                 "layout|margins": null,
                                                                 "margin": "0 5",
-                                                                "width": 135
+                                                                "width": 125
                                                             },
                                                             "name": "MyTextField60",
                                                             "designerId": "b4c0941f-6aee-4b41-bb5c-f7fc97c52b28"
@@ -1183,24 +1203,6 @@
                                                     ]
                                                 }
                                             ]
-                                        },
-                                        {
-                                            "type": "Ext.container.Container",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "container|align": "stretch",
-                                                "designer|displayName": "container",
-                                                "layout": "vbox",
-                                                "layout|flex": 1,
-                                                "layout|margins": null,
-                                                "margin": "0 1 0 5"
-                                            },
-                                            "name": "MyContainer42",
-                                            "designerId": "58d50895-ad8d-4633-a5cf-5d5562fa3af6"
                                         }
                                     ]
                                 }
@@ -1305,7 +1307,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter133",
+                                                    "name": "filter11",
                                                     "designerId": "cfe7d6a1-9373-4396-b427-061b4323a19b",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1662,7 +1664,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter134",
+                                                    "name": "filter12",
                                                     "designerId": "774320ee-0c3c-46f5-ac4e-9acda0e48025",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3073,7 +3075,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter135",
+                                                    "name": "filter13",
                                                     "designerId": "eba518f5-6e1c-4310-b412-16897ab2e39e",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3446,7 +3448,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter136",
+                                                    "name": "filter14",
                                                     "designerId": "e9ad3d80-e267-4067-aa45-29a3069f9395",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3735,7 +3737,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter137",
+                                                    "name": "filter15",
                                                     "designerId": "d3a363a5-85c8-4ee8-97e8-07576d381b52",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4016,7 +4018,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter138",
+                                                    "name": "filter16",
                                                     "designerId": "27709837-db86-47ab-a575-7586b5b5aef3",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4277,7 +4279,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging15",
+                    "name": "statusbarpaging11",
                     "designerId": "fca9ca25-ac5c-43f8-9dd2-ce604fae6ecb",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
