@@ -31,115 +31,24 @@ BEGIN
 		-- Declare the variables for the currencies
 		DECLARE @USD AS INT = 1;
 
-		INSERT INTO tblICInventoryTransaction (
-				intItemId
-				,intItemLocationId
-				,dtmDate
-				,dblUnitQty
-				,dblCost
-				,dblValue
-				,dblSalesPrice
-				,intCurrencyId
-				,dblExchangeRate
-				,intTransactionId
-				,strTransactionId
-				,strBatchId
-				,intTransactionTypeId
-				,intLotId
-				,dtmCreated
-				,intCreatedUserId
-				,intConcurrencyId
-		)
-		SELECT 	intItemId = @StickyGrains
-				,intItemLocationId = @NewHaven
-				,dtmDate = 'January 12, 2014'
-				,dblUnitQty = 1
-				,dblCost = 12.00
-				,dblValue = 0
-				,dblSalesPrice = 0
-				,intCurrencyId = @USD
-				,dblExchangeRate = 1
-				,intTransactionId = 1
-				,strTransactionId = 'PURCHASE-00001'
-				,strBatchId = 'BATCH-000001'
-				,intTransactionTypeId = @PurchaseType
-				,intLotId = NULL 
-				,dtmCreated = GETDATE()
-				,intCreatedUserId = 1
-				,intConcurrencyId = 1
+		-- There are no records in tblICInventoryTransaction
+		--INSERT INTO tblICInventoryTransaction...
 
-		CREATE TABLE expected (
-			strTransactionId NVARCHAR(40)
-			,intTransactionId INT
-			,dtmDate DATETIME 
-			,strBatchId NVARCHAR(20)
-			,intAccountId INT
-			,dblDebit NUMERIC(18,6)
-			,dblCredit NUMERIC(18,6)
-			,dblDebitUnit NUMERIC(18,6)
-			,dblCreditUnit NUMERIC(18,6)
-			,strDescription NVARCHAR(255)
-			,strCode NVARCHAR(20)
-			,strReference NVARCHAR(20)
-			,intCurrencyId INT
-			,dblExchangeRate NUMERIC(18,6)
-			,dtmDateEntered DATETIME
-			,dtmTransactionDate DATETIME
-			,strJournalLineDescription NVARCHAR(255)
-			,intJournalLineNo INT
-			,ysnIsUnposted BIT
-			,intUserId INT 
-			,intEntityId INT
-			,strTransactionForm NVARCHAR(255)
-			,strModuleName NVARCHAR(255)
-			,intConcurrencyId INT 
-		)
-
-		CREATE TABLE actual (
-			strTransactionId NVARCHAR(40)
-			,intTransactionId INT
-			,dtmDate DATETIME 
-			,strBatchId NVARCHAR(20)
-			,intAccountId INT
-			,dblDebit NUMERIC(18,6)
-			,dblCredit NUMERIC(18,6)
-			,dblDebitUnit NUMERIC(18,6)
-			,dblCreditUnit NUMERIC(18,6)
-			,strDescription NVARCHAR(255)
-			,strCode NVARCHAR(20)
-			,strReference NVARCHAR(20)
-			,intCurrencyId INT
-			,dblExchangeRate NUMERIC(18,6)
-			,dtmDateEntered DATETIME
-			,dtmTransactionDate DATETIME
-			,strJournalLineDescription NVARCHAR(255)
-			,intJournalLineNo INT
-			,ysnIsUnposted BIT
-			,intUserId INT 
-			,intEntityId INT
-			,strTransactionForm NVARCHAR(255)
-			,strModuleName NVARCHAR(255)
-			,intConcurrencyId INT 
-		)
-
-		DECLARE @intItemId AS INT = @StickyGrains
-				,@intItemLocationId AS INT = @NewHaven 
-				,@intTransactionId AS INT = 1
-				,@strTransactionId AS NVARCHAR(40) = 'PURCHASE-00001'
-				,@strBatchId AS NVARCHAR(20) = 'BATCH-000001'
-				,@UseGLAccount_ContraInventory AS NVARCHAR(255) = 'Cost of Goods'
-				,@intUserId AS INT = 1
+		-- Create the expected and actual tables. 
+		DECLARE @recap AS dbo.RecapTableType		
+		SELECT * INTO expected FROM @recap		
+		SELECT * INTO actual FROM @recap
 	END 
 	
 	-- Act
 	BEGIN 
+		DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-000001'
+				,@UseGLAccount_ContraInventory AS NVARCHAR(255) = 'Cost of Goods'
+				,@intUserId AS INT = 1
+
 		INSERT INTO actual 
 		EXEC dbo.uspICCreateGLEntries
-			@intItemId
-			,@intItemLocationId
-			,@intTransactionId
-			,@strTransactionId
-			,@strBatchId
+			@strBatchId
 			,@UseGLAccount_ContraInventory
 			,@intUserId
 	END 
@@ -155,4 +64,4 @@ BEGIN
 
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
-END 
+END

@@ -26,8 +26,13 @@ BEGIN
 	-- Test case 1: Basic test for posting 
 	BEGIN 
 		-- Act
-		EXEC dbo.uspICProcessCosting @ItemsToProcess = @Items, @strBatchId = 'BATCH-XXXX', @ysnPost = 1, @intTransactionId = 1, @intTransactionTypeId = 1;
-
+		EXEC dbo.uspICProcessCosting 
+			@ItemsToPostOrUnpost = @Items
+			,@strBatchId = 'BATCH-XXXX'
+			,@ysnPost = 1
+			,@strAccountToCounterInventory = ''
+			,@intUserId = 1;
+			
 		-- Assert
 		-- Check if the validate costing on post is CALLED. 
 		SELECT	@isCalledUspICValidateCostingOnPost = 1 
@@ -41,7 +46,7 @@ BEGIN
 		SELECT	@isCalledUspICPostCosting = 1 
 		FROM	uspICPostCosting_SpyProcedureLog 
 		WHERE	_id_ = 1 
-				AND CAST(ItemsToProcess AS NVARCHAR(MAX)) = (SELECT * FROM @Items FOR XML PATH(''))
+				AND CAST(ItemsToPost AS NVARCHAR(MAX)) = (SELECT * FROM @Items FOR XML PATH(''))
 				AND strBatchId = 'BATCH-XXXX'
 
 		EXEC tSQLt.AssertEquals 1, @isCalledUspICPostCosting;	
@@ -58,8 +63,6 @@ BEGIN
 		FROM	uspICUnpostCosting_SpyProcedureLog 
 		WHERE	_id_ = 1
 				AND strBatchId = 'BATCH-XXXX'
-				AND intTransactionId = 1
-				AND intTransactionTypeId = 1	
 		
 		EXEC tSQLt.AssertEquals 0, @isCalledUspICUnpostCosting;
 	END 	
@@ -78,7 +81,12 @@ BEGIN
 		DELETE FROM uspICUnpostCosting_SpyProcedureLog
 
 		-- Act
-		EXEC dbo.uspICProcessCosting @ItemsToProcess = @Items, @strBatchId = 'BATCH-XXXX', @ysnPost = 0, @intTransactionId = 1, @intTransactionTypeId = 1;
+		EXEC dbo.uspICProcessCosting 
+			@ItemsToPostOrUnpost = @Items
+			,@strBatchId = 'BATCH-YYYY'
+			,@ysnPost = 0
+			,@strAccountToCounterInventory = ''
+			,@intUserId = 1;
 
 		-- Assert
 		-- Check if the validate costing on post is NOT called. 
@@ -93,8 +101,8 @@ BEGIN
 		SELECT	@isCalledUspICPostCosting = 1 
 		FROM	uspICPostCosting_SpyProcedureLog 
 		WHERE	_id_ = 1 
-				AND CAST(ItemsToProcess AS NVARCHAR(MAX)) = (SELECT * FROM @Items FOR XML PATH(''))
-				AND strBatchId = 'BATCH-XXXX'
+				AND CAST(ItemsToPost AS NVARCHAR(MAX)) = (SELECT * FROM @Items FOR XML PATH(''))
+				AND strBatchId = 'BATCH-YYYY'
 
 		EXEC tSQLt.AssertEquals 0, @isCalledUspICPostCosting;		
 	
@@ -109,9 +117,7 @@ BEGIN
 		SELECT	@isCalledUspICUnpostCosting = 1 
 		FROM	uspICUnpostCosting_SpyProcedureLog 
 		WHERE	_id_ = 1
-				AND strBatchId = 'BATCH-XXXX'
-				AND intTransactionId = 1
-				AND intTransactionTypeId = 1	
+				AND strBatchId = 'BATCH-YYYY'
 		
 		EXEC tSQLt.AssertEquals 1, @isCalledUspICUnpostCosting;
 	END 

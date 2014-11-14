@@ -20,9 +20,9 @@
 */
 
 CREATE PROCEDURE [dbo].[uspICPostCosting]
-	@ItemsToProcess AS ItemCostingTableType READONLY
+	@ItemsToPost AS ItemCostingTableType READONLY
 	,@strBatchId AS NVARCHAR(20)
-	,@strAccountDescription AS NVARCHAR(255) = 'Cost of Goods'
+	,@strAccountToCounterInventory AS NVARCHAR(255) = 'Cost of Goods'
 	,@intUserId AS INT
 AS
 
@@ -76,7 +76,7 @@ SELECT  intItemId
 		,strTransactionId
 		,intTransactionTypeId
 		,intLotId
-FROM	@ItemsToProcess
+FROM	@ItemsToPost
 
 OPEN loopItems;
 
@@ -182,3 +182,5 @@ END;
 CLOSE loopItems;
 DEALLOCATE loopItems;
 
+-- Generate the g/l entries
+EXEC dbo.uspICCreateGLEntries @strBatchId, @strAccountToCounterInventory, @intUserId

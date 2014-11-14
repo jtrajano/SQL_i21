@@ -4,11 +4,12 @@
 
 CREATE TYPE [dbo].[ItemGLAccount] AS TABLE
 (
-	intItemId INT
-	,intItemLocationId INT
+	intItemId INT NOT NULL 
+	,intItemLocationId INT NOT NULL 
 	,intInventoryId INT
 	,intContraInventoryId INT
 	,intWriteOffSoldId INT
 	,intRevalueSoldId INT
 	,intAutoNegativeId INT
+	,PRIMARY KEY CLUSTERED (intItemId, intItemLocationId) 
 )
