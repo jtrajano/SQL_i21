@@ -1748,13 +1748,24 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "designer|createAlias": "advancefiltergrid",
+                                                "includeFullTextSearch": false,
                                                 "itemId": "grdOrigin",
                                                 "layout|flex": 1,
                                                 "margin": null,
                                                 "title": "Origins"
                                             },
                                             "name": "MyGridPanel15",
+                                            "configAlternates": {
+                                                "includeFullTextSearch": "boolean"
+                                            },
                                             "designerId": "73d6cb60-a096-4a20-86ac-41a1a45e31de",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "includeFullTextSearch",
+                                                    "type": "string"
+                                                }
+                                            ],
                                             "cn": [
                                                 {
                                                     "type": "Ext.toolbar.Toolbar",
@@ -1918,6 +1929,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "designer|createAlias": "advancefiltergrid",
+                                                "includeFullTextSearch": false,
                                                 "itemId": "grdProductType",
                                                 "layout|flex": 1,
                                                 "layout|margins": null,
@@ -1925,7 +1937,17 @@
                                                 "title": "Product Types"
                                             },
                                             "name": "MyGridPanel16",
+                                            "configAlternates": {
+                                                "includeFullTextSearch": "boolean"
+                                            },
                                             "designerId": "c31b872d-72d5-4187-98ad-a98704190634",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "includeFullTextSearch",
+                                                    "type": "string"
+                                                }
+                                            ],
                                             "cn": [
                                                 {
                                                     "type": "Ext.toolbar.Toolbar",
@@ -2089,6 +2111,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "designer|createAlias": "advancefiltergrid",
+                                                "includeFullTextSearch": false,
                                                 "itemId": "grdRegion",
                                                 "layout|flex": 1,
                                                 "layout|margins": null,
@@ -2096,7 +2119,17 @@
                                                 "title": "Regions"
                                             },
                                             "name": "MyGridPanel17",
+                                            "configAlternates": {
+                                                "includeFullTextSearch": "boolean"
+                                            },
                                             "designerId": "53f142a4-6e32-487b-83d6-e6705ac61925",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "includeFullTextSearch",
+                                                    "type": "string"
+                                                }
+                                            ],
                                             "cn": [
                                                 {
                                                     "type": "Ext.toolbar.Toolbar",
@@ -2260,6 +2293,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "designer|createAlias": "advancefiltergrid",
+                                                "includeFullTextSearch": false,
                                                 "itemId": "grdClassVarient",
                                                 "layout|flex": 1,
                                                 "layout|margins": null,
@@ -2267,7 +2301,17 @@
                                                 "title": "Classes and Varients"
                                             },
                                             "name": "MyGridPanel18",
+                                            "configAlternates": {
+                                                "includeFullTextSearch": "boolean"
+                                            },
                                             "designerId": "3182868d-935f-4896-a1a0-bc0d4bd046d4",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "includeFullTextSearch",
+                                                    "type": "string"
+                                                }
+                                            ],
                                             "cn": [
                                                 {
                                                     "type": "Ext.toolbar.Toolbar",
@@ -2451,13 +2495,24 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "designer|createAlias": "advancefiltergrid",
+                                                "includeFullTextSearch": false,
                                                 "itemId": "grdSeason",
                                                 "layout|flex": 1,
                                                 "margin": null,
                                                 "title": "Seasons"
                                             },
                                             "name": "MyGridPanel19",
+                                            "configAlternates": {
+                                                "includeFullTextSearch": "boolean"
+                                            },
                                             "designerId": "0fed2d5f-e00f-42e3-b5ba-1afe99548f4b",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "includeFullTextSearch",
+                                                    "type": "string"
+                                                }
+                                            ],
                                             "cn": [
                                                 {
                                                     "type": "Ext.toolbar.Toolbar",
@@ -2621,6 +2676,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "designer|createAlias": "advancefiltergrid",
+                                                "includeFullTextSearch": false,
                                                 "itemId": "grdGrade",
                                                 "layout|flex": 1,
                                                 "layout|margins": null,
@@ -2628,7 +2684,17 @@
                                                 "title": "Grades"
                                             },
                                             "name": "MyGridPanel20",
+                                            "configAlternates": {
+                                                "includeFullTextSearch": "boolean"
+                                            },
                                             "designerId": "40567a31-a415-4d33-aa45-47af1ac94607",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "includeFullTextSearch",
+                                                    "type": "string"
+                                                }
+                                            ],
                                             "cn": [
                                                 {
                                                     "type": "Ext.toolbar.Toolbar",
@@ -2792,6 +2858,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "designer|createAlias": "advancefiltergrid",
+                                                "includeFullTextSearch": false,
                                                 "itemId": "grdProductLine",
                                                 "layout|flex": 1,
                                                 "layout|margins": null,
@@ -2799,7 +2866,17 @@
                                                 "title": "Product Lines"
                                             },
                                             "name": "MyGridPanel21",
+                                            "configAlternates": {
+                                                "includeFullTextSearch": "boolean"
+                                            },
                                             "designerId": "396cd7f4-867b-4f21-b950-86ef71f3bd60",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "includeFullTextSearch",
+                                                    "type": "string"
+                                                }
+                                            ],
                                             "cn": [
                                                 {
                                                     "type": "Ext.toolbar.Toolbar",

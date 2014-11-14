@@ -849,6 +849,7 @@ Ext.define('Inventory.view.Commodity', {
                                                     {
                                                         xtype: 'advancefiltergrid',
                                                         flex: 1,
+                                                        includeFullTextSearch: false,
                                                         itemId: 'grdOrigin',
                                                         title: 'Origins',
                                                         dockedItems: [
@@ -917,6 +918,7 @@ Ext.define('Inventory.view.Commodity', {
                                                     {
                                                         xtype: 'advancefiltergrid',
                                                         flex: 1,
+                                                        includeFullTextSearch: false,
                                                         itemId: 'grdProductType',
                                                         margin: '0 0 0 5',
                                                         title: 'Product Types',
@@ -986,6 +988,7 @@ Ext.define('Inventory.view.Commodity', {
                                                     {
                                                         xtype: 'advancefiltergrid',
                                                         flex: 1,
+                                                        includeFullTextSearch: false,
                                                         itemId: 'grdRegion',
                                                         margin: '0 0 0 5',
                                                         title: 'Regions',
@@ -1055,6 +1058,7 @@ Ext.define('Inventory.view.Commodity', {
                                                     {
                                                         xtype: 'advancefiltergrid',
                                                         flex: 1,
+                                                        includeFullTextSearch: false,
                                                         itemId: 'grdClassVarient',
                                                         margin: '0 0 0 5',
                                                         title: 'Classes and Varients',
@@ -1135,6 +1139,7 @@ Ext.define('Inventory.view.Commodity', {
                                                     {
                                                         xtype: 'advancefiltergrid',
                                                         flex: 1,
+                                                        includeFullTextSearch: false,
                                                         itemId: 'grdSeason',
                                                         title: 'Seasons',
                                                         dockedItems: [
@@ -1203,6 +1208,7 @@ Ext.define('Inventory.view.Commodity', {
                                                     {
                                                         xtype: 'advancefiltergrid',
                                                         flex: 1,
+                                                        includeFullTextSearch: false,
                                                         itemId: 'grdGrade',
                                                         margin: '0 0 0 5',
                                                         title: 'Grades',
@@ -1272,6 +1278,7 @@ Ext.define('Inventory.view.Commodity', {
                                                     {
                                                         xtype: 'advancefiltergrid',
                                                         flex: 1,
+                                                        includeFullTextSearch: false,
                                                         itemId: 'grdProductLine',
                                                         margin: '0 0 0 5',
                                                         title: 'Product Lines',
