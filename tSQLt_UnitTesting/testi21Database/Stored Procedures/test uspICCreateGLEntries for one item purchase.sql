@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICCreateGLEntries for the basics]
+﻿CREATE PROCEDURE [testi21Database].[test uspICCreateGLEntries for one item purchase]
 AS
 BEGIN
 	-- Arrange 
@@ -31,8 +31,43 @@ BEGIN
 		-- Declare the variables for the currencies
 		DECLARE @USD AS INT = 1;
 
-		-- There are no records in tblICInventoryTransaction
-		--INSERT INTO tblICInventoryTransaction...
+		-- Insert a fake data in the Inventory transaction table 
+		INSERT INTO tblICInventoryTransaction (
+				intItemId
+				,intItemLocationId
+				,dtmDate
+				,dblUnitQty
+				,dblCost
+				,dblValue
+				,dblSalesPrice
+				,intCurrencyId
+				,dblExchangeRate
+				,intTransactionId
+				,strTransactionId
+				,strBatchId
+				,intTransactionTypeId
+				,intLotId
+				,dtmCreated
+				,intCreatedUserId
+				,intConcurrencyId
+		)
+		SELECT 	intItemId = @StickyGrains
+				,intItemLocationId = @NewHaven
+				,dtmDate = 'January 12, 2014'
+				,dblUnitQty = 1
+				,dblCost = 12.00
+				,dblValue = 0
+				,dblSalesPrice = 0
+				,intCurrencyId = @USD
+				,dblExchangeRate = 1
+				,intTransactionId = 1
+				,strTransactionId = 'PURCHASE-00001'
+				,strBatchId = 'BATCH-000001'
+				,intTransactionTypeId = @PurchaseType
+				,intLotId = NULL 
+				,dtmCreated = GETDATE()
+				,intCreatedUserId = 1
+				,intConcurrencyId = 1
 
 		-- Create the expected and actual tables. 
 		DECLARE @recap AS dbo.RecapTableType		

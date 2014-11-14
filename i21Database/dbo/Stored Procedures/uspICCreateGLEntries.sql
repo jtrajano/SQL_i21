@@ -1,11 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICCreateGLEntries]
-	@intItemId AS INT
-	,@intItemLocationId AS INT
-	,@intTransactionId AS INT
-	,@strTransactionId AS NVARCHAR(40)
-	,@strBatchId AS NVARCHAR(20)
+	@strBatchId AS NVARCHAR(20)
 	,@UseGLAccount_ContraInventory AS NVARCHAR(255) = 'Cost of Goods'
-	,@intUserId AS INT
+	,@intUserId AS INT	
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -25,7 +21,8 @@ DECLARE @UseGLAccount_WriteOffSold AS NVARCHAR(30) = 'WriteOffSold';
 DECLARE @UseGLAccount_RevalueSold AS NVARCHAR(30) = 'RevalueSold';
 DECLARE @UseGLAccount_AutoNegative AS NVARCHAR(30) = 'AutoNegative';
 
-DECLARE @GLAccounts AS ItemGLAccount; 
+DECLARE @GLAccounts AS dbo.ItemGLAccount; 
+DECLARE @GLEntries AS dbo.RecapTableType; 
 
 -- Get the GL Account ids to use
 INSERT INTO @GLAccounts (
@@ -47,10 +44,7 @@ SELECT	Query.intItemId
 FROM (
 	SELECT DISTINCT intItemId, intItemLocationId 
 	FROM	dbo.tblICInventoryTransaction TRANS 
-	WHERE	TRANS.intItemId = @intItemId
-			AND TRANS.intItemLocationId = @intItemLocationId
-			AND TRANS.intTransactionId = @intTransactionId
-			AND TRANS.strTransactionId = @strTransactionId 
+	WHERE	TRANS.strBatchId = @strBatchId
 ) Query;
 
 -- Generate the G/L Entries here: 
@@ -81,38 +75,64 @@ AS
 			,TRANS.intCurrencyId
 			,TRANS.dblExchangeRate
 	FROM	dbo.tblICInventoryTransaction TRANS 
-	WHERE	TRANS.intItemId = @intItemId
-			AND TRANS.intItemLocationId = @intItemLocationId
-			AND TRANS.intTransactionId = @intTransactionId
-			AND TRANS.strTransactionId = @strTransactionId
+	WHERE	TRANS.strBatchId = @strBatchId
+)
+INSERT INTO @GLEntries (
+		dtmDate
+		,strBatchId
+		,intAccountId
+		,dblDebit
+		,dblCredit
+		,dblDebitUnit
+		,dblCreditUnit
+		,strDescription
+		,strCode
+		,strReference
+		,intCurrencyId
+		,dblExchangeRate
+		,dtmDateEntered
+		,dtmTransactionDate
+		,strJournalLineDescription
+		,intJournalLineNo
+		,ysnIsUnposted
+		,intUserId
+		,intEntityId
+		,strTransactionId
+		,intTransactionId
+		,strTransactionType
+		,strTransactionForm
+		,strModuleName
+		,intConcurrencyId
 )
 -------------------------------------------------------------------------------------------
 -- This part if for the usual G/L entries for Inventory Account and its contra account 
 -------------------------------------------------------------------------------------------
-SELECT	strTransactionId = strTransactionId
-		,intTransactionId = intTransactionId
-		,dtmDate = dtmDate
-		,strBatchId = @strBatchId
-		,intAccountId = GLAccounts.intInventoryId
-		,dblDebit = Debit.Value
-		,dblCredit = Credit.Value 
-		,dblDebitUnit = 0
-		,dblCreditUnit = 0
-		,strDescription = '' -- TODO
-		,strCode = '' -- TODO
-		,strReference = '' -- TODO
-		,intCurrencyId = intCurrencyId
-		,dblExchangeRate = dblExchangeRate
-		,dtmDateEntered = GETDATE()
-		,dtmTransactionDate = dtmDate
-		,strJournalLineDescription = '' -- TODO
-		,intJournalLineNo = NULL -- TODO
-		,ysnIsUnposted = 0
-		,intUserId = @intUserId -- TODO 
-		,intEntityId = @intUserId -- TODO
-		,strTransactionForm = '' -- TODO 
-		,strModuleName = '' -- TODO 
-		,intConcurrencyId = 1
+SELECT	
+		dtmDate						= ForGLEntries_CTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= GLAccounts.intInventoryId
+		,dblDebit					= Debit.Value
+		,dblCredit					= Credit.Value
+		,dblDebitUnit				= 0
+		,dblCreditUnit				= 0
+		,strDescription				= '' -- TODO 
+		,strCode					= '' -- TODO
+		,strReference				= '' -- TODO
+		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+		,strJournalLineDescription	= '' -- TODO
+		,intJournalLineNo			= NULL -- TODO
+		,ysnIsUnposted				= 0
+		,intUserId					= @intUserId -- TODO
+		,intEntityId				= @intUserId -- TODO
+		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+		,strTransactionType			= '' -- TODO 
+		,strTransactionForm			= '' -- TODO
+		,strModuleName				= '' -- TODO
+		,intConcurrencyId			= 1
 FROM	ForGLEntries_CTE  
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -122,30 +142,32 @@ FROM	ForGLEntries_CTE
 WHERE	intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE)
 
 UNION ALL 
-SELECT	strTransactionId = strTransactionId
-		,intTransactionId = intTransactionId
-		,dtmDate = dtmDate
-		,strBatchId = @strBatchId
-		,intAccountId = GLAccounts.intContraInventoryId
-		,dblDebit = Credit.Value 
-		,dblCredit = Debit.Value
-		,dblDebitUnit = 0
-		,dblCreditUnit = 0
-		,strDescription = '' -- TODO
-		,strCode = '' -- TODO
-		,strReference = '' -- TODO
-		,intCurrencyId = intCurrencyId
-		,dblExchangeRate = dblExchangeRate
-		,dtmDateEntered = GETDATE()
-		,dtmTransactionDate = dtmDate
-		,strJournalLineDescription = '' -- TODO
-		,intJournalLineNo = NULL -- TODO
-		,ysnIsUnposted = 0
-		,intUserId = @intUserId -- TODO 
-		,intEntityId = @intUserId -- TODO
-		,strTransactionForm = '' -- TODO 
-		,strModuleName = '' -- TODO 
-		,intConcurrencyId = 1
+SELECT	
+		dtmDate						= ForGLEntries_CTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= GLAccounts.intContraInventoryId
+		,dblDebit					= Credit.Value
+		,dblCredit					= Debit.Value
+		,dblDebitUnit				= 0
+		,dblCreditUnit				= 0
+		,strDescription				= '' -- TODO 
+		,strCode					= '' -- TODO
+		,strReference				= '' -- TODO
+		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+		,strJournalLineDescription	= '' -- TODO
+		,intJournalLineNo			= NULL -- TODO
+		,ysnIsUnposted				= 0
+		,intUserId					= @intUserId -- TODO
+		,intEntityId				= @intUserId -- TODO
+		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+		,strTransactionType			= '' -- TODO 
+		,strTransactionForm			= '' -- TODO
+		,strModuleName				= '' -- TODO
+		,intConcurrencyId			= 1
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -158,30 +180,32 @@ WHERE	intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIV
 -- This part for the Write-Off Sold 
 -----------------------------------------------------------------------------------
 UNION ALL  
-SELECT	strTransactionId = strTransactionId
-		,intTransactionId = intTransactionId
-		,dtmDate = dtmDate
-		,strBatchId = @strBatchId
-		,intAccountId = GLAccounts.intInventoryId
-		,dblDebit = Debit.Value
-		,dblCredit = Credit.Value 
-		,dblDebitUnit = 0
-		,dblCreditUnit = 0
-		,strDescription = '' -- TODO
-		,strCode = '' -- TODO
-		,strReference = '' -- TODO
-		,intCurrencyId = intCurrencyId
-		,dblExchangeRate = dblExchangeRate
-		,dtmDateEntered = GETDATE()
-		,dtmTransactionDate = dtmDate
-		,strJournalLineDescription = '' -- TODO
-		,intJournalLineNo = NULL -- TODO
-		,ysnIsUnposted = 0
-		,intUserId = @intUserId -- TODO 
-		,intEntityId = @intUserId -- TODO
-		,strTransactionForm = '' -- TODO 
-		,strModuleName = '' -- TODO 
-		,intConcurrencyId = 1
+SELECT	
+		dtmDate						= ForGLEntries_CTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= GLAccounts.intInventoryId
+		,dblDebit					= Debit.Value
+		,dblCredit					= Credit.Value
+		,dblDebitUnit				= 0
+		,dblCreditUnit				= 0
+		,strDescription				= '' -- TODO 
+		,strCode					= '' -- TODO
+		,strReference				= '' -- TODO
+		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+		,strJournalLineDescription	= '' -- TODO
+		,intJournalLineNo			= NULL -- TODO
+		,ysnIsUnposted				= 0
+		,intUserId					= @intUserId -- TODO
+		,intEntityId				= @intUserId -- TODO
+		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+		,strTransactionType			= '' -- TODO 
+		,strTransactionForm			= '' -- TODO
+		,strModuleName				= '' -- TODO
+		,intConcurrencyId			= 1
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -190,30 +214,32 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetCredit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Credit
 WHERE	intTransactionTypeId = @WRITE_OFF_SOLD
 UNION ALL 
-SELECT	strTransactionId = strTransactionId
-		,intTransactionId = intTransactionId
-		,dtmDate = dtmDate
-		,strBatchId = @strBatchId
-		,intAccountId = GLAccounts.intWriteOffSoldId
-		,dblDebit = Credit.Value 
-		,dblCredit = Debit.Value
-		,dblDebitUnit = 0
-		,dblCreditUnit = 0
-		,strDescription = '' -- TODO
-		,strCode = '' -- TODO
-		,strReference = '' -- TODO
-		,intCurrencyId = intCurrencyId
-		,dblExchangeRate = dblExchangeRate
-		,dtmDateEntered = GETDATE()
-		,dtmTransactionDate = dtmDate
-		,strJournalLineDescription = '' -- TODO
-		,intJournalLineNo = NULL -- TODO
-		,ysnIsUnposted = 0
-		,intUserId = @intUserId -- TODO 
-		,intEntityId = @intUserId -- TODO
-		,strTransactionForm = '' -- TODO 
-		,strModuleName = '' -- TODO 
-		,intConcurrencyId = 1
+SELECT	
+		dtmDate						= ForGLEntries_CTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= GLAccounts.intWriteOffSoldId
+		,dblDebit					= Credit.Value
+		,dblCredit					= Debit.Value
+		,dblDebitUnit				= 0
+		,dblCreditUnit				= 0
+		,strDescription				= '' -- TODO 
+		,strCode					= '' -- TODO
+		,strReference				= '' -- TODO
+		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+		,strJournalLineDescription	= '' -- TODO
+		,intJournalLineNo			= NULL -- TODO
+		,ysnIsUnposted				= 0
+		,intUserId					= @intUserId -- TODO
+		,intEntityId				= @intUserId -- TODO
+		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+		,strTransactionType			= '' -- TODO 
+		,strTransactionForm			= '' -- TODO
+		,strModuleName				= '' -- TODO
+		,intConcurrencyId			= 1
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -226,30 +252,33 @@ WHERE	intTransactionTypeId  = @WRITE_OFF_SOLD
 -- This part is for the Revalue Sold 
 -----------------------------------------------------------------------------------
 UNION ALL  
-SELECT	strTransactionId = strTransactionId
-		,intTransactionId = intTransactionId
-		,dtmDate = dtmDate
-		,strBatchId = @strBatchId
-		,intAccountId = GLAccounts.intInventoryId
-		,dblDebit = Debit.Value
-		,dblCredit = Credit.Value 
-		,dblDebitUnit = 0
-		,dblCreditUnit = 0
-		,strDescription = '' -- TODO
-		,strCode = '' -- TODO
-		,strReference = '' -- TODO
-		,intCurrencyId = intCurrencyId
-		,dblExchangeRate = dblExchangeRate
-		,dtmDateEntered = GETDATE()
-		,dtmTransactionDate = dtmDate
-		,strJournalLineDescription = '' -- TODO
-		,intJournalLineNo = NULL -- TODO
-		,ysnIsUnposted = 0
-		,intUserId = @intUserId -- TODO 
-		,intEntityId = @intUserId -- TODO
-		,strTransactionForm = '' -- TODO 
-		,strModuleName = '' -- TODO 
-		,intConcurrencyId = 1
+SELECT	
+		dtmDate						= ForGLEntries_CTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= GLAccounts.intInventoryId
+		,dblDebit					= Debit.Value
+		,dblCredit					= Credit.Value
+		,dblDebitUnit				= 0
+		,dblCreditUnit				= 0
+		,strDescription				= '' -- TODO 
+		,strCode					= '' -- TODO
+		,strReference				= '' -- TODO
+		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+		,strJournalLineDescription	= '' -- TODO
+		,intJournalLineNo			= NULL -- TODO
+		,ysnIsUnposted				= 0
+		,intUserId					= @intUserId -- TODO
+		,intEntityId				= @intUserId -- TODO
+		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+		,strTransactionType			= '' -- TODO 
+		,strTransactionForm			= '' -- TODO
+		,strModuleName				= '' -- TODO
+		,intConcurrencyId			= 1
+
 FROM	ForGLEntries_CTE
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -258,30 +287,32 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetCredit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Credit
 WHERE	intTransactionTypeId = @REVALUE_SOLD
 UNION ALL 
-SELECT	strTransactionId = strTransactionId
-		,intTransactionId = intTransactionId
-		,dtmDate = dtmDate
-		,strBatchId = @strBatchId
-		,intAccountId = GLAccounts.intRevalueSoldId
-		,dblDebit = Credit.Value 
-		,dblCredit = Debit.Value
-		,dblDebitUnit = 0
-		,dblCreditUnit = 0
-		,strDescription = '' -- TODO
-		,strCode = '' -- TODO
-		,strReference = '' -- TODO
-		,intCurrencyId = intCurrencyId
-		,dblExchangeRate = dblExchangeRate
-		,dtmDateEntered = GETDATE()
-		,dtmTransactionDate = dtmDate
-		,strJournalLineDescription = '' -- TODO
-		,intJournalLineNo = NULL -- TODO
-		,ysnIsUnposted = 0
-		,intUserId = @intUserId -- TODO 
-		,intEntityId = @intUserId -- TODO
-		,strTransactionForm = '' -- TODO 
-		,strModuleName = '' -- TODO 
-		,intConcurrencyId = 1
+SELECT	
+		dtmDate						= ForGLEntries_CTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= GLAccounts.intRevalueSoldId
+		,dblDebit					= Credit.Value
+		,dblCredit					= Debit.Value
+		,dblDebitUnit				= 0
+		,dblCreditUnit				= 0
+		,strDescription				= '' -- TODO 
+		,strCode					= '' -- TODO
+		,strReference				= '' -- TODO
+		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+		,strJournalLineDescription	= '' -- TODO
+		,intJournalLineNo			= NULL -- TODO
+		,ysnIsUnposted				= 0
+		,intUserId					= @intUserId -- TODO
+		,intEntityId				= @intUserId -- TODO
+		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+		,strTransactionType			= '' -- TODO 
+		,strTransactionForm			= '' -- TODO
+		,strModuleName				= '' -- TODO
+		,intConcurrencyId			= 1
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -294,30 +325,32 @@ WHERE	intTransactionTypeId  = @REVALUE_SOLD
 -- This part is for the Auto-Negative 
 -----------------------------------------------------------------------------------
 UNION ALL  
-SELECT	strTransactionId = strTransactionId
-		,intTransactionId = intTransactionId
-		,dtmDate = dtmDate
-		,strBatchId = @strBatchId
-		,intAccountId = GLAccounts.intInventoryId
-		,dblDebit = Debit.Value
-		,dblCredit = Credit.Value 
-		,dblDebitUnit = 0
-		,dblCreditUnit = 0
-		,strDescription = '' -- TODO
-		,strCode = '' -- TODO
-		,strReference = '' -- TODO
-		,intCurrencyId = intCurrencyId
-		,dblExchangeRate = dblExchangeRate
-		,dtmDateEntered = GETDATE()
-		,dtmTransactionDate = dtmDate
-		,strJournalLineDescription = '' -- TODO
-		,intJournalLineNo = NULL -- TODO
-		,ysnIsUnposted = 0
-		,intUserId = @intUserId -- TODO 
-		,intEntityId = @intUserId -- TODO
-		,strTransactionForm = '' -- TODO 
-		,strModuleName = '' -- TODO 
-		,intConcurrencyId = 1
+SELECT	
+		dtmDate						= ForGLEntries_CTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= GLAccounts.intInventoryId
+		,dblDebit					= Debit.Value
+		,dblCredit					= Credit.Value
+		,dblDebitUnit				= 0
+		,dblCreditUnit				= 0
+		,strDescription				= '' -- TODO 
+		,strCode					= '' -- TODO
+		,strReference				= '' -- TODO
+		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+		,strJournalLineDescription	= '' -- TODO
+		,intJournalLineNo			= NULL -- TODO
+		,ysnIsUnposted				= 0
+		,intUserId					= @intUserId -- TODO
+		,intEntityId				= @intUserId -- TODO
+		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+		,strTransactionType			= '' -- TODO 
+		,strTransactionForm			= '' -- TODO
+		,strModuleName				= '' -- TODO
+		,intConcurrencyId			= 1
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -326,30 +359,32 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetCredit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Credit
 WHERE	intTransactionTypeId = @AUTO_NEGATIVE
 UNION ALL 
-SELECT	strTransactionId = strTransactionId
-		,intTransactionId = intTransactionId
-		,dtmDate = dtmDate
-		,strBatchId = @strBatchId
-		,intAccountId = GLAccounts.intAutoNegativeId
-		,dblDebit = Credit.Value 
-		,dblCredit = Debit.Value
-		,dblDebitUnit = 0
-		,dblCreditUnit = 0
-		,strDescription = '' -- TODO
-		,strCode = '' -- TODO
-		,strReference = '' -- TODO
-		,intCurrencyId = intCurrencyId
-		,dblExchangeRate = dblExchangeRate
-		,dtmDateEntered = GETDATE()
-		,dtmTransactionDate = dtmDate
-		,strJournalLineDescription = '' -- TODO
-		,intJournalLineNo = NULL -- TODO
-		,ysnIsUnposted = 0
-		,intUserId = @intUserId -- TODO 
-		,intEntityId = @intUserId -- TODO
-		,strTransactionForm = '' -- TODO 
-		,strModuleName = '' -- TODO 
-		,intConcurrencyId = 1
+SELECT	
+		dtmDate						= ForGLEntries_CTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= GLAccounts.intAutoNegativeId
+		,dblDebit					= Credit.Value
+		,dblCredit					= Debit.Value
+		,dblDebitUnit				= 0
+		,dblCreditUnit				= 0
+		,strDescription				= '' -- TODO 
+		,strCode					= '' -- TODO
+		,strReference				= '' -- TODO
+		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+		,strJournalLineDescription	= '' -- TODO
+		,intJournalLineNo			= NULL -- TODO
+		,ysnIsUnposted				= 0
+		,intUserId					= @intUserId -- TODO
+		,intEntityId				= @intUserId -- TODO
+		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+		,strTransactionType			= '' -- TODO 
+		,strTransactionForm			= '' -- TODO
+		,strModuleName				= '' -- TODO
+		,intConcurrencyId			= 1
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -358,3 +393,6 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetCredit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Credit
 WHERE	intTransactionTypeId  = @AUTO_NEGATIVE
 ;
+
+-- Query the GL Entries table
+SELECT * FROM @GLEntries;

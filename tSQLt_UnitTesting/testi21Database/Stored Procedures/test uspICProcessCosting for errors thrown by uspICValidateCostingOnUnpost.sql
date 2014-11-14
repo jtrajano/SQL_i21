@@ -32,10 +32,16 @@ BEGIN
 	BEGIN 
 		-- Act
 		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 50000 
-		EXEC dbo.uspICProcessCosting @ItemsToProcess = @Items, @strBatchId = 'BATCH-XXXX', @ysnPost = 0, @intTransactionId = 1, @intTransactionTypeId = 1;
+		EXEC dbo.uspICProcessCosting 
+			@ItemsToPostOrUnpost = @Items
+			,@strBatchId = 'BATCH-XXXX'
+			,@ysnPost = 0
+			,@strAccountToCounterInventory = ''
+			,@intUserId = 1			
 	
 		-- Assert
 		-- CALLED
+		BEGIN 
 			-- Check if the Validate Costing on unpost sp is called. 
 			SELECT	@isCalledUspICValidateCostingOnUnpost = 1 
 			FROM	uspICValidateCostingOnUnpost_SpyProcedureLog 
@@ -44,8 +50,10 @@ BEGIN
 					AND intTransactionTypeId = 1
 				
 			EXEC tSQLt.AssertEquals 1, @isCalledUspICValidateCostingOnUnpost;			
-	
+		END
+		
 		-- NOT CALLED
+		BEGIN 
 			-- Check if the Unpost Costing is NOT called 
 			SELECT	@isCalledUspICUnpostCosting = 1 
 			FROM	uspICUnpostCosting_SpyProcedureLog 
@@ -72,5 +80,6 @@ BEGIN
 					AND strBatchId = 'BATCH-XXXX'
 
 			EXEC tSQLt.AssertEquals 0, @isCalledUspICPostCosting;
+		END 
 	END 
 END

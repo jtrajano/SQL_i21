@@ -3,12 +3,11 @@
 */
 
 CREATE PROCEDURE [dbo].[uspICProcessCosting]
-	@ItemsToProcess AS ItemCostingTableType READONLY 
+	@ItemsToPostOrUnpost AS ItemCostingTableType READONLY 
 	,@strBatchId AS NVARCHAR(20)
 	,@ysnPost AS BIT
-	,@intTransactionId INT
-	,@intTransactionTypeId INT
-	,@strAccountDescription AS NVARCHAR(255) = 'Cost of Goods'
+	,@strAccountToCounterInventory AS NVARCHAR(255) = 'Cost of Goods'
+	,@intUserId AS INT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -26,11 +25,15 @@ IF @ysnPost = 1
 BEGIN 
 	BEGIN TRY
 		-- Do the Validation
-		EXEC [dbo].[uspICValidateCostingOnPost] @ItemsToValidate = @ItemsToProcess
+		EXEC [dbo].[uspICValidateCostingOnPost] 
+			@ItemsToValidate = @ItemsToPostOrUnpost
 
-		-- Post the items to the costing tables and generate financials (g/l entries)
-		EXEC [dbo].[uspICPostCosting] @ItemsToProcess, @strBatchId
-
+		-- Post the items to the costing tables and generate the financials (g/l entries)
+		EXEC [dbo].[uspICPostCosting] 
+			@ItemsToPostOrUnpost
+			,@strBatchId
+			,@strAccountToCounterInventory
+			,@intUserId
 	END TRY
 	BEGIN CATCH
 		SELECT 
@@ -41,30 +44,28 @@ BEGIN
 		-- Use RAISERROR inside the CATCH block to return error
 		-- information about the original error that caused
 		-- execution to jump to the CATCH block.
-		RAISERROR (@ErrorMessage, -- Message text.
-			   @ErrorSeverity, -- Severity.
-			   @ErrorState -- State.
+		RAISERROR (
+			@ErrorMessage, -- Message text.
+			@ErrorSeverity, -- Severity.
+			@ErrorState -- State.
 		);
-	END CATCH 
-
+	END CATCH
 END
 
 /* Check if we are doing an unpost*/
 ELSE IF @ysnPost = 0
 BEGIN 
 	BEGIN TRY
-		-- Get the items to unpost
-		DECLARE @ItemsToUnpost AS ItemCostingTableType 
-
-		INSERT INTO @ItemsToUnpost
-		SELECT * FROM dbo.fnGetItemsToUnpost(@intTransactionId, @intTransactionTypeId); 
-
 		-- Validate if the items can be reversed. 
-		EXEC [dbo].[uspICValidateCostingOnUnpost] @ItemsToValidate = @ItemsToUnpost
+		EXEC [dbo].[uspICValidateCostingOnUnpost] 
+			@ItemsToValidate = @ItemsToPostOrUnpost
 
 		-- Reverse the stocks and generate the financials (g/l entries)
-		EXEC [dbo].[uspICUnpostCosting] @strBatchId, @intTransactionId, @intTransactionTypeId
-
+		EXEC dbo.uspICUnpostCosting
+			@ItemsToPostOrUnpost
+			,@strBatchId
+			,@strAccountToCounterInventory
+			,@intUserId
 	END TRY
 	BEGIN CATCH
 		SELECT 
@@ -75,11 +76,10 @@ BEGIN
 		-- Use RAISERROR inside the CATCH block to return error
 		-- information about the original error that caused
 		-- execution to jump to the CATCH block.
-		RAISERROR (@ErrorMessage, -- Message text.
-			   @ErrorSeverity, -- Severity.
-			   @ErrorState -- State.
+		RAISERROR (
+			@ErrorMessage, -- Message text.
+			@ErrorSeverity, -- Severity.
+			@ErrorState -- State.
 		);
-	END CATCH 
-
+	END CATCH
 END 
-

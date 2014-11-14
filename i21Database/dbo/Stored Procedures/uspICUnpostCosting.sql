@@ -3,9 +3,10 @@
 */
 
 CREATE PROCEDURE [dbo].[uspICUnpostCosting]
-	@strBatchId AS NVARCHAR(20)
-	,@intTransactionId INT
-	,@intTransactionTypeId INT
+	@ItemsToUnpost AS ItemCostingTableType READONLY
+	,@strBatchId AS NVARCHAR(20)
+	,@strAccountToCounterInventory AS NVARCHAR(255) = 'Cost of Goods'
+	,@intUserId AS INT
 AS
 
 SET QUOTED_IDENTIFIER OFF

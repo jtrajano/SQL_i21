@@ -32,11 +32,16 @@ BEGIN
 	BEGIN 
 		-- Act
 		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 50000 
-		EXEC dbo.uspICProcessCosting @ItemsToProcess = @Items, @strBatchId = 'BATCH-XXXX', @ysnPost = 1, @intTransactionId = 1, @intTransactionTypeId = 1;
-	
+		EXEC dbo.uspICProcessCosting 
+			@ItemsToPostOrUnpost = @Items
+			,@strBatchId = 'BATCH-XXXX'
+			,@ysnPost = 1
+			,@strAccountToCounterInventory = ''
+			,@intUserId = 1;	
 
 		-- Assert
 		-- CALLED
+		BEGIN 
 			-- Check if the validate costing on post is CALLED. 
 			SELECT	@isCalledUspICValidateCostingOnPost = 1 
 			FROM	uspICValidateCostingOnPost_SpyProcedureLog 
@@ -44,8 +49,10 @@ BEGIN
 					AND CAST(ItemsToValidate AS NVARCHAR(MAX)) = (SELECT * FROM @Items FOR XML PATH(''))
 
 			EXEC tSQLt.AssertEquals 1 ,@isCalledUspICValidateCostingOnPost;			
-	
+		END
+		
 		-- NOT CALLED
+		BEGIN 
 			-- Check if the post costing sp is NOT called. 
 			SELECT	@isCalledUspICPostCosting = 1 
 			FROM	uspICPostCosting_SpyProcedureLog 
@@ -72,6 +79,7 @@ BEGIN
 					AND intTransactionId = 1
 					AND intTransactionTypeId = 1	
 			
-			EXEC tSQLt.AssertEquals 0, @isCalledUspICUnpostCosting;		
+			EXEC tSQLt.AssertEquals 0, @isCalledUspICUnpostCosting;
+		END
 	END 
-END 
+END

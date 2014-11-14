@@ -1,11 +1,13 @@
-﻿
-/**
+﻿/**
 * This function retrieves all the items it will to unpost. 
 * 
 * Sample usage: 
 *
 *	SELECT	B.*
 *	FROM	[Module Transaction Table] A CROSS APPLY dbo.fnGetItemsToUnpost(A.inTransactionId, A.intTransactionType) B
+*
+* This is going to be used in uspICUnpostCosting. Records in the ItemCostingTableType will cross apply in this function to 
+* get the actual items to unpost.  
 * 
 */
 CREATE FUNCTION fnGetItemsToUnpost (@intTransactionId AS INT, @intTransactionTypeId AS INT)

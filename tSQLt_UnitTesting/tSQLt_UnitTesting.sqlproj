@@ -213,7 +213,9 @@
     <Build Include="testi21Database\Stored Procedures\Fake data for multiple segments COA.sql" />
     <Build Include="testi21Database\Stored Procedures\Fake data for simple Items.sql" />
     <Build Include="testi21Database\Functions\test the fnGetNegativeInventoryOption function.sql" />
-    <Build Include="testi21Database\Stored Procedures\test the basics of uspICProcessCosting stored procedure.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the basics of uspICProcessCosting stored procedure.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="testi21Database\Stored Procedures\test uspICProcessCosting for errors thrown by uspICValidateCostingOnPost.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
@@ -377,6 +379,7 @@
     <Build Include="testi21Database\Functions\test fnGetCredit for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\Fake data for COA used for Items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for one item purchase.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
