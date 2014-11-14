@@ -744,7 +744,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                         }
                                     ],
                                     itemId: 'cboFreightMethod',
-                                    fieldLabel: 'Freight Method',
+                                    fieldLabel: 'Freight Term',
                                     labelWidth: 140,
                                     displayField: 'strFreightTerm',
                                     valueField: 'intFreightTermId'
@@ -818,7 +818,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                 {
                                     xtype: 'numberfield',
                                     itemId: 'txtLeadTime',
-                                    fieldLabel: 'Lead Time',
+                                    fieldLabel: 'Lead Time (Days)',
                                     labelWidth: 140,
                                     fieldStyle: 'text-align:right',
                                     hideTrigger: true
@@ -848,7 +848,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                         }
                                     ],
                                     itemId: 'cboInventoryGroupField',
-                                    fieldLabel: 'Inventory Group Field',
+                                    fieldLabel: 'Inventory Count Group',
                                     labelWidth: 140,
                                     displayField: 'strCountGroup',
                                     valueField: 'intCountGroupId'
