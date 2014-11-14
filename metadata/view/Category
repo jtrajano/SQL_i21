@@ -362,6 +362,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "disabled": true,
                                                         "fieldLabel": "Catalog Group",
                                                         "itemId": "cboCatalogGroup",
                                                         "labelWidth": 130,
