@@ -8,7 +8,7 @@ Ext.define('Inventory.model.ManufacturingCellPackType', {
         'Ext.data.Field'
     ],
 
-    idProperty: 'intManufacturingCellId',
+    idProperty: 'intManufacturingCellPackTypeId',
 
     fields: [
         { name: 'intManufacturingCellPackTypeId', type: 'int'},
