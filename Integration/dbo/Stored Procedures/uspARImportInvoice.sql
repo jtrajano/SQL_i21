@@ -13,8 +13,7 @@ BEGIN
 	--================================================
 	IF(@Checking = 0) 
 	BEGIN
-
-		--Validation
+		
 		DECLARE @Sucess BIT
 		DECLARE @Message NVARCHAR(100)
 		EXEC uspARValidations @Sucess OUT, @Message OUT
@@ -63,34 +62,50 @@ BEGIN
 			   ,[strShipToAddress] --just for insertion of identity field from origin in format LTRIM(RTRIM(agivc_ivc_no)) + LTRIM(RTRIM(agivc_bill_to_cus))
 			   )
 			SELECT
-				agivc_ivc_no,		
-				Cus.intCustomerId,		
-				(CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),
-				(CASE WHEN ISDATE(agivc_net_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_net_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),
-				0,--to do
-				NULL,--agivc_loc_no to do
-				0,--to do
-				NULL,
-				0, --to do
-				agivc_po_no, 
-				0,
-				NULL,
-				NULL,
-				NULL,
-				agivc_slsmn_tot,
-				agivc_disc_amt,
-				agivc_bal_due,
-				agivc_amt_paid,
-				agivc_type,
-				0, --agivc_pay_type
-				agivc_comment,
-				0, --to do
-				0, --"If Invoice exists in the agivcmst, that means it is posted" -Joe 
-				(CASE WHEN agivc_bal_due = 0 THEN 1 ELSE 0 END),--"If the agivc-bal-due equals zero, then it is paid." -Joe
+				agivc_ivc_no,--[strInvoiceOriginId]		
+				Cus.intCustomerId,--[intCustomerId]		
+				(CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),--[dtmDate]
+				(CASE WHEN ISDATE(agivc_net_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_net_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),--[dtmDueDate]
+				ISNULL(Cur.intCurrencyID,0),--[intCurrencyId]
+				NULL,--agivc_loc_no to do [intCompanyLocationId]
+				Salesperson.intSalespersonId,--[intSalespersonId]
+				NULL, -- [dtmShipDate]
+				0, --to do [intShipViaId]
+				agivc_po_no, --[strPONumber]
+				ISNULL(Term.intTermID,0),-- [intTermId]
+				NULL,--[dblInvoiceSubtotal]
+				NULL,--[dblShipping]
+				NULL,--[dblTax]
+				agivc_slsmn_tot,--[dblInvoiceTotal]
+				agivc_disc_amt,--[dblDiscount]
+				agivc_bal_due,--[dblAmountDue]
+				agivc_amt_paid,--[dblPayment]
+				(CASE 
+					WHEN agivc_type = 'I' 
+						THEN 'Invoice' 
+					WHEN agivc_type = 'C' 
+						THEN 'Credit' 
+					WHEN agivc_type = 'D' 
+						THEN 'Debit' 
+					WHEN agivc_type = 'S' 
+						THEN 'Cash Sales'
+					WHEN agivc_type = 'R' 
+						THEN 'Cash Refund' 
+					WHEN agivc_type = 'X' 
+						THEN 'Transfer'
+				 END),--[strTransactionType]
+				0, --agivc_pay_type [intPaymentMethodId]
+				agivc_comment, --[strComments]
+				0, --to do [intAccountId]
+				1, --"If Invoice exists in the agivcmst, that means it is posted" -Joe [ysnPosted]
+				(CASE WHEN agivc_bal_due = 0 THEN 1 ELSE 0 END),--"If the agivc-bal-due equals zero, then it is paid." -Joe [ysnPaid]
 				LTRIM(RTRIM(agivc_ivc_no)) + LTRIM(RTRIM(agivc_bill_to_cus))		
 			FROM agivcmst
-			LEFT JOIN tblARInvoice Inv ON agivcmst.agivc_ivc_no COLLATE Latin1_General_CI_AS = Inv.strInvoiceNumber COLLATE Latin1_General_CI_AS
+			LEFT JOIN tblARInvoice Inv ON agivcmst.agivc_ivc_no COLLATE Latin1_General_CI_AS = Inv.strInvoiceOriginId COLLATE Latin1_General_CI_AS
 			INNER JOIN tblARCustomer Cus ON  strCustomerNumber COLLATE Latin1_General_CI_AS = agivc_bill_to_cus COLLATE Latin1_General_CI_AS
+			INNER JOIN tblARSalesperson Salesperson ON strSalespersonId COLLATE Latin1_General_CI_AS = agivc_slsmn_no COLLATE Latin1_General_CI_AS
+			LEFT JOIN tblSMCurrency Cur ON Cur.strCurrency COLLATE Latin1_General_CI_AS = agivc_currency COLLATE Latin1_General_CI_AS
+			LEFT JOIN tblSMTerm Term ON Term.strTermCode COLLATE Latin1_General_CI_AS = agivc_terms_code COLLATE Latin1_General_CI_AS
 			WHERE Inv.strInvoiceNumber IS NULL AND agivcmst.agivc_ivc_no = UPPER(agivcmst.agivc_ivc_no) COLLATE Latin1_General_CS_AS
 			   
 			

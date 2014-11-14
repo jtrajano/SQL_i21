@@ -1,9 +1,12 @@
-﻿CREATE PROCEDURE uspARValidations
+﻿CREATE PROCEDURE [dbo].[uspARValidations]
 	@Sucess BIT = 0 OUTPUT,
 	@Message NVARCHAR(100) = '' OUTPUT
 
 	AS
 
+	--==========================
+	--	CUSTOMER
+	--==========================
 	DECLARE @customerCount INT
 	DECLARE @originCustomerCount INT
 
@@ -45,8 +48,37 @@
 		SET @Message = 'There is a discrepancy on Customer records.'
 		RETURN;
 	END
+	
+	--==========================
+	--	SALESPERSON
+	--==========================	
+	DECLARE @salespersonCount INT
+	DECLARE @originSalespersonCount INT
+	
+	SELECT 
+	@originSalespersonCount = COUNT(DISTINCT agivc_slsmn_no) 
+	FROM agivcmst 
+	WHERE agivc_slsmn_no IS NOT NULL
+	
+	SELECT
+	@salespersonCount = COUNT(DISTINCT strSalespersonId)
+	FROM agivcmst
+		INNER JOIN tblARSalesperson ON agivcmst.agivc_slsmn_no COLLATE Latin1_General_CI_AS = tblARSalesperson.strSalespersonId COLLATE Latin1_General_CI_AS
+	
+	IF(@originSalespersonCount = @salespersonCount)
+	BEGIN
+		SET @Sucess = 1
+	END
+	IF(@originSalespersonCount <> @salespersonCount)
+	BEGIN
+		SET @Sucess = 0
+		SET @Message = 'There is a discrepancy on Salesperson records.'
+		RETURN;	
+	END
 		
-		
+	--==========================
+	--	TERM
+	--==========================	
 	DECLARE @termCount INT
 	DECLARE @originTermCount INT
 	
@@ -69,5 +101,4 @@
 		SET @Sucess = 0
 		SET @Message = 'There is a discrepancy on Term records.'
 		RETURN;	
-	END	
-		
+	END
