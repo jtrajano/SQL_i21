@@ -70,7 +70,10 @@ Ext.define('Inventory.view.ItemLocationViewController', {
             chkTaxFlag3: '{current.ysnTaxFlag3}',
             chkTaxFlag4: '{current.ysnTaxFlag4}',
             chkPromotionalItem: '{current.ysnPromotionalItem}',
-            cboMixMatchCode: '{current.intMixMatchId}',
+            cboMixMatchCode: {
+                value: '{current.intMixMatchId}',
+                store: '{mixMatchCode}'
+            },
             chkDepositRequired: '{current.ysnDepositRequired}',
             txtBottleDepositNo: '{current.intBottleDepositNo}',
             chkSaleable: '{current.ysnSaleable}',

@@ -993,13 +993,54 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "columns": [
+                                            "[",
+                                            "\t{",
+                                            "\t\tdataIndex: 'intPromoSalesListId',",
+                                            "\t\tdataType: 'numeric',",
+                                            "\t\ttext: 'Promo Sales Id',",
+                                            "\t\thidden: true",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'intPromoCode',",
+                                            "\t\tdataType: 'numeric',",
+                                            "\t\ttext: 'Promo Code',",
+                                            "\t\tflex: 1",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strPromoType',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Promo Type',",
+                                            "\t\tflex: 1",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strDescription',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Description',",
+                                            "\t\tflex: 1",
+                                            "\t}",
+                                            "]"
+                                        ],
+                                        "designer|createAlias": "gridcombobox",
+                                        "displayField": "intPromoCode",
                                         "fieldLabel": "Mix/Match Code",
                                         "itemId": "cboMixMatchCode",
                                         "labelWidth": 140,
-                                        "layout|flex": null
+                                        "layout|flex": null,
+                                        "valueField": "intPromoSalesListId"
                                     },
                                     "name": "MyComboBox32",
-                                    "designerId": "ce5881d7-5d7d-4fd1-84a0-4f8fc5fb2a8c"
+                                    "configAlternates": {
+                                        "columns": "array"
+                                    },
+                                    "designerId": "ce5881d7-5d7d-4fd1-84a0-4f8fc5fb2a8c",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "columns",
+                                            "type": "string"
+                                        }
+                                    ]
                                 },
                                 {
                                     "type": "Ext.form.field.Checkbox",
@@ -1704,7 +1745,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging16",
                     "designerId": "3812557b-eaf0-4f41-b444-7da5890f9c89",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

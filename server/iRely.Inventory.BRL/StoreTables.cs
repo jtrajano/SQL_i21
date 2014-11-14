@@ -348,4 +348,70 @@ namespace iRely.Inventory.BRL
         }
     }
 
+    public class PromotionSalesList : IDisposable
+    {
+        private Repository _db;
+
+        public PromotionSalesList()
+        {
+            _db = new Repository(new Inventory.Model.InventoryEntities());
+        }
+
+        public IQueryable<tblSTPromotionSalesList> GetSearchQuery()
+        {
+            return _db.GetQuery<tblSTPromotionSalesList>();
+        }
+
+        public object GetSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<tblSTPromotionSalesList, bool>> predicate)
+        {
+            return GetSearchQuery()
+                .Where(predicate)
+                .OrderBySelector(sortSelector)
+                .Skip(start)
+                .Take(limit)
+                .Select(selector)
+                .AsNoTracking();
+        }
+
+        public int GetCount(Expression<Func<tblSTPromotionSalesList, bool>> predicate)
+        {
+            return GetSearchQuery().Where(predicate).Count();
+        }
+
+        public IQueryable<tblSTPromotionSalesList> GetPromotionSalesLists(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<tblSTPromotionSalesList, bool>> predicate)
+        {
+            var query = GetSearchQuery(); //Get Search Query
+            return _db.GetQuery<tblSTPromotionSalesList>()
+                .Where(w => query.Where(predicate).Any(a => a.intPromoSalesListId == w.intPromoSalesListId)) //Filter the Main DataSource Based on Search Query
+                .OrderBySelector(sortSelector)
+                .Skip(start)
+                .Take(limit)
+                .AsNoTracking();
+        }
+
+        public void AddPromotionSalesList(tblSTPromotionSalesList saleslist)
+        {
+            _db.AddNew<tblSTPromotionSalesList>(saleslist);
+        }
+
+        public void UpdatePromotionSalesList(tblSTPromotionSalesList saleslist)
+        {
+            _db.UpdateBatch<tblSTPromotionSalesList>(saleslist);
+        }
+
+        public void DeletePromotionSalesList(tblSTPromotionSalesList saleslist)
+        {
+            _db.Delete<tblSTPromotionSalesList>(saleslist);
+        }
+
+        public SaveResult Save(bool continueOnConflict)
+        {
+            return _db.Save(continueOnConflict);
+        }
+
+        public void Dispose()
+        {
+            _db.Dispose();
+        }
+    }
 }

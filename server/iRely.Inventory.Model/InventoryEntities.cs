@@ -173,6 +173,7 @@ namespace iRely.Inventory.Model
         public DbSet<tblSTSubcategoryRegProd> tblSTSubcategoryRegProds { get; set; }
 
         public DbSet<tblGRStorageType> tblGRStorageTypes { get; set; }
+        public DbSet<tblSTPromotionSalesList> tblSTPromotionSalesLists { get; set; }
         
         protected override void OnModelCreating(DbModelBuilder modelBuilder) 
         {
@@ -275,6 +276,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICCommoditySeasonMap());
 
             modelBuilder.Configurations.Add(new tblGRStorageTypeMap());
+            modelBuilder.Configurations.Add(new tblSTPromotionSalesListMap());
         }
     }
 }

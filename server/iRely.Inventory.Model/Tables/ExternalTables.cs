@@ -225,5 +225,14 @@ namespace iRely.Inventory.Model
         public int intSort { get; set; }
     }
 
-   
+    public class tblSTPromotionSalesList : BaseEntity
+    {
+        public int intPromoSalesListId { get; set; }
+        public bool strPromoType { get; set; }
+        public bool strDescription { get; set; }
+        public int intPromoCode { get; set; }
+        public int intPromoUnits { get; set; }
+        public decimal? dblPromoPrice { get; set; }
+    }
+
 }

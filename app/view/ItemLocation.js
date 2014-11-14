@@ -536,10 +536,38 @@ Ext.define('Inventory.view.ItemLocation', {
                             },
                             items: [
                                 {
-                                    xtype: 'combobox',
+                                    xtype: 'gridcombobox',
+                                    columns: [
+                                        {
+                                            dataIndex: 'intPromoSalesListId',
+                                            dataType: 'numeric',
+                                            text: 'Promo Sales Id',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'intPromoCode',
+                                            dataType: 'numeric',
+                                            text: 'Promo Code',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strPromoType',
+                                            dataType: 'string',
+                                            text: 'Promo Type',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strDescription',
+                                            dataType: 'string',
+                                            text: 'Description',
+                                            flex: 1
+                                        }
+                                    ],
                                     itemId: 'cboMixMatchCode',
                                     fieldLabel: 'Mix/Match Code',
-                                    labelWidth: 140
+                                    labelWidth: 140,
+                                    displayField: 'intPromoCode',
+                                    valueField: 'intPromoSalesListId'
                                 },
                                 {
                                     xtype: 'checkboxfield',

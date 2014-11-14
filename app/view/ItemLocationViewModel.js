@@ -26,6 +26,7 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
         'Inventory.store.Product',
         'Inventory.store.Class',
         'Inventory.store.Family',
+        'Inventory.store.PromotionSalesList',
         'Inventory.store.BufferedCountGroup'
     ],
 
@@ -82,6 +83,9 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
         },
         productCode: {
             type: 'storeproduct'
+        },
+        mixMatchCode: {
+            type: 'storepromotionsaleslist'
         },
 
 

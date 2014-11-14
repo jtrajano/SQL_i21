@@ -615,4 +615,122 @@ namespace iRely.Invetory.WebAPI.Controllers
         }
 
     }
+
+    public class PromotionSalesListController : ApiController
+    {
+        private PromotionSalesList _PromotionSalesListBRL = new PromotionSalesList();
+
+        [HttpGet]
+        public HttpResponseMessage SearchPromotionSalesLists(int page, int start, int limit, string columns = "", string sort = "", string filter = "")
+        {
+            var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
+            var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
+            var predicate = ExpressionBuilder.True<tblSTPromotionSalesList>();
+            var selector = ExpressionBuilder.GetSelector(columns);
+
+            var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts);
+
+            if (searchFilters != null)
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblSTPromotionSalesList>(searchFilters);
+
+            var data = _PromotionSalesListBRL.GetSearchQuery(page, start, limit, selector, sortSelector, predicate);
+
+            var total = _PromotionSalesListBRL.GetCount(predicate);
+            return Request.CreateResponse(HttpStatusCode.OK, new
+            {
+                data = data,
+                total = total
+            });
+        }
+
+        [HttpGet]
+        [ActionName("GetPromotionSalesLists")]
+        public HttpResponseMessage GetPromotionSalesLists(int start = 0, int limit = 1, int page = 0, string sort = "", string filter = "")
+        {
+            filter = string.IsNullOrEmpty(filter) ? "" : filter;
+
+            var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
+            var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
+            var predicate = ExpressionBuilder.True<tblSTPromotionSalesList>();
+            var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intPromoSalesListId", "DESC");
+
+            if (searchFilters != null)
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblSTPromotionSalesList>(searchFilters, true);
+
+            var total = _PromotionSalesListBRL.GetCount(predicate);
+            var data = _PromotionSalesListBRL.GetPromotionSalesLists(page, start, page == 0 ? total : limit, sortSelector, predicate);
+
+            return Request.CreateResponse(HttpStatusCode.OK, new
+            {
+                data = data.ToList(),
+                total = total
+            });
+        }
+
+        [HttpPost]
+        public HttpResponseMessage PostPromotionSalesLists(IEnumerable<tblSTPromotionSalesList> saleslists, bool continueOnConflict = false)
+        {
+            foreach (var saleslist in saleslists)
+                _PromotionSalesListBRL.AddPromotionSalesList(saleslist);
+
+            var result = _PromotionSalesListBRL.Save(continueOnConflict);
+            _PromotionSalesListBRL.Dispose();
+
+            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            {
+                data = saleslists,
+                success = !result.HasError,
+                message = new
+                {
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+        }
+
+        [HttpPut]
+        public HttpResponseMessage PutPromotionSalesLists(IEnumerable<tblSTPromotionSalesList> saleslists, bool continueOnConflict = false)
+        {
+            foreach (var saleslist in saleslists)
+                _PromotionSalesListBRL.UpdatePromotionSalesList(saleslist);
+
+            var result = _PromotionSalesListBRL.Save(continueOnConflict);
+            _PromotionSalesListBRL.Dispose();
+
+            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            {
+                data = saleslists,
+                success = !result.HasError,
+                message = new
+                {
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+        }
+
+        [HttpDelete]
+        public HttpResponseMessage DeletePromotionSalesLists(IEnumerable<tblSTPromotionSalesList> saleslists, bool continueOnConflict = false)
+        {
+            foreach (var saleslist in saleslists)
+                _PromotionSalesListBRL.DeletePromotionSalesList(saleslist);
+
+            var result = _PromotionSalesListBRL.Save(continueOnConflict);
+            _PromotionSalesListBRL.Dispose();
+
+            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            {
+                data = saleslists,
+                success = !result.HasError,
+                message = new
+                {
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+        }
+    }
 }
