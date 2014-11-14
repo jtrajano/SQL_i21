@@ -17,6 +17,7 @@ namespace iRely.Inventory.Model
         public int? intVendorId { get; set; }
         public string strDescription { get; set; }
         public int? intCostingMethod { get; set; }
+        public int? intAllowNegativeInventory { get; set; }
         public int? intCategoryId { get; set; }
         public string strRow { get; set; }
         public string strBin { get; set; }
@@ -26,7 +27,6 @@ namespace iRely.Inventory.Model
         public int? intFamilyId { get; set; }
         public int? intClassId { get; set; }
         public int? intProductCodeId { get; set; }
-        public int? intFuelTankId { get; set; }
         public string strPassportFuelId1 { get; set; }
         public string strPassportFuelId2 { get; set; }
         public string strPassportFuelId3 { get; set; }
@@ -37,7 +37,7 @@ namespace iRely.Inventory.Model
         public bool ysnPromotionalItem { get; set; }
         public int? intMixMatchId { get; set; }
         public bool ysnDepositRequired { get; set; }
-        public int intBottleDepositNo { get; set; }
+        public int? intBottleDepositNo { get; set; }
         public bool ysnSaleable { get; set; }
         public bool ysnQuantityRequired { get; set; }
         public bool ysnScaleItem { get; set; }
@@ -52,7 +52,7 @@ namespace iRely.Inventory.Model
         public string strSerialNoEnd { get; set; }
         public bool ysnIdRequiredLiquor { get; set; }
         public bool ysnIdRequiredCigarette { get; set; }
-        public int intMinimumAge { get; set; }
+        public int? intMinimumAge { get; set; }
         public bool ysnApplyBlueLaw1 { get; set; }
         public bool ysnApplyBlueLaw2 { get; set; }
         public int? intItemTypeCode { get; set; }
@@ -61,7 +61,15 @@ namespace iRely.Inventory.Model
         public int? intFreightMethodId { get; set; }
         public decimal? dblFreightRate { get; set; }
         public int? intFreightVendorId { get; set; }
-        public int intSort { get; set; }
+        public int? intNegativeInventory { get; set; }
+        public decimal? dblReorderPoint { get; set; }
+        public decimal? dblMinOrder { get; set; }
+        public decimal? dblSuggestedQty { get; set; }
+        public decimal? dblLeadTime { get; set; }
+        public string strCounted { get; set; }
+        public int? intCountGroupId { get; set; }
+        public bool ysnCountedDaily { get; set; }
+        public int? intSort { get; set; }
 
         private string _location;
         [NotMapped]
@@ -145,6 +153,7 @@ namespace iRely.Inventory.Model
         public vyuAPVendor vyuAPVendor { get; set; }
         public tblICCategory tblICCategory { get; set; }
         public tblICUnitMeasure tblICUnitMeasure { get; set; }
+        public tblICCountGroup tblICCountGroup { get; set; }
         
     }
 }

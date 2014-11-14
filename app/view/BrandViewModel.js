@@ -18,12 +18,12 @@ Ext.define('Inventory.view.BrandViewModel', {
     alias: 'viewmodel.brand',
 
     requires: [
-        'Inventory.store.Manufacturer'
+        'Inventory.store.BufferedManufacturer'
     ],
 
     stores: {
         manufacturer:{
-            type: 'inventorymanufacturer'
+            type: 'inventorybufferedmanufacturer'
         }
     }
 

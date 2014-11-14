@@ -18,16 +18,27 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
     alias: 'viewmodel.itemlocation',
 
     requires: [
-        'Inventory.view.override.ItemLocationViewModel',
-        'Ext.data.Store',
-        'Ext.data.field.Integer',
-        'i21.store.CompanyLocation',
-        'Inventory.store.UnitMeasure',
-        'Inventory.store.Category'
+        'i21.store.CompanyLocationBuffered',
+        'i21.store.FreightTermsBuffered',
+        'AccountsPayable.store.VendorBuffered',
+        'Inventory.store.BufferedUnitMeasure',
+        'Inventory.store.BufferedCategory',
+        'Inventory.store.Product',
+        'Inventory.store.Class',
+        'Inventory.store.Family',
+        'Inventory.store.PromotionSalesList',
+        'Inventory.store.BufferedCountGroup'
     ],
 
     stores: {
-        CostingMethods: {
+
+        location: {
+            type: 'companylocationbuffered'
+        },
+        vendor: {
+            type: 'vendorbuffered'
+        },
+        costingMethods: {
             data: [
                 {
                     intCostingMethodId: '1',
@@ -52,18 +63,50 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
                 }
             ]
         },
-        NegativeInventory: {
+        category: {
+            type: 'inventorybufferedcategory'
+        },
+        defaultUOM: {
+            type: 'inventorybuffereduom'
+        },
+        issueUOM: {
+            type: 'inventorybuffereduom'
+        },
+        receiveUOM: {
+            type: 'inventorybuffereduom'
+        },
+        family: {
+            type: 'storefamily'
+        },
+        class: {
+            type: 'storeclass'
+        },
+        productCode: {
+            type: 'storeproduct'
+        },
+        mixMatchCode: {
+            type: 'storepromotionsaleslist'
+        },
+
+
+        freightTerm: {
+            type: 'FreightTermsBuffered'
+        },
+        freightVendor: {
+            type: 'vendorbuffered'
+        },
+        negativeInventory: {
             data: [
                 {
-                    intNegativeInventoryId: '0',
+                    intNegativeInventoryId: '1',
                     strDescription: 'Yes'
                 },
                 {
-                    intNegativeInventoryId: '1',
+                    intNegativeInventoryId: '2',
                     strDescription: 'Yes with Auto Write-Off'
                 },
                 {
-                    intNegativeInventoryId: '2',
+                    intNegativeInventoryId: '3',
                     strDescription: 'No'
                 }
             ],
@@ -77,14 +120,35 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
                 }
             ]
         },
-        Location: {
-            type: 'companylocation'
+        counteds: {
+            data: [
+                {
+                    strDescription: 'Counted'
+                },
+                {
+                    strDescription: 'Not Counted'
+                },
+                {
+                    strDescription: 'Obsolete'
+                },
+                {
+                    strDescription: 'Blended'
+                },
+                {
+                    strDescription: 'Automatic Blend'
+                },
+                {
+                    strDescription: 'Special Order'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
         },
-        Category: {
-            type: 'inventorycategory'
-        },
-        UnitMeasure: {
-            type: 'inventoryuom'
+        countGroup: {
+            type: 'inventorybufferedcountgroup'
         }
     }
 

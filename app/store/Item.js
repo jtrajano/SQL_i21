@@ -14,6 +14,7 @@ Ext.define('Inventory.store.Item', {
         cfg = cfg || {};
         me.callParent([Ext.apply({
             model: 'Inventory.model.Item',
+            timeout: 120000,
             storeId: 'Item',
             pageSize: 50,
             batchActions: true,

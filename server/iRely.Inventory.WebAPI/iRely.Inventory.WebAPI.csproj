@@ -143,12 +143,14 @@
     <Compile Include="Controllers\CertificationController.cs" />
     <Compile Include="Controllers\CommodityAttributeController.cs" />
     <Compile Include="Controllers\CommodityController.cs" />
+    <Compile Include="Controllers\CommodityUnitMeasureController.cs" />
     <Compile Include="Controllers\CountGroupController.cs" />
     <Compile Include="Controllers\DocumentController.cs" />
     <Compile Include="Controllers\FuelTaxClassController.cs" />
     <Compile Include="Controllers\FuelTypeController.cs" />
     <Compile Include="Controllers\ItemLocationController.cs" />
     <Compile Include="Controllers\ItemPricingController.cs" />
+    <Compile Include="Controllers\ItemUnitMeasureController.cs" />
     <Compile Include="Controllers\LineOfBusinessController.cs" />
     <Compile Include="Controllers\LotStatusController.cs" />
     <Compile Include="Controllers\ManufacturerController.cs" />

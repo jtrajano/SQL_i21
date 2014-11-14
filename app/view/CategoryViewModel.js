@@ -22,7 +22,7 @@ Ext.define('Inventory.view.CategoryViewModel', {
         'Inventory.store.BufferedCompactItem',
         'GeneralLedger.store.BufAccountId',
         'AccountsPayable.store.VendorBuffered',
-        'i21.store.CompanyLocation',
+        'i21.store.CompanyLocationBuffered',
         'Inventory.store.Class',
         'Inventory.store.Family'
     ],
@@ -144,7 +144,7 @@ Ext.define('Inventory.view.CategoryViewModel', {
             type: 'bufAccountid'
         },
         location: {
-            type: 'companylocation'
+            type: 'companylocationbuffered'
         },
         vendorSellClass: {
             type: 'storeclass'

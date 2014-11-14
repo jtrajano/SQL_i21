@@ -25,9 +25,6 @@ Ext.define('Inventory.view.FactoryUnitTypeViewModel', {
         internalCodes: {
             data: [
                 {
-                    strInternalCode: 'MACHINES'
-                },
-                {
                     strInternalCode: 'PROD_STAGING'
                 },
                 {
@@ -71,6 +68,9 @@ Ext.define('Inventory.view.FactoryUnitTypeViewModel', {
                 },
                 {
                     strInternalCode: 'WH_RESERVED_BY_SYSTEM'
+                },
+                {
+                    strInternalCode: 'WH_RESTRICTED'
                 },
                 {
                     strInternalCode: 'WH_RM_STORAGE'

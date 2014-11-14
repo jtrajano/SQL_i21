@@ -50,12 +50,24 @@ Ext.define('Inventory.view.ManufacturingCellViewController', {
             txtStandardLineEfficiency: '{current.dblStdLineEfficiency}',
             chkIncludeInScheduling: '{current.ysnIncludeSchedule}',
 
-            colPackTypeName: 'strPackName',
-            colPackTypeDescription: 'strDescription',
-            colLineCapacity: 'dblLineCapacity',
-            colLineCapacityUOM: 'strCapacityUnitMeasure',
-            colLineCapacityRate: 'strCapacityRateUnitMeasure',
-            colLineEfficiency: 'dblLineEfficiencyRate'
+            grdPackingType: {
+                colPackTypeName: 'strPackName',
+                colPackTypeDescription: 'strDescription',
+                colLineCapacity: 'dblLineCapacity',
+                colLineCapacityUOM: {
+                    dataIndex: 'strCapacityUnitMeasure',
+                    editor: {
+                        store: '{packTypeCapacityUOM}'
+                    }
+                },
+                colLineCapacityRate: {
+                    dataIndex: 'strCapacityRateUnitMeasure',
+                    editor: {
+                        store: '{packTypeCapacityRateUOM}'
+                    }
+                },
+                colLineEfficiency: 'dblLineEfficiencyRate'
+            }
         }
     },
 
@@ -81,6 +93,15 @@ Ext.define('Inventory.view.ManufacturingCellViewController', {
                 }
             ]
         });
+
+        var notTimeFilter = [{ dataIndex: 'strUnitType', value: 'Time', condition: 'noteq' }];
+        var timeFilter = [{ dataIndex: 'strUnitType', value: 'Time', condition: 'eq' }];
+
+        var cboStandardCapacityUom = win.down('#cboStandardCapacityUom');
+        var cboStandardCapacityRate = win.down('#cboStandardCapacityRate');
+
+        cboStandardCapacityUom.defaultFilters = notTimeFilter;
+        cboStandardCapacityRate.defaultFilters = timeFilter;
 
         return win.context;
     },
@@ -122,7 +143,7 @@ Ext.define('Inventory.view.ManufacturingCellViewController', {
 
         if (combo.column.itemId === 'colPackTypeName')
         {
-            current.set('intSourceUnitMeasureId', records[0].get('intPackTypeId'));
+            current.set('intPackTypeId', records[0].get('intPackTypeId'));
             current.set('strDescription', records[0].get('strDescription'));
         }
         else if (combo.column.itemId === 'colLineCapacityUOM')
@@ -135,16 +156,31 @@ Ext.define('Inventory.view.ManufacturingCellViewController', {
         }
     },
 
+    onUOMBeforeRender: function (combo, eOpts) {
+        if (!combo) return;
+
+        if (combo.itemId === 'cboCapacityUOM'){
+            var notTimeFilter = [{ dataIndex: 'strUnitType', value: 'Time', condition: 'noteq' }];
+            combo.defaultFilters = notTimeFilter;
+        }
+        else if (combo.itemId === 'cboCapacityRateUOM'){
+            var timeFilter = [{ dataIndex: 'strUnitType', value: 'Time', condition: 'eq' }];
+            combo.defaultFilters = timeFilter;
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboPackType": {
                 select: this.onPackTypeSelect
             },
             "#cboCapacityUOM": {
-                select: this.onPackTypeSelect
+                select: this.onPackTypeSelect,
+                beforerender: this.onUOMBeforeRender
             },
             "#cboCapacityRateUOM": {
-                select: this.onPackTypeSelect
+                select: this.onPackTypeSelect,
+                beforerender: this.onUOMBeforeRender
             }
         });
     }

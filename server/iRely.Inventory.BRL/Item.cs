@@ -24,15 +24,63 @@ namespace iRely.Inventory.BRL
         public IQueryable<ItemVM> GetSearchQuery()
         {
             return _db.GetQuery<tblICItem>()
-                .Select(p => new ItemVM { 
+                .Include(p => p.tblICBrand)
+                .Include(p => p.tblICManufacturer)
+                .Include(p => p.tblICCategory)
+                .Select(p => new ItemVM
+                {
                     intItemId = p.intItemId,
                     strItemNo = p.strItemNo,
                     strType = p.strType,
                     strDescription = p.strDescription,
                     strStatus = p.strStatus,
                     strModelNo = p.strModelNo,
-                    strLotTracking = p.strLotTracking
+                    strLotTracking = p.strLotTracking,
+                    strBrand = p.tblICBrand.strBrandCode,
+                    strManufacturer = p.tblICManufacturer.strManufacturer,
+                    strTracking = p.tblICCategory.strCategoryCode
                 });
+        }
+
+        public IEnumerable<tblICItem> GetEmpty()
+        {
+            return _db.GetQuery<tblICItem>()
+                    .Include("tblICItemUOMs.tblICUnitMeasure")
+                    .Include("tblICItemLocations.tblSMCompanyLocation")
+                    .Include("tblICItemLocations.vyuAPVendor")
+                    .Include("tblICItemLocations.tblICCategory")
+                    .Include("tblICItemLocations.tblICUnitMeasure")
+                    .Include("tblICItemPOSCategories.tblICCategory")
+                    .Include(p => p.tblICItemPOSSLAs)
+                    .Include(p => p.tblICItemManufacturingUOMs)
+                    .Include("tblICItemUPCs.tblICUnitMeasure")
+                    .Include("tblICItemCustomerXrefs.tblSMCompanyLocation")
+                    .Include("tblICItemCustomerXrefs.tblARCustomer")
+                    .Include("tblICItemVendorXrefs.tblSMCompanyLocation")
+                    .Include("tblICItemVendorXrefs.vyuAPVendor")
+                    .Include("tblICItemVendorXrefs.tblICUnitMeasure")
+                    .Include("tblICItemContracts.tblSMCompanyLocation")
+                    .Include("tblICItemContracts.tblSMCountry")
+                    .Include("tblICItemContracts.tblICItemContractDocuments.tblICDocument")
+                    .Include("tblICItemCertifications.tblICCertification")
+                    .Include("tblICItemPricings.tblSMCompanyLocation")
+                    .Include("tblICItemPricingLevels.tblSMCompanyLocation")
+                    .Include("tblICItemPricingLevels.tblICUnitMeasure")
+                    .Include("tblICItemSpecialPricings.tblSMCompanyLocation")
+                    .Include("tblICItemSpecialPricings.tblICUnitMeasure")
+                    .Include("tblICItemStocks.tblSMCompanyLocation")
+                    .Include("tblICItemStocks.tblICUnitMeasure")
+                    .Include("tblICItemStocks.tblICCountGroup")
+                    .Include("tblICItemAccounts.tblGLAccount")
+                    .Include("tblICItemAccounts.ProfitCenter")
+                    .Include("tblICItemAssemblies.AssemblyItem")
+                    .Include("tblICItemAssemblies.tblICUnitMeasure")
+                    .Include("tblICItemBundles.BundleItem")
+                    .Include("tblICItemBundles.tblICUnitMeasure")
+                    .Include("tblICItemKits.tblICItemKitDetails.tblICItem")
+                    .Include("tblICItemKits.tblICItemKitDetails.tblICUnitMeasure")
+                    .Include("tblICItemNotes.tblSMCompanyLocation")
+                    .Take(0).ToList();
         }
 
         public object GetSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<ItemVM, bool>> predicate)

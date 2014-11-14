@@ -14,15 +14,15 @@ namespace iRely.Inventory.Model
         public int intItemUOMId { get; set; }
         public int intItemId { get; set; }
         public int intUnitMeasureId { get; set; }
-        public double dblUnitQty { get; set; }
-        public double dblSellQty { get; set; }
-        public double dblWeight { get; set; }
+        public decimal? dblUnitQty { get; set; }
+        public decimal? dblSellQty { get; set; }
+        public decimal? dblWeight { get; set; }
         public string strDescription { get; set; }
-        public double dblLength { get; set; }
-        public double dblWidth { get; set; }
-        public double dblHeight { get; set; }
-        public double dblVolume { get; set; }
-        public double dblMaxQty { get; set; }
+        public decimal? dblLength { get; set; }
+        public decimal? dblWidth { get; set; }
+        public decimal? dblHeight { get; set; }
+        public decimal? dblVolume { get; set; }
+        public decimal? dblMaxQty { get; set; }
 
         private string _unitmeasure;
         [NotMapped]

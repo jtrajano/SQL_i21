@@ -862,6 +862,7 @@ Ext.define('Inventory.view.Category', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        hidden: true,
                                         layout: 'fit',
                                         title: 'Catalog',
                                         items: [
@@ -1089,7 +1090,7 @@ Ext.define('Inventory.view.Category', {
                                                             },
                                                             {
                                                                 xtype: 'imagecontainer',
-                                                                name: 'imgPhoto',
+                                                                name: 'imgReceiptImage',
                                                                 baseCls: 'x-container x-header-panel-white',
                                                                 height: 121,
                                                                 itemId: 'imgReceipt',
@@ -1113,7 +1114,7 @@ Ext.define('Inventory.view.Category', {
                                                             },
                                                             {
                                                                 xtype: 'imagecontainer',
-                                                                name: 'imgPhoto',
+                                                                name: 'imgWIPImage',
                                                                 baseCls: 'x-container x-header-panel-white',
                                                                 height: 121,
                                                                 itemId: 'imgWIP',
@@ -1136,7 +1137,7 @@ Ext.define('Inventory.view.Category', {
                                                             },
                                                             {
                                                                 xtype: 'imagecontainer',
-                                                                name: 'imgPhoto',
+                                                                name: 'imgFGImage',
                                                                 baseCls: 'x-container x-header-panel-white',
                                                                 height: 121,
                                                                 itemId: 'imgFG',
@@ -1160,7 +1161,7 @@ Ext.define('Inventory.view.Category', {
                                                             },
                                                             {
                                                                 xtype: 'imagecontainer',
-                                                                name: 'imgPhoto',
+                                                                name: 'imgShipImage',
                                                                 baseCls: 'x-container x-header-panel-white',
                                                                 height: 121,
                                                                 itemId: 'imgShip',

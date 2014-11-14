@@ -104,7 +104,7 @@ namespace iRely.Invetory.WebAPI.Controllers
             });
         }
 
-        [HttpPut]
+        [AcceptVerbs("PUT", "POST")]
         public HttpResponseMessage PutCatalogs(IEnumerable<tblICCatalog> catalogs, bool continueOnConflict = false)
         {
             foreach (var catalog in catalogs)
@@ -126,7 +126,7 @@ namespace iRely.Invetory.WebAPI.Controllers
             });
         }
 
-        [HttpDelete]
+        [AcceptVerbs("DELETE", "POST")]
         public HttpResponseMessage DeleteCatalogs(IEnumerable<tblICCatalog> catalogs, bool continueOnConflict = false)
         {
             foreach (var catalog in catalogs)

@@ -16,5 +16,6 @@ namespace iRely.Inventory.Model
         public int intSort { get; set; }
 
         public ICollection<tblICItemStock> tblICItemStocks { get; set; }
+        public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
     }
 }

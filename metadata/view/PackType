@@ -377,7 +377,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter15",
+                                    "name": "filter16",
                                     "designerId": "c39762ed-6d5b-4268-95f3-6514bb2f553b",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -437,15 +437,12 @@
                                         ],
                                         "designer|createAlias": "gridcombobox",
                                         "displayField": "strUnitMeasure",
-                                        "store": [
-                                            "{sourceUnitMeasure}"
-                                        ],
+                                        "itemId": "cboSourceUOM",
                                         "valueField": "strUnitMeasure"
                                     },
                                     "name": "MyComboBox1",
                                     "configAlternates": {
-                                        "columns": "array",
-                                        "store": "binding"
+                                        "columns": "array"
                                     },
                                     "designerId": "b218e9db-6adb-4e78-826e-c04e29172862",
                                     "customConfigs": [
@@ -512,15 +509,12 @@
                                         ],
                                         "designer|createAlias": "gridcombobox",
                                         "displayField": "strUnitMeasure",
-                                        "store": [
-                                            "{targetUnitMeasure}"
-                                        ],
+                                        "itemId": "cboTargetUOM",
                                         "valueField": "strUnitMeasure"
                                     },
                                     "name": "MyComboBox2",
                                     "configAlternates": {
-                                        "columns": "array",
-                                        "store": "binding"
+                                        "columns": "array"
                                     },
                                     "designerId": "137508d4-4280-4056-9489-dfd99618072d",
                                     "customConfigs": [

@@ -18,9 +18,9 @@ Ext.define('Inventory.view.ManufacturingCellViewModel', {
     alias: 'viewmodel.manufacturingcell',
 
     requires: [
-        'i21.store.CompanyLocation',
+        'i21.store.CompanyLocationBuffered',
         'Inventory.store.BufferedUnitMeasure',
-        'Inventory.store.PackType'
+        'Inventory.store.BufferedPackType'
     ],
 
     stores: {
@@ -31,10 +31,10 @@ Ext.define('Inventory.view.ManufacturingCellViewModel', {
             type: 'inventorybuffereduom'
         },
         location: {
-            type: 'companylocation'
+            type: 'companylocationbuffered'
         },
         packType: {
-            type: 'inventorypacktype'
+            type: 'inventorybufferedpacktype'
         },
         packTypeCapacityUOM: {
             type: 'inventorybuffereduom'

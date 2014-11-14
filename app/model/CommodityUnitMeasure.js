@@ -32,7 +32,9 @@ Ext.define('Inventory.model.CommodityUnitMeasure', {
         { name: 'ysnStockUnit', type: 'boolean'},
         { name: 'ysnAllowPurchase', type: 'boolean'},
         { name: 'ysnAllowSale', type: 'boolean'},
-        { name: 'intSort', type: 'int'}
+        { name: 'intSort', type: 'int'},
+
+        { name: 'strUnitMeasure', type: 'string'}
     ],
 
     validators: [

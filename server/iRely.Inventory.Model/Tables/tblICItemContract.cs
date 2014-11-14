@@ -14,7 +14,6 @@ namespace iRely.Inventory.Model
         public int intItemContractId { get; set; }
         public int intItemId { get; set; }
         public int? intLocationId { get; set; }
-        public string strStoreName { get; set; }
         public string strContractItemName { get; set; }
         public int? intCountryId { get; set; }
         public string strGrade { get; set; }

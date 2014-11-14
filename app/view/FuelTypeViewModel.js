@@ -18,28 +18,28 @@ Ext.define('Inventory.view.FuelTypeViewModel', {
     alias: 'viewmodel.fueltype',
 
     requires: [
-        'Inventory.store.FeedStockCode',
-        'Inventory.store.FeedStockUom',
-        'Inventory.store.FuelCategory',
-        'Inventory.store.FuelCode',
-        'Inventory.store.ProcessCode'
+        'Inventory.store.BufferedFeedStockCode',
+        'Inventory.store.BufferedFeedStockUom',
+        'Inventory.store.BufferedFuelCategory',
+        'Inventory.store.BufferedFuelCode',
+        'Inventory.store.BufferedProcessCode'
     ],
 
     stores: {
         feedStock: {
-            type: 'inventoryfeedstockcode'
+            type: 'inventorybufferedfeedstockcode'
         },
         feedStockUom: {
-            type: 'inventoryfeedstockuom'
+            type: 'inventorybufferedfeedstockuom'
         },
         fuelCategory: {
-            type: 'inventoryfuelcategory'
+            type: 'inventorybufferedfuelcategory'
         },
         fuelCode: {
-            type: 'inventoryfuelcode'
+            type: 'inventorybufferedfuelcode'
         },
         productionProcess: {
-            type: 'inventoryprocesscode'
+            type: 'inventorybufferedprocesscode'
         }
     }
 

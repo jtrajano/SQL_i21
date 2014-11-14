@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -127,6 +128,68 @@ namespace iRely.Inventory.Model
         public int? intProductLineId { get; set; }
         public string strMarketValuation { get; set; }
 
+        private string _manufacturer;
+        [NotMapped]
+        public string strManufacturer
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_manufacturer))
+                    if (tblICManufacturer != null)
+                        return tblICManufacturer.strManufacturer;
+                    else
+                        return null;
+                else
+                    return _manufacturer;
+            }
+            set
+            {
+                _manufacturer = value;
+            }
+        }
+        private string _tracking;
+        [NotMapped]
+        public string strTracking
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_tracking))
+                    if (tblICCategory != null)
+                        return tblICCategory.strCategoryCode;
+                    else
+                        return null;
+                else
+                    return _tracking;
+            }
+            set
+            {
+                _tracking = value;
+            }
+        }
+        private string _brand;
+        [NotMapped]
+        public string strBrand
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_brand))
+                    if (tblICBrand != null)
+                        return tblICBrand.strBrandCode;
+                    else
+                        return null;
+                else
+                    return _brand;
+            }
+            set
+            {
+                _brand = value;
+            }
+        }
+
+        public tblICManufacturer tblICManufacturer { get; set; }
+        public tblICBrand tblICBrand { get; set; }
+        public tblICCategory tblICCategory { get; set; }
+
         public ICollection<tblICItemUOM> tblICItemUOMs { get; set; }
         public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
 
@@ -152,13 +215,13 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemAssembly> tblICItemAssemblies { get; set; }
         public ICollection<tblICItemAssembly> AssemblyItems { get; set; }
 
-        public tblICCommodity tblICCommodity { get; set; }
-        public tblICCommodityAttribute CommodityOrigin { get; set; }
-        public tblICCommodityAttribute CommodityProductType { get; set; }
-        public tblICCommodityAttribute CommodityRegion { get; set; }
-        public tblICCommodityAttribute CommoditySeason { get; set; }
-        public tblICCommodityAttribute CommodityClassVariety { get; set; }
-        public tblICCommodityAttribute CommodityProductLine { get; set; }
+        //public tblICCommodity tblICCommodity { get; set; }
+        //public tblICCommodityAttribute CommodityOrigin { get; set; }
+        //public tblICCommodityAttribute CommodityProductType { get; set; }
+        //public tblICCommodityAttribute CommodityRegion { get; set; }
+        //public tblICCommodityAttribute CommoditySeason { get; set; }
+        //public tblICCommodityAttribute CommodityClassVariety { get; set; }
+        //public tblICCommodityAttribute CommodityProductLine { get; set; }
         
     }
 
@@ -169,8 +232,11 @@ namespace iRely.Inventory.Model
         public string strItemNo { get; set; }
         public string strType { get; set; }
         public string strDescription { get; set; }
+        public string strManufacturer { get; set; }
+        public string strBrand { get; set; }
         public string strStatus { get; set; }
         public string strModelNo { get; set; }
+        public string strTracking { get; set; }
         public string strLotTracking { get; set; }
     }
 }

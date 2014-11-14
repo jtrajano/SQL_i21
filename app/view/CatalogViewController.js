@@ -39,6 +39,9 @@ Ext.define('Inventory.view.CatalogViewController', {
 
             var callback = function(store, node, records, successful) {
                 me.catalogStore.un('load', callback);
+
+                var rootNode = me.catalogStore.getRootNode();
+                rootNode.on('append', me.onTreeNodeAppend);
             };
 
             me.catalogStore.on('load', callback);
@@ -47,6 +50,13 @@ Ext.define('Inventory.view.CatalogViewController', {
             var grdCatalog = win.down('#grdCatalog');
             grdCatalog.store = null;
             grdCatalog.bindStore(me.catalogStore);
+        }
+    },
+
+    onTreeNodeAppend : function(nodeinterface, node, index) {
+        if (node) {
+            node.data.leaf = node.data.ysnLeaf;
+            node.iconCls = 'small-folder';
         }
     },
 
@@ -148,6 +158,9 @@ Ext.define('Inventory.view.CatalogViewController', {
     onDestroyCatalogScreen: function(win, eOpts) {
         var editController = this.getController();
         var editCatalog = editController.catalog;
+
+        if (!editCatalog) return;
+
         var win = eOpts.window;
         var grdCatalog = win.down('#grdCatalog');
         var action = eOpts.action;

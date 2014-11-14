@@ -35,5 +35,13 @@ Ext.define('i21.controller.Inventory', {
 
     constructor: function () {
         this.superclass.constructor.call(this);
+    },
+
+    init: function() {
+        Ext.Ajax.request({
+            timeout: 120000,
+            url: '../Inventory/api/Item/GetEmpty',
+            method: 'GET'
+        });
     }
 });

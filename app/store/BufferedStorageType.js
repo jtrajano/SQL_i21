@@ -17,6 +17,8 @@ Ext.define('Inventory.store.BufferedStorageType', {
             storeId: 'BufferedStorageType',
             pageSize: 50,
             batchActions: true,
+            remoteFilter: true,
+            remoteSort: true,
             proxy: {
                 type: 'rest',
                 api: {

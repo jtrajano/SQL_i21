@@ -10,6 +10,10 @@ namespace iRely.Inventory.Model
             // Primary Key
             this.HasKey(t => t.intCatalogId);
 
+            // Properties
+            this.Property(t => t.intCatalogId)
+                .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity);
+
             // Table & Column Mappings
             this.ToTable("tblICCatalog");
             this.Property(t => t.intCatalogId).HasColumnName("intCatalogId");
@@ -18,6 +22,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strCatalogName).HasColumnName("strCatalogName");
             this.Property(t => t.strDescription).HasColumnName("strDescription");
             this.Property(t => t.ysnLeaf).HasColumnName("ysnLeaf");
+
+            this.HasOptional(p => p.ParentCatalog)
+                .WithMany(p => p.children)
+                .HasForeignKey(p => p.intParentCatalogId);
         }
     }
 }

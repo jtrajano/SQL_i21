@@ -15,8 +15,8 @@ namespace iRely.Inventory.Model
         public int intItemId { get; set; }
         public int? intLocationId { get; set; }
         public string strPromotionType { get; set; }
-        public DateTime dtmBeginDate { get; set; }
-        public DateTime dtmEndDate { get; set; }
+        public DateTime? dtmBeginDate { get; set; }
+        public DateTime? dtmEndDate { get; set; }
         public int? intUnitMeasureId { get; set; }
         public double dblUnit { get; set; }
         public string strDiscountBy { get; set; }

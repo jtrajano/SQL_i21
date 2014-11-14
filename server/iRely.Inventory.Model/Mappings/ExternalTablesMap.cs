@@ -181,4 +181,22 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class tblSTPromotionSalesListMap : EntityTypeConfiguration<tblSTPromotionSalesList>
+    {
+        public tblSTPromotionSalesListMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intPromoSalesListId);
+
+            // Table & Column Mappings
+            this.ToTable("tblSTPromotionSalesList");
+            this.Property(t => t.dblPromoPrice).HasColumnName("dblPromoPrice");
+            this.Property(t => t.intPromoSalesListId).HasColumnName("intPromoSalesListId");
+            this.Property(t => t.intPromoUnits).HasColumnName("intPromoUnits");
+            this.Property(t => t.intPromoCode).HasColumnName("intPromoCode");
+            this.Property(t => t.strDescription).HasColumnName("strDescription");
+            this.Property(t => t.strPromoType).HasColumnName("strPromoType");
+        }
+    }
+
 }

@@ -17,7 +17,1374 @@ Ext.define('Inventory.view.ItemViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.item',
 
-    requires: [
-        'Inventory.view.override.ItemViewController'
-    ]
+    config: {
+        searchConfig: {
+            title: 'Search Item',
+            type: 'Inventory.Item',
+            api: {
+                read: '../Inventory/api/Item/SearchItems'
+            },
+            columns: [
+                {dataIndex: 'intItemId', text: "Item Id", flex: 1, defaultSort: true, dataType: 'numeric', key: true, hidden: true},
+                {dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', minWidth: 150},
+                {dataIndex: 'strType', text: 'Type', flex: 1, dataType: 'string', minWidth: 150},
+                {dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string', minWidth: 250},
+                {dataIndex: 'strStatus', text: 'Status', flex: 1, dataType: 'string', minWidth: 150},
+                {dataIndex: 'strManufacturer', text: 'Manufacturer', flex: 1, dataType: 'string', minWidth: 150},
+                {dataIndex: 'strBrand', text: 'Brand', flex: 1, dataType: 'string', minWidth: 150},
+                {dataIndex: 'strModelNo', text: 'Model No', flex: 1, dataType: 'string', minWidth: 150},
+                {dataIndex: 'strTracking', text: 'Tracking', flex: 1, dataType: 'string', minWidth: 150},
+                {dataIndex: 'strLotTracking', text: 'Lot Tracking', flex: 1, dataType: 'string', minWidth: 150}
+            ]
+        },
+        binding: {
+            //-----------//
+            //Details Tab//
+            //-----------//
+            txtItemNo: '{current.strItemNo}',
+            txtDescription: '{current.strDescription}',
+            txtModelNo: '{current.strModelNo}',
+            cboType: {
+                value: '{current.strType}',
+                store: '{itemTypes}'
+            },
+            cboManufacturer: {
+                value: '{current.intManufacturerId}',
+                store: '{manufacturer}'
+            },
+            cboBrand: {
+                value: '{current.intBrandId}',
+                store: '{brand}'
+            },
+            cboStatus: {
+                value: '{current.strStatus}',
+                store: '{itemStatuses}'
+            },
+            cboLotTracking: {
+                value: '{current.strLotTracking}',
+                store: '{lotTrackings}'
+            },
+            cboTracking: {
+                value: '{current.intTrackingId}',
+                store: '{tracking}'
+            },
+
+            grdUnitOfMeasure: {
+                colDetailUnitMeasure: {
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        store: '{uomUnitMeasure}'
+                    }
+                },
+                colDetailUnitQty: 'dblUnitQty',
+                colDetailSellQty: 'dblSellQty',
+                colDetailWeight: 'dblWeight',
+                colDetailDescription: 'strDescription',
+                colDetailLength: 'dblLength',
+                colDetailWidth: 'dblWidth',
+                colDetailHeight: 'dblHeight',
+                colDetailVolume: 'dblVolume',
+                colDetailMaxQty: 'dblMaxQty'
+            },
+
+            //----------//
+            //Setup Tab//
+            //----------//
+
+            //------------------//
+            //Location Store Tab//
+            //------------------//
+            grdLocationStore: {
+                colLocationLocation: 'strLocationName',
+                colLocationPOSDescription: 'strDescription',
+                colLocationCategory: 'strCategory',
+                colLocationVendor: 'strVendorId',
+                colLocationCostingMethod: 'intCostingMethod',
+                colLocationUOM: 'strUnitMeasure'
+            },
+
+            //--------------//
+            //GL Account Tab//
+            //--------------//
+            grdGlAccounts: {
+                colGLAccountDescription: {
+                    dataIndex: 'strAccountDescription',
+                    editor: {
+                        store: '{accountDescriptions}'
+                    }
+                },
+                colGLAccountId: {
+                    dataIndex: 'strAccountId',
+                    editor: {
+                        store: '{glAccountId}'
+                    }
+                }
+            },
+
+            //---------//
+            //Sales Tab//
+            //---------//
+            cboPatronage: {
+                value: '{current.intPatronageCategoryId}',
+                store: '{patronage}'
+            },
+            cboTaxClass: {
+                value: '{current.intTaxClassId}',
+                store: '{taxClass}'
+            },
+            chkStockedItem: '{current.ysnStockedItem}',
+            chkDyedFuel: '{current.ysnDyedFuel}',
+            cboBarcodePrint: {
+                value: '{current.strBarcodePrint}',
+                store: '{barcodePrints}'
+            },
+            chkMsdsRequired: '{current.ysnMSDSRequired}',
+            txtEpaNumber: '{current.strEPANumber}',
+            chkInboundTax: '{current.ysnInboundTax}',
+            chkOutboundTax: '{current.ysnOutboundTax}',
+            chkRestrictedChemical: '{current.ysnRestrictedChemical}',
+            chkTankRequired: '{current.ysnTankRequired}',
+            chkAvailableForTm: '{current.ysnAvailableTM}',
+            txtDefaultPercentFull: '{current.dblDefaultFull}',
+            cboFuelInspectionFee: {
+                value: '{current.strFuelInspectFee}',
+                store: '{fuelInspectFees}'
+            },
+            cboRinRequired: {
+                value: '{current.strRINRequired}',
+                store: '{rinRequires}'
+            },
+            cboFuelCategory: {
+                value: '{current.intRINFuelTypeId}',
+                store: '{fuelCategory}'
+            },
+            txtPercentDenaturant: '{current.dblDenaturantPercent}',
+            chkTonnageTax: '{current.ysnTonnageTax}',
+            chkLoadTracking: '{current.ysnLoadTracking}',
+            txtMixOrder: '{current.dblMixOrder}',
+            chkHandAddIngredients: '{current.ysnHandAddIngredient}',
+            cboMedicationTag: {
+                value: '{current.intMedicationTag}',
+                store: '{medicationTag}'
+            },
+            cboIngredientTag: {
+                value: '{current.intIngredientTag}',
+                store: '{ingredientTag}'
+            },
+            txtVolumeRebateGroup: '{current.strVolumeRebateGroup}',
+            cboPhysicalItem: {
+                value: '{current.intPhysicalItem}',
+                store: '{physicalItem}'
+            },
+            chkExtendOnPickTicket: '{current.ysnExtendPickTicket}',
+            chkExportEdi: '{current.ysnExportEDI}',
+            chkHazardMaterial: '{current.ysnHazardMaterial}',
+            chkMaterialFee: '{current.ysnMaterialFee}',
+
+            //-------//
+            //POS Tab//
+            //-------//
+            txtOrderUpcNo: '{current.strUPCNo}',
+            cboCaseUom: {
+                value: '{current.intCaseUOM}',
+                store: '{posUom}'
+            },
+            txtNacsCategory: '{current.strNACSCategory}',
+            cboWicCode: {
+                value: '{current.strWICCode}',
+                store: '{wicCodes}'
+            },
+            cboAgCategory: {
+                value: '{current.intAGCategory}',
+                store: '{agCategory}'
+            },
+            chkReceiptCommentReq: '{current.ysnReceiptCommentRequired}',
+            cboCountCode: {
+                value: '{current.strCountCode}',
+                store: '{countCodes}'
+            },
+            chkLandedCost: '{current.ysnLandedCost}',
+            txtLeadTime: '{current.strLeadTime}',
+            chkTaxable: '{current.ysnTaxable}',
+            txtKeywords: '{current.strKeywords}',
+            txtCaseQty: '{current.dblCaseQty}',
+            dtmDateShip: '{current.dtmDateShip}',
+            txtTaxExempt: '{current.dblTaxExempt}',
+            chkDropShip: '{current.ysnDropShip}',
+            chkCommissionable: '{current.ysnCommisionable}',
+            chkSpecialCommission: '{current.ysnSpecialCommission}',
+
+            grdCategory: {
+                colPOSCategoryName: {
+                    dataIndex: 'strCategoryCode',
+                    editor: {
+                        store: '{posCategory}'
+                    }
+                }
+            },
+
+            grdServiceLevelAgreement: {
+                colPOSSLAContract: 'strSLAContract',
+                colPOSSLAPrice: 'dblContractPrice',
+                colPOSSLAWarranty: 'ysnServiceWarranty'
+            },
+
+
+            //-----------------//
+            //Manufacturing Tab//
+            //-----------------//
+            chkRequireApproval: '{current.ysnRequireCustomerApproval}',
+            cboAssociatedRecipe: '{current.intRecipeId}',
+            chkSanitizationRequired: '{current.ysnSanitationRequired}',
+            txtLifeTime: '{current.intLifeTime}',
+            cboLifetimeType: {
+                value: '{current.strLifeTimeType}',
+                store: '{lifeTimeTypes}'
+            },
+            txtReceiveLife: '{current.intReceiveLife}',
+            txtGTIN: '{current.strGTIN}',
+            cboRotationType: {
+                value: '{current.strRotationType}',
+                store: '{rotationTypes}'
+            },
+            cboNFMC: {
+                value: '{current.intNMFCId}',
+                store: '{materialNMFC}'
+            },
+            chkStrictFIFO: '{current.ysnStrictFIFO}',
+            txtHeight: '{current.dblHeight}',
+            txtWidth: '{current.dblWidth}',
+            txtDepth: '{current.dblDepth}',
+            cboDimensionUOM: {
+                value: '{current.intDimensionUOMId}',
+                store: '{mfgDimensionUom}'
+            },
+            cboWeightUOM: {
+                value: '{current.intWeightUOMId}',
+                store: '{mfgWeightUom}'
+            },
+            txtWeight: '{current.dblWeight}',
+            txtMaterialPack: '{current.intMaterialPackTypeId}',
+            txtMaterialSizeCode: '{current.strMaterialSizeCode}',
+            txtInnerUnits: '{current.intInnerUnits}',
+            txtLayersPerPallet: '{current.intLayerPerPallet}',
+            txtUnitsPerLayer: '{current.intUnitPerLayer}',
+            txtStandardPalletRatio: '{current.dblStandardPalletRatio}',
+            txtMask1: '{current.strMask1}',
+            txtMask2: '{current.strMask2}',
+            txtMask3: '{current.strMask3}',
+
+            //colManufacturingUOM: 'intUnitMeasureId',
+
+            //-------//
+            //UPC Tab//
+            //-------//
+            grdUPC: {
+                colUPCUnitMeasure: {
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        store: '{upcUom}'
+                    }
+                },
+                colUPCUnitQty: 'dblUnitQty',
+                colUPCCode: 'strUPCCode'
+            },
+
+            //-------------------//
+            //Cross Reference Tab//
+            //-------------------//
+            grdCustomerXref: {
+                colCustomerXrefLocation: {
+                    dataIndex: 'strLocationName',
+                    editor: {
+                        store: '{custXrefLocation}'
+                    }
+                },
+                colCustomerXrefCustomer: {
+                    dataIndex: 'strCustomerNumber',
+                    editor: {
+                        store: '{custXrefCustomer}'
+                    }
+                },
+                colCustomerXrefProduct: 'strCustomerProduct',
+                colCustomerXrefDescription: 'strProductDescription',
+                colCustomerXrefPickTicketNotes: 'strPickTicketNotes'
+            },
+
+            grdVendorXref: {
+                colVendorXrefLocation: {
+                    dataIndex: 'strLocationName',
+                    editor: {
+                        store: '{vendorXrefLocation}'
+                    }
+                },
+                colVendorXrefVendor: {
+                    dataIndex: 'strVendorId',
+                    editor: {
+                        store: '{vendorXrefVendor}'
+                    }
+                },
+                colVendorXrefProduct: 'strVendorProduct',
+                colVendorXrefDescription: 'strProductDescription',
+                colVendorXrefConversionFactor: 'dblConversionFactor',
+                colVendorXrefUnitMeasure: {
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        store: '{vendorXrefUom}'
+                    }
+                }
+            },
+
+            //-----------------//
+            //Contract Item Tab//
+            //-----------------//
+            grdContractItem: {
+                colContractLocation: {
+                    dataIndex: 'strLocationName',
+                    editor: {
+                        store: '{contractLocation}'
+                    }
+                },
+                colContractItemName: 'strContractItemName',
+                colContractOrigin: {
+                    dataIndex: 'strCountry',
+                    editor: {
+                        store: '{origin}'
+                    }
+                },
+                colContractGrade: 'strGrade',
+                colContractGarden: 'strGarden',
+                colContractGradeType: 'strGradeType',
+                colContractYield: 'dblYieldPercent',
+                colContractTolerance: 'dblTolerancePercent',
+                colContractFranchise: 'dblFranchisePercent'
+            },
+
+            grdDocumentAssociation: {
+                colDocument:  {
+                    dataIndex: 'strDocumentName',
+                    editor: {
+                        store: '{document}'
+                    }
+                }
+            },
+
+            grdCertification: {
+                colCertification:  {
+                    dataIndex: 'strCertificationName',
+                    editor: {
+                        store: '{certification}'
+                    }
+                }
+            },
+
+            //-----------//
+            //Pricing Tab//
+            //-----------//
+            grdPricing: {
+                colPricingLocation: 'strLocationName',
+                colPricingSalePrice: 'dblSalePrice',
+                colPricingRetailPrice: 'dblRetailPrice',
+                colPricingWholesalePrice: 'dblWholesalePrice',
+                colPricingLargeVolumePrice: 'dblLargeVolumePrice',
+                colPricingMSRP: 'dblMSRPPrice',
+                colPricingMethod: 'strPricingMethod',
+                colPricingLastCost: 'dblLastCost',
+                colPricingStandardCost: 'dblStandardCost',
+                colPricingAverageCost: 'dblMovingAverageCost',
+                colPricingEOMCost: 'dblEndMonthCost',
+                colPricingActive: 'ysnActive'
+            },
+
+            grdPricingLevel: {
+                colPricingLevelLocation: {
+                    dataIndex: 'strLocationName',
+                    editor: {
+                        store: '{pricingLevelLocation}'
+                    }
+                },
+                colPricingLevelPriceLevel: 'strPriceLevel',
+                colPricingLevelUOM: {
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        store: '{pricingLevelUOM}'
+                    }
+                },
+                colPricingLevelUnits: 'dblUnit',
+                colPricingLevelMin: 'dblMin',
+                colPricingLevelMax: 'dblMax',
+                colPricingLevelMethod: {
+                    dataIndex: 'strPricingMethod',
+                    editor: {
+                        store: '{pricingMethods}'
+                    }
+                },
+                colPricingLevelCommissionOn: {
+                    dataIndex: 'strCommissionOn',
+                    editor: {
+                        store: '{commissionsOn}'
+                    }
+                },
+                colPricingLevelCommissionRate: 'dblCommissionRate',
+                colPricingLevelAmount: '',
+                colPricingLevelUnitPrice: 'dblUnitPrice',
+                colPricingLevelActive: 'ysnActive'
+            },
+
+            grdSpecialPricing: {
+                colSpecialPricingLocation: {
+                    dataIndex: 'strLocationName',
+                    editor: {
+                        store: '{specialPricingLocation}'
+                    }
+                },
+                colSpecialPricingPromotionType: {
+                    dataIndex: 'strPromotionType',
+                    editor: {
+                        store: '{promotionTypes}'
+                    }
+                },
+                colSpecialPricingBeginDate: 'dtmBeginDate',
+                colSpecialPricingEndDate: 'dtmEndDate',
+                colSpecialPricingUnit: {
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        store: '{specialPricingUOM}'
+                    }
+                },
+                colSpecialPricingQty: 'dblUnit',
+                colSpecialPricingDiscountBy: {
+                    dataIndex: 'strDiscountBy',
+                    editor: {
+                        store: '{discountsBy}'
+                    }
+                },
+                colSpecialPricingDiscountRate: 'dblDiscount',
+                colSpecialPricingUnitPrice: 'dblUnitAfterDiscount',
+                colSpecialPricingAccumQty: 'dblAccumulatedQty',
+                colSpecialPricingAccumAmount: 'dblAccumulatedAmount'
+            },
+
+            //---------//
+            //Stock Tab//
+            //---------//
+            grdStock: {
+                colStockLocation: {
+                    dataIndex: 'strLocationName',
+                    editor: {
+                        store: '{stockLocation}'
+                    }
+                },
+                colStockSubLocation: 'strWarehouse',
+                colStockUOM: {
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        store: '{stockUOM}'
+                    }
+                },
+                colStockOnHand: 'dblUnitOnHand',
+                colStockCommitted: 'dblOrderCommitted',
+                colStockOnOrder: 'dblOnOrder'
+            },
+
+            //-------------//
+            //Commodity Tab//
+            //-------------//
+            cboCommodity: {
+                value: '{current.intCommodityId}',
+                store: '{commodity}'
+            },
+            txtGaShrinkFactor: '{current.dblGAShrinkFactor}',
+            cboOrigin: {
+                value: '{current.intOriginId}',
+                store: '{originAttribute}'
+            },
+            cboProductType: {
+                value: '{current.intProductTypeId}',
+                store: '{productTypeAttribute}'
+            },
+            cboRegion: {
+                value: '{current.intRegionId}',
+                store: '{regionAttribute}'
+            },
+            cboSeason: {
+                value: '{current.intSeasonId}',
+                store: '{seasonAttribute}'
+            },
+            cboClass: {
+                value: '{current.intClassVarietyId}',
+                store: '{classAttribute}'
+            },
+            cboProductLine: {
+                value: '{current.intProductLineId}',
+                store: '{productLineAttribute}'
+            },
+            cboMarketValuation: {
+                value: '{current.strMarketValuation}',
+                store: '{marketValuations}'
+            },
+
+            //------------//
+            //Assembly Tab//
+            //------------//
+            grdAssembly: {
+                colAssemblyComponent: {
+                    dataIndex: 'strItemNo',
+                    editor: {
+                        store: '{assemblyItem}'
+                    }
+                },
+                colAssemblyQuantity: 'dblQuantity',
+//            colAssemblyStock: '',
+                colAssemblyDescription: 'strDescription',
+                colAssemblyUOM: {
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        store: '{assemblyUOM}'
+                    }
+                },
+                colAssemblyUnit: 'dblUnit',
+                colAssemblyCost: 'dblCost'
+//            colAssemblyTotal: ''
+            },
+
+            //------------------//
+            //Bundle Details Tab//
+            //------------------//
+            grdBundle: {
+                colBundleItem: {
+                    dataIndex: 'strItemNo',
+                    editor: {
+                        store: '{bundleItem}'
+                    }
+                },
+                colBundleQuantity: 'dblQuantity',
+//            colBundleStock: '',
+                colBundleDescription: 'strDescription',
+                colBundleUOM: {
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        store: '{bundleUOM}'
+                    }
+                },
+                colBundleUnit: 'dblUnit',
+                colBundlePrice: 'dblPrice'
+//            colBundleSubTotal: ''
+            },
+
+            //---------------//
+            //Kit Details Tab//
+            //---------------//
+            grdKit: {
+                colKitComponent: 'strComponent',
+                colKitInputType: {
+                    dataIndex: 'strInputType',
+                    editor: {
+                        store: '{inputTypes}'
+                    }
+                }
+            },
+
+            grdKitDetails: {
+                colKitItem: {
+                    dataIndex: 'strItemNo',
+                    editor: {
+                        store: '{kitItem}'
+                    }
+                },
+                colKitItemDescription: '',
+                colKitItemQuantity: '',
+                colKitItemUOM: {
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        store: '{kitUOM}'
+                    }
+                },
+                colKitItemPrice: '',
+                colKitItemSelected: ''
+            },
+            //-------------------//
+            //Factory & Lines Tab//
+            //-------------------//
+
+
+            //---------//
+            //Notes Tab//
+            //---------//
+            grdNotes: {
+                colNoteLocation: {
+                    dataIndex: 'strLocationName',
+                    editor: {
+                        store: '{noteLocation}'
+                    }
+                },
+                colNoteCommentType: {
+                    dataIndex: 'strCommentType',
+                    editor: {
+                        store: '{commentTypes}'
+                    }
+                },
+                colNoteComment: 'strComments'
+            }
+
+        }
+    },
+
+    setupContext : function(options){
+        var me = this,
+            win = options.window,
+            store = Ext.create('Inventory.store.Item', { pageSize: 1 });
+
+        var grdUOM = win.down('#grdUnitOfMeasure'),
+            grdLocationStore = win.down('#grdLocationStore'),
+            grdCategory = win.down('#grdCategory'),
+            grdGlAccounts = win.down('#grdGlAccounts'),
+            grdUPC = win.down('#grdUPC'),
+            grdVendorXref = win.down('#grdVendorXref'),
+            grdCustomerXref = win.down('#grdCustomerXref'),
+            grdContractItem = win.down('#grdContractItem'),
+            grdDocumentAssociation = win.down('#grdDocumentAssociation'),
+            grdCertification = win.down('#grdCertification'),
+            grdStock = win.down('#grdStock'),
+
+            grdPricing = win.down('#grdPricing'),
+            grdPricingLevel = win.down('#grdPricingLevel'),
+            grdSpecialPricing = win.down('#grdSpecialPricing'),
+
+            grdAssembly = win.down('#grdAssembly'),
+            grdBundle = win.down('#grdBundle'),
+            grdKit = win.down('#grdKit'),
+            grdKitDetails = win.down('#grdKitDetails'),
+
+            grdNotes = win.down('#grdNotes');
+
+        win.context = Ext.create('iRely.mvvm.Engine', {
+            window : win,
+            store  : store,
+            createRecord : me.createRecord,
+            binding: me.config.binding,
+            attachment: Ext.create('iRely.mvvm.attachment.Manager', {
+                type: 'Inventory.Item',
+                window: win
+            }),
+            details: [
+                {
+                    key: 'tblICItemUOMs',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdUOM,
+                        deleteButton : grdUOM.down('#btnDeleteLocation')
+                    })
+                },
+                {
+                    key: 'tblICItemLocations',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdLocationStore,
+                        deleteButton : grdLocationStore.down('#btnDeleteLocation'),
+                        position: 'none'
+                    })
+                },
+                {
+                    key: 'tblICItemUPCs',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdUPC,
+                        deleteButton : win.down('#btnDeleteUPC')
+                    })
+                },
+                {
+                    key: 'tblICItemVendorXrefs',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdVendorXref,
+                        deleteButton : grdVendorXref.down('#btnDeleteVendorXref')
+                    })
+                },
+                {
+                    key: 'tblICItemCustomerXrefs',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdCustomerXref,
+                        deleteButton : grdCustomerXref.down('#btnDeleteCustomerXref')
+                    })
+                },
+                {
+                    key: 'tblICItemContracts',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdContractItem,
+                        deleteButton : grdContractItem.down('#btnDeleteContractItem')
+                    }),
+                    details: [
+                        {
+                            key: 'tblICItemContractDocuments',
+                            component: Ext.create('iRely.mvvm.grid.Manager', {
+                                grid: grdDocumentAssociation,
+                                deleteButton : grdDocumentAssociation.down('#btnDeleteDocumentAssociation')
+                            })
+                        }
+                    ]
+                },
+                {
+                    key: 'tblICItemCertifications',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdCertification,
+                        deleteButton : grdCertification.down('#btnDeleteCertification')
+                    })
+                },
+                {
+                    key: 'tblICItemPOSCategories',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdCategory,
+                        deleteButton : win.down('#btnDeleteCategories')
+                    })
+                },
+                {
+                    key: 'tblICItemPOSSLAs',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: win.down('#grdServiceLevelAgreement'),
+                        deleteButton : win.down('#btnDeleteSLA')
+                    })
+                },
+                {
+                    key: 'tblICItemAccounts',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdGlAccounts,
+                        deleteButton : grdGlAccounts.down('#btnDeleteGlAccounts')
+                    })
+                },
+                {
+                    key: 'tblICItemStocks',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdStock,
+                        deleteButton : grdStock.down('#btnDeleteStock')
+                    })
+                },
+                {
+                    key: 'tblICItemNotes',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdNotes,
+                        deleteButton : grdNotes.down('#btnDeleteNotes')
+                    })
+                },
+                {
+                    key: 'tblICItemPricings',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdPricing,
+                        deleteButton : grdPricing.down('#btnDeletePricing'),
+                        position: 'none'
+                    })
+                },
+                {
+                    key: 'tblICItemPricingLevels',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdPricingLevel,
+                        deleteButton : grdPricingLevel.down('#btnDeletePricingLevel')
+                    })
+                },
+                {
+                    key: 'tblICItemSpecialPricings',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdSpecialPricing,
+                        deleteButton : grdSpecialPricing.down('#btnDeleteSpecialPricing')
+                    })
+                },
+                {
+                    key: 'tblICItemAssemblies',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdAssembly,
+                        deleteButton : grdAssembly.down('#btnDeleteAssembly')
+                    })
+                },
+                {
+                    key: 'tblICItemBundles',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdBundle,
+                        deleteButton : grdBundle.down('#btnDeleteBundle')
+                    })
+                },
+                {
+                    key: 'tblICItemKits',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdKit,
+                        deleteButton : grdKit.down('#btnDeleteKit')
+                    }),
+                    details: [
+                        {
+                            key: 'tblICItemKitDetails',
+                            component: Ext.create('iRely.mvvm.grid.Manager', {
+                                grid: grdKitDetails,
+                                deleteButton : grdKitDetails.down('#btnDeleteKitDetail')
+                            })
+                        }
+                    ]
+                }
+            ]
+        });
+
+        me.subscribeLocationEvents(grdLocationStore, me);
+
+
+        var btnAddPricing = grdPricing.down('#btnAddPricing');
+        btnAddPricing.on('click', me.onAddPricingClick);
+        var btnEditPricing = grdPricing.down('#btnEditPricing');
+        btnEditPricing.on('click', me.onEditPricingClick);
+
+        return win.context;
+    },
+
+    show : function(config) {
+        "use strict";
+
+        var me = this,
+            win = this.getView();
+
+        if (config) {
+            win.show();
+
+            var context = me.setupContext( {window : win} );
+
+            if (config.action === 'new') {
+                context.data.addRecord();
+            } else {
+                if (config.id) {
+                    config.filters = [{
+                        column: 'intItemId',
+                        value: config.id
+                    }];
+                }
+                context.data.load({
+                    filters: config.filters
+                });
+            }
+        }
+    },
+
+    // <editor-fold desc="Details Tab Methods and Event Handlers">
+
+    onUOMUnitMeasureSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepDetailUOM');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colDetailUnitMeasure')
+        {
+            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
+        }
+    },
+
+    // </editor-fold>
+
+    // <editor-fold desc="Location Tab Methods and Event Handlers">
+
+    subscribeLocationEvents: function (grid, scope) {
+        var me = scope;
+        var btnAddLocation = grid.down('#btnAddLocation');
+        if (btnAddLocation) btnAddLocation.on('click', me.onAddLocationClick);
+        var btnEditLocation = grid.down('#btnEditLocation');
+        if (btnEditLocation) btnEditLocation.on('click', me.onEditLocationClick);
+
+        var colLocationCostingMethod = grid.columns[4];
+        if (colLocationCostingMethod) colLocationCostingMethod.renderer = me.CostingMethodRenderer;
+    },
+
+    onAddLocationClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var me = win.controller;
+        me.openItemLocationScreen('new', win);
+    },
+
+    onEditLocationClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var me = win.controller;
+        me.openItemLocationScreen('edit', win);
+    },
+
+    openItemLocationScreen: function (action, window) {
+        var win = window;
+        var me = win.controller;
+        var screenName = 'Inventory.view.ItemLocation';
+
+        Ext.require([
+            screenName,
+                screenName + 'ViewModel',
+                screenName + 'ViewController'
+        ], function() {
+            var screen = screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
+            var view = Ext.create(screenName, { controller: screen.toLowerCase(), viewModel: screen.toLowerCase() });
+            view.on('destroy', me.onDestroyItemLocationScreen, me, { window: win });
+
+            var controller = view.getController();
+            var current = win.getViewModel().data.current;
+            controller.show({ id: current.get('intItemId'), action: action });
+        });
+    },
+
+    onDestroyItemLocationScreen: function(win, eOpts) {
+        var me = eOpts.window.getController();
+        var win = eOpts.window;
+        var grdLocation = win.down('#grdLocationStore');
+
+        grdLocation.store.reload();
+    },
+
+    CostingMethodRenderer: function (value, metadata, record) {
+        var intMethod = record.get('intCostingMethod');
+        var costingMethod = '';
+        switch (intMethod) {
+            case 1:
+                costingMethod = 'AVG';
+                break;
+            case 2:
+                costingMethod = 'FIFO';
+                break;
+            case 3:
+                costingMethod = 'LIFO';
+                break;
+        }
+        return costingMethod;
+    },
+
+    // </editor-fold>
+
+    // <editor-fold desc="GL Accounts Tab Methods and Event Handlers">
+
+    onGLAccountSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepAccount');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colGLAccountId')
+        {
+            current.set('intAccountId', records[0].get('intAccountId'));
+        }
+    },
+
+    // </editor-fold>
+
+    // <editor-fold desc="Point Of Sale Tab Methods and Event Handlers">
+
+    onPOSCategorySelect: function(combo, records, eOpts) {
+    if (records.length <= 0)
+        return;
+
+    var grid = combo.up('grid');
+    var plugin = grid.getPlugin('cepPOSCategory');
+    var current = plugin.getActiveRecord();
+
+    if (combo.column.itemId === 'colPOSCategoryName')
+    {
+        current.set('intCategoryId', records[0].get('intCategoryId'));
+    }
+},
+
+    // </editor-fold>
+
+    // <editor-fold desc="UPC Tab Methods and Event Handlers">
+
+    onUpcUOMSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepUPC');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colUPCUnitMeasure')
+        {
+            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
+        }
+    },
+
+    // </editor-fold>
+
+    // <editor-fold desc="Cross Reference Tab Methods and Event Handlers">
+
+    onCustomerXrefSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepCustomerXref');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colCustomerXrefLocation')
+        {
+            current.set('intLocationId', records[0].get('intCompanyLocationId'));
+        }
+        else if (combo.column.itemId === 'colCustomerXrefCustomer') {
+            current.set('intCustomerId', records[0].get('intCustomerId'));
+        }
+    },
+
+    onVendorXrefSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepVendorXref');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colVendorXrefLocation'){
+            current.set('intLocationId', records[0].get('intCompanyLocationId'));
+        }
+        else if (combo.column.itemId === 'colVendorXrefVendor') {
+            current.set('intVendorId', records[0].get('intVendorId'));
+        }
+        else if (combo.column.itemId === 'colVendorXrefUnitMeasure') {
+            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
+        }
+    },
+
+    // </editor-fold>
+
+    // <editor-fold desc="Contract Item Tab Methods and Event Handlers">
+
+    onContractItemSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepContractItem');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colContractLocation'){
+            current.set('intLocationId', records[0].get('intCompanyLocationId'));
+        }
+        else if (combo.column.itemId === 'colContractOrigin') {
+            current.set('intCountryId', records[0].get('intCountryID'));
+        }
+    },
+
+    onDocumentSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepDocument');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colDocument'){
+            current.set('intDocumentId', records[0].get('intDocumentId'));
+        }
+    },
+
+    onCertificationSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepCertification');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colCertification'){
+            current.set('intCertificationId', records[0].get('intCertificationId'));
+        }
+    },
+
+    // </editor-fold>
+
+    // <editor-fold desc="Pricing Tab Methods and Event Handlers">
+
+    onPricingLevelSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepPricingLevel');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colPricingLevelLocation'){
+            current.set('intLocationId', records[0].get('intCompanyLocationId'));
+        }
+        else if (combo.column.itemId === 'colPricingLevelUOM') {
+            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
+        }
+    },
+
+    onSpecialPricingSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepSpecialPricing');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colSpecialPricingLocation'){
+            current.set('intLocationId', records[0].get('intCompanyLocationId'));
+        }
+        else if (combo.column.itemId === 'colSpecialPricingUnit') {
+            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
+        }
+    },
+
+    onAddPricingClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var me = win.controller;
+        me.openItemPricingScreen('new', win);
+    },
+
+    onEditPricingClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var me = win.controller;
+        me.openItemPricingScreen('edit', win);
+    },
+
+    openItemPricingScreen: function (action, window) {
+        var win = window;
+        var me = win.controller;
+        var screenName = 'Inventory.view.ItemPricing';
+
+        Ext.require([
+            screenName,
+                screenName + 'ViewModel',
+                screenName + 'ViewController'
+        ], function() {
+            var screen = screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
+            var view = Ext.create(screenName, { controller: screen.toLowerCase(), viewModel: screen.toLowerCase() });
+            view.on('destroy', me.onDestroyItemPricingScreen, me, { window: win });
+
+            var controller = view.getController();
+            var current = win.getViewModel().data.current;
+            controller.show({ id: current.get('intItemId'), action: action });
+        });
+    },
+
+    onDestroyItemPricingScreen: function(win, eOpts) {
+        var me = eOpts.window.getController();
+        var win = eOpts.window;
+        var grdPricing = win.down('#grdPricing');
+
+        grdPricing.store.reload();
+    },
+
+    // </editor-fold>
+
+    // <editor-fold desc="Stock Tab Methods and Event Handlers">
+
+    onStockSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepStock');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colStockLocation'){
+            current.set('intLocationId', records[0].get('intCompanyLocationId'));
+        }
+        else if (combo.column.itemId === 'colStockUOM') {
+            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
+        }
+    },
+
+    // </editor-fold>
+
+    // <editor-fold desc="Commodity Tab Methods and Event Handlers">
+
+    onCommoditySelect: function (combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var commodity = records[0];
+        var intCommodityId = commodity.get('intCommodityId');
+
+        var pnlCommodity = combo.up('panel');
+        var cboOrigin = pnlCommodity.down('#cboOrigin');
+        var cboProductType = pnlCommodity.down('#cboProductType');
+        var cboRegion = pnlCommodity.down('#cboRegion');
+        var cboSeason = pnlCommodity.down('#cboSeason');
+        var cboClass = pnlCommodity.down('#cboClass');
+        var cboProductLine = pnlCommodity.down('#cboProductLine');
+
+        var filter = [{ dataIndex: 'intCommodityId', value: intCommodityId, condition: 'eq' }];
+
+        cboOrigin.defaultFilters = filter;
+        cboProductType.defaultFilters = filter;
+        cboRegion.defaultFilters = filter;
+        cboSeason.defaultFilters = filter;
+        cboClass.defaultFilters = filter;
+        cboProductLine.defaultFilters = filter;
+    },
+
+    // </editor-fold>
+
+    // <editor-fold desc="Assembly Tab Methods and Event Handlers">
+
+    onAssemblySelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepAssembly');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colAssemblyComponent'){
+            current.set('intItemId', records[0].get('intItemId'));
+        }
+        else if (combo.column.itemId === 'colAssemblyUOM') {
+            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
+        }
+    },
+
+    // </editor-fold>
+
+    // <editor-fold desc="Bundle Details Tab Methods and Event Handlers">
+
+    onBundleSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepBundle');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colBundleItem'){
+            current.set('intItemId', records[0].get('intItemId'));
+        }
+        else if (combo.column.itemId === 'colBundleUOM') {
+            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
+        }
+    },
+
+    // </editor-fold>
+
+    // <editor-fold desc="Kit Details Tab Methods and Event Handlers">
+
+    onKitSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepKitDetail');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colKitItem'){
+            current.set('intItemId', records[0].get('intItemId'));
+        }
+        else if (combo.column.itemId === 'colKitItemUOM') {
+            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
+        }
+    },
+
+    // </editor-fold>
+
+    // <editor-fold desc="Kit Details Tab Methods and Event Handlers">
+
+    onNoteSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepNote');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colNoteLocation'){
+            current.set('intLocationId', records[0].get('intCompanyLocationId'));
+        }
+    },
+
+    // </editor-fold>
+
+    init: function(application) {
+        this.control({
+            "#cboDetailUnitMeasure": {
+                select: this.onUOMUnitMeasureSelect
+            },
+            "#cboGLAccountId": {
+                select: this.onGLAccountSelect
+            },
+            "#cboPOSCategoryId": {
+                select: this.onPOSCategorySelect
+            },
+            "#cboUpcUOM": {
+                select: this.onUpcUOMSelect
+            },
+            "#cboCustXrefLocation": {
+                select: this.onCustomerXrefSelect
+            },
+            "#cboCustXrefCustomer": {
+                select: this.onCustomerXrefSelect
+            },
+            "#cboVendorXrefLocation": {
+                select: this.onVendorXrefSelect
+            },
+            "#cboVendorXrefVendor": {
+                select: this.onVendorXrefSelect
+            },
+            "#cboVendorXrefUOM": {
+                select: this.onVendorXrefSelect
+            },
+            "#cboContractLocation": {
+                select: this.onContractItemSelect
+            },
+            "#cboContractOrigin": {
+                select: this.onContractItemSelect
+            },
+            "#cboDocumentId": {
+                select: this.onDocumentSelect
+            },
+            "#cboCertificationId": {
+                select: this.onCertificationSelect
+            },
+            "#cboPricingLevelLocation": {
+                select: this.onPricingLevelSelect
+            },
+//            "#cboPricingLevelLevel": {
+//                select: this.onPricingLevelSelect
+//            },
+            "#cboPricingLevelUOM": {
+                select: this.onPricingLevelSelect
+            },
+            "#cboPricingLevelMethod": {
+                select: this.onPricingLevelSelect
+            },
+            "#cboPricingLevelCommissionOn": {
+                select: this.onPricingLevelSelect
+            },
+            "#cboSpecialPricingLocation": {
+                select: this.onSpecialPricingSelect
+            },
+            "#cboSpecialPricingPromotionType": {
+                select: this.onSpecialPricingSelect
+            },
+            "#cboSpecialPricingUOM": {
+                select: this.onSpecialPricingSelect
+            },
+            "#cboSpecialPricingDiscountBy": {
+                select: this.onSpecialPricingSelect
+            },
+            "#cboStockLocation": {
+                select: this.onStockSelect
+            },
+            "#cboStockUOM": {
+                select: this.onStockSelect
+            },
+            "#cboCommodity": {
+                select: this.onCommoditySelect
+            },
+            "#cboAssemblyItem": {
+                select: this.onAssemblySelect
+            },
+            "#cboAssemblyUOM": {
+                select: this.onAssemblySelect
+            },
+            "#cboBundleItem": {
+                select: this.onBundleSelect
+            },
+            "#cboBundleUOM": {
+                select: this.onBundleSelect
+            },
+            "#cboKitDetailItem": {
+                select: this.onKitSelect
+            },
+            "#cboKitDetailUOM": {
+                select: this.onKitSelect
+            },
+            "#cboNoteLocation": {
+                select: this.onNoteSelect
+            }
+        });
+    }
 });

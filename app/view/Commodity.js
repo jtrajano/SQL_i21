@@ -438,7 +438,6 @@ Ext.define('Inventory.view.Commodity', {
                                                             },
                                                             {
                                                                 xtype: 'gridcombobox',
-                                                                flex: 1,
                                                                 columns: [
                                                                     {
                                                                         dataIndex: 'intStorageTypeId',
@@ -459,6 +458,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                         flex: 1
                                                                     }
                                                                 ],
+                                                                flex: 1,
                                                                 itemId: 'cboScaleAutoDistDefault',
                                                                 fieldLabel: 'Scale Auto Dist Default',
                                                                 labelWidth: 140,
@@ -772,6 +772,7 @@ Ext.define('Inventory.view.Commodity', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        hidden: true,
                                         layout: 'fit',
                                         title: 'Group',
                                         items: [

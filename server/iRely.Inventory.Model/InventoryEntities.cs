@@ -98,12 +98,10 @@ namespace iRely.Inventory.Model
         public DbSet<tblICCategoryVendor> tblICCategoryVendors { get; set; }
         public DbSet<tblICCertification> tblICCertifications { get; set; }
         public DbSet<tblICCertificationCommodity> tblICCertificationCommodities { get; set; }
-        public DbSet<tblICClass> tblICClasss { get; set; }
         public DbSet<tblICCommodity> tblICCommodities { get; set; }
         public DbSet<tblICCommodityGroup> tblICCommodityGroups { get; set; }
         public DbSet<tblICCommodityUnitMeasure> tblICCommodityUnitMeasures { get; set; }
         public DbSet<tblICDocument> tblICDocuments { get; set; }
-        public DbSet<tblICFamily> tblICFamilys { get; set; }
         public DbSet<tblICFuelType> tblICFuelTypes { get; set; }
         public DbSet<tblICItem> tblICItems { get; set; }
         public DbSet<tblICItemAccount> tblICItemAccounts { get; set; }
@@ -111,7 +109,7 @@ namespace iRely.Inventory.Model
         public DbSet<tblICItemContract> tblICItemContracts { get; set; }
         public DbSet<tblICItemContractDocument> tblICItemContractDocuments { get; set; }
         public DbSet<tblICItemCustomerXref> tblICItemCustomerXrefs { get; set; }
-        public DbSet<tblICItemLocation> tblICItemLocationStores { get; set; }
+        public DbSet<tblICItemLocation> tblICItemLocations { get; set; }
         public DbSet<tblICItemManufacturingUOM> tblICItemManufacturingUOMs { get; set; }
         public DbSet<tblICItemNote> tblICItemNotes { get; set; }
         public DbSet<tblICItemPOSCategory> tblICItemPOSCategorys { get; set; }
@@ -175,6 +173,7 @@ namespace iRely.Inventory.Model
         public DbSet<tblSTSubcategoryRegProd> tblSTSubcategoryRegProds { get; set; }
 
         public DbSet<tblGRStorageType> tblGRStorageTypes { get; set; }
+        public DbSet<tblSTPromotionSalesList> tblSTPromotionSalesLists { get; set; }
         
         protected override void OnModelCreating(DbModelBuilder modelBuilder) 
         {
@@ -186,12 +185,10 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICCategoryVendorMap());
             modelBuilder.Configurations.Add(new tblICCertificationMap());
             modelBuilder.Configurations.Add(new tblICCertificationCommodityMap());
-            modelBuilder.Configurations.Add(new tblICClassMap());
             modelBuilder.Configurations.Add(new tblICCommodityMap());
             modelBuilder.Configurations.Add(new tblICCommodityGroupMap());
             modelBuilder.Configurations.Add(new tblICCommodityUnitMeasureMap());
             modelBuilder.Configurations.Add(new tblICDocumentMap());
-            modelBuilder.Configurations.Add(new tblICFamilyMap());
             modelBuilder.Configurations.Add(new tblICFuelTypeMap());
             modelBuilder.Configurations.Add(new tblICItemMap());
             modelBuilder.Configurations.Add(new tblICItemAccountMap());
@@ -279,6 +276,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICCommoditySeasonMap());
 
             modelBuilder.Configurations.Add(new tblGRStorageTypeMap());
+            modelBuilder.Configurations.Add(new tblSTPromotionSalesListMap());
         }
     }
 }

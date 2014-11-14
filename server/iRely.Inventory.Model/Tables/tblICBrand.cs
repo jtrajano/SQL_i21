@@ -38,5 +38,6 @@ namespace iRely.Inventory.Model
         }
 
         public tblICManufacturer tblICManufacturer { get; set; }
+        public ICollection<tblICItem> tblICItems { get; set; }
     }
 }
