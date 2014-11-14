@@ -121,3 +121,4 @@
 :r "..\dbo\Stored Procedures\uspARImportCustomerContacts.sql"
 :r "..\dbo\Stored Procedures\uspARImportInvoice.sql"
 :r "..\dbo\Stored Procedures\uspARImportTaxAuthority.sql"
+:r "..\dbo\Stored Procedures\uspARImportTerm.sql"
