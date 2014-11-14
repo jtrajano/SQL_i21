@@ -61,7 +61,7 @@ BEGIN
 			   ,[ysnPaid]
 			   ,[strShipToAddress] --just for insertion of identity field from origin in format LTRIM(RTRIM(agivc_ivc_no)) + LTRIM(RTRIM(agivc_bill_to_cus))
 			   )
-			SELECT 
+			SELECT
 				agivc_ivc_no,--[strInvoiceOriginId]		
 				Cus.intCustomerId,--[intCustomerId]		
 				(CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),--[dtmDate]
@@ -88,7 +88,7 @@ BEGIN
 					WHEN agivc_type = 'D' 
 						THEN 'Debit' 
 					WHEN agivc_type = 'S' 
-						THEN 'Cash Sales'
+						THEN 'Cash Sale'
 					WHEN agivc_type = 'R' 
 						THEN 'Cash Refund' 
 					WHEN agivc_type = 'X' 
@@ -125,10 +125,10 @@ BEGIN
 				INV.intInvoiceId,
 				NULL,
 				agstm_itm_no,
+				NULL,
 				agstm_un,
 				agstm_un_prc,
-				agstm_sls ,
-				agstm_line_no
+				agstm_sls 
 			FROM agstmmst
 			INNER JOIN tblARInvoice INV ON INV.strShipToAddress  = LTRIM(RTRIM(agstm_ivc_no)) + LTRIM(RTRIM(agstm_bill_to_cus))
 				
