@@ -775,7 +775,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter1",
+                                                    "name": "filter139",
                                                     "designerId": "52f90830-2c84-4dba-9ab6-9ab530dad629",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -862,6 +862,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "dataIndex": "number",
                                                 "format": "0",
                                                 "itemId": "colDetailUnitQty",
@@ -878,6 +879,10 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldStyle": "colDetailSellQty",
+                                                        "hideTrigger": true
+                                                    },
                                                     "name": "MyNumberField2",
                                                     "designerId": "91994be8-c501-4180-97a2-45ec0d86ff21"
                                                 }
@@ -891,9 +896,10 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "dataIndex": "number",
                                                 "format": "0",
-                                                "itemId": "colDetail",
+                                                "itemId": "colDetailSellQty",
                                                 "text": "Sell Qty",
                                                 "width": 62
                                             },
@@ -907,6 +913,10 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true
+                                                    },
                                                     "name": "MyNumberField3",
                                                     "designerId": "8fd1742d-39b2-4fc4-ab01-4f188ee6bbc7"
                                                 }
@@ -920,6 +930,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "dataIndex": "number",
                                                 "format": "0",
                                                 "itemId": "colDetailWeight",
@@ -936,6 +947,10 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true
+                                                    },
                                                     "name": "MyNumberField4",
                                                     "designerId": "4a650125-f1ad-47f0-a139-9374331c227c"
                                                 }
@@ -977,6 +992,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "dataIndex": "number",
                                                 "format": "0",
                                                 "itemId": "colDetailLength",
@@ -993,6 +1009,10 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true
+                                                    },
                                                     "name": "MyNumberField5",
                                                     "designerId": "9676d399-27f8-4fbc-9689-082d81dcb9ce"
                                                 }
@@ -1006,6 +1026,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "dataIndex": "number",
                                                 "format": "0",
                                                 "itemId": "colDetailWidth",
@@ -1022,6 +1043,10 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true
+                                                    },
                                                     "name": "MyNumberField7",
                                                     "designerId": "b5973dfa-1941-4cd6-a6d1-417089a7ee96"
                                                 }
@@ -1035,6 +1060,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "dataIndex": "number",
                                                 "format": "0",
                                                 "itemId": "colDetailHeight",
@@ -1051,6 +1077,10 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true
+                                                    },
                                                     "name": "MyNumberField8",
                                                     "designerId": "fd0bb672-20cc-4bbc-b2b8-d8240ef3ebff"
                                                 }
@@ -1064,6 +1094,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "dataIndex": "number",
                                                 "format": "0",
                                                 "itemId": "colDetailVolume",
@@ -1080,6 +1111,10 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true
+                                                    },
                                                     "name": "MyNumberField9",
                                                     "designerId": "43ff5aef-d466-4870-8760-500645106a64"
                                                 }
@@ -1093,6 +1128,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "dataIndex": "number",
                                                 "format": "0",
                                                 "itemId": "colDetailMaxQty",
@@ -1109,6 +1145,10 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true
+                                                    },
                                                     "name": "MyNumberField10",
                                                     "designerId": "9e25843a-856b-4f40-8815-b9f8fa5b4d11"
                                                 }
@@ -1321,7 +1361,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter11",
+                                                                    "name": "filter140",
                                                                     "designerId": "cbd9067a-ce03-4810-b0cb-7bd07d00d877",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -1550,7 +1590,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter12",
+                                                                    "name": "filter141",
                                                                     "designerId": "9949aed9-86f7-4f15-aac6-afedae027c18",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2063,6 +2103,7 @@
                                                                     "userConfig": {
                                                                         "fieldLabel": "Default % Full",
                                                                         "fieldStyle": "text-align:right",
+                                                                        "hideTrigger": true,
                                                                         "itemId": "txtDefaultPercentFull",
                                                                         "labelWidth": 110,
                                                                         "layout|flex": null
@@ -2207,6 +2248,7 @@
                                                                     "userConfig": {
                                                                         "fieldLabel": "% Denaturant",
                                                                         "fieldStyle": "text-align:right",
+                                                                        "hideTrigger": true,
                                                                         "itemId": "txtPercentDenaturant",
                                                                         "labelWidth": 125,
                                                                         "layout|flex": null
@@ -3010,6 +3052,7 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "fieldLabel": "Tax Exempt",
+                                                                                "fieldStyle": "text-align:right",
                                                                                 "hideTrigger": true,
                                                                                 "itemId": "txtTaxExempt",
                                                                                 "labelWidth": 90,
@@ -3189,7 +3232,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter13",
+                                                                            "name": "filter142",
                                                                             "designerId": "2857c700-ed36-43f0-8ef5-f340b95fdfba",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -3373,7 +3416,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter14",
+                                                                            "name": "filter143",
                                                                             "designerId": "f74d03b6-8d20-468c-ab10-a1782ac46fa4",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -3415,6 +3458,7 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
+                                                                        "align": "right",
                                                                         "dataIndex": "number",
                                                                         "itemId": "colPOSSLAPrice",
                                                                         "text": "Contract Price"
@@ -3429,6 +3473,10 @@
                                                                                 "type": "object"
                                                                             },
                                                                             "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "fieldStyle": "text-align:right",
+                                                                                "hideTrigger": true
+                                                                            },
                                                                             "name": "MyNumberField11",
                                                                             "designerId": "8221f3b7-98b6-45b8-bd30-99d5775e0375"
                                                                         }
@@ -3447,7 +3495,19 @@
                                                                         "width": 112
                                                                     },
                                                                     "name": "MyCheck",
-                                                                    "designerId": "799c7d08-5c5a-4593-a553-1d8b6c7f8269"
+                                                                    "designerId": "799c7d08-5c5a-4593-a553-1d8b6c7f8269",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Checkbox",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyCheckbox63",
+                                                                            "designerId": "ffebb9da-cb6f-4bc1-af67-5ebbd9e6c122"
+                                                                        }
+                                                                    ]
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.View",
@@ -3764,7 +3824,7 @@
                                                                                     "userConfig": {
                                                                                         "layout|flex": null
                                                                                     },
-                                                                                    "name": "filter15",
+                                                                                    "name": "filter144",
                                                                                     "designerId": "3fdba5e7-278e-4e6b-ad42-9ec658e4c660",
                                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                                 }
@@ -4536,7 +4596,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter16",
+                                                                    "name": "filter145",
                                                                     "designerId": "87274c48-fa61-4ab3-acd1-2696486c13a3",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -4623,6 +4683,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "align": "right",
                                                                 "dataIndex": "string",
                                                                 "flex": 1,
                                                                 "itemId": "colUPCUnitQty",
@@ -4638,6 +4699,10 @@
                                                                         "type": "object"
                                                                     },
                                                                     "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldStyle": "text-align:right",
+                                                                        "hideTrigger": true
+                                                                    },
                                                                     "name": "MyNumberField6",
                                                                     "designerId": "7999451d-81cd-491b-a1f9-6e0db708f5b9"
                                                                 }
@@ -4813,7 +4878,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter17",
+                                                                    "name": "filter146",
                                                                     "designerId": "f11b92d2-d17f-4030-af6e-5449c5557e10",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -5152,7 +5217,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter18",
+                                                                    "name": "filter147",
                                                                     "designerId": "317ae54f-a81d-4657-8d0b-3edd670adaca",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -5356,6 +5421,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "align": "right",
                                                                 "dataIndex": "string",
                                                                 "flex": 1,
                                                                 "itemId": "colVendorXrefConversionFactor",
@@ -5371,6 +5437,10 @@
                                                                         "type": "object"
                                                                     },
                                                                     "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldStyle": "text-align:right",
+                                                                        "hideTrigger": true
+                                                                    },
                                                                     "name": "MyNumberField19",
                                                                     "designerId": "70aad3e9-3d94-47b5-ad5c-efcec93f5204"
                                                                 }
@@ -5591,7 +5661,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter19",
+                                                                    "name": "filter148",
                                                                     "designerId": "1de0066e-eb37-44ae-af83-adcc5f465797",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -5845,6 +5915,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "align": "right",
                                                                 "dataIndex": "string",
                                                                 "flex": 1,
                                                                 "itemId": "colContractYield",
@@ -5860,6 +5931,10 @@
                                                                         "type": "object"
                                                                     },
                                                                     "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldStyle": "text-align:right",
+                                                                        "hideTrigger": true
+                                                                    },
                                                                     "name": "MyNumberField20",
                                                                     "designerId": "6abbf658-e7be-4b54-8333-b32e943fb237"
                                                                 }
@@ -5873,6 +5948,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "align": "right",
                                                                 "dataIndex": "string",
                                                                 "flex": 1,
                                                                 "itemId": "colContractTolerance",
@@ -5888,6 +5964,10 @@
                                                                         "type": "object"
                                                                     },
                                                                     "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldStyle": "text-align:right",
+                                                                        "hideTrigger": true
+                                                                    },
                                                                     "name": "MyNumberField21",
                                                                     "designerId": "f746f18f-56dd-4a0b-9db1-41e44d079eb4"
                                                                 }
@@ -5901,6 +5981,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "align": "right",
                                                                 "dataIndex": "string",
                                                                 "flex": 1,
                                                                 "itemId": "colContractFranchise",
@@ -5916,6 +5997,10 @@
                                                                         "type": "object"
                                                                     },
                                                                     "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldStyle": "text-align:right",
+                                                                        "hideTrigger": true
+                                                                    },
                                                                     "name": "MyNumberField22",
                                                                     "designerId": "9b2e920c-124d-4e12-a679-0bf04936d114"
                                                                 }
@@ -6053,7 +6138,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter110",
+                                                                            "name": "filter149",
                                                                             "designerId": "102ea262-7cce-4c88-bd43-2f80cfa1e9a8",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -6241,7 +6326,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter111",
+                                                                            "name": "filter150",
                                                                             "designerId": "437f9756-d7eb-404d-89dd-762a18b9132c",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -6492,7 +6577,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter112",
+                                                    "name": "filter151",
                                                     "designerId": "efa99b46-2432-478a-97f2-c35eb7b7ed7c",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -6516,88 +6601,93 @@
                                             "designerId": "99b8c407-e755-4e9c-b3f2-7ace0b0a7f46"
                                         },
                                         {
-                                            "type": "Ext.grid.column.Column",
+                                            "type": "Ext.grid.column.Number",
                                             "reference": {
                                                 "name": "columns",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "dataIndex": "string",
                                                 "flex": null,
                                                 "itemId": "colPricingSalePrice",
                                                 "text": "Sale Price",
                                                 "width": 80
                                             },
-                                            "name": "MyColumn23",
+                                            "name": "MyNumberColumn13",
                                             "designerId": "faded271-3d4a-4a2a-8c32-b6083c9eb19d"
                                         },
                                         {
-                                            "type": "Ext.grid.column.Column",
+                                            "type": "Ext.grid.column.Number",
                                             "reference": {
                                                 "name": "columns",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "dataIndex": "string",
                                                 "flex": null,
                                                 "itemId": "colPricingRetailPrice",
                                                 "text": "Retail Price",
                                                 "width": 80
                                             },
-                                            "name": "MyColumn24",
+                                            "name": "MyNumberColumn19",
                                             "designerId": "b6cd64ea-8606-4ed5-9754-dd37cd0bb41b"
                                         },
                                         {
-                                            "type": "Ext.grid.column.Column",
+                                            "type": "Ext.grid.column.Number",
                                             "reference": {
                                                 "name": "columns",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "dataIndex": "string",
                                                 "flex": null,
                                                 "itemId": "colPricingWholesalePrice",
                                                 "text": "Wholesale Price",
                                                 "width": 90
                                             },
-                                            "name": "MyColumn25",
+                                            "name": "MyNumberColumn20",
                                             "designerId": "c578ac2b-1167-4ccc-8d10-645416fac096"
                                         },
                                         {
-                                            "type": "Ext.grid.column.Column",
+                                            "type": "Ext.grid.column.Number",
                                             "reference": {
                                                 "name": "columns",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "dataIndex": "string",
                                                 "flex": null,
                                                 "itemId": "colPricingLargeVolumePrice",
                                                 "text": "Large Volume Price",
                                                 "width": 110
                                             },
-                                            "name": "MyColumn22",
+                                            "name": "MyNumberColumn24",
                                             "designerId": "ee7faf06-b546-4888-beb6-6eae38e50e4f"
                                         },
                                         {
-                                            "type": "Ext.grid.column.Column",
+                                            "type": "Ext.grid.column.Number",
                                             "reference": {
                                                 "name": "columns",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "dataIndex": "string",
                                                 "flex": null,
                                                 "itemId": "colPricingMSRP",
                                                 "text": "MSRP",
                                                 "width": 80
                                             },
-                                            "name": "MyColumn26",
+                                            "name": "MyNumberColumn25",
                                             "designerId": "ff739ab3-f97e-4f1c-bba1-7bd6d5a79dd1"
                                         },
                                         {
@@ -6618,71 +6708,75 @@
                                             "designerId": "ad2b887c-ef53-46e2-ac95-a40fb58c2379"
                                         },
                                         {
-                                            "type": "Ext.grid.column.Column",
+                                            "type": "Ext.grid.column.Number",
                                             "reference": {
                                                 "name": "columns",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "dataIndex": "string",
                                                 "flex": null,
                                                 "itemId": "colPricingLastCost",
                                                 "text": "Last Cost",
                                                 "width": 80
                                             },
-                                            "name": "MyColumn27",
+                                            "name": "MyNumberColumn26",
                                             "designerId": "832578c0-2da9-4d30-acb4-c5f12f799379"
                                         },
                                         {
-                                            "type": "Ext.grid.column.Column",
+                                            "type": "Ext.grid.column.Number",
                                             "reference": {
                                                 "name": "columns",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "dataIndex": "string",
                                                 "flex": null,
                                                 "itemId": "colPricingStandardCost",
                                                 "text": "Standard Cost",
                                                 "width": 85
                                             },
-                                            "name": "MyColumn29",
+                                            "name": "MyNumberColumn27",
                                             "designerId": "62726e98-d1ed-4332-9cc6-5c5426e83c0f"
                                         },
                                         {
-                                            "type": "Ext.grid.column.Column",
+                                            "type": "Ext.grid.column.Number",
                                             "reference": {
                                                 "name": "columns",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "dataIndex": "string",
                                                 "flex": null,
                                                 "itemId": "colPricingAverageCost",
                                                 "text": "Avarage Cost",
                                                 "width": 85
                                             },
-                                            "name": "MyColumn28",
+                                            "name": "MyNumberColumn28",
                                             "designerId": "b018e885-4484-4699-8b1e-0b2e8d3db91e"
                                         },
                                         {
-                                            "type": "Ext.grid.column.Column",
+                                            "type": "Ext.grid.column.Number",
                                             "reference": {
                                                 "name": "columns",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "dataIndex": "string",
                                                 "flex": null,
                                                 "itemId": "colPricingEOMCost",
                                                 "text": "End of Month Cost",
                                                 "width": 85
                                             },
-                                            "name": "MyColumn81",
+                                            "name": "MyNumberColumn29",
                                             "designerId": "fc57ef1c-79f3-4f6d-9cba-6495fca0ecf9"
                                         },
                                         {
@@ -6831,7 +6925,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter113",
+                                                                    "name": "filter152",
                                                                     "designerId": "8c12842b-2ead-456f-b4dc-8a0da80ee35f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -7016,6 +7110,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "align": "right",
                                                                 "dataIndex": "strFieldName",
                                                                 "itemId": "colPricingLevelUnits",
                                                                 "text": "Units",
@@ -7031,6 +7126,10 @@
                                                                         "type": "object"
                                                                     },
                                                                     "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldStyle": "text-align:right",
+                                                                        "hideTrigger": true
+                                                                    },
                                                                     "name": "MyNumberField23",
                                                                     "designerId": "bf5b5963-0934-4f62-b8e2-b6182ebb13a2"
                                                                 }
@@ -7044,6 +7143,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "align": "right",
                                                                 "dataIndex": "strFieldName",
                                                                 "flex": null,
                                                                 "itemId": "colPricingLevelMin",
@@ -7060,6 +7160,10 @@
                                                                         "type": "object"
                                                                     },
                                                                     "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldStyle": "text-align:right",
+                                                                        "hideTrigger": true
+                                                                    },
                                                                     "name": "MyNumberField24",
                                                                     "designerId": "54935cd9-90a1-47e9-b103-1e87cf86c76c"
                                                                 }
@@ -7073,6 +7177,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "align": "right",
                                                                 "dataIndex": "strFieldName",
                                                                 "flex": null,
                                                                 "itemId": "colPricingLevelMax",
@@ -7089,6 +7194,10 @@
                                                                         "type": "object"
                                                                     },
                                                                     "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldStyle": "text-align:right",
+                                                                        "hideTrigger": true
+                                                                    },
                                                                     "name": "MyNumberField25",
                                                                     "designerId": "a63e57e0-b6dd-4ae8-aff1-edfddd9b8a30"
                                                                 }
@@ -7187,6 +7296,10 @@
                                                                         "type": "object"
                                                                     },
                                                                     "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldStyle": "text-align:right",
+                                                                        "hideTrigger": true
+                                                                    },
                                                                     "name": "MyNumberField26",
                                                                     "designerId": "ee08427e-4de0-45a0-a922-dfae9319ab04"
                                                                 }
@@ -7217,6 +7330,10 @@
                                                                         "type": "object"
                                                                     },
                                                                     "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldStyle": "text-align:right",
+                                                                        "hideTrigger": true
+                                                                    },
                                                                     "name": "MyNumberField27",
                                                                     "designerId": "86640978-71bf-4780-bd8e-97c232730d57"
                                                                 }
@@ -7246,6 +7363,10 @@
                                                                         "type": "object"
                                                                     },
                                                                     "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldStyle": "text-align:right",
+                                                                        "hideTrigger": true
+                                                                    },
                                                                     "name": "MyNumberField28",
                                                                     "designerId": "ec746f07-493d-4dfb-bb5c-b24a80cca674"
                                                                 }
@@ -7420,7 +7541,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter114",
+                                                                    "name": "filter153",
                                                                     "designerId": "df49b4ec-5d3e-4ec5-8704-5a1a7a595dd1",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -7660,6 +7781,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "align": "right",
                                                                 "dataIndex": "strFieldName",
                                                                 "flex": null,
                                                                 "itemId": "colSpecialPricingQty",
@@ -7676,6 +7798,10 @@
                                                                         "type": "object"
                                                                     },
                                                                     "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldStyle": "text-align:right",
+                                                                        "hideTrigger": true
+                                                                    },
                                                                     "name": "MyNumberField29",
                                                                     "designerId": "19f6a41b-41ac-4c91-8c38-8daf24b24d7d"
                                                                 }
@@ -7723,6 +7849,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "align": "right",
                                                                 "dataIndex": "strFieldName",
                                                                 "flex": null,
                                                                 "itemId": "colSpecialPricingDiscountRate",
@@ -7739,6 +7866,10 @@
                                                                         "type": "object"
                                                                     },
                                                                     "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldStyle": "text-align:right",
+                                                                        "hideTrigger": true
+                                                                    },
                                                                     "name": "MyNumberField30",
                                                                     "designerId": "f65915ba-2414-46bc-9ad5-69b7eba996b2"
                                                                 }
@@ -7752,6 +7883,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "align": "right",
                                                                 "dataIndex": "strFieldName",
                                                                 "flex": null,
                                                                 "itemId": "colSpecialPricingUnitPrice",
@@ -7768,6 +7900,10 @@
                                                                         "type": "object"
                                                                     },
                                                                     "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldStyle": "text-align:right",
+                                                                        "hideTrigger": true
+                                                                    },
                                                                     "name": "MyNumberField31",
                                                                     "designerId": "9ebdfaa5-372d-41c0-a817-3e49a5c1a1f6"
                                                                 }
@@ -7781,6 +7917,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "align": "right",
                                                                 "dataIndex": "strFieldName",
                                                                 "flex": null,
                                                                 "itemId": "colSpecialPricingAccumQty",
@@ -7797,6 +7934,10 @@
                                                                         "type": "object"
                                                                     },
                                                                     "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldStyle": "text-align:right",
+                                                                        "hideTrigger": true
+                                                                    },
                                                                     "name": "MyNumberField32",
                                                                     "designerId": "db6c9a69-3dba-466e-ab4b-bbf1c3f5093b"
                                                                 }
@@ -7810,6 +7951,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "align": "right",
                                                                 "dataIndex": "strFieldName",
                                                                 "flex": null,
                                                                 "itemId": "colSpecialPricingAccumAmount",
@@ -7826,6 +7968,10 @@
                                                                         "type": "object"
                                                                     },
                                                                     "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldStyle": "text-align:right",
+                                                                        "hideTrigger": true
+                                                                    },
                                                                     "name": "MyNumberField33",
                                                                     "designerId": "b650a47c-e623-4d68-b19c-993b9b3ad759"
                                                                 }
@@ -7982,7 +8128,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter115",
+                                                    "name": "filter154",
                                                     "designerId": "1359797a-01d3-4908-862b-ecee335db0ef",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -8167,6 +8313,10 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true
+                                                    },
                                                     "name": "MyNumberField12",
                                                     "designerId": "fc7f914d-15a2-4526-8f62-fd166fbde8f3"
                                                 }
@@ -8195,6 +8345,10 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true
+                                                    },
                                                     "name": "MyNumberField13",
                                                     "designerId": "0ffdf4f1-7d3a-425e-83c3-bc52b6cf9808"
                                                 }
@@ -8223,6 +8377,10 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true
+                                                    },
                                                     "name": "MyNumberField14",
                                                     "designerId": "6c7f91d6-8e2e-4b3d-b325-aff034b307d1"
                                                 }
@@ -8371,6 +8529,8 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "fieldLabel": "GA Shrink Factor",
+                                                "fieldStyle": "text-align:right",
+                                                "hideTrigger": true,
                                                 "itemId": "txtGaShrinkFactor",
                                                 "layout|flex": null
                                             },
@@ -8848,7 +9008,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter116",
+                                                    "name": "filter155",
                                                     "designerId": "ab092e2c-0602-4213-baf5-e07813015a04",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -8934,6 +9094,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "itemId": "colAssemblyQuantity",
                                                 "text": "Quantity",
                                                 "width": 60
@@ -8948,6 +9109,10 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true
+                                                    },
                                                     "name": "MyNumberField37",
                                                     "designerId": "3bfa0225-ce73-4f6a-b80d-95e8fd6f4f2b"
                                                 }
@@ -8961,6 +9126,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "itemId": "colAssemblyStock",
                                                 "text": "Stock",
                                                 "width": 60
@@ -9077,6 +9243,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "itemId": "colAssemblyUnit",
                                                 "text": "Unit",
                                                 "width": 37
@@ -9091,6 +9258,10 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true
+                                                    },
                                                     "name": "MyNumberField38",
                                                     "designerId": "0e21534d-8493-4351-bdea-3c07870e0b4d"
                                                 }
@@ -9104,6 +9275,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "itemId": "colAssemblyCost",
                                                 "text": "Cost",
                                                 "width": 70
@@ -9118,6 +9290,10 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true
+                                                    },
                                                     "name": "MyNumberField39",
                                                     "designerId": "5ab40a8a-f4a6-4d82-acee-bf3720d31b4d"
                                                 }
@@ -9131,6 +9307,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "itemId": "colAssemblyTotal",
                                                 "text": "Total",
                                                 "width": 70
@@ -9278,7 +9455,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter117",
+                                                    "name": "filter156",
                                                     "designerId": "336a12a5-7629-4f16-aedc-1c6511cd8165",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -9364,6 +9541,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "itemId": "colBundleQuantity",
                                                 "text": "Quantity",
                                                 "width": 60
@@ -9378,6 +9556,10 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true
+                                                    },
                                                     "name": "MyNumberField34",
                                                     "designerId": "6c10e658-ecf5-47a1-8b1b-2094eab327e8"
                                                 }
@@ -9391,6 +9573,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "itemId": "colBundleStock",
                                                 "text": "Stock",
                                                 "width": 60
@@ -9507,6 +9690,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "itemId": "colBundleUnit",
                                                 "text": "Unit",
                                                 "width": 37
@@ -9521,6 +9705,10 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true
+                                                    },
                                                     "name": "MyNumberField35",
                                                     "designerId": "da010284-f4d5-4a1d-802d-a499c5b9d43b"
                                                 }
@@ -9534,6 +9722,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "itemId": "colBundlePrice",
                                                 "text": "Price",
                                                 "width": 70
@@ -9548,6 +9737,10 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true
+                                                    },
                                                     "name": "MyNumberField36",
                                                     "designerId": "a056f5d3-f436-4a59-9467-da917f54ed70"
                                                 }
@@ -9561,6 +9754,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "itemId": "colBundleSubtotal",
                                                 "text": "Subtotal",
                                                 "width": 70
@@ -9710,7 +9904,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter118",
+                                                    "name": "filter157",
                                                     "designerId": "49a9508d-505d-4de5-977b-f8ebc7227c15",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -9892,7 +10086,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter119",
+                                                    "name": "filter158",
                                                     "designerId": "6e3091f8-4c8b-4ab7-bb33-40607d9656f6",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -9986,20 +10180,21 @@
                                             "designerId": "0db2e8c1-8780-441d-ab82-f6ce510e17ea"
                                         },
                                         {
-                                            "type": "Ext.grid.column.Column",
+                                            "type": "Ext.grid.column.Number",
                                             "reference": {
                                                 "name": "columns",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "dataIndex": "string",
                                                 "flex": null,
                                                 "itemId": "colKitItemQuantity",
                                                 "text": "Quantity",
                                                 "width": 74
                                             },
-                                            "name": "MyColumn35",
+                                            "name": "MyNumberColumn11",
                                             "designerId": "898987ec-f842-4ea6-9116-4f5dc1e5d485",
                                             "cn": [
                                                 {
@@ -10009,6 +10204,10 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true
+                                                    },
                                                     "name": "MyNumberField52",
                                                     "designerId": "02a04bae-f8b8-4b9e-9160-742034906600"
                                                 }
@@ -10086,7 +10285,7 @@
                                             ]
                                         },
                                         {
-                                            "type": "Ext.grid.column.Column",
+                                            "type": "Ext.grid.column.Number",
                                             "reference": {
                                                 "name": "columns",
                                                 "type": "array"
@@ -10100,7 +10299,7 @@
                                                 "text": "Price",
                                                 "width": 98
                                             },
-                                            "name": "MyColumn53",
+                                            "name": "MyNumberColumn12",
                                             "designerId": "508a18f8-4fdd-44fb-bf51-b1e5b0fc2004",
                                             "cn": [
                                                 {
@@ -10110,6 +10309,10 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true
+                                                    },
                                                     "name": "MyNumberField53",
                                                     "designerId": "b435732d-b83e-4c5c-91ae-1aea51ba7c42"
                                                 }
@@ -10327,7 +10530,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter120",
+                                                                    "name": "filter159",
                                                                     "designerId": "2bbc0808-5b40-4515-bf7e-466c3903a1c4",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -10466,7 +10669,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter121",
+                                                                    "name": "filter160",
                                                                     "designerId": "f1bbb210-cf31-4fe7-8040-6808d9375e23",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -10642,7 +10845,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter122",
+                                                                    "name": "filter161",
                                                                     "designerId": "49a6fdf8-831b-4540-9826-f339161f9600",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -10810,7 +11013,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter123",
+                                                    "name": "filter162",
                                                     "designerId": "9d333752-e697-4d84-8cb8-bf824d7d76f6",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -11076,7 +11279,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging17",
                     "designerId": "64f13019-953f-46dc-920e-9a395d3cb3c9",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
