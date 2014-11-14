@@ -920,6 +920,23 @@ Ext.define('Inventory.view.ItemViewController', {
         grdLocation.store.reload();
     },
 
+    CostingMethodRenderer: function (value, metadata, record) {
+        var intMethod = record.get('intCostingMethod');
+        var costingMethod = '';
+        switch (intMethod) {
+            case 1:
+                costingMethod = 'AVG';
+                break;
+            case 2:
+                costingMethod = 'FIFO';
+                break;
+            case 3:
+                costingMethod = 'LIFO';
+                break;
+        }
+        return costingMethod;
+    },
+
     // </editor-fold>
 
     // <editor-fold desc="GL Accounts Tab Methods and Event Handlers">
