@@ -1,18 +1,20 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICCreateGLEntries for the basics]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostCosting for the basics]
 AS
 BEGIN
 	-- Arrange 
 	BEGIN 
-		EXEC [testi21Database].[Fake data for COA used for Items]; 
-
+		-- Fake the inventory transaction table 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
+
+		-- Create the fake data
+		EXEC testi21Database.[Fake data for item costing];
 
 		-- Create the variables for the internal transaction types used by costing. 
 		DECLARE @WRITE_OFF_SOLD AS INT = -1
 		DECLARE @REVALUE_SOLD AS INT = -2
 		DECLARE @AUTO_NEGATIVE AS INT = -3
-
 		DECLARE @PurchaseType AS INT = 1
+		DECLARE @SalesType AS INT = 2
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -20,19 +22,14 @@ BEGIN
 				,@PremiumGrains AS INT = 3
 				,@ColdGrains AS INT = 4
 				,@HotGrains AS INT = 5
-				,@InvalidItem AS INT = -1
 
 		-- Declare the variables for location
 		DECLARE @Default_Location AS INT = 1
 				,@NewHaven AS INT = 2
 				,@BetterHaven AS INT = 3
-				,@InvalidLocation AS INT = -1
 
 		-- Declare the variables for the currencies
 		DECLARE @USD AS INT = 1;
-
-		-- There are no records in tblICInventoryTransaction
-		--INSERT INTO tblICInventoryTransaction...
 
 		-- Create the expected and actual tables. 
 		DECLARE @recap AS dbo.RecapTableType		
@@ -42,18 +39,25 @@ BEGIN
 		-- Remove the column dtmDateEntered. We don't need to assert it. 
 		ALTER TABLE expected
 		DROP COLUMN dtmDateEntered
+
+		-- Declare the variables used by uspICPostCosting
+		DECLARE @ItemsToPost AS ItemCostingTableType;
+		DECLARE @strBatchId AS NVARCHAR(20);
+		DECLARE @strAccountToCounterInventory AS NVARCHAR(255) = 'Cost of Goods';
+		DECLARE @intUserId AS INT = 1;
+
+		-- Setup the items to post
+		-- (None for the basic setup)
 	END 
 	
 	-- Act
-	BEGIN 
-		DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-000001'
-				,@UseGLAccount_ContraInventory AS NVARCHAR(255) = 'Cost of Goods'
-				,@intUserId AS INT = 1
-
+	BEGIN 	
+		-- Call uspICPostCosting to post the costing and generate the g/l entries 
 		INSERT INTO actual 
-		EXEC dbo.uspICCreateGLEntries
-			@strBatchId
-			,@UseGLAccount_ContraInventory
+		EXEC dbo.uspICPostCosting
+			@ItemsToPost
+			,@strBatchId 
+			,@strAccountToCounterInventory
 			,@intUserId
 
 		-- Remove the column dtmDateEntered. We don't need to assert it. 
@@ -72,4 +76,4 @@ BEGIN
 
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
-END
+END 

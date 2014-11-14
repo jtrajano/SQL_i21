@@ -48,8 +48,6 @@ DECLARE @intItemId AS INT
 		,@intLotId AS INT
 
 DECLARE @CostingMethod AS INT 
-DECLARE @NegativeInventoryOption AS INT
---DECLARE @GLAccounts AS ItemGLAccount
 
 -- Create the CONSTANT variables for the costing methods
 DECLARE @AVERAGECOST AS INT = 1
@@ -59,8 +57,9 @@ DECLARE @AVERAGECOST AS INT = 1
 
 
 -- Create the cursor
--- Use LOCAL. It specifies that the scope of the cursor is local to the stored procedure where it was created. The cursor name is only valid within this scope. 
--- Use FAST_FORWARD. It specifies a FORWARD_ONLY, READ_ONLY cursor with performance optimizations enabled. 
+-- Make sure the following options are used: 
+-- LOCAL >> It specifies that the scope of the cursor is local to the stored procedure where it was created. The cursor name is only valid within this scope. 
+-- FAST_FORWARD >> It specifies a FORWARD_ONLY, READ_ONLY cursor with performance optimizations enabled. 
 DECLARE loopItems CURSOR LOCAL FAST_FORWARD
 FOR 
 SELECT  intItemId
@@ -83,39 +82,14 @@ OPEN loopItems;
 -- Initial fetch attempt
 FETCH NEXT FROM loopItems INTO @intItemId, @intItemLocationId, @dtmDate, @dblUnitQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId;
 
--- The loop
+-- Start of the loop
 WHILE @@FETCH_STATUS = 0
 BEGIN 
 	-- Initialize the costing method and negative inventory option. 
 	SET @CostingMethod = NULL;
-	SET @NegativeInventoryOption = NULL;
-	--DELETE FROM @GLAccounts;
 
-	-- Get the costing method of an item and the negative stock option
+	-- Get the costing method of an item 
 	SELECT @CostingMethod = dbo.fnGetCostingMethod(@intItemId, @intItemLocationId)
-			,@NegativeInventoryOption = dbo.fnGetNegativeInventoryOption(@intItemId, @intItemLocationId);
-
-	-------------------------------------------------	
-	-- Get the g/l accounts id to use. 
-	-----------------------------------------------
-	-- Note: 
-	-- 1. Inventory, RevalueSold, WriteOffSold, and AutoNegative are retreived from the default accounts
-	-- 2. ContraInventory is defined by the calling code. It is the g/l account used as contra of an inventory 
-	--		in a t-account. It can be COGS, A/P Clearing, or any type of expense, revenue, or liability account. 
-	--		Each module may use a diffent contra account. Say AP uses A/P Clearing and while a sales transaction
-	--		may use Cost of Goods. 
-	--INSERT INTO @GLAccounts (
-	--	Inventory
-	--	,ContraInventory
-	--	,RevalueSold
-	--	,WriteOffSold
-	--	,AutoNegative
-	--)
-	--SELECT	Inventory = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, 'Inventory')
-	--		,ContraInventory = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, @strAccountDescription)
-	--		,RevalueSold = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, 'RevalueSold') -- TODO: need to confirm this
-	--		,WriteOffSold = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, 'WriteOffSold') -- TODO: need to confirm this
-	--		,AutoNegative = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, 'AutoNegative') -- TODO: need to confirm this
 
 	--------------------------------------------------------------------------------
 	-- Call the SP that can process the item's costing method
@@ -157,7 +131,7 @@ BEGIN
 			,@strTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
-			,@intUserId
+			,@intUserId;
 	END
 
 	-- LIFO -- TODO
@@ -167,20 +141,26 @@ BEGIN
 	--------------------------------------------------
 	BEGIN 
 		UPDATE	Stock
-		SET		Stock.dblAverageCost =	[dbo].[fnCalculateAverageCost]((@dblUnitQty * @dblUOMQty), @dblCost, Stock.dblUnitOnHand, Stock.dblAverageCost)
+		SET		Stock.dblAverageCost = dbo.fnCalculateAverageCost((@dblUnitQty * @dblUOMQty), @dblCost, Stock.dblUnitOnHand, Stock.dblAverageCost)
 				,Stock.dblUnitOnHand = (@dblUnitQty * @dblUOMQty) + Stock.dblUnitOnHand
 				,Stock.intConcurrencyId = ISNULL(Stock.intConcurrencyId, 0) + 1 
-		FROM	[dbo].[tblICItemStock] Stock
+		FROM	dbo.tblICItemStock AS Stock
 		WHERE	Stock.intItemId = @intItemId
-				AND Stock.intLocationId = @intItemLocationId			
+				AND Stock.intLocationId = @intItemLocationId;
 	END 
 
 	-- Attempt to fetch the next row from cursor. 
 	FETCH NEXT FROM loopItems INTO @intItemId, @intItemLocationId, @dtmDate, @dblUnitQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId;
 END;
+-- End of the loop
 
 CLOSE loopItems;
 DEALLOCATE loopItems;
 
+-----------------------------------------
 -- Generate the g/l entries
-EXEC dbo.uspICCreateGLEntries @strBatchId, @strAccountToCounterInventory, @intUserId
+-----------------------------------------
+EXEC dbo.uspICCreateGLEntries 
+	@strBatchId
+	,@strAccountToCounterInventory
+	,@intUserId

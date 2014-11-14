@@ -3,7 +3,6 @@ AS
 BEGIN
 		-- Use the 'fake data for simple COA' for the simple items
 		EXEC testi21Database.[Fake data for COA used in costing]
-		-- EXEC testi21Database.[Fake data for item stock]
 
 		-- Create the fake table and data for the items
 		EXEC tSQLt.FakeTable 'dbo.tblSMCompanyLocation';
