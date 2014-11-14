@@ -3,7 +3,7 @@ AS
 BEGIN
 	-- Arrange 
 	BEGIN 
-		EXEC [testi21Database].[Fake data for COA used for Items]; 
+		EXEC [testi21Database].[Fake data for COA used in costing]
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 
