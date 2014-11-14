@@ -7,14 +7,13 @@ BEGIN
 		-- Create the fake table and data for the items
 		EXEC tSQLt.FakeTable 'dbo.tblSMCompanyLocation';
 		EXEC tSQLt.FakeTable 'dbo.tblSMCompanyLocationAccount', @Identity = 1;
-
 		EXEC tSQLt.FakeTable 'dbo.tblICItem';
 		EXEC tSQLt.FakeTable 'dbo.tblICItemLocation', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;	
 		EXEC tSQLt.FakeTable 'dbo.tblICItemAccount', @Identity = 1;
-
 		EXEC tSQLt.FakeTable 'dbo.tblICCategory';
 		EXEC tSQLt.FakeTable 'dbo.tblICCategoryAccount', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
 		
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -78,124 +77,153 @@ BEGIN
 		DECLARE @EACH AS INT = 1;
 
 		-- Fake company locations 
-		INSERT INTO tblSMCompanyLocation (intCompanyLocationId, strLocationName, intProfitCenter) VALUES (@Default_Location, 'DEFAULT', @ProfitCenter_Default)
-		INSERT INTO tblSMCompanyLocation (intCompanyLocationId, strLocationName, intProfitCenter) VALUES (@NewHaven, 'NEW HAVEN', @ProfitCenter_NewHaven)
-		INSERT INTO tblSMCompanyLocation (intCompanyLocationId, strLocationName, intProfitCenter) VALUES (@BetterHaven, 'BETTER HAVEN', @ProfitCenter_BetterHaven)
+		BEGIN 
+			INSERT INTO dbo.tblSMCompanyLocation (intCompanyLocationId, strLocationName, intProfitCenter) VALUES (@Default_Location, 'DEFAULT', @ProfitCenter_Default)
+			INSERT INTO dbo.tblSMCompanyLocation (intCompanyLocationId, strLocationName, intProfitCenter) VALUES (@NewHaven, 'NEW HAVEN', @ProfitCenter_NewHaven)
+			INSERT INTO dbo.tblSMCompanyLocation (intCompanyLocationId, strLocationName, intProfitCenter) VALUES (@BetterHaven, 'BETTER HAVEN', @ProfitCenter_BetterHaven)
+		END
 
-		-- G/L Accounts for Company Location 1 ('Default')
-		INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_Inventory, @Inventory_Default);
-		INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_CostOfGoods, @CostOfGoods_Default);
-		INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_APClearing, @APClearing_Default);
-		INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_WriteOffSold, @WriteOffSold_Default);
-		INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_RevalueSold, @RevalueSold_Default);
-		INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_AutoNegative, @AutoNegative_Default);
+		-- Fake data for Company-Location-Account
+		BEGIN 
+			-- G/L Accounts for Company Location 1 ('Default')
+			INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_Inventory, @Inventory_Default);
+			INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_CostOfGoods, @CostOfGoods_Default);
+			INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_APClearing, @APClearing_Default);
+			INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_WriteOffSold, @WriteOffSold_Default);
+			INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_RevalueSold, @RevalueSold_Default);
+			INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_AutoNegative, @AutoNegative_Default);
 
-		-- G/L Accounts for Company Location 2 ('NEW HAVEN')
-		INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_Inventory, @Inventory_NewHaven);
-		INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_CostOfGoods, @CostOfGoods_NewHaven);
-		INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_APClearing, @APClearing_NewHaven);
-		INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_WriteOffSold, @WriteOffSold_NewHaven);
-		INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_RevalueSold, @RevalueSold_NewHaven);
-		INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_AutoNegative, @AutoNegative_NewHaven);
+			-- G/L Accounts for Company Location 2 ('NEW HAVEN')
+			INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_Inventory, @Inventory_NewHaven);
+			INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_CostOfGoods, @CostOfGoods_NewHaven);
+			INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_APClearing, @APClearing_NewHaven);
+			INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_WriteOffSold, @WriteOffSold_NewHaven);
+			INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_RevalueSold, @RevalueSold_NewHaven);
+			INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_AutoNegative, @AutoNegative_NewHaven);
 
-		-- G/L Accounts for Company Location 3 ('BETTER HAVEN')
-		INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_Inventory, @Inventory_BetterHaven);
-		INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_CostOfGoods, @CostOfGoods_BetterHaven);
-		INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_APClearing, @APClearing_BetterHaven);
-		INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_WriteOffSold, @WriteOffSold_BetterHaven);
-		INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_RevalueSold, @RevalueSold_BetterHaven);
-		INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_AutoNegative, @AutoNegative_BetterHaven);
+			-- G/L Accounts for Company Location 3 ('BETTER HAVEN')
+			INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_Inventory, @Inventory_BetterHaven);
+			INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_CostOfGoods, @CostOfGoods_BetterHaven);
+			INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_APClearing, @APClearing_BetterHaven);
+			INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_WriteOffSold, @WriteOffSold_BetterHaven);
+			INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_RevalueSold, @RevalueSold_BetterHaven);
+			INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_AutoNegative, @AutoNegative_BetterHaven);
+		END
 
-		-- Category
-		INSERT INTO tblICCategory (intCategoryId, strDescription) VALUES (@HotItems, 'Hot Items');
-		INSERT INTO tblICCategory (intCategoryId, strDescription) VALUES (@ColdItems, 'Cold Items');
+		-- Fake data for Category
+		BEGIN 
+			-- Category
+			INSERT INTO dbo.tblICCategory (intCategoryId, strDescription) VALUES (@HotItems, 'Hot Items');
+			INSERT INTO dbo.tblICCategory (intCategoryId, strDescription) VALUES (@ColdItems, 'Cold Items');
+		END
 
-		-- Category Account
-		-- Add G/L setup for Hot items
-		INSERT INTO tblICCategoryAccount (intCategoryId, intAccountId, strAccountDescription) VALUES (@HotItems, @Inventory_NewHaven, @Account_Inventory)
-		INSERT INTO tblICCategoryAccount (intCategoryId, intAccountId, strAccountDescription) VALUES (@HotItems, @CostOfGoods_NewHaven, @Account_CostOfGoods)
-		INSERT INTO tblICCategoryAccount (intCategoryId, intAccountId, strAccountDescription) VALUES (@HotItems, @APClearing_NewHaven, @Account_APClearing)
+		-- Fake data Category Account
+		BEGIN 
+			-- Add G/L setup for Hot items
+			INSERT INTO dbo.tblICCategoryAccount (intCategoryId, intAccountId, strAccountDescription) VALUES (@HotItems, @Inventory_NewHaven, @Account_Inventory)
+			INSERT INTO dbo.tblICCategoryAccount (intCategoryId, intAccountId, strAccountDescription) VALUES (@HotItems, @CostOfGoods_NewHaven, @Account_CostOfGoods)
+			INSERT INTO dbo.tblICCategoryAccount (intCategoryId, intAccountId, strAccountDescription) VALUES (@HotItems, @APClearing_NewHaven, @Account_APClearing)
 
-		-- Add G/L setup for Cold items
-		-- No category-level g/l account overrides for Cold items. Use default g/l account from Location. 
+			-- Add G/L setup for Cold items
+			-- No category-level g/l account overrides for Cold items. Use default g/l account from Location. 
+		END
 		
-		-- Items 
-		INSERT INTO tblICItem (intItemId, strDescription) VALUES (@WetGrains, 'WET GRAINS')
-		INSERT INTO tblICItem (intItemId, strDescription) VALUES (@StickyGrains, 'STICKY GRAINS')
-		INSERT INTO tblICItem (intItemId, strDescription) VALUES (@PremiumGrains, 'PREMIUM GRAINS')
-		INSERT INTO tblICItem (intItemId, strDescription, intTrackingId) VALUES (@ColdGrains, 'COLD GRAINS', @ColdItems)
-		INSERT INTO tblICItem (intItemId, strDescription, intTrackingId) VALUES (@HotGrains, 'HOT GRAINS', @HotItems)
+		-- Fake data for Items 
+		BEGIN 
+			INSERT INTO dbo.tblICItem (intItemId, strDescription) VALUES (@WetGrains, 'WET GRAINS')
+			INSERT INTO dbo.tblICItem (intItemId, strDescription) VALUES (@StickyGrains, 'STICKY GRAINS')
+			INSERT INTO dbo.tblICItem (intItemId, strDescription) VALUES (@PremiumGrains, 'PREMIUM GRAINS')
+			INSERT INTO dbo.tblICItem (intItemId, strDescription, intTrackingId) VALUES (@ColdGrains, 'COLD GRAINS', @ColdItems)
+			INSERT INTO dbo.tblICItem (intItemId, strDescription, intTrackingId) VALUES (@HotGrains, 'HOT GRAINS', @HotItems)
+		END
 
-		-- Add items for location 1 ('Default')
-		INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@WetGrains, @Default_Location, 1, @AverageCosting)
-		INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@StickyGrains, @Default_Location, 1, @AverageCosting)
-		INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@PremiumGrains, @Default_Location, 1, @AverageCosting)
-		INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@ColdGrains, @Default_Location, 1, @AverageCosting)
-		INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@HotGrains, @Default_Location, 1, @AverageCosting)
+		-- Fake data for Item-Location
+		BEGIN 
+			-- Add items for location 1 ('Default')
+			INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@WetGrains, @Default_Location, 1, @AverageCosting)
+			INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@StickyGrains, @Default_Location, 1, @AverageCosting)
+			INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@PremiumGrains, @Default_Location, 1, @AverageCosting)
+			INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@ColdGrains, @Default_Location, 1, @AverageCosting)
+			INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@HotGrains, @Default_Location, 1, @AverageCosting)
 
-		-- Add items for location 2 ('NEW HAVEN')
-		INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@WetGrains, @NewHaven, 2, @FIFO)
-		INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@StickyGrains, @NewHaven, 2, @FIFO)
-		INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@PremiumGrains, @NewHaven, 2, @FIFO)
-		INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@ColdGrains, @NewHaven, 2, @FIFO)
-		INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@HotGrains, @NewHaven, 2, @FIFO)
+			-- Add items for location 2 ('NEW HAVEN')
+			INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@WetGrains, @NewHaven, 2, @FIFO)
+			INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@StickyGrains, @NewHaven, 2, @FIFO)
+			INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@PremiumGrains, @NewHaven, 2, @FIFO)
+			INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@ColdGrains, @NewHaven, 2, @FIFO)
+			INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@HotGrains, @NewHaven, 2, @FIFO)
 
-		-- Add items for location 3 ('BETTER HAVEN')
-		INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@WetGrains, @BetterHaven, 3, @LIFO)
-		INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@StickyGrains, @BetterHaven, 3, @LIFO)
-		INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@PremiumGrains, @BetterHaven, 3, @LIFO)
-		INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@ColdGrains, @BetterHaven, 3, @LIFO)
-		INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@HotGrains, @BetterHaven, 3, @LIFO)
+			-- Add items for location 3 ('BETTER HAVEN')
+			INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@WetGrains, @BetterHaven, 3, @LIFO)
+			INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@StickyGrains, @BetterHaven, 3, @LIFO)
+			INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@PremiumGrains, @BetterHaven, 3, @LIFO)
+			INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@ColdGrains, @BetterHaven, 3, @LIFO)
+			INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@HotGrains, @BetterHaven, 3, @LIFO)
+		END 
 
-		-- Add stock information for items under location 1 ('Default')
-		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@WetGrains, @Default_Location, 100, @EACH, 0)
-		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@StickyGrains, @Default_Location, 150, @EACH, 0)
-		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@PremiumGrains, @Default_Location, 200, @EACH, 0)
-		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@ColdGrains, @Default_Location, 250, @EACH, 0)
-		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@HotGrains, @Default_Location, 300, @EACH, 0)
+		-- Fake data for Item Stock
+		BEGIN 
+			-- Add stock information for items under location 1 ('Default')
+			INSERT INTO dbo.tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@WetGrains, @Default_Location, 100, @EACH, 22)
+			INSERT INTO dbo.tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@StickyGrains, @Default_Location, 150, @EACH, 33)
+			INSERT INTO dbo.tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@PremiumGrains, @Default_Location, 200, @EACH, 44)
+			INSERT INTO dbo.tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@ColdGrains, @Default_Location, 250, @EACH, 55)
+			INSERT INTO dbo.tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@HotGrains, @Default_Location, 300, @EACH, 66)
 
-		-- Add stock information for items under location 2 ('NEW HAVEN')
-		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@WetGrains, @NewHaven, 0, @EACH, 0)
-		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@StickyGrains, @NewHaven, 0, @EACH, 0)
-		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@PremiumGrains, @NewHaven, 0, @EACH, 0)
-		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@ColdGrains, @NewHaven, 0, @EACH, 0)
-		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@HotGrains, @NewHaven, 0, @EACH, 0)
+			-- Add stock information for items under location 2 ('NEW HAVEN')
+			INSERT INTO dbo.tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@WetGrains, @NewHaven, 0, @EACH, 0)
+			INSERT INTO dbo.tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@StickyGrains, @NewHaven, 0, @EACH, 0)
+			INSERT INTO dbo.tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@PremiumGrains, @NewHaven, 0, @EACH, 0)
+			INSERT INTO dbo.tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@ColdGrains, @NewHaven, 0, @EACH, 0)
+			INSERT INTO dbo.tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@HotGrains, @NewHaven, 0, @EACH, 0)
 
-		-- Add stock information for items under location 3 ('BETTER HAVEN')
-		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@WetGrains, @BetterHaven, 0, @EACH, 0)
-		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@StickyGrains, @BetterHaven, 0, @EACH, 0)
-		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@PremiumGrains, @BetterHaven, 0, @EACH, 0)
-		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@ColdGrains, @BetterHaven, 0, @EACH, 0)
-		INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@HotGrains, @BetterHaven, 0, @EACH, 0)
+			-- Add stock information for items under location 3 ('BETTER HAVEN')
+			INSERT INTO dbo.tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@WetGrains, @BetterHaven, 0, @EACH, 0)
+			INSERT INTO dbo.tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@StickyGrains, @BetterHaven, 0, @EACH, 0)
+			INSERT INTO dbo.tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@PremiumGrains, @BetterHaven, 0, @EACH, 0)
+			INSERT INTO dbo.tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@ColdGrains, @BetterHaven, 0, @EACH, 0)
+			INSERT INTO dbo.tblICItemStock (intItemId, intLocationId, dblUnitOnHand, intUnitMeasureId, dblAverageCost) VALUES (@HotGrains, @BetterHaven, 0, @EACH, 0)
+		END
 
-		-- Add the G/L accounts for WET GRAINS
-		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@WetGrains, @Account_Inventory, @Inventory_Default);
-		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@WetGrains, @Account_CostOfGoods, @CostOfGoods_Default);
-		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@WetGrains, @Account_APClearing, @APClearing_Default);
-		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@WetGrains, @Account_WriteOffSold, @WriteOffSold_Default);
-		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@WetGrains, @Account_RevalueSold, @RevalueSold_Default);
-		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@WetGrains, @Account_AutoNegative, @AutoNegative_Default);
+		-- Fake data for tblICInventoryFIFO
+		BEGIN
+			INSERT INTO dbo.tblICInventoryFIFO (intItemId, intItemLocationId, dtmDate, dblStockIn, dblStockOut, dblCost, intConcurrencyId) VALUES (@WetGrains, @Default_Location, 'January 1, 2014', 100, 0, 22.00, 1)
+			INSERT INTO dbo.tblICInventoryFIFO (intItemId, intItemLocationId, dtmDate, dblStockIn, dblStockOut, dblCost, intConcurrencyId) VALUES (@StickyGrains, @Default_Location, 'January 1, 2014', 150, 0, 33.00, 1)
+			INSERT INTO dbo.tblICInventoryFIFO (intItemId, intItemLocationId, dtmDate, dblStockIn, dblStockOut, dblCost, intConcurrencyId) VALUES (@PremiumGrains, @Default_Location, 'January 1, 2014', 200, 0, 44.00, 1)
+			INSERT INTO dbo.tblICInventoryFIFO (intItemId, intItemLocationId, dtmDate, dblStockIn, dblStockOut, dblCost, intConcurrencyId) VALUES (@ColdGrains, @Default_Location, 'January 1, 2014', 250, 0, 55.00, 1)
+			INSERT INTO dbo.tblICInventoryFIFO (intItemId, intItemLocationId, dtmDate, dblStockIn, dblStockOut, dblCost, intConcurrencyId) VALUES (@HotGrains, @Default_Location, 'January 1, 2014', 300, 0, 66.00, 1)
+		END 
 
-		-- Add the G/L accounts for STICKY GRAINS
-		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@StickyGrains, @Account_Inventory, @Inventory_NewHaven);
-		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@StickyGrains, @Account_CostOfGoods, @CostOfGoods_NewHaven);
-		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@StickyGrains, @Account_APClearing, @APClearing_NewHaven);
-		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@StickyGrains, @Account_WriteOffSold, @WriteOffSold_NewHaven);
-		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@StickyGrains, @Account_RevalueSold, @RevalueSold_NewHaven);
-		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@StickyGrains, @Account_AutoNegative, @AutoNegative_NewHaven);
+		-- Fake data for Item-Account
+		BEGIN 
+			-- Add the G/L accounts for WET GRAINS
+			INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@WetGrains, @Account_Inventory, @Inventory_Default);
+			INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@WetGrains, @Account_CostOfGoods, @CostOfGoods_Default);
+			INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@WetGrains, @Account_APClearing, @APClearing_Default);
+			INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@WetGrains, @Account_WriteOffSold, @WriteOffSold_Default);
+			INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@WetGrains, @Account_RevalueSold, @RevalueSold_Default);
+			INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@WetGrains, @Account_AutoNegative, @AutoNegative_Default);
 
-		-- Add the G/L accounts for PREMIUM GRAINS 
-		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@PremiumGrains, @Account_Inventory, @Inventory_BetterHaven);
-		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@PremiumGrains, @Account_CostOfGoods, @CostOfGoods_BetterHaven);
-		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@PremiumGrains, @Account_APClearing, @APClearing_BetterHaven);
-		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@PremiumGrains, @Account_WriteOffSold, @WriteOffSold_BetterHaven);
-		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@PremiumGrains, @Account_RevalueSold, @RevalueSold_BetterHaven);
-		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@PremiumGrains, @Account_AutoNegative, @AutoNegative_BetterHaven);
+			-- Add the G/L accounts for STICKY GRAINS
+			INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@StickyGrains, @Account_Inventory, @Inventory_NewHaven);
+			INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@StickyGrains, @Account_CostOfGoods, @CostOfGoods_NewHaven);
+			INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@StickyGrains, @Account_APClearing, @APClearing_NewHaven);
+			INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@StickyGrains, @Account_WriteOffSold, @WriteOffSold_NewHaven);
+			INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@StickyGrains, @Account_RevalueSold, @RevalueSold_NewHaven);
+			INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@StickyGrains, @Account_AutoNegative, @AutoNegative_NewHaven);
 
-		-- Add the G/L accounts for COLD GRAINS 
-		-- No item level g/l account overrides for cold grains. Use g/l from category
+			-- Add the G/L accounts for PREMIUM GRAINS 
+			INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@PremiumGrains, @Account_Inventory, @Inventory_BetterHaven);
+			INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@PremiumGrains, @Account_CostOfGoods, @CostOfGoods_BetterHaven);
+			INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@PremiumGrains, @Account_APClearing, @APClearing_BetterHaven);
+			INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@PremiumGrains, @Account_WriteOffSold, @WriteOffSold_BetterHaven);
+			INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@PremiumGrains, @Account_RevalueSold, @RevalueSold_BetterHaven);
+			INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@PremiumGrains, @Account_AutoNegative, @AutoNegative_BetterHaven);
+
+			-- Add the G/L accounts for COLD GRAINS 
+			-- No item level g/l account overrides for cold grains. Use g/l from category
 		
-		-- Add the G/L accounts for HOT GRAINS
-		-- No item level g/l account overrides for hot grains. Use g/l from category
-
+			-- Add the G/L accounts for HOT GRAINS
+			-- No item level g/l account overrides for hot grains. Use g/l from category
+		END
 END 
