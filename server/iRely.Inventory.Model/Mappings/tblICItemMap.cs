@@ -105,6 +105,17 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnTaxable).HasColumnName("ysnTaxable");
             this.Property(t => t.ysnTonnageTax).HasColumnName("ysnTonnageTax");
 
+            this.HasOptional(p => p.tblICBrand)
+                .WithMany(p => p.tblICItems)
+                .HasForeignKey(p => p.intBrandId);
+            this.HasOptional(p => p.tblICManufacturer)
+                .WithMany(p => p.tblICItems)
+                .HasForeignKey(p => p.intManufacturerId);
+            this.HasOptional(p => p.tblICCategory)
+                .WithMany(p => p.tblICItems)
+                .HasForeignKey(p => p.intTrackingId);
+
+
             this.HasMany(p => p.tblICItemUOMs)
                 .WithRequired(p => p.tblICItem)
                 .HasForeignKey(p => p.intItemId);

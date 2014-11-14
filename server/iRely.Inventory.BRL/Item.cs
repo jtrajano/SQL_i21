@@ -24,14 +24,21 @@ namespace iRely.Inventory.BRL
         public IQueryable<ItemVM> GetSearchQuery()
         {
             return _db.GetQuery<tblICItem>()
-                .Select(p => new ItemVM { 
+                .Include(p => p.tblICBrand)
+                .Include(p => p.tblICManufacturer)
+                .Include(p => p.tblICCategory)
+                .Select(p => new ItemVM
+                {
                     intItemId = p.intItemId,
                     strItemNo = p.strItemNo,
                     strType = p.strType,
                     strDescription = p.strDescription,
                     strStatus = p.strStatus,
                     strModelNo = p.strModelNo,
-                    strLotTracking = p.strLotTracking
+                    strLotTracking = p.strLotTracking,
+                    strBrand = p.tblICBrand.strBrandCode,
+                    strManufacturer = p.tblICManufacturer.strManufacturer,
+                    strTracking = p.tblICCategory.strCategoryCode
                 });
         }
 

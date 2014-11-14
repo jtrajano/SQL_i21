@@ -25,5 +25,6 @@ namespace iRely.Inventory.Model
         public string strNotes { get; set; }
 
         public ICollection<tblICBrand> tblICBrands { get; set; }
+        public ICollection<tblICItem> tblICItems { get; set; }
     }
 }

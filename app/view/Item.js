@@ -1862,8 +1862,7 @@ Ext.define('Inventory.view.Item', {
                                                                                                     {
                                                                                                         dataIndex: 'strInternalCode',
                                                                                                         dataType: 'string',
-                                                                                                        text: 'Internal Code',
-                                                                                                        flex: 1
+                                                                                                        text: 'Internal Code'
                                                                                                     },
                                                                                                     {
                                                                                                         dataIndex: 'strDisplayMember',
