@@ -319,7 +319,6 @@ Ext.define('Inventory.view.CategoryLocation', {
                                 },
                                 {
                                     xtype: 'gridcombobox',
-                                    flex: 1,
                                     columns: [
                                         {
                                             dataIndex: 'intPaidOutId',
@@ -340,6 +339,7 @@ Ext.define('Inventory.view.CategoryLocation', {
                                             flex: 1
                                         }
                                     ],
+                                    flex: 1,
                                     itemId: 'cboConvertToPaidout',
                                     fieldLabel: 'Convert to Paidout',
                                     labelWidth: 175,

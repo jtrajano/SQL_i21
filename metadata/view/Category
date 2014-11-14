@@ -829,7 +829,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter1",
+                                                    "name": "filter129",
                                                     "designerId": "9be921ca-705f-47f3-98b7-abf79fa0ae14",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1040,7 +1040,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter11",
+                                                    "name": "filter130",
                                                     "designerId": "336cd22c-55d7-4f75-bd45-20820dfc01b5",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1303,7 +1303,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter12",
+                                                    "name": "filter131",
                                                     "designerId": "1f016d2c-d6a9-4998-be84-a17777e4dd56",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1856,6 +1856,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "bodyPadding": null,
+                                "hidden": true,
                                 "layout": "fit",
                                 "title": "Catalog"
                             },
@@ -1945,7 +1946,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter13",
+                                                    "name": "filter132",
                                                     "designerId": "0763d06c-c630-47e6-91f4-89ddac6c34ff",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2428,7 +2429,7 @@
                                                         "layout|flex": null,
                                                         "margin": null,
                                                         "maxWidth": null,
-                                                        "name": "imgPhoto",
+                                                        "name": "imgReceiptImage",
                                                         "style": "background-color: white ;border:1px #b5b8c8 solid",
                                                         "width": 158
                                                     },
@@ -2494,7 +2495,7 @@
                                                         "layout|flex": null,
                                                         "margin": null,
                                                         "maxWidth": null,
-                                                        "name": "imgPhoto",
+                                                        "name": "imgWIPImage",
                                                         "style": "background-color: white ;border:1px #b5b8c8 solid",
                                                         "width": 158
                                                     },
@@ -2559,7 +2560,7 @@
                                                         "layout|flex": null,
                                                         "margin": null,
                                                         "maxWidth": null,
-                                                        "name": "imgPhoto",
+                                                        "name": "imgFGImage",
                                                         "style": "background-color: white ;border:1px #b5b8c8 solid",
                                                         "width": 158
                                                     },
@@ -2625,7 +2626,7 @@
                                                         "layout|flex": null,
                                                         "margin": null,
                                                         "maxWidth": null,
-                                                        "name": "imgPhoto",
+                                                        "name": "imgShipImage",
                                                         "style": "background-color: white ;border:1px #b5b8c8 solid",
                                                         "width": 158
                                                     },
@@ -2664,7 +2665,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging13",
                     "designerId": "0ca3c6d6-785e-4ad8-ac4f-3eaa2d75593b",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
