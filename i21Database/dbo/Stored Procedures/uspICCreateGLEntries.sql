@@ -17,9 +17,9 @@ DECLARE @AUTO_NEGATIVE AS INT = -3;
 
 -- Create the variables used by fnGetItemGLAccount
 DECLARE @UseGLAccount_Inventory AS NVARCHAR(30) = 'Inventory';
-DECLARE @UseGLAccount_WriteOffSold AS NVARCHAR(30) = 'WriteOffSold';
-DECLARE @UseGLAccount_RevalueSold AS NVARCHAR(30) = 'RevalueSold';
-DECLARE @UseGLAccount_AutoNegative AS NVARCHAR(30) = 'AutoNegative';
+DECLARE @UseGLAccount_WriteOffSold AS NVARCHAR(30) = 'Write-Off Sold';
+DECLARE @UseGLAccount_RevalueSold AS NVARCHAR(30) = 'Revalue Sold';
+DECLARE @UseGLAccount_AutoNegative AS NVARCHAR(30) = 'Auto Negative';
 
 DECLARE @GLAccounts AS dbo.ItemGLAccount; 
 DECLARE @GLEntries AS dbo.RecapTableType; 

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICCreateGLEntries for one item purchase]
+﻿CREATE PROCEDURE [testi21Database].[test uspICCreateGLEntries for Revalue Sold]
 AS
 BEGIN
 	-- Arrange 
@@ -13,6 +13,7 @@ BEGIN
 		DECLARE @AUTO_NEGATIVE AS INT = -3
 		
 		DECLARE @PurchaseType AS INT = 1
+		DECLARE @SaleType AS INT = 2
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -78,17 +79,17 @@ BEGIN
 		)
 		SELECT 	intItemId = @StickyGrains
 				,intItemLocationId = @Default_Location
-				,dtmDate = 'January 12, 2014'
-				,dblUnitQty = 1
-				,dblCost = 12.00
+				,dtmDate = 'January 17, 2014'
+				,dblUnitQty = -11
+				,dblCost = 1.50
 				,dblValue = 0
 				,dblSalesPrice = 0
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
 				,intTransactionId = 1
-				,strTransactionId = 'PURCHASE-00001'
+				,strTransactionId = 'SALE-00001'
 				,strBatchId = 'BATCH-000001'
-				,intTransactionTypeId = @PurchaseType
+				,intTransactionTypeId = @REVALUE_SOLD
 				,intLotId = NULL 
 				,dtmCreated = GETDATE()
 				,intCreatedUserId = 1
@@ -131,10 +132,36 @@ BEGIN
 			,intConcurrencyId		
 		)
 		SELECT	
-			dtmDate						= 'January 12, 2014'
+			dtmDate						= 'January 17, 2014'
 			,strBatchId					= 'BATCH-000001'
 			,intAccountId				= @Inventory_Default
-			,dblDebit					= 12.00
+			,dblDebit					= 0
+			,dblCredit					= 16.50
+			,dblDebitUnit				= 0
+			,dblCreditUnit				= 0
+			,strDescription				= '' -- TODO 
+			,strCode					= '' -- TODO
+			,strReference				= '' -- TODO
+			,intCurrencyId				= @USD
+			,dblExchangeRate			= 1
+			,dtmTransactionDate			= 'January 17, 2014'
+			,strJournalLineDescription	= '' -- TODO
+			,intJournalLineNo			= NULL -- TODO
+			,ysnIsUnposted				= 0
+			,intUserId					= 1 -- TODO
+			,intEntityId				= 1 -- TODO
+			,strTransactionId			= 'SALE-00001'
+			,intTransactionId			= 1
+			,strTransactionType			= '' -- TODO 
+			,strTransactionForm			= '' -- TODO
+			,strModuleName				= '' -- TODO
+			,intConcurrencyId			= 1
+		UNION ALL 
+		SELECT	
+			dtmDate						= 'January 17, 2014'
+			,strBatchId					= 'BATCH-000001'
+			,intAccountId				= @RevalueSold_Default
+			,dblDebit					= 16.50
 			,dblCredit					= 0
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
@@ -143,45 +170,18 @@ BEGIN
 			,strReference				= '' -- TODO
 			,intCurrencyId				= @USD
 			,dblExchangeRate			= 1
-			,dtmTransactionDate			= 'January 12, 2014'
+			,dtmTransactionDate			= 'January 17, 2014'
 			,strJournalLineDescription	= '' -- TODO
 			,intJournalLineNo			= NULL -- TODO
 			,ysnIsUnposted				= 0
 			,intUserId					= 1 -- TODO
 			,intEntityId				= 1 -- TODO
-			,strTransactionId			= 'PURCHASE-00001'
-			,intTransactionId			= 1
-			,strTransactionType			= '' -- TODO 
-			,strTransactionForm			= '' -- TODO
-			,strModuleName				= '' -- TODO
-			,intConcurrencyId			= 1
-		UNION ALL 
-		SELECT	
-			dtmDate						= 'January 12, 2014'
-			,strBatchId					= 'BATCH-000001'
-			,intAccountId				= @CostOfGoods_Default
-			,dblDebit					= 0
-			,dblCredit					= 12.00
-			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
-			,strDescription				= '' -- TODO 
-			,strCode					= '' -- TODO
-			,strReference				= '' -- TODO
-			,intCurrencyId				= @USD
-			,dblExchangeRate			= 1
-			,dtmTransactionDate			= 'January 12, 2014'
-			,strJournalLineDescription	= '' -- TODO
-			,intJournalLineNo			= NULL -- TODO
-			,ysnIsUnposted				= 0
-			,intUserId					= 1 -- TODO
-			,intEntityId				= 1 -- TODO
-			,strTransactionId			= 'PURCHASE-00001'
+			,strTransactionId			= 'SALE-00001'
 			,intTransactionId			= 1
 			,strTransactionType			= '' -- TODO 
 			,strTransactionForm			= '' -- TODO
 			,strModuleName				= '' -- TODO
 			,intConcurrencyId			= 1		
-
 	END 
 	
 	-- Act
@@ -201,7 +201,7 @@ BEGIN
 		ALTER TABLE actual 
 		DROP COLUMN dtmDateEntered			
 	END 
-
+	
 	-- Assert
 	BEGIN 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';

@@ -377,9 +377,26 @@
     <Build Include="testi21Database\Functions\test fnGetCredit for negative value.sql" />
     <Build Include="testi21Database\Functions\test fnGetCredit for positive value.sql" />
     <Build Include="testi21Database\Functions\test fnGetCredit for the basics.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for the basics.sql" />
-    <Build Include="testi21Database\Stored Procedures\Fake data for COA used for Items.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for one item purchase.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\Fake data for COA used in costing.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for one item purchase.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\Fake data for item costing.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for one item sold.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for Write-Off Sold.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for Revalue Sold.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for Auto Negative.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

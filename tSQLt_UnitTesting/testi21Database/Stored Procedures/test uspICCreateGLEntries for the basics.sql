@@ -38,18 +38,14 @@ BEGIN
 		DECLARE @recap AS dbo.RecapTableType		
 		SELECT * INTO expected FROM @recap		
 		SELECT * INTO actual FROM @recap
-
-		DECLARE @intItemId AS INT = @StickyGrains
-				,@intItemLocationId AS INT = @NewHaven 
-				,@intTransactionId AS INT = 1
-				,@strTransactionId AS NVARCHAR(40) = 'PURCHASE-00001'
-				,@strBatchId AS NVARCHAR(20) = 'BATCH-000001'
-				,@UseGLAccount_ContraInventory AS NVARCHAR(255) = 'Cost of Goods'
-				,@intUserId AS INT = 1
 	END 
 	
 	-- Act
 	BEGIN 
+		DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-000001'
+				,@UseGLAccount_ContraInventory AS NVARCHAR(255) = 'Cost of Goods'
+				,@intUserId AS INT = 1
+
 		INSERT INTO actual 
 		EXEC dbo.uspICCreateGLEntries
 			@strBatchId
