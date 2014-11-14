@@ -238,7 +238,7 @@ BEGIN
 			,[intEntityId]
 	)
 	SELECT	[strTransactionId]		= @strTransactionId
-			,[intTransactionId]		= NULL
+			,[intTransactionId]		= @intTransactionId
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= GLAccnt.intAccountId
@@ -270,7 +270,7 @@ BEGIN
 	-- 2. DEBIT SIdE (TARGET OF THE FUND)
 	UNION ALL 
 	SELECT	[strTransactionId]		= @strTransactionId
-			,[intTransactionId]		= NULL
+			,[intTransactionId]		= @intTransactionId
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= GLAccnt.intAccountId

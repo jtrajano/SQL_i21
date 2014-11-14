@@ -264,7 +264,7 @@ BEGIN
 	)
 	-- 1. CREDIT SIDE
 	SELECT	[strTransactionId]		= @strTransactionId
-			,[intTransactionId]		= NULL
+			,[intTransactionId]		= @intTransactionId
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= BankAccnt.intGLAccountId
@@ -297,7 +297,7 @@ BEGIN
 	-- 2. DEBIT SIDE
 	UNION ALL 
 	SELECT	[strTransactionId]		= @strTransactionId
-			,[intTransactionId]		= NULL
+			,[intTransactionId]		= @intTransactionId
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= B.intGLAccountId
