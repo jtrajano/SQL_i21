@@ -359,7 +359,9 @@
     <Build Include="dbo\Stored Procedures\uspSMErrorMessages.sql" />
     <Build Include="dbo\Stored Procedures\uspCMPostRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspCMReconcileBankRecords.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMReverseGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMReverseGLEntries.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Stored Procedures\uspGLAccountClone.sql" />
     <Build Include="dbo\Stored Procedures\uspGLAccountOriginSync.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildAccount.sql" />
