@@ -6,6 +6,8 @@ SELECT
 	A.dblTotal,
 	A.ysnPosted,
 	A.ysnPaid,
+	A.dtmDate,
+	A.dtmBillDate,
 	A.strVendorOrderNumber,
 	A.intTransactionType,
 	B1.strName,
