@@ -77,33 +77,33 @@ AS
 	FROM	dbo.tblICInventoryTransaction TRANS 
 	WHERE	TRANS.strBatchId = @strBatchId
 )
-INSERT INTO @GLEntries (
-		dtmDate
-		,strBatchId
-		,intAccountId
-		,dblDebit
-		,dblCredit
-		,dblDebitUnit
-		,dblCreditUnit
-		,strDescription
-		,strCode
-		,strReference
-		,intCurrencyId
-		,dblExchangeRate
-		,dtmDateEntered
-		,dtmTransactionDate
-		,strJournalLineDescription
-		,intJournalLineNo
-		,ysnIsUnposted
-		,intUserId
-		,intEntityId
-		,strTransactionId
-		,intTransactionId
-		,strTransactionType
-		,strTransactionForm
-		,strModuleName
-		,intConcurrencyId
-)
+--INSERT INTO @GLEntries (
+--		dtmDate
+--		,strBatchId
+--		,intAccountId
+--		,dblDebit
+--		,dblCredit
+--		,dblDebitUnit
+--		,dblCreditUnit
+--		,strDescription
+--		,strCode
+--		,strReference
+--		,intCurrencyId
+--		,dblExchangeRate
+--		,dtmDateEntered
+--		,dtmTransactionDate
+--		,strJournalLineDescription
+--		,intJournalLineNo
+--		,ysnIsUnposted
+--		,intUserId
+--		,intEntityId
+--		,strTransactionId
+--		,intTransactionId
+--		,strTransactionType
+--		,strTransactionForm
+--		,strModuleName
+--		,intConcurrencyId
+--)
 -------------------------------------------------------------------------------------------
 -- This part if for the usual G/L entries for Inventory Account and its contra account 
 -------------------------------------------------------------------------------------------
@@ -394,5 +394,5 @@ FROM	ForGLEntries_CTE
 WHERE	intTransactionTypeId  = @AUTO_NEGATIVE
 ;
 
--- Query the GL Entries table
-SELECT * FROM @GLEntries;
+---- Query the GL Entries table
+--SELECT * FROM @GLEntries;
