@@ -646,6 +646,8 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			--Entity
 			ptcus_last_name,
 			ptcus_first_name,
+			ptcus_mid_init, 
+			ptcus_name_suffx, 
 			ptcus_comment,
 			--Contact,
 			ptcus_contact,
@@ -694,6 +696,8 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			--Entity
 			ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,1,25) ELSE SUBSTRING(Ent.strName, 1, (CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  -1 ELSE 25 END)) END),'''') AS strLastName,
 			ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,26,50) ELSE SUBSTRING(Ent.strName,(CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  + 2 ELSE 50 END),50) END),'''') AS strFirsName,
+			'''' as strMiddleInitial, 
+			'''' as strNameSuffix,
 			SUBSTRING(Ent.strInternalNotes,1,30) as strInternalNotes,
 			--Ent.str1099Name,
 			--Contact
@@ -1097,6 +1101,5 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 	IF(@Update = 1 AND @CustomerId IS NULL) 
 	BEGIN
 		SELECT @Total = COUNT(ptcus_cus_no) from tblARTempCustomer
-	END'
-)
+	END')
 END
