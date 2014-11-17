@@ -815,6 +815,8 @@
     <Build Include="dbo\Functions\fnGetDebit.sql" />
     <Build Include="dbo\Functions\fnGetCredit.sql" />
     <Build Include="dbo\Views\vyuARInvoiceSearch.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesSummary.sql" />
+    <Build Include="dbo\Views\vyuAPPayables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

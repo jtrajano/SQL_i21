@@ -1,48 +1,48 @@
-﻿CREATE VIEW vyuAPPayablesAgingSummary 
-
-AS 
-
-SELECT tblAPBill.dtmDate AS dtmDate 
-, tblAPBill.intBillId 
-, tblAPBill.strBillId 
-, 0 AS dblAmountPaid 
-, dblTotal = ISNULL(tblAPBill.dblTotal,0) 
-, dblAmountDue = tblAPBill.dblAmountDue 
-, dblDiscount = 0 
-, dblInterest = 0 
-, tblAPVendor.strVendorId 
-, isnull(tblAPVendor.strVendorId,'') + ' - ' + isnull(tblEntity.strName,'') as strVendorIdName 
-, tblAPBill.dtmDueDate
-, tblAPBill.ysnPosted 
-, tblAPBill.ysnPaid
-, tblGLAccount.strAccountId
-, strDescription = (Select strDescription From tblGLAccount where strAccountId = tblGLAccount.strAccountId) 
-FROM tblAPBill 
-INNER JOIN tblGLAccount ON tblAPBill.intAccountId = tblGLAccount.intAccountId
-LEFT JOIN (tblAPVendor INNER JOIN tblEntity ON tblAPVendor.intEntityId = tblEntity.intEntityId)
-	ON tblAPVendor.intEntityId = tblAPBill.intVendorId 
-WHERE tblAPBill.ysnPosted = 1   
-UNION ALL   
-SELECT tblAPPayment.dtmDatePaid AS dtmDate,   
- tblAPPaymentDetail.intBillId,   
- tblAPBill.strBillId ,
- tblAPPaymentDetail.dblPayment AS dblAmountPaid,     
- dblTotal = 0 
-, dblAmountDue = 0 
-, tblAPPaymentDetail.dblDiscount 
-, tblAPPaymentDetail.dblInterest 
-, tblAPVendor.strVendorId 
-, isnull(tblAPVendor.strVendorId,'') + ' - ' + isnull(tblEntity.strName,'') as strVendorIdName 
-, tblAPBill.dtmDueDate 
-, tblAPBill.ysnPosted 
-, tblAPBill.ysnPaid
-, tblGLAccount.strAccountId
-, strDescription = (Select strDescription From tblGLAccount where strAccountId = tblGLAccount.strAccountId)
-FROM tblAPPaymentDetail   
- LEFT JOIN (tblAPBill LEFT JOIN (tblAPVendor INNER JOIN tblEntity ON tblAPVendor.intEntityId = tblEntity.intEntityId) ON tblAPVendor.intVendorId = tblAPBill.intVendorId) 
- ON tblAPBill.intBillId = tblAPPaymentDetail.intBillId 
- INNER JOIN tblGLAccount ON tblAPBill.intAccountId = tblGLAccount.intAccountId  
- LEFT JOIN tblAPPayment   
- ON tblAPPayment.intPaymentId = tblAPPaymentDetail.intPaymentId   
-WHERE tblAPBill.ysnPosted = 1  
-	AND tblAPPayment.ysnPosted = 1
+﻿CREATE VIEW [dbo].[vyuAPPayablesAgingSummary]
+WITH SCHEMABINDING
+AS
+SELECT
+A.dtmDate
+,A.dtmDueDate
+,B.strVendorId
+,tmpAgingSummaryTotal.dblTotal
+,tmpAgingSummaryTotal.dblAmountPaid
+,tmpAgingSummaryTotal.dblDiscount
+,tmpAgingSummaryTotal.dblInterest
+,tmpAgingSummaryTotal.dblAmountDue
+,ISNULL(B.strVendorId,'') + ' - ' + isnull(C.strName,'') as strVendorIdName 
+,CASE WHEN tmpAgingSummaryTotal.dblAmountDue>=0 THEN 0 
+		ELSE tmpAgingSummaryTotal.dblAmountDue END AS dblUnappliedAmount
+,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=0 THEN 0
+		ELSE DATEDIFF(dayofyear,A.dtmDueDate,GETDATE()) END AS intAging
+,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=0 
+		THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dblCurrent,
+	CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>0 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=30 
+		THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dbl1, 
+	CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>30 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=60
+		THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dbl30, 
+	CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>60 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=90 
+		THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dbl60,
+	CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>90  
+		THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dbl90
+,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=0 THEN 'Current'
+		WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>0 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=30 THEN '01 - 30 Days'
+		WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>30 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=60 THEN '31 - 60 Days' 
+		WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>60 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=90 THEN '61 - 90 Days'
+		WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>90 THEN 'Over 90' 
+		ELSE 'Current' END AS strAge
+FROM  
+(
+	SELECT 
+	intBillId
+	,dblTotal
+	,dblAmountPaid
+	,dblAmountDue
+	,dblInterest
+	,dblDiscount
+	FROM dbo.vyuAPPayablesSummary
+) AS tmpAgingSummaryTotal
+LEFT JOIN dbo.tblAPBill A
+ON A.intBillId = tmpAgingSummaryTotal.intBillId
+LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEntity C ON B.intEntityId = C.intEntityId)
+ON B.intVendorId = A.intVendorId
