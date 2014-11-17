@@ -1,4 +1,5 @@
-﻿IF EXISTS(select top 1 1 from sys.procedures where name = 'uspARImportTerm')
+﻿GO
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspARImportTerm')
 	DROP PROCEDURE uspARImportTerm
 GO
 
