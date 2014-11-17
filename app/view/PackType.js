@@ -284,9 +284,12 @@ Ext.define('Inventory.view.PackType', {
                             xtype: 'numbercolumn',
                             itemId: 'colConversionFactor',
                             width: 125,
+                            align: 'right',
                             text: 'Conversion Factor',
                             editor: {
-                                xtype: 'numberfield'
+                                xtype: 'numberfield',
+                                fieldStyle: 'text-align:right',
+                                hideTrigger: true
                             }
                         }
                     ],
