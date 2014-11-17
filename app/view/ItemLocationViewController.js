@@ -173,6 +173,7 @@ Ext.define('Inventory.view.ItemLocationViewController', {
         var me = this;
         var record = Ext.create('Inventory.model.ItemLocation');
         record.set('intItemId', me.intItemId);
+        record.set('intLocationId', app.DefaultLocation);
         action(record);
     }
 });
