@@ -28,6 +28,7 @@ Ext.define('Inventory.view.LineOfBusinessViewController', {
                 title: 'Line Of Business',
                 columns: [
                     {
+                        itemId: 'colLineOfBusiness',
                         dataIndex: 'strLineOfBusiness',
                         text: 'Line Of Business',
                         flex: 1,
