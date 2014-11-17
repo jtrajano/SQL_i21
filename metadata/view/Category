@@ -420,6 +420,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Standard Qty",
+                                                        "fieldStyle": "text-align:right",
                                                         "hideTrigger": true,
                                                         "itemId": "txtStandardQty",
                                                         "labelWidth": 130,
@@ -830,7 +831,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter129",
+                                                    "name": "filter16",
                                                     "designerId": "9be921ca-705f-47f3-98b7-abf79fa0ae14",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -876,6 +877,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "dataIndex": "string",
                                                 "flex": 1,
                                                 "itemId": "colLocationTargetGrossProfit",
@@ -892,6 +894,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "dataIndex": "string",
                                                 "flex": 1,
                                                 "itemId": "colLocationTargetInventoryCost",
@@ -908,6 +911,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "dataIndex": "string",
                                                 "flex": 1,
                                                 "itemId": "colLocationCostInventoryBOM",
@@ -1041,7 +1045,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter130",
+                                                    "name": "filter17",
                                                     "designerId": "336cd22c-55d7-4f75-bd45-20820dfc01b5",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1304,7 +1308,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter131",
+                                                    "name": "filter18",
                                                     "designerId": "1f016d2c-d6a9-4998-be84-a17777e4dd56",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1947,7 +1951,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter132",
+                                                    "name": "filter19",
                                                     "designerId": "0763d06c-c630-47e6-91f4-89ddac6c34ff",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2095,6 +2099,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Life Time (mins)",
+                                                        "fieldStyle": "text-align:right",
                                                         "hideTrigger": true,
                                                         "itemId": "txtLifeTime",
                                                         "labelWidth": 160,
@@ -2112,6 +2117,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "BOM Item Shrinkage",
+                                                        "fieldStyle": "text-align:right",
                                                         "hideTrigger": true,
                                                         "itemId": "txtBOMItemShrinkage",
                                                         "labelWidth": 160,
@@ -2129,6 +2135,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "BOM Item Upper Tolerance",
+                                                        "fieldStyle": "text-align:right",
                                                         "hideTrigger": true,
                                                         "itemId": "txtBOMItemUpperTolerance",
                                                         "labelWidth": 160,
@@ -2146,6 +2153,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "BOM Item Lower Tolerance",
+                                                        "fieldStyle": "text-align:right",
                                                         "hideTrigger": true,
                                                         "itemId": "txtBOMItemLowerTolerance",
                                                         "labelWidth": 160,
@@ -2265,6 +2273,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Labor Cost",
+                                                        "fieldStyle": "text-align:right",
                                                         "hideTrigger": true,
                                                         "itemId": "txtLaborCost",
                                                         "labelWidth": 160,
@@ -2283,6 +2292,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Over Head",
+                                                        "fieldStyle": "text-align:right",
                                                         "hideTrigger": true,
                                                         "itemId": "txtOverHead",
                                                         "labelWidth": 160,
@@ -2301,6 +2311,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "fieldLabel": "Percentage",
+                                                        "fieldStyle": "text-align:right",
                                                         "hideTrigger": true,
                                                         "itemId": "txtPercentage",
                                                         "labelWidth": 160,
@@ -2666,7 +2677,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging13",
+                    "name": "statusbarpaging11",
                     "designerId": "0ca3c6d6-785e-4ad8-ac4f-3eaa2d75593b",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

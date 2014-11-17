@@ -252,6 +252,7 @@ Ext.define('Inventory.view.CategoryLocation', {
                                     itemId: 'txtTargetGrossProfitPercent',
                                     fieldLabel: 'Target Gross Profit %',
                                     labelWidth: 165,
+                                    fieldStyle: 'text-align:right',
                                     hideTrigger: true
                                 },
                                 {
@@ -259,6 +260,7 @@ Ext.define('Inventory.view.CategoryLocation', {
                                     itemId: 'txtTargetInventoryAtCost',
                                     fieldLabel: 'Target Inventory at Cost',
                                     labelWidth: 165,
+                                    fieldStyle: 'text-align:right',
                                     hideTrigger: true
                                 },
                                 {
@@ -266,6 +268,7 @@ Ext.define('Inventory.view.CategoryLocation', {
                                     itemId: 'txtCostOfInventoryAtBom',
                                     fieldLabel: 'Cost of Inventory at BOM',
                                     labelWidth: 165,
+                                    fieldStyle: 'text-align:right',
                                     hideTrigger: true
                                 },
                                 {
@@ -273,6 +276,7 @@ Ext.define('Inventory.view.CategoryLocation', {
                                     itemId: 'txtLowGrossMarginPercentAlert',
                                     fieldLabel: 'Low Gross Margin % Alert',
                                     labelWidth: 165,
+                                    fieldStyle: 'text-align:right',
                                     hideTrigger: true
                                 },
                                 {
@@ -280,6 +284,7 @@ Ext.define('Inventory.view.CategoryLocation', {
                                     itemId: 'txtHighGrossMarginPercentAlert',
                                     fieldLabel: 'High Gross Margin % Alert',
                                     labelWidth: 165,
+                                    fieldStyle: 'text-align:right',
                                     hideTrigger: true
                                 },
                                 {
@@ -484,6 +489,7 @@ Ext.define('Inventory.view.CategoryLocation', {
                                     maxWidth: 225,
                                     fieldLabel: 'Default Minimum Age',
                                     labelWidth: 175,
+                                    fieldStyle: 'text-align:right',
                                     hideTrigger: true
                                 }
                             ]

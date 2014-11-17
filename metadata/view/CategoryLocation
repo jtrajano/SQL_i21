@@ -484,6 +484,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Target Gross Profit %",
+                                        "fieldStyle": "text-align:right",
                                         "hideTrigger": true,
                                         "itemId": "txtTargetGrossProfitPercent",
                                         "labelWidth": 165,
@@ -503,6 +504,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Target Inventory at Cost",
+                                        "fieldStyle": "text-align:right",
                                         "hideTrigger": true,
                                         "itemId": "txtTargetInventoryAtCost",
                                         "labelWidth": 165,
@@ -522,6 +524,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Cost of Inventory at BOM",
+                                        "fieldStyle": "text-align:right",
                                         "hideTrigger": true,
                                         "itemId": "txtCostOfInventoryAtBom",
                                         "labelWidth": 165,
@@ -541,6 +544,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Low Gross Margin % Alert",
+                                        "fieldStyle": "text-align:right",
                                         "hideTrigger": true,
                                         "itemId": "txtLowGrossMarginPercentAlert",
                                         "labelWidth": 165,
@@ -560,6 +564,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "High Gross Margin % Alert",
+                                        "fieldStyle": "text-align:right",
                                         "hideTrigger": true,
                                         "itemId": "txtHighGrossMarginPercentAlert",
                                         "labelWidth": 165,
@@ -1012,6 +1017,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "fieldLabel": "Default Minimum Age",
+                                        "fieldStyle": "text-align:right",
                                         "hideTrigger": true,
                                         "itemId": "txtDefaultMinimumAge",
                                         "labelWidth": 175,
@@ -1041,7 +1047,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging14",
+                    "name": "statusbarpaging12",
                     "designerId": "61a83781-4c49-4581-8dd0-248eb965f747",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

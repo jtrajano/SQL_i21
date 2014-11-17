@@ -206,6 +206,7 @@ Ext.define('Inventory.view.Category', {
                                                             },
                                                             {
                                                                 xtype: 'combobox',
+                                                                disabled: true,
                                                                 itemId: 'cboCatalogGroup',
                                                                 fieldLabel: 'Catalog Group',
                                                                 labelWidth: 130
@@ -233,6 +234,7 @@ Ext.define('Inventory.view.Category', {
                                                                 maxWidth: 225,
                                                                 fieldLabel: 'Standard Qty',
                                                                 labelWidth: 130,
+                                                                fieldStyle: 'text-align:right',
                                                                 hideTrigger: true
                                                             },
                                                             {
@@ -446,6 +448,7 @@ Ext.define('Inventory.view.Category', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colLocationTargetGrossProfit',
+                                                        align: 'right',
                                                         dataIndex: 'string',
                                                         text: 'Target Gross Profit %',
                                                         flex: 1
@@ -453,6 +456,7 @@ Ext.define('Inventory.view.Category', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colLocationTargetInventoryCost',
+                                                        align: 'right',
                                                         dataIndex: 'string',
                                                         text: 'Target Inventory at Cost',
                                                         flex: 1
@@ -460,6 +464,7 @@ Ext.define('Inventory.view.Category', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colLocationCostInventoryBOM',
+                                                        align: 'right',
                                                         dataIndex: 'string',
                                                         text: 'Cost of Inventory at BOM',
                                                         flex: 1
@@ -954,6 +959,7 @@ Ext.define('Inventory.view.Category', {
                                                                 itemId: 'txtLifeTime',
                                                                 fieldLabel: 'Life Time (mins)',
                                                                 labelWidth: 160,
+                                                                fieldStyle: 'text-align:right',
                                                                 hideTrigger: true
                                                             },
                                                             {
@@ -961,6 +967,7 @@ Ext.define('Inventory.view.Category', {
                                                                 itemId: 'txtBOMItemShrinkage',
                                                                 fieldLabel: 'BOM Item Shrinkage',
                                                                 labelWidth: 160,
+                                                                fieldStyle: 'text-align:right',
                                                                 hideTrigger: true
                                                             },
                                                             {
@@ -968,6 +975,7 @@ Ext.define('Inventory.view.Category', {
                                                                 itemId: 'txtBOMItemUpperTolerance',
                                                                 fieldLabel: 'BOM Item Upper Tolerance',
                                                                 labelWidth: 160,
+                                                                fieldStyle: 'text-align:right',
                                                                 hideTrigger: true
                                                             },
                                                             {
@@ -975,6 +983,7 @@ Ext.define('Inventory.view.Category', {
                                                                 itemId: 'txtBOMItemLowerTolerance',
                                                                 fieldLabel: 'BOM Item Lower Tolerance',
                                                                 labelWidth: 160,
+                                                                fieldStyle: 'text-align:right',
                                                                 hideTrigger: true
                                                             },
                                                             {
@@ -1024,6 +1033,7 @@ Ext.define('Inventory.view.Category', {
                                                                 maxWidth: 275,
                                                                 fieldLabel: 'Labor Cost',
                                                                 labelWidth: 160,
+                                                                fieldStyle: 'text-align:right',
                                                                 hideTrigger: true
                                                             },
                                                             {
@@ -1032,6 +1042,7 @@ Ext.define('Inventory.view.Category', {
                                                                 maxWidth: 275,
                                                                 fieldLabel: 'Over Head',
                                                                 labelWidth: 160,
+                                                                fieldStyle: 'text-align:right',
                                                                 hideTrigger: true
                                                             },
                                                             {
@@ -1040,6 +1051,7 @@ Ext.define('Inventory.view.Category', {
                                                                 maxWidth: 275,
                                                                 fieldLabel: 'Percentage',
                                                                 labelWidth: 160,
+                                                                fieldStyle: 'text-align:right',
                                                                 hideTrigger: true
                                                             },
                                                             {
