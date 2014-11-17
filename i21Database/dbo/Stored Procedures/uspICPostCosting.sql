@@ -2,14 +2,15 @@
 /*
 	This is the stored procedure that handles the "posting" of items. 
 	
-	It uses a cursor to iterate over the list of records found in the @ItemsToProcess table-parameter(variable). 
+	It uses a cursor to iterate over the list of records found in @ItemsToPost, a table-valued parameter (variable). 
 
-	The each iteration, it does the following: 
+	In each iteration, it does the following: 
 		1. Determines if a stock is for incoming or outgoing then calls the appropriate stored procedure. 
-		2. Determines the type of inventory transaction it is, whether an in, out, or cost adjustment. 
+		2. Adjust the stock quantity and current average cost. 
+		3. Calls another stored procedure that will return the generated G/L entries
 
 	Parameters: 
-	@ItemsToProcess - A user-defined table type. This is a table variable that tells this SP what items to process. 
+	@ItemsToPost - A user-defined table type. This is a table variable that tells this SP what items to process. 	
 	
 	@strBatchId - The generated batch id from the calling code. This is the same batch id this SP will use when posting the financials of an item. 
 
@@ -17,6 +18,8 @@
 				The calling code needs to specify it because each module may use a different contra g/l account against the 
 				Inventory account. For example, a Sales transaction will contra Inventory account with "Cost of Goods" while 
 				Receive stocks from AP module may use "A/P Clearing".
+
+	@intUserId - The user who is initiating the post. 
 */
 
 CREATE PROCEDURE [dbo].[uspICPostCosting]
@@ -54,7 +57,6 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@FIFO AS INT = 2
 		,@LIFO AS INT = 3
 		,@STANDARDCOST AS INT = 4 	
-
 
 -- Create the cursor
 -- Make sure the following options are used: 
