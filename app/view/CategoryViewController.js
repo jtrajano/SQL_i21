@@ -187,6 +187,13 @@ Ext.define('Inventory.view.CategoryViewController', {
                 }
             ]
         });
+
+        var filter = [{ dataIndex: 'strType', value: 'Other Charge', condition: 'eq' }];
+        var cboMaterialItem = win.down('#cboMaterialItem');
+        var cboFreightItem = win.down('#cboFreightItem');
+        cboMaterialItem.defaultFilters = filter;
+        cboFreightItem.defaultFilters = filter;
+
         return win.context;
     },
 
