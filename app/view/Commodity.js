@@ -720,11 +720,14 @@ Ext.define('Inventory.view.Commodity', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colUOMWeightPerPack',
+                                                        align: 'right',
                                                         dataIndex: 'strFieldName',
                                                         text: 'Weight Per Pack',
                                                         flex: 3,
                                                         editor: {
-                                                            xtype: 'numberfield'
+                                                            xtype: 'numberfield',
+                                                            fieldStyle: 'text-align:right',
+                                                            hideTrigger: true
                                                         }
                                                     },
                                                     {
@@ -850,8 +853,8 @@ Ext.define('Inventory.view.Commodity', {
                                                 items: [
                                                     {
                                                         xtype: 'advancefiltergrid',
-                                                        flex: 1,
                                                         includeFullTextSearch: false,
+                                                        flex: 1,
                                                         itemId: 'grdOrigin',
                                                         title: 'Origins',
                                                         dockedItems: [
@@ -919,8 +922,8 @@ Ext.define('Inventory.view.Commodity', {
                                                     },
                                                     {
                                                         xtype: 'advancefiltergrid',
-                                                        flex: 1,
                                                         includeFullTextSearch: false,
+                                                        flex: 1,
                                                         itemId: 'grdProductType',
                                                         margin: '0 0 0 5',
                                                         title: 'Product Types',
@@ -989,8 +992,8 @@ Ext.define('Inventory.view.Commodity', {
                                                     },
                                                     {
                                                         xtype: 'advancefiltergrid',
-                                                        flex: 1,
                                                         includeFullTextSearch: false,
+                                                        flex: 1,
                                                         itemId: 'grdRegion',
                                                         margin: '0 0 0 5',
                                                         title: 'Regions',
@@ -1059,8 +1062,8 @@ Ext.define('Inventory.view.Commodity', {
                                                     },
                                                     {
                                                         xtype: 'advancefiltergrid',
-                                                        flex: 1,
                                                         includeFullTextSearch: false,
+                                                        flex: 1,
                                                         itemId: 'grdClassVarient',
                                                         margin: '0 0 0 5',
                                                         title: 'Classes and Varients',
@@ -1140,8 +1143,8 @@ Ext.define('Inventory.view.Commodity', {
                                                 items: [
                                                     {
                                                         xtype: 'advancefiltergrid',
-                                                        flex: 1,
                                                         includeFullTextSearch: false,
+                                                        flex: 1,
                                                         itemId: 'grdSeason',
                                                         title: 'Seasons',
                                                         dockedItems: [
@@ -1209,8 +1212,8 @@ Ext.define('Inventory.view.Commodity', {
                                                     },
                                                     {
                                                         xtype: 'advancefiltergrid',
-                                                        flex: 1,
                                                         includeFullTextSearch: false,
+                                                        flex: 1,
                                                         itemId: 'grdGrade',
                                                         margin: '0 0 0 5',
                                                         title: 'Grades',
@@ -1279,8 +1282,8 @@ Ext.define('Inventory.view.Commodity', {
                                                     },
                                                     {
                                                         xtype: 'advancefiltergrid',
-                                                        flex: 1,
                                                         includeFullTextSearch: false,
+                                                        flex: 1,
                                                         itemId: 'grdProductLine',
                                                         margin: '0 0 0 5',
                                                         title: 'Product Lines',

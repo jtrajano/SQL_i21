@@ -374,17 +374,20 @@
                             ]
                         },
                         {
-                            "type": "Ext.form.field.Text",
+                            "type": "Ext.form.field.Number",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "allowDecimals": false,
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldCls": null,
                                 "fieldLabel": "Batch No",
+                                "fieldStyle": "text-align:right",
+                                "hideTrigger": true,
                                 "itemId": "txtBatchNo",
                                 "labelPad": null,
                                 "labelSeparator": null,
@@ -398,20 +401,23 @@
                                 "value": null,
                                 "width": null
                             },
-                            "name": "MyTextField65",
+                            "name": "MyNumberField14",
                             "designerId": "612b526d-7188-47bd-a31f-9cb9212ff0dc"
                         },
                         {
-                            "type": "Ext.form.field.Text",
+                            "type": "Ext.form.field.Number",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "allowDecimals": false,
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Ending RIN Gallons for Batch",
+                                "fieldStyle": "text-align:right",
+                                "hideTrigger": true,
                                 "itemId": "txtEndingRinGallonsForBatch",
                                 "labelPad": null,
                                 "labelSeparator": null,
@@ -423,7 +429,7 @@
                                 "tabIndex": null,
                                 "width": null
                             },
-                            "name": "MyTextField66",
+                            "name": "MyNumberField15",
                             "designerId": "1b19e950-2f0f-4e8f-93a0-d9150376cc3a"
                         },
                         {
@@ -638,7 +644,7 @@
                             ]
                         },
                         {
-                            "type": "Ext.form.field.Text",
+                            "type": "Ext.form.field.Number",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
@@ -648,6 +654,8 @@
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Feed Stock Factor",
+                                "fieldStyle": "text-align:right",
+                                "hideTrigger": true,
                                 "itemId": "txtFeedStockFactor",
                                 "labelPad": null,
                                 "labelSeparator": null,
@@ -659,7 +667,7 @@
                                 "tabIndex": null,
                                 "width": null
                             },
-                            "name": "MyTextField67",
+                            "name": "MyNumberField16",
                             "designerId": "6794b5f5-5d4f-40e7-8b9d-d3a86191072b"
                         },
                         {
@@ -680,7 +688,7 @@
                             "designerId": "5519542f-ed1d-4d6d-8ba8-98517576a584"
                         },
                         {
-                            "type": "Ext.form.field.Text",
+                            "type": "Ext.form.field.Number",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
@@ -690,6 +698,8 @@
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldLabel": "Percent of Denaturant",
+                                "fieldStyle": "text-align:right",
+                                "hideTrigger": true,
                                 "itemId": "txtPercentOfDenaturant",
                                 "labelPad": null,
                                 "labelSeparator": null,
@@ -701,7 +711,7 @@
                                 "tabIndex": null,
                                 "width": null
                             },
-                            "name": "MyTextField68",
+                            "name": "MyNumberField17",
                             "designerId": "f5644e27-75c6-46b3-85bf-659a24bbcb4b"
                         },
                         {
@@ -739,7 +749,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging112",
                     "designerId": "ef7cd9cb-b7a1-4f5a-a180-5e26b5c5119a",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

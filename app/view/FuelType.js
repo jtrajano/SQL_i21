@@ -23,6 +23,7 @@ Ext.define('Inventory.view.FuelType', {
         'Ext.button.Button',
         'Ext.toolbar.Separator',
         'Ext.form.field.ComboBox',
+        'Ext.form.field.Number',
         'Ext.form.field.Checkbox',
         'Ext.toolbar.Paging'
     ],
@@ -218,16 +219,22 @@ Ext.define('Inventory.view.FuelType', {
                             valueField: 'intRinFeedStockId'
                         },
                         {
-                            xtype: 'textfield',
+                            xtype: 'numberfield',
                             itemId: 'txtBatchNo',
                             fieldLabel: 'Batch No',
-                            labelWidth: 165
+                            labelWidth: 165,
+                            fieldStyle: 'text-align:right',
+                            hideTrigger: true,
+                            allowDecimals: false
                         },
                         {
-                            xtype: 'textfield',
+                            xtype: 'numberfield',
                             itemId: 'txtEndingRinGallonsForBatch',
                             fieldLabel: 'Ending RIN Gallons for Batch',
-                            labelWidth: 165
+                            labelWidth: 165,
+                            fieldStyle: 'text-align:right',
+                            hideTrigger: true,
+                            allowDecimals: false
                         },
                         {
                             xtype: 'textfield',
@@ -330,10 +337,12 @@ Ext.define('Inventory.view.FuelType', {
                             valueField: 'intRinFeedStockUOMId'
                         },
                         {
-                            xtype: 'textfield',
+                            xtype: 'numberfield',
                             itemId: 'txtFeedStockFactor',
                             fieldLabel: 'Feed Stock Factor',
-                            labelWidth: 165
+                            labelWidth: 165,
+                            fieldStyle: 'text-align:right',
+                            hideTrigger: true
                         },
                         {
                             xtype: 'checkboxfield',
@@ -342,10 +351,12 @@ Ext.define('Inventory.view.FuelType', {
                             labelWidth: 165
                         },
                         {
-                            xtype: 'textfield',
+                            xtype: 'numberfield',
                             itemId: 'txtPercentOfDenaturant',
                             fieldLabel: 'Percent of Denaturant',
-                            labelWidth: 165
+                            labelWidth: 165,
+                            fieldStyle: 'text-align:right',
+                            hideTrigger: true
                         },
                         {
                             xtype: 'checkboxfield',
