@@ -14,6 +14,7 @@ BEGIN
 		EXEC tSQLt.FakeTable 'dbo.tblICCategory';
 		EXEC tSQLt.FakeTable 'dbo.tblICCategoryAccount', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 		
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -75,6 +76,10 @@ BEGIN
 
 		-- Declare the variables for the Unit of Measure
 		DECLARE @EACH AS INT = 1;
+
+		-- Declare the variables for the transaction types
+		DECLARE @PurchaseType AS INT = 1
+		DECLARE @SalesType AS INT = 2
 
 		-- Fake company locations 
 		BEGIN 
@@ -192,6 +197,15 @@ BEGIN
 			INSERT INTO dbo.tblICInventoryFIFO (intItemId, intItemLocationId, dtmDate, dblStockIn, dblStockOut, dblCost, intConcurrencyId) VALUES (@PremiumGrains, @Default_Location, 'January 1, 2014', 200, 0, 44.00, 1)
 			INSERT INTO dbo.tblICInventoryFIFO (intItemId, intItemLocationId, dtmDate, dblStockIn, dblStockOut, dblCost, intConcurrencyId) VALUES (@ColdGrains, @Default_Location, 'January 1, 2014', 250, 0, 55.00, 1)
 			INSERT INTO dbo.tblICInventoryFIFO (intItemId, intItemLocationId, dtmDate, dblStockIn, dblStockOut, dblCost, intConcurrencyId) VALUES (@HotGrains, @Default_Location, 'January 1, 2014', 300, 0, 66.00, 1)
+		END 
+
+		-- Fake data for tblICInventoryTransaction
+		BEGIN 
+			INSERT INTO dbo.tblICInventoryTransaction (intItemId, intItemLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@WetGrains, @Default_Location, 'January 1, 2014', 100, 22.00, NULL, 0, 1, 1, -1, 'PURCHASE-100000', 'BATCH-100000', @PurchaseType, NULL, 1)
+			INSERT INTO dbo.tblICInventoryTransaction (intItemId, intItemLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@StickyGrains, @Default_Location, 'January 1, 2014', 150, 33.00, NULL, 0, 1, 1, -1, 'PURCHASE-200000', 'BATCH-200000', @PurchaseType, NULL, 1)
+			INSERT INTO dbo.tblICInventoryTransaction (intItemId, intItemLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@PremiumGrains, @Default_Location, 'January 1, 2014', 200, 44.00, NULL, 0, 1, 1, -1, 'PURCHASE-300000', 'BATCH-300000', @PurchaseType, NULL, 1)
+			INSERT INTO dbo.tblICInventoryTransaction (intItemId, intItemLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@ColdGrains, @Default_Location, 'January 1, 2014', 250, 55.00, NULL, 0, 1, 1, -1, 'PURCHASE-400000', 'BATCH-400000', @PurchaseType, NULL, 1)
+			INSERT INTO dbo.tblICInventoryTransaction (intItemId, intItemLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@HotGrains, @Default_Location, 'January 1, 2014', 300, 66.00, NULL, 0, 1, 1, -1, 'PURCHASE-500000', 'BATCH-500000', @PurchaseType, NULL, 1)
 		END 
 
 		-- Fake data for Item-Account
