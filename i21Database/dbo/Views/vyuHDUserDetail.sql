@@ -43,7 +43,8 @@
 			,intUserId = ec.intEntityId
 			,intEntityId = ec.intEntityId
 			,strName = en.strEmail
-			,strUserName = (select top 1 strUserName from tblEntityCredential where intEntityId = ec.intEntityId)
+			--,strUserName = (select top 1 strUserName from tblEntityCredential where intEntityId = ec.intEntityId)
+			,strUserName = case when (select top 1 strUserName from tblEntityCredential where intEntityId = ec.intEntityId) is null then 'Contact_'+convert(nvarchar(50),ec.intContactId) else (select top 1 strUserName from tblEntityCredential where intEntityId = ec.intEntityId) end
 			,strFirstName = en.strEmail
 			,strMiddleName = en.strEmail
 			,strLastName = en.strEmail
