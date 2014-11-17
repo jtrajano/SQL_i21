@@ -35,6 +35,7 @@ Ext.define('Inventory.model.CommodityAccount', {
 
     validators: [
         {type: 'presence', field: 'intLocationId'},
+        {type: 'presence', field: 'strAccountDescription'},
         {type: 'presence', field: 'intAccountId'}
     ]
 });

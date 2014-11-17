@@ -19,6 +19,6 @@ Ext.define('Inventory.model.FuelCategory', {
     ],
 
     validators: [
-        {type: 'presence', field: 'intRinFuelCategoryId'}
+        {type: 'presence', field: 'strRinFuelCategoryCode'}
     ]
 });
