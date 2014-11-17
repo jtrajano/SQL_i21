@@ -69,6 +69,11 @@ Ext.define('Inventory.view.FactoryUnitTypeViewController', {
             binding: me.config.binding
         });
 
+        var filter = [{ dataIndex: 'strUnitType', value: 'Area', condition: 'eq', conjunction: 'and' },
+            { dataIndex: 'strUnitType', value: 'Length', condition: 'eq' }];
+        var cboDimensionUom = win.down('#cboDimensionUom');
+        cboDimensionUom.defaultFilters = filter;
+
         return win.context;
     },
 

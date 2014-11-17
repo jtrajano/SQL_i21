@@ -201,7 +201,9 @@ Ext.define('Inventory.view.FactoryUnitType', {
                             xtype: 'numberfield',
                             itemId: 'txtMaxWeight',
                             fieldLabel: 'Max. Weight',
-                            labelWidth: 90
+                            labelWidth: 90,
+                            fieldStyle: 'text-align:right',
+                            hideTrigger: true
                         },
                         {
                             xtype: 'checkboxfield',
@@ -249,25 +251,33 @@ Ext.define('Inventory.view.FactoryUnitType', {
                             xtype: 'numberfield',
                             itemId: 'txtHeight',
                             fieldLabel: 'Height',
-                            labelWidth: 90
+                            labelWidth: 90,
+                            fieldStyle: 'text-align:right',
+                            hideTrigger: true
                         },
                         {
                             xtype: 'numberfield',
                             itemId: 'txtDepth',
                             fieldLabel: 'Depth',
-                            labelWidth: 90
+                            labelWidth: 90,
+                            fieldStyle: 'text-align:right',
+                            hideTrigger: true
                         },
                         {
                             xtype: 'numberfield',
                             itemId: 'txtWidth',
                             fieldLabel: 'Width',
-                            labelWidth: 90
+                            labelWidth: 90,
+                            fieldStyle: 'text-align:right',
+                            hideTrigger: true
                         },
                         {
                             xtype: 'numberfield',
                             itemId: 'txtPalletStack',
                             fieldLabel: 'Pallet Stack',
                             labelWidth: 90,
+                            fieldStyle: 'text-align:right',
+                            hideTrigger: true,
                             allowDecimals: false
                         },
                         {
@@ -275,6 +285,8 @@ Ext.define('Inventory.view.FactoryUnitType', {
                             itemId: 'txtPalletColumns',
                             fieldLabel: 'Pallet Columns',
                             labelWidth: 90,
+                            fieldStyle: 'text-align:right',
+                            hideTrigger: true,
                             allowDecimals: false
                         },
                         {
@@ -282,6 +294,8 @@ Ext.define('Inventory.view.FactoryUnitType', {
                             itemId: 'txtPalletRows',
                             fieldLabel: 'Pallet Rows',
                             labelWidth: 90,
+                            fieldStyle: 'text-align:right',
+                            hideTrigger: true,
                             allowDecimals: false
                         }
                     ]
