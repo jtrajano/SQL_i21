@@ -46,7 +46,7 @@ BEGIN
 				,(CASE WHEN ISDATE(agtrm_disc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agtrm_disc_rev_dt AS CHAR(12)), 112) ELSE NULL END)
 				,agtrm_net_days
 				,(CASE WHEN ISDATE(agtrm_net_rev_dt) = 1 THEN CONVERT(DATE, CAST(agtrm_net_rev_dt AS CHAR(12)), 112) ELSE NULL END)
-				,agtrm_eft_yn
+				,(CASE WHEN RTRIM(LTRIM(ISNULL(agtrm_eft_yn,'N'))) = 'N' THEN 0 ELSE 1 END)
 			FROM agtrmmst 
 			LEFT JOIN tblSMTerm Term ON CONVERT(NVARCHAR(20),agtrmmst.agtrm_key_n) COLLATE Latin1_General_CI_AS = Term.strTermCode COLLATE Latin1_General_CI_AS
 			WHERE agtrm_key_n in (SELECT DISTINCT agivc_terms_code FROM agivcmst) 
