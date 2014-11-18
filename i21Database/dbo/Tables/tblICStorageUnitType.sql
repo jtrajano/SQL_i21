@@ -17,8 +17,7 @@
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICStorageUnitType] PRIMARY KEY ([intStorageUnitTypeId]), 
     CONSTRAINT [FK_tblICStorageUnitType_CapacityUnitMeasure] FOREIGN KEY ([intCapacityUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
-	CONSTRAINT [FK_tblICStorageUnitType_DimensionUnitMeasure] FOREIGN KEY ([intDimensionUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
-    CONSTRAINT [FK_tblICStorageUnitType_tblICUnitType] FOREIGN KEY ([intUnitTypeId]) REFERENCES [tblICUnitType]([intUnitTypeId])  
+	CONSTRAINT [FK_tblICStorageUnitType_DimensionUnitMeasure] FOREIGN KEY ([intDimensionUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
 )
 
 GO

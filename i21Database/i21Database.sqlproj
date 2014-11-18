@@ -811,6 +811,8 @@
     <Build Include="dbo\Tables\tblICStorageLocationCategory.sql" />
     <Build Include="dbo\Tables\tblICItemSubstitution.sql" />
     <Build Include="dbo\Tables\tblICItemSubstitutionDetail.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesSummary.sql" />
+    <Build Include="dbo\Views\vyuAPPayables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
