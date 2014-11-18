@@ -892,13 +892,13 @@ GO
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Employees' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceId)
 			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Employees', 'Payroll', @PayrollMaintenanceId, 'Employees', 'Screen', '', 'small-screen', 1, 1, 0, 1, 2, 0
 
-			-- Payroll / Maintenance / Employee Pay Groups
+			-- Payroll / Maintenance / Employee Templates
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Employee Templates' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceId)
 			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Employee Templates', 'Payroll', @PayrollMaintenanceId, 'Employee Templates', 'Screen', '', 'small-screen', 1, 1, 0, 1, 3, 0
 
-			-- Payroll / Maintenance / Employee Templates
-			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Employee Templates' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceId)
-			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Employee Templates', 'Payroll', @PayrollMaintenanceId, 'Employee Templates', 'Screen', '', 'small-screen', 1, 1, 0, 1, 4, 0
+			-- Payroll / Maintenance / Employee Pay Groups
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Employee Pay Groups' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Employee Pay Groups', 'Payroll', @PayrollMaintenanceId, 'Employee Pay Groups', 'Screen', '', 'small-screen', 1, 1, 0, 1, 4, 0
 
 			GO
 

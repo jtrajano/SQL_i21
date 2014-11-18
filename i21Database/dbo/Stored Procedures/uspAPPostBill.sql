@@ -129,6 +129,18 @@ BEGIN
 		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
 			0 = ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0)
 
+		--zero amount
+		INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		SELECT 
+			'You cannot post a bill with zero amount.',
+			'Bill',
+			A.strBillId,
+			@batchId,
+			A.intBillId
+		FROM tblAPBill A 
+		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData) 
+		AND A.dblTotal = 0
+
 		--No Terms specified
 		INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT 
@@ -209,6 +221,18 @@ BEGIN
 			INNER JOIN tblAPBill C
 				ON B.intBillId = C.intBillId
 		WHERE  C.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData)
+
+		INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		SELECT 
+			'Unable to find an open fiscal year period to match the transaction date.',
+			'Bill',
+			A.strBillId,
+			@batchId,
+			A.intBillId
+		FROM tblAPBill A 
+		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData) AND 
+			0 = ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0)
+
 	END
 
 	DECLARE @totalInvalid INT = 0
@@ -267,7 +291,7 @@ BEGIN
 		FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
 	)
 	INSERT INTO tblGLDetail (
-			[strTransactionId],
+			[strTransactionId], 
 			[intTransactionId], 
 			[intAccountId],
 			[strDescription],
@@ -293,7 +317,7 @@ BEGIN
 	OUTPUT INSERTED.dtmDate, INSERTED.intAccountId, INSERTED.dblDebit, INSERTED.dblCredit, INSERTED.dblDebitUnit, INSERTED.dblCreditUnit  INTO #tmpGLDetail
 		--CREDIT
 		SELECT	
-			[strTransactionId] = A.strBillId,
+			[strTransactionId] = A.strBillId, 
 			[intTransactionId] = A.intBillId, 
 			[intAccountId] = A.intAccountId,
 			[strDescription] = A.strDescription,
@@ -303,7 +327,7 @@ BEGIN
 			[dblCredit]				= CASE WHEN @post = 1 THEN A.dblTotal ELSE 0 END,
 			[dblDebitUnit]			= CASE WHEN @post = 1 THEN ISNULL(A.[dblTotal], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0) ELSE 0 END,
 			[dblCreditUnit]			= CASE WHEN @post = 1 THEN ISNULL(A.[dblTotal], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0) ELSE 0 END,
-			[dtmDate] = DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+			[dtmDate]			= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 			[ysnIsUnposted] = CASE WHEN @post = 1 THEN 0 ELSE 1 END,
 			[intConcurrencyId] = 1,
 			[dblExchangeRate]		= 1,
@@ -326,7 +350,7 @@ BEGIN
 		--DEBIT
 		UNION ALL 
 		SELECT	
-			[strTransactionId] = A.strBillId,
+			[strTransactionId] = A.strBillId, 
 			[intTransactionId] = A.intBillId, 
 			[intAccountId] = B.intAccountId,
 			[strDescription] = A.strDescription,
@@ -496,7 +520,6 @@ BEGIN
 
 END
 
-IF @@ERROR <> 0	GOTO Post_Rollback;
 
 	IF(ISNULL(@post,0) = 0)
 	BEGIN
@@ -659,6 +682,10 @@ ELSE
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
 --=====================================================================================================================================
+-- 	RETURN TOTAL NUMBER OF VALID JOURNALS
+---------------------------------------------------------------------------------------------------------------------------------------
+
+--=====================================================================================================================================
 -- 	FINALIZING STAGE
 ---------------------------------------------------------------------------------------------------------------------------------------
 Post_Commit:
@@ -670,7 +697,7 @@ Post_Commit:
 	GOTO Post_Exit
 
 Post_Rollback:
-	ROLLBACK TRANSACTION		            
+	ROLLBACK TRANSACTION	
 	SET @success = 0
 	GOTO Post_Exit
 
