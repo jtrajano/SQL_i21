@@ -10,7 +10,6 @@
     [intGracePeriod]         INT             NULL,
     [strAppliedPer]          NVARCHAR (10)   COLLATE Latin1_General_CI_AS NULL,
     [ysnAllowCatchUpCharges] BIT             CONSTRAINT [DF__tmp_ms_xx__ysnAl__1EA6F08D] DEFAULT ((0)) NOT NULL,
-    [intOriginChargeId]      INT             NULL,
     [intConcurrencyId]       INT             NOT NULL DEFAULT ((0)),
     CONSTRAINT [PK_tblARServiceCharge] PRIMARY KEY CLUSTERED ([intServiceChargeId] ASC),
     CONSTRAINT [UKstrServiceChargeCode] UNIQUE NONCLUSTERED ([strServiceChargeCode] ASC)
@@ -18,3 +17,13 @@
 
 
 
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Field used to map to Origin',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblARServiceCharge',
+    @level2type = N'COLUMN',
+    @level2name = N'strServiceChargeCode'
