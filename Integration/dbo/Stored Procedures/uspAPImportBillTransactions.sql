@@ -449,7 +449,7 @@ BEGIN
 				intPayeeId = C.intEntityId
 			FROM tblCMBankTransaction A
 			INNER JOIN tblAPPayment B
-				ON A.dblAmount = B.dblAmountPaid
+				ON A.dblAmount = (CASE WHEN A.intBankTransactionTypeId = 11 THEN (B.dblAmountPaid) * -1 ELSE B.dblAmountPaid END)
 				AND A.dtmDate = B.dtmDatePaid
 				AND A.intBankAccountId = B.intBankAccountId
 				AND A.strReferenceNo = B.strPaymentInfo
