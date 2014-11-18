@@ -460,6 +460,12 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for multiple incoming and outgoing stock and the item stock is correct.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessCosting for one incoming stock.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessCosting for one outgoing stock.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
