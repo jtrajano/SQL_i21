@@ -813,6 +813,12 @@
     <Build Include="dbo\Tables\tblICItemSubstitutionDetail.sql" />
     <Build Include="dbo\Views\vyuAPPayablesSummary.sql" />
     <Build Include="dbo\Views\vyuAPPayables.sql" />
+    <Build Include="dbo\Tables\tblSCDistributionOption.sql" />
+    <Build Include="dbo\Tables\tblSCScaleDevice.sql" />
+    <Build Include="dbo\Tables\tblSCTicketFormat.sql" />
+    <Build Include="dbo\Tables\tblSCTicketPool.sql" />
+    <Build Include="dbo\Tables\tblSCTicketStorageType.sql" />
+    <Build Include="dbo\Tables\tblSCTicketType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
