@@ -49,9 +49,9 @@ namespace iRely.Inventory.Model
         public bool ysnRequireCustomerApproval { get; set; }
         public int? intRecipeId { get; set; }
         public bool ysnSanitationRequired { get; set; }
-        public int intLifeTime { get; set; }
+        public int? intLifeTime { get; set; }
         public string strLifeTimeType { get; set; }
-        public int intReceiveLife { get; set; }
+        public int? intReceiveLife { get; set; }
         public string strGTIN { get; set; }
         public string strRotationType { get; set; }
         public int? intNMFCId { get; set; }
@@ -64,9 +64,9 @@ namespace iRely.Inventory.Model
         public decimal? dblWeight { get; set; }
         public int? intMaterialPackTypeId { get; set; }
         public string strMaterialSizeCode { get; set; }
-        public int intInnerUnits { get; set; }
-        public int intLayerPerPallet { get; set; }
-        public int intUnitPerLayer { get; set; }
+        public int? intInnerUnits { get; set; }
+        public int? intLayerPerPallet { get; set; }
+        public int? intUnitPerLayer { get; set; }
         public decimal? dblStandardPalletRatio { get; set; }
         public string strMask1 { get; set; }
         public string strMask2 { get; set; }

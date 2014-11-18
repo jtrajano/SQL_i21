@@ -1706,6 +1706,7 @@ Ext.define('Inventory.view.Commodity', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        hidden: true,
                                         layout: 'fit',
                                         title: 'GL Accounts',
                                         items: [

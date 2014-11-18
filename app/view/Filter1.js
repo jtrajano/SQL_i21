@@ -18,15 +18,11 @@ Ext.define('Inventory.view.Filter1', {
     alias: 'widget.filter1',
 
     requires: [
-        'Inventory.view.Filter1ViewModel',
         'Ext.form.field.Text',
         'Ext.form.trigger.Trigger',
         'Ext.form.Label'
     ],
 
-    viewModel: {
-        type: 'filter1'
-    },
     height: 23,
     width: 199,
 

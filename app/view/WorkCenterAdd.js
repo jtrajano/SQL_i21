@@ -18,7 +18,6 @@ Ext.define('Inventory.view.WorkCenterAdd', {
     alias: 'widget.workcenteradd',
 
     requires: [
-        'Inventory.view.WorkCenterAddViewModel',
         'Inventory.view.Filter1',
         'Inventory.view.Statusbar1',
         'Ext.form.Panel',
@@ -30,9 +29,6 @@ Ext.define('Inventory.view.WorkCenterAdd', {
         'Ext.selection.CheckboxModel'
     ],
 
-    viewModel: {
-        type: 'workcenteradd'
-    },
     height: 424,
     hidden: false,
     minHeight: 300,

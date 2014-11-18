@@ -18,16 +18,12 @@ Ext.define('Inventory.view.Statusbar1', {
     alias: 'widget.statusbar1',
 
     requires: [
-        'Inventory.view.Statusbar1ViewModel',
         'Ext.button.Button',
         'Ext.toolbar.Separator',
         'Ext.form.Label',
         'Ext.toolbar.Fill'
     ],
 
-    viewModel: {
-        type: 'statusbar1'
-    },
     itemId: 'tlbStatusbar',
     width: 1265,
 

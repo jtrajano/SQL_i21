@@ -18,16 +18,12 @@ Ext.define('Inventory.view.StatusbarPaging1', {
     alias: 'widget.statusbarpaging1',
 
     requires: [
-        'Inventory.view.StatusbarPaging1ViewModel',
         'Ext.button.Button',
         'Ext.toolbar.Separator',
         'Ext.form.Label',
         'Ext.toolbar.Fill'
     ],
 
-    viewModel: {
-        type: 'statusbarpaging1'
-    },
     itemId: 'tlbPaging',
     inputItemWidth: 60,
     prependButtons: true,
