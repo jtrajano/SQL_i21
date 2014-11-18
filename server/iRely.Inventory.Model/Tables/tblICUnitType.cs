@@ -8,16 +8,16 @@ using iRely.Common;
 
 namespace iRely.Inventory.Model
 {
-    public class tblICUnitType : BaseEntity
+    public class tblICStorageUnitType : BaseEntity
     {
-        public int intUnitTypeId { get; set; }
-        public string strUnitType { get; set; }
+        public int intStorageUnitTypeId { get; set; }
+        public string strStorageUnitType { get; set; }
         public string strDescription { get; set; }
         public string strInternalCode { get; set; }
-        public int intCapacityUnitMeasureId { get; set; }
+        public int? intCapacityUnitMeasureId { get; set; }
         public decimal? dblMaxWeight { get; set; }
         public bool ysnAllowPick { get; set; }
-        public int intDimensionUnitMeasureId { get; set; }
+        public int? intDimensionUnitMeasureId { get; set; }
         public decimal? dblHeight { get; set; }
         public decimal? dblDepth { get; set; }
         public decimal? dblWidth { get; set; }

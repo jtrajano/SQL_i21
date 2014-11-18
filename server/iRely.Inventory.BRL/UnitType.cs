@@ -11,22 +11,22 @@ using IdeaBlade.Linq;
 
 namespace iRely.Inventory.BRL
 {
-    public class UnitType : IDisposable
+    public class StorageUnitType : IDisposable
     {
         private Repository _db;
 
-        public UnitType()
+        public StorageUnitType()
         {
             _db = new Repository(new Inventory.Model.InventoryEntities());
         }
 
-        public IQueryable<tblICUnitType> GetSearchQuery()
+        public IQueryable<tblICStorageUnitType> GetSearchQuery()
         {
-            return _db.GetQuery<tblICUnitType>();
+            return _db.GetQuery<tblICStorageUnitType>();
 
         }
 
-        public object GetSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<tblICUnitType, bool>> predicate)
+        public object GetSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<tblICStorageUnitType, bool>> predicate)
         {
             return GetSearchQuery()
                 .Where(predicate)
@@ -37,35 +37,35 @@ namespace iRely.Inventory.BRL
                 .AsNoTracking();
         }
 
-        public int GetCount(Expression<Func<tblICUnitType, bool>> predicate)
+        public int GetCount(Expression<Func<tblICStorageUnitType, bool>> predicate)
         {
             return GetSearchQuery().Where(predicate).Count();
         }
 
-        public IQueryable<tblICUnitType> GetUnitTypes(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<tblICUnitType, bool>> predicate)
+        public IQueryable<tblICStorageUnitType> GetStorageUnitTypes(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<tblICStorageUnitType, bool>> predicate)
         {
             var query = GetSearchQuery(); //Get Search Query
-            return _db.GetQuery<tblICUnitType>()
-                      .Where(w => query.Where(predicate).Any(a => a.intUnitTypeId == w.intUnitTypeId)) //Filter the Main DataSource Based on Search Query
+            return _db.GetQuery<tblICStorageUnitType>()
+                      .Where(w => query.Where(predicate).Any(a => a.intStorageUnitTypeId == w.intStorageUnitTypeId)) //Filter the Main DataSource Based on Search Query
                       .OrderBySelector(sortSelector)
                       .Skip(start)
                       .Take(limit)
                       .AsNoTracking();
         }
 
-        public void AddUnitType(tblICUnitType UnitType)
+        public void AddStorageUnitType(tblICStorageUnitType StorageUnitType)
         {
-            _db.AddNew<tblICUnitType>(UnitType);
+            _db.AddNew<tblICStorageUnitType>(StorageUnitType);
         }
 
-        public void UpdateUnitType(tblICUnitType UnitType)
+        public void UpdateStorageUnitType(tblICStorageUnitType StorageUnitType)
         {
-            _db.UpdateBatch<tblICUnitType>(UnitType);
+            _db.UpdateBatch<tblICStorageUnitType>(StorageUnitType);
         }
 
-        public void DeleteUnitType(tblICUnitType UnitType)
+        public void DeleteStorageUnitType(tblICStorageUnitType StorageUnitType)
         {
-            _db.Delete<tblICUnitType>(UnitType);
+            _db.Delete<tblICStorageUnitType>(StorageUnitType);
         }
 
         public SaveResult Save(bool continueOnConflict)

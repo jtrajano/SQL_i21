@@ -22,16 +22,16 @@ Ext.define('Inventory.view.FactoryUnitTypeViewController', {
             title:  'Search Storage Unit Type',
             type: 'Inventory.FactoryUnitType',
             api: {
-                read: '../Inventory/api/UnitType/SearchUnitTypes'
+                read: '../Inventory/api/StorageUnitType/SearchStorageUnitTypes'
             },
             columns: [
-                {dataIndex: 'intUnitTypeId',text: "UnitType Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
-                {dataIndex: 'strUnitType', text: 'Unit Type', flex: 1,  dataType: 'string'},
+                {dataIndex: 'intStorageUnitTypeId',text: "Storage Unit Type Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
+                {dataIndex: 'strStorageUnitType', text: 'Storage Unit Type', flex: 1,  dataType: 'string'},
                 {dataIndex: 'strDescription', text: 'Description', flex: 1,  dataType: 'string'}
             ]
         },
         binding: {
-            txtName: '{current.strUnitType}',
+            txtName: '{current.strStorageUnitType}',
             txtDescription: '{current.strDescription}',
             cboInternalCode: {
                 value: '{current.strInternalCode}',
@@ -93,7 +93,7 @@ Ext.define('Inventory.view.FactoryUnitTypeViewController', {
             } else {
                 if (config.id) {
                     config.filters = [{
-                        column: 'intUnitTypeId',
+                        column: 'intStorageUnitTypeId',
                         value: config.id
                     }];
                 }

@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedFactoryUnitType', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/UnitType/GetUnitTypes'
+                    read: '../Inventory/api/StorageUnitType/GetStorageUnitTypes'
                 },
                 reader: {
                     type: 'json',

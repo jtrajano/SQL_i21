@@ -3,15 +3,15 @@ using System.Data.Entity.ModelConfiguration;
 
 namespace iRely.Inventory.Model
 {
-    public class tblICUnitTypeMap : EntityTypeConfiguration<tblICUnitType>
+    public class tblICStorageUnitTypeMap : EntityTypeConfiguration<tblICStorageUnitType>
     {
-        public tblICUnitTypeMap()
+        public tblICStorageUnitTypeMap()
         {
             // Primary Key
-            this.HasKey(t => t.intUnitTypeId);
+            this.HasKey(t => t.intStorageUnitTypeId);
 
             // Table & Column Mappings
-            this.ToTable("tblICUnitType");
+            this.ToTable("tblICStorageUnitType");
             this.Property(t => t.dblDepth).HasColumnName("dblDepth");
             this.Property(t => t.dblHeight).HasColumnName("dblHeight");
             this.Property(t => t.dblMaxWeight).HasColumnName("dblMaxWeight");
@@ -21,10 +21,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intPalletColumn).HasColumnName("intPalletColumn");
             this.Property(t => t.intPalletRow).HasColumnName("intPalletRow");
             this.Property(t => t.intPalletStack).HasColumnName("intPalletStack");
-            this.Property(t => t.intUnitTypeId).HasColumnName("intUnitTypeId");
+            this.Property(t => t.intStorageUnitTypeId).HasColumnName("intStorageUnitTypeId");
             this.Property(t => t.strDescription).HasColumnName("strDescription");
             this.Property(t => t.strInternalCode).HasColumnName("strInternalCode");
-            this.Property(t => t.strUnitType).HasColumnName("strUnitType");
+            this.Property(t => t.strStorageUnitType).HasColumnName("strStorageUnitType");
             this.Property(t => t.ysnAllowPick).HasColumnName("ysnAllowPick");
 
             this.HasRequired(p => p.CapacityUnitMeasures)

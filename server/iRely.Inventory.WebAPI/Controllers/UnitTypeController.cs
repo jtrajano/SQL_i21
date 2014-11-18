@@ -16,26 +16,26 @@ using iRely.Inventory.BRL;
 
 namespace iRely.Invetory.WebAPI.Controllers
 {
-    public class UnitTypeController : ApiController
+    public class StorageUnitTypeController : ApiController
     {
-        private UnitType _UnitTypeBRL = new UnitType();
+        private StorageUnitType _StorageUnitTypeBRL = new StorageUnitType();
 
         [HttpGet]
-        public HttpResponseMessage SearchUnitTypes(int page, int start, int limit, string columns = "", string sort = "", string filter = "")
+        public HttpResponseMessage SearchStorageUnitTypes(int page, int start, int limit, string columns = "", string sort = "", string filter = "")
         {
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
-            var predicate = ExpressionBuilder.True<tblICUnitType>();
+            var predicate = ExpressionBuilder.True<tblICStorageUnitType>();
             var selector = ExpressionBuilder.GetSelector(columns);
 
             var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts);
 
             if (searchFilters != null)
-                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICUnitType>(searchFilters);
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICStorageUnitType>(searchFilters);
 
-            var data = _UnitTypeBRL.GetSearchQuery(page, start, limit, selector, sortSelector, predicate);
+            var data = _StorageUnitTypeBRL.GetSearchQuery(page, start, limit, selector, sortSelector, predicate);
 
-            var total = _UnitTypeBRL.GetCount(predicate);
+            var total = _StorageUnitTypeBRL.GetCount(predicate);
             return Request.CreateResponse(HttpStatusCode.OK, new
             {
                 data = data,
@@ -44,21 +44,21 @@ namespace iRely.Invetory.WebAPI.Controllers
         }
 
         [HttpGet]
-        [ActionName("GetUnitTypes")]
-        public HttpResponseMessage GetUnitTypes(int start = 0, int limit = 1, int page = 0, string sort = "", string filter = "")
+        [ActionName("GetStorageUnitTypes")]
+        public HttpResponseMessage GetStorageUnitTypes(int start = 0, int limit = 1, int page = 0, string sort = "", string filter = "")
         {
             filter = string.IsNullOrEmpty(filter) ? "" : filter;
 
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
-            var predicate = ExpressionBuilder.True<tblICUnitType>();
-            var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intUnitTypeId", "DESC");
+            var predicate = ExpressionBuilder.True<tblICStorageUnitType>();
+            var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intStorageUnitTypeId", "DESC");
 
             if (searchFilters != null)
-                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICUnitType>(searchFilters, true);
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICStorageUnitType>(searchFilters, true);
 
-            var total = _UnitTypeBRL.GetCount(predicate);
-            var data = _UnitTypeBRL.GetUnitTypes(page, start, page == 0 ? total : limit, sortSelector, predicate);
+            var total = _StorageUnitTypeBRL.GetCount(predicate);
+            var data = _StorageUnitTypeBRL.GetStorageUnitTypes(page, start, page == 0 ? total : limit, sortSelector, predicate);
 
             return Request.CreateResponse(HttpStatusCode.OK, new
             {
@@ -68,17 +68,17 @@ namespace iRely.Invetory.WebAPI.Controllers
         }
 
         [HttpPost]
-        public HttpResponseMessage PostUnitTypes(IEnumerable<tblICUnitType> UnitTypes, bool continueOnConflict = false)
+        public HttpResponseMessage PostStorageUnitTypes(IEnumerable<tblICStorageUnitType> StorageUnitTypes, bool continueOnConflict = false)
         {
-            foreach (var UnitType in UnitTypes)
-                _UnitTypeBRL.AddUnitType(UnitType);
+            foreach (var StorageUnitType in StorageUnitTypes)
+                _StorageUnitTypeBRL.AddStorageUnitType(StorageUnitType);
 
-            var result = _UnitTypeBRL.Save(continueOnConflict);
-            _UnitTypeBRL.Dispose();
+            var result = _StorageUnitTypeBRL.Save(continueOnConflict);
+            _StorageUnitTypeBRL.Dispose();
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
-                data = UnitTypes,
+                data = StorageUnitTypes,
                 success = !result.HasError,
                 message = new
                 {
@@ -91,17 +91,17 @@ namespace iRely.Invetory.WebAPI.Controllers
 
         [AcceptVerbs("POST", "PUT")]
         [HttpPut]
-        public HttpResponseMessage PutUnitTypes(IEnumerable<tblICUnitType> UnitTypes, bool continueOnConflict = false)
+        public HttpResponseMessage PutStorageUnitTypes(IEnumerable<tblICStorageUnitType> StorageUnitTypes, bool continueOnConflict = false)
         {
-            foreach (var UnitType in UnitTypes)
-                _UnitTypeBRL.UpdateUnitType(UnitType);
+            foreach (var StorageUnitType in StorageUnitTypes)
+                _StorageUnitTypeBRL.UpdateStorageUnitType(StorageUnitType);
 
-            var result = _UnitTypeBRL.Save(continueOnConflict);
-            _UnitTypeBRL.Dispose();
+            var result = _StorageUnitTypeBRL.Save(continueOnConflict);
+            _StorageUnitTypeBRL.Dispose();
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
-                data = UnitTypes,
+                data = StorageUnitTypes,
                 success = !result.HasError,
                 message = new
                 {
@@ -114,17 +114,17 @@ namespace iRely.Invetory.WebAPI.Controllers
 
 
         [HttpDelete]
-        public HttpResponseMessage DeleteUnitTypes(IEnumerable<tblICUnitType> UnitTypes, bool continueOnConflict = false)
+        public HttpResponseMessage DeleteStorageUnitTypes(IEnumerable<tblICStorageUnitType> StorageUnitTypes, bool continueOnConflict = false)
         {
-            foreach (var UnitType in UnitTypes)
-                _UnitTypeBRL.DeleteUnitType(UnitType);
+            foreach (var StorageUnitType in StorageUnitTypes)
+                _StorageUnitTypeBRL.DeleteStorageUnitType(StorageUnitType);
 
-            var result = _UnitTypeBRL.Save(continueOnConflict);
-            _UnitTypeBRL.Dispose();
+            var result = _StorageUnitTypeBRL.Save(continueOnConflict);
+            _StorageUnitTypeBRL.Dispose();
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
-                data = UnitTypes,
+                data = StorageUnitTypes,
                 success = !result.HasError,
                 message = new
                 {
