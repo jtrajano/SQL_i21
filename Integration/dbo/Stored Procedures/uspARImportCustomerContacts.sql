@@ -110,10 +110,10 @@ DECLARE @Contacts TABLE
 					, rtrim(ltrim(sscon_contact_id))
 					, substring((rtrim(ltrim(sscon_contact_title))), 1,35)
 					, ''
-					, rtrim(ltrim(sscon_cell_no)) + ' x' + rtrim(ltrim(sscon_cell_ext))
-					, rtrim(ltrim(sscon_work_no)) + ' x' + rtrim(ltrim(sscon_work_ext))
+					, isnull(nullif(ltrim((rtrim(rtrim(ltrim(sscon_cell_no)) + ' x' + rtrim(ltrim(sscon_cell_ext))))), 'x'), '')
+					, isnull(nullif(ltrim((rtrim(rtrim(ltrim(sscon_work_no)) + ' x' + rtrim(ltrim(sscon_work_ext))))), 'x'), '')
 					, '' , ''
-					, rtrim(ltrim(sscon_fax_no)) + ' x' + rtrim(ltrim(sscon_fax_ext))
+					, isnull(nullif(ltrim((rtrim(rtrim(ltrim(sscon_fax_no)) + ' x' + rtrim(ltrim(sscon_fax_ext))))), 'x'), '')
 					, '', '', ''
 				from @Contacts where id = @id
 				--select * from @EntityContact

@@ -39,11 +39,11 @@ BEGIN
 					EntityId
 					,Title
 					,Department
-					,Mobile
-					,Phone
-					,Phone2
+					,CASE WHEN rtrim(ltrim(substring(reverse(Mobile), 1,1))) = 'x' THEN substring(Mobile, 0, len(Mobile)) ELSE Mobile END
+					,CASE WHEN rtrim(ltrim(substring(reverse(Phone), 1,1))) = 'x' THEN substring(Phone, 0, len(Phone)) ELSE Phone END
+					,CASE WHEN rtrim(ltrim(substring(reverse(Phone2), 1,1))) = 'x' THEN substring(Phone2, 0, len(Phone2)) ELSE Phone2 END
 					,Email2
-					,Fax
+					, CASE WHEN rtrim(ltrim(substring(reverse(Fax), 1,1))) = 'x' THEN substring(Fax, 0, len(Fax)) ELSE Fax END
 					,Notes
 					,ContactMethod
 					,Timezone
