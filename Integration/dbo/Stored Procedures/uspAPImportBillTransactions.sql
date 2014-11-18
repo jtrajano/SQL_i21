@@ -454,7 +454,8 @@ BEGIN
 				AND A.intBankAccountId = B.intBankAccountId
 				AND A.strReferenceNo = B.strPaymentInfo
 			INNER JOIN (tblAPVendor C INNER JOIN tblEntity D ON C.intEntityId = D.intEntityId)
-				ON B.intVendorId = C.intVendorId AND A.strPayee = D.strName
+				ON B.intVendorId = C.intVendorId 
+				--AND A.strPayee = D.strName
 			WHERE A.strSourceSystem = ''AP''
 		
 			--SELECT * FROM tblCMBankTransaction
