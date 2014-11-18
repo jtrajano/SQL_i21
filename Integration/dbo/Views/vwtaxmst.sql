@@ -101,10 +101,10 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 		AS  
 			SELECT  
 	  
-		 vwtax_itm_no   = CAST(pttax_itm_no AS CHAR(13))  
-		, vwtax_state    = pttax_state  
-		, vwtax_auth_id1   = pttax_local1  
-		, vwtax_auth_id2   = pttax_local2  
+		 vwtax_itm_no   = CAST(ISNULL(pttax_itm_no,'''') AS CHAR(13))  
+		, vwtax_state    = ISNULL(pttax_state,'''')  
+		, vwtax_auth_id1   = ISNULL(pttax_local1,'''')  
+		, vwtax_auth_id2   = ISNULL(pttax_local2,'''')  
 		, vwtax_if_rt    = pttax_fet_rt  
 		, vwtax_if_gl_acct  = pttax_fet_acct  
 		, vwtax_fet_rt   = CAST(0.00 AS DECIMAL(18,6))  
