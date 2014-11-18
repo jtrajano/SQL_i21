@@ -1,12 +1,12 @@
-﻿CREATE TABLE [dbo].[tblICClass]
+﻿CREATE TABLE [dbo].[tblICStorageLocationCategory]
 (
-	[intClassId] INT NOT NULL  IDENTITY, 
-    [strClass] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[intStorageLocationCategoryId] INT NOT NULL IDENTITY, 
+    [intStorageLocationId] INT NOT NULL, 
+    [intCategoryId] INT NOT NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
-    CONSTRAINT [PK_tblICClass] PRIMARY KEY ([intClassId]), 
-    CONSTRAINT [AK_tblICClass_strClass] UNIQUE ([strClass])
+    CONSTRAINT [PK_tblICStorageLocationCategory] PRIMARY KEY ([intStorageLocationCategoryId]), 
+    CONSTRAINT [FK_tblICStorageLocationCategory_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]) 
 )
 
 GO
@@ -15,34 +15,34 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICClass',
+    @level1name = N'tblICStorageLocationCategory',
     @level2type = N'COLUMN',
-    @level2name = N'intClassId'
+    @level2name = N'intStorageLocationCategoryId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Class Name',
+    @value = N'Storage Location Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICClass',
+    @level1name = N'tblICStorageLocationCategory',
     @level2type = N'COLUMN',
-    @level2name = N'strClass'
+    @level2name = N'intStorageLocationId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Description',
+    @value = N'Category Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICClass',
+    @level1name = N'tblICStorageLocationCategory',
     @level2type = N'COLUMN',
-    @level2name = N'strDescription'
+    @level2name = N'intCategoryId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Sort Field',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICClass',
+    @level1name = N'tblICStorageLocationCategory',
     @level2type = N'COLUMN',
     @level2name = N'intSort'
 GO
@@ -51,6 +51,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICClass',
+    @level1name = N'tblICStorageLocationCategory',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'

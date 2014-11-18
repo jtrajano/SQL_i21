@@ -359,9 +359,7 @@
     <Build Include="dbo\Stored Procedures\uspSMErrorMessages.sql" />
     <Build Include="dbo\Stored Procedures\uspCMPostRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspCMReconcileBankRecords.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMReverseGLEntries.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
+    <Build Include="dbo\Stored Procedures\uspCMReverseGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspGLAccountClone.sql" />
     <Build Include="dbo\Stored Procedures\uspGLAccountOriginSync.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildAccount.sql" />
@@ -653,11 +651,9 @@
     <Build Include="dbo\Tables\tblICCategoryAccount.sql" />
     <Build Include="dbo\Tables\tblICCategoryLocation.sql" />
     <Build Include="dbo\Tables\tblICCategoryVendor.sql" />
-    <Build Include="dbo\Tables\tblICClass.sql" />
     <Build Include="dbo\Tables\tblICCommodity.sql" />
     <Build Include="dbo\Tables\tblICCommodityGroup.sql" />
     <Build Include="dbo\Tables\tblICCommodityUnitMeasure.sql" />
-    <Build Include="dbo\Tables\tblICFamily.sql" />
     <Build Include="dbo\Tables\tblICFuelType.sql" />
     <Build Include="dbo\Tables\tblICManufacturer.sql" />
     <Build Include="dbo\Tables\tblICPatronageCategory.sql" />
@@ -670,7 +666,6 @@
     <Build Include="dbo\Tables\tblICRinProcess.sql" />
     <Build Include="dbo\Tables\tblICTag.sql" />
     <Build Include="dbo\Tables\tblICUnitMeasure.sql" />
-    <Build Include="dbo\Tables\tblICUnitType.sql" />
     <Build Include="dbo\Tables\tblICInventoryTransaction.sql" />
     <Build Include="dbo\Tables\tblICInventoryStockSummary.sql" />
     <Build Include="dbo\Tables\tblICInventoryFIFO.sql" />
@@ -811,12 +806,11 @@
     <Build Include="dbo\Tables\tblSTPromotionSalesList.sql" />
     <Build Include="dbo\Stored Procedures\uspICProcessAverageCosting.sql" />
     <Build Include="dbo\Tables\tblARTaxAuthority.sql" />
-    <Build Include="dbo\Stored Procedures\uspICCreateGLEntries.sql" />
-    <Build Include="dbo\Functions\fnGetDebit.sql" />
-    <Build Include="dbo\Functions\fnGetCredit.sql" />
-    <Build Include="dbo\Views\vyuARInvoiceSearch.sql" />
-    <Build Include="dbo\Views\vyuAPPayablesSummary.sql" />
-    <Build Include="dbo\Views\vyuAPPayables.sql" />
+    <Build Include="dbo\Tables\tblICStorageLocation.sql" />
+    <Build Include="dbo\Tables\tblICStorageLocationMeasurement.sql" />
+    <Build Include="dbo\Tables\tblICStorageLocationCategory.sql" />
+    <Build Include="dbo\Tables\tblICItemSubstitution.sql" />
+    <Build Include="dbo\Tables\tblICItemSubstitutionDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
