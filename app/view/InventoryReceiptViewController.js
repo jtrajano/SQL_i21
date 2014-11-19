@@ -34,40 +34,80 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         binding: {
             cboReceiptType: {
                 value: '{current.strReceiptType}',
-                store: '{ReceiptTypes}'
+                store: '{receiptTypes}'
             },
             cboReferenceNumber: '{current.intSourceId}',
-            cboVendorId: '{current.intVendorId}',
+            cboVendorId: {
+                value: '{current.intVendorId}',
+                store: '{vendor}'
+            },
 //            txtVendorName: '{current.strVendorName}',
-            cboLocation: '{current.intLocationId}',
+            cboLocation: {
+                value: '{current.intLocationId}',
+                store: '{location}'
+            },
             dtmReceiptDate: '{current.dtmReceiptDate}',
-            cboCurrency: '{current.intCurrencyId}',
+            cboCurrency: {
+                value: '{current.intCurrencyId}',
+                store: '{currency}'
+            },
             txtReceiptNumber: '{current.strReceiptNumber}',
             txtBlanketReleaseNumber: '{current.intBlanketRelease}',
             txtVendorRefNumber: '{current.strVendorRefNo}',
             txtBillOfLadingNumber: '{current.strBillOfLading}',
-            txtProductOrigin: '{current.intProductOrigin}',
+            cboProductOrigin: {
+                value: '{current.intProductOrigin}',
+                store: '{country}'
+            },
             txtReceiver: '{current.strReceiver}',
             txtVessel: '{current.strVessel}',
-            cboFreightTerms: '{current.intFreightTermId}',
+            cboFreightTerms: {
+                value: '{current.intFreightTermId}',
+                store: '{freightTerm}'
+            },
 //            txtFobPoint: '{current.strMessage}',
             txtDeliveryPoint: '{current.strDeliveryPoint}',
             cboAllocateFreight: {
                 value: '{current.strAllocateFreight}',
-                store: '{AllocateFreights}'
+                store: '{allocateFreights}'
             },
             cboFreightBilledBy: {
                 value: '{current.strFreightBilledBy}',
-                store: '{FreightBilledBys}'
+                store: '{freightBilledBys}'
             },
             txtShiftNumber: '{current.intShiftNumber}',
             txtNotes: '{current.strNotes}',
 
 
+            grdInventoryReceipt: {
+                colItemNo: {
+                    dataIndex: '',
+                    editor: {
+                        store: ''
+                    }
+                },
+                colDescription: '',
+                colSubLocation: '',
+                colLotTracking: '',
+                colQtyOrdered: '',
+                colOpenReceive: '',
+                colReceived: '',
+                colUOM: {
+                    dataIndex: '',
+                    editor: {
+                        store: ''
+                    }
+                },
+                colPackages: '',
+                colPackageType: '',
+                colUnitRetail: ''
+            },
+
+
             // ---- Freight and Invoice Tab
             cboCalculationBasis: {
                 value: '{current.strCalculationBasis}',
-                store: '{CalculationBasis}'
+                store: '{calculationBasis}'
             },
             txtUnitsWeightMiles: '{current.dblUnitWeightMile}',
             txtFreightRate: '{current.dblFreightRate}',

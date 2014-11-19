@@ -12,7 +12,22 @@ Ext.define('Inventory.model.ReceiptItemLot', {
 
     fields: [
         { name: 'intInventoryReceiptItemLotId', type: 'int'},
-        { name: 'intInventoryReceiptItemId', type: 'int'},
+        { name: 'intInventoryReceiptItemId', type: 'int',
+            reference: {
+                type: 'Inventory.model.ReceiptItem',
+                inverse: {
+                    role: 'tblICInventoryReceiptItemLots',
+                    storeConfig: {
+                        complete: true,
+                        sortOnLoad: true,
+                        sorters: {
+                            direction: 'ASC',
+                            property: 'intSort'
+                        }
+                    }
+                }
+            }
+        },
         { name: 'strParentLotId', type: 'string'},
         { name: 'strLotId', type: 'string'},
         { name: 'strContainerNo', type: 'string'},
@@ -33,6 +48,10 @@ Ext.define('Inventory.model.ReceiptItemLot', {
         { name: 'strVendorLotId', type: 'string'},
         { name: 'dtmManufacturedDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d'},
         { name: 'strRemarks', type: 'string'},
-        { name: 'intSort', type: 'int'},
+        { name: 'intSort', type: 'int'}
+    ],
+
+    validators: [
+        {type: 'presence', field: 'strLotId'}
     ]
 });

@@ -18,11 +18,16 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
     alias: 'viewmodel.inventoryreceipt',
 
     requires: [
-        'Inventory.store.Item'
+        'Inventory.store.BufferedCompactItem',
+        'AccountsPayable.store.VendorBuffered',
+        'i21.store.CompanyLocationBuffered',
+        'i21.store.CountryBuffered',
+        'i21.store.CurrencyBuffered',
+        'i21.store.FreightTermsBuffered',
     ],
 
     stores: {
-        ReceiptTypes: {
+        receiptTypes: {
             autoLoad: true,
             data: [
                 {
@@ -39,7 +44,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 name: 'strDescription'
             }
         },
-        AllocateFreights: {
+        allocateFreights: {
             autoLoad: true,
             data: [
                 {
@@ -54,7 +59,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 name: 'strDescription'
             }
         },
-        FreightBilledBys: {
+        freightBilledBys: {
             autoLoad: true,
             data: [
                 {
@@ -69,7 +74,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 name: 'strDescription'
             }
         },
-        CalculationBasis: {
+        calculationBasis: {
             autoLoad: true,
             data: [
                 {
@@ -86,7 +91,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 name: 'strDescription'
             }
         },
-        SealStatuses: {
+        sealStatuses: {
             autoLoad: true,
             data: [
                 {
@@ -103,8 +108,23 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 name: 'strDescription'
             }
         },
-        Items: {
-            type: 'inventoryitem'
+        items: {
+            type: 'inventorybufferedcompactitem'
+        },
+        vendor: {
+            type: 'vendorbuffered'
+        },
+        location: {
+            type: 'companylocationbuffered'
+        },
+        currency: {
+            type: 'currencybuffered'
+        },
+        country: {
+            type: 'countrybuffered'
+        },
+        freightTerm: {
+            type: 'FreightTermsBuffered'
         }
     }
 

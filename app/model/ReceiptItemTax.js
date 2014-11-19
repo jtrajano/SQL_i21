@@ -12,9 +12,28 @@ Ext.define('Inventory.model.ReceiptItemTax', {
 
     fields: [
         { name: 'intInventoryReceiptItemTaxId', type: 'int'},
-        { name: 'intInventoryReceiptItemId', type: 'int'},
+        { name: 'intInventoryReceiptItemId', type: 'int',
+            reference: {
+                type: 'Inventory.model.ReceiptItem',
+                inverse: {
+                    role: 'tblICInventoryReceiptItemTaxes',
+                    storeConfig: {
+                        complete: true,
+                        sortOnLoad: true,
+                        sorters: {
+                            direction: 'ASC',
+                            property: 'intSort'
+                        }
+                    }
+                }
+            }
+        },
         { name: 'intTaxCodeId', type: 'int'},
         { name: 'ysnSelected', type: 'boolean'},
-        { name: 'intSort', type: 'int'},
+        { name: 'intSort', type: 'int'}
+    ],
+
+    validators: [
+        {type: 'presence', field: 'intTaxCodeId'}
     ]
 });
