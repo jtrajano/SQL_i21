@@ -12,6 +12,8 @@ CREATE TABLE [dbo].[tblICInventoryFIFO]
     [dblStockIn] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [dblStockOut] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+	[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
+	[intTransactionId] INT NOT NULL,
     [dtmCreated] DATETIME NULL, 
     [intCreatedUserId] INT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 

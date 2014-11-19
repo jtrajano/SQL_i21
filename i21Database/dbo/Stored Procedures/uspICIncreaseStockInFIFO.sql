@@ -15,6 +15,8 @@ CREATE PROCEDURE dbo.uspICIncreaseStockInFIFO
 	,@intUserId AS INT
 	,@FullQty AS NUMERIC(18,6) 
 	,@TotalQtyOffset AS NUMERIC(18,6)
+	,@strTransactionId AS NVARCHAR(40)
+	,@intTransactionId AS INT 
 	,@RemainingQty AS NUMERIC(18,6) OUTPUT
 	,@CostUsed AS NUMERIC(18,6) OUTPUT 
 	,@QtyOffset AS NUMERIC(18,6) OUTPUT 
@@ -86,6 +88,8 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 		,[dblStockIn]
 		,[dblStockOut]
 		,[dblCost]
+		,[strTransactionId]
+		,[intTransactionId]
 		,[dtmCreated]
 		,[intCreatedUserId]
 		,[intConcurrencyId]
@@ -97,6 +101,8 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 		,@FullQty
 		,@TotalQtyOffset
 		,@dblCost
+		,@strTransactionId
+		,@intTransactionId
 		,GETDATE()
 		,@intUserId
 		,1	
@@ -118,6 +124,8 @@ BEGIN
 		,[dblStockIn]
 		,[dblStockOut]
 		,[dblCost]
+		,[strTransactionId]
+		,[intTransactionId]
 		,[dtmCreated]
 		,[intCreatedUserId]
 		,[intConcurrencyId]
@@ -129,6 +137,8 @@ BEGIN
 		,@FullQty
 		,@FullQty
 		,@dblCost
+		,@strTransactionId
+		,@intTransactionId
 		,GETDATE()
 		,@intUserId
 		,1	

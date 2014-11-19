@@ -129,6 +129,8 @@ BEGIN
 				,@dtmDate
 				,@dblReduceQty
 				,@dblCost
+				,@strTransactionId
+				,@intTransactionId
 				,@intUserId
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT 
@@ -209,6 +211,8 @@ BEGIN
 				,@intUserId
 				,@FullQty
 				,@TotalQtyOffset
+				,@strTransactionId
+				,@intTransactionId
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT
 				,@QtyOffset OUTPUT 

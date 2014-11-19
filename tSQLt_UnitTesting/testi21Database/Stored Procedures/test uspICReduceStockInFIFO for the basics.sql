@@ -37,6 +37,8 @@ BEGIN
 				,@dtmDate AS DATETIME
 				,@dblSoldQty NUMERIC(18,6) 
 				,@dblCost AS NUMERIC(18,6)
+				,@strTransactionId AS NVARCHAR(40)
+				,@intTransactionId AS INT
 				,@intUserId AS INT
 				,@RemainingQty AS NUMERIC(18,6) 
 				,@CostUsed AS NUMERIC(18,6)
@@ -51,7 +53,9 @@ BEGIN
 			,@intItemLocationId 
 			,@dtmDate 
 			,@dblSoldQty 
-			,@dblCost 
+			,@dblCost
+			,@strTransactionId
+			,@intTransactionId			 
 			,@intUserId 
 			,@RemainingQty OUTPUT 
 			,@CostUsed OUTPUT

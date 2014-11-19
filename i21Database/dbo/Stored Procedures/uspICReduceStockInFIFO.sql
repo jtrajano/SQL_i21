@@ -10,6 +10,8 @@ CREATE PROCEDURE [dbo].[uspICReduceStockInFIFO]
 	,@dtmDate AS DATETIME
 	,@dblQty NUMERIC(18,6) 
 	,@dblCost AS NUMERIC(18,6)
+	,@strTransactionId AS NVARCHAR(40)
+	,@intTransactionId AS INT 
 	,@intUserId AS INT
 	,@RemainingQty AS NUMERIC(18,6) OUTPUT
 	,@CostUsed AS NUMERIC(18,6) OUTPUT 
@@ -83,6 +85,8 @@ WHEN NOT MATCHED THEN
 		,[dblStockIn]
 		,[dblStockOut]
 		,[dblCost]
+		,[strTransactionId]
+		,[intTransactionId]
 		,[dtmCreated]
 		,[intCreatedUserId]
 		,[intConcurrencyId]
@@ -94,6 +98,8 @@ WHEN NOT MATCHED THEN
 		,0
 		,@dblQty
 		,@dblCost
+		,@strTransactionId
+		,@intTransactionId
 		,GETDATE()
 		,@intUserId
 		,1	

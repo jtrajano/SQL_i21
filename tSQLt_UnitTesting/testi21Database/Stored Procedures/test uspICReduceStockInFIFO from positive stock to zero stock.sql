@@ -78,6 +78,8 @@ BEGIN
 				,@dtmDate AS DATETIME = 'January 1, 2014'
 				,@dblSoldQty NUMERIC(18,6) = -100
 				,@dblCost AS NUMERIC(18,6) 
+				,@strTransactionId AS NVARCHAR(40)
+				,@intTransactionId AS INT
 				,@intUserId AS INT = 1
 				,@dtmCreated AS DATETIME
 				,@dblReduceQty AS NUMERIC(18,6)
@@ -126,6 +128,8 @@ BEGIN
 				,@dtmDate
 				,@dblReduceQty
 				,@dblCost
+				,@strTransactionId
+				,@intTransactionId
 				,@intUserId
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT
