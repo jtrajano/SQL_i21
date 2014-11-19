@@ -14,7 +14,7 @@ namespace iRely.Inventory.Model
         public int intItemUPCId { get; set; }
         public int intItemId { get; set; }
         public int intUnitMeasureId { get; set; }
-        public double dblUnitQty { get; set; }
+        public decimal? dblUnitQty { get; set; }
         public string strUPCCode { get; set; }
         public int intSort { get; set; }
 

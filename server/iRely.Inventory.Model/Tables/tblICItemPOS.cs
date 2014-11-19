@@ -45,7 +45,7 @@ namespace iRely.Inventory.Model
         public int intItemPOSSLAId { get; set; }
         public int intItemId { get; set; }
         public string strSLAContract { get; set; }
-        public double dblContractPrice { get; set; }
+        public decimal? dblContractPrice { get; set; }
         public bool ysnServiceWarranty { get; set; }
 
         public tblICItem tblICItem { get; set; }

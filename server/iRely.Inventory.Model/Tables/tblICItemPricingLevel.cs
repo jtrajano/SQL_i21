@@ -16,13 +16,13 @@ namespace iRely.Inventory.Model
         public int? intLocationId { get; set; }
         public string strPriceLevel { get; set; }
         public int? intUnitMeasureId { get; set; }
-        public double dblUnit { get; set; }
-        public double dblMin { get; set; }
-        public double dblMax { get; set; }
+        public decimal? dblUnit { get; set; }
+        public decimal? dblMin { get; set; }
+        public decimal? dblMax { get; set; }
         public string strPricingMethod { get; set; }
         public string strCommissionOn { get; set; }
-        public double dblCommissionRate { get; set; }
-        public double dblUnitPrice { get; set; }
+        public decimal? dblCommissionRate { get; set; }
+        public decimal? dblUnitPrice { get; set; }
         public bool ysnActive { get; set; }
         public int intSort { get; set; }
 

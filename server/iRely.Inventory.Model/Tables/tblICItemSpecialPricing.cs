@@ -18,12 +18,12 @@ namespace iRely.Inventory.Model
         public DateTime? dtmBeginDate { get; set; }
         public DateTime? dtmEndDate { get; set; }
         public int? intUnitMeasureId { get; set; }
-        public double dblUnit { get; set; }
+        public decimal? dblUnit { get; set; }
         public string strDiscountBy { get; set; }
-        public double dblDiscount { get; set; }
-        public double dblUnitAfterDiscount { get; set; }
-        public double dblAccumulatedQty { get; set; }
-        public double dblAccumulatedAmount { get; set; }
+        public decimal? dblDiscount { get; set; }
+        public decimal? dblUnitAfterDiscount { get; set; }
+        public decimal? dblAccumulatedQty { get; set; }
+        public decimal? dblAccumulatedAmount { get; set; }
         public int intSort { get; set; }
 
         private string _location;
