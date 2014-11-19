@@ -10,11 +10,15 @@ CREATE FUNCTION [dbo].[fnCalculateAverageCost]
 RETURNS NUMERIC(18,6)
 AS
 BEGIN
-	-- If qty is negative (reduce stock) or zero, return the same average cost. 
+	-- If qty is negative or zero (as to reduce stock), return the same average cost. 
 	IF ISNULL(@Qty, 0) <= 0
 		RETURN @StockAverageCost;
 
-	-- If qty is postive (increase stock) but overall stock qty will remain zero or negative, return cost. 
+	-- If qty is positive (as to increase stock) but stock qty was zero or negative, return cost as the new average cost. 
+	IF ISNULL(@Qty, 0) > 0 AND ISNULL(@StockOnHandQty, 0) <= 0
+		RETURN @Cost;		
+
+	-- If qty is postive (as to increase stock) but overall stock qty will remain zero or negative, return cost as the new average cost. 
 	IF ISNULL(@Qty, 0) > 0 AND ISNULL(@Qty, 0) + ISNULL(@StockOnHandQty, 0) <= 0
 		RETURN @Cost;
 

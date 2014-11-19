@@ -466,6 +466,7 @@
     <Build Include="testi21Database\Stored Procedures\test uspICProcessCosting for one outgoing stock.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Functions\test fnCalculateAverageCost, use new cost when increasing stock but stock was from negative or zero.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
