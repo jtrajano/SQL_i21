@@ -54,6 +54,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="InventoryEntities.cs" />
+    <Compile Include="Mappings\tblICItemSubstitutionMap.cs" />
+    <Compile Include="Mappings\tblICStorageLocationMap.cs" />
     <Compile Include="Mappings\tblICLotStatusMap.cs" />
     <Compile Include="Mappings\tblICLineOfBusinessMap.cs" />
     <Compile Include="Mappings\tblICManufacturingCellMap.cs" />
@@ -109,8 +111,10 @@
     <Compile Include="Mappings\tblICRinProcessMap.cs" />
     <Compile Include="Mappings\tblICTagMap.cs" />
     <Compile Include="Mappings\tblICUnitMeasureMap.cs" />
-    <Compile Include="Mappings\tblICUnitTypeMap.cs" />
+    <Compile Include="Mappings\tblICStorageUnitTypeMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tables\tblICItemSubstitution.cs" />
+    <Compile Include="Tables\tblICStorageLocation.cs" />
     <Compile Include="Tables\tblICLotStatus.cs" />
     <Compile Include="Tables\tblICLineOfBusiness.cs" />
     <Compile Include="Tables\tblICManufacturingCell.cs" />
@@ -166,7 +170,7 @@
     <Compile Include="Tables\tblICRinProcess.cs" />
     <Compile Include="Tables\tblICTag.cs" />
     <Compile Include="Tables\tblICUnitMeasure.cs" />
-    <Compile Include="Tables\tblICUnitType.cs" />
+    <Compile Include="Tables\tblICStorageUnitType.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
