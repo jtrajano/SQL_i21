@@ -163,6 +163,7 @@
     <Compile Include="Controllers\RinProcessController.cs" />
     <Compile Include="Controllers\RinFuelController.cs" />
     <Compile Include="Controllers\RinFuelTypeController.cs" />
+    <Compile Include="Controllers\StorageLocationController.cs" />
     <Compile Include="Controllers\StorageTypeController.cs" />
     <Compile Include="Controllers\StoreController.cs" />
     <Compile Include="Controllers\TagController.cs" />

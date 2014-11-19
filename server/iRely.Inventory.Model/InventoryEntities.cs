@@ -149,7 +149,7 @@ namespace iRely.Inventory.Model
         public DbSet<tblICRinFuelCategory> tblICRinFuelCategorys { get; set; }
         public DbSet<tblICRinProcess> tblICRinProcesss { get; set; }
         public DbSet<tblICStorageLocation> tblICStorageLocations { get; set; }
-        public DbSet<tblICStorageLocationCategory> tblICStorageLocationCategorys { get; set; }
+        public DbSet<tblICStorageLocationCategory> tblICStorageLocationCategories { get; set; }
         public DbSet<tblICStorageLocationMeasurement> tblICStorageLocationMeasurements { get; set; }
         public DbSet<tblICStorageUnitType> tblICStorageUnitTypes { get; set; }
         public DbSet<tblICTag> tblICTags { get; set; }

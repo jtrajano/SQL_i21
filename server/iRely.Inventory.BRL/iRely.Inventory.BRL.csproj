@@ -69,6 +69,7 @@
     <Compile Include="CategoryLocation.cs" />
     <Compile Include="Catalog.cs" />
     <Compile Include="CommodityUnitMeasure.cs" />
+    <Compile Include="StorageLocation.cs" />
     <Compile Include="ItemUnitMeasure.cs" />
     <Compile Include="StorageType.cs" />
     <Compile Include="StoreTables.cs" />

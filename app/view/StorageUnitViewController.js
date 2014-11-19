@@ -15,5 +15,156 @@
 
 Ext.define('Inventory.view.StorageUnitViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.storageunit'
+    alias: 'controller.storageunit',
+
+    config: {
+        searchConfig: {
+            title:  'Search Storage Locations',
+            type: 'Inventory.StorageLocation',
+            api: {
+                read: '../Inventory/api/StorageLocation/SearchStorageLocations'
+            },
+            columns: [
+                {dataIndex: 'intStorageLocationId',text: "Storage Location Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
+                {dataIndex: 'strName', text: 'Name', flex: 1,  dataType: 'string'},
+                {dataIndex: 'strDescription', text: 'Description', flex: 1,  dataType: 'string'}
+            ]
+        },
+        binding: {
+            txtName: '{current.strName}',
+            txtDescription: '{current.strDescription}',
+            cboUnitType: {
+                value: '{current.intStorageUnitTypeId}',
+                store: '{storageUnitType}'
+            },
+            cboLocation: '{current.intSubLocationId}',
+            cboParentUnit: '{current.intParentStorageLocationId}',
+            cboRestrictionType: '{current.intRestrictionId}',
+            txtAisle: '{current.strUnitGroup}',
+            txtMinBatchSize: '{current.dblMinBatchSize}',
+            txtBatchSize: '{current.dblBatchSize}',
+            cboBatchSizeUom: {
+                value: '{current.intBatchSizeUOMId}',
+                store: '{batchSizeUOM}'
+            },
+            chkAllowConsume: '{current.ysnAllowConsume}',
+            chkAllowMultipleItems: '{current.ysnAllowMultipleItem}',
+            chkAllowMultipleLots: '{current.ysnAllowMultipleLot}',
+            chkMergeOnMove: '{current.ysnMergeOnMove}',
+            chkCycleCounted: '{current.ysnCycleCounted}',
+            chkDefaultWarehouseStagingUnit: '{current.ysnDefaultWHStagingUnit}',
+
+//            grdMeasurement: {
+//                colMeasurement: {
+//                    dataIndex: '',
+//                    editor: {
+//                        store: '{}'
+//                    }
+//                },
+//                colReadingPoint: {
+//                    dataIndex: '',
+//                    editor: {
+//                        store: '{}'
+//                    }
+//                },
+//                colActive: ''
+//            },
+
+            grdItemCategoryAllowed: {
+                colCategory: {
+                    dataIndex: 'strCategoryCode',
+                    editor: {
+                        store: '{categoryAllowed}'
+                    }
+                }
+            },
+
+            txtSequence: '{current.intSequence}',
+            chkActive: '{current.ysnActive}',
+            txtXPosition: '{current.intRelativeX}',
+            txtYPosition: '{current.intRelativeY}',
+            txtZPosition: '{current.intRelativeZ}'
+
+        }
+    },
+
+    setupContext : function(options){
+        "use strict";
+        var me = this,
+            win = options.window,
+            store = Ext.create('Inventory.store.StorageLocation', { pageSize: 1 });
+
+        win.context = Ext.create('iRely.mvvm.Engine', {
+            window : win,
+            store  : store,
+            binding: me.config.binding,
+            details: [
+                {
+                    key: 'tblICStorageLocationCategories',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: win.down('#grdItemCategoryAllowed'),
+                        deleteButton : win.down('#btnDeleteItemCategoryAllowed')
+                    })
+                },
+                {
+                    key: 'tblICStorageLocationMeasurements',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: win.down('#grdMeasurement'),
+                        deleteButton : win.down('#btnDeleteMeasurement')
+                    })
+                }
+            ]
+        });
+
+        return win.context;
+    },
+
+    show : function(config) {
+        "use strict";
+
+        var me = this,
+            win = this.getView();
+
+        if (config) {
+            win.show();
+
+            var context = me.setupContext( {window : win} );
+
+            if (config.action === 'new') {
+                context.data.addRecord();
+            } else {
+                if (config.id) {
+                    config.filters = [{
+                        column: 'intStorageLocationId',
+                        value: config.id
+                    }];
+                }
+                context.data.load({
+                    filters: config.filters
+                });
+            }
+        }
+    },
+
+    onCategorySelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepCategoryAllowed');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colCategory')
+        {
+            current.set('intCategoryId', records[0].get('intCategoryId'));
+        }
+    },
+
+    init: function(application) {
+        this.control({
+            "#cboCategoryAllowed": {
+                select: this.onCategorySelect
+            }
+        });
+    }
 });

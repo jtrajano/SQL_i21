@@ -38,6 +38,13 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnCycleCounted).HasColumnName("ysnCycleCounted");
             this.Property(t => t.ysnDefaultWHStagingUnit).HasColumnName("ysnDefaultWHStagingUnit");
             this.Property(t => t.ysnMergeOnMove).HasColumnName("ysnMergeOnMove");
+
+            this.HasMany(p => p.tblICStorageLocationCategories)
+                .WithRequired(p => p.tblICStorageLocation)
+                .HasForeignKey(p => p.intStorageLocationId);
+            this.HasMany(p => p.tblICStorageLocationMeasurements)
+                .WithRequired(p => p.tblICStorageLocation)
+                .HasForeignKey(p => p.intStorageLocationId);
         }
     }
 
@@ -54,6 +61,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intSort).HasColumnName("intSort");
             this.Property(t => t.intStorageLocationCategoryId).HasColumnName("intStorageLocationCategoryId");
             this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
+
+            this.HasRequired(p => p.tblICCategory)
+                .WithMany(p => p.tblICStorageLocationCategories)
+                .HasForeignKey(p => p.intCategoryId);
         }
     }
 

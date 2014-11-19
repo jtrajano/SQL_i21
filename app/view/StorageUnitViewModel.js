@@ -15,6 +15,24 @@
 
 Ext.define('Inventory.view.StorageUnitViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.storageunit'
+    alias: 'viewmodel.storageunit',
+
+    requires: [
+        'Inventory.store.BufferedUnitMeasure',
+        'Inventory.store.BufferedCategory',
+        'Inventory.store.BufferedFactoryUnitType'
+    ],
+
+    stores: {
+        batchSizeUOM: {
+            type: 'inventorybuffereduom'
+        },
+        categoryAllowed: {
+            type: 'inventorybufferedcategory'
+        },
+        storageUnitType: {
+            type: 'inventorybufferedfactoryunittype'
+        }
+    }
 
 });

@@ -37,14 +37,41 @@ namespace iRely.Inventory.Model
         public decimal? dblPackFactor { get; set; }
         public decimal? dblUnitPerFoot { get; set; }
         public decimal? dblResidualUnit { get; set; }
+
+        public ICollection<tblICStorageLocationCategory> tblICStorageLocationCategories { get; set; }
+        public ICollection<tblICStorageLocationMeasurement> tblICStorageLocationMeasurements { get; set; }
     }
 
     public class tblICStorageLocationCategory : BaseEntity
     {
         public int intStorageLocationCategoryId { get; set; }
         public int intStorageLocationId { get; set; }
-        public int intCategoryId { get; set; }
+        public int? intCategoryId { get; set; }
         public int intSort { get; set; }
+
+        private string _strCategoryCode;
+        [NotMapped]
+        public string strCategoryCode
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_strCategoryCode))
+                    if (tblICCategory != null)
+                        return tblICCategory.strCategoryCode;
+                    else
+                        return null;
+                else
+                    return _strCategoryCode;
+            }
+            set
+            {
+                _strCategoryCode = value;
+            }
+        }
+
+        public tblICStorageLocation tblICStorageLocation { get; set; }
+        public tblICCategory tblICCategory { get; set; }
+        
     }
 
     public class tblICStorageLocationMeasurement : BaseEntity
@@ -55,6 +82,8 @@ namespace iRely.Inventory.Model
         public int intReadingPointId { get; set; }
         public bool ysnActive { get; set; }
         public int intSort { get; set; }
+
+        public tblICStorageLocation tblICStorageLocation { get; set; }
     }
 
 }

@@ -18,7 +18,6 @@ Ext.define('Inventory.view.StorageUnit', {
     alias: 'widget.storageunit',
 
     requires: [
-        'Inventory.view.StorageUnitViewModel',
         'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
@@ -31,12 +30,11 @@ Ext.define('Inventory.view.StorageUnit', {
         'Ext.grid.Panel',
         'Ext.grid.column.Check',
         'Ext.grid.View',
+        'Ext.grid.plugin.CellEditing',
+        'Ext.selection.CheckboxModel',
         'Ext.toolbar.Paging'
     ],
 
-    viewModel: {
-        type: 'storageunit'
-    },
     height: 611,
     hidden: false,
     minHeight: 525,
@@ -45,7 +43,7 @@ Ext.define('Inventory.view.StorageUnit', {
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
-    title: 'Storage Unit',
+    title: 'Storage Location',
     maximizable: true,
 
     items: [
@@ -192,10 +190,38 @@ Ext.define('Inventory.view.StorageUnit', {
                                             labelWidth: 110
                                         },
                                         {
-                                            xtype: 'combobox',
+                                            xtype: 'gridcombobox',
+                                            columns: [
+                                                {
+                                                    dataIndex: 'intStorageUnitTypeId',
+                                                    dataType: 'numeric',
+                                                    text: 'Location Id',
+                                                    hidden: true
+                                                },
+                                                {
+                                                    dataIndex: 'strStorageUnitType',
+                                                    dataType: 'string',
+                                                    text: 'Location Name',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    dataIndex: 'strInternalCode',
+                                                    dataType: 'string',
+                                                    text: 'Location Type',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    dataIndex: 'strDescription',
+                                                    dataType: 'string',
+                                                    text: 'Location Type',
+                                                    flex: 1
+                                                }
+                                            ],
                                             itemId: 'cboUnitType',
-                                            fieldLabel: 'Unit Type',
-                                            labelWidth: 110
+                                            fieldLabel: 'Storage Unit Type',
+                                            labelWidth: 110,
+                                            displayField: 'strStorageUnitType',
+                                            valueField: 'intStorageUnitTypeId'
                                         },
                                         {
                                             xtype: 'combobox',
@@ -236,10 +262,38 @@ Ext.define('Inventory.view.StorageUnit', {
                                             hideTrigger: true
                                         },
                                         {
-                                            xtype: 'combobox',
+                                            xtype: 'gridcombobox',
+                                            columns: [
+                                                {
+                                                    dataIndex: 'intUnitMeasureId',
+                                                    dataType: 'numeric',
+                                                    text: 'Unit Of Measure ID',
+                                                    hidden: true
+                                                },
+                                                {
+                                                    dataIndex: 'strUnitMeasure',
+                                                    dataType: 'string',
+                                                    text: 'Unit Measure',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    dataIndex: 'strUnitType',
+                                                    dataType: 'string',
+                                                    text: 'Unit Type',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    dataIndex: 'ysnDefault',
+                                                    dataType: 'boolean',
+                                                    text: 'Default',
+                                                    flex: 1
+                                                }
+                                            ],
                                             itemId: 'cboBatchSizeUom',
                                             fieldLabel: 'Batch Size UOM',
-                                            labelWidth: 110
+                                            labelWidth: 110,
+                                            displayField: 'strUnitMeasure',
+                                            valueField: 'intUnitMeasureId'
                                         }
                                     ]
                                 },
@@ -278,7 +332,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                         },
                                         {
                                             xtype: 'checkboxfield',
-                                            itemId: 'cboCycleCounted',
+                                            itemId: 'chkCycleCounted',
                                             fieldLabel: 'Cycle Counted',
                                             labelWidth: 180
                                         },
@@ -337,23 +391,36 @@ Ext.define('Inventory.view.StorageUnit', {
                                     columns: [
                                         {
                                             xtype: 'gridcolumn',
+                                            itemId: 'colMeasurement',
                                             dataIndex: 'string',
                                             text: 'Measurement Name',
                                             flex: 1
                                         },
                                         {
                                             xtype: 'gridcolumn',
+                                            itemId: 'colReadingPoint',
                                             dataIndex: 'string',
                                             text: 'Reading Point',
                                             flex: 1
                                         },
                                         {
                                             xtype: 'checkcolumn',
-                                            text: 'Is Selected'
+                                            itemId: 'colActive',
+                                            text: 'Active'
                                         }
                                     ],
                                     viewConfig: {
                                         itemId: 'grvMeasurement'
+                                    },
+                                    plugins: [
+                                        {
+                                            ptype: 'cellediting',
+                                            pluginId: 'cepMeasurement',
+                                            clicksToEdit: 1
+                                        }
+                                    ],
+                                    selModel: {
+                                        selType: 'checkboxmodel'
                                     }
                                 }
                             ]
@@ -361,11 +428,11 @@ Ext.define('Inventory.view.StorageUnit', {
                         {
                             xtype: 'panel',
                             layout: 'fit',
-                            title: 'Material Type Allowed',
+                            title: 'Item Category Allowed',
                             items: [
                                 {
                                     xtype: 'gridpanel',
-                                    itemId: 'grdMaterialTypeAllowed',
+                                    itemId: 'grdItemCategoryAllowed',
                                     margin: -1,
                                     dockedItems: [
                                         {
@@ -380,7 +447,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                                 {
                                                     xtype: 'button',
                                                     tabIndex: -1,
-                                                    itemId: 'btnDeleteMaterialTypeAllowed',
+                                                    itemId: 'btnDeleteItemCategoryAllowed',
                                                     iconCls: 'small-delete',
                                                     text: 'Delete'
                                                 },
@@ -397,12 +464,49 @@ Ext.define('Inventory.view.StorageUnit', {
                                         {
                                             xtype: 'gridcolumn',
                                             dataIndex: 'string',
-                                            text: 'Material Type',
-                                            flex: 1
+                                            itemId: 'colCategory',
+                                            text: 'Category',
+                                            flex: 1,
+                                            editor: {
+                                                xtype: 'gridcombobox',
+                                                columns: [
+                                                    {
+                                                        dataIndex: 'intCategoryId',
+                                                        dataType: 'numeric',
+                                                        text: 'Category ID',
+                                                        hidden: true
+                                                    },
+                                                    {
+                                                        dataIndex: 'strCategoryCode',
+                                                        dataType: 'string',
+                                                        text: 'Category Code',
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        dataIndex: 'strDescription',
+                                                        dataType: 'string',
+                                                        text: 'Description',
+                                                        flex: 1
+                                                    }
+                                                ],
+                                                itemId: 'cboCategoryAllowed',
+                                                displayField: 'strCategoryCode',
+                                                valueField: 'strCategoryCode'
+                                            }
                                         }
                                     ],
                                     viewConfig: {
                                         itemId: 'grvMaterialTypeAllowed'
+                                    },
+                                    plugins: [
+                                        {
+                                            ptype: 'cellediting',
+                                            pluginId: 'cepCategoryAllowed',
+                                            clicksToEdit: 1
+                                        }
+                                    ],
+                                    selModel: {
+                                        selType: 'checkboxmodel'
                                     }
                                 }
                             ]
@@ -425,7 +529,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                     },
                                     items: [
                                         {
-                                            xtype: 'textfield',
+                                            xtype: 'numberfield',
                                             itemId: 'txtSequence',
                                             fieldLabel: 'Sequence'
                                         },
