@@ -118,8 +118,8 @@ StartTest (function (t) {
 //        .checkMessageBox('iRely i21','Fuel Category already exists.','ok','error') /* IC-84 */
 //        .clickMessageBoxButton('ok').wait(10)
 //
-//        /*Scenario 6. Modify duplicate ProcessCode to correct it*/
-//        .addFunction(function(next){t.diag("Scenario 6. Modify duplicate ProcessCode to correct it"); next();}).wait(100)
+//        /*Scenario 6. Modify duplicate ProductionProcess to correct it*/
+//        .addFunction(function(next){t.diag("Scenario 6. Modify duplicate ProductionProcess to correct it"); next();}).wait(100)
 //        .enterGridData('#grdFeedStockUom', 3, 'colUOM', 'u04').wait(100) /* IC-81 */
 //        .clickButton('#closeButton').wait(100)
 //        .checkMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel', 'question')
