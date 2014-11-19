@@ -63,6 +63,7 @@ StartTest (function (t) {
 //        no checking if button label is correct
 //        check columns shown
 //        check column headers
+        .checkControlVisible(['#btnInsertCriteria', '#txtFilterGrid','#lblTotalRecords'],true)
         .checkControlVisible(['#btnHelp', '#btnSupport', '#btnFieldName'], true)
         .checkStatusBar()
         .checkStatusMessage('Ready')
@@ -151,7 +152,7 @@ StartTest (function (t) {
         .checkControlVisible(['#btnHelp', '#btnSupport', '#btnFieldName'], true)
         .checkStatusBar()
         .checkStatusMessage('Ready')
-        .selectSearchRowByFilter('ptn01')
+        .selectSearchRowByFilter('ptn02')
         .clickButton('#btnOpenSelected').wait(100)
         .checkScreenShown ('Pack Type').wait(200)
         .addFunction(function(next){t.diag("Opens screen"); next();}).wait(100)
