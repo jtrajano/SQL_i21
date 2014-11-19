@@ -98,6 +98,10 @@
 );
 GO
 
+CREATE NONCLUSTERED INDEX [IX_tblICItem_intItemId]
+    ON [dbo].[tblICItem]([intItemId] ASC);
+GO
+
 EXECUTE sp_addextendedproperty @name = N'MS_Description', @value = N'Identity Field', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'tblICItem', @level2type = N'COLUMN', @level2name = N'intItemId';
 GO
 EXECUTE sp_addextendedproperty @name = N'MS_Description', @value = N'Unique key that corresponds to the item number. Origin: agitm-no ', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'tblICItem', @level2type = N'COLUMN', @level2name = N'strItemNo';

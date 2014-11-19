@@ -27,13 +27,20 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+CREATE TABLE #FoundErrors (
+	intItemId INT
+	,intLocationId INT
+	,strText NVARCHAR(MAX)
+	,intErrorCode INT
+)
+
 -- Cross-check each items against the function that does the validation. 
 -- Store the result in a temporary table. 
+INSERT INTO #FoundErrors
 SELECT	Errors.intItemId
 		,Errors.intLocationId
 		,Errors.strText
 		,Errors.intErrorCode
-INTO	#FoundErrors 
 FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnPostErrors(Item.intItemId, Item.intItemLocationId, Item.dblUnitQty * Item.dblUOMQty) Errors
 
 -- Check for invalid items in the temp table. 
