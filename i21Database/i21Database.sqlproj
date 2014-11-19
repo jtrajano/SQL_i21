@@ -822,6 +822,7 @@
     <Build Include="dbo\Stored Procedures\uspICCreateGLEntries.sql" />
     <Build Include="dbo\Functions\fnGetDebit.sql" />
     <Build Include="dbo\Functions\fnGetCredit.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPDuplicateBill.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
