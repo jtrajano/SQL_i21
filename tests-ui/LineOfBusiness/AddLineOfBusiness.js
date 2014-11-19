@@ -74,7 +74,6 @@ StartTest (function (t) {
         .checkIfScreenClosed('lineofbusiness').wait(100) /*issue - FRM-1547 or TS-445 or FRM-1560*/
 
 //        Verify record added
-        .addFunction(function(next){t.diag("Scenario 4. Add another record, SAVE the changes > 2. Verify record added"); next();}).wait(100)
         .openScreen('Line Of Business').wait(200)
         .checkScreenShown ('lineofbusiness').wait(100)
         .checkGridData('#grdGridTemplate', 0, 'colLineOfBusiness','lob03')
