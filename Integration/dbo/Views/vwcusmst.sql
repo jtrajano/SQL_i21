@@ -79,6 +79,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 		,vwcus_balance = agcus_ar_future + agcus_ar_per1 + agcus_ar_per2 + agcus_ar_per3 + agcus_ar_per4 + agcus_ar_per5 - agcus_cred_reg - agcus_cred_ga  
 		,vwcus_ptd_sls = agcus_ptd_sls   
 		,vwcus_lyr_sls = agcus_lyr_sls
+		,vwcus_acct_stat_x_1 = agcus_acct_stat_x_1
 		,dblFutureCurrent = ISNULL(agcus_ar_future,0.0) + ISNULL(agcus_ar_per1,0.0)
 		,intConcurrencyId = 0
 		FROM agcusmst
@@ -183,6 +184,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 		,vwcus_balance = ptcus_ar_curr + ptcus_ar_3160 + ptcus_ar_6190 + ptcus_ar_91120 + ptcus_ar_ov120 -ptcus_cred_reg - ptcus_cred_ppd 
 		,vwcus_ptd_sls = ptcus_ptd_sales   
 		,vwcus_lyr_sls = CAST(0 AS DECIMAL)
+		,vwcus_acct_stat_x_1 = ptcus_acct_stat_x_1
 		,dblFutureCurrent = ptcus_ar_curr
 		,intConcurrencyId = 0
 		FROM ptcusmst
