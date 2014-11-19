@@ -819,6 +819,9 @@
     <Build Include="dbo\Tables\tblSCTicketPool.sql" />
     <Build Include="dbo\Tables\tblSCTicketStorageType.sql" />
     <Build Include="dbo\Tables\tblSCTicketType.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateGLEntries.sql" />
+    <Build Include="dbo\Functions\fnGetDebit.sql" />
+    <Build Include="dbo\Functions\fnGetCredit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
