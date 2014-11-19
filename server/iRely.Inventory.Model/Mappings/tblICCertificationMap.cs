@@ -42,6 +42,16 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
             this.Property(t => t.intSort).HasColumnName("intSort");
             this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
+
+            this.HasOptional(p => p.tblICCommodity)
+                .WithMany(p => p.tblICCertificationCommodities)
+                .HasForeignKey(p => p.intCommodityId);
+            this.HasOptional(p => p.tblSMCurrency)
+                .WithMany(p => p.tblICCertificationCommodities)
+                .HasForeignKey(p => p.intCurrencyId);
+            this.HasOptional(p => p.tblICUnitMeasure)
+                .WithMany(p => p.tblICCertificationCommodities)
+                .HasForeignKey(p => p.intUnitMeasureId);
         }
     }
 }

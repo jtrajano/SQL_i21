@@ -18,7 +18,6 @@ Ext.define('Inventory.view.CertificationProgram', {
     alias: 'widget.certificationprogram',
 
     requires: [
-        'Inventory.view.CertificationProgramViewModel',
         'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
@@ -28,15 +27,15 @@ Ext.define('Inventory.view.CertificationProgram', {
         'Ext.form.field.ComboBox',
         'Ext.grid.Panel',
         'Ext.grid.column.Number',
+        'Ext.form.field.Number',
         'Ext.grid.column.Date',
+        'Ext.form.field.Date',
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
+        'Ext.grid.plugin.CellEditing',
         'Ext.toolbar.Paging'
     ],
 
-    viewModel: {
-        type: 'certificationprogram'
-    },
     height: 551,
     hidden: false,
     minHeight: 525,
@@ -205,11 +204,27 @@ Ext.define('Inventory.view.CertificationProgram', {
                                     labelWidth: 110
                                 },
                                 {
-                                    xtype: 'combobox',
+                                    xtype: 'gridcombobox',
                                     flex: 1,
-                                    itemId: 'txtSpecificCountry',
+                                    columns: [
+                                        {
+                                            dataIndex: 'intCountryID',
+                                            dataType: 'numeric',
+                                            text: 'Country Id',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strCountry',
+                                            dataType: 'string',
+                                            text: 'Country',
+                                            flex: 1
+                                        }
+                                    ],
+                                    itemId: 'cboSpecificCountry',
                                     fieldLabel: 'Specific Country',
-                                    labelWidth: 110
+                                    labelWidth: 110,
+                                    displayField: 'strCountry',
+                                    valueField: 'intCountryID'
                                 }
                             ]
                         }
@@ -248,29 +263,125 @@ Ext.define('Inventory.view.CertificationProgram', {
                     columns: [
                         {
                             xtype: 'gridcolumn',
+                            itemId: 'colCommodity',
                             dataIndex: 'string',
                             text: 'Commodity',
-                            flex: 1
+                            flex: 1,
+                            editor: {
+                                xtype: 'gridcombobox',
+                                columns: [
+                                    {
+                                        dataIndex: 'intCommodityId',
+                                        dataType: 'numeric',
+                                        text: 'Commodity Id',
+                                        hidden: true
+                                    },
+                                    {
+                                        dataIndex: 'strCommodityCode',
+                                        dataType: 'string',
+                                        text: 'Commodity',
+                                        flex: 1
+                                    },
+                                    {
+                                        dataIndex: 'strDescription',
+                                        dataType: 'string',
+                                        text: 'Description',
+                                        flex: 1
+                                    }
+                                ],
+                                itemId: 'cboCommodity',
+                                displayField: 'strCommodityCode',
+                                valueField: 'strCommodityCode'
+                            }
                         },
                         {
                             xtype: 'gridcolumn',
+                            itemId: 'colCurrency',
                             defaultWidth: 90,
                             dataIndex: 'string',
-                            text: 'Currency'
+                            text: 'Currency',
+                            editor: {
+                                xtype: 'gridcombobox',
+                                columns: [
+                                    {
+                                        dataIndex: 'intCurrencyID',
+                                        dataType: 'numeric',
+                                        text: 'Currency Id',
+                                        hidden: true
+                                    },
+                                    {
+                                        dataIndex: 'strCurrency',
+                                        dataType: 'string',
+                                        text: 'Currency',
+                                        flex: 1
+                                    },
+                                    {
+                                        dataIndex: 'strDescription',
+                                        dataType: 'string',
+                                        text: 'Description',
+                                        flex: 1
+                                    }
+                                ],
+                                itemId: 'cboCurrency',
+                                displayField: 'strCurrency',
+                                valueField: 'strCurrency'
+                            }
                         },
                         {
                             xtype: 'numbercolumn',
-                            width: 125,
-                            text: 'Certification Premium'
+                            itemId: 'colPremium',
+                            minWidth: 150,
+                            width: 150,
+                            text: 'Certification Premium',
+                            editor: {
+                                xtype: 'numberfield'
+                            }
                         },
                         {
                             xtype: 'numbercolumn',
+                            itemId: 'colPerUOM',
                             width: 80,
-                            text: 'Per UOM'
+                            text: 'Per UOM',
+                            editor: {
+                                xtype: 'gridcombobox',
+                                columns: [
+                                    {
+                                        dataIndex: 'intUnitMeasureId',
+                                        dataType: 'numeric',
+                                        text: 'Unit Of Measure ID',
+                                        hidden: true
+                                    },
+                                    {
+                                        dataIndex: 'strUnitMeasure',
+                                        dataType: 'string',
+                                        text: 'Unit Measure',
+                                        flex: 1
+                                    },
+                                    {
+                                        dataIndex: 'strUnitType',
+                                        dataType: 'string',
+                                        text: 'Unit Type',
+                                        flex: 1
+                                    },
+                                    {
+                                        dataIndex: 'ysnDefault',
+                                        dataType: 'boolean',
+                                        text: 'Default',
+                                        flex: 1
+                                    }
+                                ],
+                                itemId: 'cboPerUnitMeasure',
+                                displayField: 'strUnitMeasure',
+                                valueField: 'strUnitMeasure'
+                            }
                         },
                         {
                             xtype: 'datecolumn',
-                            text: 'Effective From'
+                            itemId: 'colEffectiveFrom',
+                            text: 'Effective From',
+                            editor: {
+                                xtype: 'datefield'
+                            }
                         }
                     ],
                     viewConfig: {
@@ -278,7 +389,14 @@ Ext.define('Inventory.view.CertificationProgram', {
                     },
                     selModel: {
                         selType: 'checkboxmodel'
-                    }
+                    },
+                    plugins: [
+                        {
+                            ptype: 'cellediting',
+                            pluginId: 'cepCommodity',
+                            clicksToEdit: 1
+                        }
+                    ]
                 }
             ]
         }

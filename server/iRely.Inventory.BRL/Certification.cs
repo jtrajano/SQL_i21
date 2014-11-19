@@ -46,7 +46,9 @@ namespace iRely.Inventory.BRL
         {
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICCertification>()
-                .Include(p => p.tblICCertificationCommodities)
+                .Include("tblICCertificationCommodities.tblICCommodity")
+                .Include("tblICCertificationCommodities.tblSMCurrency")
+                .Include("tblICCertificationCommodities.tblICUnitMeasure")
                 .Where(w => query.Where(predicate).Any(a => a.intCertificationId == w.intCertificationId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)
                 .Skip(start)

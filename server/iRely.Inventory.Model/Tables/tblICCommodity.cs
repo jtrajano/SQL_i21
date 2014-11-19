@@ -71,6 +71,8 @@ namespace iRely.Inventory.Model
         public ICollection<tblICCommodityRegion> tblICCommodityRegions { get; set; }
         public ICollection<tblICCommoditySeason> tblICCommoditySeasons { get; set; }
 
+        public ICollection<tblICCertificationCommodity> tblICCertificationCommodities { get; set; }
+
     }
 
     public class CommodityVM

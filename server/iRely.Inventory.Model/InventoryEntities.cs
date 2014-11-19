@@ -161,6 +161,7 @@ namespace iRely.Inventory.Model
         public DbSet<vyuAPVendor> vyuAPVendors { get; set; }
         public DbSet<tblARCustomer> tblARCustomers { get; set; }
         public DbSet<tblSMCountry> tblSMCountries { get; set; }
+        public DbSet<tblSMCurrency> tblSMCurrencies { get; set; }
 
         public DbSet<tblSTPaidOut> tblSTPaidOut { get; set; }
         public DbSet<tblSTStore> tblSTStore { get; set; }
@@ -260,6 +261,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuAPVendorMap());
             modelBuilder.Configurations.Add(new tblARCustomerMap());
             modelBuilder.Configurations.Add(new tblSMCountryMap());
+            modelBuilder.Configurations.Add(new tblSMCurrencyMap());
 
             modelBuilder.Configurations.Add(new tblSTPaidOutMap());
             modelBuilder.Configurations.Add(new tblSTStoreMap());

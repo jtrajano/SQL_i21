@@ -80,6 +80,21 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class tblSMCurrencyMap : EntityTypeConfiguration<tblSMCurrency>
+    {
+        public tblSMCurrencyMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intCurrencyID);
+
+            // Table & Column Mappings
+            this.ToTable("tblSMCurrency");
+            this.Property(t => t.intCurrencyID).HasColumnName("intCurrencyID");
+            this.Property(t => t.strCurrency).HasColumnName("strCurrency");
+            this.Property(t => t.strDescription).HasColumnName("strDescription");
+        }
+    }
+
     public class tblSTStoreMap : EntityTypeConfiguration<tblSTStore>
     {
         public tblSTStoreMap()

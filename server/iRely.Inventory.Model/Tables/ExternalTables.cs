@@ -165,6 +165,16 @@ namespace iRely.Inventory.Model
         public string strCountry { get; set; }
 
         public ICollection<tblICItemContract> tblICItemContracts { get; set; }
+        public ICollection<tblICCertificationCommodity> tblICCertificationCommodities { get; set; }
+    }
+
+    public class tblSMCurrency : BaseEntity
+    {
+        public int intCurrencyID { get; set; }
+        public string strCurrency { get; set; }
+        public string strDescription { get; set; }
+
+        public ICollection<tblICCertificationCommodity> tblICCertificationCommodities { get; set; }
     }
 
     public class tblSTStore : BaseEntity

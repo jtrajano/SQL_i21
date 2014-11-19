@@ -15,5 +15,141 @@
 
 Ext.define('Inventory.view.CertificationProgramViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.certificationprogram'
+    alias: 'controller.certificationprogram',
+
+    config: {
+        searchConfig: {
+            title:  'Search Certification Programs',
+            type: 'Inventory.CertificationProgram',
+            api: {
+                read: '../Inventory/api/Certification/SearchCertifications'
+            },
+            columns: [
+                {dataIndex: 'intCertificationId',text: "Certification Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
+                {dataIndex: 'strCertificationName', text: 'Certification Name', flex: 1,  dataType: 'string'},
+                {dataIndex: 'strIssuingOrganization', text: 'Issuing Organization', flex: 1,  dataType: 'string'}
+            ]
+        },
+        binding: {
+            txtCertificationProgram: '{current.strCertificationName}',
+            txtIssuingOrganization: '{current.strIssuingOrganization}',
+            txtCertificationID: '{current.strCertificationIdName}',
+            chkGlobalCertification: '{current.ysnGlobalCertification}',
+            cboSpecificCountry: {
+                value: '{current.intCountryId}',
+                store: '{country}'
+            },
+
+            grdCertificationProgram: {
+                colCommodity: {
+                    dataIndex: 'strCommodityCode',
+                    editor: {
+                        store: '{commodity}'
+                    }
+                },
+                colCurrency: {
+                    dataIndex: 'strCurrency',
+                    editor: {
+                        store: '{currency}'
+                    }
+                },
+                colPremium: 'dblCertificationPremium',
+                colPerUOM: {
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        store: '{perUOM}'
+                    }
+                },
+                colEffectiveFrom: 'dtmDateEffective'
+            }
+        }
+    },
+
+    setupContext : function(options){
+        "use strict";
+        var me = this,
+            win = options.window,
+            store = Ext.create('Inventory.store.Certification', { pageSize: 1 });
+
+        win.context = Ext.create('iRely.mvvm.Engine', {
+            window : win,
+            store  : store,
+            binding: me.config.binding,
+            details: [
+                {
+                    key: 'tblICCertificationCommodities',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: win.down('#grdCertificationProgram'),
+                        deleteButton : win.down('#btnDeleteCertificationProgram')
+                    })
+                }
+            ]
+        });
+
+        return win.context;
+    },
+
+    show : function(config) {
+        "use strict";
+
+        var me = this,
+            win = this.getView();
+
+        if (config) {
+            win.show();
+
+            var context = me.setupContext( {window : win} );
+
+            if (config.action === 'new') {
+                context.data.addRecord();
+            } else {
+                if (config.id) {
+                    config.filters = [{
+                        column: 'intCertificationId',
+                        value: config.id
+                    }];
+                }
+                context.data.load({
+                    filters: config.filters
+                });
+            }
+        }
+    },
+
+    onCommoditySelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepCommodity');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colCommodity')
+        {
+            current.set('intCommodityId', records[0].get('intCommodityId'));
+        }
+        else if (combo.column.itemId === 'colCurrency')
+        {
+            current.set('intCurrencyId', records[0].get('intCurrencyID'));
+        }
+        else if (combo.column.itemId === 'colPerUOM')
+        {
+            current.set('intCommodityId', records[0].get('intCommodityId'));
+        }
+    },
+
+    init: function(application) {
+        this.control({
+            "#cboCommodity": {
+                select: this.onCommoditySelect
+            },
+            "#cboCurrency": {
+                select: this.onCommoditySelect
+            },
+            "#cboPerUnitMeasure": {
+                select: this.onCommoditySelect
+            }
+        });
+    }
+
 });

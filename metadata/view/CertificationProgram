@@ -395,13 +395,43 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "columns": [
+                                            "[",
+                                            "\t{",
+                                            "\t\tdataIndex: 'intCountryID',",
+                                            "\t\tdataType: 'numeric',",
+                                            "\t\ttext: 'Country Id',",
+                                            "\t\thidden: true",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strCountry',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Country',",
+                                            "\t\tflex: 1",
+                                            "\t}",
+                                            "]",
+                                            ""
+                                        ],
+                                        "designer|createAlias": "gridcombobox",
+                                        "displayField": "strCountry",
                                         "fieldLabel": "Specific Country",
-                                        "itemId": "txtSpecificCountry",
+                                        "itemId": "cboSpecificCountry",
                                         "labelWidth": 110,
-                                        "layout|flex": 1
+                                        "layout|flex": 1,
+                                        "valueField": "intCountryID"
                                     },
                                     "name": "MyComboBox",
-                                    "designerId": "9ad9a3f9-c7dc-4fee-8a6f-0bfc033cefb7"
+                                    "configAlternates": {
+                                        "columns": "array"
+                                    },
+                                    "designerId": "9ad9a3f9-c7dc-4fee-8a6f-0bfc033cefb7",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "columns",
+                                            "type": "string"
+                                        }
+                                    ]
                                 }
                             ]
                         }
@@ -479,7 +509,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter129",
+                                    "name": "filter119",
                                     "designerId": "264fa430-47fb-419b-9c59-83d13bd35b5f",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -495,10 +525,61 @@
                             "userConfig": {
                                 "dataIndex": "string",
                                 "flex": 1,
+                                "itemId": "colCommodity",
                                 "text": "Commodity"
                             },
                             "name": "MyColumn125",
-                            "designerId": "39653299-94c9-4863-af99-b2831621ee8a"
+                            "designerId": "39653299-94c9-4863-af99-b2831621ee8a",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.ComboBox",
+                                    "reference": {
+                                        "name": "editor",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "columns": [
+                                            "[",
+                                            "\t{",
+                                            "\t\tdataIndex: 'intCommodityId',",
+                                            "\t\tdataType: 'numeric',",
+                                            "\t\ttext: 'Commodity Id',",
+                                            "\t\thidden: true",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strCommodityCode',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Commodity',",
+                                            "\t\tflex: 1",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strDescription',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Description',",
+                                            "\t\tflex: 1",
+                                            "\t}",
+                                            "]"
+                                        ],
+                                        "designer|createAlias": "gridcombobox",
+                                        "displayField": "strCommodityCode",
+                                        "itemId": "cboCommodity",
+                                        "valueField": "strCommodityCode"
+                                    },
+                                    "name": "MyComboBox9",
+                                    "configAlternates": {
+                                        "columns": "array"
+                                    },
+                                    "designerId": "1b220d98-5e5f-4c1a-b9e1-d8c6c4b37449",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "columns",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.grid.column.Column",
@@ -511,10 +592,61 @@
                                 "dataIndex": "string",
                                 "defaultWidth": 90,
                                 "flex": null,
+                                "itemId": "colCurrency",
                                 "text": "Currency"
                             },
                             "name": "MyColumn8",
-                            "designerId": "ad3c10d1-4d3c-439c-a61a-65d2f054287b"
+                            "designerId": "ad3c10d1-4d3c-439c-a61a-65d2f054287b",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.ComboBox",
+                                    "reference": {
+                                        "name": "editor",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "columns": [
+                                            "[",
+                                            "\t{",
+                                            "\t\tdataIndex: 'intCurrencyID',",
+                                            "\t\tdataType: 'numeric',",
+                                            "\t\ttext: 'Currency Id',",
+                                            "\t\thidden: true",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strCurrency',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Currency',",
+                                            "\t\tflex: 1",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strDescription',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Description',",
+                                            "\t\tflex: 1",
+                                            "\t}",
+                                            "]"
+                                        ],
+                                        "designer|createAlias": "gridcombobox",
+                                        "displayField": "strCurrency",
+                                        "itemId": "cboCurrency",
+                                        "valueField": "strCurrency"
+                                    },
+                                    "name": "MyComboBox10",
+                                    "configAlternates": {
+                                        "columns": "array"
+                                    },
+                                    "designerId": "c1a49e18-877f-442b-8098-631f94156bd8",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "columns",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.grid.column.Number",
@@ -524,11 +656,25 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "itemId": "colPremium",
+                                "minWidth": 150,
                                 "text": "Certification Premium",
-                                "width": 125
+                                "width": 150
                             },
                             "name": "MyNumberColumn15",
-                            "designerId": "3872a3a3-f546-46bf-945e-576eb9abaf6d"
+                            "designerId": "3872a3a3-f546-46bf-945e-576eb9abaf6d",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Number",
+                                    "reference": {
+                                        "name": "editor",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "name": "MyNumberField17",
+                                    "designerId": "239e72da-5af4-4896-a8d2-ac36baf63a5f"
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.grid.column.Number",
@@ -538,11 +684,68 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "itemId": "colPerUOM",
                                 "text": "Per UOM",
                                 "width": 80
                             },
                             "name": "MyNumberColumn",
-                            "designerId": "3b0b297a-07f4-437d-9aa7-6c7381474f54"
+                            "designerId": "3b0b297a-07f4-437d-9aa7-6c7381474f54",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.ComboBox",
+                                    "reference": {
+                                        "name": "editor",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "columns": [
+                                            "[",
+                                            "\t{",
+                                            "\t\tdataIndex: 'intUnitMeasureId',",
+                                            "\t\tdataType: 'numeric',",
+                                            "\t\ttext: 'Unit Of Measure ID',",
+                                            "\t\thidden: true",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strUnitMeasure',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Unit Measure',",
+                                            "\t\tflex: 1",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strUnitType',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Unit Type',",
+                                            "\t\tflex: 1",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'ysnDefault',",
+                                            "\t\tdataType: 'boolean',",
+                                            "\t\ttext: 'Default',",
+                                            "\t\tflex: 1",
+                                            "\t}",
+                                            "]"
+                                        ],
+                                        "designer|createAlias": "gridcombobox",
+                                        "displayField": "strUnitMeasure",
+                                        "itemId": "cboPerUnitMeasure",
+                                        "valueField": "strUnitMeasure"
+                                    },
+                                    "name": "MyComboBox11",
+                                    "configAlternates": {
+                                        "columns": "array"
+                                    },
+                                    "designerId": "aa56047b-1198-438e-a8cf-f18a7661ff55",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "columns",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.grid.column.Date",
@@ -552,10 +755,23 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "itemId": "colEffectiveFrom",
                                 "text": "Effective From"
                             },
                             "name": "MyDateColumn",
-                            "designerId": "70e4a54f-c3b6-4597-aea2-67e500a666c3"
+                            "designerId": "70e4a54f-c3b6-4597-aea2-67e500a666c3",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Date",
+                                    "reference": {
+                                        "name": "editor",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "name": "MyDateField4",
+                                    "designerId": "b0458584-8ddf-4d24-b7e9-3dcb6e847e92"
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.grid.View",
@@ -579,6 +795,21 @@
                             "codeClass": null,
                             "name": "MyCheckboxSelectionModel27",
                             "designerId": "d4871c52-c3bc-4cd3-bfa9-54547e7e8e9c"
+                        },
+                        {
+                            "type": "Ext.grid.plugin.CellEditing",
+                            "reference": {
+                                "name": "plugins",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "clicksToEdit": 1,
+                                "designer|displayName": "cepCommodity",
+                                "pluginId": "cepCommodity"
+                            },
+                            "name": "MyCellEditingPlugin14",
+                            "designerId": "cb8fa592-09e1-46fc-9397-a2f6051a736f"
                         }
                     ]
                 },
@@ -598,7 +829,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging13",
+                    "name": "statusbarpaging16",
                     "designerId": "24cec6a2-4a25-4a94-b646-9410f4905c67",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

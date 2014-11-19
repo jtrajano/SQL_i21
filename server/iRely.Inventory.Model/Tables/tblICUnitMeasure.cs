@@ -46,7 +46,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICManufacturingCellPackType> CapacityRateManufacturingCellPackTypes { get; set; }
         public ICollection<tblICManufacturingCellPackType> CapacityManufacturingCellPackTypes { get; set; }
 
-
+        public ICollection<tblICCertificationCommodity> tblICCertificationCommodities { get; set; }
     }
 
     public class tblICUnitMeasureConversion : BaseEntity

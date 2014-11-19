@@ -12,17 +12,32 @@ Ext.define('Inventory.model.CertificationCommodity', {
 
     fields: [
         { name: 'intCertificationCommodityId', type: 'int'},
-        { name: 'intCertificationId', type: 'int'},
-        { name: 'intCommodityId', type: 'int'},
-        { name: 'intCurrencyId', type: 'int'},
+        { name: 'intCertificationId', type: 'int',
+            reference: {
+                type: 'Inventory.model.Certification',
+                inverse: {
+                    role: 'tblICCertificationCommodities',
+                    storeConfig: {
+                        complete: true,
+                        sortOnLoad: true,
+                        sorters: {
+                            direction: 'ASC',
+                            property: 'intSort'
+                        }
+                    }
+                }
+            }
+        },
+        { name: 'intCommodityId', type: 'int', allowNull: true},
+        { name: 'intCurrencyId', type: 'int', allowNull: true},
         { name: 'dblCertificationPremium', type: 'float'},
-        { name: 'intUnitMeasureId', type: 'int'},
+        { name: 'intUnitMeasureId', type: 'int', allowNull: true},
         { name: 'dtmDateEffective', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d'},
         { name: 'intSort', type: 'int'}
+
     ],
 
     validators: [
-        {type: 'presence', field: 'intCertificationId'},
         {type: 'presence', field: 'intCommodityId'}
     ]
 });

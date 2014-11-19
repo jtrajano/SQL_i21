@@ -16,23 +16,9 @@ Ext.define('Inventory.model.Certification', {
         { name: 'strCertificationName', type: 'string'},
         { name: 'strIssuingOrganization', type: 'string'},
         { name: 'ysnGlobalCertification', type: 'boolean'},
-        { name: 'intCountryId', type: 'int'},
+        { name: 'intCountryId', type: 'int', allowNull: true},
         { name: 'strCertificationIdName', type: 'string'}
     ],
-
-    hasMany: {
-        model: 'Inventory.model.CertificationCommodity',
-        name: 'tblICCertificationCommodities',
-        foreignKey: 'intCertificationId',
-        primaryKey: 'intCertificationId',
-        storeConfig: {
-            sortOnLoad: true,
-            sorters: {
-                direction: 'ASC',
-                property: 'intSort'
-            }
-        }
-    },
 
     validators: [
         {type: 'presence', field: 'strCertificationName'}

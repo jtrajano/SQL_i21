@@ -15,6 +15,28 @@
 
 Ext.define('Inventory.view.CertificationProgramViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.certificationprogram'
+    alias: 'viewmodel.certificationprogram',
+
+    requires: [
+        'i21.store.CountryBuffered',
+        'Inventory.store.BufferedCommodity',
+        'Inventory.store.BufferedUnitMeasure',
+        'i21.store.CurrencyBuffered'
+    ],
+
+    stores: {
+        country: {
+            type: 'countrybuffered'
+        },
+        commodity: {
+            type: 'inventorybufferedcommodity'
+        },
+        currency: {
+            type: 'currencybuffered'
+        },
+        perUOM: {
+            type: 'inventorybuffereduom'
+        }
+    }
 
 });
