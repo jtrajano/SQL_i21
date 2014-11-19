@@ -526,8 +526,30 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "designer|createAlias": null,
-                                                "displayField": null,
+                                                "columns": [
+                                                    "[",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'intVendorId',",
+                                                    "\t\tdataType: 'numeric',",
+                                                    "\t\ttext: 'Vendor Id',",
+                                                    "\t\thidden: true",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strVendorId',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Vendor No',",
+                                                    "\t\tflex: 1",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strVendorName',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Vendor Name',",
+                                                    "\t\tflex: 1",
+                                                    "\t}",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "displayField": "strVendorId",
                                                 "fieldLabel": "Vendor ID",
                                                 "itemId": "cboVendorID",
                                                 "labelAlign": "top",
@@ -536,11 +558,21 @@
                                                 "layout|margins": null,
                                                 "margin": null,
                                                 "name": null,
-                                                "valueField": null,
+                                                "valueField": "intVendorId",
                                                 "width": null
                                             },
                                             "name": "MyComboBox3",
-                                            "designerId": "8a65ead9-b3b7-4c7a-b924-31963d6d349f"
+                                            "configAlternates": {
+                                                "columns": "array"
+                                            },
+                                            "designerId": "8a65ead9-b3b7-4c7a-b924-31963d6d349f",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.form.field.Text",
@@ -559,6 +591,7 @@
                                                 "layout|margins": null,
                                                 "margin": "0 5",
                                                 "name": null,
+                                                "readOnly": true,
                                                 "width": null
                                             },
                                             "name": "MyTextField3",
@@ -572,6 +605,30 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "columns": [
+                                                    "[",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'intCompanyLocationId',",
+                                                    "\t\tdataType: 'numeric',",
+                                                    "\t\ttext: 'Location Id',",
+                                                    "\t\thidden: true",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strLocationName',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Location Name',",
+                                                    "\t\tflex: 1",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strLocationType',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Location Type',",
+                                                    "\t\tflex: 1",
+                                                    "\t}",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "displayField": "strLocationName",
                                                 "fieldLabel": "Location",
                                                 "itemId": "cboLocation",
                                                 "labelAlign": "top",
@@ -581,10 +638,21 @@
                                                 "margin": null,
                                                 "name": null,
                                                 "readOnly": null,
+                                                "valueField": "intCompanyLocationId",
                                                 "width": null
                                             },
                                             "name": "MyComboBox2",
-                                            "designerId": "038a7242-5956-4d4d-b83d-b71a956cdfb1"
+                                            "configAlternates": {
+                                                "columns": "array"
+                                            },
+                                            "designerId": "038a7242-5956-4d4d-b83d-b71a956cdfb1",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.form.field.Date",
@@ -614,8 +682,30 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "designer|createAlias": null,
-                                                "displayField": null,
+                                                "columns": [
+                                                    "[",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'intCurrencyID',",
+                                                    "\t\tdataType: 'numeric',",
+                                                    "\t\ttext: 'Currency Id',",
+                                                    "\t\thidden: true",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strCurrency',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Currency',",
+                                                    "\t\tflex: 1",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strDescription',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Description',",
+                                                    "\t\tflex: 1",
+                                                    "\t}",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "displayField": "strCurrency",
                                                 "fieldLabel": "Currency",
                                                 "itemId": "cboCurrency",
                                                 "labelAlign": "top",
@@ -623,11 +713,21 @@
                                                 "layout|flex": null,
                                                 "margin": null,
                                                 "name": null,
-                                                "valueField": null,
+                                                "valueField": "intCurrencyID",
                                                 "width": 60
                                             },
                                             "name": "MyComboBox9",
-                                            "designerId": "b0b229da-0b8f-4aec-89bb-bc3143ac30b1"
+                                            "configAlternates": {
+                                                "columns": "array"
+                                            },
+                                            "designerId": "b0b229da-0b8f-4aec-89bb-bc3143ac30b1",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.form.field.Text",
@@ -770,7 +870,7 @@
                                             "designerId": "8c0a03b2-e976-4409-b87f-1e8edad40e65",
                                             "cn": [
                                                 {
-                                                    "type": "Ext.form.field.Text",
+                                                    "type": "Ext.form.field.ComboBox",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
@@ -778,25 +878,49 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "alwaysDisplayDecimals": null,
-                                                        "designer|createAlias": null,
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intCountryID',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Country Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strCountry',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Country',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strCountry",
                                                         "fieldLabel": "Product Origin",
                                                         "hideTrigger": null,
-                                                        "itemId": "txtProductOrigin",
+                                                        "itemId": "cboProductOrigin",
                                                         "labelWidth": 105,
                                                         "layout|flex": null,
                                                         "layout|margins": null,
                                                         "name": null,
+                                                        "valueField": "intCountryID",
                                                         "width": 200
                                                     },
-                                                    "name": "MyTextField13",
+                                                    "name": "MyComboBox6",
                                                     "configAlternates": {
-                                                        "alwaysDisplayDecimals": "boolean"
+                                                        "alwaysDisplayDecimals": "boolean",
+                                                        "columns": "array"
                                                     },
                                                     "designerId": "5213581d-f8f3-4c04-a933-56bc58404677",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
                                                             "name": "alwaysDisplayDecimals",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
                                                             "type": "string"
                                                         }
                                                     ]
@@ -870,8 +994,37 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "designer|createAlias": null,
-                                                        "displayField": null,
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intFreightTermId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Freight Term Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strFreightTerm',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Freight Term',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strFobPoint',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'FOB Point',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'ysnActive',",
+                                                            "\t\tdataType: 'boolean',",
+                                                            "\t\ttext: 'Active',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]",
+                                                            ""
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strFreightTerm",
                                                         "fieldLabel": "Freight Terms",
                                                         "itemId": "cboFreightTerms",
                                                         "labelWidth": 110,
@@ -879,11 +1032,21 @@
                                                         "layout|margins": null,
                                                         "name": null,
                                                         "readOnly": null,
-                                                        "valueField": null,
+                                                        "valueField": "intFreightTermId",
                                                         "width": null
                                                     },
                                                     "name": "MyComboBox15",
-                                                    "designerId": "7b80bb0a-2e0a-426f-883b-678536bafba0"
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "7b80bb0a-2e0a-426f-883b-678536bafba0",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 },
                                                 {
                                                     "type": "Ext.form.field.Text",
@@ -1183,7 +1346,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter125",
+                                                    "name": "filter120",
                                                     "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1208,7 +1371,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "strItemNo",
-                                                "itemId": null,
+                                                "itemId": "colItemNo",
                                                 "text": "Item No.",
                                                 "width": 100
                                             },
@@ -1224,7 +1387,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "strDescription",
-                                                "itemId": null,
+                                                "itemId": "colDescription",
                                                 "text": "Description",
                                                 "width": 175
                                             },
@@ -1240,7 +1403,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "strDescription",
-                                                "itemId": "colItemNo2",
+                                                "itemId": "colSubLocation",
                                                 "text": "Sublocation",
                                                 "width": 90
                                             },
@@ -1256,7 +1419,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "strDescription",
-                                                "itemId": "colItemNo5",
+                                                "itemId": "colLotTracking",
                                                 "text": "Lot Tracking",
                                                 "width": 100
                                             },
@@ -1301,7 +1464,7 @@
                                                 "dataIndex": "dblQtyOrdered",
                                                 "dataType": "numeric",
                                                 "format": "0,000.##",
-                                                "itemId": "colQtyOrdered1",
+                                                "itemId": "colOpenReceive",
                                                 "text": "Open to Receive",
                                                 "width": 105
                                             },
@@ -1327,7 +1490,7 @@
                                                 "dataIndex": "dblQtyOrdered",
                                                 "dataType": "numeric",
                                                 "format": "0,000.##",
-                                                "itemId": "colQtyOrdered2",
+                                                "itemId": "colReceived",
                                                 "text": "Received",
                                                 "width": 81
                                             },
@@ -1350,7 +1513,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "strDescription",
-                                                "itemId": "colItemNo3",
+                                                "itemId": "colUOM",
                                                 "text": "UOM",
                                                 "width": 76
                                             },
@@ -1369,7 +1532,7 @@
                                                 "dataIndex": "dblQtyOrdered",
                                                 "dataType": "numeric",
                                                 "format": "0,000.##",
-                                                "itemId": "colQtyOrdered3",
+                                                "itemId": "colPackages",
                                                 "text": "Packages",
                                                 "width": 72
                                             },
@@ -1392,7 +1555,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "strDescription",
-                                                "itemId": "colItemNo4",
+                                                "itemId": "colPackageType",
                                                 "text": "Package Type",
                                                 "width": 85
                                             },
@@ -1411,7 +1574,7 @@
                                                 "dataIndex": "dblQtyOrdered",
                                                 "dataType": null,
                                                 "format": null,
-                                                "itemId": "colQtyOrdered4",
+                                                "itemId": "colUnitCost",
                                                 "text": "Unit Cost",
                                                 "width": 95
                                             },
@@ -1437,7 +1600,7 @@
                                                 "dataIndex": "dblQtyOrdered",
                                                 "dataType": null,
                                                 "format": null,
-                                                "itemId": "colQtyOrdered5",
+                                                "itemId": "colUnitRetail",
                                                 "text": "Unit Retail",
                                                 "width": 95
                                             },
@@ -1459,7 +1622,9 @@
                                             },
                                             "codeClass": "Ext.grid.plugin.CellEditing",
                                             "userConfig": {
-                                                "clicksToEdit": 1
+                                                "clicksToEdit": 1,
+                                                "designer|displayName": "cepItem",
+                                                "pluginId": "cepItem"
                                             },
                                             "name": "MyCellEditingPlugin",
                                             "designerId": "f91cfe7d-61d6-4e3b-aa2f-07bbab10abb9"
@@ -1603,7 +1768,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter126",
+                                                    "name": "filter121",
                                                     "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2103,7 +2268,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter127",
+                                                    "name": "filter122",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2879,7 +3044,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter128",
+                                                    "name": "filter123",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3428,7 +3593,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter129",
+                                                    "name": "filter124",
                                                     "designerId": "4228a31b-bb4e-45e0-9af0-fd9778808126",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3615,7 +3780,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging13",
+                    "name": "statusbarpaging17",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

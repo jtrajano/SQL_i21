@@ -17,7 +17,7 @@ namespace iRely.Inventory.Model
         public int? intVendorId { get; set; }
         public string strVendorProduct { get; set; }
         public string strProductDescription { get; set; }
-        public double dblConversionFactor { get; set; }
+        public decimal? dblConversionFactor { get; set; }
         public int? intUnitMeasureId { get; set; }
         public int intSort { get; set; }
 

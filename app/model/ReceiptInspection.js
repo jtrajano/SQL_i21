@@ -12,9 +12,28 @@ Ext.define('Inventory.model.ReceiptInspection', {
 
     fields: [
         { name: 'intInventoryReceiptInspectionId', type: 'int'},
-        { name: 'intInventoryReceiptId', type: 'int'},
+        { name: 'intInventoryReceiptId', type: 'int',
+            reference: {
+                type: 'Inventory.model.Receipt',
+                inverse: {
+                    role: 'tblICInventoryReceiptInspections',
+                    storeConfig: {
+                        complete: true,
+                        sortOnLoad: true,
+                        sorters: {
+                            direction: 'ASC',
+                            property: 'intSort'
+                        }
+                    }
+                }
+            }
+        },
         { name: 'intQAPropertyId', type: 'int'},
         { name: 'ysnSelected', type: 'boolean'},
         { name: 'intSort', type: 'int'}
+    ],
+
+    validators: [
+        {type: 'presence', field: 'intQAPropertyId'}
     ]
 });

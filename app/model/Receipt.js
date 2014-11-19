@@ -16,26 +16,26 @@ Ext.define('Inventory.model.Receipt', {
         { name: 'intInventoryReceiptId', type: 'int'},
         { name: 'strReceiptNumber', type: 'string'},
         { name: 'dtmReceiptDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d'},
-        { name: 'intVendorId', type: 'int'},
+        { name: 'intVendorId', type: 'int', allowNull: true },
         { name: 'strReceiptType', type: 'string'},
-        { name: 'intSourceId', type: 'int'},
-        { name: 'intBlanketRelease', type: 'int'},
-        { name: 'intLocationId', type: 'int'},
-        { name: 'intWarehouseId', type: 'int'},
+        { name: 'intSourceId', type: 'int', allowNull: true },
+        { name: 'intBlanketRelease', type: 'int', allowNull: true },
+        { name: 'intLocationId', type: 'int', allowNull: true },
+        { name: 'intWarehouseId', type: 'int', allowNull: true },
         { name: 'strVendorRefNo', type: 'string'},
         { name: 'strBillOfLading', type: 'string'},
-        { name: 'intShipViaId', type: 'int'},
-        { name: 'intReceiptSequenceNo', type: 'int'},
-        { name: 'intBatchNo', type: 'int'},
-        { name: 'intTermId', type: 'int'},
-        { name: 'intProductOrigin', type: 'int'},
+        { name: 'intShipViaId', type: 'int', allowNull: true },
+        { name: 'intReceiptSequenceNo', type: 'int', allowNull: true },
+        { name: 'intBatchNo', type: 'int', allowNull: true },
+        { name: 'intTermId', type: 'int', allowNull: true },
+        { name: 'intProductOrigin', type: 'int', allowNull: true },
         { name: 'strReceiver', type: 'string'},
-        { name: 'intCurrencyId', type: 'int'},
+        { name: 'intCurrencyId', type: 'int', allowNull: true },
         { name: 'strVessel', type: 'string'},
         { name: 'strAPAccount', type: 'string'},
         { name: 'strBillingStatus', type: 'string'},
         { name: 'strOrderNumber', type: 'string'},
-        { name: 'intFreightTermId', type: 'int'},
+        { name: 'intFreightTermId', type: 'int', allowNull: true },
         { name: 'strDeliveryPoint', type: 'string'},
         { name: 'strAllocateFreight', type: 'string'},
         { name: 'strFreightBilledBy', type: 'string'},
@@ -49,7 +49,7 @@ Ext.define('Inventory.model.Receipt', {
         { name: 'ysnInvoicePaid', type: 'boolean'},
         { name: 'intCheckNo', type: 'int'},
         { name: 'dteCheckDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d'},
-        { name: 'intTrailerTypeId', type: 'int'},
+        { name: 'intTrailerTypeId', type: 'int', allowNull: true },
         { name: 'dteTrailerArrivalDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d'},
         { name: 'dteTrailerArrivalTime', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d'},
         { name: 'strSealNo', type: 'string'},
@@ -58,36 +58,13 @@ Ext.define('Inventory.model.Receipt', {
         { name: 'dblActualTempReading', type: 'float'},
     ],
 
-    hasMany: [
-        {
-            model: 'Inventory.model.ReceiptItem',
-            name: 'tblICInventoryReceiptItems',
-            foreignKey: 'intInventoryReceiptId',
-            primaryKey: 'intInventoryReceiptId',
-            storeConfig: {
-                sortOnLoad: true,
-                sorters: {
-                    direction: 'ASC',
-                    property: 'intSort'
-                }
-            }
-        },
-        {
-            model: 'Inventory.model.ReceiptInspection',
-            name: 'tblICInventoryReceiptInspections',
-            foreignKey: 'intInventoryReceiptId',
-            primaryKey: 'intInventoryReceiptId',
-            storeConfig: {
-                sortOnLoad: true,
-                sorters: {
-                    direction: 'ASC',
-                    property: 'intSort'
-                }
-            }
-        }
-    ],
-
     validators: [
-        {type: 'presence', field: 'strReceiptNumber'}
+        {type: 'presence', field: 'strReceiptNumber'},
+        {type: 'presence', field: 'dtmReceiptDate'},
+        {type: 'presence', field: 'intVendorId'},
+        {type: 'presence', field: 'strReceiptType'},
+        {type: 'presence', field: 'intLocationId'},
+        {type: 'presence', field: 'intReceiptSequenceNo'},
+        {type: 'presence', field: 'strReceiver'}
     ]
 });

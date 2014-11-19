@@ -19,9 +19,9 @@ namespace iRely.Inventory.Model
         public string strGrade { get; set; }
         public string strGradeType { get; set; }
         public string strGarden { get; set; }
-        public double dblYieldPercent { get; set; }
-        public double dblTolerancePercent { get; set; }
-        public double dblFranchisePercent { get; set; }
+        public decimal? dblYieldPercent { get; set; }
+        public decimal? dblTolerancePercent { get; set; }
+        public decimal? dblFranchisePercent { get; set; }
         public int intSort { get; set; }
 
         private string _location;
