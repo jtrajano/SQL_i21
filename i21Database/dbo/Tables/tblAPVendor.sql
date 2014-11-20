@@ -16,7 +16,7 @@
     [ysnPymtCtrlEFTActive]      BIT            DEFAULT 0 NOT NULL,
     [ysnPymtCtrlHold]           BIT            DEFAULT 0 NOT NULL,
     [ysnWithholding]            BIT            NOT NULL,
-    [dblCreditLimit]            NUMERIC(18, 6)     NOT NULL,
+    [dblCreditLimit]            DECIMAL(18, 6)     NOT NULL,
     [intCreatedUserId]          INT            NULL,
     [intLastModifiedUserId]     INT            NULL,
     [dtmLastModified]           DATETIME       NULL,
@@ -32,7 +32,7 @@
 	CONSTRAINT [UK_intVendorId] UNIQUE NONCLUSTERED ([intVendorId] ASC),
 	CONSTRAINT [FK_tblAPVendor_tblEntityContact] FOREIGN KEY ([intDefaultContactId]) REFERENCES [tblEntityContact]([intContactId]),
 	CONSTRAINT [FK_tblAPVendor_tblEntityLocation] FOREIGN KEY ([intDefaultLocationId]) REFERENCES [tblEntityLocation]([intEntityLocationId]),
-	--CONSTRAINT [FK_tblAPVendor_tblGLAccount] FOREIGN KEY ([intGLAccountExpenseId]) REFERENCES [tblGLAccount]([intAccountId])
+	CONSTRAINT [FK_tblAPVendor_tblGLAccount] FOREIGN KEY ([intGLAccountExpenseId]) REFERENCES [tblGLAccount]([intAccountId])
 );
 
 

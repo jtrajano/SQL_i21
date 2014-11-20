@@ -48,7 +48,8 @@
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblSMTerm_intTermId] FOREIGN KEY ([intTermsId]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEntity(intEntityId),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPVendor_intVendorId] FOREIGN KEY (intVendorId) REFERENCES tblAPVendor(intVendorId),
-	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblGLAccount_intAccountId] FOREIGN KEY (intAccountId) REFERENCES tblGLAccount(intAccountId)
+	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblGLAccount_intAccountId] FOREIGN KEY (intAccountId) REFERENCES tblGLAccount(intAccountId),
+	CONSTRAINT [UK_dbo.tblAPBill_strBillId] UNIQUE (strBillId)
 );
 GO
 CREATE NONCLUSTERED INDEX [IX_intBillBatchId]
@@ -60,49 +61,3 @@ GO
 CREATE NONCLUSTERED INDEX [IX_intVendorId]
     ON [dbo].[tblAPBill]([intVendorId] ASC)
 	INCLUDE ([intBillId], [strVendorOrderNumber]) WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
-
-GO
-CREATE TRIGGER trgBillRecordNumber
-ON tblAPBill
-AFTER INSERT
-AS
-
-DECLARE @inserted TABLE(intBillId INT, intTransactionType INT)
-DECLARE @count INT = 0
-DECLARE @intBillId INT
-DECLARE @type INT
-DECLARE @BillId NVARCHAR(50)
-
-INSERT INTO @inserted
-SELECT intBillId, intTransactionType FROM INSERTED ORDER BY intBillId
-
-EXEC uspAPFixStartingNumbers
-
-WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
-BEGIN
-
-	SELECT TOP 1 @intBillId = intBillId, @type = intTransactionType FROM @inserted
-
-	IF @type = 1
-		EXEC uspSMGetStartingNumber 9, @BillId OUT
-	ELSE IF @type = 3
-		EXEC uspSMGetStartingNumber 18, @BillId OUT
-	ELSE IF @type = 2
-		EXEC uspSMGetStartingNumber 20, @BillId OUT
-	
-	IF(@BillId IS NOT NULL)
-	BEGIN
-		UPDATE tblAPBill
-			SET tblAPBill.strBillId = @BillId
-		FROM tblAPBill A
-		WHERE A.intBillId = @intBillId
-		--INNER JOIN INSERTED B ON A.intBillId = B.intBillId
-		--WHERE A.strBillId IS NULL
-	END
-
-	DELETE FROM @inserted
-	WHERE intBillId = @intBillId
-
-END
-
-

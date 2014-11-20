@@ -24,7 +24,9 @@ BEGIN
 		--CREATE TEMP TABLE TO BYPASS EXECUTING FIXING STARTING NUMBERS
 		SELECT @@ROWCOUNT AS TestColumn INTO #tblTempAPByPassFixStartingNumber
 
-		DECLARE @InsertedData TABLE (intBillId INT, strBillId NVARCHAR(100), ysnPosted BIT, ysnPaid BIT, strVendorOrderNumber NVARCHAR(50))
+		--DECLARE #InsertedData TABLE (intBillId INT, strBillId NVARCHAR(100), ysnPosted BIT, ysnPaid BIT, strVendorOrderNumber NVARCHAR(50))
+		CREATE TABLE #InsertedData(intBillId INT PRIMARY KEY CLUSTERED, strBillId NVARCHAR(100), ysnPosted BIT, ysnPaid BIT, strVendorOrderNumber NVARCHAR(50), intTransactionType INT)
+		CREATE NONCLUSTERED INDEX [IX_tmpInsertedData_intBillId] ON #InsertedData([intBillId]);
 		DECLARE @insertedBillBatch TABLE(intBillBatchId INT, intBillId INT)
 		DECLARE @totalBills INT
 		DECLARE @BillId INT
@@ -32,6 +34,8 @@ BEGIN
 		DECLARE @ImportedRecords INT
 		DECLARE @IsPosted BIT
 		DECLARE @IsPaid BIT
+		DECLARE @type INT
+		DECLARE @GeneratedBillId NVARCHAR(50)
 
 		--Validation
 		--Check if there is a payment method with a type of ''Check''
@@ -73,18 +77,6 @@ BEGIN
 					@withHeld DECIMAL(18,6) = 0,
 					@billIds NVARCHAR(MAX)
 
-		--Create table that holds all the imported transaction
-	--	IF(OBJECT_ID(''dbo.tblAPTempBill'') IS NULL)
-	--	BEGIN
-	--        EXEC(''
-	--        --SELECT aptrx_vnd_no, aptrx_ivc_no INTO tblAPTempBill FROM aptrxmst WHERE aptrx_trans_type IN (''''I'''',''''C'''')
-	--
-	--		--INSERT INTO tblAPTempBill
-	--		--SELECT apivc_vnd_no, apivc_ivc_no FROM apivcmst WHERE apivc_trans_type IN (''''I'''',''''C'''')
-	--		SELECT apivc_vnd_no, apivc_ivc_no INTO tblAPTempBill FROM apivcmst WHERE apivc_trans_type IN (''''I'''',''''C'''')
-	--		'')
-	--
-	--	END
 
 		IF(@DateFrom IS NULL AND @PeriodFrom IS NULL)
 		BEGIN
@@ -110,7 +102,7 @@ BEGIN
 				[dblDiscount],
 				[dblWithheld],
 				[ysnOrigin])
-			OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid, inserted.strVendorOrderNumber INTO @InsertedData
+			OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid, inserted.strVendorOrderNumber, inserted.intTransactionType INTO #InsertedData
 			--Unposted
 			SELECT
 				[intVendorId]			=	D.intVendorId,
@@ -247,12 +239,12 @@ BEGIN
 					AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.apivc_vnd_no
 					ORDER BY C.aphgl_dist_no
 			--Create Bill Batch transaction
-			--SELECT @totalBills = COUNT(*) FROM @InsertedData
+			--SELECT @totalBills = COUNT(*) FROM #InsertedData
 
-			WHILE((SELECT TOP 1 1 FROM @InsertedData) IS NOT NULL)
+			WHILE((SELECT TOP 1 1 FROM #InsertedData) IS NOT NULL)
 			BEGIN
 
-				SELECT TOP 1 @BillId = intBillId, @IsPosted = ysnPosted, @IsPaid = ysnPaid FROM @InsertedData
+				SELECT TOP 1 @BillId = intBillId, @IsPosted = ysnPosted, @IsPaid = ysnPaid, @type = intTransactionType FROM #InsertedData
 
 				INSERT INTO tblAPBillBatch(intAccountId, ysnPosted, dblTotal, intEntityId, dtmBatchDate)
 				--OUTPUT inserted.intBillBatchId, @BillId INTO @insertedBillBatch
@@ -267,13 +259,20 @@ BEGIN
 
 				SET @BillBatchId = SCOPE_IDENTITY() --GET Last identity value of bill batch
 
+				IF @type = 1
+					EXEC uspSMGetStartingNumber 9, @GeneratedBillId OUT
+				ELSE IF @type = 3
+					EXEC uspSMGetStartingNumber 18, @GeneratedBillId OUT
+				ELSE IF @type = 2
+					EXEC uspSMGetStartingNumber 20, @GeneratedBillId OUT
+
 				--UPDATE billbatch of Bill
 				UPDATE tblAPBill
 					SET intBillBatchId = @BillBatchId
 				FROM tblAPBill
 				WHERE intBillId = @BillId
 
-				DELETE FROM @InsertedData WHERE intBillId = @BillId
+				DELETE FROM #InsertedData WHERE intBillId = @BillId
 			END;
 
 			--CREATE PAYMENT
@@ -485,7 +484,7 @@ BEGIN
 				[dblDiscount],
 				[dblWithheld],
 				[ysnOrigin])
-			OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid, inserted.strVendorOrderNumber INTO @InsertedData
+			OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid, inserted.strVendorOrderNumber, inserted.intTransactionType INTO #InsertedData
 			--Unposted
 			SELECT
 				[intVendorId]			=	D.intVendorId,
@@ -524,49 +523,8 @@ BEGIN
 			WHERE CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
 				 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
 				 AND A.aptrx_trans_type IN (''I'',''C'',''A'')
-				 --AND C.aptrx_ivc_no IS NULL
-
-				--Posted
-	--		UNION
-	--		SELECT
-	--			[intVendorId]			=	D.intVendorId,
-	--			--[strVendorId]			=	A.apivc_vnd_no,
-	--			--[strBillId] 			=	A.apivc_ivc_no,
-	--			[strVendorOrderNumber] 	=	A.apivc_ivc_no,
-	--			[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation
-	--												WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor
-	--													WHERE strVendorId COLLATE Latin1_General_CS_AS = A.apivc_vnd_no COLLATE Latin1_General_CS_AS)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
-	--			[intTaxId] 			=	NULL,
-	--			[dtmDate] 				=	CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-	--			[dtmBillDate] 			=	CASE WHEN ISDATE(A.apivc_ivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_ivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-	--			[dtmDueDate] 			=	CASE WHEN ISDATE(A.apivc_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-	--			[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
-	--			[strDescription] 		=	A.apivc_comment,
-	--			[dblTotal] 				=	(CASE WHEN A.apivc_trans_type = ''C'' THEN (A.apivc_orig_amt * -1) ELSE A.apivc_orig_amt END),
-	--			[dblAmountDue]			=	CASE WHEN A.apivc_status_ind = ''P'' THEN 0 ELSE
-	--										(CASE WHEN A.apivc_trans_type = ''C'' THEN (A.apivc_orig_amt * -1) ELSE A.apivc_orig_amt END)
-	--										END,
-	--			[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CS_AS = RTRIM(A.apivc_user_id) COLLATE Latin1_General_CS_AS),@UserId),
-	--			[ysnPosted]				=	1,
-	--			[ysnPaid]				=	CASE WHEN A.apivc_status_ind = ''P'' THEN 1 ELSE 0 END,
-	--			[intTransactionType]	=	(CASE WHEN A.apivc_trans_type = ''C'' THEN 3 ELSE 1 END),
-	--			[dblDiscount]			=	A.apivc_disc_avail,
-	--			[dblWithheld]			=	A.apivc_wthhld_amt
-	--		FROM apivcmst A
-	--			LEFT JOIN apcbkmst B
-	--				ON A.apivc_cbk_no = B.apcbk_no
-	--			INNER JOIN tblAPVendor D
-	--				ON A.apivc_vnd_no COLLATE Latin1_General_CS_AS = D.strVendorId COLLATE Latin1_General_CS_AS
-	--			LEFT JOIN tblAPBill E
-	--				ON D.intVendorId  = E.intVendorId
-	--				AND A.apivc_ivc_no COLLATE Latin1_General_CS_AS = E.strVendorOrderNumber COLLATE Latin1_General_CS_AS
-	--
-	--		WHERE CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
-	--			 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
-	--			 AND A.apivc_trans_type IN (''I'',''C'')
-	--			 AND E.strVendorOrderNumber IS NULL
 		
-				SELECT @ImportedRecords = @@ROWCOUNT
+			SELECT @ImportedRecords = @@ROWCOUNT
 
 			--add detail
 			INSERT INTO tblAPBillDetail(
@@ -615,7 +573,7 @@ BEGIN
 			--	A.dblTotal,
 			--	@UserId
 			--	FROM tblAPBill A
-			--	INNER JOIN @InsertedData B
+			--	INNER JOIN #InsertedData B
 			--		ON A.intBillId = B.intBillId
 
 			--Add already imported bill
@@ -626,24 +584,24 @@ BEGIN
 			----	A.aptrx_vnd_no
 			----	,aptrx_ivc_no
 			----FROM aptrxmst A
-			----INNER JOIN @InsertedData B
+			----INNER JOIN #InsertedData B
 			----	ON A.aptrx_ivc_no = B.strBillId
 			----UNION
 			--SELECT 
 			--	A.apivc_vnd_no
 			--	,apivc_ivc_no
 			--FROM apivcmst A
-			--INNER JOIN @InsertedData B
+			--INNER JOIN #InsertedData B
 			--	ON A.apivc_ivc_no = B.strVendorOrderNumber
 			--SET IDENTITY_INSERT tblAPTempBill OFF
 	
 				--Create Bill Batch transaction
-			SELECT @totalBills = COUNT(*) FROM @InsertedData
+			SELECT @totalBills = COUNT(*) FROM #InsertedData
 
-			WHILE((SELECT TOP 1 1 FROM @InsertedData) IS NOT NULL)
+			WHILE((SELECT TOP 1 1 FROM #InsertedData) IS NOT NULL)
 			BEGIN
 
-				SELECT TOP 1 @BillId = intBillId, @IsPosted = ysnPosted, @IsPaid = ysnPaid FROM @InsertedData
+				SELECT TOP 1 @BillId = intBillId, @IsPosted = ysnPosted, @IsPaid = ysnPaid, @type = intTransactionType FROM #InsertedData
 
 				INSERT INTO tblAPBillBatch(intAccountId, ysnPosted, dblTotal, intEntityId, dtmBatchDate)
 				--OUTPUT inserted.intBillBatchId, @BillId INTO @insertedBillBatch
@@ -658,13 +616,20 @@ BEGIN
 
 				SET @BillBatchId = SCOPE_IDENTITY() --GET Last identity value of bill batch
 
+				IF @type = 1
+					EXEC uspSMGetStartingNumber 9, @GeneratedBillId OUT
+				ELSE IF @type = 3
+					EXEC uspSMGetStartingNumber 18, @GeneratedBillId OUT
+				ELSE IF @type = 2
+					EXEC uspSMGetStartingNumber 20, @GeneratedBillId OUT
+
 				--UPDATE billbatch of Bill
 				UPDATE tblAPBill
 					SET intBillBatchId = @BillBatchId
 				FROM tblAPBill
 				WHERE intBillId = @BillId
 
-				DELETE FROM @InsertedData WHERE intBillId = @BillId
+				DELETE FROM #InsertedData WHERE intBillId = @BillId
 			END;
 		
 			SET @Total = @ImportedRecords;

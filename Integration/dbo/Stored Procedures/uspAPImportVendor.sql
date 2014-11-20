@@ -20,7 +20,7 @@ AS
 IF EXISTS(SELECT 1 FROM ssvndmst 
 		WHERE NOT EXISTS(
 				(SELECT 1 FROM tblGLCOACrossReference WHERE strExternalId = CONVERT(NVARCHAR(50),ssvnd_gl_pur)))
-			AND ssvnd_gl_pur <> 0)
+			AND ssvnd_gl_pur <> 0 AND ssvnd_gl_pur <> 1)
 BEGIN
 	RAISERROR(''Some of the vendor default expense account do not exists in i21 Accounts.'', 16, 1);
 	RETURN;
@@ -275,10 +275,10 @@ BEGIN
 
             SELECT TOP 1
                 --Entities
-                @strName = CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
+                @strName = ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
                             ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
                                 + '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
-                            END,
+                            END,''''),
                 @strWebsite = '''',
                 @strInternalNotes = '''',
                 @ysnPrint1099   = CASE WHEN ssvnd_1099_yn = ''Y'' THEN 1 ELSE 0 END,
