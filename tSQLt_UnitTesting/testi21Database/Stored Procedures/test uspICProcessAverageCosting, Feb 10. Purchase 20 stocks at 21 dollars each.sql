@@ -41,7 +41,7 @@ BEGIN
 		-- Declare the variables used in uspICProcessAverageCosting
 		DECLARE 
 			@intItemId AS INT
-			,@intItemLocationId AS INT
+			,@intLocationId AS INT
 			,@dtmDate AS DATETIME
 			,@dblUnitQty AS NUMERIC(18,6)
 			,@dblUOMQty AS NUMERIC(18,6)
@@ -62,7 +62,7 @@ BEGIN
 		CREATE TABLE expected (
 			[intInventoryTransactionId] INT NOT NULL, 
 			[intItemId] INT NOT NULL,
-			[intItemLocationId] INT NOT NULL,
+			[intLocationId] INT NOT NULL,
 			[dtmDate] DATETIME NOT NULL, 
 			[dblUnitQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 			[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
@@ -82,7 +82,7 @@ BEGIN
 		CREATE TABLE actual (
 			[intInventoryTransactionId] INT NOT NULL, 
 			[intItemId] INT NOT NULL,
-			[intItemLocationId] INT NOT NULL,
+			[intLocationId] INT NOT NULL,
 			[dtmDate] DATETIME NOT NULL, 
 			[dblUnitQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 			[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
@@ -109,7 +109,7 @@ BEGIN
 		-- 1. Expected data from Jan 1. Purchase 20 stocks @ 20 dollars each
 		BEGIN 
 			SET	@intItemId = @WetGrains
-			SET @intItemLocationId = @NewHaven
+			SET @intLocationId = @NewHaven
 			SET @dtmDate = 'January 1, 2014'
 			SET @dblUnitQty = 20
 			SET @dblUOMQty = @EACH 
@@ -128,7 +128,7 @@ BEGIN
 			INSERT INTO expected (
 					[intInventoryTransactionId]
 					,[intItemId]
-					,[intItemLocationId]
+					,[intLocationId]
 					,[dtmDate]
 					,[dblUnitQty]
 					,[dblCost]
@@ -146,7 +146,7 @@ BEGIN
 			)
 			SELECT	[intInventoryTransactionId] = 1
 					,[intItemId] = @intItemId
-					,[intItemLocationId] = @NewHaven
+					,[intLocationId] = @NewHaven
 					,[dtmDate] = @dtmDate
 					,[dblUnitQty] = (@dblUnitQty * @dblUOMQty)
 					,[dblCost] = @dblCost
@@ -165,7 +165,7 @@ BEGIN
 			-- Re-insert the expected data in tblICInventoryTransaction
 			INSERT INTO tblICInventoryTransaction (
 					[intItemId]
-					,[intItemLocationId]
+					,[intLocationId]
 					,[dtmDate]
 					,[dblUnitQty]
 					,[dblCost]
@@ -182,7 +182,7 @@ BEGIN
 					,[intConcurrencyId]
 			)
 			SELECT	[intItemId] = @intItemId
-					,[intItemLocationId] = @NewHaven
+					,[intLocationId] = @NewHaven
 					,[dtmDate] = @dtmDate
 					,[dblUnitQty] = (@dblUnitQty * @dblUOMQty)
 					,[dblCost] = @dblCost
@@ -203,12 +203,12 @@ BEGIN
 			SET		dblAverageCost = 20
 					,dblUnitOnHand = 20
 			WHERE	intItemId = @intItemId
-					AND intLocationId = @intItemLocationId
+					AND intLocationId = @intLocationId
 					
 			-- Add the fake data for tblICInventoryFIFO
 			INSERT INTO tblICInventoryFIFO (
 					intItemId
-					,intItemLocationId
+					,intLocationId
 					,dtmDate
 					,dblStockIn
 					,dblStockOut
@@ -217,7 +217,7 @@ BEGIN
 					,intConcurrencyId
 			)
 			SELECT	intItemId = @WetGrains
-					,intItemLocationId = @NewHaven
+					,intLocationId = @NewHaven
 					,dtmDate = 'January 1, 2014'
 					,dblStockIn = 20
 					,dblStockOut = 0
@@ -229,7 +229,7 @@ BEGIN
 		-- 1. Feb 10. Purchase 20 stocks at 21 dollars each
 		BEGIN 
 			SET	@intItemId = @WetGrains
-			SET @intItemLocationId = @NewHaven
+			SET @intLocationId = @NewHaven
 			SET @dtmDate = 'February 10, 2014'
 			SET @dblUnitQty = 20
 			SET @dblUOMQty = @EACH 
@@ -248,7 +248,7 @@ BEGIN
 			INSERT INTO expected (
 					[intInventoryTransactionId]
 					,[intItemId]
-					,[intItemLocationId]
+					,[intLocationId]
 					,[dtmDate]
 					,[dblUnitQty]
 					,[dblCost]
@@ -266,7 +266,7 @@ BEGIN
 			)
 			SELECT	[intInventoryTransactionId] = 2
 					,[intItemId] = @intItemId
-					,[intItemLocationId] = @NewHaven
+					,[intLocationId] = @NewHaven
 					,[dtmDate] = @dtmDate
 					,[dblUnitQty] = (@dblUnitQty * @dblUOMQty)
 					,[dblCost] = @dblCost
@@ -288,7 +288,7 @@ BEGIN
 					,dblUnitOnHand = 40
 					,intConcurrencyId += 1
 			WHERE	intItemId = @intItemId
-					AND intLocationId = @intItemLocationId					
+					AND intLocationId = @intLocationId					
 		END 
 	END 
 	
@@ -296,7 +296,7 @@ BEGIN
 	BEGIN 
 		EXEC dbo.uspICProcessAverageCosting
 			@intItemId
-			,@intItemLocationId
+			,@intLocationId
 			,@dtmDate
 			,@dblUnitQty
 			,@dblUOMQty
@@ -317,7 +317,7 @@ BEGIN
 		INSERT INTO actual (
 				[intInventoryTransactionId]
 				,[intItemId]
-				,[intItemLocationId]
+				,[intLocationId]
 				,[dtmDate]
 				,[dblUnitQty]
 				,[dblCost]
@@ -335,7 +335,7 @@ BEGIN
 		)
 		SELECT	[intInventoryTransactionId]
 				,[intItemId]
-				,[intItemLocationId]
+				,[intLocationId]
 				,[dtmDate]
 				,[dblUnitQty]
 				,[dblCost]
@@ -352,7 +352,7 @@ BEGIN
 				,[intConcurrencyId]	
 		FROM	tblICInventoryTransaction
 		WHERE	intItemId = @intItemId
-				AND intItemLocationId = @intItemLocationId
+				AND intLocationId = @intLocationId
 
 		-- Assert the expected data for tblICInventoryTransaction is built correctly. 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';

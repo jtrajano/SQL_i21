@@ -4,7 +4,7 @@
 
 CREATE PROCEDURE [dbo].[uspICProcessFIFO]
 	@intItemId AS INT
-	,@intItemLocationId AS INT
+	,@intLocationId AS INT
 	,@dtmDate AS DATETIME
 	,@dblUnitQty AS NUMERIC(18,6)
 	,@dblUOMQty AS NUMERIC(18,6)
@@ -58,7 +58,7 @@ BEGIN
 		BEGIN 
 			EXEC dbo.uspICReduceStockInFIFO
 				@intItemId
-				,@intItemLocationId
+				,@intLocationId
 				,@dtmDate
 				,@dblReduceQty
 				,@dblCost
@@ -73,7 +73,7 @@ BEGIN
 			-- Insert the inventory transaction record
 			INSERT INTO tblICInventoryTransaction (
 				[intItemId] 
-				,[intItemLocationId] 
+				,[intLocationId] 
 				,[dtmDate] 
 				,[dblUnitQty] 
 				,[dblCost] 
@@ -90,7 +90,7 @@ BEGIN
 				,[intConcurrencyId] 
 			)			
 			SELECT	[intItemId] = @intItemId
-					,[intItemLocationId] = @intItemLocationId
+					,[intLocationId] = @intLocationId
 					,[dtmDate] = @dtmDate
 					,[dblUnitQty] = @dblReduceQty - ISNULL(@RemainingQty, 0) 
 					,[dblCost] = ISNULL(@CostUsed, @dblCost)
@@ -138,7 +138,7 @@ BEGIN
 		-- Insert the inventory transaction record
 		INSERT INTO tblICInventoryTransaction (
 			[intItemId] 
-			,[intItemLocationId] 
+			,[intLocationId] 
 			,[dtmDate] 
 			,[dblUnitQty] 
 			,[dblCost] 
@@ -155,7 +155,7 @@ BEGIN
 			,[intConcurrencyId] 
 		)			
 		SELECT	[intItemId] = @intItemId
-				,[intItemLocationId] = @intItemLocationId
+				,[intLocationId] = @intLocationId
 				,[dtmDate] = @dtmDate
 				,[dblUnitQty] = @FullQty
 				,[dblCost] = @dblCost
@@ -176,7 +176,7 @@ BEGIN
 		BEGIN 
 			EXEC dbo.uspICIncreaseStockInFIFO
 				@intItemId
-				,@intItemLocationId
+				,@intLocationId
 				,@dtmDate
 				,@dblAddQty
 				,@dblCost
@@ -197,7 +197,7 @@ BEGIN
 			-- Insert the inventory transaction record
 			INSERT INTO tblICInventoryTransaction (
 				[intItemId] 
-				,[intItemLocationId] 
+				,[intLocationId] 
 				,[dtmDate] 
 				,[dblUnitQty] 
 				,[dblCost] 
@@ -215,7 +215,7 @@ BEGIN
 			)
 			-- Add Write-Off Sold
 			SELECT	[intItemId] = @intItemId
-					,[intItemLocationId] = @intItemLocationId
+					,[intLocationId] = @intLocationId
 					,[dtmDate] = @dtmDate
 					,[dblUnitQty] = 0
 					,[dblCost] = 0
@@ -234,7 +234,7 @@ BEGIN
 			-- Add Revalue sold
 			UNION ALL 
 			SELECT	[intItemId] = @intItemId
-					,[intItemLocationId] = @intItemLocationId
+					,[intLocationId] = @intLocationId
 					,[dtmDate] = @dtmDate
 					,[dblUnitQty] = 0
 					,[dblCost] = 0
@@ -277,7 +277,7 @@ BEGIN
 					ON FifoOut.intInventoryTransactionId = TRANS.intInventoryTransactionId 
 					AND FifoOut.intInventoryFIFOId IS NULL 
 					AND TRANS.intItemId = @intItemId
-					AND TRANS.intItemLocationId = @intItemLocationId
+					AND TRANS.intLocationId = @intLocationId
 					AND TRANS.intTransactionId = @intTransactionId
 					AND TRANS.strBatchId = @strBatchId
 		WHERE	@NewFifoId IS NOT NULL 

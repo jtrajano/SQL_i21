@@ -7,7 +7,7 @@ BEGIN
 
 		CREATE TABLE expected (
 			[intItemId] INT 
-			,[intItemLocationId] INT 
+			,[intLocationId] INT 
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -19,7 +19,7 @@ BEGIN
 
 		CREATE TABLE actual (
 			[intItemId] INT 
-			,[intItemLocationId] INT 
+			,[intLocationId] INT 
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -31,7 +31,7 @@ BEGIN
 
 		-- Create the variables 
 		DECLARE @intItemId AS INT
-				,@intItemLocationId AS INT
+				,@intLocationId AS INT
 				,@dtmDate AS DATETIME
 				,@dblQty NUMERIC(18,6) 
 				,@dblCost AS NUMERIC(18,6)
@@ -51,7 +51,7 @@ BEGIN
 	BEGIN 
 		EXEC dbo.uspICIncreaseStockInFIFO
 			@intItemId
-			,@intItemLocationId
+			,@intLocationId
 			,@dtmDate
 			,@dblQty
 			,@dblCost
@@ -68,7 +68,7 @@ BEGIN
 
 		INSERT INTO actual (
 				[intItemId] 
-				,[intItemLocationId] 
+				,[intLocationId] 
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -79,7 +79,7 @@ BEGIN
 		)
 		SELECT
 				[intItemId] 
-				,[intItemLocationId] 
+				,[intLocationId] 
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -89,7 +89,7 @@ BEGIN
 				,[intConcurrencyId]
 		FROM	tblICInventoryFIFO
 		WHERE	intItemId = @intItemId
-				AND intItemLocationId = @intItemLocationId
+				AND intLocationId = @intLocationId
 	END 
 
 	-- Assert

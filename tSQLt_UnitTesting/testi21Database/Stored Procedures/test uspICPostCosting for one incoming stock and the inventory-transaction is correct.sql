@@ -74,7 +74,7 @@ BEGIN
 		-- Setup the items to post
 		INSERT INTO @ItemsToPost 
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 14, 2014'
 				,dblUnitQty = 100
 				,dblUOMQty = 1
@@ -90,7 +90,7 @@ BEGIN
 		-- Setup the expected g/l entries 
 		INSERT INTO expected (
 				intItemId 
-				,intItemLocationId 
+				,intLocationId 
 				,dtmDate 
 				,dblUnitQty 
 				,dblCost 
@@ -107,7 +107,7 @@ BEGIN
 				,intConcurrencyId 
 		)
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 14, 2014'
 				,dblUnitQty = 100
 				,dblCost = 14.00
@@ -135,7 +135,7 @@ BEGIN
 
 		INSERT INTO actual (
 				intItemId 
-				,intItemLocationId 
+				,intLocationId 
 				,dtmDate 
 				,dblUnitQty 
 				,dblCost 
@@ -152,7 +152,7 @@ BEGIN
 				,intConcurrencyId 		
 		)
 		SELECT	intItemId 
-				,intItemLocationId 
+				,intLocationId 
 				,dtmDate 
 				,dblUnitQty 
 				,dblCost 

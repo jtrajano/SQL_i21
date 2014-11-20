@@ -56,8 +56,8 @@ BEGIN
 		DECLARE @AutoNegative_BetterHaven AS INT = 6002
 
 		-- Create the expected and actual tables. 
-		SELECT intItemId, intItemLocationId, dtmDate, dblStockIn, dblStockOut, dblCost INTO expected FROM dbo.tblICInventoryFIFO WHERE 1 = 0		
-		SELECT intItemId, intItemLocationId, dtmDate, dblStockIn, dblStockOut, dblCost INTO actual FROM dbo.tblICInventoryFIFO WHERE 1 = 0
+		SELECT intItemId, intLocationId, dtmDate, dblStockIn, dblStockOut, dblCost INTO expected FROM dbo.tblICInventoryFIFO WHERE 1 = 0		
+		SELECT intItemId, intLocationId, dtmDate, dblStockIn, dblStockOut, dblCost INTO actual FROM dbo.tblICInventoryFIFO WHERE 1 = 0
 
 		-- Declare the variables used by uspICPostCosting
 		DECLARE @ItemsToPost AS ItemCostingTableType;
@@ -68,7 +68,7 @@ BEGIN
 		-- Setup the items to post
 		INSERT INTO @ItemsToPost 
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 14, 2014'
 				,dblUnitQty = 100
 				,dblUOMQty = 1
@@ -82,7 +82,7 @@ BEGIN
 				,intLotId = NULL
 		UNION ALL 
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = 75
 				,dblUOMQty = 1
@@ -98,7 +98,7 @@ BEGIN
 		-- Setup the expected fifo records
 		INSERT INTO expected (
 				intItemId
-				,intItemLocationId
+				,intLocationId
 				,dtmDate
 				,dblStockIn
 				,dblStockOut
@@ -137,21 +137,21 @@ BEGIN
 
 		INSERT INTO actual (
 				intItemId
-				,intItemLocationId
+				,intLocationId
 				,dtmDate
 				,dblStockIn
 				,dblStockOut
 				,dblCost
 		)
 		SELECT	intItemId
-				,intItemLocationId
+				,intLocationId
 				,dtmDate
 				,dblStockIn
 				,dblStockOut
 				,dblCost
 		FROM	dbo.tblICInventoryFIFO
 		WHERE	intItemId = @WetGrains
-				AND intItemLocationId = @Default_Location
+				AND intLocationId = @Default_Location
 	END 
 
 	-- Assert

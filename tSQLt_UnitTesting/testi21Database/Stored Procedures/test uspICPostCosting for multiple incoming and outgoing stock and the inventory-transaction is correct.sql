@@ -54,8 +54,8 @@ BEGIN
 		DECLARE @AutoNegative_BetterHaven AS INT = 6002
 
 		-- Create the expected and actual tables. 
-		SELECT * INTO expected FROM dbo.tblICInventoryTransaction WHERE intItemId = @WetGrains AND intItemLocationId = @Default_Location
-		SELECT * INTO actual FROM dbo.tblICInventoryTransaction WHERE intItemId = @WetGrains AND intItemLocationId = @Default_Location
+		SELECT * INTO expected FROM dbo.tblICInventoryTransaction WHERE intItemId = @WetGrains AND intLocationId = @Default_Location
+		SELECT * INTO actual FROM dbo.tblICInventoryTransaction WHERE intItemId = @WetGrains AND intLocationId = @Default_Location
 
 		-- Drop the dtmCreated column. We don't need to assert it. 
 		ALTER TABLE expected
@@ -75,7 +75,7 @@ BEGIN
 		INSERT INTO @ItemsToPost
 		-- in (Stock goes up to 200)
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = 100
 				,dblUOMQty = 1
@@ -90,7 +90,7 @@ BEGIN
 		-- out (Stock goes down to 170)
 		UNION ALL
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = -30
 				,dblUOMQty = 1
@@ -105,7 +105,7 @@ BEGIN
 		-- out (Stock goes down to 135)
 		UNION ALL
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = -35
 				,dblUOMQty = 1
@@ -120,7 +120,7 @@ BEGIN
 		-- out (Stock goes down to 90)
 		UNION ALL
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = -45
 				,dblUOMQty = 1
@@ -135,7 +135,7 @@ BEGIN
 		-- out (Stock goes down to -42)
 		UNION ALL
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = -132
 				,dblUOMQty = 1
@@ -150,7 +150,7 @@ BEGIN
 		-- in (Stock goes up to -22)
 		UNION ALL		
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = 20
 				,dblUOMQty = 1
@@ -165,7 +165,7 @@ BEGIN
 		-- in (Stock goes up to 0)
 		UNION ALL				
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = 22
 				,dblUOMQty = 1
@@ -180,7 +180,7 @@ BEGIN
 		-- in (Stock goes up to 100)
 		UNION ALL				
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = 100
 				,dblUOMQty = 1
@@ -196,7 +196,7 @@ BEGIN
 		-- Setup the expected tblICInventoryTransaction
 		INSERT INTO expected (
 				intItemId 
-				,intItemLocationId 
+				,intLocationId 
 				,dtmDate 
 				,dblUnitQty 
 				,dblCost 
@@ -214,7 +214,7 @@ BEGIN
 		)
 		-- Purchase 1: 100 @ $14.00
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = 100
 				,dblCost = 14.00
@@ -232,7 +232,7 @@ BEGIN
 		-- SALE 1: 30 
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = -30
 				,dblCost = 18.00
@@ -250,7 +250,7 @@ BEGIN
 		-- SALE 2: 35
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = -35
 				,dblCost = 18.00
@@ -268,7 +268,7 @@ BEGIN
 		-- SALE 3: 45
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = -45
 				,dblCost = 18.00
@@ -286,7 +286,7 @@ BEGIN
 		-- SALE 4: 132
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = -132
 				,dblCost = 18.00
@@ -304,7 +304,7 @@ BEGIN
 		-- Purchase 2: 20 @ $15.50
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = 20
 				,dblCost = 15.50
@@ -322,7 +322,7 @@ BEGIN
 		-- Write-off sold
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = 0
 				,dblCost = 0
@@ -340,7 +340,7 @@ BEGIN
 		-- Revalue sold
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = 0
 				,dblCost = 0
@@ -358,7 +358,7 @@ BEGIN
 		-- Auto-Negative
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = 0
 				,dblCost = 0
@@ -376,7 +376,7 @@ BEGIN
 		-- Purchase 3: 22 @16.50
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = 22
 				,dblCost = 16.50
@@ -394,7 +394,7 @@ BEGIN
 		-- Write-off sold
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = 0
 				,dblCost = 0
@@ -412,7 +412,7 @@ BEGIN
 		-- Revalue sold
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = 0
 				,dblCost = 0
@@ -431,7 +431,7 @@ BEGIN
 		-- Purchase 3: 100 @ $18.00
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = 100
 				,dblCost = 18.00
@@ -459,7 +459,7 @@ BEGIN
 
 		INSERT INTO actual (
 				intItemId 
-				,intItemLocationId 
+				,intLocationId 
 				,dtmDate 
 				,dblUnitQty 
 				,dblCost 
@@ -476,7 +476,7 @@ BEGIN
 				,intConcurrencyId 		
 		)
 		SELECT	intItemId 
-				,intItemLocationId 
+				,intLocationId 
 				,dtmDate 
 				,dblUnitQty 
 				,dblCost 

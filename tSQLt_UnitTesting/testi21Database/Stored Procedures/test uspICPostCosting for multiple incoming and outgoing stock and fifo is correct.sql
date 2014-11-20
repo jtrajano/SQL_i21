@@ -55,8 +55,8 @@ BEGIN
 		DECLARE @AutoNegative_BetterHaven AS INT = 6002;
 
 		-- Create the expected and actual tables. 
-		SELECT intItemId, intItemLocationId, dtmDate, dblStockIn, dblStockOut, dblCost INTO expected FROM dbo.tblICInventoryFIFO WHERE 1 = 0;
-		SELECT intItemId, intItemLocationId, dtmDate, dblStockIn, dblStockOut, dblCost INTO actual FROM dbo.tblICInventoryFIFO WHERE 1 = 0;
+		SELECT intItemId, intLocationId, dtmDate, dblStockIn, dblStockOut, dblCost INTO expected FROM dbo.tblICInventoryFIFO WHERE 1 = 0;
+		SELECT intItemId, intLocationId, dtmDate, dblStockIn, dblStockOut, dblCost INTO actual FROM dbo.tblICInventoryFIFO WHERE 1 = 0;
 
 		-- Declare the variables used by uspICPostCosting
 		DECLARE @ItemsToPost AS ItemCostingTableType;
@@ -68,7 +68,7 @@ BEGIN
 		INSERT INTO @ItemsToPost
 		-- in (Stock goes up to 200)
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = 100
 				,dblUOMQty = 1
@@ -83,7 +83,7 @@ BEGIN
 		-- out (Stock goes down to 170)
 		UNION ALL
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = -30
 				,dblUOMQty = 1
@@ -98,7 +98,7 @@ BEGIN
 		-- out (Stock goes down to 135)
 		UNION ALL
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = -35
 				,dblUOMQty = 1
@@ -113,7 +113,7 @@ BEGIN
 		-- out (Stock goes down to 90)
 		UNION ALL
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = -45
 				,dblUOMQty = 1
@@ -128,7 +128,7 @@ BEGIN
 		-- out (Stock goes down to -42)
 		UNION ALL
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = -132
 				,dblUOMQty = 1
@@ -143,7 +143,7 @@ BEGIN
 		-- in (Stock goes up to -22)
 		UNION ALL		
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = 20
 				,dblUOMQty = 1
@@ -158,7 +158,7 @@ BEGIN
 		-- in (Stock goes up to 0)
 		UNION ALL				
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = 22
 				,dblUOMQty = 1
@@ -173,7 +173,7 @@ BEGIN
 		-- in (Stock goes up to 100)
 		UNION ALL				
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = 100
 				,dblUOMQty = 1
@@ -189,7 +189,7 @@ BEGIN
 		-- Setup the expected tblICInventoryFIFO
 		INSERT INTO expected (
 				intItemId
-				,intItemLocationId
+				,intLocationId
 				,dtmDate
 				,dblStockIn
 				,dblStockOut
@@ -249,21 +249,21 @@ BEGIN
 
 		INSERT INTO actual (
 				intItemId
-				,intItemLocationId
+				,intLocationId
 				,dtmDate
 				,dblStockIn
 				,dblStockOut
 				,dblCost
 		)
 		SELECT	intItemId
-				,intItemLocationId
+				,intLocationId
 				,dtmDate
 				,dblStockIn
 				,dblStockOut
 				,dblCost
 		FROM	dbo.tblICInventoryFIFO
 		WHERE	intItemId = @WetGrains
-				AND intItemLocationId = @Default_Location
+				AND intLocationId = @Default_Location
 	END 
 
 	select * from expected
