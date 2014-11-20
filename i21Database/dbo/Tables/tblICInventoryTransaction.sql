@@ -59,3 +59,8 @@ CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_intTransactionId]
 GO
 CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_strTransactionId]
 	ON [dbo].[tblICInventoryTransaction]([strTransactionId] ASC);
+
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_strBatchId]
+	ON [dbo].[tblICInventoryTransaction]([strBatchId] ASC);
