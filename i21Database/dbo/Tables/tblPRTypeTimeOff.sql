@@ -2,14 +2,17 @@
 	[intTypeTimeOffId] INT NOT NULL,
 	[strTimeOff] nvarchar(30) NOT NULL,
 	[strDescription] NVARCHAR(50) NULL, 
+	[intTypeEarningId] INT NULL,
+	[dtmEligible] DATETIME NULL, 
 	[dblRate] [numeric](18, 6) NULL DEFAULT ((0)),
 	[dblPerPeriod] [numeric](18, 6) NULL DEFAULT ((0)),
 	[strPeriod] NVARCHAR(30) NULL DEFAULT ((0)),
 	[strAwardPeriod] NVARCHAR(30) NULL DEFAULT ((0)),
-	[dblMaxCarryover] [numeric](18, 6) NULL DEFAULT ((0)),
 	[dblMaxEarned] [numeric](18, 6) NULL DEFAULT ((0)),
+	[dblMaxCarryover] [numeric](18, 6) NULL DEFAULT ((0)),
 	[intAccountId] [int] NULL,
-	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
+	[intSort] INT NULL,
+	[intConcurrencyId] [int] NULL DEFAULT ((1))
     CONSTRAINT [PK_tblPRTypeTimeOff] PRIMARY KEY ([intTypeTimeOffId])
 	)
 GO
@@ -123,3 +126,30 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRTypeTimeOff',
     @level2type = N'COLUMN',
     @level2name = N'intAccountId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Sort Field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTypeTimeOff',
+    @level2type = N'COLUMN',
+    @level2name = N'intSort'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Eligible Date',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTypeTimeOff',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmEligible'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Earning Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTypeTimeOff',
+    @level2type = N'COLUMN',
+    @level2name = N'intTypeEarningId'
