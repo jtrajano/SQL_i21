@@ -620,7 +620,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				ptcus_phone = (CASE WHEN CHARINDEX(''x'', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,15), 0, CHARINDEX(''x'',Con.strPhone)) ELSE SUBSTRING(Con.strPhone,1,15)END),
 				ptcus_phone_ext = (CASE WHEN CHARINDEX(''x'', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,30),CHARINDEX(''x'',Con.strPhone) + 1, LEN(Con.strPhone))END),
 				ptcus_phone2 = (CASE WHEN CHARINDEX(''x'', Con.strPhone2) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone2,1,15), 0, CHARINDEX(''x'',Con.strPhone2)) ELSE SUBSTRING(Con.strPhone2,1,15)END),
-				ptcus_phone2_ext = (CASE WHEN CHARINDEX(''x'', Con.strPhone2) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone2,1,30),CHARINDEX(''x'',Con.strPhone2) + 1, LEN(Con.strPhone2))END),
+				ptcus_phone_ext2 = (CASE WHEN CHARINDEX(''x'', Con.strPhone2) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone2,1,30),CHARINDEX(''x'',Con.strPhone2) + 1, LEN(Con.strPhone2))END),
 				--Customer
 				ptcus_cus_no = SUBSTRING(Cus.strCustomerNumber,1,10),
 				ptcus_co_per_ind_cp = CASE WHEN Cus.strType = ''Company'' THEN ''C'' ELSE ''P'' END,
@@ -673,7 +673,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				ptcus_phone,
 				ptcus_phone_ext,
 				ptcus_phone2,
-				ptcus_phone2_ext,
+				ptcus_phone_ext2,
 				--Location
 				ptcus_addr,
 				ptcus_addr2,
@@ -909,12 +909,12 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 											RTRIM(LTRIM(ptcus_phone)) + '' x'' + RTRIM(LTRIM(ptcus_phone_ext))
 									 END),
 					@strPhone2     = (CASE	
-										WHEN ptcus_phone2_ext IS NULL OR ptcus_phone2_ext = '''' THEN
+										WHEN ptcus_phone_ext2 IS NULL OR ptcus_phone_ext2 = '''' THEN
 											RTRIM(LTRIM(ptcus_phone2))
-										WHEN ptcus_phone2 IS NULL OR ptcus_phone2 = '''' AND ptcus_phone2_ext IS NOT NULL AND ptcus_phone2_ext <> '''' THEN
-											''x'' + RTRIM(LTRIM(ptcus_phone2_ext))
+										WHEN ptcus_phone2 IS NULL OR ptcus_phone2 = '''' AND ptcus_phone_ext2 IS NOT NULL AND ptcus_phone_ext2 <> '''' THEN
+											''x'' + RTRIM(LTRIM(ptcus_phone_ext2))
 										ELSE
-											RTRIM(LTRIM(ptcus_phone2)) + '' x'' + RTRIM(LTRIM(ptcus_phone2_ext))
+											RTRIM(LTRIM(ptcus_phone2)) + '' x'' + RTRIM(LTRIM(ptcus_phone_ext2))
 									 END),
 					@strEmail      = NULL,
 					@strEmail2     = NULL,
@@ -1141,6 +1141,5 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				ON ptcusmst.ptcus_cus_no COLLATE Latin1_General_CI_AS = tblARCustomer.strCustomerNumber COLLATE Latin1_General_CI_AS
 			WHERE tblARCustomer.strCustomerNumber IS NULL
 		END
-	END
-	')
+	END')
 END
