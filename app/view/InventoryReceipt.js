@@ -407,30 +407,144 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                 items: [
                                                     {
                                                         xtype: 'container',
-                                                        flex: 1,
-                                                        margin: '0 5 0 0',
+                                                        flex: 3,
                                                         layout: {
-                                                            type: 'vbox',
+                                                            type: 'hbox',
                                                             align: 'stretch'
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtBlanketReleaseNumber',
-                                                                fieldLabel: 'Blanket Release No',
-                                                                labelWidth: 110
+                                                                xtype: 'container',
+                                                                flex: 1,
+                                                                margin: '0 5 0 0',
+                                                                layout: {
+                                                                    type: 'vbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'textfield',
+                                                                        itemId: 'txtBlanketReleaseNumber',
+                                                                        fieldLabel: 'Blanket Release No',
+                                                                        labelWidth: 110
+                                                                    },
+                                                                    {
+                                                                        xtype: 'textfield',
+                                                                        itemId: 'txtVendorRefNumber',
+                                                                        fieldLabel: 'Vendor Ref No',
+                                                                        labelWidth: 110
+                                                                    },
+                                                                    {
+                                                                        xtype: 'textfield',
+                                                                        itemId: 'txtBillOfLadingNumber',
+                                                                        fieldLabel: 'Bill of Lading No',
+                                                                        labelWidth: 110
+                                                                    }
+                                                                ]
                                                             },
                                                             {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtVendorRefNumber',
-                                                                fieldLabel: 'Vendor Ref No',
-                                                                labelWidth: 110
+                                                                xtype: 'container',
+                                                                flex: 1,
+                                                                margin: '0 0 0 5',
+                                                                layout: {
+                                                                    type: 'vbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        itemId: 'cboShipVia',
+                                                                        width: 200,
+                                                                        fieldLabel: 'Ship Via',
+                                                                        labelWidth: 90
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intCountryID',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Country Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strCountry',
+                                                                                dataType: 'string',
+                                                                                text: 'Country',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboProductOrigin',
+                                                                        width: 200,
+                                                                        fieldLabel: 'Product Origin',
+                                                                        labelWidth: 90,
+                                                                        displayField: 'strCountry',
+                                                                        valueField: 'intCountryID'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'textfield',
+                                                                        itemId: 'txtReceiver',
+                                                                        fieldLabel: 'Receiver',
+                                                                        labelWidth: 90
+                                                                    }
+                                                                ]
                                                             },
                                                             {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtBillOfLadingNumber',
-                                                                fieldLabel: 'Bill of Lading No',
-                                                                labelWidth: 110
+                                                                xtype: 'container',
+                                                                flex: 1,
+                                                                margin: '0 0 0 5',
+                                                                layout: {
+                                                                    type: 'vbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'textfield',
+                                                                        itemId: 'txtVessel',
+                                                                        fieldLabel: 'Vessel',
+                                                                        labelWidth: 90
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intFreightTermId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Freight Term Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strFreightTerm',
+                                                                                dataType: 'string',
+                                                                                text: 'Freight Term',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strFobPoint',
+                                                                                dataType: 'string',
+                                                                                text: 'FOB Point',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'ysnActive',
+                                                                                dataType: 'boolean',
+                                                                                text: 'Active',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboFreightTerms',
+                                                                        fieldLabel: 'Freight Terms',
+                                                                        labelWidth: 90,
+                                                                        displayField: 'strFreightTerm',
+                                                                        valueField: 'intFreightTermId'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'textfield',
+                                                                        itemId: 'txtFobPoint',
+                                                                        fieldLabel: 'FOB Point',
+                                                                        labelWidth: 90
+                                                                    }
+                                                                ]
                                                             }
                                                         ]
                                                     },
@@ -443,114 +557,17 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             align: 'stretch'
                                                         },
                                                         items: [
-                                                            {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
-                                                                    {
-                                                                        dataIndex: 'intCountryID',
-                                                                        dataType: 'numeric',
-                                                                        text: 'Country Id',
-                                                                        hidden: true
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strCountry',
-                                                                        dataType: 'string',
-                                                                        text: 'Country',
-                                                                        flex: 1
-                                                                    }
-                                                                ],
-                                                                itemId: 'cboProductOrigin',
-                                                                width: 200,
-                                                                fieldLabel: 'Product Origin',
-                                                                labelWidth: 105,
-                                                                displayField: 'strCountry',
-                                                                valueField: 'intCountryID'
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtReceiver',
-                                                                fieldLabel: 'Receiver',
-                                                                labelWidth: 105
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtVessel',
-                                                                fieldLabel: 'Vessel',
-                                                                labelWidth: 105
-                                                            }
-                                                        ]
-                                                    },
-                                                    {
-                                                        xtype: 'container',
-                                                        flex: 1,
-                                                        margin: '0 0 0 5',
-                                                        layout: {
-                                                            type: 'vbox',
-                                                            align: 'stretch'
-                                                        },
-                                                        items: [
-                                                            {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
-                                                                    {
-                                                                        dataIndex: 'intFreightTermId',
-                                                                        dataType: 'numeric',
-                                                                        text: 'Freight Term Id',
-                                                                        hidden: true
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strFreightTerm',
-                                                                        dataType: 'string',
-                                                                        text: 'Freight Term',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strFobPoint',
-                                                                        dataType: 'string',
-                                                                        text: 'FOB Point',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'ysnActive',
-                                                                        dataType: 'boolean',
-                                                                        text: 'Active',
-                                                                        flex: 1
-                                                                    }
-                                                                ],
-                                                                itemId: 'cboFreightTerms',
-                                                                fieldLabel: 'Freight Terms',
-                                                                labelWidth: 110,
-                                                                displayField: 'strFreightTerm',
-                                                                valueField: 'intFreightTermId'
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtFobPoint',
-                                                                fieldLabel: 'FOB Point',
-                                                                labelWidth: 110
-                                                            },
                                                             {
                                                                 xtype: 'textfield',
                                                                 itemId: 'txtDeliveryPoint',
                                                                 fieldLabel: 'Delivery Point',
-                                                                labelWidth: 110
-                                                            }
-                                                        ]
-                                                    },
-                                                    {
-                                                        xtype: 'container',
-                                                        flex: 1,
-                                                        margin: '0 0 0 5',
-                                                        layout: {
-                                                            type: 'vbox',
-                                                            align: 'stretch'
-                                                        },
-                                                        items: [
+                                                                labelWidth: 95
+                                                            },
                                                             {
                                                                 xtype: 'combobox',
                                                                 itemId: 'cboAllocateFreight',
                                                                 fieldLabel: 'Allocate Freight',
-                                                                labelWidth: 110,
+                                                                labelWidth: 95,
                                                                 displayField: 'strDescription',
                                                                 valueField: 'strDescription'
                                                             },
@@ -558,25 +575,37 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 xtype: 'combobox',
                                                                 itemId: 'cboFreightBilledBy',
                                                                 fieldLabel: 'Freight Billed By',
-                                                                labelWidth: 110,
+                                                                labelWidth: 95,
                                                                 displayField: 'strDescription',
                                                                 valueField: 'strDescription'
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtShiftNumber',
-                                                                fieldLabel: 'Shift Number',
-                                                                labelWidth: 110
                                                             }
                                                         ]
                                                     }
                                                 ]
                                             },
                                             {
-                                                xtype: 'textfield',
-                                                itemId: 'txtNotes',
-                                                fieldLabel: 'Notes',
-                                                labelWidth: 110
+                                                xtype: 'container',
+                                                layout: {
+                                                    type: 'hbox',
+                                                    align: 'stretch'
+                                                },
+                                                items: [
+                                                    {
+                                                        xtype: 'textfield',
+                                                        flex: 3,
+                                                        itemId: 'txtNotes',
+                                                        fieldLabel: 'Notes',
+                                                        labelWidth: 110
+                                                    },
+                                                    {
+                                                        xtype: 'textfield',
+                                                        flex: 1,
+                                                        itemId: 'txtShiftNumber',
+                                                        margin: '0 0 0 5',
+                                                        fieldLabel: 'Shift Number',
+                                                        labelWidth: 95
+                                                    }
+                                                ]
                                             },
                                             {
                                                 xtype: 'advancefiltergrid',
