@@ -5,6 +5,11 @@ SELECT
 A.dtmDate
 ,A.dtmDueDate
 ,B.strVendorId
+,B.intVendorId
+,A.intBillId
+,A.strBillId
+,A.intAccountId
+,D.strAccountId
 ,tmpAgingSummaryTotal.dblTotal
 ,tmpAgingSummaryTotal.dblAmountPaid
 ,tmpAgingSummaryTotal.dblDiscount
@@ -46,3 +51,4 @@ LEFT JOIN dbo.tblAPBill A
 ON A.intBillId = tmpAgingSummaryTotal.intBillId
 LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEntity C ON B.intEntityId = C.intEntityId)
 ON B.intVendorId = A.intVendorId
+LEFT JOIN dbo.tblGLAccount D ON  A.intAccountId = D.intAccountId
