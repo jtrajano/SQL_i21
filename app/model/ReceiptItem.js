@@ -31,19 +31,24 @@ Ext.define('Inventory.model.ReceiptItem', {
             }
         },
         { name: 'intLineNo', type: 'int'},
-        { name: 'intItemId', type: 'int'},
-        { name: 'intUnitMeasureId', type: 'int'},
+        { name: 'intItemId', type: 'int', allowNull: true },
+        { name: 'dblOrderQty', type: 'float'},
+        { name: 'dblOpenReceive', type: 'float'},
+        { name: 'dblReceived', type: 'float'},
+        { name: 'intUnitMeasureId', type: 'int', allowNull: true },
         { name: 'intNoPackages', type: 'int'},
+        { name: 'intPackTypeId', type: 'int', allowNull: true },
         { name: 'dblExpPackageWeight', type: 'float'},
         { name: 'dblUnitCost', type: 'float'},
         { name: 'dblUnitRetail', type: 'float'},
         { name: 'dblLineTotal', type: 'float'},
         { name: 'dblGrossMargin', type: 'float'},
-        { name: 'intSort', type: 'int'}
+        { name: 'intSort', type: 'int'},
     ],
 
     validators: [
-        {type: 'presence', field: 'intItemId'}
+        {type: 'presence', field: 'intItemId'},
+        {type: 'presence', field: 'intUnitMeasureId'}
     ]
 
 });

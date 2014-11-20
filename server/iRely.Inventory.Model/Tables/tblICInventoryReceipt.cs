@@ -76,14 +76,18 @@ namespace iRely.Inventory.Model
         public int intInventoryReceiptId { get; set; }
         public int intLineNo { get; set; }
         public int intItemId { get; set; }
+        public decimal? dblOrderQty { get; set; }
+        public decimal? dblOpenReceive { get; set; }
+        public decimal? dblReceived { get; set; }
         public int intUnitMeasureId { get; set; }
-        public int intNoPackages { get; set; }
+        public int? intNoPackages { get; set; }
+        public int? intPackTypeId { get; set; }
         public decimal? dblExpPackageWeight { get; set; }
         public decimal? dblUnitCost { get; set; }
         public decimal? dblUnitRetail { get; set; }
         public decimal? dblLineTotal { get; set; }
         public decimal? dblGrossMargin { get; set; }
-        public int intSort { get; set; }
+        public int? intSort { get; set; }
 
         public virtual tblICInventoryReceipt tblICInventoryReceipt { get; set; }
 

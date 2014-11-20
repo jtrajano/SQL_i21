@@ -70,6 +70,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblExpPackageWeight).HasColumnName("dblExpPackageWeight");
             this.Property(t => t.dblGrossMargin).HasColumnName("dblGrossMargin");
             this.Property(t => t.dblLineTotal).HasColumnName("dblLineTotal");
+            this.Property(t => t.dblOpenReceive).HasColumnName("dblOpenReceive");
+            this.Property(t => t.dblOrderQty).HasColumnName("dblOrderQty");
+            this.Property(t => t.dblReceived).HasColumnName("dblReceived");
             this.Property(t => t.dblUnitCost).HasColumnName("dblUnitCost");
             this.Property(t => t.dblUnitRetail).HasColumnName("dblUnitRetail");
             this.Property(t => t.intInventoryReceiptId).HasColumnName("intInventoryReceiptId");
@@ -77,6 +80,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.intLineNo).HasColumnName("intLineNo");
             this.Property(t => t.intNoPackages).HasColumnName("intNoPackages");
+            this.Property(t => t.intPackTypeId).HasColumnName("intPackTypeId");
             this.Property(t => t.intSort).HasColumnName("intSort");
             this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
         }

@@ -81,26 +81,27 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             grdInventoryReceipt: {
                 colItemNo: {
-                    dataIndex: '',
+                    dataIndex: 'strItemNo',
                     editor: {
                         store: ''
                     }
                 },
-                colDescription: '',
+                colDescription: 'strDescription',
                 colSubLocation: '',
                 colLotTracking: '',
                 colQtyOrdered: '',
                 colOpenReceive: '',
                 colReceived: '',
                 colUOM: {
-                    dataIndex: '',
+                    dataIndex: 'strUnitMeasure',
                     editor: {
                         store: ''
                     }
                 },
-                colPackages: '',
+                colPackages: 'intNoPackages',
                 colPackageType: '',
-                colUnitRetail: ''
+                colUnitCost: 'dblUnitCost',
+                colUnitRetail: 'dblUnitRetail'
             },
 
 
