@@ -6,10 +6,9 @@ StartTest (function (t) {
     var engine = new iRely.TestEngine();
     engine.start(t)
 
-        /*Scenario 1. Add new records */
-        /* 1. Open screen and check default controls' state */
+        /*1. Open screen and check default control's state*/
         .login('ssiadmin','summit','ag').wait(1500)
-        .addFunction(function(next){t.diag("Scenario 1. Add new records > 1. Open screen and check default controls' state"); next();}).wait(100)
+        .addFunction(function(next){t.diag("1. Open screen and check default control's state"); next();}).wait(100)
         .expandMenu('Inventory').wait(100)
         .expandMenu('Maintenance').wait(200)
         .openScreen('Brand').wait(200)
@@ -23,8 +22,8 @@ StartTest (function (t) {
         .checkStatusMessage('Ready')
 
 
-        /* 2. Multiple Data entry */
-        .addFunction(function(next){t.diag("Scenario 1. Add new records > 2. Multiple Data entry"); next();}).wait(100)
+        /*2. Add multiple data*/
+        .addFunction(function(next){t.diag("2. Add multiple data"); next();}).wait(100)
         .enterGridData('#grdGridTemplate', 0, 'colBrandCode', 'b01').wait(100)
         .enterGridData('#grdGridTemplate', 0, 'colBrandName', 'brand 01').wait(100)
 //        .selectGridComboRowByFilter() --not working yet
@@ -37,8 +36,7 @@ StartTest (function (t) {
         .checkIfScreenClosed('brand').wait(100)
 
 
-        /* 3. Verify record added*/
-        .addFunction(function(next){t.diag("Scenario 1. Add new records > 3. Verify records added"); next();}).wait(100)
+//        verify records added
         .openScreen('Brand').wait(200)
         .checkScreenShown ('brand').wait(100)
         .checkGridData('#grdGridTemplate', 0, 'colBrandCode','b02')
@@ -51,9 +49,8 @@ StartTest (function (t) {
         .clickButton('#btnClose').wait(100)
         .checkIfScreenClosed('brand').wait(100)
 
-        /* Scenario 2. Add another record, click Close button, do NOT save the changes */
-        /* 1. Data entry. */
-        .addFunction(function(next){t.diag("Scenario 2. Add another record, click Close button, do NOT save the changes"); next();}).wait(100)
+        /*3. Add another record, Click Close button, do NOT save the changes*/
+        .addFunction(function(next){t.diag("3. Add another record, Click Close button, do NOT save the changes"); next();}).wait(100)
         .openScreen('Brand').wait(200)
         .checkScreenShown ('brand').wait(100)
         .enterGridData('#grdGridTemplate', 2, 'colBrandCode', 'b03').wait(100)
@@ -66,9 +63,8 @@ StartTest (function (t) {
         .checkIfScreenClosed('brand').wait(100)
 
 
-        /* Scenario 3. Add another record, click Close button, Cancel*/
-        /* 1. Data entry. */
-        .addFunction(function(next){t.diag("Scenario 3. Add another record, click Close button, Cancel"); next();}).wait(100)
+        /*4. Add another record, click Close, Cancel*/
+        .addFunction(function(next){t.diag("4. Add another record, click Close, Cancel"); next();}).wait(100)
         .openScreen('Brand').wait(200)
         .checkScreenShown ('brand').wait(100)
         .enterGridData('#grdGridTemplate', 2, 'colBrandCode', 'b03').wait(100)
@@ -80,14 +76,13 @@ StartTest (function (t) {
         .clickButton('#btnClose').wait(100)
 
 
-        /* Scenario 4. Add another record, click Close button, SAVE the changes*/
-        .addFunction(function(next){t.diag("Scenario 4. Add another record, click Close button, SAVE the changes"); next();}).wait(100)
+        /*5. Add another record, Click Close button, SAVE the changes*/
+        .addFunction(function(next){t.diag("5. Add another record, Click Close button, SAVE the changes"); next();}).wait(100)
         .checkMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel', 'question')
         .clickMessageBoxButton('yes').wait(500)
         .checkIfScreenClosed('brand').wait(100) /*issue - FRM-1547 or TS-445 or FRM-1560*/
 
-        /* 2. Verify record added*/
-        .addFunction(function(next){t.diag("Scenario 4. Add another record, SAVE the changes > 2. Verify record added"); next();}).wait(100)
+//        Verify record added
         .openScreen('Brand').wait(200)
         .checkScreenShown ('brand').wait(100)
         .checkGridData('#grdGridTemplate', 0, 'colBrandCode','b03')
@@ -98,8 +93,8 @@ StartTest (function (t) {
         .checkIfScreenClosed('brand').wait(100)
 
 
-        /*Scenario 5. Add duplicate record */
-        .addFunction(function(next){t.diag("Scenario 5. Add duplicate record "); next();}).wait(100)
+        /*6. Add duplicate record*/
+        .addFunction(function(next){t.diag("6. Add duplicate record"); next();}).wait(100)
         .openScreen('Brand').wait(200)
         .checkScreenShown ('brand').wait(100)
         .enterGridData('#grdGridTemplate', 3, 'colBrandCode', 'b03').wait(100)
@@ -109,18 +104,15 @@ StartTest (function (t) {
         .checkMessageBox('iRely i21','Fuel Category already exists.','ok','error') /*issue - IC-84 */
         .clickMessageBoxButton('ok').wait(10)
 
-        /*Scenario 6. Modify duplicate record to correct it*/
-        .addFunction(function(next){t.diag("Scenario 6. Modify duplicate record to correct it"); next();}).wait(100)
+//        Modify duplicate record to correct it
+        .addFunction(function(next){t.diag("6. Add duplicate record > Modify duplicate record to correct it"); next();}).wait(100)
         .enterGridData('#grdGridTemplate', 3, 'colBrandCode', 'b04').wait(100) /*issue - IC-81 */
         .clickButton('#btnClose').wait(100)
         .checkMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel', 'question').wait(100)
         .clickMessageBoxButton('yes').wait(10)
         .checkIfScreenClosed('brand').wait(100)
 
-
-
-        /* 2. Verify record added*/
-        .addFunction(function(next){t.diag("Scenario 6. Modify duplicate record to correct it > 2. Verify record added"); next();}).wait(100)
+//        Verify record added
         .openScreen('Brand').wait(200)
         .checkScreenShown ('brand').wait(100)
         .checkGridData('#grdGridTemplate', 0, 'colBrandCode','b04')
@@ -130,25 +122,15 @@ StartTest (function (t) {
         .clickButton('#btnClose').wait(100)
         .checkIfScreenClosed('brand').wait(100)
 
-//        .enterDummyRowData('#grdFuelCategory', [{ column: 'strRinFuelTypeCode', data: '10Et'}, {column: 'strDescription', data: '10-Ethanol'}]) /*issue - FRM-1535 or TS-446 or FRM-1559*/
-
-//        /*Scenario 7. Add records > FuelCategory*/
-//        .addFunction(function(next){t.diag("Scenario 7. Add records "); next();}).wait(100)
-//        .openScreen('Fuel Category').wait(200)
-//        .checkScreenShown ('fuelcategory').wait(100)
-//        .enterGridData('#grdGridTemplate', 4, 'colRinFuelCategoryCode', 'fc05').wait(100)
-//        .enterGridData('#grdGridTemplate', 4, 'colDescription', 'fuel category 05').wait(100)
-//        .enterGridData('#grdGridTemplate', 4, 'colEquivalenceValue', '5 Test EV').wait(100)
-//        .enterGridData('#grdGridTemplate', 5, 'colRinFuelCategoryCode', 'fc06').wait(100)
-//        .enterGridData('#grdGridTemplate', 5, 'colDescription', 'fuel category 06').wait(100)
-//        .enterGridData('#grdGridTemplate', 5, 'colEquivalenceValue', '6 Test EV').wait(100)
-//        .enterGridData('#grdGridTemplate', 6, 'colRinFuelCategoryCode', 'fc07').wait(100)
-//        .enterGridData('#grdGridTemplate', 6, 'colDescription', 'fuel category 07').wait(100)
-//        .enterGridData('#grdGridTemplate', 6, 'colEquivalenceValue', '7 Test EV').wait(100)
-//        .clickButton('#btnSave').wait(100)
-//        .checkStatusMessage('Edited')
-//        .clickButton('#btnClose').wait(100)
-//        .checkIfScreenClosed('fuelcategory').wait(100)
+        /*7. Add primary key only then SAVE*/
+        .addFunction(function(next){t.diag("7. Add primary key only then SAVE"); next();}).wait(100)
+        .openScreen('Brand').wait(200)
+        .checkScreenShown ('brand').wait(100)
+        .enterGridData('#grdGridTemplate', 4, 'colBrandCode', 'b05').wait(100)
+        .clickButton('#btnSave').wait(100)
+        .checkStatusMessage('Saved')
+        .clickButton('#btnClose').wait(100)
+        .checkIfScreenClosed('brand').wait(100)
 
         .done()
 })
