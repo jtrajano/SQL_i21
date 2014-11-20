@@ -35,7 +35,7 @@ Ext.define('Inventory.view.StorageUnit', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 611,
+    height: 620,
     hidden: false,
     minHeight: 525,
     minWidth: 425,
@@ -43,7 +43,7 @@ Ext.define('Inventory.view.StorageUnit', {
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
-    title: 'Storage Location',
+    title: 'Storage Unit',
     maximizable: true,
 
     items: [
@@ -170,7 +170,7 @@ Ext.define('Inventory.view.StorageUnit', {
                             items: [
                                 {
                                     xtype: 'container',
-                                    flex: 1,
+                                    flex: 1.2,
                                     margin: '0 5 0 0',
                                     layout: {
                                         type: 'vbox',
@@ -307,40 +307,171 @@ Ext.define('Inventory.view.StorageUnit', {
                                     },
                                     items: [
                                         {
-                                            xtype: 'checkboxfield',
-                                            itemId: 'chkAllowConsume',
-                                            fieldLabel: 'Allow Consume',
-                                            labelWidth: 180
+                                            xtype: 'panel',
+                                            itemId: 'pnlCapacity',
+                                            bodyPadding: 5,
+                                            title: 'Capacity',
+                                            layout: {
+                                                type: 'vbox',
+                                                align: 'stretch'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'combobox',
+                                                    itemId: 'cboCommodity',
+                                                    fieldLabel: 'Commodity',
+                                                    labelWidth: 115
+                                                },
+                                                {
+                                                    xtype: 'numberfield',
+                                                    itemId: 'txtPackFactor',
+                                                    fieldLabel: 'Pack Factor',
+                                                    labelWidth: 115,
+                                                    hideTrigger: true
+                                                },
+                                                {
+                                                    xtype: 'numberfield',
+                                                    itemId: 'txtUnitsPerFoot',
+                                                    fieldLabel: 'Units Per Foot',
+                                                    labelWidth: 115,
+                                                    hideTrigger: true
+                                                },
+                                                {
+                                                    xtype: 'numberfield',
+                                                    itemId: 'txtResidualUnits',
+                                                    fieldLabel: 'Residual Units',
+                                                    labelWidth: 115,
+                                                    hideTrigger: true
+                                                }
+                                            ]
                                         },
                                         {
-                                            xtype: 'checkboxfield',
-                                            itemId: 'chkAllowMultipleItems',
-                                            fieldLabel: 'Allow Multiple Items',
-                                            labelWidth: 180
+                                            xtype: 'panel',
+                                            itemId: 'pnlOptions',
+                                            margin: '5 0',
+                                            bodyPadding: 5,
+                                            title: 'Options',
+                                            layout: {
+                                                type: 'vbox',
+                                                align: 'stretch'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'container',
+                                                    flex: 1,
+                                                    layout: {
+                                                        type: 'hbox',
+                                                        align: 'stretch'
+                                                    },
+                                                    items: [
+                                                        {
+                                                            xtype: 'checkboxfield',
+                                                            flex: 1,
+                                                            itemId: 'chkAllowConsume',
+                                                            fieldLabel: 'Allow Consume',
+                                                            labelWidth: 115
+                                                        },
+                                                        {
+                                                            xtype: 'checkboxfield',
+                                                            flex: 1.2,
+                                                            itemId: 'chkMergeOnMove',
+                                                            fieldLabel: 'Merge on Move',
+                                                            labelWidth: 190
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    xtype: 'container',
+                                                    flex: 1,
+                                                    margin: '5 0',
+                                                    layout: {
+                                                        type: 'hbox',
+                                                        align: 'stretch'
+                                                    },
+                                                    items: [
+                                                        {
+                                                            xtype: 'checkboxfield',
+                                                            flex: 1,
+                                                            itemId: 'chkAllowMultipleItems',
+                                                            fieldLabel: 'Allow Multiple Items',
+                                                            labelWidth: 115
+                                                        },
+                                                        {
+                                                            xtype: 'checkboxfield',
+                                                            flex: 1.2,
+                                                            itemId: 'chkCycleCounted',
+                                                            fieldLabel: 'Cycle Counted',
+                                                            labelWidth: 190
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    xtype: 'container',
+                                                    flex: 1,
+                                                    layout: {
+                                                        type: 'hbox',
+                                                        align: 'stretch'
+                                                    },
+                                                    items: [
+                                                        {
+                                                            xtype: 'checkboxfield',
+                                                            flex: 1,
+                                                            itemId: 'chkAllowMultipleLots',
+                                                            fieldLabel: 'Allow Multiple Lots',
+                                                            labelWidth: 115
+                                                        },
+                                                        {
+                                                            xtype: 'checkboxfield',
+                                                            flex: 1.2,
+                                                            itemId: 'chkDefaultWarehouseStagingUnit',
+                                                            fieldLabel: 'Default Warehouse Staging Unit',
+                                                            labelWidth: 190
+                                                        }
+                                                    ]
+                                                }
+                                            ]
                                         },
                                         {
-                                            xtype: 'checkboxfield',
-                                            itemId: 'chkAllowMultipleLots',
-                                            fieldLabel: 'Allow Multiple Lots',
-                                            labelWidth: 180
-                                        },
-                                        {
-                                            xtype: 'checkboxfield',
-                                            itemId: 'chkMergeOnMove',
-                                            fieldLabel: 'Merge on Move',
-                                            labelWidth: 180
-                                        },
-                                        {
-                                            xtype: 'checkboxfield',
-                                            itemId: 'chkCycleCounted',
-                                            fieldLabel: 'Cycle Counted',
-                                            labelWidth: 180
-                                        },
-                                        {
-                                            xtype: 'checkboxfield',
-                                            itemId: 'chkDefaultWarehouseStagingUnit',
-                                            fieldLabel: 'Default Warehouse Staging Unit',
-                                            labelWidth: 180
+                                            xtype: 'panel',
+                                            itemId: 'pnlPosition',
+                                            margin: '0 0 7 0',
+                                            bodyPadding: 5,
+                                            title: 'Position',
+                                            layout: {
+                                                type: 'vbox',
+                                                align: 'stretch'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'numberfield',
+                                                    itemId: 'txtSequence',
+                                                    fieldLabel: 'Sequence',
+                                                    hideTrigger: true
+                                                },
+                                                {
+                                                    xtype: 'checkboxfield',
+                                                    itemId: 'chkActive',
+                                                    fieldLabel: 'Active'
+                                                },
+                                                {
+                                                    xtype: 'numberfield',
+                                                    itemId: 'txtXPosition',
+                                                    fieldLabel: 'X Position',
+                                                    hideTrigger: true
+                                                },
+                                                {
+                                                    xtype: 'numberfield',
+                                                    itemId: 'txtYPosition',
+                                                    fieldLabel: 'Y Position',
+                                                    hideTrigger: true
+                                                },
+                                                {
+                                                    xtype: 'numberfield',
+                                                    itemId: 'txtZPosition',
+                                                    fieldLabel: 'Z Position',
+                                                    hideTrigger: true
+                                                }
+                                            ]
                                         }
                                     ]
                                 }
@@ -428,7 +559,7 @@ Ext.define('Inventory.view.StorageUnit', {
                         {
                             xtype: 'panel',
                             layout: 'fit',
-                            title: 'Item Category Allowed',
+                            title: 'Item Categories Allowed',
                             items: [
                                 {
                                     xtype: 'gridpanel',
@@ -463,8 +594,8 @@ Ext.define('Inventory.view.StorageUnit', {
                                     columns: [
                                         {
                                             xtype: 'gridcolumn',
-                                            dataIndex: 'string',
                                             itemId: 'colCategory',
+                                            dataIndex: 'string',
                                             text: 'Category',
                                             flex: 1,
                                             editor: {
@@ -508,59 +639,6 @@ Ext.define('Inventory.view.StorageUnit', {
                                     selModel: {
                                         selType: 'checkboxmodel'
                                     }
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'panel',
-                            title: 'Position',
-                            layout: {
-                                type: 'hbox',
-                                align: 'stretch',
-                                padding: 10
-                            },
-                            items: [
-                                {
-                                    xtype: 'container',
-                                    flex: 1,
-                                    layout: {
-                                        type: 'vbox',
-                                        align: 'stretch'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'numberfield',
-                                            itemId: 'txtSequence',
-                                            fieldLabel: 'Sequence'
-                                        },
-                                        {
-                                            xtype: 'checkboxfield',
-                                            itemId: 'chkActive',
-                                            fieldLabel: 'Active'
-                                        },
-                                        {
-                                            xtype: 'numberfield',
-                                            itemId: 'txtXPosition',
-                                            fieldLabel: 'X Position',
-                                            hideTrigger: true
-                                        },
-                                        {
-                                            xtype: 'numberfield',
-                                            itemId: 'txtYPosition',
-                                            fieldLabel: 'Y Position',
-                                            hideTrigger: true
-                                        },
-                                        {
-                                            xtype: 'numberfield',
-                                            itemId: 'txtZPosition',
-                                            fieldLabel: 'Z Position',
-                                            hideTrigger: true
-                                        }
-                                    ]
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 2
                                 }
                             ]
                         },

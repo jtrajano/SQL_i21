@@ -18,7 +18,6 @@ Ext.define('Inventory.view.StorePaymentMethod', {
     alias: 'widget.storepaymentmethod',
 
     requires: [
-        'Inventory.view.StorePaymentMethodViewModel',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
         'Ext.button.Button',
@@ -29,9 +28,6 @@ Ext.define('Inventory.view.StorePaymentMethod', {
         'Ext.toolbar.Paging'
     ],
 
-    viewModel: {
-        type: 'storepaymentmethod'
-    },
     height: 570,
     hidden: false,
     minHeight: 570,

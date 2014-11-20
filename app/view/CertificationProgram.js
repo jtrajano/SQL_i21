@@ -205,7 +205,6 @@ Ext.define('Inventory.view.CertificationProgram', {
                                 },
                                 {
                                     xtype: 'gridcombobox',
-                                    flex: 1,
                                     columns: [
                                         {
                                             dataIndex: 'intCountryID',
@@ -220,6 +219,7 @@ Ext.define('Inventory.view.CertificationProgram', {
                                             flex: 1
                                         }
                                     ],
+                                    flex: 1,
                                     itemId: 'cboSpecificCountry',
                                     fieldLabel: 'Specific Country',
                                     labelWidth: 110,

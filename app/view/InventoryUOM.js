@@ -263,28 +263,22 @@ Ext.define('Inventory.view.InventoryUOM', {
                                         xtype: 'numbercolumn',
                                         itemId: 'colConversionToStockUOM',
                                         width: 98,
-                                        align: 'right',
                                         dataIndex: 'string',
                                         text: 'Conversion<br>to Stock UOM',
                                         editor: {
                                             xtype: 'numberfield',
-                                            itemId: 'txtConvertToStock',
-                                            fieldStyle: 'text-align:right',
-                                            hideTrigger: true
+                                            itemId: 'txtConvertToStock'
                                         }
                                     },
                                     {
                                         xtype: 'numbercolumn',
                                         itemId: 'colConversionFromStockUOM',
                                         width: 98,
-                                        align: 'right',
                                         dataIndex: 'string',
                                         text: 'Conversion from<br>Stock UOM',
                                         editor: {
                                             xtype: 'numberfield',
-                                            itemId: 'txtConvertFromStock',
-                                            fieldStyle: 'text-align:right',
-                                            hideTrigger: true
+                                            itemId: 'txtConvertFromStock'
                                         }
                                     }
                                 ],

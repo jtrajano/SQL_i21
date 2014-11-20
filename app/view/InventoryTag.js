@@ -18,7 +18,6 @@ Ext.define('Inventory.view.InventoryTag', {
     alias: 'widget.inventorytag',
 
     requires: [
-        'Inventory.view.InventoryTagViewModel',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
         'Ext.button.Button',
@@ -28,9 +27,6 @@ Ext.define('Inventory.view.InventoryTag', {
         'Ext.toolbar.Paging'
     ],
 
-    viewModel: {
-        type: 'inventorytag'
-    },
     height: 525,
     hidden: false,
     minHeight: 525,

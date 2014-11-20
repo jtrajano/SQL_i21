@@ -10,7 +10,7 @@
         "defaultFocus": null,
         "designer|userAlias": "storageunit",
         "designer|userClassName": "StorageUnit",
-        "height": 611,
+        "height": 620,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
@@ -20,7 +20,7 @@
         "minWidth": 425,
         "minimizable": null,
         "reference": null,
-        "title": "Storage Location",
+        "title": "Storage Unit",
         "width": 943
     },
     "name": "FuelTaxClass2",
@@ -281,7 +281,7 @@
                                         "designer|displayName": "container",
                                         "height": null,
                                         "layout": "vbox",
-                                        "layout|flex": 1,
+                                        "layout|flex": 1.2,
                                         "layout|margins": null,
                                         "margin": "0 5 0 0",
                                         "width": null
@@ -628,106 +628,388 @@
                                     "designerId": "bdaa3add-05ff-4779-b24c-b013fd6711b6",
                                     "cn": [
                                         {
-                                            "type": "Ext.form.field.Checkbox",
+                                            "type": "Ext.panel.Panel",
                                             "reference": {
                                                 "name": "items",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "boxLabel": null,
-                                                "fieldLabel": "Allow Consume",
-                                                "itemId": "chkAllowConsume",
-                                                "labelWidth": 180,
-                                                "layout|flex": null
+                                                "bodyPadding": 5,
+                                                "container|align": "stretch",
+                                                "itemId": "pnlCapacity",
+                                                "layout": "vbox",
+                                                "layout|flex": null,
+                                                "margin": null,
+                                                "title": "Capacity"
                                             },
-                                            "name": "MyCheckbox22",
-                                            "designerId": "18d0cb6f-58fc-4665-9182-0e195166f722"
+                                            "name": "MyPanel",
+                                            "designerId": "c4381daa-7228-430e-afb6-2dafa242cd88",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": null,
+                                                        "designer|createAlias": null,
+                                                        "displayField": null,
+                                                        "fieldLabel": "Commodity",
+                                                        "itemId": "cboCommodity",
+                                                        "labelWidth": 115,
+                                                        "layout|flex": null,
+                                                        "layout|margins": null,
+                                                        "margin": null,
+                                                        "name": null,
+                                                        "valueField": null
+                                                    },
+                                                    "name": "MyComboBox7",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "31787237-f06e-4742-903a-0e4c3573d3ce",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Pack Factor",
+                                                        "hideTrigger": true,
+                                                        "itemId": "txtPackFactor",
+                                                        "labelWidth": 115,
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyNumberField17",
+                                                    "designerId": "51136bd2-8976-42fb-82c4-eac169772bba"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Units Per Foot",
+                                                        "hideTrigger": true,
+                                                        "itemId": "txtUnitsPerFoot",
+                                                        "labelWidth": 115,
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyNumberField18",
+                                                    "designerId": "4a1902d7-a315-402e-b487-823fe4226a08"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Residual Units",
+                                                        "hideTrigger": true,
+                                                        "itemId": "txtResidualUnits",
+                                                        "labelWidth": 115,
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyNumberField19",
+                                                    "designerId": "34c60abb-b777-4929-9675-5f2c44cc0800"
+                                                }
+                                            ]
                                         },
                                         {
-                                            "type": "Ext.form.field.Checkbox",
+                                            "type": "Ext.panel.Panel",
                                             "reference": {
                                                 "name": "items",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "boxLabel": null,
-                                                "fieldLabel": "Allow Multiple Items",
-                                                "itemId": "chkAllowMultipleItems",
-                                                "labelWidth": 180,
-                                                "layout|flex": null
+                                                "bodyPadding": 5,
+                                                "container|align": "stretch",
+                                                "itemId": "pnlOptions",
+                                                "layout": "vbox",
+                                                "layout|flex": null,
+                                                "margin": "5 0",
+                                                "title": "Options"
                                             },
-                                            "name": "MyCheckbox28",
-                                            "designerId": "bbae933c-e599-4761-9156-2c92dbd64578"
+                                            "name": "MyPanel1",
+                                            "designerId": "6756f793-bfa9-4422-af5e-2d928febc376",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.container.Container",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "container|align": "stretch",
+                                                        "designer|displayName": "container",
+                                                        "layout": "hbox",
+                                                        "layout|flex": 1
+                                                    },
+                                                    "name": "MyContainer1",
+                                                    "designerId": "b5a27cc2-5588-4dfc-8314-9681d922eb09",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.field.Checkbox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "boxLabel": null,
+                                                                "fieldLabel": "Allow Consume",
+                                                                "itemId": "chkAllowConsume",
+                                                                "labelWidth": 115,
+                                                                "layout|flex": 1
+                                                            },
+                                                            "name": "MyCheckbox22",
+                                                            "designerId": "18d0cb6f-58fc-4665-9182-0e195166f722"
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.Checkbox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "boxLabel": null,
+                                                                "fieldLabel": "Merge on Move",
+                                                                "itemId": "chkMergeOnMove",
+                                                                "labelWidth": 190,
+                                                                "layout|flex": 1.2
+                                                            },
+                                                            "name": "MyCheckbox29",
+                                                            "designerId": "e69dd3fe-2528-4587-ae5f-0f7be1f8ceba"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.container.Container",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "container|align": "stretch",
+                                                        "designer|displayName": "container",
+                                                        "layout": "hbox",
+                                                        "layout|flex": 1,
+                                                        "margin": "5 0"
+                                                    },
+                                                    "name": "MyContainer2",
+                                                    "designerId": "df2fa997-d44c-4c0c-ace8-476dbabb1f55",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.field.Checkbox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "boxLabel": null,
+                                                                "fieldLabel": "Allow Multiple Items",
+                                                                "itemId": "chkAllowMultipleItems",
+                                                                "labelWidth": 115,
+                                                                "layout|flex": 1
+                                                            },
+                                                            "name": "MyCheckbox28",
+                                                            "designerId": "bbae933c-e599-4761-9156-2c92dbd64578"
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.Checkbox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "boxLabel": null,
+                                                                "fieldLabel": "Cycle Counted",
+                                                                "itemId": "chkCycleCounted",
+                                                                "labelWidth": 190,
+                                                                "layout|flex": 1.2
+                                                            },
+                                                            "name": "MyCheckbox30",
+                                                            "designerId": "5ed1ed2e-d64b-4515-aa93-5c7c30e246bd"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.container.Container",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "container|align": "stretch",
+                                                        "designer|displayName": "container",
+                                                        "layout": "hbox",
+                                                        "layout|flex": 1
+                                                    },
+                                                    "name": "MyContainer3",
+                                                    "designerId": "68e47f23-f1fb-4980-993c-f18a491d92f3",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.field.Checkbox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "boxLabel": null,
+                                                                "fieldLabel": "Allow Multiple Lots",
+                                                                "itemId": "chkAllowMultipleLots",
+                                                                "labelWidth": 115,
+                                                                "layout|flex": 1
+                                                            },
+                                                            "name": "MyCheckbox27",
+                                                            "designerId": "d839a702-8744-4be7-a704-7836771fdb79"
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.Checkbox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "boxLabel": null,
+                                                                "fieldLabel": "Default Warehouse Staging Unit",
+                                                                "itemId": "chkDefaultWarehouseStagingUnit",
+                                                                "labelWidth": 190,
+                                                                "layout|flex": 1.2
+                                                            },
+                                                            "name": "MyCheckbox26",
+                                                            "designerId": "9cf21160-e18f-4a54-9833-b366c17fff37"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
                                         },
                                         {
-                                            "type": "Ext.form.field.Checkbox",
+                                            "type": "Ext.panel.Panel",
                                             "reference": {
                                                 "name": "items",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "boxLabel": null,
-                                                "fieldLabel": "Allow Multiple Lots",
-                                                "itemId": "chkAllowMultipleLots",
-                                                "labelWidth": 180,
-                                                "layout|flex": null
+                                                "bodyPadding": 5,
+                                                "container|align": "stretch",
+                                                "itemId": "pnlPosition",
+                                                "layout": "vbox",
+                                                "layout|flex": null,
+                                                "margin": "0 0 7 0",
+                                                "title": "Position"
                                             },
-                                            "name": "MyCheckbox27",
-                                            "designerId": "d839a702-8744-4be7-a704-7836771fdb79"
-                                        },
-                                        {
-                                            "type": "Ext.form.field.Checkbox",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "boxLabel": null,
-                                                "fieldLabel": "Merge on Move",
-                                                "itemId": "chkMergeOnMove",
-                                                "labelWidth": 180,
-                                                "layout|flex": null
-                                            },
-                                            "name": "MyCheckbox29",
-                                            "designerId": "e69dd3fe-2528-4587-ae5f-0f7be1f8ceba"
-                                        },
-                                        {
-                                            "type": "Ext.form.field.Checkbox",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "boxLabel": null,
-                                                "fieldLabel": "Cycle Counted",
-                                                "itemId": "chkCycleCounted",
-                                                "labelWidth": 180,
-                                                "layout|flex": null
-                                            },
-                                            "name": "MyCheckbox30",
-                                            "designerId": "5ed1ed2e-d64b-4515-aa93-5c7c30e246bd"
-                                        },
-                                        {
-                                            "type": "Ext.form.field.Checkbox",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "boxLabel": null,
-                                                "fieldLabel": "Default Warehouse Staging Unit",
-                                                "itemId": "chkDefaultWarehouseStagingUnit",
-                                                "labelWidth": 180,
-                                                "layout|flex": null
-                                            },
-                                            "name": "MyCheckbox26",
-                                            "designerId": "9cf21160-e18f-4a54-9833-b366c17fff37"
+                                            "name": "MyPanel2",
+                                            "designerId": "2e1e8e31-d758-4aee-a432-29d35a294ff1",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Sequence",
+                                                        "hideTrigger": true,
+                                                        "itemId": "txtSequence",
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyNumberField16",
+                                                    "designerId": "532c58a6-72fc-4a7b-8cc6-055ed56eb5ae"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Active",
+                                                        "itemId": "chkActive",
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyCheckbox20",
+                                                    "designerId": "fd3786f8-c8f0-485f-823a-c5634633b455"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "X Position",
+                                                        "hideTrigger": true,
+                                                        "itemId": "txtXPosition",
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyNumberField11",
+                                                    "designerId": "530fffdf-d1cb-48a3-b70e-9ca6b9d07f72"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Y Position",
+                                                        "hideTrigger": true,
+                                                        "itemId": "txtYPosition",
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyNumberField12",
+                                                    "designerId": "673f16be-3d13-427e-a70f-040206d488b7"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Z Position",
+                                                        "hideTrigger": true,
+                                                        "itemId": "txtZPosition",
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyNumberField13",
+                                                    "designerId": "7a0b7dd3-2cc6-4e05-8764-51da5fcd0f35"
+                                                }
+                                            ]
                                         }
                                     ]
                                 }
@@ -847,7 +1129,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter111",
+                                                    "name": "filter16",
                                                     "designerId": "44f4490e-5a9c-40bb-beaf-26df2f659502",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -950,7 +1232,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "layout": "fit",
-                                "title": "Item Category Allowed"
+                                "title": "Item Categories Allowed"
                             },
                             "name": "MyPanel40",
                             "designerId": "e0e363d6-4798-4bb2-a723-e53afa6e99ae",
@@ -1037,7 +1319,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter112",
+                                                    "name": "filter17",
                                                     "designerId": "22931607-4134-4630-a48a-1fe5916ccd67",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1159,146 +1441,6 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "container|align": "stretch",
-                                "container|padding": 10,
-                                "layout": "hbox",
-                                "title": "Position"
-                            },
-                            "name": "MyPanel35",
-                            "designerId": "c4854206-897f-4f2b-ab8e-23db1d8b4d26",
-                            "cn": [
-                                {
-                                    "type": "Ext.tab.Tab",
-                                    "reference": {
-                                        "name": "tabConfig",
-                                        "type": "object"
-                                    },
-                                    "codeClass": null,
-                                    "name": "TabConfig24",
-                                    "designerId": "255ecbc3-dbab-4083-88e2-6b9c0f473cbd"
-                                },
-                                {
-                                    "type": "Ext.container.Container",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "container|align": "stretch",
-                                        "designer|displayName": "container",
-                                        "layout": "vbox",
-                                        "layout|flex": 1,
-                                        "maxWidth": null
-                                    },
-                                    "name": "MyContainer11",
-                                    "designerId": "519481ed-0074-4e73-95e3-a25b80c0c2fe",
-                                    "cn": [
-                                        {
-                                            "type": "Ext.form.field.Number",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "fieldLabel": "Sequence",
-                                                "itemId": "txtSequence",
-                                                "layout|flex": null
-                                            },
-                                            "name": "MyNumberField16",
-                                            "designerId": "9cc025ca-1ed9-40cf-a45c-5359bc068154"
-                                        },
-                                        {
-                                            "type": "Ext.form.field.Checkbox",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "boxLabel": null,
-                                                "fieldLabel": "Active",
-                                                "itemId": "chkActive",
-                                                "layout|flex": null
-                                            },
-                                            "name": "MyCheckbox20",
-                                            "designerId": "2665cfab-ba91-46ae-b69c-b00415fa8caf"
-                                        },
-                                        {
-                                            "type": "Ext.form.field.Number",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "fieldLabel": "X Position",
-                                                "hideTrigger": true,
-                                                "itemId": "txtXPosition",
-                                                "layout|flex": null
-                                            },
-                                            "name": "MyNumberField11",
-                                            "designerId": "170ac100-e0df-4853-b6c2-2f8ed0de42c1"
-                                        },
-                                        {
-                                            "type": "Ext.form.field.Number",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "fieldLabel": "Y Position",
-                                                "hideTrigger": true,
-                                                "itemId": "txtYPosition",
-                                                "layout|flex": null
-                                            },
-                                            "name": "MyNumberField12",
-                                            "designerId": "f6f3ea91-c5d5-43db-9e9b-e216f571aca6"
-                                        },
-                                        {
-                                            "type": "Ext.form.field.Number",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "fieldLabel": "Z Position",
-                                                "hideTrigger": true,
-                                                "itemId": "txtZPosition",
-                                                "layout|flex": null
-                                            },
-                                            "name": "MyNumberField13",
-                                            "designerId": "f8ab265b-40b8-4514-a2ff-cdfd4605505c"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "type": "Ext.container.Container",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "designer|displayName": "container",
-                                        "layout|flex": 2
-                                    },
-                                    "name": "MyContainer46",
-                                    "designerId": "68c20e85-44db-4af1-b816-89981727836b"
-                                }
-                            ]
-                        },
-                        {
-                            "type": "Ext.panel.Panel",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
                                 "layout": "fit",
                                 "title": "Container"
                             },
@@ -1387,7 +1529,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter113",
+                                                    "name": "filter18",
                                                     "designerId": "e4e6a664-7884-4ddd-8995-16e91bcb4363",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1581,7 +1723,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter114",
+                                                    "name": "filter19",
                                                     "designerId": "6e9571a9-d0ec-46b7-ab0d-11523cb26254",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1758,7 +1900,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging13",
+                    "name": "statusbarpaging11",
                     "designerId": "007a0d4c-2515-4998-91ed-043de4f99d12",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

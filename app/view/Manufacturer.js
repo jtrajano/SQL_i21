@@ -18,7 +18,6 @@ Ext.define('Inventory.view.Manufacturer', {
     alias: 'widget.manufacturer',
 
     requires: [
-        'Inventory.view.ManufacturerViewModel',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
         'Ext.button.Button',
@@ -29,9 +28,6 @@ Ext.define('Inventory.view.Manufacturer', {
         'Ext.toolbar.Paging'
     ],
 
-    viewModel: {
-        type: 'manufacturer'
-    },
     height: 455,
     hidden: false,
     minHeight: 455,

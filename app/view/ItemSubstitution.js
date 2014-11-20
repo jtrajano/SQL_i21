@@ -18,7 +18,6 @@ Ext.define('Inventory.view.ItemSubstitution', {
     alias: 'widget.itemsubstitution',
 
     requires: [
-        'Inventory.view.ItemSubstitutionViewModel',
         'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
@@ -33,9 +32,6 @@ Ext.define('Inventory.view.ItemSubstitution', {
         'Ext.toolbar.Paging'
     ],
 
-    viewModel: {
-        type: 'itemsubstitution'
-    },
     height: 629,
     hidden: false,
     minHeight: 525,

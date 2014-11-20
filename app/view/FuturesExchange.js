@@ -18,7 +18,6 @@ Ext.define('Inventory.view.FuturesExchange', {
     alias: 'widget.futuresexchange',
 
     requires: [
-        'Inventory.view.FuturesExchangeViewModel',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
         'Ext.button.Button',
@@ -29,9 +28,6 @@ Ext.define('Inventory.view.FuturesExchange', {
         'Ext.toolbar.Paging'
     ],
 
-    viewModel: {
-        type: 'futuresexchange'
-    },
     height: 390,
     hidden: false,
     maxHeight: 390,

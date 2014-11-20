@@ -223,7 +223,7 @@
                 "designer|createAlias": "istatusbar",
                 "dock": "bottom"
             },
-            "name": "statusbar1",
+            "name": "statusbar11",
             "designerId": "91a29111-5c5d-4c6e-b183-67021ff83b3a",
             "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
         }

@@ -279,7 +279,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     },
                                                     {
                                                         xtype: 'gridcombobox',
-                                                        flex: 1,
                                                         columns: [
                                                             {
                                                                 dataIndex: 'intVendorId',
@@ -300,6 +299,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 flex: 1
                                                             }
                                                         ],
+                                                        flex: 1,
                                                         itemId: 'cboVendorID',
                                                         fieldLabel: 'Vendor ID',
                                                         labelAlign: 'top',
@@ -319,7 +319,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     },
                                                     {
                                                         xtype: 'gridcombobox',
-                                                        flex: 1,
                                                         columns: [
                                                             {
                                                                 dataIndex: 'intCompanyLocationId',
@@ -340,6 +339,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 flex: 1
                                                             }
                                                         ],
+                                                        flex: 1,
                                                         itemId: 'cboLocation',
                                                         fieldLabel: 'Location',
                                                         labelAlign: 'top',

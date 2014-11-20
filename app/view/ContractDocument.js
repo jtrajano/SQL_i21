@@ -18,7 +18,6 @@ Ext.define('Inventory.view.ContractDocument', {
     alias: 'widget.contractdocument',
 
     requires: [
-        'Inventory.view.ContractDocumentViewModel',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
         'Ext.button.Button',
@@ -28,9 +27,6 @@ Ext.define('Inventory.view.ContractDocument', {
         'Ext.toolbar.Paging'
     ],
 
-    viewModel: {
-        type: 'contractdocument'
-    },
     height: 250,
     hidden: false,
     maxHeight: 250,
