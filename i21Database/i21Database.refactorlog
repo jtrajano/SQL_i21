@@ -1351,4 +1351,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intStorageLocationId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="4713b1f9-ca70-40b0-a166-ecb7022127ec" ChangeDateTime="11/21/2014 08:11:42">
+    <Property Name="ElementName" Value="[dbo].[tblICMeasurement].[strMesaurementType]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICMeasurement]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strMeasurementType" />
+  </Operation>
 </Operations>
