@@ -876,6 +876,7 @@ GO
 		SELECT @PayrollActivityId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollModuleId
 		SELECT @PayrollMaintenanceId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollModuleId
 
+			/*
 			-- Payroll / Activities / Paychecks
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Paychecks' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollActivityId)
 			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Paychecks', 'Payroll', @PayrollActivityId, 'Paychecks', 'Screen', 'pr/paycheck', 'small-screen', 1, 1, 0, 1, 1, 0
@@ -883,6 +884,7 @@ GO
 			-- Payroll / Activities / Process Pay Groups
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Process Pay Groups' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollActivityId)
 			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Process Pay Groups', 'Payroll', @PayrollActivityId, 'Process Pay Groups', 'Screen', '', 'small-screen', 1, 1, 0, 1, 2, 0		
+			*/
 
 			-- Payroll / Maintenance / Payroll Types
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Payroll Types' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceId)
@@ -892,6 +894,7 @@ GO
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Employees' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceId)
 			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Employees', 'Payroll', @PayrollMaintenanceId, 'Employees', 'Screen', '', 'small-screen', 1, 1, 0, 1, 2, 0
 
+			/*
 			-- Payroll / Maintenance / Employee Templates
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Employee Templates' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceId)
 			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Employee Templates', 'Payroll', @PayrollMaintenanceId, 'Employee Templates', 'Screen', '', 'small-screen', 1, 1, 0, 1, 3, 0
@@ -899,6 +902,7 @@ GO
 			-- Payroll / Maintenance / Employee Pay Groups
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Employee Pay Groups' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceId)
 			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Employee Pay Groups', 'Payroll', @PayrollMaintenanceId, 'Employee Pay Groups', 'Screen', '', 'small-screen', 1, 1, 0, 1, 4, 0
+			*/
 
 			GO
 
