@@ -37,7 +37,7 @@ SET ANSI_WARNINGS OFF
 
 -- Declare the variables to use for the cursor
 DECLARE @intItemId AS INT
-		,@intItemLocationId AS INT 
+		,@intLocationId AS INT 
 		,@dtmDate AS DATETIME
 		,@dblUnitQty AS NUMERIC(18, 6) 
 		,@dblUOMQty AS NUMERIC(18, 6)
@@ -65,7 +65,7 @@ DECLARE @AVERAGECOST AS INT = 1
 DECLARE loopItems CURSOR LOCAL FAST_FORWARD
 FOR 
 SELECT  intItemId
-		,intItemLocationId
+		,intLocationId
 		,dtmDate
 		,dblUnitQty
 		,dblUOMQty
@@ -82,7 +82,7 @@ FROM	@ItemsToPost
 OPEN loopItems;
 
 -- Initial fetch attempt
-FETCH NEXT FROM loopItems INTO @intItemId, @intItemLocationId, @dtmDate, @dblUnitQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId;
+FETCH NEXT FROM loopItems INTO @intItemId, @intLocationId, @dtmDate, @dblUnitQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId;
 
 -- Start of the loop
 WHILE @@FETCH_STATUS = 0
@@ -91,7 +91,7 @@ BEGIN
 	SET @CostingMethod = NULL;
 
 	-- Get the costing method of an item 
-	SELECT @CostingMethod = dbo.fnGetCostingMethod(@intItemId, @intItemLocationId)
+	SELECT @CostingMethod = dbo.fnGetCostingMethod(@intItemId, @intLocationId)
 
 	--------------------------------------------------------------------------------
 	-- Call the SP that can process the item's costing method
@@ -101,7 +101,7 @@ BEGIN
 	BEGIN 
 		EXEC dbo.uspICProcessAverageCosting
 			@intItemId
-			,@intItemLocationId
+			,@intLocationId
 			,@dtmDate
 			,@dblUnitQty
 			,@dblUOMQty
@@ -121,7 +121,7 @@ BEGIN
 	BEGIN 
 		EXEC dbo.uspICProcessFIFO
 			@intItemId
-			,@intItemLocationId
+			,@intLocationId
 			,@dtmDate
 			,@dblUnitQty
 			,@dblUOMQty
@@ -148,11 +148,11 @@ BEGIN
 				,Stock.intConcurrencyId = ISNULL(Stock.intConcurrencyId, 0) + 1 
 		FROM	dbo.tblICItemStock AS Stock
 		WHERE	Stock.intItemId = @intItemId
-				AND Stock.intLocationId = @intItemLocationId;
+				AND Stock.intLocationId = @intLocationId;
 	END 
 
 	-- Attempt to fetch the next row from cursor. 
-	FETCH NEXT FROM loopItems INTO @intItemId, @intItemLocationId, @dtmDate, @dblUnitQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId;
+	FETCH NEXT FROM loopItems INTO @intItemId, @intLocationId, @dtmDate, @dblUnitQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId;
 END;
 -- End of the loop
 

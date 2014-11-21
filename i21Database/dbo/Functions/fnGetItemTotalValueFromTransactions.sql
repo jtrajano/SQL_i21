@@ -1,7 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnGetItemTotalValueFromTransactions]
 (
 	@intItemId INT
-	,@intItemLocationId INT
+	,@intLocationId INT
 )
 RETURNS NUMERIC(18,6)
 AS 
@@ -12,7 +12,7 @@ BEGIN
 	SELECT	@Value = SUM(ISNULL(A.dblUnitQty, 0) * ISNULL(A.dblCost, 0) + ISNULL(A.dblValue, 0)) 
 	FROM	[dbo].[tblICInventoryTransaction] A
 	WHERE	A.intItemId = @intItemId
-			AND A.intItemLocationId = @intItemLocationId
+			AND A.intLocationId = @intLocationId
 
 	RETURN ISNULL(@Value, 0)
 END

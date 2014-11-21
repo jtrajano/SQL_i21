@@ -23,8 +23,8 @@ BEGIN
 
 		DECLARE @Items AS ItemCostingTableType
 		
-		INSERT @Items (intItemId, intItemLocationId, dtmDate, dblUnitQty, dblUOMQty, dblCost, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, intTransactionTypeId, intLotId)
-		SELECT intItemId = 1, intItemLocationId = 1, dtmDate = GETDATE(), dblUnitQty = 1, dblUOMQty = 1, dblCost = 1.00, dblSalesPrice = 2.00 , intCurrencyId = 1, dblExchangeRate = 1, intTransactionId = 1, strTransactionId = 'TRANSACTION-ID', intTransactionTypeId = 1, intLotId = 1
+		INSERT @Items (intItemId, intLocationId, dtmDate, dblUnitQty, dblUOMQty, dblCost, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, intTransactionTypeId, intLotId)
+		SELECT intItemId = 1, intLocationId = 1, dtmDate = GETDATE(), dblUnitQty = 1, dblUOMQty = 1, dblCost = 1.00, dblSalesPrice = 2.00 , intCurrencyId = 1, dblExchangeRate = 1, intTransactionId = 1, strTransactionId = 'TRANSACTION-ID', intTransactionTypeId = 1, intLotId = 1
 	END 
 	
 	-- Errors from uspICValidateCostingOnPost are handled properly. 

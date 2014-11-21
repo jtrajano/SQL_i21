@@ -6,10 +6,12 @@
 
 CREATE PROCEDURE [dbo].[uspICReduceStockInFIFO]
 	@intItemId AS INT
-	,@intItemLocationId AS INT
+	,@intLocationId AS INT
 	,@dtmDate AS DATETIME
 	,@dblQty NUMERIC(18,6) 
 	,@dblCost AS NUMERIC(18,6)
+	,@strTransactionId AS NVARCHAR(40)
+	,@intTransactionId AS INT 
 	,@intUserId AS INT
 	,@RemainingQty AS NUMERIC(18,6) OUTPUT
 	,@CostUsed AS NUMERIC(18,6) OUTPUT 
@@ -39,10 +41,10 @@ WITH	(HOLDLOCK)
 AS		fifo_bucket	
 USING (
 	SELECT	intItemId = @intItemId
-			,intItemLocationId = @intItemLocationId	
+			,intLocationId = @intLocationId	
 ) AS Source_Query  
 	ON fifo_bucket.intItemId = Source_Query.intItemId
-	AND fifo_bucket.intItemLocationId = Source_Query.intItemLocationId
+	AND fifo_bucket.intLocationId = Source_Query.intLocationId
 	AND (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) > 0 
 	AND dbo.fnDateGreaterThanEquals(@dtmDate, fifo_bucket.dtmDate) = 1
 
@@ -78,22 +80,26 @@ WHEN MATCHED THEN
 WHEN NOT MATCHED THEN 
 	INSERT (
 		[intItemId]
-		,[intItemLocationId]
+		,[intLocationId]
 		,[dtmDate]
 		,[dblStockIn]
 		,[dblStockOut]
 		,[dblCost]
+		,[strTransactionId]
+		,[intTransactionId]
 		,[dtmCreated]
 		,[intCreatedUserId]
 		,[intConcurrencyId]
 	)
 	VALUES (
 		@intItemId
-		,@intItemLocationId
+		,@intLocationId
 		,@dtmDate
 		,0
 		,@dblQty
 		,@dblCost
+		,@strTransactionId
+		,@intTransactionId
 		,GETDATE()
 		,@intUserId
 		,1	

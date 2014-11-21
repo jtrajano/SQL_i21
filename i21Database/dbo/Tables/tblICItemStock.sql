@@ -24,6 +24,15 @@
     CONSTRAINT [FK_tblICItemStock_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
     CONSTRAINT [FK_tblICItemStock_tblICCountGroup] FOREIGN KEY ([intInventoryGroupId]) REFERENCES [tblICCountGroup]([intCountGroupId])
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICItemStock_intItemId]
+    ON [dbo].[tblICItemStock]([intItemId] ASC);
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICItemStock_intLocationId]
+    ON [dbo].[tblICItemStock]([intLocationId] ASC);
+GO
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',

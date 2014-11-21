@@ -72,8 +72,16 @@
 	CONSTRAINT [FK_tblICItemLocation_tblAPVendorFreight] FOREIGN KEY ([intFreightVendorId]) REFERENCES [tblAPVendor]([intVendorId]), 
     CONSTRAINT [FK_tblICItemLocation_tblICCountGroup] FOREIGN KEY ([intCountGroupId]) REFERENCES [tblICCountGroup]([intCountGroupId])
 )
-
 GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICItemLocation_intItemId]
+    ON [dbo].[tblICItemLocation]([intItemId] ASC);
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICItemLocation_intLocationId]
+    ON [dbo].[tblICItemLocation]([intLocationId] ASC);
+GO
+
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity Field',
     @level0type = N'SCHEMA',

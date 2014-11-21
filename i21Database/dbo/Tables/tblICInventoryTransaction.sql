@@ -17,7 +17,7 @@ CREATE TABLE [dbo].[tblICInventoryTransaction]
 (
 	[intInventoryTransactionId] INT NOT NULL  IDENTITY, 
 	[intItemId] INT NOT NULL,
-	[intItemLocationId] INT NOT NULL,
+	[intLocationId] INT NOT NULL,
 	[dtmDate] DATETIME NOT NULL, 
     [dblUnitQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
@@ -38,7 +38,7 @@ CREATE TABLE [dbo].[tblICInventoryTransaction]
 GO
 
 CREATE CLUSTERED INDEX [IDX_tblICInventoryTransaction]
-    ON [dbo].[tblICInventoryTransaction]([intItemId] ASC, [intItemLocationId] ASC, [dtmDate] ASC, [intInventoryTransactionId] ASC);
+    ON [dbo].[tblICInventoryTransaction]([intItemId] ASC, [intLocationId] ASC, [dtmDate] ASC, [intInventoryTransactionId] ASC);
 GO
 
 CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_intInventoryTransactionId]
@@ -49,8 +49,8 @@ CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_intItemId]
     ON [dbo].[tblICInventoryTransaction]([intItemId] ASC);
 
 GO
-CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_intItemLocationId]
-    ON [dbo].[tblICInventoryTransaction]([intItemLocationId] ASC);
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_intLocationId]
+    ON [dbo].[tblICInventoryTransaction]([intLocationId] ASC);
 
 GO
 CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_intTransactionId]
@@ -59,3 +59,8 @@ CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_intTransactionId]
 GO
 CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_strTransactionId]
 	ON [dbo].[tblICInventoryTransaction]([strTransactionId] ASC);
+
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_strBatchId]
+	ON [dbo].[tblICInventoryTransaction]([strBatchId] ASC);

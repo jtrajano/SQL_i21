@@ -1,7 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnGetItemAverageCost]
 (
 	@intItemId INT
-	,@intItemLocationId INT
+	,@intLocationId INT
 )
 RETURNS NUMERIC(18,6)
 AS 
@@ -12,7 +12,7 @@ BEGIN
 	SELECT	@AverageCost = dblAverageCost
 	FROM	[dbo].[tblICItemStock]
 	WHERE	intItemId = @intItemId
-			AND intLocationId = @intItemLocationId
+			AND intLocationId = @intLocationId
 
 	RETURN ISNULL(@AverageCost, 0)
 END

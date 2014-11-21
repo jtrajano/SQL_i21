@@ -6,18 +6,13 @@ GO
 
 IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()) = 1
 BEGIN
-EXEC(
-	'CREATE PROCEDURE [dbo].[uspARImportSalesperson]
+EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 	@SalespersonId NVARCHAR(3) = NULL,
 	@Update BIT = 0,
 	@Total INT = 0 OUTPUT
 
 	AS
-
-	--Make first a copy of agslsmst. This will use to track all salesperson already imported
-	IF(OBJECT_ID(''dbo.tblARTempSalesperson'') IS NULL)
-		SELECT * INTO tblARTempSalesperson FROM agslsmst
-	
+	BEGIN
 	--================================================
 	--     UPDATE/INSERT IN ORIGIN	
 	--================================================
@@ -175,15 +170,15 @@ EXEC(
 			   (@EntityId,
 				@strSalespersonId,
 				@strType,
-				ISNULL(@strPhone,''''),
-				ISNULL(@strAddress,''''),
-				ISNULL(@strZipCode,''''),
-				ISNULL(@strCity,''''),
-				ISNULL(@strState,''''),
-				ISNULL(@strCountry,''''),
+				ISNULL(LTRIM(RTRIM(@strPhone)),''''),
+				ISNULL(LTRIM(RTRIM(@strAddress)),''''),
+				ISNULL(LTRIM(RTRIM(@strZipCode)),''''),
+				ISNULL(LTRIM(RTRIM(@strCity)),''''),
+				ISNULL(LTRIM(RTRIM(@strState)),''''),
+				ISNULL(LTRIM(RTRIM(@strCountry)),''''),
 				1,
-				ISNULL(@strDispatchNotification,''''),
-				ISNULL(@strTextMessage,''''),
+				ISNULL(LTRIM(RTRIM(@strDispatchNotification)),''''),
+				ISNULL(LTRIM(RTRIM(@strTextMessage)),''''),
 				''None'',
 				0,
 				'''',
@@ -207,8 +202,7 @@ EXEC(
 		END
 	
 	SET @Total = @Counter
-	--To delete all record on temp table to determine if there are still record to import
-	DELETE FROM tblARTempSalesperson
+	
 
 	END
 
@@ -217,7 +211,12 @@ EXEC(
 	--================================================
 	IF(@Update = 1 AND @SalespersonId IS NULL) 
 	BEGIN
-		SELECT @Total = COUNT(agsls_slsmn_id) from tblARTempSalesperson
+		SELECT @Total = COUNT(agsls_slsmn_id)  
+			FROM agslsmst
+		LEFT JOIN tblARSalesperson
+			ON agslsmst.agsls_slsmn_id COLLATE Latin1_General_CI_AS = tblARSalesperson.strSalespersonId COLLATE Latin1_General_CI_AS
+		WHERE tblARSalesperson.strSalespersonId IS NULL
+	END
 	END'
 )
 END
@@ -225,17 +224,13 @@ END
 
 IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1
 BEGIN
-EXEC(
-	'CREATE PROCEDURE [dbo].[uspARImportSalesperson]
+EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 	@SalespersonId NVARCHAR(3) = NULL,
 	@Update BIT = 0,
 	@Total INT = 0 OUTPUT
 
 	AS
-
-	--Make first a copy of ptslsmst. This will use to track all salesperson already imported
-	IF(OBJECT_ID(''dbo.tblARTempSalesperson'') IS NULL)
-		SELECT * INTO tblARTempSalesperson FROM ptslsmst
+	BEGIN
 	
 	--================================================
 	--     UPDATE/INSERT IN ORIGIN	
@@ -394,15 +389,15 @@ EXEC(
 			   (@EntityId,
 				@strSalespersonId,
 				@strType,
-				ISNULL(@strPhone,''''),
-				ISNULL(@strAddress,''''),
-				ISNULL(@strZipCode,''''),
-				ISNULL(@strCity,''''),
-				ISNULL(@strState,''''),
-				ISNULL(@strCountry,''''),
+				ISNULL(LTRIM(RTRIM(@strPhone)),''''),
+				ISNULL(LTRIM(RTRIM(@strAddress)),''''),
+				ISNULL(LTRIM(RTRIM(@strZipCode)),''''),
+				ISNULL(LTRIM(RTRIM(@strCity)),''''),
+				ISNULL(LTRIM(RTRIM(@strState)),''''),
+				ISNULL(LTRIM(RTRIM(@strCountry)),''''),
 				1,
-				ISNULL(@strDispatchNotification,''''),
-				ISNULL(@strTextMessage,''''),
+				ISNULL(LTRIM(RTRIM(@strDispatchNotification)),''''),
+				ISNULL(LTRIM(RTRIM(@strTextMessage)),''''),
 				''None'',
 				0,
 				'''',
@@ -426,8 +421,6 @@ EXEC(
 		END
 	
 	SET @Total = @Counter
-	--To delete all record on temp table to determine if there are still record to import
-	DELETE FROM tblARTempSalesperson
 
 	END
 
@@ -436,7 +429,13 @@ EXEC(
 	--================================================
 	IF(@Update = 1 AND @SalespersonId IS NULL) 
 	BEGIN
-		SELECT @Total = COUNT(ptsls_slsmn_id) from tblARTempSalesperson
+		SELECT @Total = COUNT(ptsls_slsmn_id)
+			FROM ptslsmst
+		LEFT JOIN tblARSalesperson
+			ON ptslsmst.ptsls_slsmn_id COLLATE Latin1_General_CI_AS = tblARSalesperson.strSalespersonId COLLATE Latin1_General_CI_AS
+		WHERE tblARSalesperson.strSalespersonId IS NULL
+	END
 	END'
 )
 END
+

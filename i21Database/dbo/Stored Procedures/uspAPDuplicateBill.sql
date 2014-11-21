@@ -1,20 +1,15 @@
-﻿CREATE PROCEDURE [dbo].[uspAPBillRecurring]
-	@recurrings NVARCHAR(MAX),
+﻿CREATE PROCEDURE [dbo].[uspAPDuplicateBill]
+	@BillIds NVARCHAR(MAX),
 	@userId INT
 AS
 BEGIN
 
-CREATE TABLE #tmpRecurringData (
-	[intRecurringId] [int] PRIMARY KEY,
-	UNIQUE ([intRecurringId])
+CREATE TABLE #tmpBillData (
+	[intBillId] [int] PRIMARY KEY,
+	UNIQUE ([intBillId])
 );
 
-DECLARE @InsertedData TABLE (intBillId INT)
-
-INSERT INTO #tmpRecurringData SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@recurrings)
-
-SELECT * INTO #tmpRecurringBill FROM tblAPRecurringTransaction
-WHERE intRecurringId IN (SELECT intRecurringId FROM #tmpRecurringData)
+INSERT INTO #tmpBillData SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@BillIds)
 
 INSERT INTO tblAPBill(
 		[strVendorOrderNumber], 
@@ -50,7 +45,6 @@ INSERT INTO tblAPBill(
 		[intOrderById],
 		[intEntityId]
 	)
-	OUTPUT inserted.intBillId INTO @InsertedData
 	SELECT 
 		[strVendorOrderNumber], 
 		[intTermsId],
@@ -83,9 +77,9 @@ INSERT INTO tblAPBill(
 		[intStoreLocationId],
 		[intContactId],
 		[intOrderById],
-		@userId
+		ISNULL(@userId, intEntityId)
 	FROM tblAPBill
-	WHERE intBillId IN (SELECT intTransactionId FROM #tmpRecurringBill)
+	WHERE intBillId IN (SELECT [intBillId] FROM #tmpBillData)
 
 	INSERT INTO tblAPBillDetail(
 		[intBillId],
@@ -127,29 +121,6 @@ INSERT INTO tblAPBill(
 		[intTaxId],
 		[intLineNo]
 	FROM tblAPBillDetail
-	WHERE intBillId IN (SELECT intTransactionId FROM #tmpRecurringBill)
-
-	--Create History
-	INSERT INTO tblAPRecurringHistory(
-		[strTransactionId], 
-		[strTransactionCreated], 
-		[dtmDateProcessed], 
-		[strReference], 
-		[dtmNextProcess], 
-		[dtmLastProcess], 
-		[intTransactionType]
-	)
-	SELECT 
-		[strTransactionId]		= C.strBillId, 
-		[strTransactionCreated]	= B.strBillId, 
-		[dtmDateProcessed]		= GETDATE(), 
-		[strReference]			= D.strReference, 
-		[dtmNextProcess]		= D.dtmNextProcess, 
-		[dtmLastProcess]		= D.dtmLastProcess,
-		[intTransactionType]	= 1
-	FROM @InsertedData A
-		INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
-		INNER JOIN tblAPBill C ON B.strVendorOrderNumber = C.strVendorOrderNumber
-		INNER JOIN #tmpRecurringBill D ON C.intBillId = D.intTransactionId
+	WHERE intBillId IN (SELECT [intBillId] FROM #tmpBillData)
 
 END

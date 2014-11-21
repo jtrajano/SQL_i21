@@ -24,7 +24,7 @@ BEGIN
 		-- Insert the items unpost 
 		INSERT	@Items (
 				intItemId
-				, intItemLocationId
+				, intLocationId
 				, dtmDate
 				, dblUnitQty
 				, dblUOMQty
@@ -38,7 +38,7 @@ BEGIN
 				, intLotId
 		)
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = GETDATE()
 				,dblUnitQty = -10000
 				,dblUOMQty = 1
@@ -52,7 +52,7 @@ BEGIN
 				,intLotId = NULL 
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @NewHaven
+				,intLocationId = @NewHaven
 				,dtmDate = GETDATE()
 				,dblUnitQty = -10000
 				,dblUOMQty = 1

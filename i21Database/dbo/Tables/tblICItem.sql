@@ -98,7 +98,10 @@
 );
 GO
 
-EXECUTE sp_addextendedproperty @name = N'MS_Description', @value = N'Identity Field', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'tblICItem', @level2type = N'COLUMN', @level2name = N'intItemId';
+CREATE NONCLUSTERED INDEX [IX_tblICItem_intItemId]
+    ON [dbo].[tblICItem]([intItemId] ASC);
+GO
+
 GO
 EXECUTE sp_addextendedproperty @name = N'MS_Description', @value = N'Unique key that corresponds to the item number. Origin: agitm-no ', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'tblICItem', @level2type = N'COLUMN', @level2name = N'strItemNo';
 GO
@@ -869,3 +872,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICItem',
     @level2type = N'COLUMN',
     @level2name = N'strMarketValuation'
+
+	GO
+	EXECUTE sp_addextendedproperty @name = N'iMake Mapping', @value = N'Identity Field', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'tblICItem', @level2type = N'COLUMN', @level2name = N'intItemId';
