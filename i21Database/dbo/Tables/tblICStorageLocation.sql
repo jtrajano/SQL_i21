@@ -29,7 +29,10 @@
 	[intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICStorageLocation] PRIMARY KEY ([intStorageLocationId]), 
     CONSTRAINT [AK_tblICStorageLocation_strName] UNIQUE ([strName]), 
-    CONSTRAINT [FK_tblICStorageLocation_tblICStorageUnitType] FOREIGN KEY ([intStorageUnitTypeId]) REFERENCES [tblICStorageUnitType]([intStorageUnitTypeId]) 
+    CONSTRAINT [FK_tblICStorageLocation_tblICStorageUnitType] FOREIGN KEY ([intStorageUnitTypeId]) REFERENCES [tblICStorageUnitType]([intStorageUnitTypeId]), 
+    CONSTRAINT [FK_tblICStorageLocation_tblICRestriction] FOREIGN KEY ([intRestrictionId]) REFERENCES [tblICRestriction]([intRestrictionId]), 
+    CONSTRAINT [FK_tblICStorageLocation_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]), 
+    CONSTRAINT [FK_tblICStorageLocation_tblICUnitMeasure] FOREIGN KEY ([intBatchSizeUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]) 
 )
 
 GO

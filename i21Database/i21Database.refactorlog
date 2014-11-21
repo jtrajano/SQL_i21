@@ -1239,4 +1239,116 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intSubstituteItemId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="cb354a14-81a0-4358-9426-888377a8dd17" ChangeDateTime="11/21/2014 02:06:06">
+    <Property Name="ElementName" Value="[dbo].[tblICStorageUnitType].[intUnitTypeId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICStorageUnitType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strUnitTypeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="7a0bc765-b577-4415-b46b-f9ec681e8dd7" ChangeDateTime="11/21/2014 02:06:42">
+    <Property Name="ElementName" Value="[dbo].[tblICStorageUnitType].[strStorageName]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICStorageUnitType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strStorageUnitType" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8218a28e-1836-4545-b540-32ba45480c33" ChangeDateTime="11/21/2014 02:07:27">
+    <Property Name="ElementName" Value="[dbo].[tblICStorageUnitType].[strUnitTypeId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICStorageUnitType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strInternalCode" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="272a5bef-f896-4bef-b6c4-240d793c8bbb" ChangeDateTime="11/21/2014 02:38:14">
+    <Property Name="ElementName" Value="[dbo].[tblICReadingPoint].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICReadingPoint]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intReadingPointId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b1d0c660-912b-4cc6-b435-1d7466f5803c" ChangeDateTime="11/21/2014 02:41:22">
+    <Property Name="ElementName" Value="[dbo].[tblICMeasurement].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICMeasurement]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d369551c-f4b6-40a5-91f2-c85941543f22" ChangeDateTime="11/21/2014 02:41:29">
+    <Property Name="ElementName" Value="[dbo].[tblICMeasurement].[intId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICMeasurement]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intMeasurementId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="239ca609-9b99-48f0-b4c0-910ed166e9d6" ChangeDateTime="11/21/2014 02:47:11">
+    <Property Name="ElementName" Value="[dbo].[tblICContainer].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICContainer]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intContainerId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8fdaea9e-7a78-4778-9d36-6956bb1bca4b" ChangeDateTime="11/21/2014 02:52:41">
+    <Property Name="ElementName" Value="[dbo].[tblICContainerType].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICContainerType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intContainerTypeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e7b61276-c5cb-494b-8e75-fab629717799" ChangeDateTime="11/21/2014 02:53:25">
+    <Property Name="ElementName" Value="[dbo].[tblICContainerType].[strExternalSystemId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICContainerType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intExternalSystemId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4c39bc78-43ff-4b28-a808-43ffc31f864d" ChangeDateTime="11/21/2014 02:53:34">
+    <Property Name="ElementName" Value="[dbo].[tblICContainer].[strExternalSystemId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICContainer]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intExternalSystemId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5188671d-5091-4a0d-a787-eeeb4838392e" ChangeDateTime="11/21/2014 02:54:07">
+    <Property Name="ElementName" Value="[dbo].[tblICContainerType].[strInterlCode]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICContainerType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strInternalCode" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="14d5a455-575a-4743-89dd-7854f99cc485" ChangeDateTime="11/21/2014 02:58:22">
+    <Property Name="ElementName" Value="[dbo].[tblICContainerType].[ysnMultipleLots]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICContainerType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnAllowMultipleLots" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e8ab4e41-8844-4321-8cca-ee09b393dd58" ChangeDateTime="11/21/2014 03:15:50">
+    <Property Name="ElementName" Value="[dbo].[tblICSku].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICSku]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intSKUId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="312b0de3-16c3-4be0-ad5a-197f8797b2bb" ChangeDateTime="11/21/2014 03:18:25">
+    <Property Name="ElementName" Value="[dbo].[tblICSku].[intItem]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICSku]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intItemId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="05d62424-35f9-42d7-881d-ad33d17ecdeb" ChangeDateTime="11/21/2014 03:28:53">
+    <Property Name="ElementName" Value="[dbo].[tblICRestriction].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICRestriction]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intRestrictionId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e74c5650-7944-464b-b63c-14aec53e265d" ChangeDateTime="11/21/2014 06:24:48">
+    <Property Name="ElementName" Value="[dbo].[tblICContainer].[intUnitId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICContainer]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intStorageLocationId" />
+  </Operation>
 </Operations>
