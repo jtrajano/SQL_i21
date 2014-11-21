@@ -3,6 +3,7 @@
     [intInvoiceId]       INT             NOT NULL,
     [intItemId]          INT             NULL,
     [strItemDescription] NVARCHAR (250)  NULL,
+	[intItemUOMId]       INT             NULL,
     [dblQtyOrdered]      NUMERIC (18, 6) NULL,
     [dblQtyShipped]      NUMERIC (18, 6) NULL,
     [dblPrice]           NUMERIC (18, 6) NULL,

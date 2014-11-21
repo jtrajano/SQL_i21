@@ -830,6 +830,7 @@
     <Build Include="dbo\Tables\tblICContainerType.sql" />
     <Build Include="dbo\Tables\tblICSku.sql" />
     <Build Include="dbo\Tables\tblICRestriction.sql" />
+    <Build Include="dbo\Views\vyuARInvoiceSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
