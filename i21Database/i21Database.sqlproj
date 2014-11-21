@@ -853,6 +853,7 @@
     <Build Include="dbo\Tables\tblFRAccountMonitor.sql" />
     <None Include="Scripts\Post-Deployment\AP\FixPaymentRecordStatus.sql" />
     <None Include="Scripts\Post-Deployment\AP\FixstrBillId.sql" />
+    <None Include="Scripts\Post-Deployment\IC\3_DefaultData.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
