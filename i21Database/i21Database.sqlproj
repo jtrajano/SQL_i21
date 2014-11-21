@@ -854,6 +854,7 @@
     <Build Include="dbo\Functions\fnGetConvertToItemReceiptErrors.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateConvertToItemReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseOnOrderQty.sql" />
+    <Build Include="dbo\Views\vyuAPPurchase.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
