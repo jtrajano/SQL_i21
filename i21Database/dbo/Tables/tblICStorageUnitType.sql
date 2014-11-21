@@ -1,9 +1,9 @@
 ﻿CREATE TABLE [dbo].[tblICStorageUnitType]
 (
 	[intStorageUnitTypeId] INT NOT NULL IDENTITY, 
-    [strStorageName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strStorageUnitType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
-    [intUnitTypeId] INT NULL, 
+    [strInternalCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intCapacityUnitMeasureId] INT NULL, 
     [dblMaxWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [ysnAllowPick] BIT NULL DEFAULT ((0)), 
@@ -31,13 +31,13 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intStorageUnitTypeId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Storage Name',
+    @value = N'Storage Unit Type',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblICStorageUnitType',
     @level2type = N'COLUMN',
-    @level2name = N'strStorageName'
+    @level2name = 'strStorageUnitType'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Description',
@@ -55,7 +55,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblICStorageUnitType',
     @level2type = N'COLUMN',
-    @level2name = 'intUnitTypeId'
+    @level2name = 'strInternalCode'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Capacity Unit Measure Id',

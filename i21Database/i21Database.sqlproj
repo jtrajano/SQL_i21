@@ -824,6 +824,12 @@
     <Build Include="dbo\Functions\fnGetCredit.sql" />
     <Build Include="dbo\Stored Procedures\uspAPDuplicateBill.sql" />
     <Build Include="dbo\Stored Procedures\uspICConvertToItemReceipt.sql" />
+    <Build Include="dbo\Tables\tblICReadingPoint.sql" />
+    <Build Include="dbo\Tables\tblICMeasurement.sql" />
+    <Build Include="dbo\Tables\tblICContainer.sql" />
+    <Build Include="dbo\Tables\tblICContainerType.sql" />
+    <Build Include="dbo\Tables\tblICSku.sql" />
+    <Build Include="dbo\Tables\tblICRestriction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
