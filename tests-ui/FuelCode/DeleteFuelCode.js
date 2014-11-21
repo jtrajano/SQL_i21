@@ -6,8 +6,7 @@ StartTest (function (t) {
     var engine = new iRely.TestEngine();
     engine.start(t)
 
-        /*Scenario 1. Delete unused single record */
-        /* 1.  */
+        /*1.Delete unused single record*/
         .login('ssiadmin','summit','ag').wait(1500)
         .addFunction(function(next){t.diag("Scenario 1. Delete unused record"); next();}).wait(100)
         .expandMenu('Inventory').wait(100)
