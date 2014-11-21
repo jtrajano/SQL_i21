@@ -23,6 +23,7 @@
     [intPaymentMethodId]   INT             NOT NULL,
     [strComments]          NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [intAccountId]         INT             NOT NULL,
+	[dtmPostDate]          DATETIME        NULL,
     [ysnPosted]            BIT             CONSTRAINT [DF_tblARInvoice_ysnPosted] DEFAULT ((0)) NOT NULL,
     [ysnPaid]              BIT             CONSTRAINT [DF_tblARInvoice_ysnPaid] DEFAULT ((0)) NOT NULL,
     [strShipToAddress]     NVARCHAR (100)  NULL,
