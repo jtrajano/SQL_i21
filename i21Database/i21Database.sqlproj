@@ -831,6 +831,26 @@
     <Build Include="dbo\Tables\tblICSku.sql" />
     <Build Include="dbo\Tables\tblICRestriction.sql" />
     <Build Include="dbo\Views\vyuARInvoiceSearch.sql" />
+    <Build Include="dbo\Tables\tblCTBuySell.sql" />
+    <Build Include="dbo\Tables\tblCTCashOrFuture.sql" />
+    <Build Include="dbo\Tables\tblCTContractCost.sql" />
+    <Build Include="dbo\Tables\tblCTContractDetail.sql" />
+    <Build Include="dbo\Tables\tblCTContractHeader.sql" />
+    <Build Include="dbo\Tables\tblCTContractOptDetail.sql" />
+    <Build Include="dbo\Tables\tblCTContractOptHeader.sql" />
+    <Build Include="dbo\Tables\tblCTContractOption.sql" />
+    <Build Include="dbo\Tables\tblCTContractText.sql" />
+    <Build Include="dbo\Tables\tblCTCostMethod.sql" />
+    <Build Include="dbo\Tables\tblCTCostType.sql" />
+    <Build Include="dbo\Tables\tblCTCropYear.sql" />
+    <Build Include="dbo\Tables\tblCTDeferredPay.sql" />
+    <Build Include="dbo\Tables\tblCTDeferredPayRate.sql" />
+    <Build Include="dbo\Tables\tblCTFreightRate.sql" />
+    <Build Include="dbo\Tables\tblCTPremFee.sql" />
+    <Build Include="dbo\Tables\tblCTPricingType.sql" />
+    <Build Include="dbo\Tables\tblCTPutCall.sql" />
+    <Build Include="dbo\Tables\tblCTRailGrade.sql" />
+    <Build Include="dbo\Tables\tblCTWeightGrade.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
