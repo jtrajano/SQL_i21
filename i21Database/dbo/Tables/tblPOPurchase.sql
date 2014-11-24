@@ -12,7 +12,22 @@
     [intShipFromId] INT NULL, 
     [intShipToId] INT NULL, 
     [intStoreId] INT NULL, 
-    [strPONumber] NVARCHAR(100) NULL, 
+	[intOrderStatusId] INT NOT NULL, 
+    [strPurchaseOrderNumber] NVARCHAR(100) NULL, 
+	[strVendorOrderNumber] NVARCHAR(100) NULL, 
     [dtmDate] DATETIME NOT NULL DEFAULT GETDATE(), 
-    [dtmExpectedDate] DATETIME NOT NULL DEFAULT GETDATE()
-)
+    [dtmExpectedDate] DATETIME NOT NULL DEFAULT GETDATE(),
+	CONSTRAINT [UK_dbo.tblPOPurchase_strPurchaseOrderNumber] UNIQUE (strPurchaseOrderNumber),
+	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblGLAccount_intAccountId] FOREIGN KEY (intAccountId) REFERENCES tblGLAccount(intAccountId),
+	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblPOOrderStatus_intOrderStatusId] FOREIGN KEY (intOrderStatusId) REFERENCES tblPOOrderStatus(intOrderStatusId)
+);
+GO
+CREATE NONCLUSTERED INDEX [IX_tblPOPurchase_intPurchaseId]
+    ON [dbo].[tblPOPurchase]([intPurchaseId] ASC);
+GO
+CREATE NONCLUSTERED INDEX [IX_tblPOPurchase_strPurchaseOrderNumber]
+    ON [dbo].[tblPOPurchase]([strPurchaseOrderNumber] ASC);
+GO
+CREATE NONCLUSTERED INDEX [IX_tblPOPurchase_intVendorId]
+    ON [dbo].[tblPOPurchase]([intVendorId] ASC)
+	INCLUDE ([intPurchaseId],[strVendorOrderNumber]) WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]

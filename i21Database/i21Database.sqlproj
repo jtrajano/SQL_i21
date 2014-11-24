@@ -137,6 +137,7 @@
     <Folder Include="Scripts\Post-Deployment\HD\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\IC" />
     <Folder Include="Scripts\Post-Deployment\Optional Run\Reports" />
+    <Folder Include="Scripts\Post-Deployment\AP\DefaultData" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -862,6 +863,8 @@
     <Build Include="dbo\Stored Procedures\uspICProcessLIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspARDuplicateInvoice.sql" />
     <Build Include="dbo\Functions\fnGetDueDateBasedOnTerm.sql" />
+    <Build Include="dbo\Tables\tblPOOrderStatus.sql" />
+    <None Include="Scripts\Post-Deployment\AP\DefaultData\POOrderStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
