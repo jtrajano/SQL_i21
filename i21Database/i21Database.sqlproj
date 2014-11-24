@@ -860,6 +860,8 @@
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInLIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICProcessLIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspARDuplicateInvoice.sql" />
+    <Build Include="dbo\Functions\fnGetDueDateBasedOnTerm.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
