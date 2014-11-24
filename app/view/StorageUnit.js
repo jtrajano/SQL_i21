@@ -201,19 +201,19 @@ Ext.define('Inventory.view.StorageUnit', {
                                                 {
                                                     dataIndex: 'strStorageUnitType',
                                                     dataType: 'string',
-                                                    text: 'Location Name',
+                                                    text: 'Storage Unit Type',
                                                     flex: 1
                                                 },
                                                 {
                                                     dataIndex: 'strInternalCode',
                                                     dataType: 'string',
-                                                    text: 'Location Type',
+                                                    text: 'Internal Code',
                                                     flex: 1
                                                 },
                                                 {
                                                     dataIndex: 'strDescription',
                                                     dataType: 'string',
-                                                    text: 'Location Type',
+                                                    text: 'Description',
                                                     flex: 1
                                                 }
                                             ],
@@ -227,7 +227,8 @@ Ext.define('Inventory.view.StorageUnit', {
                                             xtype: 'combobox',
                                             itemId: 'cboLocation',
                                             fieldLabel: 'Location',
-                                            labelWidth: 110
+                                            labelWidth: 110,
+                                            readOnly: true
                                         },
                                         {
                                             xtype: 'combobox',
@@ -236,10 +237,32 @@ Ext.define('Inventory.view.StorageUnit', {
                                             labelWidth: 110
                                         },
                                         {
-                                            xtype: 'combobox',
+                                            xtype: 'gridcombobox',
+                                            columns: [
+                                                {
+                                                    dataIndex: 'intRestrictionId',
+                                                    dataType: 'numeric',
+                                                    text: 'Restriction Id',
+                                                    hidden: true
+                                                },
+                                                {
+                                                    dataIndex: 'strInternalCode',
+                                                    dataType: 'string',
+                                                    text: 'Internal Code',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    dataIndex: 'strDisplayMember',
+                                                    dataType: 'string',
+                                                    text: 'Display Member',
+                                                    flex: 1
+                                                }
+                                            ],
                                             itemId: 'cboRestrictionType',
                                             fieldLabel: 'Restriction Type',
-                                            labelWidth: 110
+                                            labelWidth: 110,
+                                            displayField: 'strInternalCode',
+                                            valueField: 'intRestrictionId'
                                         },
                                         {
                                             xtype: 'textfield',
@@ -317,10 +340,32 @@ Ext.define('Inventory.view.StorageUnit', {
                                             },
                                             items: [
                                                 {
-                                                    xtype: 'combobox',
+                                                    xtype: 'gridcombobox',
+                                                    columns: [
+                                                        {
+                                                            dataIndex: 'intCommodityId',
+                                                            dataType: 'numeric',
+                                                            text: 'Commodity Id',
+                                                            hidden: true
+                                                        },
+                                                        {
+                                                            dataIndex: 'strCommodityCode',
+                                                            dataType: 'string',
+                                                            text: 'Commodity',
+                                                            flex: 1
+                                                        },
+                                                        {
+                                                            dataIndex: 'strDescription',
+                                                            dataType: 'string',
+                                                            text: 'Description',
+                                                            flex: 1
+                                                        }
+                                                    ],
                                                     itemId: 'cboCommodity',
                                                     fieldLabel: 'Commodity',
-                                                    labelWidth: 115
+                                                    labelWidth: 115,
+                                                    displayField: 'strCommodityCode',
+                                                    valueField: 'intCommodityId'
                                                 },
                                                 {
                                                     xtype: 'numberfield',
@@ -525,19 +570,68 @@ Ext.define('Inventory.view.StorageUnit', {
                                             itemId: 'colMeasurement',
                                             dataIndex: 'string',
                                             text: 'Measurement Name',
-                                            flex: 1
+                                            flex: 1,
+                                            editor: {
+                                                xtype: 'gridcombobox',
+                                                columns: [
+                                                    {
+                                                        dataIndex: 'intMeasurementId',
+                                                        dataType: 'numeric',
+                                                        text: 'Measurement Id',
+                                                        hidden: true
+                                                    },
+                                                    {
+                                                        dataIndex: 'strMeasurementName',
+                                                        dataType: 'string',
+                                                        text: 'Measurement Name',
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        dataIndex: 'strDescription',
+                                                        dataType: 'string',
+                                                        text: 'Description',
+                                                        flex: 1
+                                                    }
+                                                ],
+                                                itemId: 'cboMeasurement',
+                                                displayField: 'strMeasurementName',
+                                                valueField: 'strMeasurementName'
+                                            }
                                         },
                                         {
                                             xtype: 'gridcolumn',
                                             itemId: 'colReadingPoint',
                                             dataIndex: 'string',
                                             text: 'Reading Point',
-                                            flex: 1
+                                            flex: 1,
+                                            editor: {
+                                                xtype: 'gridcombobox',
+                                                columns: [
+                                                    {
+                                                        dataIndex: 'intReadingPointId',
+                                                        dataType: 'numeric',
+                                                        text: 'Reading Point Id',
+                                                        hidden: true
+                                                    },
+                                                    {
+                                                        dataIndex: 'strReadingPoint',
+                                                        dataType: 'string',
+                                                        text: 'Reading Point',
+                                                        flex: 1
+                                                    }
+                                                ],
+                                                itemId: 'cboReadingPoint',
+                                                displayField: 'strReadingPoint',
+                                                valueField: 'strReadingPoint'
+                                            }
                                         },
                                         {
                                             xtype: 'checkcolumn',
                                             itemId: 'colActive',
-                                            text: 'Active'
+                                            text: 'Active',
+                                            editor: {
+                                                xtype: 'checkboxfield'
+                                            }
                                         }
                                     ],
                                     viewConfig: {
@@ -680,30 +774,35 @@ Ext.define('Inventory.view.StorageUnit', {
                                     columns: [
                                         {
                                             xtype: 'gridcolumn',
+                                            itemId: 'colContainer',
                                             dataIndex: 'string',
                                             text: 'Container ID',
                                             flex: 1
                                         },
                                         {
                                             xtype: 'gridcolumn',
+                                            itemId: 'colExternalSystem',
                                             dataIndex: 'string',
                                             text: 'External System ID',
                                             flex: 1
                                         },
                                         {
                                             xtype: 'gridcolumn',
+                                            itemId: 'colContainerType',
                                             dataIndex: 'string',
                                             text: 'Container Type',
                                             flex: 1
                                         },
                                         {
                                             xtype: 'gridcolumn',
+                                            itemId: 'colLastUpdateBy',
                                             dataIndex: 'string',
                                             text: 'Last Updated By',
                                             flex: 1
                                         },
                                         {
                                             xtype: 'gridcolumn',
+                                            itemId: 'colLastUpdateOn',
                                             dataIndex: 'string',
                                             text: 'Last Updated On',
                                             flex: 1
@@ -753,54 +852,56 @@ Ext.define('Inventory.view.StorageUnit', {
                                     columns: [
                                         {
                                             xtype: 'gridcolumn',
+                                            itemId: 'colItem',
                                             dataIndex: 'string',
-                                            text: 'Unit',
-                                            flex: 1
-                                        },
-                                        {
-                                            xtype: 'gridcolumn',
-                                            dataIndex: 'string',
-                                            text: 'Material Description',
+                                            text: 'Item',
                                             flex: 2
                                         },
                                         {
                                             xtype: 'gridcolumn',
+                                            itemId: 'colSku',
                                             dataIndex: 'string',
                                             text: 'SKU ID',
                                             flex: 1
                                         },
                                         {
                                             xtype: 'gridcolumn',
+                                            itemId: 'colQty',
                                             width: 59,
                                             dataIndex: 'string',
                                             text: 'Qty'
                                         },
                                         {
                                             xtype: 'gridcolumn',
+                                            itemId: 'colContainer',
                                             dataIndex: 'string',
                                             text: 'Container',
                                             flex: 1
                                         },
                                         {
                                             xtype: 'gridcolumn',
+                                            itemId: 'colLotSerial',
                                             dataIndex: 'string',
                                             text: 'Lot/Serial',
                                             flex: 1
                                         },
                                         {
                                             xtype: 'gridcolumn',
+                                            itemId: 'colExpiration',
                                             dataIndex: 'string',
                                             text: 'Expiration',
                                             flex: 1
                                         },
                                         {
                                             xtype: 'gridcolumn',
+                                            itemId: 'colStatus',
                                             dataIndex: 'string',
                                             text: 'Status',
                                             flex: 1
                                         },
                                         {
                                             xtype: 'gridcolumn',
+                                            itemId: 'colOwner',
                                             dataIndex: 'string',
                                             text: 'Owner',
                                             flex: 1

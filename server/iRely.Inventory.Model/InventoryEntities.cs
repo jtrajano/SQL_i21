@@ -151,10 +151,19 @@ namespace iRely.Inventory.Model
         public DbSet<tblICStorageLocation> tblICStorageLocations { get; set; }
         public DbSet<tblICStorageLocationCategory> tblICStorageLocationCategories { get; set; }
         public DbSet<tblICStorageLocationMeasurement> tblICStorageLocationMeasurements { get; set; }
+        public DbSet<tblICStorageLocationSku> tblICStorageLocationSkus { get; set; }
+        public DbSet<tblICStorageLocationContainer> tblICStorageLocationContainers { get; set; }
         public DbSet<tblICStorageUnitType> tblICStorageUnitTypes { get; set; }
         public DbSet<tblICTag> tblICTags { get; set; }
         public DbSet<tblICUnitMeasure> tblICUnitMeasures { get; set; }
         public DbSet<tblICUnitMeasureConversion> tblICUnitMeasureConversions { get; set; }
+
+        public DbSet<tblICContainer> tblICContainers { get; set; }
+        public DbSet<tblICContainerType> tblICContainerTypes { get; set; }
+        public DbSet<tblICMeasurement> tblICMeasurements { get; set; }
+        public DbSet<tblICReadingPoint> tblICReadingPoints { get; set; }
+        public DbSet<tblICRestriction> tblICRestrictions { get; set; }
+        public DbSet<tblICSku> tblICSkus { get; set; }
 
         public DbSet<tblICInventoryReceipt> tblICInventoryReceipts { get; set; }
         public DbSet<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
@@ -241,6 +250,8 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICStorageLocationMap());
             modelBuilder.Configurations.Add(new tblICStorageLocationCategoryMap());
             modelBuilder.Configurations.Add(new tblICStorageLocationMeasurementMap());
+            modelBuilder.Configurations.Add(new tblICStorageLocationSkuMap());
+            modelBuilder.Configurations.Add(new tblICStorageLocationContainerMap());
             modelBuilder.Configurations.Add(new tblICStorageUnitTypeMap());
             modelBuilder.Configurations.Add(new tblICTagMap());
             modelBuilder.Configurations.Add(new tblICUnitMeasureMap());
@@ -261,6 +272,13 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICCommodityProductTypeMap());
             modelBuilder.Configurations.Add(new tblICCommodityRegionMap());
             modelBuilder.Configurations.Add(new tblICCommoditySeasonMap());
+
+            modelBuilder.Configurations.Add(new tblICContainerMap());
+            modelBuilder.Configurations.Add(new tblICContainerTypeMap());
+            modelBuilder.Configurations.Add(new tblICMeasurementMap());
+            modelBuilder.Configurations.Add(new tblICReadingPointMap());
+            modelBuilder.Configurations.Add(new tblICRestrictionMap());
+            modelBuilder.Configurations.Add(new tblICSkuMap());
 
             modelBuilder.Configurations.Add(new tblICInventoryReceiptMap());
             modelBuilder.Configurations.Add(new tblICInventoryReceiptInspectionMap());

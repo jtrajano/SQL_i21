@@ -47,7 +47,14 @@ namespace iRely.Inventory.BRL
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICStorageLocation>()
                 .Include("tblICStorageLocationCategories.tblICCategory")
-                .Include(p => p.tblICStorageLocationMeasurements)
+                .Include("tblICStorageLocationMeasurements.tblICMeasurement")
+                .Include("tblICStorageLocationMeasurements.tblICReadingPoint")
+                .Include("tblICStorageLocationSkus.tblICItem")
+                .Include("tblICStorageLocationSkus.tblICSku")
+                .Include("tblICStorageLocationSkus.tblICContainer")
+                .Include("tblICStorageLocationSkus.tblICLotStatus")
+                .Include("tblICStorageLocationContainers.tblICContainer")
+                .Include("tblICStorageLocationContainers.tblICContainerType")
                 .Where(w => query.Where(predicate).Any(a => a.intStorageLocationId == w.intStorageLocationId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)
                 .Skip(start)

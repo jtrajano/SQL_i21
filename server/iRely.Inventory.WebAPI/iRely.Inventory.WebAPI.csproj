@@ -144,6 +144,12 @@
     <Compile Include="Controllers\CommodityAttributeController.cs" />
     <Compile Include="Controllers\CommodityController.cs" />
     <Compile Include="Controllers\CommodityUnitMeasureController.cs" />
+    <Compile Include="Controllers\ContainerTypeController.cs" />
+    <Compile Include="Controllers\MeasurementController.cs" />
+    <Compile Include="Controllers\ReadingPointController.cs" />
+    <Compile Include="Controllers\RestrictionController.cs" />
+    <Compile Include="Controllers\SkuController.cs" />
+    <Compile Include="Controllers\ContainerController.cs" />
     <Compile Include="Controllers\CountGroupController.cs" />
     <Compile Include="Controllers\DocumentController.cs" />
     <Compile Include="Controllers\FuelTaxClassController.cs" />

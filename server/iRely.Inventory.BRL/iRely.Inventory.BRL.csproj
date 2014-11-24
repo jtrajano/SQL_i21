@@ -69,6 +69,12 @@
     <Compile Include="CategoryLocation.cs" />
     <Compile Include="Catalog.cs" />
     <Compile Include="CommodityUnitMeasure.cs" />
+    <Compile Include="ContainerType.cs" />
+    <Compile Include="Measurement.cs" />
+    <Compile Include="ReadingPoint.cs" />
+    <Compile Include="Restriction.cs" />
+    <Compile Include="Sku.cs" />
+    <Compile Include="Container.cs" />
     <Compile Include="StorageLocation.cs" />
     <Compile Include="ItemUnitMeasure.cs" />
     <Compile Include="StorageType.cs" />

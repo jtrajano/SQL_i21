@@ -358,19 +358,19 @@
                                                     "\t{",
                                                     "\t\tdataIndex: 'strStorageUnitType',",
                                                     "\t\tdataType: 'string',",
-                                                    "\t\ttext: 'Location Name',",
+                                                    "\t\ttext: 'Storage Unit Type',",
                                                     "\t\tflex: 1",
                                                     "\t},",
                                                     "\t{",
                                                     "\t\tdataIndex: 'strInternalCode',",
                                                     "\t\tdataType: 'string',",
-                                                    "\t\ttext: 'Location Type',",
+                                                    "\t\ttext: 'Internal Code',",
                                                     "\t\tflex: 1",
                                                     "\t},",
                                                     "\t{",
                                                     "\t\tdataIndex: 'strDescription',",
                                                     "\t\tdataType: 'string',",
-                                                    "\t\ttext: 'Location Type',",
+                                                    "\t\ttext: 'Description',",
                                                     "\t\tflex: 1",
                                                     "\t}",
                                                     "]"
@@ -415,7 +415,8 @@
                                                 "layout|flex": null,
                                                 "layout|margins": null,
                                                 "margin": null,
-                                                "name": null
+                                                "name": null,
+                                                "readOnly": true
                                             },
                                             "name": "MyComboBox26",
                                             "configAlternates": {
@@ -469,15 +470,38 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "columns": null,
-                                                "designer|createAlias": null,
+                                                "columns": [
+                                                    "[",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'intRestrictionId',",
+                                                    "\t\tdataType: 'numeric',",
+                                                    "\t\ttext: 'Restriction Id',",
+                                                    "\t\thidden: true",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strInternalCode',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Internal Code',",
+                                                    "\t\tflex: 1",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strDisplayMember',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Display Member',",
+                                                    "\t\tflex: 1",
+                                                    "\t}",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "displayField": "strInternalCode",
                                                 "fieldLabel": "Restriction Type",
                                                 "itemId": "cboRestrictionType",
                                                 "labelWidth": 110,
                                                 "layout|flex": null,
                                                 "layout|margins": null,
                                                 "margin": null,
-                                                "name": null
+                                                "name": null,
+                                                "valueField": "intRestrictionId"
                                             },
                                             "name": "MyComboBox31",
                                             "configAlternates": {
@@ -654,9 +678,30 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "columns": null,
-                                                        "designer|createAlias": null,
-                                                        "displayField": null,
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intCommodityId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Commodity Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strCommodityCode',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Commodity',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strDescription',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Description',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strCommodityCode",
                                                         "fieldLabel": "Commodity",
                                                         "itemId": "cboCommodity",
                                                         "labelWidth": 115,
@@ -664,7 +709,7 @@
                                                         "layout|margins": null,
                                                         "margin": null,
                                                         "name": null,
-                                                        "valueField": null
+                                                        "valueField": "intCommodityId"
                                                     },
                                                     "name": "MyComboBox7",
                                                     "configAlternates": {
@@ -1149,7 +1194,57 @@
                                                 "text": "Measurement Name"
                                             },
                                             "name": "MyColumn125",
-                                            "designerId": "433c98ea-0e32-46eb-9c6d-a1951670a5e6"
+                                            "designerId": "433c98ea-0e32-46eb-9c6d-a1951670a5e6",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intMeasurementId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Measurement Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strMeasurementName',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Measurement Name',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strDescription',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Description',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strMeasurementName",
+                                                        "itemId": "cboMeasurement",
+                                                        "valueField": "strMeasurementName"
+                                                    },
+                                                    "name": "MyComboBox11",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "8a8020e1-8854-465d-90ea-97c36fa34359",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -1165,7 +1260,51 @@
                                                 "text": "Reading Point"
                                             },
                                             "name": "MyColumn95",
-                                            "designerId": "90892927-9692-49b8-a3ba-2db038bf8e45"
+                                            "designerId": "90892927-9692-49b8-a3ba-2db038bf8e45",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intReadingPointId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Reading Point Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strReadingPoint',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Reading Point',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strReadingPoint",
+                                                        "itemId": "cboReadingPoint",
+                                                        "valueField": "strReadingPoint"
+                                                    },
+                                                    "name": "MyComboBox14",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "c16eb8cc-bfb4-43e1-821f-20162d0e9998",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.column.Check",
@@ -1179,7 +1318,19 @@
                                                 "text": "Active"
                                             },
                                             "name": "MyCheck2",
-                                            "designerId": "5a17dd3c-f1a6-441a-977a-c4059b141bd4"
+                                            "designerId": "5a17dd3c-f1a6-441a-977a-c4059b141bd4",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyCheckbox",
+                                                    "designerId": "51665758-654e-4598-ab9d-6901acbab6d5"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.View",
@@ -1545,6 +1696,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
+                                                "itemId": "colContainer",
                                                 "text": "Container ID"
                                             },
                                             "name": "MyColumn125",
@@ -1560,6 +1712,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
+                                                "itemId": "colExternalSystem",
                                                 "text": "External System ID"
                                             },
                                             "name": "MyColumn95",
@@ -1575,6 +1728,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
+                                                "itemId": "colContainerType",
                                                 "text": "Container Type"
                                             },
                                             "name": "MyColumn96",
@@ -1590,6 +1744,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
+                                                "itemId": "colLastUpdateBy",
                                                 "text": "Last Updated By"
                                             },
                                             "name": "MyColumn97",
@@ -1605,6 +1760,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
+                                                "itemId": "colLastUpdateOn",
                                                 "text": "Last Updated On"
                                             },
                                             "name": "MyColumn98",
@@ -1738,23 +1894,9 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "string",
-                                                "flex": 1,
-                                                "text": "Unit"
-                                            },
-                                            "name": "MyColumn125",
-                                            "designerId": "2333339a-8c99-4f68-a2b8-ad64b19bf8f6"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "string",
                                                 "flex": 2,
-                                                "text": "Material Description"
+                                                "itemId": "colItem",
+                                                "text": "Item"
                                             },
                                             "name": "MyColumn95",
                                             "designerId": "b1ebe915-8f99-4bdb-bf2d-cb23911bfb66"
@@ -1769,6 +1911,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
+                                                "itemId": "colSku",
                                                 "text": "SKU ID"
                                             },
                                             "name": "MyColumn96",
@@ -1784,6 +1927,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": null,
+                                                "itemId": "colQty",
                                                 "text": "Qty",
                                                 "width": 59
                                             },
@@ -1800,6 +1944,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
+                                                "itemId": "colContainer",
                                                 "text": "Container"
                                             },
                                             "name": "MyColumn98",
@@ -1815,6 +1960,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
+                                                "itemId": "colLotSerial",
                                                 "text": "Lot/Serial"
                                             },
                                             "name": "MyColumn99",
@@ -1830,6 +1976,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
+                                                "itemId": "colExpiration",
                                                 "text": "Expiration"
                                             },
                                             "name": "MyColumn100",
@@ -1845,6 +1992,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
+                                                "itemId": "colStatus",
                                                 "text": "Status"
                                             },
                                             "name": "MyColumn101",
@@ -1860,6 +2008,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
+                                                "itemId": "colOwner",
                                                 "text": "Owner"
                                             },
                                             "name": "MyColumn102",

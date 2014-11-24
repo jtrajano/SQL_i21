@@ -39,7 +39,10 @@ Ext.define('Inventory.view.StorageUnitViewController', {
             },
             cboLocation: '{current.intSubLocationId}',
             cboParentUnit: '{current.intParentStorageLocationId}',
-            cboRestrictionType: '{current.intRestrictionId}',
+            cboRestrictionType: {
+                value: '{current.intRestrictionId}',
+                store: '{restriction}'
+            },
             txtAisle: '{current.strUnitGroup}',
             txtMinBatchSize: '{current.dblMinBatchSize}',
             txtBatchSize: '{current.dblBatchSize}',
@@ -47,6 +50,15 @@ Ext.define('Inventory.view.StorageUnitViewController', {
                 value: '{current.intBatchSizeUOMId}',
                 store: '{batchSizeUOM}'
             },
+
+            cboCommodity: {
+                value: '{current.intCommodityId}',
+                store: '{commodity}'
+            },
+            txtPackFactor: '{current.dblPackFactor}',
+            txtUnitsPerFoot: '{current.dblUnitPerFoot}',
+            txtResidualUnits: '{current.dblResidualUnit}',
+
             chkAllowConsume: '{current.ysnAllowConsume}',
             chkAllowMultipleItems: '{current.ysnAllowMultipleItem}',
             chkAllowMultipleLots: '{current.ysnAllowMultipleLot}',
@@ -54,21 +66,27 @@ Ext.define('Inventory.view.StorageUnitViewController', {
             chkCycleCounted: '{current.ysnCycleCounted}',
             chkDefaultWarehouseStagingUnit: '{current.ysnDefaultWHStagingUnit}',
 
-//            grdMeasurement: {
-//                colMeasurement: {
-//                    dataIndex: '',
-//                    editor: {
-//                        store: '{}'
-//                    }
-//                },
-//                colReadingPoint: {
-//                    dataIndex: '',
-//                    editor: {
-//                        store: '{}'
-//                    }
-//                },
-//                colActive: ''
-//            },
+            txtSequence: '{current.intSequence}',
+            chkActive: '{current.ysnActive}',
+            txtXPosition: '{current.intRelativeX}',
+            txtYPosition: '{current.intRelativeY}',
+            txtZPosition: '{current.intRelativeZ}',
+
+            grdMeasurement: {
+                colMeasurement: {
+                    dataIndex: 'strMeasurementName',
+                    editor: {
+                        store: '{measurement}'
+                    }
+                },
+                colReadingPoint: {
+                    dataIndex: 'strReadingPoint',
+                    editor: {
+                        store: '{readingPoint}'
+                    }
+                },
+                colActive: ''
+            },
 
             grdItemCategoryAllowed: {
                 colCategory: {
@@ -79,11 +97,24 @@ Ext.define('Inventory.view.StorageUnitViewController', {
                 }
             },
 
-            txtSequence: '{current.intSequence}',
-            chkActive: '{current.ysnActive}',
-            txtXPosition: '{current.intRelativeX}',
-            txtYPosition: '{current.intRelativeY}',
-            txtZPosition: '{current.intRelativeZ}'
+            grdSKU: {
+                colItem: 'strItemNo',
+                colSku: 'strSku',
+                colQty: 'dblQuantity',
+                colContainer: 'strContainer',
+                colLotSerial: 'intLotCodeId',
+                colExpiration: 'dtmExpiration',
+                colStatus: 'strLotStatus',
+                colOwner: 'intOwnerId'
+            },
+
+            grdContainer: {
+                colContainer: 'strContainer',
+                colExternalSystem: 'intExternalSystemId',
+                colContainerType: 'strContainerType',
+                colLastUpdateBy: 'strLastUpdatedBy',
+                colLastUpdateOn: 'dtmLastUpdatedOn'
+            }
 
         }
     },
@@ -111,6 +142,22 @@ Ext.define('Inventory.view.StorageUnitViewController', {
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: win.down('#grdMeasurement'),
                         deleteButton : win.down('#btnDeleteMeasurement')
+                    })
+                },
+                {
+                    key: 'tblICStorageLocationSkus',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: win.down('#grdSKU'),
+                        deleteButton : win.down('#btnDeleteSKU'),
+                        position: 'none'
+                    })
+                },
+                {
+                    key: 'tblICStorageLocationContainers',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: win.down('#grdContainer'),
+                        deleteButton : win.down('#btnDeleteContainer'),
+                        position: 'none'
                     })
                 }
             ]
@@ -160,10 +207,34 @@ Ext.define('Inventory.view.StorageUnitViewController', {
         }
     },
 
+    onMeasurementSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepMeasurement');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colMeasurement')
+        {
+            current.set('intMeasurementId', records[0].get('intMeasurementId'));
+        }
+        else if (combo.column.itemId === 'colReadingPoint')
+        {
+            current.set('intReadingPointId', records[0].get('intReadingPointId'));
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboCategoryAllowed": {
                 select: this.onCategorySelect
+            },
+            "#cboMeasurement": {
+                select: this.onMeasurementSelect
+            },
+            "#cboReadingPoint": {
+                select: this.onMeasurementSelect
             }
         });
     }

@@ -7,6 +7,8 @@ Ext.define('Inventory.model.StorageLocation', {
     requires: [
         'Inventory.model.StorageLocationCategory',
         'Inventory.model.StorageLocationMeasurement',
+        'Inventory.model.StorageLocationSku',
+        'Inventory.model.StorageLocationContainer',
         'Ext.data.Field'
     ],
 

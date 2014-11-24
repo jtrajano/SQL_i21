@@ -83,6 +83,75 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
             this.Property(t => t.intStorageLocationMeasurementId).HasColumnName("intStorageLocationMeasurementId");
             this.Property(t => t.ysnActive).HasColumnName("ysnActive");
+
+            this.HasRequired(p => p.tblICMeasurement)
+                .WithMany(p => p.tblICStorageLocationMeasurements)
+                .HasForeignKey(p => p.intMeasurementId);
+            this.HasRequired(p => p.tblICReadingPoint)
+                .WithMany(p => p.tblICStorageLocationMeasurements)
+                .HasForeignKey(p => p.intReadingPointId);
+        }
+    }
+
+    public class tblICStorageLocationSkuMap : EntityTypeConfiguration<tblICStorageLocationSku>
+    {
+        public tblICStorageLocationSkuMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intStorageLocationSkuId);
+
+            // Table & Column Mappings
+            this.ToTable("tblICStorageLocationSku");
+            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity");
+            this.Property(t => t.intContainerId).HasColumnName("intContainerId");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.intLotCodeId).HasColumnName("intLotCodeId");
+            this.Property(t => t.intLotStatusId).HasColumnName("intLotStatusId");
+            this.Property(t => t.intOwnerId).HasColumnName("intOwnerId");
+            this.Property(t => t.intSkuId).HasColumnName("intSkuId");
+            this.Property(t => t.intSort).HasColumnName("intSort");
+            this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
+            this.Property(t => t.intStorageLocationSkuId).HasColumnName("intStorageLocationSkuId");
+
+            this.HasRequired(p => p.tblICItem)
+                .WithMany(p => p.tblICStorageLocationSkus)
+                .HasForeignKey(p => p.intItemId);
+            this.HasRequired(p => p.tblICSku)
+                .WithMany(p => p.tblICStorageLocationSkus)
+                .HasForeignKey(p => p.intSkuId);
+            this.HasOptional(p => p.tblICContainer)
+                .WithMany(p => p.tblICStorageLocationSkus)
+                .HasForeignKey(p => p.intContainerId);
+            this.HasOptional(p => p.tblICLotStatus)
+                .WithMany(p => p.tblICStorageLocationSkus)
+                .HasForeignKey(p => p.intLotStatusId);
+        }
+    }
+
+    public class tblICStorageLocationContainerMap : EntityTypeConfiguration<tblICStorageLocationContainer>
+    {
+        public tblICStorageLocationContainerMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intStorageLocationContainerId);
+
+            // Table & Column Mappings
+            this.ToTable("tblICStorageLocationContainer");
+            this.Property(t => t.dtmLastUpdatedOn).HasColumnName("dtmLastUpdatedOn");
+            this.Property(t => t.intContainerId).HasColumnName("intContainerId");
+            this.Property(t => t.intContainerTypeId).HasColumnName("intContainerTypeId");
+            this.Property(t => t.intExternalSystemId).HasColumnName("intExternalSystemId");
+            this.Property(t => t.intSort).HasColumnName("intSort");
+            this.Property(t => t.intStorageLocationContainerId).HasColumnName("intStorageLocationContainerId");
+            this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
+            this.Property(t => t.strLastUpdatedBy).HasColumnName("strLastUpdatedBy");
+
+            this.HasRequired(p => p.tblICContainer)
+                .WithMany(p => p.tblICStorageLocationContainers)
+                .HasForeignKey(p => p.intContainerId);
+            this.HasOptional(p => p.tblICContainerType)
+                .WithMany(p => p.tblICStorageLocationContainers)
+                .HasForeignKey(p => p.intContainerTypeId);
         }
     }
 }

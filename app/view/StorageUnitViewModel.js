@@ -20,7 +20,11 @@ Ext.define('Inventory.view.StorageUnitViewModel', {
     requires: [
         'Inventory.store.BufferedUnitMeasure',
         'Inventory.store.BufferedCategory',
-        'Inventory.store.BufferedFactoryUnitType'
+        'Inventory.store.BufferedFactoryUnitType',
+        'Inventory.store.BufferedCommodity',
+        'Inventory.store.BufferedRestriction',
+        'Inventory.store.BufferedMeasurement',
+        'Inventory.store.BufferedReadingPoint'
     ],
 
     stores: {
@@ -32,6 +36,18 @@ Ext.define('Inventory.view.StorageUnitViewModel', {
         },
         storageUnitType: {
             type: 'inventorybufferedfactoryunittype'
+        },
+        commodity: {
+            type: 'inventorybufferedcommodity'
+        },
+        restriction: {
+            type: 'inventorybufferedrestriction'
+        },
+        measurement: {
+            type: 'inventorybufferedmeasurement'
+        },
+        readingPoint: {
+            type: 'inventorybufferedreadingpoint'
         }
     }
 
