@@ -38,7 +38,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strERPItemClass).HasColumnName("strERPItemClass");
             this.Property(t => t.strGLDivisionNumber).HasColumnName("strGLDivisionNumber");
             this.Property(t => t.strInventoryTracking).HasColumnName("strInventoryTracking");
-            this.Property(t => t.strLineOfBusiness).HasColumnName("strLineOfBusiness");
+            this.Property(t => t.intLineOfBusinessId).HasColumnName("intLineOfBusinessId");
             this.Property(t => t.strMaterialFee).HasColumnName("strMaterialFee");
             this.Property(t => t.strShortName).HasColumnName("strShortName");
             this.Property(t => t.ysnAutoCalculateFreight).HasColumnName("ysnAutoCalculateFreight");

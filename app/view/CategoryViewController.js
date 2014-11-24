@@ -34,7 +34,7 @@ Ext.define('Inventory.view.CategoryViewController', {
             txtCategoryCode: '{current.strCategoryCode}',
             txtDescription: '{current.strDescription}',
             cboLineOfBusiness: {
-                value: '{current.strLineOfBusiness}',
+                value: '{current.intLineOfBusinessId}',
                 store: '{linesOfBusiness}'
             },
             cboCatalogGroup: '{current.intCatalogGroupId}',
@@ -59,12 +59,14 @@ Ext.define('Inventory.view.CategoryViewController', {
             },
             cboMaterialItem: {
                 value: '{current.intMaterialItemId}',
-                store: '{materialItem}'
+                store: '{materialItem}',
+                readOnly: '{checkMaterialFee}'
             },
             chkAutoCalculateFreight: '{current.ysnAutoCalculateFreight}',
             cboFreightItem: {
                 value: '{current.intFreightItemId}',
-                store: '{freightItem}'
+                store: '{freightItem}',
+                readOnly: '{checkAutoCalculateFreight}'
             },
 
             grdLocation: {

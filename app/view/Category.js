@@ -196,13 +196,27 @@ Ext.define('Inventory.view.Category', {
                                                                 labelWidth: 130
                                                             },
                                                             {
-                                                                xtype: 'combobox',
+                                                                xtype: 'gridcombobox',
+                                                                columns: [
+                                                                    {
+                                                                        dataIndex: 'intLineOfBusinessId',
+                                                                        dataType: 'numeric',
+                                                                        text: 'Line Of Business Id',
+                                                                        hidden: true
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strLineOfBusiness',
+                                                                        dataType: 'string',
+                                                                        text: 'Line Of Business',
+                                                                        flex: 1
+                                                                    }
+                                                                ],
                                                                 itemId: 'cboLineOfBusiness',
                                                                 fieldLabel: 'Line of Business',
                                                                 labelWidth: 130,
-                                                                displayField: 'strDescription',
+                                                                displayField: 'strLineOfBusiness',
                                                                 forceSelection: true,
-                                                                valueField: 'strDescription'
+                                                                valueField: 'intLineOfBusinessId'
                                                             },
                                                             {
                                                                 xtype: 'combobox',

@@ -20,6 +20,7 @@ Ext.define('Inventory.view.CategoryViewModel', {
     requires: [
         'Inventory.store.BufferedUnitMeasure',
         'Inventory.store.BufferedCompactItem',
+        'Inventory.store.BufferedLineOfBusiness',
         'GeneralLedger.store.BufAccountId',
         'AccountsPayable.store.VendorBuffered',
         'i21.store.CompanyLocationBuffered',
@@ -29,25 +30,7 @@ Ext.define('Inventory.view.CategoryViewModel', {
 
     stores: {
         linesOfBusiness: {
-            autoLoad: true,
-            data: [
-                {
-                    strDescription: 'Agronomy'
-                },{
-                    strDescription: 'Feed'
-                },{
-                    strDescription: 'Petroleum'
-                },{
-                    strDescription: 'Retail'
-                },{
-                    strDescription: 'Grain'
-                },{
-                    strDescription: 'Oil & Grease'
-                }
-            ],
-            fields: {
-                name: 'strDescription'
-            }
+            type: 'inventorybufferedlineofbusiness'
         },
         costingMethods: {
             autoLoad: true,
@@ -157,6 +140,27 @@ Ext.define('Inventory.view.CategoryViewModel', {
         },
         vendor: {
             type: 'vendorbuffered'
+        }
+    },
+
+    formulas: {
+        checkMaterialFee: function(get){
+            if (iRely.Functions.isEmpty(get('current.strMaterialFee')) || get('current.strMaterialFee') === 'No'){
+                this.data.current.set('intMaterialItemId', null);
+                return true;
+            }
+            else{
+                return false;
+            }
+        },
+        checkAutoCalculateFreight: function(get){
+            if (!get('current.ysnAutoCalculateFreight')){
+                this.data.current.set('intFreightItemId', null);
+                return true;
+            }
+            else{
+                return false;
+            }
         }
     }
 
