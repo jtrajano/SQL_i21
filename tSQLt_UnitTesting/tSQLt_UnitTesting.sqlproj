@@ -467,10 +467,6 @@
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="testi21Database\Functions\test fnCalculateAverageCost, use new cost when increasing stock but stock was from negative or zero.sql" />
-    <Build Include="testi21Database\Functions\test the fnGetConvertToItemReceiptErrors function for the basics.sql" />
-    <Build Include="testi21Database\Functions\test the fnGetConvertToItemReceiptErrors function for invalid item and valid location.sql" />
-    <Build Include="testi21Database\Functions\test the fnGetConvertToItemReceiptErrors function for valid item and invalid location.sql" />
-    <Build Include="testi21Database\Functions\test the fnGetConvertToItemReceiptErrors function for invalid item and invalid location.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICValidateProcessToItemReceipt as it checks for a valid item and location.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
@@ -493,6 +489,17 @@
     <Build Include="testi21Database\Stored Procedures\test uspICProcessToItemReceipt for errors thrown by uspICValidateProcessToItemReceipt.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLIFO for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLIFO from negative to negative.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLIFO from negative to positive _with partial in_.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLIFO from negative to positive.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLIFO from negative to zero.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLIFO from positive to positive.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLIFO from zero to positive.sql" />
+    <Build Include="testi21Database\Functions\test the fnGetProcessToItemReceiptErrors function for valid item and invalid location.sql" />
+    <Build Include="testi21Database\Functions\test the fnGetProcessToItemReceiptErrors function for the basics.sql" />
+    <Build Include="testi21Database\Functions\test the fnGetProcessToItemReceiptErrors function for invalid item and valid location.sql" />
+    <Build Include="testi21Database\Functions\test the fnGetProcessToItemReceiptErrors function for invalid item and invalid location.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

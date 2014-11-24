@@ -669,7 +669,6 @@
     <Build Include="dbo\Tables\tblICInventoryTransaction.sql" />
     <Build Include="dbo\Tables\tblICInventoryStockSummary.sql" />
     <Build Include="dbo\Tables\tblICInventoryFIFO.sql" />
-    <Build Include="dbo\Tables\tblICInventoryLIFO.sql" />
     <Build Include="dbo\Tables\tblICItemLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspICProcessCosting.sql" />
     <Build Include="dbo\User Defined Types\ItemCostingTableType.sql" />
@@ -855,7 +854,12 @@
     <Build Include="dbo\Stored Procedures\uspICValidateProcessToItemReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseOnOrderQty.sql" />
     <Build Include="dbo\Views\vyuAPPurchase.sql" />
-	<Build Include="dbo\Stored Procedures\uspICGetItemsForItemReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetItemsForItemReceipt.sql" />
+    <Build Include="dbo\Tables\tblICInventoryLIFO.sql" />
+    <Build Include="dbo\Tables\tblICInventoryLIFOOut.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReduceStockInLIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICProcessLIFO.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
