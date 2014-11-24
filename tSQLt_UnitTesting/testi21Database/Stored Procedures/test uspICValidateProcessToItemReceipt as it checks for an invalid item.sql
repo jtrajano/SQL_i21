@@ -1,6 +1,6 @@
 ﻿
 
-CREATE PROCEDURE [testi21Database].[test uspICValidateConvertToItemReceipt as it checks for an invalid item]
+CREATE PROCEDURE [testi21Database].[test uspICValidateProcessToItemReceipt as it checks for an invalid item]
 AS
 BEGIN
 	-- Arrange 
@@ -55,12 +55,9 @@ BEGIN
 		EXEC testi21Database.[Fake data for simple Items]; 
 	END 
 	
-	-- Test case 1: 
+	-- Act and Assert
 	BEGIN 
-		-- Assert the error expected
 		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 50027
-
-		-- Act 
-		EXEC dbo.uspICValidateConvertToItemReceipt @ItemsToValidate = @Items;
+		EXEC dbo.uspICValidateProcessToItemReceipt @ItemsToValidate = @Items;
 	END 
 END 

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE testi21Database.[test the fnGetConvertToItemReceiptErrors function for invalid item and valid location]
+﻿CREATE PROCEDURE testi21Database.[test the fnGetProcessToItemReceiptErrors function for the basics]
 AS 
 BEGIN
 	-- Arrange
@@ -31,33 +31,14 @@ BEGIN
 				,@BetterHaven AS INT = 3
 				,@InvalidLocation AS INT = -1
 
-		-- Setup the expected data
-		INSERT INTO expected (
-				intItemId
-				,intLocationId
-				,strText
-				,intErrorCode
-		)
-		-- Invalid item and valid location
-		SELECT	intItemId = @InvalidItem
-				,intLocationId = @Default_Location
-				,strText = FORMATMESSAGE(50027)
-				,intErrorCode = 50027
-		UNION ALL
-		SELECT	intItemId = @InvalidItem
-				,intLocationId = @Default_Location
-				,strText = FORMATMESSAGE(50028)
-				,intErrorCode = 50028
-
 		-- Create the mock data 
 		EXEC testi21Database.[Fake data for simple Items];
 	END
 
 	-- Act
 	BEGIN 
-		INSERT INTO actual	
-		-- Invalid item and valid location
-		SELECT * FROM dbo.fnGetConvertToItemReceiptErrors(@InvalidItem, @Default_Location, NULL)		
+		INSERT INTO actual
+		SELECT * FROM dbo.fnGetProcessToItemReceiptErrors(@WetGrains, @Default_Location, 0)		
 	END
 
 	-- Assert

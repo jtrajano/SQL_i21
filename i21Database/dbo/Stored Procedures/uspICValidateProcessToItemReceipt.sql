@@ -2,19 +2,15 @@
 	Used to validate the items before converting it to item receipt. When an error is found, it will execute a RAISERROR. 
 	This stored procedure is internally used for validation and it will always be called. 
 	
-	If you wish to retrieve the errors prior to posting and show it to the user, I suggest you use fnGetItemCostingOnPostErrors
+	If you wish to retrieve the errors prior to posting and show it to the user, I suggest you use fnGetProcessToItemReceiptErrors
 	and return the result back to the user-interface. 
 
 	These are the validations performed by this stored procedure
 	1. Check if item id is valid
 	2. Check if location is valid
-	
-	These are the validations outside this stored procedure. 
-	1. Check for closed period. 
-	2. Check for invalid G/L Account Ids - Do this inside the uspICPostCosting	
 */
 
-CREATE PROCEDURE [dbo].[uspICValidateConvertToItemReceipt]
+CREATE PROCEDURE [dbo].[uspICValidateProcessToItemReceipt]
 	@ItemsToValidate ItemCostingTableType READONLY
 AS
 
@@ -38,7 +34,7 @@ SELECT	Errors.intItemId
 		,Errors.intLocationId
 		,Errors.strText
 		,Errors.intErrorCode
-FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetConvertToItemReceiptErrors(Item.intItemId, Item.intLocationId, Item.dblUnitQty * Item.dblUOMQty) Errors
+FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetProcessToItemReceiptErrors(Item.intItemId, Item.intLocationId, Item.dblUnitQty * Item.dblUOMQty) Errors
 
 -- Check for invalid items in the temp table. 
 -- If such error is found, raise the error to stop the costing and allow the caller code to do a rollback. 

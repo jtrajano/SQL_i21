@@ -1,6 +1,4 @@
-﻿
-
-CREATE PROCEDURE [testi21Database].[test uspICValidateConvertToItemReceipt as it checks for an invalid item location]
+﻿CREATE PROCEDURE [testi21Database].[test uspICValidateProcessToItemReceipt as it checks for a valid item and location]
 AS
 BEGIN
 	-- Arrange 
@@ -17,7 +15,6 @@ BEGIN
 		DECLARE @Default_Location AS INT = 1
 				,@NewHaven AS INT = 2
 				,@BetterHaven AS INT = 3
-				,@InvalidLocation AS INT = -1
 
 		-- Create the items to validate variable. 
 		DECLARE @Items AS ItemCostingTableType
@@ -39,7 +36,35 @@ BEGIN
 				, intLotId
 		)
 		SELECT	intItemId = @WetGrains
-				,intLocationId = @InvalidLocation
+				,intLocationId = @Default_Location
+				,dtmDate = GETDATE()
+				,dblUnitQty = 10
+				,dblUOMQty = 1
+				,dblCost = 1.00
+				,dblSalesPrice = 2.00
+				,intCurrencyId = 1
+				,dblExchangeRate = 1
+				,intTransactionId = 1
+				,strTransactionId = 'TRANSACTION-XXXXX'
+				,intTransactionTypeId = 1
+				,intLotId = NULL 
+		UNION ALL 
+		SELECT	intItemId = @StickyGrains
+				,intLocationId = @NewHaven
+				,dtmDate = GETDATE()
+				,dblUnitQty = 10
+				,dblUOMQty = 1
+				,dblCost = 1.00
+				,dblSalesPrice = 2.00
+				,intCurrencyId = 1
+				,dblExchangeRate = 1
+				,intTransactionId = 1
+				,strTransactionId = 'TRANSACTION-XXXXX'
+				,intTransactionTypeId = 1
+				,intLotId = NULL 
+		UNION ALL 
+		SELECT	intItemId = @PremiumGrains
+				,intLocationId = @BetterHaven
 				,dtmDate = GETDATE()
 				,dblUnitQty = 10
 				,dblUOMQty = 1
@@ -56,12 +81,9 @@ BEGIN
 		EXEC testi21Database.[Fake data for simple Items]; 
 	END 
 	
-	-- Test case 1: 
+	-- Act and Assert
 	BEGIN 
-		-- Assert the error expected
-		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 50028
-
-		-- Act 
-		EXEC dbo.uspICValidateConvertToItemReceipt @ItemsToValidate = @Items;
+		EXEC tSQLt.ExpectNoException;
+		EXEC dbo.uspICValidateProcessToItemReceipt @ItemsToValidate = @Items;		
 	END 
 END 

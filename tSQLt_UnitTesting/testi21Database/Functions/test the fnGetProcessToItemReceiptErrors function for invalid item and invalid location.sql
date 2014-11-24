@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE testi21Database.[test the fnGetConvertToItemReceiptErrors function for valid item and invalid location]
+﻿CREATE PROCEDURE testi21Database.[test the fnGetProcessToItemReceiptErrors function for invalid item and invalid location]
 AS 
 BEGIN
 	-- Arrange
@@ -38,8 +38,13 @@ BEGIN
 				,strText
 				,intErrorCode
 		)
-		-- Valid item and invalid location
-		SELECT	intItemId = @StickyGrains
+		-- Invalid item and invalid location
+		SELECT	intItemId = @InvalidItem
+				,intLocationId = @InvalidLocation
+				,strText = FORMATMESSAGE(50027)
+				,intErrorCode = 50027
+		UNION ALL
+		SELECT	intItemId = @InvalidItem
 				,intLocationId = @InvalidLocation
 				,strText = FORMATMESSAGE(50028)
 				,intErrorCode = 50028
@@ -51,8 +56,8 @@ BEGIN
 	-- Act
 	BEGIN 
 		INSERT INTO actual	
-		-- valid item and invalid location
-		SELECT * FROM dbo.fnGetConvertToItemReceiptErrors(@StickyGrains, @InvalidLocation, NULL)		
+		-- Invalid item and invalid location
+		SELECT * FROM dbo.fnGetProcessToItemReceiptErrors(@InvalidItem, @InvalidLocation, NULL)		
 	END
 
 	-- Assert
@@ -63,5 +68,6 @@ BEGIN
 		DROP TABLE actual
 
 	IF OBJECT_ID('expected') IS NOT NULL 
-		DROP TABLE expected	
+		DROP TABLE expected
+	
 END
