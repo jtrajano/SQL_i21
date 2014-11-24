@@ -137,7 +137,6 @@
     <Folder Include="Scripts\Post-Deployment\HD\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\IC" />
     <Folder Include="Scripts\Post-Deployment\Optional Run\Reports" />
-    <Folder Include="Scripts\Post-Deployment\AP\DefaultData" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -670,6 +669,7 @@
     <Build Include="dbo\Tables\tblICInventoryTransaction.sql" />
     <Build Include="dbo\Tables\tblICInventoryStockSummary.sql" />
     <Build Include="dbo\Tables\tblICInventoryFIFO.sql" />
+    <Build Include="dbo\Tables\tblICInventoryLIFO.sql" />
     <Build Include="dbo\Tables\tblICItemLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspICProcessCosting.sql" />
     <Build Include="dbo\User Defined Types\ItemCostingTableType.sql" />
@@ -823,7 +823,7 @@
     <Build Include="dbo\Functions\fnGetDebit.sql" />
     <Build Include="dbo\Functions\fnGetCredit.sql" />
     <Build Include="dbo\Stored Procedures\uspAPDuplicateBill.sql" />
-    <Build Include="dbo\Stored Procedures\uspICProcessToItemReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspICConvertToItemReceipt.sql" />
     <Build Include="dbo\Tables\tblICReadingPoint.sql" />
     <Build Include="dbo\Tables\tblICMeasurement.sql" />
     <Build Include="dbo\Tables\tblICContainer.sql" />
@@ -851,20 +851,12 @@
     <Build Include="dbo\Tables\tblCTPutCall.sql" />
     <Build Include="dbo\Tables\tblCTRailGrade.sql" />
     <Build Include="dbo\Tables\tblCTWeightGrade.sql" />
-    <Build Include="dbo\Functions\fnGetProcessToItemReceiptErrors.sql" />
-    <Build Include="dbo\Stored Procedures\uspICValidateProcessToItemReceipt.sql" />
+    <Build Include="dbo\Functions\fnGetConvertToItemReceiptErrors.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateConvertToItemReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseOnOrderQty.sql" />
     <Build Include="dbo\Views\vyuAPPurchase.sql" />
-    <Build Include="dbo\Stored Procedures\uspICGetItemsForItemReceipt.sql" />
-    <Build Include="dbo\Tables\tblICInventoryLIFO.sql" />
-    <Build Include="dbo\Tables\tblICInventoryLIFOOut.sql" />
-    <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLIFO.sql" />
-    <Build Include="dbo\Stored Procedures\uspICReduceStockInLIFO.sql" />
-    <Build Include="dbo\Stored Procedures\uspICProcessLIFO.sql" />
-    <Build Include="dbo\Stored Procedures\uspARDuplicateInvoice.sql" />
-    <Build Include="dbo\Functions\fnGetDueDateBasedOnTerm.sql" />
-    <Build Include="dbo\Tables\tblPOOrderStatus.sql" />
-    <None Include="Scripts\Post-Deployment\AP\DefaultData\POOrderStatus.sql" />
+    <Build Include="dbo\Tables\tblICStorageLocationContainer.sql" />
+    <Build Include="dbo\Tables\tblICStorageLocationSku.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
