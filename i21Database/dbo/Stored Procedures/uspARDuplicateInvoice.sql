@@ -7,6 +7,10 @@ AS
 DECLARE @InvoiceNumber nvarchar(25)
 EXEC uspSMGetStartingNumber 19, @InvoiceNumber OUT
 
+DECLARE @EntityId int
+
+SET @EntityId = ISNULL((SELECT TOP 1 intEntityId FROM tblSMUserSecurity WHERE intUserSecurityID = @UserId), 0)
+
 INSERT INTO tblARInvoice(
 	strInvoiceNumber
 	,strInvoiceOriginId
@@ -43,7 +47,8 @@ INSERT INTO tblARInvoice(
 	,strBillToState
 	,strBillToZipCode
 	,strBillToCountry
-	,intConcurrencyId)
+	,intConcurrencyId
+	,intEntityId)
 SELECT 
 	@InvoiceNumber
 	,strInvoiceOriginId
@@ -81,13 +86,13 @@ SELECT
 	,strBillToZipCode
 	,strBillToCountry
 	,0
+	,@EntityId
 FROM 
 	tblARInvoice
 WHERE
 	intInvoiceId = @InvoiceId
 	
 	
-
 DECLARE @NewInvoiceId int
 
 SET @NewInvoiceId = SCOPE_IDENTITY()
@@ -114,6 +119,3 @@ FROM
 	tblARInvoiceDetail
 WHERE
 	intInvoiceId = @InvoiceId	
-
-
-
