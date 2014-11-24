@@ -19,6 +19,15 @@ GO
 IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPVendorHistory')
 	DROP VIEW vyuAPVendorHistory
 GO
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPPayablesAgingSummary')
+	DROP VIEW vyuAPPayablesAgingSummary
+GO
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPPayablesSummary')
+	DROP VIEW vyuAPPayablesSummary
+GO
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPPayables')
+	DROP VIEW vyuAPPayables
+GO
 
 PRINT 'END DROPPING AP VIEWS'
 GO

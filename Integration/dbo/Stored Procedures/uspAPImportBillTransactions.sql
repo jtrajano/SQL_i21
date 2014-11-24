@@ -268,7 +268,7 @@ BEGIN
 
 				--UPDATE billbatch of Bill
 				UPDATE tblAPBill
-					SET intBillBatchId = @BillBatchId
+					SET intBillBatchId = @BillBatchId, strBillId = @GeneratedBillId
 				FROM tblAPBill
 				WHERE intBillId = @BillId
 
@@ -277,7 +277,7 @@ BEGIN
 
 			--CREATE PAYMENT
 
-				CREATE TABLE #tmpBillsPayment
+			CREATE TABLE #tmpBillsPayment
 			(
 				[id] INT IDENTITY(1,1),
 				[strCheckBookNo] NVARCHAR(4),
@@ -366,19 +366,20 @@ BEGIN
 			FROM #tmpBillsPayment A
 				WHERE NOT EXISTS(SELECT * FROM tblSMPaymentMethod B WHERE B.strPaymentMethod = A.strPaymentMethod COLLATE Latin1_General_CS_AS)
 	
-			DECLARE @paymentId INT
+			DECLARE @paymentId INT, @paymentKey INT
 
 			WHILE EXISTS(SELECT 1 FROM #tmpBillsPayment)
 			BEGIN
 
-				SELECT TOP 1
+				SELECT TOP(1)
 					@bankAccount = C.intBankAccountId,
 					@intVendorId = B.intVendorId,
 					@paymentInfo = A.strCheckNo,
 					@payment = A.dblAmount,
 					@datePaid = A.dtmDate,
 					@paymentMethod = (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = A.strPaymentMethod COLLATE Latin1_General_CS_AS),
-					@billIds = A.strBills
+					@billIds = A.strBills,
+					@paymentKey = A.id
 				FROM #tmpBillsPayment A
 					INNER JOIN tblAPVendor B
 						ON A.strVendorId = B.strVendorId COLLATE Latin1_General_CS_AS
@@ -401,7 +402,8 @@ BEGIN
 				UPDATE tblAPPayment
 				SET ysnOrigin = 1
 				WHERE intPaymentId = @paymentId
-				DELETE TOP(1) FROM #tmpBillsPayment
+
+				DELETE FROM #tmpBillsPayment WHERE id = @paymentKey
 			END
 
 			--backup data from aptrxmst on one time synchronization
@@ -625,7 +627,7 @@ BEGIN
 
 				--UPDATE billbatch of Bill
 				UPDATE tblAPBill
-					SET intBillBatchId = @BillBatchId
+					SET intBillBatchId = @BillBatchId, strBillId = @GeneratedBillId
 				FROM tblAPBill
 				WHERE intBillId = @BillId
 

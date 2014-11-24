@@ -85,6 +85,7 @@
     <None Include="Scripts\Pre-Deployment\6_GL\2_1430_to_1440.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\DropAPViews.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\FixPaymentWithoutVendorId.sql" />
+    <None Include="Scripts\Pre-Deployment\8_AP\DropTriggers.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
