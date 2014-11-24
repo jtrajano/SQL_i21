@@ -20,6 +20,17 @@
     [ysnUseDeliveryTermOnCS]           BIT             DEFAULT 1 NULL,
     [ysnEnableLeaseBillingAboveMinUse] BIT             DEFAULT 0 NULL,
     [ysnOriginDataImported] BIT NOT NULL DEFAULT 1, 
+    [dblDefaultBurnRate] NUMERIC(18, 6) NOT NULL DEFAULT 1, 
     CONSTRAINT [PK_tblTMPreferenceCompany] PRIMARY KEY CLUSTERED ([intPreferenceCompanyID] ASC)
 );
 
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Default burn rate for new Site',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'dblDefaultBurnRate'
