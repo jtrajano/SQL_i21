@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE testi21Database.[test the fnGetItemCostingOnPostErrors function]
+﻿CREATE PROCEDURE testi21Database.[test the fnGetItemCostingOnPostErrorss function for the basics]
 AS 
 BEGIN
 	-- Arrange

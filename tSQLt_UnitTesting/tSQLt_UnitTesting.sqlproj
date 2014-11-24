@@ -467,6 +467,29 @@
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="testi21Database\Functions\test fnCalculateAverageCost, use new cost when increasing stock but stock was from negative or zero.sql" />
+    <Build Include="testi21Database\Functions\test the fnGetConvertToItemReceiptErrors function for the basics.sql" />
+    <Build Include="testi21Database\Functions\test the fnGetConvertToItemReceiptErrors function for invalid item and valid location.sql" />
+    <Build Include="testi21Database\Functions\test the fnGetConvertToItemReceiptErrors function for valid item and invalid location.sql" />
+    <Build Include="testi21Database\Functions\test the fnGetConvertToItemReceiptErrors function for invalid item and invalid location.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateConvertToItemReceipt as it checks for a valid item and location.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateConvertToItemReceipt as it checks for an invalid item location.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateConvertToItemReceipt as it checks for an invalid item.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICConvertToItemReceipt for errors thrown by uspICValidateConvertToItemReceipt.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICConvertToItemReceipt for errors thrown by uspICIncreaseOnOrderQty.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseOnOrderQty for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseOnOrderQty for increase in on-order qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseOnOrderQty for decrease in on-order qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseOnOrderQty for decrease in on-order qty on multiple items.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

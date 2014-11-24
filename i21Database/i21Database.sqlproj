@@ -851,6 +851,9 @@
     <Build Include="dbo\Tables\tblCTPutCall.sql" />
     <Build Include="dbo\Tables\tblCTRailGrade.sql" />
     <Build Include="dbo\Tables\tblCTWeightGrade.sql" />
+    <Build Include="dbo\Functions\fnGetConvertToItemReceiptErrors.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateConvertToItemReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseOnOrderQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
