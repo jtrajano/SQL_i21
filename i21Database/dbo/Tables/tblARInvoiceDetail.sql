@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblARInvoiceDetail] (
     [intInvoiceDetailId] INT             IDENTITY (1, 1) NOT NULL,
     [intInvoiceId]       INT             NOT NULL,
+	[intCompanyLocationId]      INT      NOT NULL DEFAULT ((0)),
     [intItemId]          INT             NULL,
     [strItemDescription] NVARCHAR (250)  NULL,
 	[intItemUOMId]       INT             NULL,
@@ -8,6 +9,7 @@
     [dblQtyShipped]      NUMERIC (18, 6) NULL,
     [dblPrice]           NUMERIC (18, 6) NULL,
     [dblTotal]           NUMERIC (18, 6) NULL,
+	[intAccountId]		 INT             NULL,
     [intConcurrencyId]   INT             CONSTRAINT [DF_tblARInvoiceDetail_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARInvoiceDetail] PRIMARY KEY CLUSTERED ([intInvoiceDetailId] ASC),
     CONSTRAINT [FK_tblARInvoiceDetail_tblARInvoice1] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId])

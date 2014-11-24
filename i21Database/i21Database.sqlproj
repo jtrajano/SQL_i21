@@ -857,6 +857,7 @@
     <Build Include="dbo\Views\vyuAPPurchase.sql" />
     <Build Include="dbo\Tables\tblICStorageLocationContainer.sql" />
     <Build Include="dbo\Tables\tblICStorageLocationSku.sql" />
+    <Build Include="dbo\Views\vyuARItemUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
