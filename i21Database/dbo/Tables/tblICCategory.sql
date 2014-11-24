@@ -3,7 +3,7 @@
 	[intCategoryId] INT NOT NULL IDENTITY , 
     [strCategoryCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-	[strLineOfBusiness] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[intLineOfBusinessId] INT NULL, 
     [intCatalogGroupId] INT NULL, 
     [intCostingMethod] INT NOT NULL DEFAULT 1,
     [strInventoryTracking] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
@@ -40,10 +40,8 @@
     CONSTRAINT [PK_tblICCategory] PRIMARY KEY ([intCategoryId]), 
     CONSTRAINT [AK_tblICCategory_strCategoryCode] UNIQUE ([strCategoryCode]), 
     CONSTRAINT [FK_tblICCategory_tblICCatalog] FOREIGN KEY ([intCatalogGroupId]) REFERENCES [tblICCatalog]([intCatalogId]),
-	CONSTRAINT [FK_tblICCategory_tblICUnitMeasure] FOREIGN KEY ([intUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
-	--CONSTRAINT [FK_tblICCategory_MaterialItem] FOREIGN KEY ([intMaterialItemId]) REFERENCES [tblICItem]([intItemId]),
-	--CONSTRAINT [FK_tblICCategory_FreightItem] FOREIGN KEY ([intFreightItemId]) REFERENCES [tblICItem]([intItemId])
-	
+	CONSTRAINT [FK_tblICCategory_tblICUnitMeasure] FOREIGN KEY ([intUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+    CONSTRAINT [FK_tblICCategory_tblICLineOfBusiness] FOREIGN KEY ([intLineOfBusinessId]) REFERENCES [tblICLineOfBusiness]([intLineOfBusinessId])	
 )
 
 GO
@@ -174,38 +172,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICCategory',
     @level2type = N'COLUMN',
     @level2name = N'intFreightItemId'
-GO
-
-GO
-
-GO
-
-GO
-
-GO
-
-GO
-
-GO
-
-GO
-
-GO
-
-GO
-
-GO
-
-GO
-
-GO
-
-GO
-
-GO
-
-GO
-
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'ERP Item Class',
@@ -403,4 +369,4 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblICCategory',
     @level2type = N'COLUMN',
-    @level2name = N'strLineOfBusiness'
+    @level2name = 'intLineOfBusinessId'
