@@ -872,6 +872,7 @@
     <Build Include="dbo\Tables\tblICItemFactoryManufacturingCell.sql" />
     <Build Include="dbo\Tables\tblICItemOwner.sql" />
     <Build Include="dbo\Views\vyuICGetItemStock.sql" />
+    <Build Include="dbo\Tables\tblSMRecurringTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
