@@ -80,6 +80,9 @@ namespace iRely.Inventory.BRL
                     .Include("tblICItemKits.tblICItemKitDetails.tblICItem")
                     .Include("tblICItemKits.tblICItemKitDetails.tblICUnitMeasure")
                     .Include("tblICItemNotes.tblSMCompanyLocation")
+                    .Include("tblICItemFactories.tblSMCompanyLocation")
+                    .Include("tblICItemFactories.tblICItemFactoryManufacturingCells.tblICManufacturingCell")
+                    .Include("tblICItemOwners.tblARCustomer")
                     .Take(0).ToList();
         }
 
@@ -138,6 +141,9 @@ namespace iRely.Inventory.BRL
                     .Include("tblICItemKits.tblICItemKitDetails.tblICItem")
                     .Include("tblICItemKits.tblICItemKitDetails.tblICUnitMeasure")
                     .Include("tblICItemNotes.tblSMCompanyLocation")
+                    .Include("tblICItemFactories.tblSMCompanyLocation")
+                    .Include("tblICItemFactories.tblICItemFactoryManufacturingCells.tblICManufacturingCell")
+                    .Include("tblICItemOwners.tblARCustomer")
                     .Where(w => query.Where(predicate).Any(a => a.intItemId == w.intItemId)) //Filter the Main DataSource Based on Search Query
                     .OrderBySelector(sortSelector)
                     .Skip(start)

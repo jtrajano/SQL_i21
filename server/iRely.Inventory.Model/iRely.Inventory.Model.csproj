@@ -54,6 +54,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="InventoryEntities.cs" />
+    <Compile Include="Mappings\tblICItemFactoryMap.cs" />
+    <Compile Include="Mappings\tblICItemOwnerMap.cs" />
     <Compile Include="Mappings\tblICContainerMap.cs" />
     <Compile Include="Mappings\tblICContainerTypeMap.cs" />
     <Compile Include="Mappings\tblICMeasurementMap.cs" />
@@ -119,6 +121,8 @@
     <Compile Include="Mappings\tblICUnitMeasureMap.cs" />
     <Compile Include="Mappings\tblICStorageUnitTypeMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tables\tblICItemFactory.cs" />
+    <Compile Include="Tables\tblICItemOwner.cs" />
     <Compile Include="Tables\tblICSku.cs" />
     <Compile Include="Tables\tblICRestriction.cs" />
     <Compile Include="Tables\tblICReadingPoint.cs" />

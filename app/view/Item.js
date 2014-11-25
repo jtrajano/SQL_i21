@@ -4676,7 +4676,7 @@ Ext.define('Inventory.view.Item', {
                                     },
                                     {
                                         xtype: 'panel',
-                                        hidden: true,
+                                        width: 926,
                                         bodyPadding: 5,
                                         title: 'Factory & Lines',
                                         layout: {
@@ -4734,15 +4734,45 @@ Ext.define('Inventory.view.Item', {
                                                                 columns: [
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        itemId: 'colPricingLevelLocation',
+                                                                        itemId: 'colFactoryName',
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Factory Name',
-                                                                        flex: 1
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intCompanyLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Location Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strLocationName',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Location Name',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strLocationType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Location Type',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboFactory',
+                                                                            displayField: 'strLocationName',
+                                                                            valueField: 'strLocationName'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'checkcolumn',
+                                                                        itemId: 'colFactoryDefault',
                                                                         width: 60,
-                                                                        text: 'Default'
+                                                                        text: 'Default',
+                                                                        editor: {
+                                                                            xtype: 'checkboxfield'
+                                                                        }
                                                                     }
                                                                 ],
                                                                 viewConfig: {
@@ -4751,7 +4781,14 @@ Ext.define('Inventory.view.Item', {
                                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                                     selType: 'checkboxmodel',
                                                                     mode: 'SINGLE'
-                                                                })
+                                                                }),
+                                                                plugins: [
+                                                                    {
+                                                                        ptype: 'cellediting',
+                                                                        pluginId: 'cepFactory',
+                                                                        clicksToEdit: 1
+                                                                    }
+                                                                ]
                                                             },
                                                             {
                                                                 xtype: 'advancefiltergrid',
@@ -4788,19 +4825,53 @@ Ext.define('Inventory.view.Item', {
                                                                 columns: [
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        itemId: 'colPricingLevelLocation',
+                                                                        itemId: 'colCellName',
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Cell Name',
-                                                                        flex: 1
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intManufacturingCellId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Manufacturing Cell Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strCellName',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Cell Name',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strDescription',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Description',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboManufacturingCell',
+                                                                            displayField: 'strCellName',
+                                                                            valueField: 'strCellName'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'checkcolumn',
+                                                                        itemId: 'colCellNameDefault',
                                                                         width: 60,
-                                                                        text: 'Default'
+                                                                        text: 'Default',
+                                                                        editor: {
+                                                                            xtype: 'checkboxfield'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
-                                                                        text: 'Preference'
+                                                                        itemId: 'colCellPreference',
+                                                                        text: 'Preference',
+                                                                        editor: {
+                                                                            xtype: 'numberfield'
+                                                                        }
                                                                     }
                                                                 ],
                                                                 viewConfig: {
@@ -4809,7 +4880,14 @@ Ext.define('Inventory.view.Item', {
                                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                                     selType: 'checkboxmodel',
                                                                     mode: 'SINGLE'
-                                                                })
+                                                                }),
+                                                                plugins: [
+                                                                    {
+                                                                        ptype: 'cellediting',
+                                                                        pluginId: 'cepManufacturingCell',
+                                                                        clicksToEdit: 1
+                                                                    }
+                                                                ]
                                                             }
                                                         ]
                                                     },
@@ -4852,15 +4930,45 @@ Ext.define('Inventory.view.Item', {
                                                                 columns: [
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        itemId: 'colSpecialPricingLocation',
+                                                                        itemId: 'colOwner',
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Owner',
-                                                                        flex: 1
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intCustomerId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Customer Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strCustomerNumber',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Customer No',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Type',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboOwner',
+                                                                            displayField: 'strCustomerNumber',
+                                                                            valueField: 'strCustomerNumber'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'checkcolumn',
+                                                                        itemId: 'colOwnerDefault',
                                                                         width: 70,
-                                                                        text: 'Is Default'
+                                                                        text: 'Is Default',
+                                                                        editor: {
+                                                                            xtype: 'checkboxfield'
+                                                                        }
                                                                     }
                                                                 ],
                                                                 viewConfig: {
@@ -4869,7 +4977,14 @@ Ext.define('Inventory.view.Item', {
                                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                                     selType: 'checkboxmodel',
                                                                     mode: 'SINGLE'
-                                                                })
+                                                                }),
+                                                                plugins: [
+                                                                    {
+                                                                        ptype: 'cellediting',
+                                                                        pluginId: 'cepOwner',
+                                                                        clicksToEdit: 1
+                                                                    }
+                                                                ]
                                                             }
                                                         ]
                                                     }

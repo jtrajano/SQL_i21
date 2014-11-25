@@ -82,6 +82,7 @@ namespace iRely.Inventory.Model
         }
 
         public ICollection<tblICManufacturingCellPackType> tblICManufacturingCellPackTypes { get; set; }
+        public ICollection<tblICItemFactoryManufacturingCell> tblICItemFactoryManufacturingCells { get; set; }
 
         public tblSMCompanyLocation tblSMCompanyLocation { get; set; }
         public tblICUnitMeasure CapacityUnitMeasure { get; set; }

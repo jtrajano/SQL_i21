@@ -20,6 +20,7 @@ Ext.define('Inventory.view.ItemViewModel', {
     requires: [
         'Inventory.store.BufferedCompactItem',
         'Inventory.store.BufferedManufacturer',
+        'Inventory.store.BufferedManufacturingCell',
         'Inventory.store.BufferedCategory',
         'Inventory.store.BufferedPatronageCategory',
         'Inventory.store.BufferedInventoryTag',
@@ -570,6 +571,15 @@ Ext.define('Inventory.view.ItemViewModel', {
             type: 'inventorybuffereduom'
         },
 
+        factory: {
+            type: 'companylocationbuffered'
+        },
+        factoryManufacturingCell: {
+            type: 'inventorybufferedmanufacturingcell'
+        },
+        owner: {
+            type: 'customerbuffered'
+        },
 
         noteLocation: {
             type: 'companylocationbuffered'

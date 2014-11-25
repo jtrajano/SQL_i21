@@ -606,7 +606,36 @@ Ext.define('Inventory.view.ItemViewController', {
             //-------------------//
             //Factory & Lines Tab//
             //-------------------//
+            grdFactory: {
+                colFactoryName: {
+                    dataIndex: 'strLocationName',
+                    editor: {
+                        store: '{factory}'
+                    }
+                },
+                colFactoryDefault: 'ysnDefault'
+            },
 
+            grdManufacturingCellAssociation: {
+                colCellName: {
+                    dataIndex: 'strCellName',
+                    editor: {
+                        store: '{factoryManufacturingCell}'
+                    }
+                },
+                colCellNameDefault: 'ysnDefault',
+                colCellPreference: 'intPreference'
+            },
+
+            grdOwner: {
+                colOwner: {
+                    dataIndex: 'strCustomerNumber',
+                    editor: {
+                        store: '{owner}'
+                    }
+                },
+                colOwnerDefault: 'ysnActive'
+            },
 
             //---------//
             //Notes Tab//
@@ -646,6 +675,9 @@ Ext.define('Inventory.view.ItemViewController', {
             grdDocumentAssociation = win.down('#grdDocumentAssociation'),
             grdCertification = win.down('#grdCertification'),
             grdStock = win.down('#grdStock'),
+            grdFactory = win.down('#grdFactory'),
+            grdManufacturingCellAssociation = win.down('#grdManufacturingCellAssociation'),
+            grdOwner = win.down('#grdOwner'),
 
             grdPricing = win.down('#grdPricing'),
             grdPricingLevel = win.down('#grdPricingLevel'),
@@ -810,6 +842,29 @@ Ext.define('Inventory.view.ItemViewController', {
                             component: Ext.create('iRely.mvvm.grid.Manager', {
                                 grid: grdKitDetails,
                                 deleteButton : grdKitDetails.down('#btnDeleteKitDetail')
+                            })
+                        }
+                    ]
+                },
+                {
+                    key: 'tblICItemOwners',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdOwner,
+                        deleteButton : grdOwner.down('#btnDeleteOwner')
+                    })
+                },
+                {
+                    key: 'tblICItemFactories',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdFactory,
+                        deleteButton : grdFactory.down('#btnDeleteFactory')
+                    }),
+                    details: [
+                        {
+                            key: 'tblICItemFactoryManufacturingCells',
+                            component: Ext.create('iRely.mvvm.grid.Manager', {
+                                grid: grdManufacturingCellAssociation,
+                                deleteButton : grdManufacturingCellAssociation.down('#btnDeleteManufacturingCellAssociation')
                             })
                         }
                     ]
@@ -1270,7 +1325,50 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // </editor-fold>
 
-    // <editor-fold desc="Kit Details Tab Methods and Event Handlers">
+    // <editor-fold desc="Factory & Lines Tab Methods and Event Handlers">
+
+    onFactorySelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepFactory');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colFactoryName'){
+            current.set('intFactoryId', records[0].get('intCompanyLocationId'));
+        }
+    },
+
+    onManufacturingCellSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepManufacturingCell');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colCellName'){
+            current.set('intManufacturingCellId', records[0].get('intManufacturingCellId'));
+        }
+    },
+
+    onOwnerSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepOwner');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colOwner'){
+            current.set('intOwnerId', records[0].get('intCustomerId'));
+        }
+    },
+
+    // </editor-fold>
+
+    // <editor-fold desc="Note Tab Methods and Event Handlers">
 
     onNoteSelect: function(combo, records, eOpts) {
         if (records.length <= 0)
@@ -1384,6 +1482,15 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboNoteLocation": {
                 select: this.onNoteSelect
+            },
+            "#cboFactory": {
+                select: this.onFactorySelect
+            },
+            "#cboManufacturingCell": {
+                select: this.onManufacturingCellSelect
+            },
+            "#cboOwner": {
+                select: this.onOwnerSelect
             }
         });
     }

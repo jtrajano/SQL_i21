@@ -24,6 +24,8 @@ Ext.define('Inventory.model.Item', {
         'Inventory.model.ItemBundle',
         'Inventory.model.ItemKit',
         'Inventory.model.ItemNote',
+        'Inventory.model.ItemOwner',
+        'Inventory.model.ItemFactory',
         'Ext.data.Field'
     ],
 

@@ -30,7 +30,8 @@ namespace iRely.Inventory.Model
             this.tblICItemStocks = new List<tblICItemStock>();
             this.tblICItemAccounts = new List<tblICItemAccount>();
             this.tblICItemNotes = new List<tblICItemNote>();
-
+            this.tblICItemFactories = new List<tblICItemFactory>();
+            this.tblICItemOwners = new List<tblICItemOwner>();
             this.tblICItemKits = new List<tblICItemKit>();
             this.tblICItemAssemblies = new List<tblICItemAssembly>();
             this.tblICItemBundles = new List<tblICItemBundle>();
@@ -202,12 +203,14 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemCustomerXref> tblICItemCustomerXrefs { get; set; }
         public ICollection<tblICItemContract> tblICItemContracts { get; set; }
         public ICollection<tblICItemCertification> tblICItemCertifications { get; set; }
+        public ICollection<tblICItemFactory> tblICItemFactories { get; set; }
         public ICollection<tblICItemPricing> tblICItemPricings { get; set; }
         public ICollection<tblICItemPricingLevel> tblICItemPricingLevels { get; set; }
         public ICollection<tblICItemSpecialPricing> tblICItemSpecialPricings { get; set; }
         public ICollection<tblICItemStock> tblICItemStocks { get; set; }
         public ICollection<tblICItemAccount> tblICItemAccounts { get; set; }
         public ICollection<tblICItemNote> tblICItemNotes { get; set; }
+        public ICollection<tblICItemOwner> tblICItemOwners { get; set; }
         public ICollection<tblICItemKit> tblICItemKits { get; set; }
         public ICollection<tblICItemKitDetail> tblICItemKitDetails { get; set; }
         public ICollection<tblICItemBundle> tblICItemBundles { get; set; }
