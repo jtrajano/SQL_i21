@@ -137,6 +137,7 @@
     <Folder Include="Scripts\Post-Deployment\HD\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\IC" />
     <Folder Include="Scripts\Post-Deployment\Optional Run\Reports" />
+    <Folder Include="Scripts\Post-Deployment\AP\DefaultData" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -855,6 +856,17 @@
     <Build Include="dbo\Tables\tblICStorageLocationContainer.sql" />
     <Build Include="dbo\Tables\tblICStorageLocationSku.sql" />
     <Build Include="dbo\Views\vyuARItemUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspICProcessToItemReceipt.sql" />
+    <Build Include="dbo\Functions\fnGetProcessToItemReceiptErrors.sql" />
+    <None Include="Scripts\Post-Deployment\AP\DefaultData\POOrderStatus.sql" />
+    <Build Include="dbo\Tables\tblICInventoryLIFOOut.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateProcessToItemReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReduceStockInLIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICProcessLIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspARDuplicateInvoice.sql" />
+    <Build Include="dbo\Functions\fnGetDueDateBasedonTerm.sql" />
+    <Build Include="dbo\Tables\tblPOOrderStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
