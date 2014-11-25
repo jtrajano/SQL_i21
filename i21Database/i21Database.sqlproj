@@ -855,6 +855,9 @@
     <Build Include="dbo\Tables\tblICStorageLocationContainer.sql" />
     <Build Include="dbo\Tables\tblICStorageLocationSku.sql" />
     <Build Include="dbo\Views\vyuARItemUOM.sql" />
+    <Build Include="dbo\Tables\tblICItemFactory.sql" />
+    <Build Include="dbo\Tables\tblICItemFactoryManufacturingCell.sql" />
+    <Build Include="dbo\Tables\tblICItemOwner.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
