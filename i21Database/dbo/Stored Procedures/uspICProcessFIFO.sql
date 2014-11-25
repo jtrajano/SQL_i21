@@ -71,7 +71,7 @@ BEGIN
 				,@UpdatedFifoId OUTPUT 
 
 			-- Insert the inventory transaction record
-			INSERT INTO tblICInventoryTransaction (
+			INSERT INTO dbo.tblICInventoryTransaction (
 				[intItemId] 
 				,[intLocationId] 
 				,[dtmDate] 
@@ -110,7 +110,7 @@ BEGIN
 			SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
 			
 			-- Insert the record the the fifo-out table
-			INSERT INTO tblICInventoryFIFOOut (
+			INSERT INTO dbo.tblICInventoryFIFOOut (
 					intInventoryTransactionId
 					,intInventoryFIFOId
 					,dblQty
@@ -136,7 +136,7 @@ BEGIN
 		SET @TotalQtyOffset = 0;
 
 		-- Insert the inventory transaction record
-		INSERT INTO tblICInventoryTransaction (
+		INSERT INTO dbo.tblICInventoryTransaction (
 			[intItemId] 
 			,[intLocationId] 
 			,[dtmDate] 
@@ -195,7 +195,7 @@ BEGIN
 			SET @TotalQtyOffset += ISNULL(@QtyOffset, 0)
 
 			-- Insert the inventory transaction record
-			INSERT INTO tblICInventoryTransaction (
+			INSERT INTO dbo.tblICInventoryTransaction (
 				[intItemId] 
 				,[intLocationId] 
 				,[dtmDate] 
@@ -255,7 +255,7 @@ BEGIN
 			SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
 			
 			-- Insert the record the the fifo-out table
-			INSERT INTO tblICInventoryFIFOOut (
+			INSERT INTO dbo.tblICInventoryFIFOOut (
 					intInventoryTransactionId
 					,intInventoryFIFOId
 					,dblQty
@@ -273,7 +273,7 @@ BEGIN
 		-- Update the fifo out table and assign the correct fifo id. 
 		UPDATE	FifoOut
 		SET		FifoOut.intInventoryFIFOId = @NewFifoId
-		FROM	tblICInventoryFIFOOut FifoOut INNER JOIN tblICInventoryTransaction TRANS
+		FROM	dbo.tblICInventoryFIFOOut FifoOut INNER JOIN dbo.tblICInventoryTransaction TRANS
 					ON FifoOut.intInventoryTransactionId = TRANS.intInventoryTransactionId 
 					AND FifoOut.intInventoryFIFOId IS NULL 
 					AND TRANS.intItemId = @intItemId

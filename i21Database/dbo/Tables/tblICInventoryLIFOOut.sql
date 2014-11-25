@@ -1,10 +1,10 @@
 ﻿CREATE TABLE [dbo].[tblICInventoryLIFOOut]
 (
-	[Id] INT NOT NULL IDENTITY, 
+	[intId] INT NOT NULL IDENTITY, 
     [intInventoryLIFOId] INT NULL, 
     [intInventoryTransactionId] INT NOT NULL, 
     [dblQty] NUMERIC(18, 6) NOT NULL,
-	CONSTRAINT [PK_tblICInventoryLIFOOut] PRIMARY KEY NONCLUSTERED ([Id])    
+	CONSTRAINT [PK_tblICInventoryLIFOOut] PRIMARY KEY NONCLUSTERED ([intId])    
 )
 GO
 
