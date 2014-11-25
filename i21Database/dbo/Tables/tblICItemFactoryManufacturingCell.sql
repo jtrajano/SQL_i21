@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblICItemManufacturingCell]
+﻿CREATE TABLE [dbo].[tblICItemFactoryManufacturingCell]
 (
 	[intItemFactoryManufacturingCellId] INT NOT NULL IDENTITY, 
     [intItemFactoryId] INT NOT NULL, 
@@ -18,7 +18,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemManufacturingCell',
+    @level1name = N'tblICItemFactoryManufacturingCell',
     @level2type = N'COLUMN',
     @level2name = N'intItemFactoryManufacturingCellId'
 GO
@@ -27,7 +27,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemManufacturingCell',
+    @level1name = N'tblICItemFactoryManufacturingCell',
     @level2type = N'COLUMN',
     @level2name = N'intItemFactoryId'
 GO
@@ -36,7 +36,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemManufacturingCell',
+    @level1name = N'tblICItemFactoryManufacturingCell',
     @level2type = N'COLUMN',
     @level2name = N'intManufacturingCellId'
 GO
@@ -45,7 +45,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemManufacturingCell',
+    @level1name = N'tblICItemFactoryManufacturingCell',
     @level2type = N'COLUMN',
     @level2name = N'ysnDefault'
 GO
@@ -54,7 +54,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemManufacturingCell',
+    @level1name = N'tblICItemFactoryManufacturingCell',
     @level2type = N'COLUMN',
     @level2name = N'intPreference'
 GO
@@ -63,7 +63,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemManufacturingCell',
+    @level1name = N'tblICItemFactoryManufacturingCell',
     @level2type = N'COLUMN',
     @level2name = N'intSort'
 GO
@@ -72,6 +72,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemManufacturingCell',
+    @level1name = N'tblICItemFactoryManufacturingCell',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
