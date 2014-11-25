@@ -18,6 +18,7 @@ Ext.define('Inventory.model.CategoryAccount', {
                 inverse: {
                     role: 'tblICCategoryAccounts',
                     storeConfig: {
+                        complete: true,
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',

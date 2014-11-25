@@ -18,6 +18,7 @@ Ext.define('Inventory.model.CategoryVendor', {
                 inverse: {
                     role: 'tblICCategoryVendors',
                     storeConfig: {
+                        complete: true,
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',
