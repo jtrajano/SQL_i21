@@ -30,6 +30,7 @@ Ext.define('Inventory.view.Filter1', {
         {
             xtype: 'textfield',
             tabIndex: -1,
+            hidden: true,
             itemId: 'txtFitlerGrid',
             margin: '0 0 0 5',
             width: 189,

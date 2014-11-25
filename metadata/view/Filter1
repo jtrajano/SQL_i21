@@ -24,6 +24,7 @@
             "codeClass": null,
             "userConfig": {
                 "fieldLabel": "Filter",
+                "hidden": true,
                 "itemId": "txtFitlerGrid",
                 "labelWidth": 35,
                 "margin": "0 0 0 5",

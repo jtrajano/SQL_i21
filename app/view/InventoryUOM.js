@@ -18,7 +18,6 @@ Ext.define('Inventory.view.InventoryUOM', {
     alias: 'widget.inventoryuom',
 
     requires: [
-        'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
         'Ext.button.Button',
@@ -186,7 +185,7 @@ Ext.define('Inventory.view.InventoryUOM', {
                                 ]
                             },
                             {
-                                xtype: 'gridpanel',
+                                xtype: 'advancefiltergrid',
                                 flex: 1,
                                 itemId: 'grdConversion',
                                 title: 'Conversion',
@@ -209,9 +208,6 @@ Ext.define('Inventory.view.InventoryUOM', {
                                             },
                                             {
                                                 xtype: 'tbseparator'
-                                            },
-                                            {
-                                                xtype: 'filter1'
                                             }
                                         ]
                                     }

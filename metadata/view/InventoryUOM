@@ -318,6 +318,7 @@
                     },
                     "codeClass": null,
                     "userConfig": {
+                        "designer|createAlias": "advancefiltergrid",
                         "itemId": "grdConversion",
                         "layout|flex": 1,
                         "margin": null,
@@ -372,20 +373,6 @@
                                     },
                                     "name": "MySeparator49",
                                     "designerId": "c1fc7a04-0d32-4966-bdab-2f25eda99b54"
-                                },
-                                {
-                                    "type": "linkedinstance",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "layout|flex": null
-                                    },
-                                    "name": "filter123",
-                                    "designerId": "f6d3603a-325f-4715-8aae-53dd182f6038",
-                                    "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
                             ]
                         },
@@ -582,7 +569,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging112",
+                    "name": "statusbarpaging13",
                     "designerId": "0065255e-fbbc-413c-8c51-8b3ece401ce4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
