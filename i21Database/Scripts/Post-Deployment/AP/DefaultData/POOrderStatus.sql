@@ -1,4 +1,5 @@
-﻿MERGE INTO tblPOOrderStatus AS Target
+﻿GO
+MERGE INTO tblPOOrderStatus AS Target
 USING (VALUES
   (1, N'Open'),
   (2, N'Partial'),
@@ -16,3 +17,4 @@ UPDATE SET strStatus = Source.strStatus
 WHEN NOT MATCHED BY TARGET THEN
 INSERT (intOrderStatusId, strStatus)
 VALUES (intOrderStatusId, strStatus);
+GO
