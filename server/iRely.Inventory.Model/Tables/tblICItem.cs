@@ -243,4 +243,32 @@ namespace iRely.Inventory.Model
         public string strTracking { get; set; }
         public string strLotTracking { get; set; }
     }
+
+    public class vyuICGetItemStock
+    {
+        [Key]
+        public int intKey { get; set; }
+        public int intItemId { get; set; }
+        public string strItemNo { get; set; }
+        public string strType { get; set; }
+        public string strDescription { get; set; }
+        public int? intLocationId { get; set; }
+        public string strLocationName { get; set; }
+        public string strLocationType { get; set; }
+        public int? intVendorId { get; set; }
+        public string strVendorId { get; set; }
+        public int? intDefaultUOMId { get; set; }
+        public string strDefaultUOM { get; set; }
+        public int? intAllowNegativeInventory { get; set; }
+        public string strAllowNegativeInventory { get; set; }
+        public int? intCostingMethod { get; set; }
+        public string strCostingMethod { get; set; }
+        public int? intUnitMeasureId { get; set; }
+        public string strStockUOM { get; set; }
+        public decimal? dblUnitOnHand { get; set; }
+        public decimal? dblAverageCost { get; set; }
+        public decimal? dblMinOrder { get; set; }
+        public decimal? dblOnOrder { get; set; }
+        public decimal? dblOrderCommitted { get; set; }
+    }
 }

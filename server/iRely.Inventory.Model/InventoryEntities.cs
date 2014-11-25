@@ -189,6 +189,8 @@ namespace iRely.Inventory.Model
 
         public DbSet<tblGRStorageType> tblGRStorageTypes { get; set; }
         public DbSet<tblSTPromotionSalesList> tblSTPromotionSalesLists { get; set; }
+
+        public DbSet<vyuICGetItemStock> vyuICGetItemStocks { get; set; }
         
         protected override void OnModelCreating(DbModelBuilder modelBuilder) 
         {
@@ -308,6 +310,8 @@ namespace iRely.Inventory.Model
 
             modelBuilder.Configurations.Add(new tblGRStorageTypeMap());
             modelBuilder.Configurations.Add(new tblSTPromotionSalesListMap());
+
+            modelBuilder.Configurations.Add(new vyuICGetItemStockMap());
         }
     }
 }
