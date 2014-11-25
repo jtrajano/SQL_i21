@@ -13,7 +13,7 @@
 	[dblSubtotal]          DECIMAL (18, 6) NOT NULL DEFAULT 0,
     [ysnPosted]            BIT             NOT NULL DEFAULT 0,
     [ysnPaid]              BIT             NOT NULL DEFAULT 0,
-    [strBillId]            NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
+    [strBillId]            NVARCHAR (50)   COLLATE Latin1_General_CI_AS NOT NULL,
     [dblAmountDue]         DECIMAL (18, 6) NOT NULL DEFAULT 0,
     [dtmDatePaid]          DATETIME        NULL ,
     [dtmDiscountDate]      DATETIME        NULL,

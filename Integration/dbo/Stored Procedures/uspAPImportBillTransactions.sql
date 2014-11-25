@@ -17,6 +17,12 @@ BEGIN
 		AS
 		BEGIN
 
+		SET QUOTED_IDENTIFIER OFF
+		SET ANSI_NULLS ON
+		SET NOCOUNT ON
+		SET XACT_ABORT ON
+		SET ANSI_WARNINGS OFF
+
 		--TODO Add Validation
 		--1. All account that will use in importing should exists in tblAGLAccount
 		--2. Validate Balance after importing
@@ -77,9 +83,13 @@ BEGIN
 					@withHeld DECIMAL(18,6) = 0,
 					@billIds NVARCHAR(MAX)
 
+		--removed first the constraint
+		ALTER TABLE tblAPBill
+			DROP CONSTRAINT [UK_dbo.tblAPBill_strBillId]
 
 		IF(@DateFrom IS NULL AND @PeriodFrom IS NULL)
 		BEGIN
+
 			INSERT INTO [dbo].[tblAPBill] (
 				[intVendorId],
 				--[strVendorId], 
@@ -636,6 +646,9 @@ BEGIN
 		
 			SET @Total = @ImportedRecords;
 		END
+
+		ALTER TABLE tblAPBill
+			ADD CONSTRAINT [UK_dbo.tblAPBill_strBillId] UNIQUE (strBillId);
 
 		--backup data from aptrxmst on one time synchronization
 			INSERT INTO tblAPaptrxmst
