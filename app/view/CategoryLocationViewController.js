@@ -116,7 +116,8 @@ Ext.define('Inventory.view.CategoryLocationViewController', {
         var me = this;
         var record = Ext.create('Inventory.model.CategoryLocation');
         record.set('intCategoryId', me.intCategoryId);
-        record.set('intLocationId', app.DefaultLocation);
+        if (app.DefaultLocation > 0)
+            record.set('intLocationId', app.DefaultLocation);
         action(record);
     }
 });

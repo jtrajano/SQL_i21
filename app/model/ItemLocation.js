@@ -41,7 +41,7 @@ Ext.define('Inventory.model.ItemLocation', {
         { name: 'intLocationId', type: 'int', allowNull: true},
         { name: 'intVendorId', type: 'int', allowNull: true},
         { name: 'strDescription', type: 'string'},
-        { name: 'intCostingMethod', type: 'int'},
+        { name: 'intCostingMethod', type: 'int', allowNull: true },
         { name: 'intCategoryId', type: 'int', allowNull: true},
         { name: 'strRow', type: 'string'},
         { name: 'strBin', type: 'string'},
