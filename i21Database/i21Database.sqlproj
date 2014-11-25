@@ -867,7 +867,10 @@
     <Build Include="dbo\Stored Procedures\uspARDuplicateInvoice.sql" />
     <Build Include="dbo\Functions\fnGetDueDateBasedonTerm.sql" />
     <Build Include="dbo\Tables\tblPOOrderStatus.sql" />
-    <Build Include="dbo\Stored Procedures\uspICGetItemsForItemReceipt.sql" />	
+    <Build Include="dbo\Stored Procedures\uspICGetItemsForItemReceipt.sql" />
+    <Build Include="dbo\Tables\tblICItemFactory.sql" />
+    <Build Include="dbo\Tables\tblICItemFactoryManufacturingCell.sql" />
+    <Build Include="dbo\Tables\tblICItemOwner.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
