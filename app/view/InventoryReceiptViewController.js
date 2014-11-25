@@ -144,7 +144,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             window : win,
             store  : store,
             createRecord : me.createRecord,
-            binding: me.config.binding
+            binding: me.config.binding,
+            attachment: Ext.create('iRely.mvvm.attachment.Manager', {
+                type: 'Inventory.Receipt',
+                window: win
+            })
         });
 
         return win.context;
