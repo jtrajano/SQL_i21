@@ -867,6 +867,8 @@
     <Build Include="dbo\Stored Procedures\uspARDuplicateInvoice.sql" />
     <Build Include="dbo\Functions\fnGetDueDateBasedonTerm.sql" />
     <Build Include="dbo\Tables\tblPOOrderStatus.sql" />
+    <None Include="Scripts\Post-Deployment\AP\DefaultData\POOrderStatus.sql" />
+    <Build Include="dbo\Tables\tblPOOrderStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
