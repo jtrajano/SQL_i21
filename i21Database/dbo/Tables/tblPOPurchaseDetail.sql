@@ -11,5 +11,7 @@
     [dblWeight] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [dblDiscount] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
-    [strDescription] NVARCHAR(250) NULL
+    [strDescription] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL, 
+	[dtmExpectedDate] DATETIME,
+    [intLineNo] INT NOT NULL DEFAULT 1
 )
