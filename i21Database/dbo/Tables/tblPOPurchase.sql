@@ -5,7 +5,6 @@
     [intAccountId] INT NOT NULL, 
     [intFreightId] INT NULL, 
     [intCurrencyId] INT NOT NULL, 
-    [intTermId] INT NOT NULL, 
     [intOrderById] INT NOT NULL, 
     [intApprovedById] INT NULL, 
     [intShipViaId] INT NULL, 
