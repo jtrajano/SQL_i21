@@ -240,6 +240,36 @@ Ext.define('Inventory.view.CategoryViewController', {
         }
     },
 
+    onVendorXRefSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepVendor');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colVendorLocation')
+        {
+            current.set('intLocationId', records[0].get('intCompanyLocationId'));
+        }
+        else if (combo.column.itemId === 'colVendorId')
+        {
+            current.set('intVendorId', records[0].get('intVendorId'));
+        }
+        else if (combo.column.itemId === 'colVendorFamily')
+        {
+            current.set('intFamilyId', records[0].get('intFamilyId'));
+        }
+        else if (combo.column.itemId === 'colVendorSellClass')
+        {
+            current.set('intSellClassId', records[0].get('intClassId'));
+        }
+        else if (combo.column.itemId === 'colVendorOrderClass')
+        {
+            current.set('intOrderClassId', records[0].get('intClassId'));
+        }
+    },
+
     onbtnAddLocationClick: function(button, e, eOpts) {
         var win = button.up('window');
         var me = win.controller;
@@ -290,7 +320,24 @@ Ext.define('Inventory.view.CategoryViewController', {
             },
             "#btnEditLocation": {
                 click: this.onbtnEditLocationClick
+            },
+            "#cboVendorLocation": {
+                select: this.onVendorXRefSelect
+            },
+            "#cboVendorId": {
+                select: this.onVendorXRefSelect
+            },
+            "#cboVendorFamily": {
+                select: this.onVendorXRefSelect
+            },
+            "#cboVendorSellClass": {
+                select: this.onVendorXRefSelect
+            },
+            "#cboVendorOrderClass": {
+                select: this.onVendorXRefSelect
             }
+
+
         });
     }
 });

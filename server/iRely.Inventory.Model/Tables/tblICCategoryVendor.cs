@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,6 +24,102 @@ namespace iRely.Inventory.Model
         public int? intSellClassId { get; set; }
         public int? intOrderClassId { get; set; }
         public string strComments { get; set; }
+
+        private string _location;
+        [NotMapped]
+        public string strLocationName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_location))
+                    if (tblSMCompanyLocation != null)
+                        return tblSMCompanyLocation.strLocationName;
+                    else
+                        return null;
+                else
+                    return _location;
+            }
+            set
+            {
+                _location = value;
+            }
+        }
+        private string _vendorId;
+        [NotMapped]
+        public string strVendorId
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_vendorId))
+                    if (vyuAPVendor != null)
+                        return vyuAPVendor.strVendorId;
+                    else
+                        return null;
+                else
+                    return _vendorId;
+            }
+            set
+            {
+                _vendorId = value;
+            }
+        }
+        private string _familyId;
+        [NotMapped]
+        public string strFamilyId
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_familyId))
+                    if (Family != null)
+                        return Family.strFamilyId;
+                    else
+                        return null;
+                else
+                    return _familyId;
+            }
+            set
+            {
+                _familyId = value;
+            }
+        }
+        private string _sellclassId;
+        [NotMapped]
+        public string strSellClassId
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_sellclassId))
+                    if (SellClass != null)
+                        return SellClass.strClassId;
+                    else
+                        return null;
+                else
+                    return _sellclassId;
+            }
+            set
+            {
+                _sellclassId = value;
+            }
+        }
+        private string _orderclassId;
+        [NotMapped]
+        public string strOrderClassId
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_orderclassId))
+                    if (OrderClass != null)
+                        return OrderClass.strClassId;
+                    else
+                        return null;
+                else
+                    return _orderclassId;
+            }
+            set
+            {
+                _orderclassId = value;
+            }
+        }
 
         public vyuAPVendor vyuAPVendor { get; set; }
         public tblICCategory tblICCategory { get; set; }

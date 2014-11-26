@@ -184,18 +184,18 @@ namespace iRely.Inventory.Model
     {
         public int intStoreId { get; set; }
         public int intStoreNo { get; set; }
-        public bool strStoreName { get; set; }
-        public bool strDescription { get; set; }
-        public bool strRegion { get; set; }
-        public bool strDestrict { get; set; }
+        public string strStoreName { get; set; }
+        public string strDescription { get; set; }
+        public string strRegion { get; set; }
+        public string strDestrict { get; set; }
     }
 
     public class tblSTSubcategoryClass : BaseEntity
     {
         public int intClassId { get; set; }
-        public bool strClassId { get; set; }
-        public bool strClassDesc { get; set; }
-        public bool strClassComment { get; set; }
+        public string strClassId { get; set; }
+        public string strClassDesc { get; set; }
+        public string strClassComment { get; set; }
 
         public ICollection<tblICCategoryVendor> tblICCategoryVendorSellClasses { get; set; }
         public ICollection<tblICCategoryVendor> tblICCategoryVendorOrderClasses { get; set; }
@@ -204,9 +204,9 @@ namespace iRely.Inventory.Model
     public class tblSTSubcategoryFamily : BaseEntity
     {
         public int intFamilyId { get; set; }
-        public bool strFamilyId { get; set; }
-        public bool strFamilyDesc { get; set; }
-        public bool strFamilyComment { get; set; }
+        public string strFamilyId { get; set; }
+        public string strFamilyDesc { get; set; }
+        public string strFamilyComment { get; set; }
 
         public ICollection<tblICCategoryVendor> tblICCategoryVendors { get; set; }
     }
@@ -215,17 +215,17 @@ namespace iRely.Inventory.Model
     {
         public int intRegProdId { get; set; }
         public int intStoreId { get; set; }
-        public bool strRegProdCode { get; set; }
-        public bool strRegProdDesc { get; set; }
-        public bool strRegProdComment { get; set; }
+        public string strRegProdCode { get; set; }
+        public string strRegProdDesc { get; set; }
+        public string strRegProdComment { get; set; }
     }
 
     public class tblSTPaidOut : BaseEntity
     {
         public int intPaidOutId { get; set; }
         public int intStoreId { get; set; }
-        public bool strPaidOutId { get; set; }
-        public bool strDescription { get; set; }
+        public string strPaidOutId { get; set; }
+        public string strDescription { get; set; }
         public int intAccountId { get; set; }
         public int intPaymentMethodId { get; set; }
     }
@@ -241,8 +241,8 @@ namespace iRely.Inventory.Model
     public class tblSTPromotionSalesList : BaseEntity
     {
         public int intPromoSalesListId { get; set; }
-        public bool strPromoType { get; set; }
-        public bool strDescription { get; set; }
+        public string strPromoType { get; set; }
+        public string strDescription { get; set; }
         public int intPromoCode { get; set; }
         public int intPromoUnits { get; set; }
         public decimal? dblPromoPrice { get; set; }

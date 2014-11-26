@@ -75,7 +75,7 @@ namespace iRely.Invetory.WebAPI.Controllers
 
             var result = _CategoryBRL.Save(continueOnConflict);
             _CategoryBRL.Dispose();
-
+            
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
                 data = categories,

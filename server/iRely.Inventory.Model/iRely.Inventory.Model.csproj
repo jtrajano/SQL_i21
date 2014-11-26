@@ -101,7 +101,7 @@
     <Compile Include="Mappings\tblICCatalogMap.cs" />
     <Compile Include="Mappings\tblICCategoryAccountMap.cs" />
     <Compile Include="Mappings\tblICCategoryMap.cs" />
-    <Compile Include="Mappings\tblICCategoryStoreMap.cs" />
+    <Compile Include="Mappings\tblICCategoryLocationMap.cs" />
     <Compile Include="Mappings\tblICCategoryVendorMap.cs" />
     <Compile Include="Mappings\tblICCommodityGroupMap.cs" />
     <Compile Include="Mappings\tblICCommodityMap.cs" />

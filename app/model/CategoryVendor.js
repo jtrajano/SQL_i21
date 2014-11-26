@@ -38,10 +38,16 @@ Ext.define('Inventory.model.CategoryVendor', {
         { name: 'intSellClassId', type: 'int', allowNull: true },
         { name: 'intOrderClassId', type: 'int', allowNull: true },
         { name: 'strComments', type: 'string'},
+
+        { name: 'strLocationName', type: 'string'},
+        { name: 'strVendorId', type: 'string'},
+        { name: 'strFamilyId', type: 'string'},
+        { name: 'strSellClassId', type: 'string'},
+        { name: 'strOrderClassId', type: 'string'}
     ],
 
     validators: [
-        {type: 'presence', field: 'intLocationId'},
-        {type: 'presence', field: 'intVendorId'}
+        {type: 'presence', field: 'strLocationName'},
+        {type: 'presence', field: 'strVendorId'}
     ]
 });

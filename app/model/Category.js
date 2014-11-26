@@ -52,6 +52,7 @@ Ext.define('Inventory.model.Category', {
     ],
 
     validators: [
-        {type: 'presence', field: 'strCategoryCode'}
+        {type: 'presence', field: 'strCategoryCode'},
+        {type: 'presence', field: 'intCostingMethod'}
     ]
 });
