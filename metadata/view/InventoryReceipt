@@ -1298,7 +1298,7 @@
                                             "designerId": "dbaea71c-4a23-4663-aaed-75b6cc1631e4"
                                         },
                                         {
-                                            "type": "Ext.form.field.Text",
+                                            "type": "Ext.form.field.Number",
                                             "reference": {
                                                 "name": "items",
                                                 "type": "array"
@@ -1317,7 +1317,7 @@
                                                 "name": null,
                                                 "width": null
                                             },
-                                            "name": "MyTextField8",
+                                            "name": "MyNumberField",
                                             "configAlternates": {
                                                 "alwaysDisplayDecimals": "boolean"
                                             },
@@ -2486,7 +2486,7 @@
                                             "designerId": "4b5ab35f-9076-49a6-bde8-55ad9b3d0a6b"
                                         },
                                         {
-                                            "type": "Ext.form.field.Text",
+                                            "type": "Ext.form.field.Number",
                                             "reference": {
                                                 "name": "items",
                                                 "type": "array"
@@ -2502,11 +2502,11 @@
                                                 "readOnly": null,
                                                 "width": null
                                             },
-                                            "name": "MyTextField5",
+                                            "name": "MyNumberField1",
                                             "designerId": "85092c0e-e861-434b-b506-c3869676eb0e"
                                         },
                                         {
-                                            "type": "Ext.form.field.Text",
+                                            "type": "Ext.form.field.Number",
                                             "reference": {
                                                 "name": "items",
                                                 "type": "array"
@@ -2523,11 +2523,11 @@
                                                 "readOnly": null,
                                                 "width": null
                                             },
-                                            "name": "MyTextField",
+                                            "name": "MyNumberField2",
                                             "designerId": "8771499f-d9d8-42dd-a8a8-73f8218f5389"
                                         },
                                         {
-                                            "type": "Ext.form.field.Text",
+                                            "type": "Ext.form.field.Number",
                                             "reference": {
                                                 "name": "items",
                                                 "type": "array"
@@ -2544,11 +2544,11 @@
                                                 "readOnly": null,
                                                 "width": null
                                             },
-                                            "name": "MyTextField22",
+                                            "name": "MyNumberField3",
                                             "designerId": "db45c115-4ffb-44cc-b5f6-93c3dabc0b58"
                                         },
                                         {
-                                            "type": "Ext.form.field.Text",
+                                            "type": "Ext.form.field.Number",
                                             "reference": {
                                                 "name": "items",
                                                 "type": "array"
@@ -2562,10 +2562,10 @@
                                                 "layout|flex": null,
                                                 "layout|margins": null,
                                                 "name": null,
-                                                "readOnly": null,
+                                                "readOnly": true,
                                                 "width": null
                                             },
-                                            "name": "MyTextField23",
+                                            "name": "MyNumberField9",
                                             "designerId": "1f92c382-0c6e-4bd8-9156-598527acbba8"
                                         }
                                     ]
@@ -2592,7 +2592,7 @@
                                     "designerId": "b429f92c-1e2f-4478-9a2c-a35d891ddcf7",
                                     "cn": [
                                         {
-                                            "type": "Ext.form.field.Text",
+                                            "type": "Ext.form.field.Number",
                                             "reference": {
                                                 "name": "items",
                                                 "type": "array"
@@ -2605,14 +2605,14 @@
                                                 "layout|flex": null,
                                                 "layout|margins": null,
                                                 "name": null,
-                                                "readOnly": null,
+                                                "readOnly": true,
                                                 "width": null
                                             },
-                                            "name": "MyTextField14",
+                                            "name": "MyNumberField6",
                                             "designerId": "6712db11-55eb-43b0-ba55-09fefe369f6d"
                                         },
                                         {
-                                            "type": "Ext.form.field.Text",
+                                            "type": "Ext.form.field.Number",
                                             "reference": {
                                                 "name": "items",
                                                 "type": "array"
@@ -2628,11 +2628,11 @@
                                                 "readOnly": null,
                                                 "width": null
                                             },
-                                            "name": "MyTextField5",
+                                            "name": "MyNumberField5",
                                             "designerId": "50cbf859-6d9c-45da-ac9a-b56db227ec66"
                                         },
                                         {
-                                            "type": "Ext.form.field.Text",
+                                            "type": "Ext.form.field.Number",
                                             "reference": {
                                                 "name": "items",
                                                 "type": "array"
@@ -2646,10 +2646,10 @@
                                                 "layout|flex": null,
                                                 "layout|margins": null,
                                                 "name": null,
-                                                "readOnly": null,
+                                                "readOnly": true,
                                                 "width": null
                                             },
-                                            "name": "MyTextField",
+                                            "name": "MyNumberField7",
                                             "designerId": "c3f8deb9-81ca-402f-93a2-7bd669f8050a"
                                         },
                                         {
@@ -2670,7 +2670,7 @@
                                             "designerId": "7c36476e-dbf6-46d5-9f0a-9e4f68fc5cee"
                                         },
                                         {
-                                            "type": "Ext.form.field.Text",
+                                            "type": "Ext.form.field.Number",
                                             "reference": {
                                                 "name": "items",
                                                 "type": "array"
@@ -2687,7 +2687,7 @@
                                                 "readOnly": null,
                                                 "width": null
                                             },
-                                            "name": "MyTextField22",
+                                            "name": "MyNumberField4",
                                             "designerId": "f7e93eca-4ce8-4116-84e5-b0810d05b95f"
                                         },
                                         {
@@ -2712,7 +2712,7 @@
                                             "designerId": "00d4fd84-fda9-4a16-a735-66569ae9eb85"
                                         },
                                         {
-                                            "type": "Ext.form.field.Text",
+                                            "type": "Ext.form.field.Number",
                                             "reference": {
                                                 "name": "items",
                                                 "type": "array"
@@ -2726,10 +2726,10 @@
                                                 "layout|flex": null,
                                                 "layout|margins": null,
                                                 "name": null,
-                                                "readOnly": null,
+                                                "readOnly": true,
                                                 "width": null
                                             },
-                                            "name": "MyTextField24",
+                                            "name": "MyNumberField8",
                                             "designerId": "1031199f-6b77-4f15-8201-9772a2bf44c2"
                                         }
                                     ]

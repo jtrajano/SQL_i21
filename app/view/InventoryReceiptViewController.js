@@ -118,8 +118,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             txtInvoiceAmount: '{current.dblInvoiceAmount}',
 //            txtDifference: '{current.strMessage}',
             chkInvoicePaid: '{current.ysnInvoicePaid}',
-            txtCheckNo: '{current.intCheckNo}',
-            txtCheckDate: '{current.dteCheckDate}',
+            txtCheckNo: {
+                value: '{current.intCheckNo}',
+                readOnly: '{!current.ysnInvoicePaid}'
+            },
+            txtCheckDate: {
+                value: '{current.dteCheckDate}',
+                readOnly: '{!current.ysnInvoicePaid}'
+            },
 //            txtInvoiceMargin: '{current.strMessage}',
 
             // ---- EDI tab
@@ -140,6 +146,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             win = options.window,
             store = Ext.create('Inventory.store.Receipt', { pageSize: 1 });
 
+        var grdInventoryReceipt = win.down('#grdInventoryReceipt'),
+            grdLotTracking = win.down('#grdLotTracking');
+
         win.context = Ext.create('iRely.mvvm.Engine', {
             window : win,
             store  : store,
@@ -148,7 +157,25 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.Receipt',
                 window: win
-            })
+            }),
+            details: [
+                {
+                    key: 'tblICInventoryReceiptItems',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdInventoryReceipt,
+                        deleteButton : grdInventoryReceipt.down('#btnDeleteInventoryReceipt')
+                    }),
+                    details: [
+                        {
+                            key: 'tblICInventoryReceiptItemLots',
+                            component: Ext.create('iRely.mvvm.grid.Manager', {
+                                grid: grdLotTracking,
+                                deleteButton : grdLotTracking.down('#btnDeleteInventoryReceipt')
+                            })
+                        }
+                    ]
+                }
+            ]
         });
 
         return win.context;
@@ -179,6 +206,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 });
             }
         }
+    },
+
+    createRecord: function(config, action) {
+        var me = this;
+        var today = new Date();
+        var record = Ext.create('Inventory.model.Receipt');
+        if (app.DefaultLocation > 0)
+            record.set('intLocationId', app.DefaultLocation);
+
+        record.set('dtmReceiptDate', today);
+        record.set('dtmReceiptDate', today);
+        action(record);
     }
 
 });

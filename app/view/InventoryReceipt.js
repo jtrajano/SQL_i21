@@ -26,6 +26,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
         'Ext.tab.Tab',
         'Ext.form.field.ComboBox',
         'Ext.form.field.Date',
+        'Ext.form.field.Number',
         'Ext.grid.Panel',
         'Ext.selection.CheckboxModel',
         'Ext.grid.column.Number',
@@ -34,7 +35,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
         'Ext.form.Label',
         'Ext.grid.column.Check',
         'Ext.form.field.Checkbox',
-        'Ext.form.field.Number',
         'Ext.grid.column.Date',
         'Ext.toolbar.Paging'
     ],
@@ -598,7 +598,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         labelWidth: 110
                                                     },
                                                     {
-                                                        xtype: 'textfield',
+                                                        xtype: 'numberfield',
                                                         flex: 1,
                                                         itemId: 'txtShiftNumber',
                                                         margin: '0 0 0 5',
@@ -1052,28 +1052,29 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         valueField: 'strDescription'
                                                     },
                                                     {
-                                                        xtype: 'textfield',
+                                                        xtype: 'numberfield',
                                                         itemId: 'txtUnitsWeightMiles',
                                                         fieldLabel: 'Units / Weight / Miles',
                                                         labelWidth: 130
                                                     },
                                                     {
-                                                        xtype: 'textfield',
+                                                        xtype: 'numberfield',
                                                         itemId: 'txtFreightRate',
                                                         fieldLabel: 'Freight Rate',
                                                         labelWidth: 130
                                                     },
                                                     {
-                                                        xtype: 'textfield',
+                                                        xtype: 'numberfield',
                                                         itemId: 'txtFuelSurcharge',
                                                         fieldLabel: 'Fuel Surcharge %',
                                                         labelWidth: 130
                                                     },
                                                     {
-                                                        xtype: 'textfield',
+                                                        xtype: 'numberfield',
                                                         itemId: 'txtCalculatedFreight',
                                                         fieldLabel: 'Calculated Freight',
-                                                        labelWidth: 130
+                                                        labelWidth: 130,
+                                                        readOnly: true
                                                     }
                                                 ]
                                             },
@@ -1090,22 +1091,24 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                 },
                                                 items: [
                                                     {
-                                                        xtype: 'textfield',
+                                                        xtype: 'numberfield',
                                                         itemId: 'txtCalculatedAmount',
                                                         fieldLabel: 'Calculated Amount',
-                                                        labelWidth: 130
+                                                        labelWidth: 130,
+                                                        readOnly: true
                                                     },
                                                     {
-                                                        xtype: 'textfield',
+                                                        xtype: 'numberfield',
                                                         itemId: 'txtInvoiceAmount',
                                                         fieldLabel: 'Invoice Amount',
                                                         labelWidth: 130
                                                     },
                                                     {
-                                                        xtype: 'textfield',
+                                                        xtype: 'numberfield',
                                                         itemId: 'txtDifference',
                                                         fieldLabel: 'Difference',
-                                                        labelWidth: 130
+                                                        labelWidth: 130,
+                                                        readOnly: true
                                                     },
                                                     {
                                                         xtype: 'checkboxfield',
@@ -1114,7 +1117,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         labelWidth: 130
                                                     },
                                                     {
-                                                        xtype: 'textfield',
+                                                        xtype: 'numberfield',
                                                         itemId: 'txtCheckNo',
                                                         fieldLabel: 'Check No',
                                                         labelWidth: 130
@@ -1126,10 +1129,11 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         labelWidth: 130
                                                     },
                                                     {
-                                                        xtype: 'textfield',
+                                                        xtype: 'numberfield',
                                                         itemId: 'txtInvoiceMargin',
                                                         fieldLabel: 'Invoice Margin %',
-                                                        labelWidth: 130
+                                                        labelWidth: 130,
+                                                        readOnly: true
                                                     }
                                                 ]
                                             },
