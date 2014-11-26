@@ -125,16 +125,13 @@ Ext.define('Inventory.view.ItemViewModel', {
             autoLoad: true,
             data: [
                 {
-                    strLotTracking: 'Yes'
+                    strLotTracking: 'Yes - Manual'
+                },
+                {
+                    strLotTracking: 'Yes - Serial Number'
                 },
                 {
                     strLotTracking: 'No'
-                },
-                {
-                    strLotTracking: 'Serial Number'
-                },
-                {
-                    strLotTracking: 'Bulk'
                 }
             ],
             fields: [
@@ -144,7 +141,25 @@ Ext.define('Inventory.view.ItemViewModel', {
             ]
         },
         tracking: {
-            type: 'inventorybufferedcategory'
+            autoLoad: true,
+            data: [
+                {
+                    intTracking: '1',
+                    strDescription: 'Item Level'
+                },
+                {
+                    intTracking: '2',
+                    strDescription: 'Category Level'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                },
+                {
+                    name: 'intTrackingId'
+                }
+            ]
         },
         uomUnitMeasure: {
             type: 'inventorybuffereduom'

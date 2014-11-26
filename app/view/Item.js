@@ -192,8 +192,9 @@ Ext.define('Inventory.view.Item', {
                                                 items: [
                                                     {
                                                         xtype: 'container',
-                                                        flex: 1.1,
+                                                        flex: 0.9,
                                                         margin: '0 5 0 0 ',
+                                                        width: 446,
                                                         layout: {
                                                             type: 'vbox',
                                                             align: 'stretch'
@@ -210,10 +211,10 @@ Ext.define('Inventory.view.Item', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'textfield',
-                                                                        flex: 1.5,
+                                                                        flex: 1.2,
                                                                         itemId: 'txtItemNo',
                                                                         fieldLabel: 'Item No',
-                                                                        labelWidth: 95
+                                                                        labelWidth: 80
                                                                     },
                                                                     {
                                                                         xtype: 'combobox',
@@ -234,7 +235,7 @@ Ext.define('Inventory.view.Item', {
                                                                 height: 62,
                                                                 itemId: 'txtDescription',
                                                                 fieldLabel: 'Description',
-                                                                labelWidth: 95
+                                                                labelWidth: 80
                                                             }
                                                         ]
                                                     },
@@ -277,7 +278,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 flex: 1
                                                                             }
                                                                         ],
-                                                                        flex: 1.4,
+                                                                        flex: 1,
                                                                         itemId: 'cboManufacturer',
                                                                         fieldLabel: 'Manufacturer',
                                                                         labelWidth: 80,
@@ -310,7 +311,7 @@ Ext.define('Inventory.view.Item', {
                                                                         itemId: 'cboBrand',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'Brand',
-                                                                        labelWidth: 50,
+                                                                        labelWidth: 75,
                                                                         displayField: 'strBrandCode',
                                                                         valueField: 'intBrandId'
                                                                     }
@@ -340,7 +341,7 @@ Ext.define('Inventory.view.Item', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'combobox',
-                                                                        flex: 1.4,
+                                                                        flex: 1,
                                                                         itemId: 'cboLotTracking',
                                                                         fieldLabel: 'Lot Tracking',
                                                                         labelWidth: 80,
@@ -348,7 +349,7 @@ Ext.define('Inventory.view.Item', {
                                                                         valueField: 'strLotTracking'
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcombobox',
+                                                                        xtype: 'combobox',
                                                                         columns: [
                                                                             {
                                                                                 dataIndex: 'intCategoryId',
@@ -372,10 +373,10 @@ Ext.define('Inventory.view.Item', {
                                                                         flex: 1,
                                                                         itemId: 'cboTracking',
                                                                         margin: '0 0 0 5',
-                                                                        fieldLabel: 'Tracking',
-                                                                        labelWidth: 50,
-                                                                        displayField: 'strCategoryCode',
-                                                                        valueField: 'intCategoryId'
+                                                                        fieldLabel: 'Inv. Tracking',
+                                                                        labelWidth: 75,
+                                                                        displayField: 'strDescription',
+                                                                        valueField: 'strDescription'
                                                                     }
                                                                 ]
                                                             }

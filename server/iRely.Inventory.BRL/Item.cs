@@ -26,7 +26,6 @@ namespace iRely.Inventory.BRL
             return _db.GetQuery<tblICItem>()
                 .Include(p => p.tblICBrand)
                 .Include(p => p.tblICManufacturer)
-                .Include(p => p.tblICCategory)
                 .Select(p => new ItemVM
                 {
                     intItemId = p.intItemId,
@@ -38,7 +37,7 @@ namespace iRely.Inventory.BRL
                     strLotTracking = p.strLotTracking,
                     strBrand = p.tblICBrand.strBrandCode,
                     strManufacturer = p.tblICManufacturer.strManufacturer,
-                    strTracking = p.tblICCategory.strCategoryCode
+                    strTracking = p.strInventoryTracking
                 });
         }
 

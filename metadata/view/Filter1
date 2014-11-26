@@ -9,6 +9,8 @@
         "designer|userAlias": "filter1",
         "designer|userClassName": "Filter1",
         "height": 23,
+        "hidden": true,
+        "hideMode": "offsets",
         "width": 199
     },
     "designerId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4",

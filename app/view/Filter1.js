@@ -24,6 +24,8 @@ Ext.define('Inventory.view.Filter1', {
     ],
 
     height: 23,
+    hidden: true,
+    hideMode: 'offsets',
     width: 199,
 
     items: [

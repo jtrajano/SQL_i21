@@ -52,7 +52,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intRINFuelTypeId).HasColumnName("intRINFuelTypeId");
             this.Property(t => t.intSeasonId).HasColumnName("intSeasonId");
             this.Property(t => t.intTaxClassId).HasColumnName("intTaxClassId");
-            this.Property(t => t.intTrackingId).HasColumnName("intTrackingId");
+            this.Property(t => t.strInventoryTracking).HasColumnName("strInventoryTracking");
             this.Property(t => t.intUnitPerLayer).HasColumnName("intUnitPerLayer");
             this.Property(t => t.intWeightUOMId).HasColumnName("intWeightUOMId");
             this.Property(t => t.strBarcodePrint).HasColumnName("strBarcodePrint");
@@ -111,10 +111,6 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblICManufacturer)
                 .WithMany(p => p.tblICItems)
                 .HasForeignKey(p => p.intManufacturerId);
-            this.HasOptional(p => p.tblICCategory)
-                .WithMany(p => p.tblICItems)
-                .HasForeignKey(p => p.intTrackingId);
-
 
             this.HasMany(p => p.tblICItemUOMs)
                 .WithRequired(p => p.tblICItem)

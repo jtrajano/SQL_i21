@@ -45,7 +45,7 @@ namespace iRely.Inventory.Model
         public int? intBrandId { get; set; }
         public string strStatus { get; set; }
         public string strModelNo { get; set; }
-        public int? intTrackingId { get; set; }
+        public string strInventoryTracking { get; set; }
         public string strLotTracking { get; set; }
         public bool ysnRequireCustomerApproval { get; set; }
         public int? intRecipeId { get; set; }
@@ -148,25 +148,6 @@ namespace iRely.Inventory.Model
                 _manufacturer = value;
             }
         }
-        private string _tracking;
-        [NotMapped]
-        public string strTracking
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_tracking))
-                    if (tblICCategory != null)
-                        return tblICCategory.strCategoryCode;
-                    else
-                        return null;
-                else
-                    return _tracking;
-            }
-            set
-            {
-                _tracking = value;
-            }
-        }
         private string _brand;
         [NotMapped]
         public string strBrand
@@ -189,7 +170,6 @@ namespace iRely.Inventory.Model
 
         public tblICManufacturer tblICManufacturer { get; set; }
         public tblICBrand tblICBrand { get; set; }
-        public tblICCategory tblICCategory { get; set; }
 
         public ICollection<tblICItemUOM> tblICItemUOMs { get; set; }
         public ICollection<tblICItemLocation> tblICItemLocations { get; set; }

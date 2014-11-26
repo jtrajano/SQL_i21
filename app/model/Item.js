@@ -40,7 +40,7 @@ Ext.define('Inventory.model.Item', {
         { name: 'intBrandId', type: 'int', allowNull: true},
         { name: 'strStatus', type: 'string'},
         { name: 'strModelNo', type: 'string'},
-        { name: 'intTrackingId', type: 'int', allowNull: true},
+        { name: 'strInventoryTracking', type: 'string'},
         { name: 'strLotTracking', type: 'string'},
         { name: 'ysnRequireCustomerApproval', type: 'boolean'},
         { name: 'intRecipeId', type: 'int', allowNull: true},
