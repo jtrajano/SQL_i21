@@ -32,9 +32,12 @@ Ext.define('Inventory.model.UnitMeasureConversion', {
         { name: 'dblConversionToStock', type: 'float'},
         { name: 'dblConversionFromStock', type: 'float'},
         { name: 'intSort', type: 'int'},
+
+        { name: 'strUnitMeasure', type: 'string'}
+
     ],
 
     validators: [
-        {type: 'presence', field: 'intStockUnitMeasureId'}
+        {type: 'presence', field: 'strUnitMeasure'}
     ]
 });

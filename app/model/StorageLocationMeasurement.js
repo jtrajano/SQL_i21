@@ -31,10 +31,14 @@ Ext.define('Inventory.model.StorageLocationMeasurement', {
         { name: 'intMeasurementId', type: 'int', allowNull: true },
         { name: 'intReadingPointId', type: 'int', allowNull: true },
         { name: 'ysnActive', type: 'boolean'},
-        { name: 'intSort', type: 'int'}
+        { name: 'intSort', type: 'int'},
+
+        { name: 'strMeasurementName', type: 'string'},
+        { name: 'strReadingPoint', type: 'string'}
     ],
 
     validators: [
-        {type: 'presence', field: 'intMeasurementId'}
+        {type: 'presence', field: 'strMeasurementName'},
+        {type: 'presence', field: 'strReadingPoint'}
     ]
 });

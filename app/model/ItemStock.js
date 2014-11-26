@@ -45,6 +45,6 @@ Ext.define('Inventory.model.ItemStock', {
     ],
 
     validators: [
-        {type: 'presence', field: 'intLocationId'}
+        {type: 'presence', field: 'strLocationName'}
     ]
 });

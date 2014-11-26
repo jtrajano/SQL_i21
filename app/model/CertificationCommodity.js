@@ -33,11 +33,12 @@ Ext.define('Inventory.model.CertificationCommodity', {
         { name: 'dblCertificationPremium', type: 'float'},
         { name: 'intUnitMeasureId', type: 'int', allowNull: true},
         { name: 'dtmDateEffective', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d'},
-        { name: 'intSort', type: 'int'}
+        { name: 'intSort', type: 'int'},
 
+        { name: 'strCommodityCode', type: 'string'}
     ],
 
     validators: [
-        {type: 'presence', field: 'intCommodityId'}
+        {type: 'presence', field: 'strCommodityCode'}
     ]
 });

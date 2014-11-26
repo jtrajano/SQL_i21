@@ -39,7 +39,7 @@ Ext.define('Inventory.model.ItemKitDetail', {
     ],
 
     validators: [
-        {type: 'presence', field: 'intItemId'},
-        {type: 'intUnitMeasureId', field: 'intItemId'},
+        {type: 'presence', field: 'strItemNo'},
+        {type: 'presence', field: 'strUnitMeasure'}
     ]
 });

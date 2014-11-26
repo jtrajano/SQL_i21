@@ -31,11 +31,15 @@ Ext.define('Inventory.model.PackTypeDetail', {
         { name: 'intSourceUnitMeasureId', type: 'int', allowNull: true },
         { name: 'intTargetUnitMeasureId', type: 'int', allowNull: true },
         { name: 'dblConversionFactor', type: 'float'},
-        { name: 'intSort', type: 'int'}
+        { name: 'intSort', type: 'int'},
+
+        { name: 'strSourceUnitMeasure', type: 'string'},
+        { name: 'strTargetUnitMeasure', type: 'string'}
+
     ],
 
     validators: [
-        {type: 'presence', field: 'intSourceUnitMeasureId'},
-        {type: 'presence', field: 'intTargetUnitMeasureId'}
+        {type: 'presence', field: 'strSourceUnitMeasure'},
+        {type: 'presence', field: 'strTargetUnitMeasure'}
     ]
 });

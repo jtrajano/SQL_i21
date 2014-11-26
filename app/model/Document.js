@@ -15,11 +15,13 @@ Ext.define('Inventory.model.Document', {
         { name: 'strDocumentName', type: 'string'},
         { name: 'strDescription', type: 'string'},
         { name: 'intCommodityId', type: 'int', allowNull: true},
-        { name: 'ysnStandard', type: 'boolean'}
+        { name: 'ysnStandard', type: 'boolean'},
+
+        { name: 'strCommodityCode', type: 'string'}
     ],
 
     validators: [
         {type: 'presence', field: 'strDocumentName'},
-        {type: 'presence', field: 'intCommodityId'}
+        {type: 'presence', field: 'strCommodityCode'}
     ]
 });

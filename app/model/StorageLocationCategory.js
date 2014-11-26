@@ -35,6 +35,6 @@ Ext.define('Inventory.model.StorageLocationCategory', {
     ],
 
     validators: [
-        {type: 'presence', field: 'intCategoryId'}
+        {type: 'presence', field: 'strCategoryCode'}
     ]
 });

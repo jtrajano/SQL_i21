@@ -35,7 +35,12 @@ Ext.define('Inventory.model.StorageLocationSku', {
         { name: 'intLotCodeId', type: 'int', allowNull: true },
         { name: 'intLotStatusId', type: 'int', allowNull: true },
         { name: 'intOwnerId', type: 'int', allowNull: true },
-        { name: 'intSort', type: 'int'}
+        { name: 'intSort', type: 'int'},
+
+        { name: 'strSKU', type: 'string'},
+        { name: 'strItemNo', type: 'string'},
+        { name: 'strContainer', type: 'string'},
+        { name: 'strLotStatus', type: 'string'}
     ],
 
     validators: [

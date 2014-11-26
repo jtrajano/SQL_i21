@@ -33,10 +33,12 @@ Ext.define('Inventory.model.StorageLocationContainer', {
         { name: 'intContainerTypeId', type: 'int', allowNull: true },
         { name: 'strLastUpdatedBy', type: 'string'},
         { name: 'dtmLastUpdatedOn', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d'},
-        { name: 'intSort', type: 'int'}
+        { name: 'intSort', type: 'int'},
+        { name: 'strContainer', type: 'string'},
+        { name: 'strContainerType', type: 'string'}
     ],
 
     validators: [
-        {type: 'presence', field: 'intContainerId'}
+        {type: 'presence', field: 'strContainer'}
     ]
 });

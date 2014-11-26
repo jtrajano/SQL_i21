@@ -42,8 +42,8 @@ Ext.define('Inventory.model.ItemVendorXref', {
     ],
 
     validators: [
-        {type: 'presence', field: 'intLocationId'},
-        {type: 'presence', field: 'intVendorId'},
+        {type: 'presence', field: 'strLocationName'},
+        {type: 'presence', field: 'strVendorId'},
         {type: 'presence', field: 'strVendorProduct'}
     ]
 });

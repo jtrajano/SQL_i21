@@ -36,6 +36,6 @@ Ext.define('Inventory.model.ItemOwner', {
     ],
 
     validators: [
-        {type: 'presence', field: 'intOwnerId'}
+        {type: 'presence', field: 'strCustomerNumber'}
     ]
 });

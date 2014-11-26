@@ -29,10 +29,12 @@ Ext.define('Inventory.model.CategoryAccount', {
             }},
         { name: 'strAccountDescription', type: 'string'},
         { name: 'intAccountId', type: 'int', allowNull: true },
+
+        { name: 'strAccountId', type: 'int', allowNull: true }
     ],
 
     validators: [
-        {type: 'presence', field: 'intAccountId'},
+        {type: 'presence', field: 'strAccountId'},
         {type: 'presence', field: 'strAccountDescription'}
     ]
 });

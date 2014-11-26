@@ -30,12 +30,15 @@ Ext.define('Inventory.model.CommodityAccount', {
         { name: 'intLocationId', type: 'int', allowNull: true },
         { name: 'strAccountDescription', type: 'string'},
         { name: 'intAccountId', type: 'int', allowNull: true },
-        { name: 'intSort', type: 'int'}
+        { name: 'intSort', type: 'int'},
+
+        { name: 'strLocationName', type: 'string'},
+        { name: 'strAccountId', type: 'string'}
     ],
 
     validators: [
-        {type: 'presence', field: 'intLocationId'},
+        {type: 'presence', field: 'strLocationName'},
         {type: 'presence', field: 'strAccountDescription'},
-        {type: 'presence', field: 'intAccountId'}
+        {type: 'presence', field: 'strAccountId'}
     ]
 });

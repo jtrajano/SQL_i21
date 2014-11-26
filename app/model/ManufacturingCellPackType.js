@@ -32,10 +32,14 @@ Ext.define('Inventory.model.ManufacturingCellPackType', {
         { name: 'intLineCapacityUnitMeasureId', type: 'int', allowNull: true },
         { name: 'intLineCapacityRateUnitMeasureId', type: 'int', allowNull: true },
         { name: 'dblLineEfficiencyRate', type: 'float'},
-        { name: 'intSort', type: 'int'}
+        { name: 'intSort', type: 'int'},
+
+        { name: 'strPackName', type: 'string'},
+        { name: 'strDescription', type: 'string'}
+
     ],
 
     validators: [
-        {type: 'presence', field: 'intPackTypeId'}
+        {type: 'presence', field: 'strPackName'}
     ]
 });

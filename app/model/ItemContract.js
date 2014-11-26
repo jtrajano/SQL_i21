@@ -45,7 +45,7 @@ Ext.define('Inventory.model.ItemContract', {
     ],
 
     validators: [
-        { type: 'presence', field: 'intLocationId' },
+        { type: 'presence', field: 'strLocationName' },
         { type: 'presence', field: 'strContractItemName' }
     ]
 });

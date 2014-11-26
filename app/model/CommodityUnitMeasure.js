@@ -38,6 +38,6 @@ Ext.define('Inventory.model.CommodityUnitMeasure', {
     ],
 
     validators: [
-        {type: 'presence', field: 'intUnitMeasureId'}
+        {type: 'presence', field: 'strUnitMeasure'}
     ]
 });

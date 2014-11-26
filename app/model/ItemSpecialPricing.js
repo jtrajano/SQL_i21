@@ -46,6 +46,6 @@ Ext.define('Inventory.model.ItemSpecialPricing', {
     ],
 
     validators: [
-        {type: 'presence', field: 'intLocationId'}
+        {type: 'presence', field: 'strLocationName'}
     ]
 });

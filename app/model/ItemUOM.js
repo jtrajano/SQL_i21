@@ -38,10 +38,12 @@ Ext.define('Inventory.model.ItemUOM', {
         { name: 'dblWidth', type: 'float'},
         { name: 'dblHeight', type: 'float'},
         { name: 'dblVolume', type: 'float'},
-        { name: 'dblMaxQty', type: 'float'}
+        { name: 'dblMaxQty', type: 'float'},
+
+        { name: 'strUnitMeasure', type: 'string'}
     ],
 
     validators: [
-        {type: 'presence', field: 'intUnitMeasureId'}
+        {type: 'presence', field: 'strUnitMeasure'}
     ]
 });

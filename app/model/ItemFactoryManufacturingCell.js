@@ -33,10 +33,11 @@ Ext.define('Inventory.model.ItemFactoryManufacturingCell', {
         { name: 'intPreference', type: 'int'},
         { name: 'intSort', type: 'int'},
 
-        { name: 'strLocationName', type: 'string'}
+        { name: 'strCellName', type: 'string'}
+
     ],
 
     validators: [
-        {type: 'presence', field: 'intManufacturingCellId'}
+        {type: 'presence', field: 'strCellName'}
     ]
 });

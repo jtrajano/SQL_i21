@@ -40,8 +40,8 @@ Ext.define('Inventory.model.ItemAssembly', {
     ],
 
     validators: [
-        {type: 'presence', field: 'intAssemblyItemId'},
-        {type: 'presence', field: 'intUnitMeasureId'}
+        {type: 'presence', field: 'strItemNo'},
+        {type: 'presence', field: 'strUnitMeasure'}
     ]
 
 

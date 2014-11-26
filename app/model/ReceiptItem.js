@@ -43,12 +43,15 @@ Ext.define('Inventory.model.ReceiptItem', {
         { name: 'dblUnitRetail', type: 'float'},
         { name: 'dblLineTotal', type: 'float'},
         { name: 'dblGrossMargin', type: 'float'},
-        { name: 'intSort', type: 'int'}
+        { name: 'intSort', type: 'int'},
+
+        { name: 'strItemNo', type: 'string'},
+        { name: 'strUnitMeasure', type: 'string'}
     ],
 
     validators: [
-        {type: 'presence', field: 'intItemId'},
-        {type: 'presence', field: 'intUnitMeasureId'}
+        {type: 'presence', field: 'strItemNo'},
+        {type: 'presence', field: 'strUnitMeasure'}
     ]
 
 });
