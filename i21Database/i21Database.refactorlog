@@ -1435,4 +1435,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intItemFactoryId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="ff7d12b4-180a-4949-b511-a6969718acd1" ChangeDateTime="11/26/2014 10:34:28">
+    <Property Name="ElementName" Value="[dbo].[tblICItem].[intTrackingId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItem]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strInventoryTracking" />
+  </Operation>
 </Operations>

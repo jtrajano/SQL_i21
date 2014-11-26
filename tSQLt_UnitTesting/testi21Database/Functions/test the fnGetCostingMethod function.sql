@@ -55,15 +55,15 @@ BEGIN
 		UNION ALL SELECT intCostingMethod = @LIFO -- Category 3
 		UNION ALL SELECT intCostingMethod = @StandardCost -- Category 4
 		
-		-- Setup a fake table and data for tblICItem
-		EXEC tSQLt.FakeTable 'dbo.tblICItem', @Identity = 1;
-		INSERT tblICItem (
-			intTrackingId
-		)
-		SELECT intTrackingId = 2 -- Item 1 with category 2
-		UNION ALL SELECT intTrackingId = 2 -- Item 2 with category 2
-		UNION ALL SELECT intTrackingId = 3 -- Item 3 with category 3
-		UNION ALL SELECT intTrackingId = 4 -- Item 4 with category 4
+		---- Setup a fake table and data for tblICItem
+		--EXEC tSQLt.FakeTable 'dbo.tblICItem', @Identity = 1;
+		--INSERT tblICItem (
+		--	intTrackingId
+		--)
+		--SELECT intTrackingId = 2 -- Item 1 with category 2
+		--UNION ALL SELECT intTrackingId = 2 -- Item 2 with category 2
+		--UNION ALL SELECT intTrackingId = 3 -- Item 3 with category 3
+		--UNION ALL SELECT intTrackingId = 4 -- Item 4 with category 4
 	END
 	
 	-- Test average cost

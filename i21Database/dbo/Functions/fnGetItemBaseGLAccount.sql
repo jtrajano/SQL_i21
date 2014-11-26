@@ -23,14 +23,14 @@ BEGIN
 	IF @intGLAccountId IS NOT NULL 
 		RETURN @intGLAccountId
 
-	-- 2: Try to get the account id from the category (G/L Setup tab)
-	SELECT	@intGLAccountId = CatGLAccounts.intAccountId
-	FROM	tblICItem Item INNER JOIN tblICCategory Cat
-				ON Item.intTrackingId = Cat.intCategoryId
-			INNER JOIN tblICCategoryAccount CatGLAccounts
-				ON Cat.intCategoryId = CatGLAccounts.intCategoryId
-	WHERE	Item.intItemId = @intItemId
-			AND CatGLAccounts.strAccountDescription = @strAccountDescription 
+	---- 2: Try to get the account id from the category (G/L Setup tab)
+	--SELECT	@intGLAccountId = CatGLAccounts.intAccountId
+	--FROM	tblICItem Item INNER JOIN tblICCategory Cat
+	--			ON Item.intTrackingId = Cat.intCategoryId
+	--		INNER JOIN tblICCategoryAccount CatGLAccounts
+	--			ON Cat.intCategoryId = CatGLAccounts.intCategoryId
+	--WHERE	Item.intItemId = @intItemId
+	--		AND CatGLAccounts.strAccountDescription = @strAccountDescription 
 
 	IF @intGLAccountId IS NOT NULL 
 		RETURN @intGLAccountId

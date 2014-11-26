@@ -69,8 +69,8 @@ BEGIN
 	INSERT INTO tblICItem (intItemId, strDescription) VALUES (@WetGrains, 'WET GRAINS')
 	INSERT INTO tblICItem (intItemId, strDescription) VALUES (@StickyGrains, 'STICKY GRAINS')
 	INSERT INTO tblICItem (intItemId, strDescription) VALUES (@PremiumGrains, 'PREMIUM GRAINS')
-	INSERT INTO tblICItem (intItemId, strDescription, intTrackingId) VALUES (@ColdGrains, 'COLD GRAINS', 2)
-	INSERT INTO tblICItem (intItemId, strDescription, intTrackingId) VALUES (@HotGrains, 'HOT GRAINS', 1)
+	--INSERT INTO tblICItem (intItemId, strDescription, intTrackingId) VALUES (@ColdGrains, 'COLD GRAINS', 2)
+	--INSERT INTO tblICItem (intItemId, strDescription, intTrackingId) VALUES (@HotGrains, 'HOT GRAINS', 1)
 
 	-- Add items for location 1 ('')
 	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@WetGrains, @Default_Location, @AllowNegativeStock)
