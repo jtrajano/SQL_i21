@@ -28,7 +28,7 @@ Ext.define('Inventory.model.ReceiptInspection', {
                 }
             }
         },
-        { name: 'intQAPropertyId', type: 'int'},
+        { name: 'intQAPropertyId', type: 'int', allowNull: true },
         { name: 'ysnSelected', type: 'boolean'},
         { name: 'intSort', type: 'int'}
     ],

@@ -28,7 +28,7 @@ Ext.define('Inventory.model.ItemPOSCategory', {
                 }
             }
         },
-        { name: 'intCategoryId', type: 'int'},
+        { name: 'intCategoryId', type: 'int', allowNull: true },
         { name: 'intSort', type: 'int'},
 
         { name: 'strCategory', type: 'string'}

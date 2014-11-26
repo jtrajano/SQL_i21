@@ -28,7 +28,7 @@ Ext.define('Inventory.model.ItemSpecialPricing', {
                 }
             }
         },
-        { name: 'intLocationId', type: 'int'},
+        { name: 'intLocationId', type: 'int', allowNull: true },
         { name: 'strPromotionType', type: 'string'},
         { name: 'dtmBeginDate', type: 'date'},
         { name: 'dtmEndDate', type: 'date'},

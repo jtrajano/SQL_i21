@@ -28,7 +28,7 @@ Ext.define('Inventory.model.ItemContractDocument', {
                 }
             }
         },
-        { name: 'intDocumentId', type: 'int'},
+        { name: 'intDocumentId', type: 'int', allowNull: true },
         { name: 'intSort', type: 'int'},
 
         { name: 'strDocumentName', type: 'string'}

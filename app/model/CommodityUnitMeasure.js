@@ -27,7 +27,7 @@ Ext.define('Inventory.model.CommodityUnitMeasure', {
                     }
                 }
             }},
-        { name: 'intUnitMeasureId', type: 'int'},
+        { name: 'intUnitMeasureId', type: 'int', allowNull: true },
         { name: 'dblWeightPerPack', type: 'float'},
         { name: 'ysnStockUnit', type: 'boolean'},
         { name: 'ysnAllowPurchase', type: 'boolean'},

@@ -28,7 +28,7 @@ Ext.define('Inventory.model.ReceiptItemTax', {
                 }
             }
         },
-        { name: 'intTaxCodeId', type: 'int'},
+        { name: 'intTaxCodeId', type: 'int', allowNull: true },
         { name: 'ysnSelected', type: 'boolean'},
         { name: 'intSort', type: 'int'}
     ],

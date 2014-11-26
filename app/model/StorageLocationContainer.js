@@ -28,9 +28,9 @@ Ext.define('Inventory.model.StorageLocationContainer', {
                 }
             }
         },
-        { name: 'intContainerId', type: 'int'},
+        { name: 'intContainerId', type: 'int', allowNull: true },
         { name: 'intExternalSystemId', type: 'int'},
-        { name: 'intContainerTypeId', type: 'int'},
+        { name: 'intContainerTypeId', type: 'int', allowNull: true },
         { name: 'strLastUpdatedBy', type: 'string'},
         { name: 'dtmLastUpdatedOn', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d'},
         { name: 'intSort', type: 'int'}

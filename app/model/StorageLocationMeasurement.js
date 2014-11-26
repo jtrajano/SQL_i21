@@ -28,8 +28,8 @@ Ext.define('Inventory.model.StorageLocationMeasurement', {
                 }
             }
         },
-        { name: 'intMeasurementId', type: 'int'},
-        { name: 'intReadingPointId', type: 'int'},
+        { name: 'intMeasurementId', type: 'int', allowNull: true },
+        { name: 'intReadingPointId', type: 'int', allowNull: true },
         { name: 'ysnActive', type: 'boolean'},
         { name: 'intSort', type: 'int'}
     ],

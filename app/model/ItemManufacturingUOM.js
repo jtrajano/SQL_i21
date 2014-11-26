@@ -28,7 +28,7 @@ Ext.define('Inventory.model.ItemManufacturingUOM', {
                 }
             }
         },
-        { name: 'intUnitMeasureId', type: 'int'},
+        { name: 'intUnitMeasureId', type: 'int', allowNull: true },
         { name: 'intSort', type: 'int'},
     ],
 

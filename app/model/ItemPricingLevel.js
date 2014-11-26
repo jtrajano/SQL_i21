@@ -28,7 +28,7 @@ Ext.define('Inventory.model.ItemPricingLevel', {
                 }
             }
         },
-        { name: 'intLocationId', type: 'int'},
+        { name: 'intLocationId', type: 'int', allowNull: true },
         { name: 'strPriceLevel', type: 'string'},
         { name: 'intUnitMeasureId', type: 'int', allowNull: true },
         { name: 'dblUnit', type: 'float'},

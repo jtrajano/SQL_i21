@@ -28,18 +28,18 @@ Ext.define('Inventory.model.StorageLocationSku', {
                 }
             }
         },
-        { name: 'intItemId', type: 'int'},
-        { name: 'intSkuId', type: 'int'},
+        { name: 'intItemId', type: 'int', allowNull: true },
+        { name: 'intSkuId', type: 'int', allowNull: true },
         { name: 'dblQuantity', type: 'float'},
-        { name: 'intContainerId', type: 'int'},
-        { name: 'intLotCodeId', type: 'int'},
-        { name: 'intLotStatusId', type: 'int'},
-        { name: 'intOwnerId', type: 'int'},
+        { name: 'intContainerId', type: 'int', allowNull: true },
+        { name: 'intLotCodeId', type: 'int', allowNull: true },
+        { name: 'intLotStatusId', type: 'int', allowNull: true },
+        { name: 'intOwnerId', type: 'int', allowNull: true },
         { name: 'intSort', type: 'int'}
     ],
 
     validators: [
         {type: 'presence', field: 'intItemId'},
-        {type: 'presence', field: 'intSkuId'},
+        {type: 'presence', field: 'intSkuId'}
     ]
 });

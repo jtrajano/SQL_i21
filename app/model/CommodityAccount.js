@@ -27,10 +27,10 @@ Ext.define('Inventory.model.CommodityAccount', {
                     }
                 }
             }},
-        { name: 'intLocationId', type: 'int'},
+        { name: 'intLocationId', type: 'int', allowNull: true },
         { name: 'strAccountDescription', type: 'string'},
-        { name: 'intAccountId', type: 'int'},
-        { name: 'intSort', type: 'int'},
+        { name: 'intAccountId', type: 'int', allowNull: true },
+        { name: 'intSort', type: 'int'}
     ],
 
     validators: [
