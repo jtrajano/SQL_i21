@@ -875,6 +875,7 @@
     <Build Include="dbo\Tables\tblSMRecurringTransaction.sql" />
     <Build Include="dbo\Tables\tblFRValidateDesign.sql" />
     <Build Include="dbo\Stored Procedures\uspFRValidateDesign.sql" />
+    <Build Include="dbo\Views\vyuAPRptPurchase.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

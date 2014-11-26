@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblPOPurchase]
 (
-	[intPurchaseId] INT NOT NULL PRIMARY KEY, 
+	[intPurchaseId] INT IDENTITY (1, 1) NOT NULL PRIMARY KEY, 
     [intVendorId] INT NOT NULL, 
     [intAccountId] INT NOT NULL, 
     [intFreightId] INT NULL, 
@@ -12,6 +12,13 @@
     [intShipFromId] INT NULL, 
     [intShipToId] INT NULL, 
     [intStoreId] INT NULL, 
+	[intEntityId] INT NOT NULL,
+	[intTermsId] INT NOT NULL,
+	[intTransactionType] INT NOT NULL DEFAULT 5,
+	[dblTotal] DECIMAL NOT NULL DEFAULT 0,
+	[dblSubtotal] DECIMAL NOT NULL DEFAULT 0,
+	[dblShipping] DECIMAL NOT NULL DEFAULT 0,
+	[dblTax] DECIMAL NOT NULL DEFAULT 0,
 	[intOrderStatusId] INT NOT NULL, 
     [strPurchaseOrderNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[strVendorOrderNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
@@ -22,9 +29,12 @@
 	[strCountry] NVARCHAR (25) COLLATE Latin1_General_CI_AS NULL, 
     [dtmDate] DATETIME NOT NULL DEFAULT GETDATE(), 
     [dtmExpectedDate] DATETIME NOT NULL DEFAULT GETDATE(),
-	CONSTRAINT [UK_dbo.tblPOPurchase_strPurchaseOrderNumber] UNIQUE (strPurchaseOrderNumber),
+	[intConcurrencyId] INT NOT NULL DEFAULT 0, 
+    CONSTRAINT [UK_dbo.tblPOPurchase_strPurchaseOrderNumber] UNIQUE (strPurchaseOrderNumber),
 	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblGLAccount_intAccountId] FOREIGN KEY (intAccountId) REFERENCES tblGLAccount(intAccountId),
-	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblPOOrderStatus_intOrderStatusId] FOREIGN KEY (intOrderStatusId) REFERENCES tblPOOrderStatus(intOrderStatusId)
+	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblPOOrderStatus_intOrderStatusId] FOREIGN KEY (intOrderStatusId) REFERENCES tblPOOrderStatus(intOrderStatusId),
+	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblSMTerm_intTermId] FOREIGN KEY ([intTermsId]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),
+	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEntity(intEntityId)
 );
 GO
 CREATE NONCLUSTERED INDEX [IX_tblPOPurchase_intPurchaseId]

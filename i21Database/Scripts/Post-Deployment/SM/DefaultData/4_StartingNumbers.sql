@@ -208,7 +208,16 @@ GO
 			,[strModule]			= 'Tank Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Lease')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Purchase Order')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 22
+			,[strTransactionType]	= N'Purchase Order'
+			,[strPrefix]			= N'PO-'
+			,[intNumber]			= 1
+			,[strModule]			= 'AccountsPayable'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Purchase Order')
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'
