@@ -3,7 +3,7 @@
 	[intPaymentMethodId] INT NOT NULL IDENTITY,
     [intStoreId] INT NOT NULL, 
     [intPaymentMethodNo] INT NOT NULL, 
-    [strDescription] NCHAR(25) NULL, 
+    [strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intRegisterMopCode] INT NULL, 
     [dblMinSaleAmount] NUMERIC(9, 2) NULL, 
     [dblMaxSaleAmount] NUMERIC(9, 2) NULL, 
