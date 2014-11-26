@@ -1,5 +1,4 @@
 ﻿CREATE VIEW [dbo].[vyuPREmployee]
-WITH SCHEMABINDING
 AS
 SELECT
 Ent.intEntityId,
