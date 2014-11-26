@@ -873,6 +873,8 @@
     <Build Include="dbo\Tables\tblICItemOwner.sql" />
     <Build Include="dbo\Views\vyuICGetItemStock.sql" />
     <Build Include="dbo\Tables\tblSMRecurringTransaction.sql" />
+    <Build Include="dbo\Tables\tblFRValidateDesign.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRValidateDesign.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
