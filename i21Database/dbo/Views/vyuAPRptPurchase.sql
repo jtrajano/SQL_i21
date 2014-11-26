@@ -6,7 +6,7 @@ A.intPurchaseId
 ,A.dtmDate
 ,A.intVendorId
 ,A.strPurchaseOrderNumber
-,B.strVendorId 
+,C.strVendorId 
 FROM dbo.tblPOPurchase A
 	INNER JOIN dbo.tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
-	INNER JOIN dbo.tblAPVendor B ON A.intVendorId = B.intVendorId
+	INNER JOIN dbo.tblAPVendor C ON A.intVendorId = C.intVendorId
