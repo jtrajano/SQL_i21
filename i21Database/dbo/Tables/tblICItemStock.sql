@@ -26,12 +26,8 @@
 )
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblICItemStock_intItemId]
-    ON [dbo].[tblICItemStock]([intItemId] ASC);
-GO
-
-CREATE NONCLUSTERED INDEX [IX_tblICItemStock_intLocationId]
-    ON [dbo].[tblICItemStock]([intLocationId] ASC);
+CREATE NONCLUSTERED INDEX [IX_tblICItemStock_intItemId_intLocationId]
+    ON [dbo].[tblICItemStock]([intItemId] ASC, [intLocationId] ASC);
 GO
 
 GO

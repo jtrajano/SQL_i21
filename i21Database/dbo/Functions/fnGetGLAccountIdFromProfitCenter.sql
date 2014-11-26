@@ -6,49 +6,54 @@
 RETURNS INT
 AS 
 BEGIN
-	DECLARE @strAccountId AS NVARCHAR(40)
-	DECLARE @strDivider AS NVARCHAR(100)
-	DECLARE @Length AS INT
-
-	DECLARE @intFoundGLAccountId INT
+	DECLARE @intFoundGLAccountId AS INT 
 	
-	-- Retrieve the account structure to modify. 
-	DECLARE @intAccountStructureToModify AS INT	
-	SELECT	@intAccountStructureToModify = Structure.intAccountStructureId
-	FROM	tblGLAccountSegment Segment INNER JOIN tblGLAccountStructure Structure
-				ON Segment.intAccountStructureId = Structure.intAccountStructureId
-	WHERE	Segment.intAccountSegmentId = @intAccountSegmentId 
-
-	-- Retrieve the divider to use. 
-	SELECT	@strDivider = strMask
-	FROM	tblGLAccountStructure
-	WHERE	strType = 'Divider'
-	
-	SET @Length = ISNULL(LEN(@strDivider), 0)
-	
-	-- Re-create the strAccountId (Original Account + Account Structure to modify)
-	SELECT	@strAccountId = STUFF((	
-					SELECT	@strDivider + RecreateStructure.strCode
-					FROM	tblGLAccountSegment RecreateStructure INNER JOIN (
-								SELECT	intAccountSegmentId = CASE WHEN @intAccountStructureToModify = Structure.intAccountStructureId THEN @intAccountSegmentId ELSE SegmentMap.intAccountSegmentId END 
-										,Structure.intSort 
-								FROM	tblGLAccountStructure Structure INNER JOIN tblGLAccountSegment Segment
-											ON Structure.intAccountStructureId = Segment.intAccountStructureId
-										INNER JOIN tblGLAccountSegmentMapping SegmentMap
-											ON Segment.intAccountSegmentId = SegmentMap.intAccountSegmentId
-								WHERE	Structure.strType <> 'Divider'
-										AND SegmentMap.intAccountId = @intGLAccountId
-							) TemplateStructure 
-								ON RecreateStructure.intAccountSegmentId = TemplateStructure.intAccountSegmentId
-					ORDER BY TemplateStructure.intSort
-					FOR XML PATH('')
-				), 1, @Length, '' 
-			)
-
-	-- Try to retrieve the intAccountId based on the re-created strAccountId
-	SELECT	@intFoundGLAccountId = intAccountId
-	FROM	tblGLAccount
-	WHERE	strAccountId = 	@strAccountId 
+	-- Compare the re-created account id to the tblGLAccount table
+	SELECT @intFoundGLAccountId = tblGLAccount.intAccountId	
+	FROM	(
+				-- Re-create the strAccountId (Original Account + Account Structure to modify)
+				SELECT strAccountId = STUFF(
+									(	
+										SELECT	Divider.strMask + RecreateStructure.strCode
+										FROM	tblGLAccountSegment RecreateStructure INNER JOIN (
+													SELECT	intAccountSegmentId = 
+																CASE	WHEN EXISTS (
+																			-- Get the structure id for @intAccountSegmentId. if it matches, use it as the override. 
+																			SELECT	B.intAccountStructureId
+																			FROM	tblGLAccountSegment A INNER JOIN tblGLAccountStructure B
+																						ON A.intAccountStructureId = B.intAccountStructureId
+																			WHERE	A.intAccountSegmentId = @intAccountSegmentId 
+																					AND B.intAccountStructureId = Structure.intAccountStructureId
+																		) 
+																		THEN 
+																			@intAccountSegmentId 
+																		ELSE 
+																			SegmentMap.intAccountSegmentId 
+																END 
+															,Structure.intSort 
+													FROM	tblGLAccountStructure Structure INNER JOIN tblGLAccountSegment Segment
+																ON Structure.intAccountStructureId = Segment.intAccountStructureId
+															INNER JOIN tblGLAccountSegmentMapping SegmentMap
+																ON Segment.intAccountSegmentId = SegmentMap.intAccountSegmentId
+													WHERE	Structure.strType <> 'Divider'
+															AND SegmentMap.intAccountId = @intGLAccountId
+												) AS TemplateStructure 
+													ON RecreateStructure.intAccountSegmentId = TemplateStructure.intAccountSegmentId
+												,(
+													SELECT TOP 1 
+															strMask = ISNULL(strMask, '')
+													FROM	tblGLAccountStructure
+													WHERE	strType = 'Divider'
+												) AS Divider							
+										ORDER BY TemplateStructure.intSort
+										FOR XML PATH('')
+									)
+									, 1
+									, 1 -- We expect the divider used in COA setup is always one character. 
+									, '' 
+							)	
+			) AS RecreatedAccount INNER JOIN tblGLAccount 
+				ON RecreatedAccount.strAccountId = tblGLAccount.strAccountId
 
 	RETURN @intFoundGLAccountId
 END

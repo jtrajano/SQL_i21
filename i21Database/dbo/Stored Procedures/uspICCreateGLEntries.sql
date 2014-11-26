@@ -22,7 +22,6 @@ DECLARE @UseGLAccount_RevalueSold AS NVARCHAR(30) = 'Revalue Sold';
 DECLARE @UseGLAccount_AutoNegative AS NVARCHAR(30) = 'Auto Negative';
 
 DECLARE @GLAccounts AS dbo.ItemGLAccount; 
-DECLARE @GLEntries AS dbo.RecapTableType; 
 
 -- Get the GL Account ids to use
 INSERT INTO @GLAccounts (
@@ -77,33 +76,6 @@ AS
 	FROM	dbo.tblICInventoryTransaction TRANS 
 	WHERE	TRANS.strBatchId = @strBatchId
 )
---INSERT INTO @GLEntries (
---		dtmDate
---		,strBatchId
---		,intAccountId
---		,dblDebit
---		,dblCredit
---		,dblDebitUnit
---		,dblCreditUnit
---		,strDescription
---		,strCode
---		,strReference
---		,intCurrencyId
---		,dblExchangeRate
---		,dtmDateEntered
---		,dtmTransactionDate
---		,strJournalLineDescription
---		,intJournalLineNo
---		,ysnIsUnposted
---		,intUserId
---		,intEntityId
---		,strTransactionId
---		,intTransactionId
---		,strTransactionType
---		,strTransactionForm
---		,strModuleName
---		,intConcurrencyId
---)
 -------------------------------------------------------------------------------------------
 -- This part if for the usual G/L entries for Inventory Account and its contra account 
 -------------------------------------------------------------------------------------------
@@ -393,6 +365,3 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetCredit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Credit
 WHERE	intTransactionTypeId  = @AUTO_NEGATIVE
 ;
-
----- Query the GL Entries table
---SELECT * FROM @GLEntries;
