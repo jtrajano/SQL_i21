@@ -876,6 +876,7 @@
     <Build Include="dbo\Tables\tblFRValidateDesign.sql" />
     <Build Include="dbo\Stored Procedures\uspFRValidateDesign.sql" />
     <Build Include="dbo\Views\vyuAPRptPurchase.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
