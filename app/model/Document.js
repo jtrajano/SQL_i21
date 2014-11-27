@@ -22,6 +22,6 @@ Ext.define('Inventory.model.Document', {
 
     validators: [
         {type: 'presence', field: 'strDocumentName'},
-        {type: 'presence', field: 'strCommodityCode'}
+        {type: 'presence', field: 'intCommodityId'}
     ]
 });
