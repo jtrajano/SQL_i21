@@ -15,8 +15,7 @@ namespace iRely.Inventory.Model
         public int intItemId { get; set; }
         public string strAccountDescription { get; set; }
         public int? intAccountId { get; set; }
-        public int? intProfitCenterId { get; set; }
-        public int intSort { get; set; }
+        public int? intSort { get; set; }
 
         private string _accountid;
         [NotMapped]
@@ -37,28 +36,8 @@ namespace iRely.Inventory.Model
                 _accountid = value;
             }
         }
-        private string _profitcenter;
-        [NotMapped]
-        public string strProfitCenter
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_profitcenter))
-                    if (ProfitCenter != null)
-                        return ProfitCenter.strAccountId;
-                    else
-                        return null;
-                else
-                    return _profitcenter;
-            }
-            set
-            {
-                _profitcenter = value;
-            }
-        }
-
+        
         public tblICItem tblICItem { get; set; }
         public tblGLAccount tblGLAccount { get; set; }
-        public tblGLAccount ProfitCenter { get; set; }
     }
 }

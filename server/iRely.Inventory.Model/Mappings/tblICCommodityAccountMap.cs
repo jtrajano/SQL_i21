@@ -16,16 +16,12 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intCommodityAccountId).HasColumnName("intCommodityAccountId");
             this.Property(t => t.intCommodityId).HasColumnName("intCommodityId");
             this.Property(t => t.intConcurrencyId).HasColumnName("intConcurrencyId");
-            this.Property(t => t.intLocationId).HasColumnName("intLocationId");
             this.Property(t => t.intSort).HasColumnName("intSort");
             this.Property(t => t.strAccountDescription).HasColumnName("strAccountDescription");
 
             this.HasOptional(p => p.tblGLAccount)
                 .WithMany(p => p.tblICCommodityAccounts)
                 .HasForeignKey(p => p.intAccountId);
-            this.HasOptional(p => p.tblSMCompanyLocation)
-                .WithMany(p => p.tblICCommodityAccounts)
-                .HasForeignKey(p => p.intLocationId);
         }
     }
 }

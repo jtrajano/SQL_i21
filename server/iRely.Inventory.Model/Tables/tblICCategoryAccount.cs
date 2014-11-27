@@ -15,7 +15,7 @@ namespace iRely.Inventory.Model
         public int intCategoryId { get; set; }
         public string strAccountDescription { get; set; }
         public int? intAccountId { get; set; }
-        public int intSort { get; set; }
+        public int? intSort { get; set; }
 
         private string _accountid;
         [NotMapped]

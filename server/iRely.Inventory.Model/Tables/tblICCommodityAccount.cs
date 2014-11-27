@@ -13,30 +13,10 @@ namespace iRely.Inventory.Model
     {
         public int intCommodityAccountId { get; set; }
         public int intCommodityId { get; set; }
-        public int? intLocationId { get; set; }
         public string strAccountDescription { get; set; }
         public int? intAccountId { get; set; }
-        public int intSort { get; set; }
+        public int? intSort { get; set; }
 
-        private string _location;
-        [NotMapped]
-        public string strLocationName
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_location))
-                    if (tblSMCompanyLocation != null)
-                        return tblSMCompanyLocation.strLocationName;
-                    else
-                        return null;
-                else
-                    return _location;
-            }
-            set
-            {
-                _location = value;
-            }
-        }
         private string _accountid;
         [NotMapped]
         public string strAccountId
@@ -58,7 +38,6 @@ namespace iRely.Inventory.Model
         }
 
         public tblICCommodity tblICCommodity { get; set; }
-        public tblSMCompanyLocation tblSMCompanyLocation { get; set; }
         public tblGLAccount tblGLAccount { get; set; }
     }
 }
