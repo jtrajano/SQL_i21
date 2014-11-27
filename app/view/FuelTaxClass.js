@@ -191,7 +191,7 @@ Ext.define('Inventory.view.FuelTaxClass', {
                                         labelWidth: 90
                                     },
                                     {
-                                        xtype: 'gridpanel',
+                                        xtype: 'advancefiltergrid',
                                         flex: 1,
                                         itemId: 'grdProductCode',
                                         title: 'Product Codes',

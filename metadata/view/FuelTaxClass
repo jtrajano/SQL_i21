@@ -354,6 +354,7 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "designer|createAlias": "advancefiltergrid",
                                 "itemId": "grdProductCode",
                                 "layout|flex": 1,
                                 "title": "Product Codes"
@@ -418,7 +419,7 @@
                                             "userConfig": {
                                                 "layout|flex": null
                                             },
-                                            "name": "filter117",
+                                            "name": "filter162",
                                             "designerId": "e1124fa2-1f3c-4468-b2f5-c45d35cb7517",
                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                         }
