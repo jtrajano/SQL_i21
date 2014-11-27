@@ -1,13 +1,13 @@
 ﻿CREATE TABLE [dbo].[tblSTPromotionSalesList]
 (
 	[intPromoSalesListId] INT NOT NULL IDENTITY, 
-    [strPromoType] NCHAR(10) NOT NULL, 
+    [strPromoType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intStoreId] INT NOT NULL, 
     [intPromoSalesId] INT NOT NULL, 
     [intPromoDepartment] INT NOT NULL, 
-    [strDescription] NCHAR(40) NULL, 
+    [strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intPromoCode] INT NOT NULL, 
-    [strPromoReason] NCHAR(40) NOT NULL, 
+    [strPromoReason] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intPromoUnits] INT NULL, 
     [dblPromoPrice] NUMERIC(5, 2) NULL, 
     [intPromoFeeType] INT NOT NULL, 

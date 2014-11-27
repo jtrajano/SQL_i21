@@ -1,49 +1,117 @@
 ﻿CREATE PROCEDURE testi21Database.[test the fnGetCostingMethod function]
 AS 
 BEGIN
-	-- Arrange
-	DECLARE @intItemId AS INT
-	DECLARE @intLocationId AS INT
-	
+	-- Arrange	
 	DECLARE @AverageCost AS INT = 1
 			,@FIFO AS INT = 2
 			,@LIFO AS INT = 3
 			,@StandardCost AS INT = 4 	
 
 	DECLARE @actual AS INT;
+	
+	DECLARE @Item1 AS INT = 1
+			,@Item2 AS INT = 2
+			,@Item3 AS INT = 3
+			,@Item4 AS INT = 4
+	
+	DECLARE @LocationA AS INT = 100
+			,@LocationB AS INT = 200
+			,@LocationC AS INT = 300
+			,@LocationD AS INT = 400
+			
+	DECLARE @Category_On_AverageCosting AS INT = 1
+			,@Category_On_FIFO AS INT = 2
+			,@Category_On_LIFO AS INT = 3
+			,@Category_On_StandardCost AS INT = 4
 
 	-- Setup the fake table and data 
 	BEGIN 
-		EXEC tSQLt.FakeTable 'dbo.tblICItemLocation';
+		EXEC tSQLt.FakeTable 'dbo.tblICItemLocation', @Identity = 1;
 		INSERT INTO tblICItemLocation(
-			intItemLocationId
-			,intItemId
+			intItemId
 			,intLocationId
 			,intCostingMethod
+			,intCategoryId
 		)
+		-- Add location for Item 1
 		-- Add item-location, costing method is average cost
-		SELECT	intItemLocationId = 1
-				,intItemId = 1
-				,intLocationId = 100
+		SELECT	intItemId = @Item1
+				,intLocationId = @LocationA
 				,intCostingMethod = @AverageCost
+				,intCategoryId = NULL
 		-- Add costing method for FIFO			
 		UNION ALL
-		SELECT	intItemLocationId = 2
-				,intItemId = 1
-				,intLocationId = 200
+		SELECT	intItemId = @Item1
+				,intLocationId = @LocationB
 				,intCostingMethod = @FIFO	
+				,intCategoryId = NULL
 		-- Add costing method for LIFO
 		UNION ALL
-		SELECT	intItemLocationId = 3
-				,intItemId = 1
-				,intLocationId = 300
+		SELECT	intItemId = @Item1
+				,intLocationId = @LocationC
 				,intCostingMethod = @LIFO	
+				,intCategoryId = NULL
 		-- Add costing method for Standard Cost
 		UNION ALL
-		SELECT	intItemLocationId = 4
-				,intItemId = 1
-				,intLocationId = 400
+		SELECT	intItemId = @Item1
+				,intLocationId = @LocationD
 				,intCostingMethod = @StandardCost
+				,intCategoryId = NULL
+
+		-- Add location for Item 2		
+		-- Add item-location, costing method is average cost but category is set to FIFO. 
+		-- Item must use FIFO costing because of the category. 
+		UNION ALL 
+		SELECT	intItemId = @Item2
+				,intLocationId = @LocationA
+				,intCostingMethod = NULL
+				,intCategoryId = @Category_On_FIFO
+		-- Add costing method for FIFO			
+		UNION ALL
+		SELECT	intItemId = @Item2
+				,intLocationId = @LocationB
+				,intCostingMethod = NULL
+				,intCategoryId = @Category_On_FIFO
+		-- Add costing method for LIFO
+		UNION ALL
+		SELECT	intItemId = @Item2
+				,intLocationId = @LocationC
+				,intCostingMethod = NULL
+				,intCategoryId = @Category_On_FIFO
+		-- Add costing method for Standard Cost
+		UNION ALL
+		SELECT	intItemId = @Item2
+				,intLocationId = @LocationD
+				,intCostingMethod = NULL
+				,intCategoryId = @Category_On_FIFO								
+
+		-- Add location for Item 3
+		-- Add item-location, costing method is average cost but category is set to LIFO. 
+		-- It must use Costing method at item-location level. 
+		UNION ALL 
+		SELECT	intItemId = @Item3
+				,intLocationId = @LocationA
+				,intCostingMethod = @AverageCost
+				,intCategoryId = @Category_On_LIFO
+		-- Add costing method for FIFO			
+		UNION ALL
+		SELECT	intItemId = @Item3
+				,intLocationId = @LocationB
+				,intCostingMethod = @AverageCost
+				,intCategoryId = @Category_On_LIFO
+		-- Add costing method for LIFO
+		UNION ALL
+		SELECT	intItemId = @Item3
+				,intLocationId = @LocationC
+				,intCostingMethod = @AverageCost 
+				,intCategoryId = @Category_On_LIFO
+		-- Add costing method for Standard Cost
+		UNION ALL
+		SELECT	intItemId = @Item3
+				,intLocationId = @LocationD
+				,intCostingMethod = @AverageCost 
+				,intCategoryId = @Category_On_LIFO				
+
 		
 		-- Setup a fake table and data for tblICCategory
 		EXEC tSQLt.FakeTable 'dbo.tblICCategory', @Identity = 1;
@@ -58,20 +126,19 @@ BEGIN
 		-- Setup a fake table and data for tblICItem
 		EXEC tSQLt.FakeTable 'dbo.tblICItem', @Identity = 1;
 		INSERT tblICItem (
-			intTrackingId
+			strDescription
 		)
-		SELECT intTrackingId = 2 -- Item 1 with category 2
-		UNION ALL SELECT intTrackingId = 2 -- Item 2 with category 2
-		UNION ALL SELECT intTrackingId = 3 -- Item 3 with category 3
-		UNION ALL SELECT intTrackingId = 4 -- Item 4 with category 4
+		SELECT strDescription = 'I am item 1'
+		UNION ALL SELECT strDescription = 'I am item 2'
+		UNION ALL SELECT strDescription = 'I am item 3'
+		UNION ALL SELECT strDescription = 'I am item 4'
 	END
 	
 	-- Test average cost
 	BEGIN		
 		-- Act
-		SET @intItemId = 1
-		SET @intLocationId = 100
-		SELECT @actual = [dbo].[fnGetCostingMethod](@intItemId, @intLocationId);
+		-- Get costing method at Item Location 
+		SELECT @actual = [dbo].[fnGetCostingMethod](@Item1, @LocationA);
 
 		-- Assert
 		EXEC tSQLt.AssertEquals @AverageCost, @actual;
@@ -80,9 +147,8 @@ BEGIN
 	-- Test FIFO
 	BEGIN 
 		-- Act
-		SET @intItemId = 1
-		SET @intLocationId = 200
-		SELECT @actual = [dbo].[fnGetCostingMethod](@intItemId, @intLocationId);
+		-- Get costing method at Item Location 
+		SELECT @actual = [dbo].[fnGetCostingMethod](@Item1, @LocationB);
 
 		-- Assert
 		EXEC tSQLt.AssertEquals @FIFO, @actual;
@@ -91,9 +157,8 @@ BEGIN
 	-- Test LIFO
 	BEGIN 
 		-- Act
-		SET @intItemId = 1
-		SET @intLocationId = 300
-		SELECT @actual = [dbo].[fnGetCostingMethod](@intItemId, @intLocationId);
+		-- Get costing method at Item Location 
+		SELECT @actual = [dbo].[fnGetCostingMethod](@Item1, @LocationC);
 
 		-- Assert
 		EXEC tSQLt.AssertEquals @LIFO, @actual;
@@ -102,9 +167,8 @@ BEGIN
 	-- Test Standard Cost
 	BEGIN 
 		-- Act
-		SET @intItemId = 1
-		SET @intLocationId = 400
-		SELECT @actual = [dbo].[fnGetCostingMethod](@intItemId, @intLocationId);
+		-- Get costing method at Item Location 
+		SELECT @actual = [dbo].[fnGetCostingMethod](@Item1, @LocationD);
 
 		-- Assert
 		EXEC tSQLt.AssertEquals @StandardCost, @actual;
@@ -113,9 +177,9 @@ BEGIN
 	-- Test the part where item-location is missing
 	BEGIN 
 		-- Act
-		SET @intItemId = 2 -- Item 2 is category 2. Costing method used in @FIFO
-		SET @intLocationId = 100
-		SELECT @actual = [dbo].[fnGetCostingMethod](@intItemId, @intLocationId);
+		-- Item 2 costing method is NULL. It is also category 2. 
+		-- Use Costing method from Category (which is FIFO)
+		SELECT @actual = [dbo].[fnGetCostingMethod](@Item2, @LocationA);
 
 		-- Assert
 		EXEC tSQLt.AssertEquals @FIFO, @actual;
@@ -124,22 +188,32 @@ BEGIN
 	-- Test the part where item-location is missing
 	BEGIN 
 		-- Act
-		SET @intItemId = 3 -- Item 3 is category 2. Costing method used in @FIFO
-		SET @intLocationId = NULL
-		SELECT @actual = [dbo].[fnGetCostingMethod](@intItemId, @intLocationId);
+		-- Item 3 costing method is Average Cost
+		-- It also belong to in LIFO category
+		-- When both are configured, it must use costing method at item-location level. 
+		SELECT @actual = [dbo].[fnGetCostingMethod](@Item3, @LocationA);
 
 		-- Assert
-		EXEC tSQLt.AssertEquals @LIFO, @actual;
+		EXEC tSQLt.AssertEquals @AverageCost, @actual;
+	END		
+	
+	-- Test the part where item-location is missing
+	BEGIN 
+		-- Act
+		-- Item 3 is set to Average Cost. It is also category 3 (using LIFO) 
+		-- But location is NULL. Costing method returned must be NULL. 
+		SELECT @actual = [dbo].[fnGetCostingMethod](@Item3, NULL);
+
+		-- Assert
+		EXEC tSQLt.AssertEquals NULL, @actual;
 	END
 	
 	-- Null must be returned if no costing method is found. 
 	BEGIN 
 		-- Act
-		SET @intItemId = NULL
-		SET @intLocationId = NULL
-		SELECT @actual = [dbo].[fnGetCostingMethod](@intItemId, @intLocationId);
+		SELECT @actual = [dbo].[fnGetCostingMethod](NULL, NULL);
 
 		-- Assert
 		EXEC tSQLt.AssertEquals NULL, @actual;
 	END			
-END 
+END

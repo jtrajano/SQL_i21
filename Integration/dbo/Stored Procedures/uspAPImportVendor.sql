@@ -15,6 +15,12 @@ CREATE PROCEDURE [dbo].[uspAPImportVendor]
 
 AS
 
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
+
 --VALIDATION
 --Do not allow to import if some of the default gl account setup for vendor do not exists in tblGLAccount
 IF EXISTS(SELECT 1 FROM ssvndmst 

@@ -4,6 +4,7 @@ GO
 
 CREATE PROCEDURE uspARImportInvoice
 	@Checking BIT = 0,
+	@UserId INT = 0,
 	@Total INT = 0 OUTPUT
 
 	AS
@@ -11,6 +12,10 @@ BEGIN
 	--================================================
 	--     ONE TIME INVOICE SYNCHRONIZATION	
 	--================================================
+	
+	DECLARE @EntityId int
+	SET @EntityId = ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE intUserSecurityID = @UserId),@UserId)
+	
 	IF(@Checking = 0) 
 	BEGIN
 		
@@ -59,6 +64,7 @@ BEGIN
 			   ,[intAccountId]
 			   ,[ysnPosted]
 			   ,[ysnPaid]
+			   ,[intEntityId]
 			   ,[strShipToAddress] --just for insertion of identity field from origin in format LTRIM(RTRIM(agivc_ivc_no)) + LTRIM(RTRIM(agivc_bill_to_cus))
 			   )
 			SELECT
@@ -99,6 +105,7 @@ BEGIN
 				0, --to do [intAccountId]
 				1, --"If Invoice exists in the agivcmst, that means it is posted" -Joe [ysnPosted]
 				(CASE WHEN agivc_bal_due = 0 THEN 1 ELSE 0 END),--"If the agivc-bal-due equals zero, then it is paid." -Joe [ysnPaid]
+				@EntityId,
 				LTRIM(RTRIM(agivc_ivc_no)) + LTRIM(RTRIM(agivc_bill_to_cus))		
 			FROM agivcmst
 			LEFT JOIN tblARInvoice Inv ON agivcmst.agivc_ivc_no COLLATE Latin1_General_CI_AS = Inv.strInvoiceOriginId COLLATE Latin1_General_CI_AS
@@ -153,3 +160,6 @@ BEGIN
 	END
 		
 END	
+
+
+

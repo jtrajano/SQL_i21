@@ -892,7 +892,7 @@ GO
 
 			-- Payroll / Maintenance / Employees
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Employees' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceId)
-			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Employees', 'Payroll', @PayrollMaintenanceId, 'Employees', 'Screen', '', 'small-screen', 1, 1, 0, 1, 2, 0
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Employees', 'Payroll', @PayrollMaintenanceId, 'Employees', 'Screen', 'Payroll.view.Employee', 'small-screen', 1, 1, 0, 1, 2, 0
 
 			/*
 			-- Payroll / Maintenance / Employee Templates
@@ -916,18 +916,27 @@ GO
 
 				-- Payroll / Maintenance / Payroll Types / Tax Types
 				IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tax Types' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollTypesId)
-				INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Tax Types', 'Payroll', @PayrollTypesId, 'Tax Types', 'Screen', '', 'small-screen', 1, 1, 0, 1, 1, 0
+				INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Tax Types', 'Payroll', @PayrollTypesId, 'Tax Types', 'Screen', 'Payroll.view.TaxType', 'small-screen', 1, 1, 0, 1, 1, 0
 
 				-- Payroll / Maintenance / Payroll Types / Earning Types
 				IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Earning Types' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollTypesId)
-				INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Earning Types', 'Payroll', @PayrollTypesId, 'Earning Types', 'Screen', '', 'small-screen', 1, 1, 0, 1, 2, 0
+				INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Earning Types', 'Payroll', @PayrollTypesId, 'Earning Types', 'Screen', 'Payroll.view.EarningType', 'small-screen', 1, 1, 0, 1, 2, 0
 
 				-- Payroll / Maintenance / Payroll Types / Deduction Types
 				IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Deduction Types' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollTypesId)
-				INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Deduction Types', 'Payroll', @PayrollTypesId, 'Deduction Types', 'Screen', '', 'small-screen', 1, 1, 0, 1, 3, 0
+				INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Deduction Types', 'Payroll', @PayrollTypesId, 'Deduction Types', 'Screen', 'Payroll.view.DeductionType', 'small-screen', 1, 1, 0, 1, 3, 0
 
 				-- Payroll / Maintenance / Payroll Types / Time Off Types
 				IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Time Off Types' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollTypesId)
-				INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Time Off Types', 'Payroll', @PayrollTypesId, 'Time Off Types', 'Screen', '', 'small-screen', 1, 1, 0, 1, 4, 0
+				INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Time Off Types', 'Payroll', @PayrollTypesId, 'Time Off Types', 'Screen', 'Payroll.view.TimeOffType', 'small-screen', 1, 1, 0, 1, 4, 0
+
+GO
+
+-- /* Recurring Transaction under Common Info */
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'System Manager' AND intParentMenuID = 13 AND strMenuName = 'Recurring Transaction')
+BEGIN
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Recurring Transaction', N'System Manager', 13, N'Recurring Transaction', N'Screen', N'i21.view.RecurringTransaction', N'small-screen', 0, 0, 0, 1, NULL, 1) 
+END
 
 GO

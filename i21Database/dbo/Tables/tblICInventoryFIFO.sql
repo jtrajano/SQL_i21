@@ -29,5 +29,6 @@ CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFO_intItemId]
     ON [dbo].[tblICInventoryFIFO]([intItemId] ASC);
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFO_intInventoryFIFOId]
-    ON [dbo].[tblICInventoryFIFO]([intInventoryFIFOId] ASC);
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFO_intLocationId]
+    ON [dbo].[tblICInventoryFIFO]([intLocationId] ASC);
+GO

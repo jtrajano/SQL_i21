@@ -71,7 +71,7 @@ BEGIN
 				,@UpdatedLIFOId OUTPUT 
 
 			-- Insert the inventory transaction record
-			INSERT INTO tblICInventoryTransaction (
+			INSERT INTO dbo.tblICInventoryTransaction (
 				[intItemId] 
 				,[intLocationId] 
 				,[dtmDate] 
@@ -110,7 +110,7 @@ BEGIN
 			SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
 			
 			-- Insert the record the the LIFO-out table
-			INSERT INTO tblICInventoryLIFOOut (
+			INSERT INTO dbo.tblICInventoryLIFOOut (
 					intInventoryTransactionId
 					,intInventoryLIFOId
 					,dblQty
@@ -136,7 +136,7 @@ BEGIN
 		SET @TotalQtyOffset = 0;
 
 		-- Insert the inventory transaction record
-		INSERT INTO tblICInventoryTransaction (
+		INSERT INTO dbo.tblICInventoryTransaction (
 			[intItemId] 
 			,[intLocationId] 
 			,[dtmDate] 
@@ -195,7 +195,7 @@ BEGIN
 			SET @TotalQtyOffset += ISNULL(@QtyOffset, 0)
 
 			-- Insert the inventory transaction record
-			INSERT INTO tblICInventoryTransaction (
+			INSERT INTO dbo.tblICInventoryTransaction (
 				[intItemId] 
 				,[intLocationId] 
 				,[dtmDate] 
@@ -255,7 +255,7 @@ BEGIN
 			SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
 			
 			-- Insert the record the the LIFO-out table
-			INSERT INTO tblICInventoryLIFOOut (
+			INSERT INTO dbo.tblICInventoryLIFOOut (
 					intInventoryTransactionId
 					,intInventoryLIFOId
 					,dblQty
@@ -273,7 +273,7 @@ BEGIN
 		-- Update the LIFO out table and assign the correct LIFO id. 
 		UPDATE	LIFOOut
 		SET		LIFOOut.intInventoryLIFOId = @NewLIFOId
-		FROM	tblICInventoryLIFOOut LIFOOut INNER JOIN tblICInventoryTransaction TRANS
+		FROM	dbo.tblICInventoryLIFOOut LIFOOut INNER JOIN dbo.tblICInventoryTransaction TRANS
 					ON LIFOOut.intInventoryTransactionId = TRANS.intInventoryTransactionId 
 					AND LIFOOut.intInventoryLIFOId IS NULL 
 					AND TRANS.intItemId = @intItemId

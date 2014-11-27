@@ -1,15 +1,14 @@
-﻿CREATE TABLE [dbo].[tblICItemAccount]
+﻿CREATE TABLE [dbo].[tblICItemFactory]
 (
-	[intItemAccountId] INT NOT NULL IDENTITY, 
+	[intItemFactoryId] INT NOT NULL IDENTITY, 
     [intItemId] INT NOT NULL, 
-    [strAccountDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [intAccountId] INT NULL, 
+    [intFactoryId] INT NOT NULL, 
+    [ysnDefault] BIT NULL DEFAULT ((0)), 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
-    CONSTRAINT [PK_tblICItemAccount] PRIMARY KEY ([intItemAccountId]), 
-    CONSTRAINT [FK_tblICItemAccount_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
-    CONSTRAINT [FK_tblICItemAccount_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
-    CONSTRAINT [AK_tblICItemAccount] UNIQUE ([strAccountDescription], [intItemId])
+    CONSTRAINT [PK_tblICItemFactory] PRIMARY KEY ([intItemFactoryId]), 
+    CONSTRAINT [FK_tblICItemFactory_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
+    CONSTRAINT [FK_tblICItemFactory_tblSMCompanyLocation] FOREIGN KEY ([intFactoryId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId])
 )
 
 GO
@@ -18,46 +17,43 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemAccount',
+    @level1name = N'tblICItemFactory',
     @level2type = N'COLUMN',
-    @level2name = N'intItemAccountId'
+    @level2name = N'intItemFactoryId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Item Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemAccount',
+    @level1name = N'tblICItemFactory',
     @level2type = N'COLUMN',
     @level2name = N'intItemId'
 GO
-
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Account Description',
+    @value = N'Factory Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemAccount',
+    @level1name = N'tblICItemFactory',
     @level2type = N'COLUMN',
-    @level2name = N'strAccountDescription'
+    @level2name = N'intFactoryId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Account Id',
+    @value = N'Default',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemAccount',
+    @level1name = N'tblICItemFactory',
     @level2type = N'COLUMN',
-    @level2name = N'intAccountId'
-GO
-
+    @level2name = N'ysnDefault'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Sort Field',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemAccount',
+    @level1name = N'tblICItemFactory',
     @level2type = N'COLUMN',
     @level2name = N'intSort'
 GO
@@ -66,7 +62,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemAccount',
+    @level1name = N'tblICItemFactory',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
-GO

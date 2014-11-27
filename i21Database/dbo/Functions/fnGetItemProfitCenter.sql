@@ -9,7 +9,7 @@ BEGIN
 
 	-- Get the profit center from the company location
 	SELECT	@intProfitCenter = intProfitCenter
-	FROM	tblSMCompanyLocation 
+	FROM	dbo.tblSMCompanyLocation 
 	WHERE	intCompanyLocationId = @intLocationId
 
 	RETURN @intProfitCenter 

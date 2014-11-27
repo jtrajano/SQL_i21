@@ -138,8 +138,8 @@ BEGIN
 			INSERT INTO dbo.tblICItem (intItemId, strDescription) VALUES (@WetGrains, 'WET GRAINS')
 			INSERT INTO dbo.tblICItem (intItemId, strDescription) VALUES (@StickyGrains, 'STICKY GRAINS')
 			INSERT INTO dbo.tblICItem (intItemId, strDescription) VALUES (@PremiumGrains, 'PREMIUM GRAINS')
-			INSERT INTO dbo.tblICItem (intItemId, strDescription, intTrackingId) VALUES (@ColdGrains, 'COLD GRAINS', @ColdItems)
-			INSERT INTO dbo.tblICItem (intItemId, strDescription, intTrackingId) VALUES (@HotGrains, 'HOT GRAINS', @HotItems)
+			--INSERT INTO dbo.tblICItem (intItemId, strDescription, intTrackingId) VALUES (@ColdGrains, 'COLD GRAINS', @ColdItems)
+			--INSERT INTO dbo.tblICItem (intItemId, strDescription, intTrackingId) VALUES (@HotGrains, 'HOT GRAINS', @HotItems)
 		END
 
 		-- Fake data for Item-Location

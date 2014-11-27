@@ -74,12 +74,12 @@
 )
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblICItemLocation_intItemId]
-    ON [dbo].[tblICItemLocation]([intItemId] ASC);
+CREATE NONCLUSTERED INDEX [IX_tblICItemLocation_intItemId_intLocationId]
+    ON [dbo].[tblICItemLocation]([intItemId] ASC, [intLocationId] ASC);
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblICItemLocation_intLocationId]
-    ON [dbo].[tblICItemLocation]([intLocationId] ASC);
+CREATE NONCLUSTERED INDEX [IX_tblICItemLocation_intCategoryId]
+    ON [dbo].[tblICItemLocation]([intCategoryId] ASC);
 GO
 
 EXEC sp_addextendedproperty @name = N'MS_Description',

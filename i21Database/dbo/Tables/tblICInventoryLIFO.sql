@@ -16,8 +16,7 @@ CREATE TABLE [dbo].[tblICInventoryLIFO]
     [dtmCreated] DATETIME NULL, 
     [intCreatedUserId] INT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
-    CONSTRAINT [PK_tblICInventoryLIFO] PRIMARY KEY NONCLUSTERED ([intInventoryLIFOId]) 
-)
+    CONSTRAINT [PK_tblICInventoryLIFO] PRIMARY KEY NONCLUSTERED ([intInventoryLIFOId]) )
 GO
 
 CREATE CLUSTERED INDEX [IDX_tblICInventoryLIFO]
@@ -28,5 +27,6 @@ CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFO_intItemId]
     ON [dbo].[tblICInventoryLIFO]([intItemId] ASC);
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFO_intInventoryLIFOId]
-    ON [dbo].[tblICInventoryLIFO]([intInventoryLIFOId] ASC);
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFO_intLocationId]
+    ON [dbo].[tblICInventoryLIFO]([intLocationId] ASC);
+GO

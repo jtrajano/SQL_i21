@@ -3,8 +3,17 @@ AS
 BEGIN
 	-- Arrange
 	BEGIN 
-		DECLARE @intItemId AS INT
-		DECLARE @intLocationId AS INT
+		-- Declare the variables for grains (item)
+		DECLARE @WetGrains AS INT = 1
+				,@StickyGrains AS INT = 2
+				,@PremiumGrains AS INT = 3
+				,@ColdGrains AS INT = 4
+				,@HotGrains AS INT = 5
+
+		-- Declare the variables for location
+		DECLARE @Default_Location AS INT = 1
+				,@NewHaven AS INT = 2
+				,@BetterHaven AS INT = 3
 
 		DECLARE @actual AS INT;
 		DECLARE @expected AS INT;
@@ -17,13 +26,11 @@ BEGIN
 		-- Generate the fake data. 
 		EXEC testi21Database.[Fake data for simple Items]
 	END
-
+	
 	-- Get the base account in the category level 
 	-- Must return account id 12040-1001 (INVENTORY WHEAT-NEW HAVEN GRAIN)
-	BEGIN 
-		SET @intItemId = 5; -- HOT GRAINS 
-                                                                                                                                                                                                                                                                               
-		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@intItemId, @intLocationId, @InventoryDescription);
+	BEGIN                                                                                                                                                                                                                                                                                
+		SELECT @actual =[dbo].[fnGetItemBaseGLAccount](@HotGrains, @Default_Location, @InventoryDescription);
 
 		-- Assert
 		SET @expected = 1001;
@@ -32,10 +39,8 @@ BEGIN
 	END
 
 	-- Must return account id 40100-1001 (COST OF GOODS WHEAT-NEW HAVEN GRAIN)
-	BEGIN 
-		SET @intItemId = 5; -- HOT GRAINS 
-                                                                                                                                                                                                                                                                               
-		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@intItemId, @intLocationId, @CostOfGoodsDescription);
+	BEGIN                                                                                                                                                                                                                                                                               
+		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@HotGrains, @Default_Location, @CostOfGoodsDescription);
 
 		-- Assert
 		SET @expected = 2001;
@@ -44,10 +49,8 @@ BEGIN
 	END
 
 	-- Must return account id 50110-1001 (PURCHASES WHEAT-HEW HAVEN GRAIN)
-	BEGIN 
-		SET @intItemId = 5; -- HOT GRAINS 
-                                                                                                                                                                                                                                                                               
-		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@intItemId, @intLocationId, @PurchasesDescription);
+	BEGIN                                                                                                                                                                                                                                                                               
+		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@HotGrains, @Default_Location, @PurchasesDescription);
 
 		-- Assert
 		SET @expected = 3001;
@@ -55,4 +58,4 @@ BEGIN
 
 	END
 
-END 
+END

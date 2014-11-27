@@ -7,7 +7,7 @@
     [intBrandId]                 INT             NULL,
     [strStatus]                NVARCHAR(50)    COLLATE Latin1_General_CI_AS           NULL,
     [strModelNo]                 NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
-    [intTrackingId] INT NULL, 
+    [strInventoryTracking] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strLotTracking] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[ysnRequireCustomerApproval] BIT NULL DEFAULT ((0)), 
     [intRecipeId] INT NULL, 
@@ -93,8 +93,7 @@
 	[intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 
     CONSTRAINT [PK_tblICItem] PRIMARY KEY ([intItemId]), 
-    CONSTRAINT [FK_tblICItem_tblICManufacturer] FOREIGN KEY ([intManufacturerId]) REFERENCES [tblICManufacturer]([intManufacturerId]), 
-    CONSTRAINT [FK_tblICItem_tblICCategory] FOREIGN KEY ([intTrackingId]) REFERENCES [tblICCategory]([intCategoryId])
+    CONSTRAINT [FK_tblICItem_tblICManufacturer] FOREIGN KEY ([intManufacturerId]) REFERENCES [tblICManufacturer]([intManufacturerId]) 
 );
 GO
 
@@ -619,7 +618,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblICItem',
     @level2type = N'COLUMN',
-    @level2name = N'intTrackingId'
+    @level2name = 'strInventoryTracking'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Lot Tracking',

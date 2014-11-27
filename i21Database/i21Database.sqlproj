@@ -867,8 +867,17 @@
     <Build Include="dbo\Stored Procedures\uspARDuplicateInvoice.sql" />
     <Build Include="dbo\Functions\fnGetDueDateBasedonTerm.sql" />
     <Build Include="dbo\Tables\tblPOOrderStatus.sql" />
-    <None Include="Scripts\Post-Deployment\AP\DefaultData\POOrderStatus.sql" />
-    <Build Include="dbo\Tables\tblPOOrderStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetItemsForItemReceipt.sql" />
+    <Build Include="dbo\Tables\tblICItemFactory.sql" />
+    <Build Include="dbo\Tables\tblICItemFactoryManufacturingCell.sql" />
+    <Build Include="dbo\Tables\tblICItemOwner.sql" />
+    <Build Include="dbo\Views\vyuICGetItemStock.sql" />
+    <Build Include="dbo\Tables\tblSMRecurringTransaction.sql" />
+    <Build Include="dbo\Tables\tblFRValidateDesign.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRValidateDesign.sql" />
+    <Build Include="dbo\Views\vyuAPRptPurchase.sql" />
+	<Build Include="dbo\Stored Procedures\uspARPostInvoice.sql" />
+	<Build Include="dbo\Functions\fnGetItemGLAccountAsTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
