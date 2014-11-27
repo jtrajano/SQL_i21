@@ -26,6 +26,8 @@
     [strTaxNumber] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
     [intBillToId] INT NULL, 
     [intShipFromId] INT NULL, 
+	[ysnDeleted] BIT NULL DEFAULT 0,
+	[dtmDateDeleted] DATETIME NULL,
     CONSTRAINT [PK_dbo.tblAPVendor] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
     CONSTRAINT [FK_dbo.tblAPVendor_dbo.tblEntities_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
     CONSTRAINT [UK_strVendorId] UNIQUE NONCLUSTERED ([strVendorId] ASC),
