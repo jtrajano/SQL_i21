@@ -443,6 +443,7 @@ GO
 							WHEN strMenuName = 'Create Ticket' THEN 1 END)
 	WHERE intParentMenuID = @intParent
 GO
+	
 	IF EXISTS (SELECT * FROM tblSMMasterMenu WHERE strMenuName = 'Customer Portal User Configuration' AND strModuleName = 'Customer Portal' AND strType = 'Screen')
 	DELETE FROM tblSMMasterMenu
 	WHERE strMenuName = 'Customer Portal User Configuration' AND strModuleName = 'Customer Portal' AND strType = 'Screen'
@@ -466,7 +467,19 @@ GO
 	/* ---------------------------------- */
 	/* -- Remove Ecommerce Module Menu -- */
 	/* ---------------------------------- */
+	--FRM-1606
 	DELETE FROM tblSMMasterMenu WHERE strModuleName = 'Customer Portal'
+GO
+-- FRM-1587
+	IF EXISTS(SELECT * FROM tblSMMasterMenu WHERE strModuleName = 'Help Desk' and intParentMenuID not in (SELECT intMenuID FROM tblSMMasterMenu) and not intParentMenuID = 0)
+	BEGIN
+		-- delete the menu under Help Desk folder under the deleted Customer Portal parent folder
+		delete from tblSMMasterMenu 
+		where intParentMenuID in (SELECT intMenuID FROM tblSMMasterMenu WHERE strModuleName = 'Help Desk' and intParentMenuID not in (SELECT intMenuID FROM tblSMMasterMenu) and not intParentMenuID = 0)
+	
+		--delete the Help Desk folder under the deleted Customer Portal parent folder
+		delete FROM tblSMMasterMenu WHERE strModuleName = 'Help Desk' and intParentMenuID not in (SELECT intMenuID FROM tblSMMasterMenu) and not intParentMenuID = 0
+	END
 GO
 	
 	/* ---------------------------------- */
