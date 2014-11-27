@@ -55,7 +55,8 @@ Ext.define('Inventory.view.PatronageCategoryViewController', {
                             valueField: 'strPurchaseSale',
                             bind: {
                                 store: '{purchaseSales}'
-                            }
+                            },
+                            forceSelection: true
                         }
                     },
                     {
@@ -68,7 +69,8 @@ Ext.define('Inventory.view.PatronageCategoryViewController', {
                             valueField: 'strUnitAmount',
                             bind: {
                                 store: '{unitAmount}'
-                            }
+                            },
+                            forceSelection: true
                         }
                     }
                 ]
