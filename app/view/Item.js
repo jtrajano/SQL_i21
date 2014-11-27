@@ -1320,58 +1320,19 @@ Ext.define('Inventory.view.Item', {
                                                                                 valueField: 'strDescription'
                                                                             },
                                                                             {
-                                                                                xtype: 'gridcombobox',
-                                                                                columns: [
-                                                                                    {
-                                                                                        dataIndex: 'intCategoryId',
-                                                                                        dataType: 'numeric',
-                                                                                        text: 'Category ID',
-                                                                                        hidden: true
-                                                                                    },
-                                                                                    {
-                                                                                        dataIndex: 'strCategoryCode',
-                                                                                        dataType: 'string',
-                                                                                        text: 'Category Code',
-                                                                                        flex: 1
-                                                                                    },
-                                                                                    {
-                                                                                        dataIndex: 'strDescription',
-                                                                                        dataType: 'string',
-                                                                                        text: 'Description',
-                                                                                        flex: 1
-                                                                                    }
-                                                                                ],
-                                                                                itemId: 'cboAgCategory',
-                                                                                fieldLabel: 'AG Category',
-                                                                                labelWidth: 130,
-                                                                                displayField: 'strCategoryCode',
-                                                                                valueField: 'intCategoryId'
+                                                                                xtype: 'checkboxfield',
+                                                                                itemId: 'chkReceiptCommentReq',
+                                                                                fieldLabel: 'Receipt Comment Req',
+                                                                                labelWidth: 130
                                                                             },
                                                                             {
-                                                                                xtype: 'container',
-                                                                                margin: '0 0 5 0',
-                                                                                layout: {
-                                                                                    type: 'hbox',
-                                                                                    align: 'stretch'
-                                                                                },
-                                                                                items: [
-                                                                                    {
-                                                                                        xtype: 'checkboxfield',
-                                                                                        itemId: 'chkReceiptCommentReq',
-                                                                                        fieldLabel: 'Receipt Comment Req',
-                                                                                        labelWidth: 130
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'combobox',
-                                                                                        flex: 1,
-                                                                                        itemId: 'cboCountCode',
-                                                                                        margin: '0 0 0 5',
-                                                                                        fieldLabel: 'Count Code',
-                                                                                        labelWidth: 70,
-                                                                                        displayField: 'strDescription',
-                                                                                        valueField: 'strDescription'
-                                                                                    }
-                                                                                ]
+                                                                                xtype: 'combobox',
+                                                                                flex: 1,
+                                                                                itemId: 'cboCountCode',
+                                                                                fieldLabel: 'Count Code',
+                                                                                labelWidth: 130,
+                                                                                displayField: 'strDescription',
+                                                                                valueField: 'strDescription'
                                                                             }
                                                                         ]
                                                                     },
@@ -3767,14 +3728,7 @@ Ext.define('Inventory.view.Item', {
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'
-                                                }),
-                                                plugins: [
-                                                    {
-                                                        ptype: 'cellediting',
-                                                        pluginId: 'cepStock',
-                                                        clicksToEdit: 1
-                                                    }
-                                                ]
+                                                })
                                             }
                                         ]
                                     },

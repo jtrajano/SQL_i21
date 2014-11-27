@@ -194,10 +194,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 value: '{current.strWICCode}',
                 store: '{wicCodes}'
             },
-            cboAgCategory: {
-                value: '{current.intAGCategory}',
-                store: '{agCategory}'
-            },
             chkReceiptCommentReq: '{current.ysnReceiptCommentRequired}',
             cboCountCode: {
                 value: '{current.strCountCode}',
@@ -784,7 +780,8 @@ Ext.define('Inventory.view.ItemViewController', {
                     key: 'tblICItemStocks',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdStock,
-                        deleteButton : grdStock.down('#btnDeleteStock')
+                        deleteButton : grdStock.down('#btnDeleteStock'),
+                        position: 'none'
                     })
                 },
                 {
