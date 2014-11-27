@@ -137,7 +137,7 @@ BEGIN
 				,@QtyOffset OUTPUT 
 				,@UpdatedFifoId OUTPUT 
 			
-			-- Insert the record the the fifo-out table
+			-- Insert the record to the fifo-out table
 			INSERT INTO dbo.tblICInventoryFIFOOut (
 					intInventoryTransactionId
 					,intInventoryFIFOId
@@ -282,7 +282,7 @@ BEGIN
 			-- Get the id inserted for Revalue-Sold
 			SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
 			
-			-- Insert the record the the fifo-out table
+			-- Insert the record to the fifo-out table
 			INSERT INTO dbo.tblICInventoryFIFOOut (
 					intInventoryTransactionId
 					,intInventoryFIFOId
@@ -308,7 +308,7 @@ BEGIN
 					AND TRANS.intLocationId = @intLocationId
 					AND TRANS.intTransactionId = @intTransactionId
 					AND TRANS.strBatchId = @strBatchId
-		WHERE	@NewFifoId IS NOT NULL 
+					AND @NewFifoId IS NOT NULL  
 
 		-- Add Auto Negative (if current stock qty is still after adding it) 
 		INSERT INTO dbo.tblICInventoryTransaction (

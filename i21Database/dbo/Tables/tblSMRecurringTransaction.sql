@@ -1,7 +1,8 @@
 ﻿CREATE TABLE [dbo].[tblSMRecurringTransaction]
 (
-    [intRecurringID] INT NOT NULL IDENTITY ,    
-	[intTransactionID] INT NOT NULL , 
+    [intRecurringId] INT NOT NULL IDENTITY ,    
+	[intTransactionId] INT NOT NULL , 
+    [strTransactionNumber] NVARCHAR(50) NOT NULL, 
     [strTransactionType] NVARCHAR(50) NOT NULL, 
     [strReference] NVARCHAR(50) NULL, 
     [strFrequency] NVARCHAR(50) NOT NULL, 
@@ -16,7 +17,7 @@
     [intIteration] INT NOT NULL, 
     [intUserId] INT NOT NULL , 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
-    CONSTRAINT [PK_tblSMRecurringTransaction] PRIMARY KEY ([intRecurringID])
+    CONSTRAINT [PK_tblSMRecurringTransaction] PRIMARY KEY ([intRecurringId])
 )
 
 GO
@@ -27,4 +28,4 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblSMRecurringTransaction',
     @level2type = N'COLUMN',
-    @level2name = N'intRecurringID'
+    @level2name = 'intRecurringId'

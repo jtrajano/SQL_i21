@@ -16,4 +16,8 @@
     CONSTRAINT [FK_tblGLAccount_tblGLAccountGroup] FOREIGN KEY ([intAccountGroupId]) REFERENCES [dbo].[tblGLAccountGroup] ([intAccountGroupId]) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT [FK_tblGLAccount_tblGLAccountUnit] FOREIGN KEY ([intAccountUnitId]) REFERENCES [dbo].[tblGLAccountUnit] ([intAccountUnitId])
 );
+GO
 
+CREATE NONCLUSTERED INDEX [IX_tblGLAccount_strAccountId]
+    ON [dbo].[tblGLAccount]([strAccountId] ASC);
+GO

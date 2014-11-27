@@ -1442,4 +1442,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strInventoryTracking" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="fc9dc5a0-301c-4cf8-a1ce-3bb81f0427cb" ChangeDateTime="11/27/2014 02:29:56">
+    <Property Name="ElementName" Value="[dbo].[tblSMRecurringTransaction].[intRecurringID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMRecurringTransaction]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intRecurringId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4823ef93-a9fe-49d0-8a7d-62b42fce23f2" ChangeDateTime="11/27/2014 02:30:05">
+    <Property Name="ElementName" Value="[dbo].[tblSMRecurringTransaction].[intTransactionID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMRecurringTransaction]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTransactionId" />
+  </Operation>
 </Operations>
