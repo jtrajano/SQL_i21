@@ -35,16 +35,21 @@ INSERT INTO @GLAccounts (
 )
 SELECT	Query.intItemId
 		,Query.intLocationId
-		,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intLocationId, @UseGLAccount_Inventory)
-		,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intLocationId, @UseGLAccount_ContraInventory)
-		,intWriteOffSoldId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intLocationId, @UseGLAccount_WriteOffSold)
-		,intRevalueSoldId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intLocationId, @UseGLAccount_RevalueSold)
-		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intLocationId, @UseGLAccount_AutoNegative)
-FROM (
-	SELECT DISTINCT intItemId, intLocationId 
-	FROM	dbo.tblICInventoryTransaction TRANS 
-	WHERE	TRANS.strBatchId = @strBatchId
-) Query;
+		,intInventoryId = Inventory.intAccountId
+		,intContraInventoryId = ContraInventory.intAccountId
+		,intWriteOffSoldId = WriteOffSold.intAccountId
+		,intRevalueSoldId = RevalueSold.intAccountId
+		,intAutoNegativeId = AutoNegative.intAccountId
+FROM	(
+			SELECT DISTINCT intItemId, intLocationId 
+			FROM	dbo.tblICInventoryTransaction TRANS 
+			WHERE	TRANS.strBatchId = @strBatchId
+		) Query
+		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intLocationId, @UseGLAccount_Inventory) Inventory
+		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intLocationId, @UseGLAccount_ContraInventory) ContraInventory
+		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intLocationId, @UseGLAccount_WriteOffSold) WriteOffSold
+		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intLocationId, @UseGLAccount_RevalueSold) RevalueSold
+		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intLocationId, @UseGLAccount_AutoNegative) AutoNegative;
 
 -- Generate the G/L Entries here: 
 WITH ForGLEntries_CTE (

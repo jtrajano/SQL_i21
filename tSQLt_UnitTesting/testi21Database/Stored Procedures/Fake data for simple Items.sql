@@ -18,6 +18,10 @@ BEGIN
 			,@NewHaven AS INT = 2
 			,@BetterHaven AS INT = 3
 
+	-- Declare the categories
+	DECLARE @HotItems AS INT = 1
+			,@ColdItems AS INT = 2;
+
 	-- Use the 'fake data for simple COA' for the simple items
 	EXEC testi21Database.[Fake data for simple COA]
 
@@ -53,8 +57,8 @@ BEGIN
 	INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (3, 'Purchase Account', 3002);
 
 	-- Category
-	INSERT INTO tblICCategory (intCategoryId, strDescription) VALUES (1, 'Hot Items');
-	INSERT INTO tblICCategory (intCategoryId, strDescription) VALUES (2, 'Cold Items');
+	INSERT INTO tblICCategory (intCategoryId, strDescription) VALUES (@HotItems, 'Hot Items');
+	INSERT INTO tblICCategory (intCategoryId, strDescription) VALUES (@ColdItems, 'Cold Items');
 
 	-- Category Account
 	-- Add G/L setup for Hot items
@@ -69,29 +73,29 @@ BEGIN
 	INSERT INTO tblICItem (intItemId, strDescription) VALUES (@WetGrains, 'WET GRAINS')
 	INSERT INTO tblICItem (intItemId, strDescription) VALUES (@StickyGrains, 'STICKY GRAINS')
 	INSERT INTO tblICItem (intItemId, strDescription) VALUES (@PremiumGrains, 'PREMIUM GRAINS')
-	--INSERT INTO tblICItem (intItemId, strDescription, intTrackingId) VALUES (@ColdGrains, 'COLD GRAINS', 2)
-	--INSERT INTO tblICItem (intItemId, strDescription, intTrackingId) VALUES (@HotGrains, 'HOT GRAINS', 1)
+	INSERT INTO tblICItem (intItemId, strDescription) VALUES (@ColdGrains, 'COLD GRAINS')
+	INSERT INTO tblICItem (intItemId, strDescription) VALUES (@HotGrains, 'HOT GRAINS')
 
 	-- Add items for location 1 ('')
 	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@WetGrains, @Default_Location, @AllowNegativeStock)
 	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@StickyGrains, @Default_Location, @AllowNegativeStock)
 	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@PremiumGrains, @Default_Location, @AllowNegativeStock)
-	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@ColdGrains, @Default_Location, @AllowNegativeStock)
-	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@HotGrains, @Default_Location, @AllowNegativeStock)
+	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCategoryId) VALUES (@ColdGrains, @Default_Location, @AllowNegativeStock, @ColdItems)
+	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCategoryId) VALUES (@HotGrains, @Default_Location, @AllowNegativeStock, @HotItems)
 
 	-- Add items for location 2 ('NEW HAVEN')
 	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@WetGrains, @NewHaven, @AllowNegativeStockWithWriteOff)
 	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@StickyGrains, @NewHaven, @AllowNegativeStockWithWriteOff)
 	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@PremiumGrains, @NewHaven, @AllowNegativeStockWithWriteOff)
-	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@ColdGrains, @NewHaven, @AllowNegativeStockWithWriteOff)
-	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@HotGrains, @NewHaven, @AllowNegativeStockWithWriteOff)
+	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCategoryId) VALUES (@ColdGrains, @NewHaven, @AllowNegativeStockWithWriteOff, @ColdItems)
+	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCategoryId) VALUES (@HotGrains, @NewHaven, @AllowNegativeStockWithWriteOff, @HotItems)
 
 	-- Add items for location 3 ('BETTER HAVEN')
-	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@WetGrains, @BetterHaven,		@DoNotAllowNegativeStock)
-	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@StickyGrains, @BetterHaven,	@DoNotAllowNegativeStock)
-	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@PremiumGrains, @BetterHaven,	@DoNotAllowNegativeStock)
-	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@ColdGrains, @BetterHaven,		@DoNotAllowNegativeStock)
-	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@HotGrains, @BetterHaven,		@DoNotAllowNegativeStock)
+	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@WetGrains, @BetterHaven, @DoNotAllowNegativeStock)
+	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@StickyGrains, @BetterHaven, @DoNotAllowNegativeStock)
+	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@PremiumGrains, @BetterHaven, @DoNotAllowNegativeStock)
+	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCategoryId) VALUES (@ColdGrains, @BetterHaven, @DoNotAllowNegativeStock, @ColdItems)
+	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCategoryId) VALUES (@HotGrains, @BetterHaven, @DoNotAllowNegativeStock, @HotItems)
 		
 	-- Add stock information for items under location 1 ('')
 	INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (@WetGrains, @Default_Location,	100)
