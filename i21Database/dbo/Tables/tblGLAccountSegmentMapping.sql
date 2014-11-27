@@ -7,4 +7,12 @@
     CONSTRAINT [FK_tblGLAccountSegmentMapping_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblGLAccountSegmentMapping_tblGLAccountSegment] FOREIGN KEY ([intAccountSegmentId]) REFERENCES [dbo].[tblGLAccountSegment] ([intAccountSegmentId]) ON DELETE CASCADE
 );
+GO
 
+CREATE NONCLUSTERED INDEX [IX_tblGLAccountSegmentMapping_intAccountId]
+    ON [dbo].[tblGLAccountSegmentMapping]([intAccountId] ASC);
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblGLAccountSegmentMapping_intAccountSegmentId]
+    ON [dbo].[tblGLAccountSegmentMapping]([intAccountSegmentId] ASC);
+GO

@@ -11,8 +11,12 @@
     CONSTRAINT [FK_tblICCategoryAccount_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]), 
     CONSTRAINT [FK_tblICCategoryAccount_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]) 
 )
-
 GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICCategoryAccount_intCategoryId]
+    ON [dbo].[tblICCategoryAccount]([intCategoryId] ASC);
+GO
+
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity Field',
     @level0type = N'SCHEMA',

@@ -106,7 +106,7 @@ BEGIN
 		)
 		
 		CREATE TABLE ExpectedInventoryFIFOOut (
-			Id INT
+			intId INT
 			,intInventoryFIFOId INT 
 			,intInventoryTransactionId INT
 			,dblQty NUMERIC(18,6)

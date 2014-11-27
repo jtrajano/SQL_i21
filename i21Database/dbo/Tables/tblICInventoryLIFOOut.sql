@@ -4,7 +4,7 @@
     [intInventoryLIFOId] INT NULL, 
     [intInventoryTransactionId] INT NOT NULL, 
     [dblQty] NUMERIC(18, 6) NOT NULL,
-	CONSTRAINT [PK_tblICInventoryLIFOOut] PRIMARY KEY NONCLUSTERED ([intId])    
+	CONSTRAINT [PK_tblICInventoryLIFOOut] PRIMARY KEY CLUSTERED ([intId])    
 )
 GO
 

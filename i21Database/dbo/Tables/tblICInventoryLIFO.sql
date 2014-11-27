@@ -30,6 +30,3 @@ GO
 CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFO_intLocationId]
     ON [dbo].[tblICInventoryLIFO]([intLocationId] ASC);
 GO
-
-CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFO_intInventoryLIFOId]
-    ON [dbo].[tblICInventoryLIFO]([intInventoryLIFOId] ASC);
