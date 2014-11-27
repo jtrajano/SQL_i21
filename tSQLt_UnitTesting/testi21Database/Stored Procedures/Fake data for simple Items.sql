@@ -62,9 +62,9 @@ BEGIN
 
 	-- Category Account
 	-- Add G/L setup for Hot items
-	INSERT INTO tblICCategoryAccount (intCategoryId, intAccountId, strAccountDescription) VALUES (1, 1001, 'Inventory')
-	INSERT INTO tblICCategoryAccount (intCategoryId, intAccountId, strAccountDescription) VALUES (1, 2001, 'Cost of Goods')
-	INSERT INTO tblICCategoryAccount (intCategoryId, intAccountId, strAccountDescription) VALUES (1, 3001, 'Purchase Account')
+	INSERT INTO tblICCategoryAccount (intCategoryId, intAccountId, strAccountDescription) VALUES (@HotItems, 1001, 'Inventory')
+	INSERT INTO tblICCategoryAccount (intCategoryId, intAccountId, strAccountDescription) VALUES (@HotItems, 2001, 'Cost of Goods')
+	INSERT INTO tblICCategoryAccount (intCategoryId, intAccountId, strAccountDescription) VALUES (@HotItems, 3001, 'Purchase Account')
 
 	-- Add G/L setup for Cold items
 	-- No category-level g/l account overrides for Cold items. Use default g/l account from Location. 

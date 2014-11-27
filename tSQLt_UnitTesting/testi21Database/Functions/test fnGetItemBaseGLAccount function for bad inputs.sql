@@ -3,9 +3,6 @@ AS
 BEGIN
 	-- Arrange
 	BEGIN 
-		DECLARE @intItemId AS INT
-		DECLARE @intLocationId AS INT
-
 		DECLARE @actual AS INT;
 		DECLARE @expected AS INT;
 
@@ -21,7 +18,7 @@ BEGIN
 	-- Act
 	-- Test for bad inputs
 	BEGIN 
-		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@intItemId, @intLocationId, @InventoryDescription);
+		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](NULL, NULL, @InventoryDescription);
 
 		-- Assert
 		-- If item and location is null, expected is also NULL. 
