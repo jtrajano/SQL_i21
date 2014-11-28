@@ -879,6 +879,9 @@
     <Build Include="dbo\Stored Procedures\uspARPostInvoice.sql" />
     <Build Include="dbo\Functions\fnGetItemGLAccountAsTable.sql" />
     <Build Include="dbo\Views\vyuSMContacts.sql" />
+    <Build Include="dbo\Views\vyuHDSearchDetailsDetails.sql" />
+    <Build Include="dbo\Views\vyuHDSearchDetailsNotes.sql" />
+    <Build Include="dbo\Views\vyuHDSearchDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
