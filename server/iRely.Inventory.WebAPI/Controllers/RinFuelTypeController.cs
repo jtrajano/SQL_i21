@@ -76,13 +76,22 @@ namespace iRely.Invetory.WebAPI.Controllers
             var result = _FuelCategoryBRL.Save(continueOnConflict);
             _FuelCategoryBRL.Dispose();
 
+            var errMessage = result.Exception.Message;
+            if (result.BaseException != null)
+            {
+                if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICRinFuelCategory_strRinFuelCategoryCode'"))
+                {
+                    errMessage = "Fuel Category already exists.";
+                }
+            }
+
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
                 data = categories,
                 success = !result.HasError,
                 message = new
                 {
-                    statusText = result.Exception.Message,
+                    statusText = errMessage,
                     status = result.Exception.Error,
                     button = result.Exception.Button.ToString()
                 }
@@ -98,13 +107,22 @@ namespace iRely.Invetory.WebAPI.Controllers
             var result = _FuelCategoryBRL.Save(continueOnConflict);
             _FuelCategoryBRL.Dispose();
 
+            var errMessage = result.Exception.Message;
+            if (result.BaseException != null)
+            {
+                if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICRinFuelCategory_strRinFuelCategoryCode'"))
+                {
+                    errMessage = "Fuel Category already exists.";
+                }
+            }
+
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
                 data = categories,
                 success = !result.HasError,
                 message = new
                 {
-                    statusText = result.Exception.Message,
+                    statusText = errMessage,
                     status = result.Exception.Error,
                     button = result.Exception.Button.ToString()
                 }
