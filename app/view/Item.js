@@ -4072,7 +4072,7 @@ Ext.define('Inventory.view.Item', {
                                                             ],
                                                             itemId: 'cboAssemblyItem',
                                                             displayField: 'strItemNo',
-                                                            valueField: 'intItemId'
+                                                            valueField: 'strItemNo'
                                                         }
                                                     },
                                                     {
@@ -4263,7 +4263,7 @@ Ext.define('Inventory.view.Item', {
                                                             ],
                                                             itemId: 'cboBundleItem',
                                                             displayField: 'strItemNo',
-                                                            valueField: 'intItemId'
+                                                            valueField: 'strItemNo'
                                                         }
                                                     },
                                                     {
