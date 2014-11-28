@@ -270,7 +270,7 @@ BEGIN
 			,[dblExchangeRate]		= 1
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
-			,[strJournalLineDescription] = NULL 
+			,[strJournalLineDescription] = A.strMemo 
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId
@@ -305,7 +305,7 @@ BEGIN
 			,[dblExchangeRate]		= 1
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
-			,[strJournalLineDescription] = NULL 
+			,[strJournalLineDescription] = B.strDescription 
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId
