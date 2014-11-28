@@ -5,8 +5,8 @@
 	[strDescription] [nvarchar](150) COLLATE Latin1_General_CI_AS NULL,
 	[ysnBillable] [bit] NOT NULL,
 	[dblRate] [numeric](18, 6) NOT NULL,
-	[intSort] [int] NULL,
 	[ysnSupported] [bit] NOT NULL DEFAULT 1,
+	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL,
  CONSTRAINT [PK_tblHDJobCode] PRIMARY KEY CLUSTERED ([intJobCodeId] ASC),
  CONSTRAINT [UNQ_tblHDJobCode] UNIQUE ([strJobCode])
