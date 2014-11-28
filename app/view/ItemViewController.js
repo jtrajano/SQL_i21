@@ -975,7 +975,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var win = eOpts.window;
         var grdLocation = win.down('#grdLocationStore');
 
-        grdLocation.store.reload();
+        grdLocation.store.load();
     },
 
     CostingMethodRenderer: function (value, metadata, record) {
@@ -1208,7 +1208,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var win = eOpts.window;
         var grdPricing = win.down('#grdPricing');
 
-        grdPricing.store.reload();
+        grdPricing.store.load();
     },
 
     // </editor-fold>
