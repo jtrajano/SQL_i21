@@ -131,9 +131,12 @@ namespace iRely.Invetory.WebAPI.Controllers
             _ItemBRL.Dispose();
 
             var errMessage = result.Exception.Message;
-            if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItemAccount'"))
+            if (result.BaseException != null)
             {
-                errMessage = "Account Description must be unique.";
+                if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItemAccount'"))
+                {
+                    errMessage = "Account Description must be unique.";
+                }
             }
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
@@ -159,9 +162,12 @@ namespace iRely.Invetory.WebAPI.Controllers
             _ItemBRL.Dispose();
 
             var errMessage = result.Exception.Message;
-            if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItemAccount'"))
+            if (result.BaseException != null)
             {
-                errMessage = "Account Description must be unique.";
+                if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItemAccount'"))
+                {
+                    errMessage = "Account Description must be unique.";
+                }
             }
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
