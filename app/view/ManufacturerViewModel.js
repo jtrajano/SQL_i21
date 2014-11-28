@@ -15,20 +15,6 @@
 
 Ext.define('Inventory.view.ManufacturerViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.manufacturer',
-
-    requires:[
-        'i21.store.ZipCodeBuffered',
-        'i21.store.CountryBuffered'
-    ],
-
-    stores: {
-        ZipCode: {
-            type: 'zipcodebuffered'
-        },
-        Country: {
-            type: 'countrybuffered'
-        }
-    }
+    alias: 'viewmodel.manufacturer'
 
 });
