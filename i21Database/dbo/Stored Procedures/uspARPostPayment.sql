@@ -1,6 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPostPayment]
 	@batchId			AS NVARCHAR(20)		= NULL,
-	@transactionType	AS NVARCHAR(30)		= NULL,	
 	@post				AS BIT				= 0,
 	@recap				AS BIT				= 0,
 	@param				AS NVARCHAR(MAX)	= NULL,
@@ -9,6 +8,7 @@
 	@endDate			AS DATE				= NULL,
 	@beginTransaction	AS NVARCHAR(50)		= NULL,
 	@endTransaction		AS NVARCHAR(50)		= NULL,
+	@exclude			AS NVARCHAR(MAX)	= NULL,
 	@successfulCount	AS INT				= 0 OUTPUT,
 	@invalidCount		AS INT				= 0 OUTPUT,
 	@success			AS BIT				= 0 OUTPUT,
@@ -89,6 +89,15 @@ IF(@beginTransaction IS NOT NULL)
 		SELECT intPaymentId FROM tblARPayment
 		WHERE intPaymentId BETWEEN @beginTransaction AND @endTransaction AND ysnPosted = @post
 	END
+
+--Removed excluded Invoices to post/unpost
+IF(@exclude IS NOT NULL)
+BEGIN
+	SELECT intID INTO #tmpReceivableExclude FROM fnGetRowsFromDelimitedValues(@exclude)
+	DELETE FROM A
+	FROM #tmpPostInvoiceData A
+	WHERE EXISTS(SELECT * FROM #tmpReceivableExclude B WHERE A.intInvoiceId = B.intID)
+END
 
 --=====================================================================================================================================
 -- 	GET ALL INVALID TRANSACTIONS
