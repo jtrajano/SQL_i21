@@ -392,6 +392,14 @@ GO
 		VALUES ('Receive Payment Detail','Accounts Receivable',@activitiesId,'Receive Payment Detail','Screen','AccountsReceivable.view.ReceivePaymentsDetail','small-screen',1,0,0,1,3,1)
 	END
 
+	/* -------------------------------------------------- */
+	/* -- End Add Accounts Receivable Activities Menus -- */
+	/* -------------------------------------------------- */
+
+	/* ----------------------------------------------- */
+	/* -- Add Accounts Receivable Maintenance Menus -- */
+	/* ----------------------------------------------- */
+
 	SELECT @maintenanceId = intMenuID FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Maintenance' AND intParentMenuID = @rootParentId
 
 	IF NOT EXISTS (SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Tax Authority' AND intParentMenuID = @maintenanceId)
@@ -400,9 +408,15 @@ GO
 		VALUES ('Tax Authority','Accounts Receivable',@maintenanceId,'Tax Authority','Screen','AccountsReceivable.view.TaxAuthority','small-screen',1,0,0,1,8,1)
 	END
 
-	/* -------------------------------------------------- */
-	/* -- End Add Accounts Receivable Activities Menus -- */
-	/* -------------------------------------------------- */
+	IF NOT EXISTS (SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Account Status Codes' AND intParentMenuID = @maintenanceId)
+	BEGIN
+		INSERT dbo.tblSMMasterMenu(strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon,ysnVisible, ysnExpanded,ysnIsLegacy,ysnLeaf,intSort,intConcurrencyId)
+		VALUES ('Account Status Codes','Accounts Receivable',@maintenanceId,'Account Status Codes','Screen','AccountsReceivable.controller.AccountStatus','small-screen',1,0,0,1,null,1)
+	END
+
+	/* --------------------------------------------------- */
+	/* -- End Add Accounts Receivable Maintenance Menus -- */
+	/* --------------------------------------------------- */
 GO
 	DECLARE @intParent INT
 	SELECT @intParent = intMenuID FROM tblSMMasterMenu
