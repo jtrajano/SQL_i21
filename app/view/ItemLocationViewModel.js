@@ -21,7 +21,7 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
         'i21.store.CompanyLocationBuffered',
         'i21.store.FreightTermsBuffered',
         'AccountsPayable.store.VendorBuffered',
-        'Inventory.store.BufferedUnitMeasure',
+        'Inventory.store.BufferedItemUnitMeasure',
         'Inventory.store.BufferedCategory',
         'Inventory.store.Product',
         'Inventory.store.Class',
@@ -67,13 +67,13 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
             type: 'inventorybufferedcategory'
         },
         defaultUOM: {
-            type: 'inventorybuffereduom'
+            type: 'inventorybuffereditemunitmeasure'
         },
         issueUOM: {
-            type: 'inventorybuffereduom'
+            type: 'inventorybuffereditemunitmeasure'
         },
         receiveUOM: {
-            type: 'inventorybuffereduom'
+            type: 'inventorybuffereditemunitmeasure'
         },
         family: {
             type: 'storefamily'

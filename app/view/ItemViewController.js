@@ -700,7 +700,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     key: 'tblICItemUOMs',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdUOM,
-                        deleteButton : grdUOM.down('#btnDeleteLocation')
+                        deleteButton : grdUOM.down('#btnDeleteUom')
                     })
                 },
                 {
