@@ -39,6 +39,25 @@ namespace iRely.Inventory.Model
                 _item = value;
             }
         }
+        string _description;
+        [NotMapped]
+        public string strDescription
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_description))
+                    if (tblICItem != null)
+                        return tblICItem.strDescription;
+                    else
+                        return null;
+                else
+                    return _description;
+            }
+            set
+            {
+                _description = value;
+            }
+        }
         private string _uom;
         [NotMapped]
         public string strUnitMeasure

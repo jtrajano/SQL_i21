@@ -9774,6 +9774,7 @@
                                         "itemId": "grdKit",
                                         "layout|flex": 1,
                                         "margin": "5 -1 5 -1",
+                                        "reference": "grdKit",
                                         "title": "Kit Components"
                                     },
                                     "name": "MyGridPanel11",
@@ -10076,6 +10077,7 @@
                                                             "\t}",
                                                             "]"
                                                         ],
+                                                        "designer|createAlias": "gridcombobox",
                                                         "displayField": "strItemNo",
                                                         "itemId": "cboKitDetailItem",
                                                         "valueField": "strItemNo"
@@ -10197,6 +10199,7 @@
                                                             "\t}",
                                                             "]"
                                                         ],
+                                                        "designer|createAlias": "gridcombobox",
                                                         "displayField": "strUnitMeasure",
                                                         "itemId": "cboKitDetailUOM",
                                                         "valueField": "strUnitMeasure"
@@ -10307,6 +10310,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "clicksToEdit": 1,
                                                 "designer|displayName": "cepKitDetail",
                                                 "pluginId": "cepKitDetail"
                                             },
@@ -10401,6 +10405,7 @@
                                                         "itemId": "grdFactory",
                                                         "layout|flex": 1,
                                                         "margin": -1,
+                                                        "reference": "grdFactory",
                                                         "title": "Factory Association"
                                                     },
                                                     "name": "MyGridPanel7",

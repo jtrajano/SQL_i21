@@ -4401,6 +4401,7 @@ Ext.define('Inventory.view.Item', {
                                             {
                                                 xtype: 'advancefiltergrid',
                                                 flex: 1,
+                                                reference: 'grdKit',
                                                 itemId: 'grdKit',
                                                 margin: '5 -1 5 -1',
                                                 title: 'Kit Components',
@@ -4510,7 +4511,7 @@ Ext.define('Inventory.view.Item', {
                                                         text: 'Item No.',
                                                         flex: 1,
                                                         editor: {
-                                                            xtype: 'combobox',
+                                                            xtype: 'gridcombobox',
                                                             columns: [
                                                                 {
                                                                     dataIndex: 'intItemId',
@@ -4568,7 +4569,7 @@ Ext.define('Inventory.view.Item', {
                                                         dataIndex: 'string',
                                                         text: 'UOM',
                                                         editor: {
-                                                            xtype: 'combobox',
+                                                            xtype: 'gridcombobox',
                                                             columns: [
                                                                 {
                                                                     dataIndex: 'intUnitMeasureId',
@@ -4631,7 +4632,8 @@ Ext.define('Inventory.view.Item', {
                                                 plugins: [
                                                     {
                                                         ptype: 'cellediting',
-                                                        pluginId: 'cepKitDetail'
+                                                        pluginId: 'cepKitDetail',
+                                                        clicksToEdit: 1
                                                     }
                                                 ]
                                             }
@@ -4666,6 +4668,7 @@ Ext.define('Inventory.view.Item', {
                                                             {
                                                                 xtype: 'advancefiltergrid',
                                                                 flex: 1,
+                                                                reference: 'grdFactory',
                                                                 itemId: 'grdFactory',
                                                                 margin: -1,
                                                                 title: 'Factory Association',

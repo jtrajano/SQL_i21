@@ -8,7 +8,7 @@ Ext.define('Inventory.model.ItemKitDetail', {
         'Ext.data.Field'
     ],
 
-    idProperty: 'intItemKitId',
+    idProperty: 'intItemKitDetailId',
 
     fields: [
         { name: 'intItemKitDetailId', type: 'int'},
@@ -35,6 +35,7 @@ Ext.define('Inventory.model.ItemKitDetail', {
         { name: 'inSort', type: 'int'},
 
         { name: 'strItemNo', type: 'string'},
+        { name: 'strDescription', type: 'string'},
         { name: 'strUnitMeasure', type: 'string'}
     ],
 

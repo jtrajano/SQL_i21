@@ -588,16 +588,16 @@ Ext.define('Inventory.view.ItemViewController', {
                         store: '{kitItem}'
                     }
                 },
-                colKitItemDescription: '',
-                colKitItemQuantity: '',
+                colKitItemDescription: 'strDescription',
+                colKitItemQuantity: 'dblQuantity',
                 colKitItemUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
                         store: '{kitUOM}'
                     }
                 },
-                colKitItemPrice: '',
-                colKitItemSelected: ''
+                colKitItemPrice: 'dblPrice',
+                colKitItemSelected: 'ysnSelected'
             },
             //-------------------//
             //Factory & Lines Tab//
@@ -1502,6 +1502,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
         if (combo.column.itemId === 'colKitItem'){
             current.set('intItemId', records[0].get('intItemId'));
+            current.set('strDescription', records[0].get('strDescription'));
         }
         else if (combo.column.itemId === 'colKitItemUOM') {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
