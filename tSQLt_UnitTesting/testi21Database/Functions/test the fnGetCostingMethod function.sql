@@ -124,6 +124,7 @@ BEGIN
 		UNION ALL SELECT intCostingMethod = @StandardCost -- Category 4
 		
 		-- Setup a fake table and data for tblICItem
+		DROP VIEW vyuAPRptPurchase
 		EXEC tSQLt.FakeTable 'dbo.tblICItem', @Identity = 1;
 		INSERT tblICItem (
 			strDescription
