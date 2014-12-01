@@ -290,6 +290,7 @@
                             "userConfig": {
                                 "bodyPadding": 10,
                                 "container|align": "stretch",
+                                "itemId": "pgeDetails",
                                 "layout": "vbox",
                                 "title": "Details"
                             },
@@ -1206,6 +1207,7 @@
                             "userConfig": {
                                 "bodyPadding": 5,
                                 "container|align": "stretch",
+                                "itemId": "pgeSetup",
                                 "layout": "vbox",
                                 "title": "Setup"
                             },
@@ -6390,6 +6392,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "container|align": "stretch",
+                                "itemId": "pgePricing",
                                 "layout": "vbox",
                                 "title": "Pricing"
                             },
@@ -7974,6 +7977,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "bodyPadding": null,
+                                "itemId": "pgeStock",
                                 "layout": "fit",
                                 "title": "Stock"
                             },
@@ -8362,6 +8366,7 @@
                             "userConfig": {
                                 "bodyPadding": 10,
                                 "container|align": "stretch",
+                                "itemId": "pgeCommodity",
                                 "layout": "hbox",
                                 "title": "Commodity"
                             },
@@ -8843,6 +8848,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "bodyPadding": null,
+                                "itemId": "pgeAssembly",
                                 "layout": "fit",
                                 "title": "Assembly"
                             },
@@ -9290,6 +9296,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "bodyPadding": null,
+                                "itemId": "pgeBundle",
                                 "layout": "fit",
                                 "title": "Bundle Details"
                             },
@@ -9738,6 +9745,7 @@
                             "userConfig": {
                                 "bodyPadding": null,
                                 "container|align": "stretch",
+                                "itemId": "pgeKit",
                                 "layout": "vbox",
                                 "title": "Kit Details"
                             },
@@ -10319,6 +10327,7 @@
                             "userConfig": {
                                 "bodyPadding": 5,
                                 "container|align": "stretch",
+                                "itemId": "pgeFactory",
                                 "layout": "vbox",
                                 "title": "Factory & Lines",
                                 "width": 926
@@ -11095,6 +11104,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "bodyPadding": null,
+                                "itemId": "pgeNotes",
                                 "layout": "fit",
                                 "title": "Notes"
                             },
@@ -11368,6 +11378,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "bodyPadding": null,
+                                "itemId": "pgeAttachments",
                                 "layout": "fit",
                                 "title": "Attachments"
                             },

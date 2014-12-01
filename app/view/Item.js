@@ -176,6 +176,7 @@ Ext.define('Inventory.view.Item', {
                                 items: [
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeDetails',
                                         bodyPadding: 10,
                                         title: 'Details',
                                         layout: {
@@ -598,6 +599,7 @@ Ext.define('Inventory.view.Item', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeSetup',
                                         bodyPadding: 5,
                                         title: 'Setup',
                                         layout: {
@@ -2921,6 +2923,7 @@ Ext.define('Inventory.view.Item', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgePricing',
                                         title: 'Pricing',
                                         layout: {
                                             type: 'vbox',
@@ -3571,6 +3574,7 @@ Ext.define('Inventory.view.Item', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeStock',
                                         layout: 'fit',
                                         title: 'Stock',
                                         items: [
@@ -3734,6 +3738,7 @@ Ext.define('Inventory.view.Item', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeCommodity',
                                         bodyPadding: 10,
                                         title: 'Commodity',
                                         layout: {
@@ -4002,6 +4007,7 @@ Ext.define('Inventory.view.Item', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeAssembly',
                                         layout: 'fit',
                                         title: 'Assembly',
                                         items: [
@@ -4193,6 +4199,7 @@ Ext.define('Inventory.view.Item', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeBundle',
                                         layout: 'fit',
                                         title: 'Bundle Details',
                                         items: [
@@ -4384,6 +4391,7 @@ Ext.define('Inventory.view.Item', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeKit',
                                         title: 'Kit Details',
                                         layout: {
                                             type: 'vbox',
@@ -4631,6 +4639,7 @@ Ext.define('Inventory.view.Item', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeFactory',
                                         width: 926,
                                         bodyPadding: 5,
                                         title: 'Factory & Lines',
@@ -4949,6 +4958,7 @@ Ext.define('Inventory.view.Item', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeNotes',
                                         layout: 'fit',
                                         title: 'Notes',
                                         items: [
@@ -5058,6 +5068,7 @@ Ext.define('Inventory.view.Item', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeAttachments',
                                         layout: 'fit',
                                         title: 'Attachments',
                                         items: [
