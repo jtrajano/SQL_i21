@@ -86,12 +86,15 @@
 	@originTermCount = COUNT(DISTINCT agivc_terms_code) 
 	FROM agivcmst 
 	WHERE agivc_terms_code IS NOT NULL
-	
+ 
 	SELECT
 	@termCount = COUNT(DISTINCT strTerm)
-	FROM agivcmst
-		INNER JOIN tblSMTerm ON agivcmst.agivc_bill_to_cus COLLATE Latin1_General_CI_AS = tblSMTerm.strTerm COLLATE Latin1_General_CI_AS
-	
+	FROM tblSMTerm
+	WHERE strTermCode COLLATE Latin1_General_CI_AS in (SELECT 
+			DISTINCT (CASE WHEN SUBSTRING(agivc_terms_code,1, 1) = 0 THEN SUBSTRING(agivc_terms_code,2,1) ELSE agivc_terms_code END) COLLATE Latin1_General_CI_AS
+			FROM agivcmst 
+			WHERE agivc_terms_code IS NOT NULL)
+
 	IF(@originTermCount = @termCount)
 	BEGIN
 		SET @Sucess = 1
