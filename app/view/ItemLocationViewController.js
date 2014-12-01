@@ -141,6 +141,14 @@ Ext.define('Inventory.view.ItemLocationViewController', {
             }
         });
 
+        var filter = [{ dataIndex: 'intItemId', value: options.itemId, condition: 'eq' }];
+        var cboDefaultUom = win.down('#cboDefaultUom');
+        var cboIssueUom = win.down('#cboIssueUom');
+        var cboReceiveUom = win.down('#cboReceiveUom');
+        cboDefaultUom.defaultFilters = filter;
+        cboIssueUom.defaultFilters = filter;
+        cboReceiveUom.defaultFilters = filter;
+
         return win.context;
     },
 
@@ -153,7 +161,7 @@ Ext.define('Inventory.view.ItemLocationViewController', {
         if (config) {
             win.show();
 
-            var context = me.setupContext( { window : win } );
+            var context = me.setupContext( { window : win, itemId: config.id } );
             me.intItemId = config.id;
             if (config.action === 'new') {
                 context.data.addRecord();
