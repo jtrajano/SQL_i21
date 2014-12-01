@@ -6,8 +6,13 @@ AS
 		,tblAPVendor.intEntityId
 		,tblAPVendor.intVendorId
 		,A.dtmDate
+		,A.dtmBillDate
 		,intTransactionId = A.intBillId 
-		,CASE WHEN A.intTransactionType = 1 THEN 'Bill' ELSE 'Vendor Prepayment' END AS strTransactionType 
+		,CASE WHEN A.intTransactionType = 1 THEN 'Bill' 
+			WHEN A.intTransactionType = 2 THEN 'Vendor Prepayment' 
+			WHEN A.intTransactionType = 3 THEN 'Debit Memo' 
+		ELSE 'Not Bill Type'
+		END AS strTransactionType 
 		,strBillId = A.strBillId
 		,strInvoiceNumber = strVendorOrderNumber
 		,dblTotal = ISNULL(A.dblTotal,0)
@@ -16,20 +21,26 @@ AS
 		,dblAmountPaid = CASE WHEN A.ysnPaid = 1 THEN A.dblTotal ELSE ISNULL(SUM(B.dblPayment),0) END
 		,A.ysnPaid
 		,strVendorOrderNumber
-		,A.strDescription
+		,A.strReference
 		,A.dblAmountDue
 	FROM dbo.tblAPBill A
 			LEFT JOIN (dbo.tblAPPayment B1 INNER JOIN dbo.tblAPPaymentDetail B ON B1.intPaymentId = B.intPaymentId)
 			 ON A.intBillId = B.intBillId
 			LEFT JOIN dbo.tblAPVendor
 				ON tblAPVendor.intVendorId = A.intVendorId
-	WHERE B1.ysnPosted = 1
+	WHERE 
+	1 = CASE WHEN B1.intPaymentId IS NULL 
+		THEN 1
+		ELSE
+			(CASE WHEN B1.ysnPosted = 1 THEN 1 ELSE 0 END)
+		END 
 	GROUP BY A.intBillId,
 		A.dtmDate,
+		A.dtmBillDate,
 		A.dblTotal,
 		A.dblDiscount,
 		A.dblWithheld,
-		A.strDescription,
+		A.strReference,
 		A.intTransactionType,
 		tblAPVendor.strVendorId,
 		tblAPVendor.intEntityId,

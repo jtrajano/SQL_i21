@@ -7,7 +7,7 @@
     [dtmDate]              DATETIME        NOT NULL DEFAULT GETDATE(),
     [dtmDueDate]           DATETIME        NOT NULL DEFAULT GETDATE(),
     [intAccountId]         INT             NOT NULL DEFAULT 0,
-    [strDescription]       NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
+    [strReference]       NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
 	[strComment]			NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
     [dblTotal]             DECIMAL (18, 6) NOT NULL DEFAULT 0,
 	[dblSubtotal]          DECIMAL (18, 6) NOT NULL DEFAULT 0,
