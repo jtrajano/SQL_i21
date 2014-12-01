@@ -10,6 +10,7 @@
 					   else tc.strComment
 					   end)+'</br><hr></br>'
 		,ysnComment = 1
+		,dtmCreated = tc.dtmCreated
 	from
 		tblHDTicket t
 		inner join tblHDTicketComment tc on tc.intTicketId = t.intTicketId
@@ -22,6 +23,7 @@
 		,t.strCustomerNumber
 		,strNote = '<p>'+tn.strNote+'</p></br><hr></br>'
 		,ysnComment = 0
+		,dtmCreated = tn.dtmCreated
 	from
 		tblHDTicket t
 		inner join tblHDTicketNote tn on tn.intTicketId = t.intTicketId

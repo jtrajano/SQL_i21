@@ -882,6 +882,7 @@
     <Build Include="dbo\Views\vyuHDSearchDetailsDetails.sql" />
     <Build Include="dbo\Views\vyuHDSearchDetailsNotes.sql" />
     <Build Include="dbo\Views\vyuHDSearchDetails.sql" />
+    <Build Include="dbo\Views\vyuHDSearchDetailsBase.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
