@@ -691,6 +691,7 @@ Ext.define('Inventory.view.ItemViewController', {
             store  : store,
             createRecord : me.createRecord,
             binding: me.config.binding,
+            fieldTitle: 'strItemNo',
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.Item',
                 window: win
@@ -878,6 +879,13 @@ Ext.define('Inventory.view.ItemViewController', {
         btnEditPricing.on('click', me.onEditPricingClick);
 
         return win.context;
+    },
+
+    createRecord: function(config, action) {
+        var me = this;
+        var record = Ext.create('Inventory.model.Item');
+        record.set('strStatus', 'Active');
+        action(record);
     },
 
     show : function(config) {
