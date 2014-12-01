@@ -235,15 +235,18 @@ GO
 
 	IF NOT EXISTS(SELECT 1 FROM tblSMMasterMenu where strMenuName = 'Paid Bills History' and strModuleName = 'Accounts Payable' and strType = 'Screen')
 	BEGIN
-		INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Paid Bills History', N'Accounts Payable', 113, N'Shows all the payments', N'Screen', N'AccountsPayable.view.PaidBillsHistory', N'small-screen', 0, 0, 0, 1, NULL, 1)
+		INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Paid Bills History', N'Accounts Payable', 113, N'Shows all the payments', N'Screen', N'AccountsPayable.view.PaidBillsHistory', N'small-screen', 1, 0, 0, 1, NULL, 1)
 	END
 
 	IF NOT EXISTS(SELECT 1 FROM tblSMMasterMenu where strMenuName = 'Recurring Transactions' and strModuleName = 'Accounts Payable' and strType = 'Screen')
 	BEGIN
-		INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Recurring Transactions', N'Accounts Payable', 113, N'', N'Screen', N'AccountsPayable.view.RecurringTransaction', N'small-screen', 0, 0, 0, 1, NULL, 1)
+		INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Recurring Transactions', N'Accounts Payable', 113, N'', N'Screen', N'AccountsPayable.view.RecurringTransaction', N'small-screen', 1, 0, 0, 1, NULL, 1)
 	END
 
-	
+	IF NOT EXISTS(SELECT 1 FROM tblSMMasterMenu where strMenuName = 'Purchase Order' and strModuleName = 'Accounts Payable' and strType = 'Screen')
+	BEGIN
+		INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Purchase Order', N'Accounts Payable', 113, N'', N'Screen', N'AccountsPayable.view.PurchaseOrder', N'small-screen', 1, 0, 0, 1, NULL, 1)
+	END
 GO
 --update missing commands
 	UPDATE tblSMMasterMenu
@@ -389,6 +392,14 @@ GO
 		VALUES ('Receive Payment Detail','Accounts Receivable',@activitiesId,'Receive Payment Detail','Screen','AccountsReceivable.view.ReceivePaymentsDetail','small-screen',1,0,0,1,3,1)
 	END
 
+	/* -------------------------------------------------- */
+	/* -- End Add Accounts Receivable Activities Menus -- */
+	/* -------------------------------------------------- */
+
+	/* ----------------------------------------------- */
+	/* -- Add Accounts Receivable Maintenance Menus -- */
+	/* ----------------------------------------------- */
+
 	SELECT @maintenanceId = intMenuID FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Maintenance' AND intParentMenuID = @rootParentId
 
 	IF NOT EXISTS (SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Tax Authority' AND intParentMenuID = @maintenanceId)
@@ -397,9 +408,15 @@ GO
 		VALUES ('Tax Authority','Accounts Receivable',@maintenanceId,'Tax Authority','Screen','AccountsReceivable.view.TaxAuthority','small-screen',1,0,0,1,8,1)
 	END
 
-	/* -------------------------------------------------- */
-	/* -- End Add Accounts Receivable Activities Menus -- */
-	/* -------------------------------------------------- */
+	IF NOT EXISTS (SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Account Status Codes' AND intParentMenuID = @maintenanceId)
+	BEGIN
+		INSERT dbo.tblSMMasterMenu(strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon,ysnVisible, ysnExpanded,ysnIsLegacy,ysnLeaf,intSort,intConcurrencyId)
+		VALUES ('Account Status Codes','Accounts Receivable',@maintenanceId,'Account Status Codes','Screen','AccountsReceivable.controller.AccountStatus','small-screen',1,0,0,1,null,1)
+	END
+
+	/* --------------------------------------------------- */
+	/* -- End Add Accounts Receivable Maintenance Menus -- */
+	/* --------------------------------------------------- */
 GO
 	DECLARE @intParent INT
 	SELECT @intParent = intMenuID FROM tblSMMasterMenu
@@ -443,6 +460,7 @@ GO
 							WHEN strMenuName = 'Create Ticket' THEN 1 END)
 	WHERE intParentMenuID = @intParent
 GO
+	
 	IF EXISTS (SELECT * FROM tblSMMasterMenu WHERE strMenuName = 'Customer Portal User Configuration' AND strModuleName = 'Customer Portal' AND strType = 'Screen')
 	DELETE FROM tblSMMasterMenu
 	WHERE strMenuName = 'Customer Portal User Configuration' AND strModuleName = 'Customer Portal' AND strType = 'Screen'
@@ -466,7 +484,19 @@ GO
 	/* ---------------------------------- */
 	/* -- Remove Ecommerce Module Menu -- */
 	/* ---------------------------------- */
+	--FRM-1606
 	DELETE FROM tblSMMasterMenu WHERE strModuleName = 'Customer Portal'
+GO
+-- FRM-1587
+	IF EXISTS(SELECT * FROM tblSMMasterMenu WHERE strModuleName = 'Help Desk' and intParentMenuID not in (SELECT intMenuID FROM tblSMMasterMenu) and not intParentMenuID = 0)
+	BEGIN
+		-- delete the menu under Help Desk folder under the deleted Customer Portal parent folder
+		delete from tblSMMasterMenu 
+		where intParentMenuID in (SELECT intMenuID FROM tblSMMasterMenu WHERE strModuleName = 'Help Desk' and intParentMenuID not in (SELECT intMenuID FROM tblSMMasterMenu) and not intParentMenuID = 0)
+	
+		--delete the Help Desk folder under the deleted Customer Portal parent folder
+		delete FROM tblSMMasterMenu WHERE strModuleName = 'Help Desk' and intParentMenuID not in (SELECT intMenuID FROM tblSMMasterMenu) and not intParentMenuID = 0
+	END
 GO
 	
 	/* ---------------------------------- */

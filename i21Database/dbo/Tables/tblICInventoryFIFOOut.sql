@@ -8,10 +8,7 @@
 )
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFOOut_intInventoryFifoId]
-    ON [dbo].[tblICInventoryFIFOOut]([intInventoryFIFOId] ASC);
-GO
-
 CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFOOut_intInventoryTransactionId]
-    ON [dbo].[tblICInventoryFIFOOut]([intInventoryTransactionId] ASC);
+    ON [dbo].[tblICInventoryFIFOOut]([intInventoryTransactionId] ASC)
+    INCLUDE(intInventoryFIFOId);
 GO

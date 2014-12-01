@@ -876,8 +876,12 @@
     <Build Include="dbo\Tables\tblFRValidateDesign.sql" />
     <Build Include="dbo\Stored Procedures\uspFRValidateDesign.sql" />
     <Build Include="dbo\Views\vyuAPRptPurchase.sql" />
-	<Build Include="dbo\Stored Procedures\uspARPostInvoice.sql" />
-	<Build Include="dbo\Functions\fnGetItemGLAccountAsTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostInvoice.sql" />
+    <Build Include="dbo\Functions\fnGetItemGLAccountAsTable.sql" />
+    <Build Include="dbo\Views\vyuSMContacts.sql" />
+    <Build Include="dbo\Views\vyuHDSearchDetailsDetails.sql" />
+    <Build Include="dbo\Views\vyuHDSearchDetailsNotes.sql" />
+    <Build Include="dbo\Views\vyuHDSearchDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -895,7 +899,7 @@
     <None Include="Scripts\Post-Deployment\HD\DefaultData\1_StatusData.sql" />
     <None Include="Scripts\Post-Deployment\HD\HDEntryDataFix.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\11_FreightTerms.sql" />
-    <None Include="dbo\Views\vyuPREmployee.sql" />
+    <Build Include="dbo\Views\vyuPREmployee.sql" />
     <None Include="Scripts\Post-Deployment\IC\2_MaterialNMFC.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillBatch.sql" />
     <Build Include="dbo\Tables\tblFRAccountMonitor.sql" />

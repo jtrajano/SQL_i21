@@ -4,6 +4,7 @@
 
 CREATE TYPE [dbo].[ItemCostingTableType] AS TABLE
 (
+	[intId] INT IDENTITY PRIMARY KEY CLUSTERED,
 	[intItemId] INT NOT NULL, -- The PK of the item. 
 	[intLocationId] INT NOT NULL, -- The location-store where the item is found or served.
 	[dtmDate] DATETIME NOT NULL, -- The date of the transaction

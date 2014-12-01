@@ -82,7 +82,7 @@ AS
 	WHERE	TRANS.strBatchId = @strBatchId
 )
 -------------------------------------------------------------------------------------------
--- This part if for the usual G/L entries for Inventory Account and its contra account 
+-- This part is for the usual G/L entries for Inventory Account and its contra account 
 -------------------------------------------------------------------------------------------
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -154,7 +154,7 @@ FROM	ForGLEntries_CTE
 WHERE	intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE)
 
 -----------------------------------------------------------------------------------
--- This part for the Write-Off Sold 
+-- This part is for the Write-Off Sold 
 -----------------------------------------------------------------------------------
 UNION ALL  
 SELECT	

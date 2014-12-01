@@ -29,6 +29,7 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblSMCompanyLocation';
 	EXEC tSQLt.FakeTable 'dbo.tblSMCompanyLocationAccount', @Identity = 1;
 
+	DROP VIEW vyuAPRptPurchase
 	EXEC tSQLt.FakeTable 'dbo.tblICItem';
 	EXEC tSQLt.FakeTable 'dbo.tblICItemLocation', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;	
