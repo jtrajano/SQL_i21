@@ -1469,7 +1469,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var current = plugin.getActiveRecord();
 
         if (combo.column.itemId === 'colAssemblyComponent'){
-            current.set('intItemId', records[0].get('intItemId'));
+            current.set('intAssemblyItemId', records[0].get('intItemId'));
         }
         else if (combo.column.itemId === 'colAssemblyUOM') {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
@@ -1489,7 +1489,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var current = plugin.getActiveRecord();
 
         if (combo.column.itemId === 'colBundleItem'){
-            current.set('intItemId', records[0].get('intItemId'));
+            current.set('intBundleItemId', records[0].get('intItemId'));
         }
         else if (combo.column.itemId === 'colBundleUOM') {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
