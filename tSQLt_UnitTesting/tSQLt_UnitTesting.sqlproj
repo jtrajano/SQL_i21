@@ -500,6 +500,8 @@
     <Build Include="testi21Database\Functions\test the fnGetProcessToItemReceiptErrors function for the basics.sql" />
     <Build Include="testi21Database\Functions\test the fnGetProcessToItemReceiptErrors function for invalid item and valid location.sql" />
     <Build Include="testi21Database\Functions\test the fnGetProcessToItemReceiptErrors function for invalid item and invalid location.sql" />
+    <Build Include="testi21Database\Scripts\test the account id constraints of AP tables.sql" />
+    <Build Include="testi21Database\Scripts\test the item id constraints on AP tables.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
