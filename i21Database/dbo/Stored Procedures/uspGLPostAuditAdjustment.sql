@@ -107,6 +107,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 					'This transaction cannot be posted because the currency is missing.' AS strMessage
 				FROM tblGLJournal A 
 				WHERE 0 = CASE WHEN ISNULL(A.intCurrencyId, '') = '' THEN 0 ELSE 1 END 
+					  AND A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)
 				UNION
 				SELECT DISTINCT A.intJournalId,
 					'You cannot post this transaction because it has inactive account id ' + B.strAccountId + '.' AS strMessage
