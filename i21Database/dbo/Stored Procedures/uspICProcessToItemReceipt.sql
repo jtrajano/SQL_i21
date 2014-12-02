@@ -43,7 +43,7 @@ BEGIN TRY
 
 	-- Add the items to the item receipt 
 	-- TODO by Lawrence 
-	-- Ex: EXEC dbo.uspICAddToItemReceipt @ItemsToReceive;
+	-- Ex: EXEC dbo.uspICAddPurchaseOrderToItemReceipt @ItemsToReceive;
 
 	-- Increase the On-Order Qty for the items
 	IF @strSourceType = @SourceType_PurchaseOrder

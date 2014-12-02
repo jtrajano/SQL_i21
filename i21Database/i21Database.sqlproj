@@ -885,7 +885,8 @@
     <Build Include="dbo\Views\vyuHDSearchDetailsBase.sql" />
     <Build Include="dbo\Functions\fnGetCostingMethodAsTable.sql" />
     <Build Include="dbo\Functions\fnGetItemAverageCostAsTable.sql" />
-    <Build Include="dbo\Stored Procedures\uspPOProcessItemReceipt.sql" />
+	<Build Include="dbo\Stored Procedures\uspPOProcessItemReceipt.sql" />
+	<Build Include="dbo\Stored Procedures\uspICAddPurchaseOrderToItemReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
