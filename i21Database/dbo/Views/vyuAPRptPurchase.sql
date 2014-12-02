@@ -17,13 +17,13 @@ A.intPurchaseId
  CASE WHEN LEN(A.strShipToZipCode) <> 0 THEN CHAR(32) + A.strShipToZipCode + CHAR(13) + CHAR (10) else '' end +    
  CASE WHEN LEN(A.strShipToCountry) <> 0 THEN CHAR(32) + A.strShipToCountry + CHAR(13) + CHAR (10) else '' end +    
  CASE WHEN LEN(A.strShipToPhone) <> 0 THEN CHAR(32) + A.strShipToPhone + CHAR(13) + CHAR (10) else '' end)
- ,strBillTo = (CASE WHEN LEN(A.strBillToAttention) <> 0 THEN CHAR(32) + 'Attn: ' + A.strBillToAttention + CHAR(13) + CHAR (10) else '' end +    
- CASE WHEN LEN(A.strBillToAddress) <> 0 THEN CHAR(32) + REPLACE(A.strBillToAddress,char(10), ' ') + CHAR(13) + CHAR (10) else '' end +    
- CASE WHEN LEN(A.strBillToCity) <> 0 THEN CHAR(32) + A.strBillToCity + ','  else '' end +    
- CASE WHEN LEN(A.strBillToState) <> 0 THEN CHAR(32) + A.strBillToState + ',' else  '' end +    
- CASE WHEN LEN(A.strBillToZipCode) <> 0 THEN CHAR(32) + A.strBillToZipCode + CHAR(13) + CHAR (10) else '' end +    
- CASE WHEN LEN(A.strBillToCountry) <> 0 THEN CHAR(32) + A.strBillToCountry + CHAR(13) + CHAR (10) else '' end +    
- CASE WHEN LEN(A.strBillToPhone) <> 0 THEN CHAR(32) + A.strBillToPhone + CHAR(13) + CHAR (10) else '' end)
+ ,strShipFrom = (CASE WHEN LEN(A.strShipFromAttention) <> 0 THEN CHAR(32) + 'Attn: ' + A.strShipFromAttention + CHAR(13) + CHAR (10) else '' end +    
+ CASE WHEN LEN(A.strShipFromAddress) <> 0 THEN CHAR(32) + REPLACE(A.strShipFromAddress,char(10), ' ') + CHAR(13) + CHAR (10) else '' end +    
+ CASE WHEN LEN(A.strShipFromCity) <> 0 THEN CHAR(32) + A.strShipFromCity + ','  else '' end +    
+ CASE WHEN LEN(A.strShipFromState) <> 0 THEN CHAR(32) + A.strShipFromState + ',' else  '' end +    
+ CASE WHEN LEN(A.strShipFromZipCode) <> 0 THEN CHAR(32) + A.strShipFromZipCode + CHAR(13) + CHAR (10) else '' end +    
+ CASE WHEN LEN(A.strShipFromCountry) <> 0 THEN CHAR(32) + A.strShipFromCountry + CHAR(13) + CHAR (10) else '' end +    
+ CASE WHEN LEN(A.strShipFromPhone) <> 0 THEN CHAR(32) + A.strShipFromPhone + CHAR(13) + CHAR (10) else '' end)
  ,intShipViaId
  ,strShipVia = (SELECT strShipVia FROM dbo.tblSMShipVia WHERE intShipViaID = intShipViaID)
  ,intTermsId
@@ -31,6 +31,7 @@ A.intPurchaseId
  ,B.dblQtyOrdered
  ,B.dblCost
  ,B.dblDiscount
+ ,B.dblTotal AS dblDetailTotal
  ,A.dblTotal
  ,A.dblSubtotal
  ,A.dblTax

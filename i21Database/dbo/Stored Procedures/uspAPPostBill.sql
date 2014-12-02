@@ -220,7 +220,7 @@ BEGIN
 				ON A.intPaymentId = B.intPaymentId
 			INNER JOIN tblAPBill C
 				ON B.intBillId = C.intBillId
-		WHERE  C.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData)
+		WHERE  C.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData) AND A.ysnPosted = 1
 
 		INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT 
