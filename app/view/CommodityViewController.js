@@ -76,15 +76,45 @@ Ext.define('Inventory.view.CommodityViewController', {
                 store: '{directPatronageCategory}'
             },
 
-            colUOMCode: 'strUnitMeasure',
-            colUOMWeightPerPack: 'dblWeightPerPack',
-            colUOMStockUnit: 'ysnStockUnit',
-            colUOMAllowPurchase: 'ysnAllowPurchase',
-            colUOMAllowSale: 'ysnAllowSale',
+            grdUom: {
+                colUOMCode: {
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        store: '{unitMeasure}'
+                    }
+                },
+                colUOMWeightPerPack: 'dblWeightPerPack',
+                colUOMStockUnit: 'ysnStockUnit',
+                colUOMAllowPurchase: {
+                    dataIndex: 'ysnAllowPurchase',
+                    readOnly: ''
+                },
+                colUOMAllowSale: {
+                    dataIndex: 'ysnAllowSale',
+                    readOnly: ''
+                }
+            },
 
-            colAccountLocation: 'strLocationName',
-            colAccountDescription: 'strAccountDescription',
-            colAccountId: 'strAccountId',
+            grdGlAccounts: {
+                colAccountLocation: {
+                    dataIndex: 'strLocationName',
+                    editor: {
+                        store: '{location}'
+                    }
+                },
+                colAccountDescription: {
+                    dataIndex: 'strAccountDescription',
+                    editor: {
+                        store: '{accountDescriptions}'
+                    }
+                },
+                colAccountId: {
+                    dataIndex: 'strAccountId',
+                    editor: {
+                        store: '{glAccount}'
+                    }
+                }
+            },
 
             grdOrigin: {
                 colOrigin: 'strDescription'
@@ -255,6 +285,49 @@ Ext.define('Inventory.view.CommodityViewController', {
         }
     },
 
+    onUOMBeforeCheckChange: function (obj, rowIndex, checked, eOpts) {
+        if (obj.dataIndex === 'ysnAllowPurchase' || obj.dataIndex === 'ysnAllowSale'){
+            var grid = obj.up('grid');
+            var selModel = grid.getSelectionModel();
+
+            if (selModel.hasSelection()){
+                var current = selModel.getSelection()[0];
+                if (current.data.ysnStockUnit !== true){
+                    return false;
+                }
+            }
+            else {
+                return false;
+            }
+        }
+    },
+
+    onUOMStockUnitCheckChange: function (obj, rowIndex, checked, eOpts) {
+        if (obj.dataIndex === 'ysnStockUnit'){
+            var grid = obj.up('grid');
+            var selModel = grid.getSelectionModel();
+
+            var current = selModel.getSelection()[0];
+
+            if (checked === true){
+                var uoms = grid.store.data.items;
+                uoms.forEach(function(uom){
+                    if (uom !== current && uom.dummy !== true){
+                        uom.set('ysnStockUnit', false);
+                        uom.set('ysnAllowPurchase', false);
+                        uom.set('ysnAllowSale', false);
+                    }
+                });
+            }
+            else {
+                if (current){
+                    current.set('ysnAllowPurchase', false);
+                    current.set('ysnAllowSale', false);
+                }
+            }
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboUOM": {
@@ -265,6 +338,15 @@ Ext.define('Inventory.view.CommodityViewController', {
             },
             "#cboAccountId": {
                 select: this.onAccountSelect
+            },
+            "#colUOMStockUnit": {
+                beforecheckchange: this.onUOMStockUnitCheckChange
+            },
+            "#colUOMAllowPurchase": {
+                beforecheckchange: this.onUOMBeforeCheckChange
+            },
+            "#colUOMAllowSale": {
+                beforecheckchange: this.onUOMBeforeCheckChange
             }
         });
     }

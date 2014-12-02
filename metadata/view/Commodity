@@ -1307,7 +1307,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter1",
+                                                    "name": "filter125",
                                                     "designerId": "cfe7d6a1-9373-4396-b427-061b4323a19b",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1368,15 +1368,11 @@
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strUnitMeasure",
                                                         "itemId": "cboUOM",
-                                                        "store": [
-                                                            "{unitMeasure}"
-                                                        ],
                                                         "valueField": "strUnitMeasure"
                                                     },
                                                     "name": "MyComboBox6",
                                                     "configAlternates": {
-                                                        "columns": "array",
-                                                        "store": "binding"
+                                                        "columns": "array"
                                                     },
                                                     "designerId": "96e220f2-3477-4783-88df-a6002987c289",
                                                     "customConfigs": [
@@ -1476,19 +1472,7 @@
                                                 "text": "Stock Unit"
                                             },
                                             "name": "MyCheck",
-                                            "designerId": "26a91c5d-92cb-49d4-b040-a632ba5706cc",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Checkbox",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "name": "MyCheckbox",
-                                                    "designerId": "1a8bec99-c954-4d89-bfab-025476ff53f8"
-                                                }
-                                            ]
+                                            "designerId": "26a91c5d-92cb-49d4-b040-a632ba5706cc"
                                         },
                                         {
                                             "type": "Ext.grid.column.Check",
@@ -1503,19 +1487,7 @@
                                                 "text": "Allow Purchase in Stock Unit"
                                             },
                                             "name": "MyCheck1",
-                                            "designerId": "8147542f-8a87-4b89-852c-a63e1e0c1ff3",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Checkbox",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "name": "MyCheckbox1",
-                                                    "designerId": "8860d516-b974-4f74-ac0f-b6a7705e80a5"
-                                                }
-                                            ]
+                                            "designerId": "8147542f-8a87-4b89-852c-a63e1e0c1ff3"
                                         },
                                         {
                                             "type": "Ext.grid.column.Check",
@@ -1530,19 +1502,7 @@
                                                 "text": "Allow Sale in Stock Unit"
                                             },
                                             "name": "MyCheck2",
-                                            "designerId": "dee47e54-2d37-46d5-9239-25a432476080",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Checkbox",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "name": "MyCheckbox2",
-                                                    "designerId": "4a710eed-de10-4420-9dc0-e0ec32a11ffd"
-                                                }
-                                            ]
+                                            "designerId": "dee47e54-2d37-46d5-9239-25a432476080"
                                         }
                                     ]
                                 }
@@ -1669,7 +1629,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter11",
+                                                    "name": "filter126",
                                                     "designerId": "774320ee-0c3c-46f5-ac4e-9acda0e48025",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3157,7 +3117,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter12",
+                                                    "name": "filter127",
                                                     "designerId": "eba518f5-6e1c-4310-b412-16897ab2e39e",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3530,7 +3490,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter13",
+                                                    "name": "filter128",
                                                     "designerId": "e9ad3d80-e267-4067-aa45-29a3069f9395",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3819,7 +3779,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter14",
+                                                    "name": "filter129",
                                                     "designerId": "d3a363a5-85c8-4ee8-97e8-07576d381b52",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4101,7 +4061,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter15",
+                                                    "name": "filter130",
                                                     "designerId": "27709837-db86-47ab-a575-7586b5b5aef3",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4156,15 +4116,11 @@
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strLocationName",
                                                         "itemId": "cboAccountLocation",
-                                                        "store": [
-                                                            "{location}"
-                                                        ],
                                                         "valueField": "strLocationName"
                                                     },
                                                     "name": "MyComboBox2",
                                                     "configAlternates": {
-                                                        "columns": "array",
-                                                        "store": "binding"
+                                                        "columns": "array"
                                                     },
                                                     "designerId": "70fce8b0-55dd-496d-b268-4861b518de61",
                                                     "customConfigs": [
@@ -4203,15 +4159,9 @@
                                                     "userConfig": {
                                                         "displayField": "strDescription",
                                                         "itemId": "cboAccountDescription",
-                                                        "store": [
-                                                            "{accountDescriptions}"
-                                                        ],
                                                         "valueField": "strDescription"
                                                     },
                                                     "name": "MyComboBox1",
-                                                    "configAlternates": {
-                                                        "store": "binding"
-                                                    },
                                                     "designerId": "a8334702-092b-4802-b4ff-6bedd4648ae1"
                                                 }
                                             ]
@@ -4283,15 +4233,11 @@
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strAccountId",
                                                         "itemId": "cboAccountId",
-                                                        "store": [
-                                                            "{glAccount}"
-                                                        ],
                                                         "valueField": "strAccountId"
                                                     },
                                                     "name": "MyComboBox",
                                                     "configAlternates": {
-                                                        "columns": "array",
-                                                        "store": "binding"
+                                                        "columns": "array"
                                                     },
                                                     "designerId": "3ac0a2cb-2c0f-464a-9002-d5db958e6b15",
                                                     "customConfigs": [
@@ -4362,7 +4308,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging13",
                     "designerId": "fca9ca25-ac5c-43f8-9dd2-ce604fae6ecb",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

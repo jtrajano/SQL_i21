@@ -711,10 +711,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             ],
                                                             itemId: 'cboUOM',
                                                             displayField: 'strUnitMeasure',
-                                                            valueField: 'strUnitMeasure',
-                                                            bind: {
-                                                                store: '{unitMeasure}'
-                                                            }
+                                                            valueField: 'strUnitMeasure'
                                                         }
                                                     },
                                                     {
@@ -734,28 +731,19 @@ Ext.define('Inventory.view.Commodity', {
                                                         xtype: 'checkcolumn',
                                                         itemId: 'colUOMStockUnit',
                                                         text: 'Stock Unit',
-                                                        flex: 1,
-                                                        editor: {
-                                                            xtype: 'checkboxfield'
-                                                        }
+                                                        flex: 1
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',
                                                         itemId: 'colUOMAllowPurchase',
                                                         text: 'Allow Purchase in Stock Unit',
-                                                        flex: 2,
-                                                        editor: {
-                                                            xtype: 'checkboxfield'
-                                                        }
+                                                        flex: 2
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',
                                                         itemId: 'colUOMAllowSale',
                                                         text: 'Allow Sale in Stock Unit',
-                                                        flex: 2,
-                                                        editor: {
-                                                            xtype: 'checkboxfield'
-                                                        }
+                                                        flex: 2
                                                     }
                                                 ],
                                                 viewConfig: {
@@ -1771,10 +1759,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             ],
                                                             itemId: 'cboAccountLocation',
                                                             displayField: 'strLocationName',
-                                                            valueField: 'strLocationName',
-                                                            bind: {
-                                                                store: '{location}'
-                                                            }
+                                                            valueField: 'strLocationName'
                                                         }
                                                     },
                                                     {
@@ -1787,10 +1772,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             xtype: 'combobox',
                                                             itemId: 'cboAccountDescription',
                                                             displayField: 'strDescription',
-                                                            valueField: 'strDescription',
-                                                            bind: {
-                                                                store: '{accountDescriptions}'
-                                                            }
+                                                            valueField: 'strDescription'
                                                         }
                                                     },
                                                     {
@@ -1841,10 +1823,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             ],
                                                             itemId: 'cboAccountId',
                                                             displayField: 'strAccountId',
-                                                            valueField: 'strAccountId',
-                                                            bind: {
-                                                                store: '{glAccount}'
-                                                            }
+                                                            valueField: 'strAccountId'
                                                         }
                                                     }
                                                 ],
