@@ -223,5 +223,6 @@
     <None Include="dbo\Stored Procedures\uspARImportCustomerContacts.sql" />
     <None Include="dbo\Stored Procedures\uspARImportTaxAuthority.sql" />
     <None Include="dbo\Stored Procedures\uspARImportTerm.sql" />
+    <None Include="dbo\Stored Procedures\uspSMImportCompanyLocation.sql" />
   </ItemGroup>
 </Project>
