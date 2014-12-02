@@ -756,9 +756,9 @@ Ext.define('Inventory.view.Item', {
                                                                 columns: [
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        itemId: 'colGLAccountDescription',
+                                                                        itemId: 'colGLAccountCategory',
                                                                         dataIndex: 'string',
-                                                                        text: 'Account Description',
+                                                                        text: 'Account Category',
                                                                         flex: 1,
                                                                         editor: {
                                                                             xtype: 'combobox',
@@ -817,6 +817,12 @@ Ext.define('Inventory.view.Item', {
                                                                             displayField: 'strAccountId',
                                                                             valueField: 'strAccountId'
                                                                         }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colDescription',
+                                                                        text: 'Description',
+                                                                        flex: 1
                                                                     }
                                                                 ],
                                                                 viewConfig: {
