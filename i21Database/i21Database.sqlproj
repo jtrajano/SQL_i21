@@ -883,6 +883,8 @@
     <Build Include="dbo\Views\vyuHDSearchDetailsNotes.sql" />
     <Build Include="dbo\Views\vyuHDSearchDetails.sql" />
     <Build Include="dbo\Views\vyuHDSearchDetailsBase.sql" />
+    <Build Include="dbo\Functions\fnGetCostingMethodAsTable.sql" />
+    <Build Include="dbo\Functions\fnGetItemAverageCostAsTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
