@@ -616,6 +616,7 @@ Ext.define('Inventory.view.Item', {
                                                 items: [
                                                     {
                                                         xtype: 'panel',
+                                                        itemId: 'pgeLocation',
                                                         layout: 'fit',
                                                         title: 'Location',
                                                         items: [
@@ -717,6 +718,7 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'panel',
+                                                        itemId: 'pgeGLAccounts',
                                                         layout: 'fit',
                                                         title: 'GL Accounts',
                                                         items: [
@@ -835,6 +837,7 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'panel',
+                                                        itemId: 'pgeSales',
                                                         title: 'Sales',
                                                         layout: {
                                                             type: 'hbox',
@@ -1246,6 +1249,7 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'panel',
+                                                        itemId: 'pgePOS',
                                                         title: 'Point of Sale',
                                                         layout: {
                                                             type: 'vbox',
@@ -1629,6 +1633,7 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'panel',
+                                                        itemId: 'pgeManufacturing',
                                                         title: 'Manufacturing ',
                                                         layout: {
                                                             type: 'hbox',
@@ -2090,6 +2095,7 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'panel',
+                                                        itemId: 'pgeUPC',
                                                         layout: 'fit',
                                                         title: 'UPC',
                                                         items: [
@@ -2206,6 +2212,7 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'panel',
+                                                        itemId: 'pgeXref',
                                                         title: 'Xref',
                                                         layout: {
                                                             type: 'vbox',
@@ -2550,6 +2557,7 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'panel',
+                                                        itemId: 'pgeContract',
                                                         title: 'Contract Item',
                                                         layout: {
                                                             type: 'vbox',

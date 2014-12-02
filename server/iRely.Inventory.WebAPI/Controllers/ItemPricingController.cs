@@ -33,9 +33,9 @@ namespace iRely.Invetory.WebAPI.Controllers
             if (searchFilters != null)
                 predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICItemPricing>(searchFilters);
 
-            var data = _ItemPricingBRL.GetSearchQuery(page, start, limit, selector, sortSelector, predicate);
+            var data = _ItemPricingBRL.GetPricingSearchQuery(page, start, limit, selector, sortSelector, predicate);
 
-            var total = _ItemPricingBRL.GetCount(predicate);
+            var total = _ItemPricingBRL.GetPricingCount(predicate);
             return Request.CreateResponse(HttpStatusCode.OK, new
             {
                 data = data,
@@ -57,7 +57,7 @@ namespace iRely.Invetory.WebAPI.Controllers
             if (searchFilters != null)
                 predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICItemPricing>(searchFilters, true);
 
-            var total = _ItemPricingBRL.GetCount(predicate);
+            var total = _ItemPricingBRL.GetPricingCount(predicate);
             var data = _ItemPricingBRL.GetItemPricings(page, start, page == 0 ? total : limit, sortSelector, predicate);
 
             return Request.CreateResponse(HttpStatusCode.OK, new
@@ -132,5 +132,55 @@ namespace iRely.Invetory.WebAPI.Controllers
                 }
             });
         }
+
+        [HttpGet]
+        [ActionName("GetItemPricingLevels")]
+        public HttpResponseMessage GetItemPricingLevels(int start = 0, int limit = 1, int page = 0, string sort = "", string filter = "")
+        {
+            filter = string.IsNullOrEmpty(filter) ? "" : filter;
+
+            var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
+            var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
+            var predicate = ExpressionBuilder.True<tblICItemPricingLevel>();
+            var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intItemPricingLevelId", "DESC");
+
+            if (searchFilters != null)
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICItemPricingLevel>(searchFilters, true);
+
+            var total = _ItemPricingBRL.GetPricingLevelCount(predicate);
+            var data = _ItemPricingBRL.GetItemPricingLevels(page, start, page == 0 ? total : limit, sortSelector, predicate);
+
+            return Request.CreateResponse(HttpStatusCode.OK, new
+            {
+                data = data.ToList(),
+                total = total
+            });
+        }
+
+        [HttpGet]
+        [ActionName("GetItemSpecialPricings")]
+        public HttpResponseMessage GetItemSpecialPricings(int start = 0, int limit = 1, int page = 0, string sort = "", string filter = "")
+        {
+            filter = string.IsNullOrEmpty(filter) ? "" : filter;
+
+            var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
+            var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
+            var predicate = ExpressionBuilder.True<tblICItemSpecialPricing>();
+            var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intItemSpecialPricingId", "DESC");
+
+            if (searchFilters != null)
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICItemSpecialPricing>(searchFilters, true);
+
+            var total = _ItemPricingBRL.GetSpecialPricingCount(predicate);
+            var data = _ItemPricingBRL.GetItemSpecialPricings(page, start, page == 0 ? total : limit, sortSelector, predicate);
+
+            return Request.CreateResponse(HttpStatusCode.OK, new
+            {
+                data = data.ToList(),
+                total = total
+            });
+        }
+
+        
     }
 }

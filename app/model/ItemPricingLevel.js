@@ -19,6 +19,18 @@ Ext.define('Inventory.model.ItemPricingLevel', {
                     role: 'tblICItemPricingLevels',
                     storeConfig: {
                         complete: true,
+                        remoteFilter: true,
+                        proxy: {
+                            type: 'rest',
+                            api: {
+                                read: '../Inventory/api/ItemPricing/GetItemPricingLevels'
+                            },
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data',
+                                messageProperty: 'message'
+                            }
+                        },
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',

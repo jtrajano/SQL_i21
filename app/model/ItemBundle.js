@@ -19,6 +19,18 @@ Ext.define('Inventory.model.ItemBundle', {
                     role: 'tblICItemBundles',
                     storeConfig: {
                         complete: true,
+                        remoteFilter: true,
+                        proxy: {
+                            type: 'rest',
+                            api: {
+                                read: '../Inventory/api/ItemBundle/GetItemBundles'
+                            },
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data',
+                                messageProperty: 'message'
+                            }
+                        },
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',

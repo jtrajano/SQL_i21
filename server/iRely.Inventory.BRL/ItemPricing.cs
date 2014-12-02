@@ -21,14 +21,14 @@ namespace iRely.Inventory.BRL
             _db = new Repository(new Inventory.Model.InventoryEntities());
         }
 
-        public IQueryable<tblICItemPricing> GetSearchQuery()
+        public IQueryable<tblICItemPricing> GetPricingSearchQuery()
         {
             return _db.GetQuery<tblICItemPricing>();
         }
 
-        public object GetSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<tblICItemPricing, bool>> predicate)
+        public object GetPricingSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<tblICItemPricing, bool>> predicate)
         {
-            return GetSearchQuery()
+            return GetPricingSearchQuery()
                 .Where(predicate)
                 .OrderBySelector(sortSelector)
                 .Skip(start)
@@ -37,14 +37,14 @@ namespace iRely.Inventory.BRL
                 .AsNoTracking();
         }
 
-        public int GetCount(Expression<Func<tblICItemPricing, bool>> predicate)
+        public int GetPricingCount(Expression<Func<tblICItemPricing, bool>> predicate)
         {
-            return GetSearchQuery().Where(predicate).Count();
+            return GetPricingSearchQuery().Where(predicate).Count();
         }
 
         public IQueryable<tblICItemPricing> GetItemPricings(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<tblICItemPricing, bool>> predicate)
         {
-            var query = GetSearchQuery(); //Get Search Query
+            var query = GetPricingSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICItemPricing>()
                 .Include(p => p.tblSMCompanyLocation)
                 .Where(w => query.Where(predicate).Any(a => a.intItemPricingId == w.intItemPricingId)) //Filter the Main DataSource Based on Search Query
@@ -67,6 +67,104 @@ namespace iRely.Inventory.BRL
         public void DeleteItemPricing(tblICItemPricing pricing)
         {
             _db.Delete<tblICItemPricing>(pricing);
+        }
+
+        public IQueryable<tblICItemPricingLevel> GetPricingLevelSearchQuery()
+        {
+            return _db.GetQuery<tblICItemPricingLevel>();
+        }
+
+        public object GetPricingLevelSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<tblICItemPricingLevel, bool>> predicate)
+        {
+            return GetPricingLevelSearchQuery()
+                .Where(predicate)
+                .OrderBySelector(sortSelector)
+                .Skip(start)
+                .Take(limit)
+                .Select(selector)
+                .AsNoTracking();
+        }
+
+        public int GetPricingLevelCount(Expression<Func<tblICItemPricingLevel, bool>> predicate)
+        {
+            return GetPricingLevelSearchQuery().Where(predicate).Count();
+        }
+
+        public IQueryable<tblICItemPricingLevel> GetItemPricingLevels(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<tblICItemPricingLevel, bool>> predicate)
+        {
+            var query = GetPricingLevelSearchQuery(); //Get Search Query
+            return _db.GetQuery<tblICItemPricingLevel>()
+                .Include(p => p.tblICUnitMeasure)
+                .Include(p => p.tblSMCompanyLocation)
+                .Where(w => query.Where(predicate).Any(a => a.intItemPricingLevelId == w.intItemPricingLevelId)) //Filter the Main DataSource Based on Search Query
+                .OrderBySelector(sortSelector)
+                .Skip(start)
+                .Take(limit)
+                .AsNoTracking();
+        }
+
+        public void AddItemPricingLevel(tblICItemPricingLevel level)
+        {
+            _db.AddNew<tblICItemPricingLevel>(level);
+        }
+
+        public void UpdateItemPricingLevel(tblICItemPricingLevel level)
+        {
+            _db.UpdateBatch<tblICItemPricingLevel>(level);
+        }
+
+        public void DeleteItemPricingLevel(tblICItemPricingLevel level)
+        {
+            _db.Delete<tblICItemPricingLevel>(level);
+        }
+
+        public IQueryable<tblICItemSpecialPricing> GetSpecialPricingSearchQuery()
+        {
+            return _db.GetQuery<tblICItemSpecialPricing>();
+        }
+
+        public object GetSpecialPricingSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<tblICItemSpecialPricing, bool>> predicate)
+        {
+            return GetSpecialPricingSearchQuery()
+                .Where(predicate)
+                .OrderBySelector(sortSelector)
+                .Skip(start)
+                .Take(limit)
+                .Select(selector)
+                .AsNoTracking();
+        }
+
+        public int GetSpecialPricingCount(Expression<Func<tblICItemSpecialPricing, bool>> predicate)
+        {
+            return GetSpecialPricingSearchQuery().Where(predicate).Count();
+        }
+
+        public IQueryable<tblICItemSpecialPricing> GetItemSpecialPricings(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<tblICItemSpecialPricing, bool>> predicate)
+        {
+            var query = GetSpecialPricingSearchQuery(); //Get Search Query
+            return _db.GetQuery<tblICItemSpecialPricing>()
+                .Include(p => p.tblICUnitMeasure)
+                .Include(p => p.tblSMCompanyLocation)
+                .Where(w => query.Where(predicate).Any(a => a.intItemSpecialPricingId == w.intItemSpecialPricingId)) //Filter the Main DataSource Based on Search Query
+                .OrderBySelector(sortSelector)
+                .Skip(start)
+                .Take(limit)
+                .AsNoTracking();
+        }
+
+        public void AddItemSpecialPricing(tblICItemSpecialPricing specialPricing)
+        {
+            _db.AddNew<tblICItemSpecialPricing>(specialPricing);
+        }
+
+        public void UpdateItemSpecialPricing(tblICItemSpecialPricing specialPricing)
+        {
+            _db.UpdateBatch<tblICItemSpecialPricing>(specialPricing);
+        }
+
+        public void DeleteItemSpecialPricing(tblICItemSpecialPricing specialPricing)
+        {
+            _db.Delete<tblICItemSpecialPricing>(specialPricing);
         }
 
         public SaveResult Save(bool continueOnConflict)

@@ -20,6 +20,18 @@ Ext.define('Inventory.model.ItemKit', {
                     role: 'tblICItemKits',
                     storeConfig: {
                         complete: true,
+                        remoteFilter: true,
+                        proxy: {
+                            type: 'rest',
+                            api: {
+                                read: '../Inventory/api/ItemKit/GetItemKits'
+                            },
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data',
+                                messageProperty: 'message'
+                            }
+                        },
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',

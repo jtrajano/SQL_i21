@@ -19,6 +19,18 @@ Ext.define('Inventory.model.ItemCertification', {
                     role: 'tblICItemCertifications',
                     storeConfig: {
                         complete: true,
+                        remoteFilter: true,
+                        proxy: {
+                            type: 'rest',
+                            api: {
+                                read: '../Inventory/api/ItemCertification/GetItemCertifications'
+                            },
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data',
+                                messageProperty: 'message'
+                            }
+                        },
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',

@@ -917,6 +917,95 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // <editor-fold desc="Details Tab Methods and Event Handlers">
 
+    onItemTabChange: function(tabPanel, newCard, oldCard, eOpts) {
+        switch(newCard.itemId){
+            case 'pgeSetup':
+                var pgeLocation = tabPanel.down('#pgeLocation');
+                var grdLocationStore = pgeLocation.down('#grdLocationStore');
+                grdLocationStore.store.load();
+                break;
+
+
+            case 'pgeLocation':
+                var pgeLocation = tabPanel.down('#pgeLocation');
+                var grdLocationStore = pgeLocation.down('#grdLocationStore');
+                grdLocationStore.store.load();
+                break;
+            case 'pgeGLAccounts':
+                var pgeGLAccounts = tabPanel.down('#pgeGLAccounts');
+                var grdGlAccounts = pgeGLAccounts.down('#grdGlAccounts');
+                grdGlAccounts.store.load();
+                break;
+            case 'pgePOS':
+                var pgePOS = tabPanel.down('#pgePOS');
+                var grdCategory = pgePOS.down('#grdCategory');
+                grdCategory.store.load();
+                var grdServiceLevelAgreement = pgePOS.down('#grdServiceLevelAgreement');
+                grdServiceLevelAgreement.store.load();
+                break;
+            case 'pgeUPC':
+                var pgeUPC = tabPanel.down('#pgeUPC');
+                var grdUPC = pgeUPC.down('#grdUPC');
+                grdUPC.store.load();
+                break;
+            case 'pgeXref':
+                var pgeXref = tabPanel.down('#pgeXref');
+                var grdCustomerXref = pgeXref.down('#grdCustomerXref');
+                grdCustomerXref.store.load();
+                var grdVendorXref = pgeXref.down('#grdVendorXref');
+                grdVendorXref.store.load();
+                break;
+            case 'pgeContract':
+                var pgeContract = tabPanel.down('#pgeContract');
+                var grdContractItem = pgeContract.down('#grdContractItem');
+                grdContractItem.store.load();
+                var grdDocumentAssociation = pgeContract.down('#grdDocumentAssociation');
+                grdDocumentAssociation.store.load();
+                var grdCertification = pgeContract.down('#grdCertification');
+                grdCertification.store.load();
+                break;
+
+
+            case 'pgePricing':
+                var pgePricing = tabPanel.down('#pgePricing');
+                var grdPricing = pgePricing.down('#grdPricing');
+                grdPricing.store.load();
+                break;
+            case 'pgeStock':
+                var pgeStock = tabPanel.down('#pgeStock');
+                var grdStock = pgeStock.down('#grdStock');
+                grdStock.store.load();
+                break;
+            case 'pgeAssembly':
+                var pgeAssembly = tabPanel.down('#pgeAssembly');
+                var grdAssembly = pgeAssembly.down('#grdAssembly');
+                grdAssembly.store.load();
+                break;
+            case 'pgeBundle':
+                var pgeBundle = tabPanel.down('#pgeBundle');
+                var grdBundle = pgeBundle.down('#grdBundle');
+                grdBundle.store.load();
+                break;
+            case 'pgeKit':
+                var pgeKit = tabPanel.down('#pgeKit');
+                var grdKit = pgeKit.down('#grdKit');
+                grdKit.store.load();
+                var grdKitDetails = pgeKit.down('#grdKitDetails');
+                grdKitDetails.store.load();
+                break;
+            case 'pgeFactory':
+                var pgeFactory = tabPanel.down('#pgeFactory');
+                var grdFactory = pgeFactory.down('#grdFactory');
+                grdFactory.store.load();
+                break;
+            case 'pgeNotes':
+                var pgeNotes = tabPanel.down('#pgeNotes');
+                var grdNotes = pgeNotes.down('#grdNotes');
+                grdNotes.store.load();
+                break;
+        }
+    },
+
     onInventoryTypeChange: function(combo, newValue, oldValue, eOpts) {
         var win = combo.up('window');
         var pgeDetails = win.down('#pgeDetails');
@@ -1688,6 +1777,12 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboOwner": {
                 select: this.onOwnerSelect
+            },
+            "#tabItem": {
+                tabchange: this.onItemTabChange
+            },
+            "#tabSetup": {
+                tabchange: this.onItemTabChange
             }
         });
     }

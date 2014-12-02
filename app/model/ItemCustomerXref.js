@@ -19,6 +19,18 @@ Ext.define('Inventory.model.ItemCustomerXref', {
                     role: 'tblICItemCustomerXrefs',
                     storeConfig: {
                         complete: true,
+                        remoteFilter: true,
+                        proxy: {
+                            type: 'rest',
+                            api: {
+                                read: '../Inventory/api/ItemXref/GetItemCustomerXrefs'
+                            },
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data',
+                                messageProperty: 'message'
+                            }
+                        },
                         sortOnLoad: true,
                         sorters: {
                             direction: 'ASC',
