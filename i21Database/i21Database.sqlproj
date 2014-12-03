@@ -888,6 +888,7 @@
     <Build Include="dbo\Stored Procedures\uspPOProcessItemReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddPurchaseOrderToItemReceipt.sql" />
     <Build Include="dbo\Functions\fnGetDiscountBasedOnTerm.sql" />
+    <None Include="Scripts\Post-Deployment\AP\ClearPostResult.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
