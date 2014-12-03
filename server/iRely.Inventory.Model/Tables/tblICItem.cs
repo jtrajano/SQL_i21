@@ -57,7 +57,7 @@ namespace iRely.Inventory.Model
         public string strRotationType { get; set; }
         public int? intNMFCId { get; set; }
         public bool ysnStrictFIFO { get; set; }
-        public int intDimensionUOMId { get; set; }
+        public int? intDimensionUOMId { get; set; }
         public decimal? dblHeight { get; set; }
         public decimal? dblWidth { get; set; }
         public decimal? dblDepth { get; set; }

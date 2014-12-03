@@ -23,12 +23,12 @@ namespace iRely.Inventory.Model
         public int? intVendorId { get; set; }
         public string strReceiptType { get; set; }
         public int? intSourceId { get; set; }
-        public int intBlanketRelease { get; set; }
+        public int? intBlanketRelease { get; set; }
         public int? intLocationId { get; set; }
         public string strVendorRefNo { get; set; }
         public string strBillOfLading { get; set; }
         public int? intShipViaId { get; set; }
-        public int intProductOrigin { get; set; }
+        public int? intProductOrigin { get; set; }
         public int? intReceiverId { get; set; }
         public int? intCurrencyId { get; set; }
         public string strVessel { get; set; }
@@ -36,7 +36,7 @@ namespace iRely.Inventory.Model
         public string strDeliveryPoint { get; set; }
         public string strAllocateFreight { get; set; }
         public string strFreightBilledBy { get; set; }
-        public int intShiftNumber { get; set; }
+        public int? intShiftNumber { get; set; }
         public string strNotes { get; set; }
         public string strCalculationBasis { get; set; }
         public decimal? dblUnitWeightMile { get; set; }
@@ -44,7 +44,7 @@ namespace iRely.Inventory.Model
         public decimal? dblFuelSurcharge { get; set; }
         public decimal? dblInvoiceAmount { get; set; }
         public bool ysnInvoicePaid { get; set; }
-        public int intCheckNo { get; set; }
+        public int? intCheckNo { get; set; }
         public DateTime? dteCheckDate { get; set; }
         public int? intTrailerTypeId { get; set; }
         public DateTime? dteTrailerArrivalDate { get; set; }
@@ -110,7 +110,7 @@ namespace iRely.Inventory.Model
 
         public int intInventoryReceiptItemId { get; set; }
         public int intInventoryReceiptId { get; set; }
-        public int intLineNo { get; set; }
+        public int? intLineNo { get; set; }
         public int? intItemId { get; set; }
         public decimal? dblOrderQty { get; set; }
         public decimal? dblOpenReceive { get; set; }
