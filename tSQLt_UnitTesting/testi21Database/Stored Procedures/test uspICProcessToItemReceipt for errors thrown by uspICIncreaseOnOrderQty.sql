@@ -21,6 +21,7 @@ BEGIN
 			 @intSourceTransactionId = NULL
 			 ,@strSourceType = 'Purchase Order'
 			 ,@intUserId = NULL
+			 ,@InventoryReceiptId = NULL 
 
 		-- Assert
 		BEGIN 

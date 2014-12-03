@@ -10,7 +10,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @Inventory_Receipt_Type AS NVARCHAR(100) = 'Inventory Receipt'
+DECLARE @StartingNumberId_InventoryReceipt AS INT = 23;
 DECLARE @ReceiptNumber AS NVARCHAR(20)
 
 DECLARE @ReceiptType_PurchaseOrder AS NVARCHAR(100) = 'Purchase Order'
@@ -18,7 +18,7 @@ DECLARE @ReceiptType_TransferOrder AS NVARCHAR(100) = 'Transfer Order'
 DECLARE @ReceiptType_Direct AS NVARCHAR(100) = 'Direct'
 
 -- Get the transaction id 
-EXEC dbo.uspSMGetStartingNumber @Inventory_Receipt_Type, @ReceiptNumber OUTPUT 
+EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryReceipt, @ReceiptNumber OUTPUT 
 
 IF @ReceiptNumber IS NULL 
 BEGIN 
