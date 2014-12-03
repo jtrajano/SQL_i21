@@ -6,6 +6,7 @@
     [dblRetailPrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblWholesalePrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblLargeVolumePrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+	[dblAmountPercent] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblSalePrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblMSRPPrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [strPricingMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
@@ -167,3 +168,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICItemPricing',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Amount/Percent',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemPricing',
+    @level2type = N'COLUMN',
+    @level2name = N'dblAmountPercent'
