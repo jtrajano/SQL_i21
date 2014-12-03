@@ -37,11 +37,9 @@ INSERT INTO dbo.tblICInventoryReceipt (
 		,intSourceId
 		,intBlanketRelease
 		,intLocationId
-		,intWarehouseId
 		,strVendorRefNo
 		,strBillOfLading
 		,intShipViaId
-		,intTermId
 		,intProductOrigin
 		,intReceiverId
 		,intCurrencyId
@@ -76,11 +74,9 @@ SELECT 	strReceiptNumber		= @ReceiptNumber
 		,intSourceId			= PO.intPurchaseId 
 		,intBlanketRelease		= NULL
 		,intLocationId			= PO.intShipToId
-		,intWarehouseId			= NULL -- TODO Add logic for it when spec for sub-location is defined. 
 		,strVendorRefNo			= PO.strReference
 		,strBillOfLading		= NULL
 		,intShipViaId			= PO.intShipViaId
-		,intTermId				= PO.intTermsId
 		,intProductOrigin		= NULL 
 		,intReceiverId			= NULL 
 		,intCurrencyId			= PO.intCurrencyId
