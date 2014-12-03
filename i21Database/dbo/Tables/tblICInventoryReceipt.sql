@@ -12,16 +12,11 @@
     [strVendorRefNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strBillOfLading] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [intShipViaId] INT NULL, 
-    [intReceiptSequenceNo] INT NULL, -- Changed to NULLable. Receipt sequence number should not be on the purchase order it is for integration with origin. Remove from screen. See http://inet.irelyserver.com/display/INV/Inventory+Receipt+%28Detail%29+Tab?focusedCommentId=37455559#comment-37455559
-    [intBatchNo] INT NULL, 
     [intTermId] INT NOT NULL, 
     [intProductOrigin] INT NULL, 
-    [strReceiver] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [intReceiverId] INT COLLATE Latin1_General_CI_AS NOT NULL, 
     [intCurrencyId] INT NOT NULL, 
     [strVessel] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [strAPAccount] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [strBillingStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [strOrderNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intFreightTermId] INT NULL, 
     [strDeliveryPoint] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strAllocateFreight] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT ('No'), 
@@ -51,7 +46,8 @@
     CONSTRAINT [FK_tblICInventoryReceipt_tblSMFreightTerm] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]), 
     CONSTRAINT [FK_tblICInventoryReceipt_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intShipViaID]), 
     CONSTRAINT [FK_tblICInventoryReceipt_tblSMTerm] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID]), 
-    CONSTRAINT [FK_tblICInventoryReceipt_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
+    CONSTRAINT [FK_tblICInventoryReceipt_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]), 
+    CONSTRAINT [FK_tblICInventoryReceipt_tblEntityCredential] FOREIGN KEY ([intReceiverId]) REFERENCES [tblEntityCredential]([intEntityId])
 )
 
 GO
@@ -163,23 +159,9 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'intShipViaId'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Receipt Sequence Number',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryReceipt',
-    @level2type = N'COLUMN',
-    @level2name = N'intReceiptSequenceNo'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Batch Number',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryReceipt',
-    @level2type = N'COLUMN',
-    @level2name = N'intBatchNo'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Term Id',
@@ -206,7 +188,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblICInventoryReceipt',
     @level2type = N'COLUMN',
-    @level2name = N'strReceiver'
+    @level2name = 'intReceiverId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Currency Id',
@@ -226,32 +208,11 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'strVessel'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'AP Account',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryReceipt',
-    @level2type = N'COLUMN',
-    @level2name = N'strAPAccount'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Billing Status',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryReceipt',
-    @level2type = N'COLUMN',
-    @level2name = N'strBillingStatus'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Order Number',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryReceipt',
-    @level2type = N'COLUMN',
-    @level2name = N'strOrderNumber'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Freight Terms',

@@ -1463,4 +1463,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[strReference]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="f6842a41-fceb-4281-8a5b-a58bc7cc8e81" ChangeDateTime="12/03/2014 04:00:52">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryReceipt].[strReceiver]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryReceipt]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="int" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3b6a1579-79db-4cfb-82cd-62e5a35100da" ChangeDateTime="12/03/2014 04:01:11">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryReceipt].[int]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryReceipt]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intReceiverId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="31e7ad3c-2986-4e61-a74c-c51e987c70ba" ChangeDateTime="12/03/2014 04:39:00">
+    <Property Name="ElementName" Value="[dbo].[FK_tblICInventoryReceipt_tblSMEntityCredential]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryReceipt]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblICInventoryReceipt_tblEntityCredential]" />
+  </Operation>
 </Operations>
