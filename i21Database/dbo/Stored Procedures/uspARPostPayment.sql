@@ -95,8 +95,8 @@ IF(@exclude IS NOT NULL)
 BEGIN
 	SELECT intID INTO #tmpReceivableExclude FROM fnGetRowsFromDelimitedValues(@exclude)
 	DELETE FROM A
-	FROM #tmpPostInvoiceData A
-	WHERE EXISTS(SELECT * FROM #tmpReceivableExclude B WHERE A.intInvoiceId = B.intID)
+	FROM #tmpARReceivablePostData A
+	WHERE EXISTS(SELECT * FROM #tmpReceivableExclude B WHERE A.intPaymentId = B.intID)
 END
 
 --=====================================================================================================================================
@@ -167,6 +167,49 @@ IF (ISNULL(@recap, 0) = 0)
 						ON A.intPaymentId = P.intPaymentId					
 				WHERE
 					ISNULL([dbo].isOpenAccountingDate(A.dtmDatePaid), 0) = 0
+					
+				--Company Location
+				INSERT INTO 
+					#tmpARReceivableInvalidData
+				SELECT 
+					'Company location of ' + A.strRecordNumber + ' was not set.'
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPayment A
+				INNER JOIN
+					#tmpARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId						 
+				LEFT OUTER JOIN
+					tblSMCompanyLocation L
+						ON A.intLocationId = L.intCompanyLocationId
+				WHERE L.intCompanyLocationId IS NULL
+				
+				--Sales Discount Account
+				INSERT INTO 
+					#tmpARReceivableInvalidData
+				SELECT 
+					'The Sales Discounts account of Company Location ' + L.strLocationName + ' was not set.'
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPayment A
+				INNER JOIN
+					#tmpARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId						 
+				INNER JOIN
+					tblSMCompanyLocation L
+						ON A.intLocationId = L.intCompanyLocationId
+				LEFT OUTER JOIN
+					tblGLAccount G
+						ON L.intSalesDiscounts = G.intAccountId						
+				WHERE
+					G.intAccountId IS NULL				
+					
 
 				--NOT BALANCE +overpayment
 				INSERT INTO
@@ -709,11 +752,14 @@ BEGIN
 					ON B.intInvoiceId = C.intInvoiceId
 			WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
 
-			--Update dblAmountDue, dtmDatePaid and ysnPaid on tblARBill
+			--Update dblAmountDue, dtmDatePaid and ysnPaid on tblARInvoice
 			UPDATE tblARInvoice
 				SET tblARInvoice.dblAmountDue = B.dblAmountDue,
 					tblARInvoice.ysnPaid = 0,
-					tblARInvoice.dtmPostDate = NULL					
+					tblARInvoice.dtmPostDate = NULL,	
+					tblARInvoice.dblDiscount = 0,
+					tblARInvoice.dblPayment = 0
+					
 			FROM tblARPayment A
 						INNER JOIN tblARPaymentDetail B 
 								ON A.intPaymentId = B.intPaymentId
@@ -808,7 +854,7 @@ BEGIN
 			WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
 
 
-			--Update dblAmountDue, dtmDatePaid and ysnPaid on tblARBill
+			--Update dblAmountDue, dtmDatePaid and ysnPaid on tblARInvoice
 			UPDATE tblARInvoice
 				SET tblARInvoice.dblAmountDue = B.dblAmountDue,
 					tblARInvoice.ysnPaid = (CASE WHEN (B.dblAmountDue) = 0 THEN 1 ELSE 0 END),
@@ -819,6 +865,23 @@ BEGIN
 						INNER JOIN tblARInvoice C
 								ON B.intInvoiceId = C.intInvoiceId
 						WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
+						
+			UPDATE tblARInvoice
+				SET tblARInvoice.dblDiscount = (
+													SELECT
+														SUM(dblDiscount)
+													FROM tblARPaymentDetail 															
+													WHERE
+														intInvoiceId = B.intInvoiceId
+														AND intPaymentId = A.intPaymentId																											
+												)
+					,dblPayment = A.dblAmountPaid 
+			FROM tblARPayment A
+						INNER JOIN tblARPaymentDetail B 
+								ON A.intPaymentId = B.intPaymentId
+						INNER JOIN tblARInvoice C
+								ON B.intInvoiceId = C.intInvoiceId
+						WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)					
 
 			--Update Bill Amount Due associated on the other payment record
 			UPDATE tblARPaymentDetail

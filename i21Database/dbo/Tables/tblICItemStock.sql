@@ -27,7 +27,8 @@
 GO
 
 CREATE NONCLUSTERED INDEX [IX_tblICItemStock_intItemId_intLocationId]
-    ON [dbo].[tblICItemStock]([intItemId] ASC, [intLocationId] ASC);
+    ON [dbo].[tblICItemStock]([intItemId] ASC, [intLocationId] ASC)
+	INCLUDE(dblUnitOnHand, dblAverageCost);
 GO
 
 GO

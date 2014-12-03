@@ -27,5 +27,5 @@ GO
 
 CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFO_intItemId_intLocationId]
     ON [dbo].[tblICInventoryFIFO]([intItemId] ASC, [intLocationId] ASC)
-    INCLUDE (dblStockIn, dblStockOut, dblCost);
+    INCLUDE (dtmDate, dblStockIn, dblStockOut, dblCost);
 GO

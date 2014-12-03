@@ -12,7 +12,7 @@
     [strVendorRefNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strBillOfLading] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [intShipViaId] INT NULL, 
-    [intReceiptSequenceNo] INT NOT NULL, 
+    [intReceiptSequenceNo] INT NULL, -- Changed to NULLable. Receipt sequence number should not be on the purchase order it is for integration with origin. Remove from screen. See http://inet.irelyserver.com/display/INV/Inventory+Receipt+%28Detail%29+Tab?focusedCommentId=37455559#comment-37455559
     [intBatchNo] INT NULL, 
     [intTermId] INT NOT NULL, 
     [intProductOrigin] INT NULL, 

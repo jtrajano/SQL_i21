@@ -10,7 +10,7 @@ BEGIN
 
 	-- Get the average cost of item per location
 	SELECT	@AverageCost = dblAverageCost
-	FROM	[dbo].[tblICItemStock]
+	FROM	dbo.tblICItemStock
 	WHERE	intItemId = @intItemId
 			AND intLocationId = @intLocationId
 

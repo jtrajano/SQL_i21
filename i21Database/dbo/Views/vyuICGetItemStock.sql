@@ -23,6 +23,10 @@ SELECT
 	strCostingMethod = (CASE WHEN ItemLocation.intCostingMethod = 1 THEN 'AVG'
 							 WHEN ItemLocation.intCostingMethod = 2 THEN 'FIFO'
 							 WHEN ItemLocation.intCostingMethod = 3 THEN 'LIFO' END),
+	strAccountCategory = ItemAccount.strAccountDescription,
+	intAccountId = dbo.fnGetItemGLAccount(Item.intItemId, ItemLocation.intLocationId, ItemAccount.strAccountDescription),
+	strAccountId = (SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(Item.intItemId, ItemLocation.intLocationId, ItemAccount.strAccountDescription)),
+	strAccountDescription = (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(Item.intItemId, ItemLocation.intLocationId, ItemAccount.strAccountDescription)),
 	ItemStock.intUnitMeasureId,
 	strStockUOM = (SELECT TOP 1 strUnitMeasure FROM tblICUnitMeasure WHERE intUnitMeasureId = ItemStock.intUnitMeasureId),
 	ItemStock.dblUnitOnHand,
@@ -34,3 +38,4 @@ FROM tblICItem Item
 LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Item.intItemId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
 LEFT JOIN tblICItemStock ItemStock ON ItemStock.intItemId = Item.intItemId AND ItemLocation.intLocationId = ItemStock.intLocationId
+LEFT JOIN tblICItemAccount ItemAccount ON ItemAccount.intItemId = Item.intItemId

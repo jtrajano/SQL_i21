@@ -79,7 +79,9 @@ BEGIN
 	IF (ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0) < 0)
 	BEGIN 
 		SET @dblReduceQty = ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0)
-		SET @dblCost = dbo.fnGetItemAverageCost(@intItemId, @intLocationId)
+
+		SELECT @dblCost = AverageCost
+		FROM dbo.fnGetItemAverageCostAsTable(@intItemId, @intLocationId)
 
 		-- Insert the inventory transaction record
 		INSERT INTO dbo.tblICInventoryTransaction (

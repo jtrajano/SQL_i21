@@ -92,7 +92,8 @@ BEGIN
 	SET @CostingMethod = NULL;
 
 	-- Get the costing method of an item 
-	SELECT @CostingMethod = dbo.fnGetCostingMethod(@intItemId, @intLocationId)
+	SELECT	@CostingMethod = CostingMethod 
+	FROM	dbo.fnGetCostingMethodAsTable(@intItemId, @intLocationId)
 
 	--------------------------------------------------------------------------------
 	-- Call the SP that can process the item's costing method

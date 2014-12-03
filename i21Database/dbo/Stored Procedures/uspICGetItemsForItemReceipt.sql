@@ -10,6 +10,8 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+
+
 -- TODO by Lawrence
 -- CREATE THE Header record for the item receipt. 
 

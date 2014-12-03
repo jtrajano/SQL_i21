@@ -10,6 +10,7 @@
 					   then dbo.fnHDDecodeComment(SUBSTRING(tc.strComment,4,len(tc.strComment)-3)) 
 					   else tc.strComment
 					   end)
+		,dtmCreated = tc.dtmCreated
 	from
 		tblHDTicket t
 		inner join tblHDTicketComment tc on tc.intTicketId = t.intTicketId and tc.ysnSent = 1
