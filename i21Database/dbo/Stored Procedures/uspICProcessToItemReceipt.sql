@@ -2,6 +2,7 @@
 	@intSourceTransactionId AS INT
 	,@strSourceType AS NVARCHAR(100) 
 	,@intUserId AS INT 
+	,@InventoryReceiptId AS INT OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -15,7 +16,9 @@ DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
 
 -- Constant variables for the source type
-DECLARE @SourceType_PurchaseOrder AS NVARCHAR(100) = 'Purchase Order';
+DECLARE @SourceType_PurchaseOrder AS NVARCHAR(100) = 'Purchase Order'
+DECLARE @SourceType_TransferOrder AS NVARCHAR(100) = 'Transfer Order'
+DECLARE @SourceType_Direct AS NVARCHAR(100) = 'Direct'
 
 DECLARE @ItemsToReceive AS ItemCostingTableType 
 
@@ -36,18 +39,19 @@ BEGIN TRY
 		,intTransactionTypeId
 		,intLotId
 	)
-	EXEC dbo.uspICGetItemsForItemReceipt @intSourceTransactionId, @strSourceType, @intUserId
+	EXEC dbo.uspICGetItemsForItemReceipt 
+		@intSourceTransactionId
+		,@strSourceType
 
 	-- Validate the items to receive 
 	EXEC dbo.uspICValidateProcessToItemReceipt @ItemsToReceive; 
 
 	-- Add the items to the item receipt 
-	-- TODO by Lawrence 
-	-- Ex: EXEC dbo.uspICAddPurchaseOrderToItemReceipt @ItemsToReceive;
-
-	-- Increase the On-Order Qty for the items
 	IF @strSourceType = @SourceType_PurchaseOrder
+	BEGIN 
+		EXEC dbo.uspICAddPurchaseOrderToItemReceipt @intSourceTransactionId, @intUserId, @InventoryReceiptId OUTPUT; 
 		EXEC dbo.uspICIncreaseOnOrderQty @ItemsToReceive;
+	END
 
 END TRY
 BEGIN CATCH

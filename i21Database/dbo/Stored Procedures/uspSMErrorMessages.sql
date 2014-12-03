@@ -123,3 +123,7 @@ EXEC sp_addmessage 50029,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50030) EXEC sp_dropmessage 50030, 'us_english'	
 SET @strmessage = 'Unable to generate the transaction id. Please ask your local administrator to check the starting numbers setup.'
 EXEC sp_addmessage 50030,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50031) EXEC sp_dropmessage 50031, 'us_english'	
+SET @strmessage = 'Unable to generate the Inventory Receipt. An error stopped the process from Purchase Order to Inventory Receipt.'
+EXEC sp_addmessage 50031,11,@strmessage,'us_english','False'

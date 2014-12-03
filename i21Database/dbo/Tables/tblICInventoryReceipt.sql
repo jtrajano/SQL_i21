@@ -19,9 +19,6 @@
     [strReceiver] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intCurrencyId] INT NOT NULL, 
     [strVessel] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [strAPAccount] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [strBillingStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [strOrderNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intFreightTermId] INT NULL, 
     [strDeliveryPoint] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strAllocateFreight] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT ('No'), 
@@ -225,33 +222,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICInventoryReceipt',
     @level2type = N'COLUMN',
     @level2name = N'strVessel'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'AP Account',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryReceipt',
-    @level2type = N'COLUMN',
-    @level2name = N'strAPAccount'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Billing Status',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryReceipt',
-    @level2type = N'COLUMN',
-    @level2name = N'strBillingStatus'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Order Number',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryReceipt',
-    @level2type = N'COLUMN',
-    @level2name = N'strOrderNumber'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Freight Terms',
