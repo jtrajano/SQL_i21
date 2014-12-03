@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICAddPurchaseOrderToItemReceipt]
-	@ItemsToReceive AS ItemCostingTableType READONLY
-	,@intSourceTransactionId AS INT
-	,@intUserId AS INT 
+	@PurchaseOrderId AS INT
+	,@intUserId AS INT
+	,@InventoryReceiptId AS INT OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -11,18 +11,16 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @Inventory_Receipt_Type AS NVARCHAR(100) = 'Inventory Receipt'
-DECLARE @strReceiptNumber AS NVARCHAR(20)
-DECLARE @intInventoryReceiptId AS INT
-
+DECLARE @ReceiptNumber AS NVARCHAR(20)
 
 DECLARE @ReceiptType_PurchaseOrder AS NVARCHAR(100) = 'Purchase Order'
 DECLARE @ReceiptType_TransferOrder AS NVARCHAR(100) = 'Transfer Order'
 DECLARE @ReceiptType_Direct AS NVARCHAR(100) = 'Direct'
 
 -- Get the transaction id 
-EXEC dbo.uspSMGetStartingNumber @Inventory_Receipt_Type, @strReceiptNumber OUTPUT 
+EXEC dbo.uspSMGetStartingNumber @Inventory_Receipt_Type, @ReceiptNumber OUTPUT 
 
-IF ISNULL(@strReceiptNumber, '') = '' 
+IF @ReceiptNumber IS NULL 
 BEGIN 
 	-- Raise the error:
 	-- Unable to generate the transaction id. Please ask your local administrator to check the starting numbers setup.
@@ -50,9 +48,6 @@ INSERT INTO dbo.tblICInventoryReceipt (
 		,strReceiver
 		,intCurrencyId
 		,strVessel
-		,strAPAccount
-		,strBillingStatus
-		,strOrderNumber
 		,intFreightTermId
 		,strDeliveryPoint
 		,strAllocateFreight
@@ -76,8 +71,8 @@ INSERT INTO dbo.tblICInventoryReceipt (
 		,dblActualTempReading
 		,intConcurrencyId
 )
-SELECT 	strReceiptNumber		= @strReceiptNumber
-		,dtmReceiptDate			= GETDATE()
+SELECT 	strReceiptNumber		= @ReceiptNumber
+		,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(GETDATE())
 		,intVendorId			= PO.intVendorId
 		,strReceiptType			= @ReceiptType_PurchaseOrder
 		,intSourceId			= PO.intPurchaseId 
@@ -87,25 +82,22 @@ SELECT 	strReceiptNumber		= @strReceiptNumber
 		,strVendorRefNo			= PO.strReference
 		,strBillOfLading		= NULL
 		,intShipViaId			= PO.intShipViaId
-		,intReceiptSequenceNo	= NULL  
-		,intBatchNo				= NULL 
+		,intReceiptSequenceNo	= NULL
+		,intBatchNo				= NULL
 		,intTermId				= PO.intTermsId
 		,intProductOrigin		= NULL 
 		,strReceiver			= '' -- TODO See http://inet.irelyserver.com/display/INV/Inventory+Receipt+%28Detail%29+Tab?focusedCommentId=42272077#comment-42272077
 		,intCurrencyId			= PO.intCurrencyId
-		,strVessel				= NULL 
-		,strAPAccount			= NULL -- TODO. I think we need to remove it. 
-		,strBillingStatus		= NULL -- TODO. I think we need to remove it. 
-		,strOrderNumber			= NULL -- TODO. I think we need to remove it. 
+		,strVessel				= NULL
 		,intFreightTermId		= PO.intFreightId
 		,strDeliveryPoint		= NULL 
 		,strAllocateFreight		= 'No' -- Default is No
 		,strFreightBilledBy		= 'No' -- Default is No
 		,intShiftNumber			= NULL 
 		,strNotes				= NULL 
-		,strCalculationBasis	= 'Per Unit' -- TODO. This is mandatory and default value is not defined. Need to change it to Nullable. 
+		,strCalculationBasis	= NULL 
 		,dblUnitWeightMile		= 0 -- TODO Not sure where to get this from PO
-		,dblFreightRate			= PO.dblShipping -- TODO
+		,dblFreightRate			= PO.dblShipping -- TODO I assume dblShipping is the Freight Rate. 
 		,dblFuelSurcharge		= 0 
 		,dblInvoiceAmount		= PO.dblTotal
 		,ysnInvoicePaid			= 0 
@@ -120,7 +112,51 @@ SELECT 	strReceiptNumber		= @strReceiptNumber
 		,dblActualTempReading	= NULL 
 		,intConcurrencyId		= 1
 FROM	dbo.tblPOPurchase PO
-WHERE	PO.intPurchaseId = @intSourceTransactionId
+WHERE	PO.intPurchaseId = @PurchaseOrderId
 
 -- Get the identity value from tblICInventoryReceipt
-SELECT @intInventoryReceiptId = SCOPE_IDENTITY()
+SELECT @InventoryReceiptId = SCOPE_IDENTITY()
+
+IF @InventoryReceiptId IS NULL 
+BEGIN 
+	-- Raise the error:
+	-- Unable to generate the Inventory Receipt. An error stopped the process from Purchase Order to Inventory Receipt.
+	RAISERROR(50031, 11, 1);
+	RETURN;
+END
+
+INSERT INTO dbo.tblICInventoryReceiptItem (
+	intInventoryReceiptId
+    ,intLineNo
+    ,intItemId
+	,dblOrderQty
+	,dblOpenReceive
+	,dblReceived
+    ,intUnitMeasureId
+    ,intNoPackages
+	,intPackTypeId
+    ,dblExpPackageWeight
+    ,dblUnitCost
+	,dblLineTotal
+    ,intSort
+    ,intConcurrencyId
+)
+SELECT	intInventoryReceiptId = @InventoryReceiptId
+		,intLineNo				= PODetail.intLineNo
+		,intItemId				= PODetail.intItemId
+		,dblOrderQty			= ISNULL(PODetail.dblQtyOrdered, 0)
+		,dblOpenReceive			= ISNULL(PODetail.dblQtyOrdered, 0) - ISNULL(PODetail.dblQtyReceived, 0)
+		,dblReceived			= 0 -- Default to zero. Received will be keyed-in by the end-user at the client-side. 
+		,intUnitMeasureId		= PODetail.intUnitOfMeasureId
+		,intNoPackages			= 0 -- None found from Purchase Order
+		,intPackTypeId			= 0 -- None found from Purchase Order
+		,dblExpPackageWeight	= 0 -- None found from Purchase Order
+		,dblUnitCost			= PODetail.dblCost
+		,dblLineTotal			= ISNULL(PODetail.dblQtyOrdered, 0) * ISNULL(PODetail.dblCost, 0) * ISNULL(UOMConversion.dblConversionToStock, 0)
+		,intSort				= PODetail.intLineNo
+		,intConcurrencyId		= 1
+FROM	dbo.tblPOPurchaseDetail PODetail LEFT JOIN dbo.tblICUnitMeasure UOM
+			ON PODetail.intUnitOfMeasureId = UOM.intUnitMeasureId
+		INNER JOIN dbo.tblICUnitMeasureConversion UOMConversion
+			ON UOM.intUnitMeasureId = UOMConversion.intUnitMeasureId
+WHERE	PODetail.intPurchaseId = @PurchaseOrderId
