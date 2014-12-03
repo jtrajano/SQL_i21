@@ -14,7 +14,7 @@
     [intShipViaId] INT NULL, 
     [intTermId] INT NOT NULL, 
     [intProductOrigin] INT NULL, 
-    [intReceiverId] INT COLLATE Latin1_General_CI_AS NOT NULL, 
+    [intReceiverId] INT NULL, 
     [intCurrencyId] INT NOT NULL, 
     [strVessel] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intFreightTermId] INT NULL, 
@@ -47,7 +47,7 @@
     CONSTRAINT [FK_tblICInventoryReceipt_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intShipViaID]), 
     CONSTRAINT [FK_tblICInventoryReceipt_tblSMTerm] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID]), 
     CONSTRAINT [FK_tblICInventoryReceipt_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]), 
-    CONSTRAINT [FK_tblICInventoryReceipt_tblEntityCredential] FOREIGN KEY ([intReceiverId]) REFERENCES [tblEntityCredential]([intEntityId])
+    CONSTRAINT [FK_tblICInventoryReceipt_tblEntity] FOREIGN KEY ([intReceiverId]) REFERENCES [tblEntity]([intEntityId])
 )
 
 GO
