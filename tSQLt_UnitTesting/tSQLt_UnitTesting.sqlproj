@@ -506,6 +506,16 @@
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="testi21Database\Stored Procedures\test uspICAddPurchaseOrderToItemReceipt for errors thrown by uspSMGetStartingNumber.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAddPurchaseOrderToItemReceipt for errors thrown by a null transaction id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAddPurchaseOrderToItemReceipt on converting a PO into Inventory Receipt.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICGetItemsForItemReceipt for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICGetItemsForItemReceipt for getting the items from PO.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
