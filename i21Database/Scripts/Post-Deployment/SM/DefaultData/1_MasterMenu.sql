@@ -968,13 +968,6 @@ GO
 
 -- /* Recurring Transaction under Common Info */
 
-IF EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'System Manager' AND intParentMenuID = 13 AND strMenuName = 'Recurring Transaction')
-BEGIN
-	UPDATE [dbo].[tblSMMasterMenu] SET [strMenuName] = N'Recurring Transactions', [strDescription] = N'Recurring Transactions' WHERE strModuleName = 'System Manager' AND intParentMenuID = 13 AND strMenuName = 'Recurring Transaction'
-END
-
-GO
-
 IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'System Manager' AND intParentMenuID = 13 AND strMenuName = 'Recurring Transactions')
 BEGIN
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Recurring Transactions', N'System Manager', 13, N'Recurring Transactions', N'Screen', N'i21.view.RecurringTransaction', N'small-screen', 0, 0, 0, 1, NULL, 1) 
