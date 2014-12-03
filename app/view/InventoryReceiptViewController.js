@@ -37,11 +37,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 store: '{receiptTypes}'
             },
             cboReferenceNumber: '{current.intSourceId}',
-            cboVendorId: {
+            cboVendor: {
                 value: '{current.intVendorId}',
                 store: '{vendor}'
             },
-//            txtVendorName: '{current.strVendorName}',
+            txtVendorName: '{current.strVendorName}',
             cboLocation: {
                 value: '{current.intLocationId}',
                 store: '{location}'
@@ -59,13 +59,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 value: '{current.intProductOrigin}',
                 store: '{country}'
             },
-            txtReceiver: '{current.strReceiver}',
+            txtReceiver: '{current.intReceiverId}',
             txtVessel: '{current.strVessel}',
             cboFreightTerms: {
                 value: '{current.intFreightTermId}',
                 store: '{freightTerm}'
             },
-//            txtFobPoint: '{current.strMessage}',
+            txtFobPoint: '{current.strFobPoint}',
             txtDeliveryPoint: '{current.strDeliveryPoint}',
             cboAllocateFreight: {
                 value: '{current.strAllocateFreight}',
@@ -83,10 +83,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colItemNo: {
                     dataIndex: 'strItemNo',
                     editor: {
-                        store: ''
+                        store: '{items}'
                     }
                 },
-                colDescription: 'strDescription',
+                colDescription: 'strItemDescription',
                 colSubLocation: '',
                 colLotTracking: '',
                 colQtyOrdered: '',
@@ -95,11 +95,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
-                        store: ''
+                        store: '{itemUOM}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{grdInventoryReceipt.selection.intItemId}'
+                        }]
                     }
                 },
                 colPackages: 'intNoPackages',
-                colPackageType: '',
+                colPackageType: {
+                    dataIndex: 'strPackName',
+                    editor: {
+                        store: '{itemPackType}'
+                    }
+                },
                 colUnitCost: 'dblUnitCost',
                 colUnitRetail: 'dblUnitRetail'
             },
@@ -218,6 +227,69 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         record.set('dtmReceiptDate', today);
         record.set('dtmReceiptDate', today);
         action(record);
+    },
+
+    onVendorSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current) current.set('strVendorName', records[0].get('strName'));
+    },
+
+    onFreightTermSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current) current.set('strFobPoint', records[0].get('strFobPoint'));
+    },
+
+    onReceiptItemSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colItemNo')
+        {
+            current.set('intItemId', records[0].get('intItemId'));
+            current.set('strItemDescription', records[0].get('strDescription'));
+        }
+        else if (combo.column.itemId === 'colUOM')
+        {
+            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
+        }
+        else if (combo.column.itemId === 'colPackageType')
+        {
+            current.set('intPackTypeId', records[0].get('intPackTypeId'));
+        }
+    },
+
+    init: function(application) {
+        this.control({
+            "#cboVendor": {
+                select: this.onVendorSelect
+            },
+            "#cboFreightTerms": {
+                select: this.onFreightTermSelect
+            },
+            "#cboItem": {
+                select: this.onReceiptItemSelect
+            },
+            "#cboItemUOM": {
+                select: this.onReceiptItemSelect
+            },
+            "#cboItemPackType": {
+                select: this.onReceiptItemSelect
+            }
+        })
     }
 
 });

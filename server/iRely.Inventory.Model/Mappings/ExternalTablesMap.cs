@@ -214,4 +214,38 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class tblSMStartingNumberMap : EntityTypeConfiguration<tblSMStartingNumber>
+    {
+        public tblSMStartingNumberMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intStartingNumberId);
+
+            // Table & Column Mappings
+            this.ToTable("tblSMStartingNumber");
+            this.Property(t => t.intNumber).HasColumnName("intNumber");
+            this.Property(t => t.intStartingNumberId).HasColumnName("intStartingNumberId");
+            this.Property(t => t.strModule).HasColumnName("strModule");
+            this.Property(t => t.strPrefix).HasColumnName("strPrefix");
+            this.Property(t => t.strTransactionType).HasColumnName("strTransactionType");
+            this.Property(t => t.ysnEnable).HasColumnName("ysnEnable");
+        }
+    }
+
+    public class tblSMFreightTermMap : EntityTypeConfiguration<tblSMFreightTerm>
+    {
+        public tblSMFreightTermMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intFreightTermId);
+
+            // Table & Column Mappings
+            this.ToTable("tblSMFreightTerms");
+            this.Property(t => t.intFreightTermId).HasColumnName("intFreightTermId");
+            this.Property(t => t.strFobPoint).HasColumnName("strFobPoint");
+            this.Property(t => t.strFreightTerm).HasColumnName("strFreightTerm");
+            this.Property(t => t.ysnActive).HasColumnName("ysnActive");
+        }
+    }
+
 }

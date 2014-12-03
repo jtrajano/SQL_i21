@@ -19,6 +19,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblMSRPPrice).HasColumnName("dblMSRPPrice");
             this.Property(t => t.dblRetailPrice).HasColumnName("dblRetailPrice");
             this.Property(t => t.dblSalePrice).HasColumnName("dblSalePrice");
+            this.Property(t => t.dblAmountPercent).HasColumnName("dblAmountPercent");
             this.Property(t => t.dblStandardCost).HasColumnName("dblStandardCost");
             this.Property(t => t.dblWholesalePrice).HasColumnName("dblWholesalePrice");
             this.Property(t => t.intItemId).HasColumnName("intItemId");

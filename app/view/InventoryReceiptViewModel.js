@@ -19,6 +19,8 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
 
     requires: [
         'Inventory.store.BufferedCompactItem',
+        'Inventory.store.BufferedItemUnitMeasure',
+        'Inventory.store.BufferedPackType',
         'AccountsPayable.store.VendorBuffered',
         'i21.store.CompanyLocationBuffered',
         'i21.store.CountryBuffered',
@@ -110,6 +112,12 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
         items: {
             type: 'inventorybufferedcompactitem'
+        },
+        itemUOM: {
+            type: 'inventorybuffereditemunitmeasure'
+        },
+        itemPackType: {
+            type: 'inventorybufferedpacktype'
         },
         vendor: {
             type: 'vendorbuffered'

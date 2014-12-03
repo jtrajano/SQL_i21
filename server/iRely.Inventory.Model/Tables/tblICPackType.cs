@@ -17,6 +17,7 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICPackTypeDetail> tblICPackTypeDetails { get; set; }
         public ICollection<tblICManufacturingCellPackType> tblICManufacturingCellPackTypes { get; set; }
+        public ICollection<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
     }
 
     public class tblICPackTypeDetail : BaseEntity

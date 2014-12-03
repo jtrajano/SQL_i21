@@ -46,6 +46,7 @@ Ext.define('Inventory.model.ReceiptItem', {
         { name: 'intSort', type: 'int'},
 
         { name: 'strItemNo', type: 'string'},
+        { name: 'strItemDescription', type: 'string'},
         { name: 'strUnitMeasure', type: 'string'}
     ],
 

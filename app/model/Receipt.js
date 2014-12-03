@@ -21,20 +21,13 @@ Ext.define('Inventory.model.Receipt', {
         { name: 'intSourceId', type: 'int', allowNull: true },
         { name: 'intBlanketRelease', type: 'int', allowNull: true },
         { name: 'intLocationId', type: 'int', allowNull: true },
-        { name: 'intWarehouseId', type: 'int', allowNull: true },
         { name: 'strVendorRefNo', type: 'string'},
         { name: 'strBillOfLading', type: 'string'},
         { name: 'intShipViaId', type: 'int', allowNull: true },
-        { name: 'intReceiptSequenceNo', type: 'int', allowNull: true },
-        { name: 'intBatchNo', type: 'int', allowNull: true },
-        { name: 'intTermId', type: 'int', allowNull: true },
         { name: 'intProductOrigin', type: 'int', allowNull: true },
-        { name: 'strReceiver', type: 'string'},
+        { name: 'intReceiverId', type: 'string'},
         { name: 'intCurrencyId', type: 'int', allowNull: true },
         { name: 'strVessel', type: 'string'},
-        { name: 'strAPAccount', type: 'string'},
-        { name: 'strBillingStatus', type: 'string'},
-        { name: 'strOrderNumber', type: 'string'},
         { name: 'intFreightTermId', type: 'int', allowNull: true },
         { name: 'strDeliveryPoint', type: 'string'},
         { name: 'strAllocateFreight', type: 'string'},
@@ -55,16 +48,13 @@ Ext.define('Inventory.model.Receipt', {
         { name: 'strSealNo', type: 'string'},
         { name: 'strSealStatus', type: 'string'},
         { name: 'dteReceiveTime', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d'},
-        { name: 'dblActualTempReading', type: 'float'},
+        { name: 'dblActualTempReading', type: 'float'}
     ],
 
     validators: [
-        {type: 'presence', field: 'strReceiptNumber'},
         {type: 'presence', field: 'dtmReceiptDate'},
         {type: 'presence', field: 'intVendorId'},
         {type: 'presence', field: 'strReceiptType'},
-        {type: 'presence', field: 'intLocationId'},
-        {type: 'presence', field: 'intReceiptSequenceNo'},
-        {type: 'presence', field: 'strReceiver'}
+        {type: 'presence', field: 'intLocationId'}
     ]
 });

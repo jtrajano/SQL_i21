@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,25 +20,18 @@ namespace iRely.Inventory.Model
         public int intInventoryReceiptId { get; set; }
         public string strReceiptNumber { get; set; }
         public DateTime? dtmReceiptDate { get; set; }
-        public int intVendorId { get; set; }
+        public int? intVendorId { get; set; }
         public string strReceiptType { get; set; }
         public int? intSourceId { get; set; }
         public int intBlanketRelease { get; set; }
         public int? intLocationId { get; set; }
-        public int? intWarehouseId { get; set; }
         public string strVendorRefNo { get; set; }
         public string strBillOfLading { get; set; }
         public int? intShipViaId { get; set; }
-        public int intReceiptSequenceNo { get; set; }
-        public int intBatchNo { get; set; }
-        public int? intTermId { get; set; }
         public int intProductOrigin { get; set; }
-        public string strReceiver { get; set; }
+        public int? intReceiverId { get; set; }
         public int? intCurrencyId { get; set; }
         public string strVessel { get; set; }
-        public string strAPAccount { get; set; }
-        public string strBillingStatus { get; set; }
-        public string strOrderNumber { get; set; }
         public int? intFreightTermId { get; set; }
         public string strDeliveryPoint { get; set; }
         public string strAllocateFreight { get; set; }
@@ -51,7 +45,7 @@ namespace iRely.Inventory.Model
         public decimal? dblInvoiceAmount { get; set; }
         public bool ysnInvoicePaid { get; set; }
         public int intCheckNo { get; set; }
-        public DateTime dteCheckDate { get; set; }
+        public DateTime? dteCheckDate { get; set; }
         public int? intTrailerTypeId { get; set; }
         public DateTime? dteTrailerArrivalDate { get; set; }
         public DateTime? dteTrailerArrivalTime { get; set; }
@@ -60,8 +54,50 @@ namespace iRely.Inventory.Model
         public DateTime? dteReceiveTime { get; set; }
         public decimal? dblActualTempReading { get; set; }
 
-        public virtual ICollection<tblICInventoryReceiptInspection> tblICInventoryReceiptInspections { get; set; }
-        public virtual ICollection<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
+        private string _vendorName;
+        [NotMapped]
+        public string strVendorName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_vendorName))
+                    if (vyuAPVendor != null)
+                        return vyuAPVendor.strName;
+                    else
+                        return null;
+                else
+                    return _vendorName;
+            }
+            set
+            {
+                _vendorName = value;
+            }
+        }
+        private string _fobPoint;
+        [NotMapped]
+        public string strFobPoint
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_fobPoint))
+                    if (tblSMFreightTerm != null)
+                        return tblSMFreightTerm.strFobPoint;
+                    else
+                        return null;
+                else
+                    return _fobPoint;
+            }
+            set
+            {
+                _fobPoint = value;
+            }
+        }
+
+        public ICollection<tblICInventoryReceiptInspection> tblICInventoryReceiptInspections { get; set; }
+        public ICollection<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
+
+        public vyuAPVendor vyuAPVendor { get; set; }
+        public tblSMFreightTerm tblSMFreightTerm { get; set; }
     }
 
     public class tblICInventoryReceiptItem : BaseEntity
@@ -75,24 +111,102 @@ namespace iRely.Inventory.Model
         public int intInventoryReceiptItemId { get; set; }
         public int intInventoryReceiptId { get; set; }
         public int intLineNo { get; set; }
-        public int intItemId { get; set; }
+        public int? intItemId { get; set; }
         public decimal? dblOrderQty { get; set; }
         public decimal? dblOpenReceive { get; set; }
         public decimal? dblReceived { get; set; }
-        public int intUnitMeasureId { get; set; }
+        public int? intUnitMeasureId { get; set; }
         public int? intNoPackages { get; set; }
         public int? intPackTypeId { get; set; }
         public decimal? dblExpPackageWeight { get; set; }
         public decimal? dblUnitCost { get; set; }
-        public decimal? dblUnitRetail { get; set; }
         public decimal? dblLineTotal { get; set; }
-        public decimal? dblGrossMargin { get; set; }
         public int? intSort { get; set; }
 
-        public virtual tblICInventoryReceipt tblICInventoryReceipt { get; set; }
+        private string _itemNo;
+        [NotMapped]
+        public string strItemNo
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_itemNo))
+                    if (tblICItem != null)
+                        return tblICItem.strItemNo;
+                    else
+                        return null;
+                else
+                    return _itemNo;
+            }
+            set
+            {
+                _itemNo = value;
+            }
+        }
+        private string _itemDescription;
+        [NotMapped]
+        public string strItemDescription
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_itemDescription))
+                    if (tblICItem != null)
+                        return tblICItem.strDescription;
+                    else
+                        return null;
+                else
+                    return _itemDescription;
+            }
+            set
+            {
+                _itemDescription = value;
+            }
+        }
+        private string _uom;
+        [NotMapped]
+        public string strUnitMeasure
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_uom))
+                    if (tblICUnitMeasure != null)
+                        return tblICUnitMeasure.strUnitMeasure;
+                    else
+                        return null;
+                else
+                    return _uom;
+            }
+            set
+            {
+                _uom = value;
+            }
+        }
+        private string _packName;
+        [NotMapped]
+        public string strPackName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_packName))
+                    if (tblICPackType != null)
+                        return tblICPackType.strPackName;
+                    else
+                        return null;
+                else
+                    return _packName;
+            }
+            set
+            {
+                _packName = value;
+            }
+        }
 
-        public virtual ICollection<tblICInventoryReceiptItemLot> tblICInventoryReceiptItemLots { get; set; }
-        public virtual ICollection<tblICInventoryReceiptItemTax> tblICInventoryReceiptItemTaxes { get; set; }
+        public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
+        public tblICItem tblICItem { get; set; }
+        public tblICUnitMeasure tblICUnitMeasure { get; set; }
+        public tblICPackType tblICPackType { get; set; }
+        
+        public ICollection<tblICInventoryReceiptItemLot> tblICInventoryReceiptItemLots { get; set; }
+        public ICollection<tblICInventoryReceiptItemTax> tblICInventoryReceiptItemTaxes { get; set; }
     }
 
     public class tblICInventoryReceiptItemLot : BaseEntity
@@ -121,7 +235,7 @@ namespace iRely.Inventory.Model
         public string strRemarks { get; set; }
         public int intSort { get; set; }
 
-        public virtual tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
+        public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
     }
 
     public class tblICInventoryReceiptItemTax : BaseEntity
@@ -132,7 +246,7 @@ namespace iRely.Inventory.Model
         public bool ysnSelected { get; set; }
         public int intSort { get; set; }
 
-        public virtual tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
+        public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
     }
 
     public class tblICInventoryReceiptInspection : BaseEntity
@@ -143,6 +257,6 @@ namespace iRely.Inventory.Model
         public bool ysnSelected { get; set; }
         public int intSort { get; set; }
 
-        public virtual tblICInventoryReceipt tblICInventoryReceipt { get; set; }
+        public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
     }
 }

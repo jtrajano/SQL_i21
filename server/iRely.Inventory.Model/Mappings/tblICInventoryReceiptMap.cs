@@ -22,7 +22,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dteTrailerArrivalDate).HasColumnName("dteTrailerArrivalDate");
             this.Property(t => t.dteTrailerArrivalTime).HasColumnName("dteTrailerArrivalTime");
             this.Property(t => t.dtmReceiptDate).HasColumnName("dtmReceiptDate");
-            this.Property(t => t.intBatchNo).HasColumnName("intBatchNo");
             this.Property(t => t.intBlanketRelease).HasColumnName("intBlanketRelease");
             this.Property(t => t.intCheckNo).HasColumnName("intCheckNo");
             this.Property(t => t.intCurrencyId).HasColumnName("intCurrencyId");
@@ -30,31 +29,32 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intInventoryReceiptId).HasColumnName("intInventoryReceiptId");
             this.Property(t => t.intLocationId).HasColumnName("intLocationId");
             this.Property(t => t.intProductOrigin).HasColumnName("intProductOrigin");
-            this.Property(t => t.intReceiptSequenceNo).HasColumnName("intReceiptSequenceNo");
             this.Property(t => t.intShiftNumber).HasColumnName("intShiftNumber");
             this.Property(t => t.intShipViaId).HasColumnName("intShipViaId");
             this.Property(t => t.intSourceId).HasColumnName("intSourceId");
-            this.Property(t => t.intTermId).HasColumnName("intTermId");
             this.Property(t => t.intTrailerTypeId).HasColumnName("intTrailerTypeId");
             this.Property(t => t.intVendorId).HasColumnName("intVendorId");
-            this.Property(t => t.intWarehouseId).HasColumnName("intWarehouseId");
             this.Property(t => t.strAllocateFreight).HasColumnName("strAllocateFreight");
-            this.Property(t => t.strAPAccount).HasColumnName("strAPAccount");
-            this.Property(t => t.strBillingStatus).HasColumnName("strBillingStatus");
             this.Property(t => t.strBillOfLading).HasColumnName("strBillOfLading");
             this.Property(t => t.strCalculationBasis).HasColumnName("strCalculationBasis");
             this.Property(t => t.strDeliveryPoint).HasColumnName("strDeliveryPoint");
             this.Property(t => t.strFreightBilledBy).HasColumnName("strFreightBilledBy");
             this.Property(t => t.strNotes).HasColumnName("strNotes");
-            this.Property(t => t.strOrderNumber).HasColumnName("strOrderNumber");
             this.Property(t => t.strReceiptNumber).HasColumnName("strReceiptNumber");
             this.Property(t => t.strReceiptType).HasColumnName("strReceiptType");
-            this.Property(t => t.strReceiver).HasColumnName("strReceiver");
+            this.Property(t => t.intReceiverId).HasColumnName("intReceiverId");
             this.Property(t => t.strSealNo).HasColumnName("strSealNo");
             this.Property(t => t.strSealStatus).HasColumnName("strSealStatus");
             this.Property(t => t.strVendorRefNo).HasColumnName("strVendorRefNo");
             this.Property(t => t.strVessel).HasColumnName("strVessel");
             this.Property(t => t.ysnInvoicePaid).HasColumnName("ysnInvoicePaid");
+
+            this.HasOptional(p => p.vyuAPVendor)
+                .WithMany(p => p.tblICInventoryReceipts)
+                .HasForeignKey(p => p.intVendorId);
+            this.HasOptional(p => p.tblSMFreightTerm)
+                .WithMany(p => p.tblICInventoryReceipts)
+                .HasForeignKey(p => p.intFreightTermId);
         }
     }
 
@@ -68,13 +68,11 @@ namespace iRely.Inventory.Model
             // Table & Column Mappings
             this.ToTable("tblICInventoryReceiptItem");
             this.Property(t => t.dblExpPackageWeight).HasColumnName("dblExpPackageWeight");
-            this.Property(t => t.dblGrossMargin).HasColumnName("dblGrossMargin");
             this.Property(t => t.dblLineTotal).HasColumnName("dblLineTotal");
             this.Property(t => t.dblOpenReceive).HasColumnName("dblOpenReceive");
             this.Property(t => t.dblOrderQty).HasColumnName("dblOrderQty");
             this.Property(t => t.dblReceived).HasColumnName("dblReceived");
             this.Property(t => t.dblUnitCost).HasColumnName("dblUnitCost");
-            this.Property(t => t.dblUnitRetail).HasColumnName("dblUnitRetail");
             this.Property(t => t.intInventoryReceiptId).HasColumnName("intInventoryReceiptId");
             this.Property(t => t.intInventoryReceiptItemId).HasColumnName("intInventoryReceiptItemId");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
@@ -83,6 +81,16 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intPackTypeId).HasColumnName("intPackTypeId");
             this.Property(t => t.intSort).HasColumnName("intSort");
             this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
+
+            this.HasOptional(p => p.tblICItem)
+                .WithMany(p => p.tblICInventoryReceiptItems)
+                .HasForeignKey(p => p.intItemId);
+            this.HasOptional(p => p.tblICUnitMeasure)
+                .WithMany(p => p.tblICInventoryReceiptItems)
+                .HasForeignKey(p => p.intUnitMeasureId);
+            this.HasOptional(p => p.tblICPackType)
+                .WithMany(p => p.tblICInventoryReceiptItems)
+                .HasForeignKey(p => p.intPackTypeId);
         }
     }
 

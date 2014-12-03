@@ -147,6 +147,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemVendorXref> tblICItemVendorXrefs { get; set; }
         public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
         public ICollection<tblICCategoryVendor> tblICCategoryVendors { get; set; }
+        public ICollection<tblICInventoryReceipt> tblICInventoryReceipts { get; set; }
     }
 
     public class tblARCustomer : BaseEntity
@@ -244,6 +245,26 @@ namespace iRely.Inventory.Model
         public int intPromoCode { get; set; }
         public int intPromoUnits { get; set; }
         public decimal? dblPromoPrice { get; set; }
+    }
+
+    public class tblSMStartingNumber : BaseEntity
+    {
+        public int intStartingNumberId { get; set; }
+        public string strTransactionType { get; set; }
+        public string strPrefix { get; set; }
+        public int intNumber { get; set; }
+        public string strModule { get; set; }
+        public bool ysnEnable { get; set; }
+    }
+
+    public class tblSMFreightTerm : BaseEntity
+    {
+        public int intFreightTermId { get; set; }
+        public string strFreightTerm { get; set; }
+        public string strFobPoint { get; set; }
+        public bool ysnActive { get; set; }
+
+        public ICollection<tblICInventoryReceipt> tblICInventoryReceipts { get; set; }
     }
 
 }

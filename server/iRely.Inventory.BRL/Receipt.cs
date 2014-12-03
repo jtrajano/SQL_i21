@@ -47,6 +47,11 @@ namespace iRely.Inventory.BRL
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICInventoryReceipt>()
                 .Include(p => p.tblICInventoryReceiptInspections)
+                .Include(p => p.vyuAPVendor)
+                .Include(p=> p.tblSMFreightTerm)
+                .Include("tblICInventoryReceiptItems.tblICItem")
+                .Include("tblICInventoryReceiptItems.tblICUnitMeasure")
+                .Include("tblICInventoryReceiptItems.tblICPackType")
                 .Include("tblICInventoryReceiptItems.tblICInventoryReceiptItemLots")
                 .Include("tblICInventoryReceiptItems.tblICInventoryReceiptItemTaxes")
                 .Where(w => query.Where(predicate).Any(a => a.intInventoryReceiptId == w.intInventoryReceiptId)) //Filter the Main DataSource Based on Search Query
@@ -58,6 +63,7 @@ namespace iRely.Inventory.BRL
 
         public void AddReceipt(tblICInventoryReceipt receipt)
         {
+            receipt.strReceiptNumber = Common.GetStartingNumber(Common.StartingNumber.InventoryReceipt);
             _db.AddNew<tblICInventoryReceipt>(receipt);
         }
 
