@@ -41,11 +41,9 @@ INSERT INTO dbo.tblICInventoryReceipt (
 		,strVendorRefNo
 		,strBillOfLading
 		,intShipViaId
-		,intReceiptSequenceNo
-		,intBatchNo
 		,intTermId
 		,intProductOrigin
-		,strReceiver
+		,intReceiverId
 		,intCurrencyId
 		,strVessel
 		,intFreightTermId
@@ -82,11 +80,9 @@ SELECT 	strReceiptNumber		= @ReceiptNumber
 		,strVendorRefNo			= PO.strReference
 		,strBillOfLading		= NULL
 		,intShipViaId			= PO.intShipViaId
-		,intReceiptSequenceNo	= NULL
-		,intBatchNo				= NULL
 		,intTermId				= PO.intTermsId
 		,intProductOrigin		= NULL 
-		,strReceiver			= '' -- TODO See http://inet.irelyserver.com/display/INV/Inventory+Receipt+%28Detail%29+Tab?focusedCommentId=42272077#comment-42272077
+		,intReceiverId			= NULL 
 		,intCurrencyId			= PO.intCurrencyId
 		,strVessel				= NULL
 		,intFreightTermId		= PO.intFreightId
