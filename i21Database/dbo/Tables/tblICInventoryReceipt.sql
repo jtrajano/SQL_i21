@@ -8,11 +8,9 @@
     [intSourceId] INT NULL, 
     [intBlanketRelease] INT NULL DEFAULT ((0)), 
     [intLocationId] INT NOT NULL, 
-    [intWarehouseId] INT NULL, 
     [strVendorRefNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strBillOfLading] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [intShipViaId] INT NULL, 
-    [intTermId] INT NOT NULL, 
     [intProductOrigin] INT NULL, 
     [intReceiverId] INT NULL, 
     [intCurrencyId] INT NOT NULL, 
@@ -45,7 +43,6 @@
     CONSTRAINT [FK_tblICInventoryReceipt_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblICInventoryReceipt_tblSMFreightTerm] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]), 
     CONSTRAINT [FK_tblICInventoryReceipt_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intShipViaID]), 
-    CONSTRAINT [FK_tblICInventoryReceipt_tblSMTerm] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID]), 
     CONSTRAINT [FK_tblICInventoryReceipt_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]), 
     CONSTRAINT [FK_tblICInventoryReceipt_tblEntity] FOREIGN KEY ([intReceiverId]) REFERENCES [tblEntity]([intEntityId])
 )
@@ -123,14 +120,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'intLocationId'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Warehouse Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryReceipt',
-    @level2type = N'COLUMN',
-    @level2name = N'intWarehouseId'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Vendor Reference Number',
@@ -163,14 +153,7 @@ GO
 GO
 
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Term Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryReceipt',
-    @level2type = N'COLUMN',
-    @level2name = N'intTermId'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Product Origin',
