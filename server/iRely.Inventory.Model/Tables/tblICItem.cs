@@ -243,6 +243,9 @@ namespace iRely.Inventory.Model
         public string strAllowNegativeInventory { get; set; }
         public int? intCostingMethod { get; set; }
         public string strCostingMethod { get; set; }
+        public int? intAccountId { get; set; }
+        public string strAccountId { get; set; }
+        public string strAccountDescription { get; set; }
         public int? intUnitMeasureId { get; set; }
         public string strStockUOM { get; set; }
         public decimal? dblUnitOnHand { get; set; }

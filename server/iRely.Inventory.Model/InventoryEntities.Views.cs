@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets28fde3c2e60703d6a6b2b8b12fefa06972b295ab3e18bd438fcbd05a0c252ed4))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets30837f149cc1bf28d3f895c0fd6a18a038f8ee96aad902ab703b15c18096c51c))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets28fde3c2e60703d6a6b2b8b12fefa06972b295ab3e18bd438fcbd05a0c252ed4 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets30837f149cc1bf28d3f895c0fd6a18a038f8ee96aad902ab703b15c18096c51c : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "28fde3c2e60703d6a6b2b8b12fefa06972b295ab3e18bd438fcbd05a0c252ed4"; }
+            get { return "30837f149cc1bf28d3f895c0fd6a18a038f8ee96aad902ab703b15c18096c51c"; }
         }
 
         /// <summary>
@@ -6271,7 +6271,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemStock
-        [CodeFirstDatabaseSchema.vyuICGetItemStock](T1.vyuICGetItemStock_intKey, T1.vyuICGetItemStock_intItemId, T1.vyuICGetItemStock_strItemNo, T1.vyuICGetItemStock_strType, T1.vyuICGetItemStock_strDescription, T1.vyuICGetItemStock_intLocationId, T1.vyuICGetItemStock_strLocationName, T1.vyuICGetItemStock_strLocationType, T1.vyuICGetItemStock_intVendorId, T1.vyuICGetItemStock_strVendorId, T1.vyuICGetItemStock_intDefaultUOMId, T1.vyuICGetItemStock_strDefaultUOM, T1.vyuICGetItemStock_intAllowNegativeInventory, T1.vyuICGetItemStock_strAllowNegativeInventory, T1.vyuICGetItemStock_intCostingMethod, T1.vyuICGetItemStock_strCostingMethod, T1.vyuICGetItemStock_intUnitMeasureId, T1.vyuICGetItemStock_strStockUOM, T1.vyuICGetItemStock_dblUnitOnHand, T1.vyuICGetItemStock_dblAverageCost, T1.vyuICGetItemStock_dblMinOrder, T1.vyuICGetItemStock_dblOnOrder, T1.vyuICGetItemStock_dblOrderCommitted)
+        [CodeFirstDatabaseSchema.vyuICGetItemStock](T1.vyuICGetItemStock_intKey, T1.vyuICGetItemStock_intItemId, T1.vyuICGetItemStock_strItemNo, T1.vyuICGetItemStock_strType, T1.vyuICGetItemStock_strDescription, T1.vyuICGetItemStock_intLocationId, T1.vyuICGetItemStock_strLocationName, T1.vyuICGetItemStock_strLocationType, T1.vyuICGetItemStock_intVendorId, T1.vyuICGetItemStock_strVendorId, T1.vyuICGetItemStock_intDefaultUOMId, T1.vyuICGetItemStock_strDefaultUOM, T1.vyuICGetItemStock_intAllowNegativeInventory, T1.vyuICGetItemStock_strAllowNegativeInventory, T1.vyuICGetItemStock_intCostingMethod, T1.vyuICGetItemStock_strCostingMethod, T1.vyuICGetItemStock_intAccountId, T1.vyuICGetItemStock_strAccountId, T1.vyuICGetItemStock_strAccountDescription, T1.vyuICGetItemStock_intUnitMeasureId, T1.vyuICGetItemStock_strStockUOM, T1.vyuICGetItemStock_dblUnitOnHand, T1.vyuICGetItemStock_dblAverageCost, T1.vyuICGetItemStock_dblMinOrder, T1.vyuICGetItemStock_dblOnOrder, T1.vyuICGetItemStock_dblOrderCommitted)
     FROM (
         SELECT 
             T.intKey AS vyuICGetItemStock_intKey, 
@@ -6290,6 +6290,9 @@ namespace Edm_EntityMappingGeneratedViews
             T.strAllowNegativeInventory AS vyuICGetItemStock_strAllowNegativeInventory, 
             T.intCostingMethod AS vyuICGetItemStock_intCostingMethod, 
             T.strCostingMethod AS vyuICGetItemStock_strCostingMethod, 
+            T.intAccountId AS vyuICGetItemStock_intAccountId, 
+            T.strAccountId AS vyuICGetItemStock_strAccountId, 
+            T.strAccountDescription AS vyuICGetItemStock_strAccountDescription, 
             T.intUnitMeasureId AS vyuICGetItemStock_intUnitMeasureId, 
             T.strStockUOM AS vyuICGetItemStock_strStockUOM, 
             T.dblUnitOnHand AS vyuICGetItemStock_dblUnitOnHand, 
@@ -6310,7 +6313,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemStocks
-        [iRely.Inventory.Model.vyuICGetItemStock](T1.vyuICGetItemStock_intKey, T1.vyuICGetItemStock_intItemId, T1.vyuICGetItemStock_strItemNo, T1.vyuICGetItemStock_strType, T1.vyuICGetItemStock_strDescription, T1.vyuICGetItemStock_intLocationId, T1.vyuICGetItemStock_strLocationName, T1.vyuICGetItemStock_strLocationType, T1.vyuICGetItemStock_intVendorId, T1.vyuICGetItemStock_strVendorId, T1.vyuICGetItemStock_intDefaultUOMId, T1.vyuICGetItemStock_strDefaultUOM, T1.vyuICGetItemStock_intAllowNegativeInventory, T1.vyuICGetItemStock_strAllowNegativeInventory, T1.vyuICGetItemStock_intCostingMethod, T1.vyuICGetItemStock_strCostingMethod, T1.vyuICGetItemStock_intUnitMeasureId, T1.vyuICGetItemStock_strStockUOM, T1.vyuICGetItemStock_dblUnitOnHand, T1.vyuICGetItemStock_dblAverageCost, T1.vyuICGetItemStock_dblMinOrder, T1.vyuICGetItemStock_dblOnOrder, T1.vyuICGetItemStock_dblOrderCommitted)
+        [iRely.Inventory.Model.vyuICGetItemStock](T1.vyuICGetItemStock_intKey, T1.vyuICGetItemStock_intItemId, T1.vyuICGetItemStock_strItemNo, T1.vyuICGetItemStock_strType, T1.vyuICGetItemStock_strDescription, T1.vyuICGetItemStock_intLocationId, T1.vyuICGetItemStock_strLocationName, T1.vyuICGetItemStock_strLocationType, T1.vyuICGetItemStock_intVendorId, T1.vyuICGetItemStock_strVendorId, T1.vyuICGetItemStock_intDefaultUOMId, T1.vyuICGetItemStock_strDefaultUOM, T1.vyuICGetItemStock_intAllowNegativeInventory, T1.vyuICGetItemStock_strAllowNegativeInventory, T1.vyuICGetItemStock_intCostingMethod, T1.vyuICGetItemStock_strCostingMethod, T1.vyuICGetItemStock_intAccountId, T1.vyuICGetItemStock_strAccountId, T1.vyuICGetItemStock_strAccountDescription, T1.vyuICGetItemStock_intUnitMeasureId, T1.vyuICGetItemStock_strStockUOM, T1.vyuICGetItemStock_dblUnitOnHand, T1.vyuICGetItemStock_dblAverageCost, T1.vyuICGetItemStock_dblMinOrder, T1.vyuICGetItemStock_dblOnOrder, T1.vyuICGetItemStock_dblOrderCommitted)
     FROM (
         SELECT 
             T.intKey AS vyuICGetItemStock_intKey, 
@@ -6329,6 +6332,9 @@ namespace Edm_EntityMappingGeneratedViews
             T.strAllowNegativeInventory AS vyuICGetItemStock_strAllowNegativeInventory, 
             T.intCostingMethod AS vyuICGetItemStock_intCostingMethod, 
             T.strCostingMethod AS vyuICGetItemStock_strCostingMethod, 
+            T.intAccountId AS vyuICGetItemStock_intAccountId, 
+            T.strAccountId AS vyuICGetItemStock_strAccountId, 
+            T.strAccountDescription AS vyuICGetItemStock_strAccountDescription, 
             T.intUnitMeasureId AS vyuICGetItemStock_intUnitMeasureId, 
             T.strStockUOM AS vyuICGetItemStock_strStockUOM, 
             T.dblUnitOnHand AS vyuICGetItemStock_dblUnitOnHand, 
