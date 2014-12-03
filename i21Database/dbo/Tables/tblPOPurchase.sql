@@ -18,6 +18,7 @@
 	[dblSubtotal] DECIMAL NOT NULL DEFAULT 0,
 	[dblShipping] DECIMAL NOT NULL DEFAULT 0,
 	[dblTax] DECIMAL NOT NULL DEFAULT 0,
+	[dblExchangeRate] DECIMAL NOT NULL DEFAULT 0,
 	[intOrderStatusId] INT NOT NULL, 
     [strPurchaseOrderNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[strVendorOrderNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
