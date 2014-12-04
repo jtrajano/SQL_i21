@@ -1,0 +1,221 @@
+{
+    "type": "Ext.window.Window",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "collapsible": true,
+        "defaultFocus": null,
+        "designer|userAlias": "inventoryreceipttaxes",
+        "designer|userClassName": "InventoryReceiptTaxes",
+        "height": 519,
+        "hidden": false,
+        "icon": null,
+        "iconCls": "small-icon-i21",
+        "layout": "fit",
+        "maximizable": true,
+        "minHeight": 500,
+        "minWidth": 500,
+        "minimizable": null,
+        "reference": null,
+        "title": "Inventory Receipt Taxes",
+        "width": 500
+    },
+    "name": "GridTemplate1",
+    "designerId": "095ddde6-09f1-4e4c-9859-b0ca62900dfe",
+    "viewControllerInstanceId": "89dcba2a-41a9-4213-a4a7-bbd07d23faed",
+    "viewModelInstanceId": "6bbe324b-26ce-4758-9701-6a850bbc96c6",
+    "cn": [
+        {
+            "type": "Ext.form.Panel",
+            "reference": {
+                "name": "items",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "autoShow": true,
+                "bodyBorder": null,
+                "bodyPadding": 5,
+                "container|align": "stretch",
+                "dock": null,
+                "frame": null,
+                "header": null,
+                "height": 350,
+                "itemId": "frmPopup",
+                "layout": "vbox",
+                "margin": -1,
+                "title": null,
+                "trackResetOnLoad": true,
+                "url": null,
+                "width": 450
+            },
+            "name": "MyForm16",
+            "designerId": "016ac597-181e-4bc5-835f-6234f2efb54a",
+            "cn": [
+                {
+                    "type": "Ext.toolbar.Toolbar",
+                    "reference": {
+                        "name": "dockedItems",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|padding": "0 0 0 1",
+                        "designer|displayName": "toolbar",
+                        "dock": "top",
+                        "width": 588
+                    },
+                    "name": "MyToolbar50",
+                    "designerId": "9fbef5ff-603b-4fac-b516-fe4973f62c0b",
+                    "cn": [
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-close",
+                                "itemId": "btnClose",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Close",
+                                "width": 45
+                            },
+                            "name": "MyButton162",
+                            "designerId": "824e14a2-5bf4-4eee-9fd2-8eb507eb674c"
+                        }
+                    ]
+                },
+                {
+                    "type": "Ext.grid.Panel",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "itemId": "grdInventoryReceiptTaxes",
+                        "layout|flex": 1,
+                        "title": null
+                    },
+                    "name": "MyGridPanel41",
+                    "designerId": "5f199986-ab3f-4800-89c7-5dfbdf4f9f93",
+                    "cn": [
+                        {
+                            "type": "Ext.toolbar.Toolbar",
+                            "reference": {
+                                "name": "dockedItems",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|padding": "0 0 0 1",
+                                "dock": "top",
+                                "itemId": "tlbGridOptions"
+                            },
+                            "name": "MyToolbar51",
+                            "designerId": "93d3f8a3-36e1-4a69-baf7-0c5ee706e26d",
+                            "cn": [
+                                {
+                                    "type": "linkedinstance",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "layout|flex": null
+                                    },
+                                    "name": "filter16",
+                                    "designerId": "c5d21cd2-be49-48e8-92e3-a99bb6b54b7f",
+                                    "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.grid.column.Column",
+                            "reference": {
+                                "name": "columns",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "flex": 1,
+                                "text": "Tax Code"
+                            },
+                            "name": "MyColumn",
+                            "designerId": "1dc94187-4339-472a-8a24-85278f022900"
+                        },
+                        {
+                            "type": "Ext.grid.column.Column",
+                            "reference": {
+                                "name": "columns",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "flex": 1,
+                                "text": "Tax Rate"
+                            },
+                            "name": "MyColumn1",
+                            "designerId": "00749d03-844e-497a-8413-94a113692cde"
+                        },
+                        {
+                            "type": "Ext.grid.column.Column",
+                            "reference": {
+                                "name": "columns",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "flex": 1,
+                                "text": "Tax Amount"
+                            },
+                            "name": "MyColumn2",
+                            "designerId": "afa1c4e3-95b3-4140-9a01-54a5eddd804c"
+                        },
+                        {
+                            "type": "Ext.grid.View",
+                            "reference": {
+                                "name": "viewConfig",
+                                "type": "object"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "itemId": "grvInventoryReceiptTaxes"
+                            },
+                            "name": "MyGridView41",
+                            "designerId": "cbc4b539-618e-488e-9fcc-b115624ee5ed"
+                        }
+                    ]
+                },
+                {
+                    "type": "linkedinstance",
+                    "reference": {
+                        "name": "dockedItems",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "designer|createAlias": "istatusbar",
+                        "dock": "bottom",
+                        "layout|flex": 1
+                    },
+                    "name": "statusbar1",
+                    "designerId": "df82d035-2307-4831-8643-e8e787f451c2",
+                    "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
+                }
+            ]
+        }
+    ]
+}

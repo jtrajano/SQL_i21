@@ -28,12 +28,10 @@ Ext.define('Inventory.view.ItemPricing', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 315,
+    height: 466,
     hidden: false,
-    maxHeight: 315,
     minHeight: 315,
-    minWidth: 650,
-    width: 650,
+    width: 437,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
@@ -148,104 +146,94 @@ Ext.define('Inventory.view.ItemPricing', {
             items: [
                 {
                     xtype: 'container',
+                    flex: 1,
                     layout: {
-                        type: 'hbox',
-                        align: 'stretch',
-                        padding: 5
+                        type: 'vbox',
+                        align: 'stretch'
                     },
                     items: [
                         {
-                            xtype: 'container',
-                            flex: 1,
-                            layout: {
-                                type: 'vbox',
-                                align: 'stretch'
-                            },
-                            items: [
+                            xtype: 'gridcombobox',
+                            columns: [
                                 {
-                                    xtype: 'gridcombobox',
-                                    columns: [
-                                        {
-                                            dataIndex: 'intCompanyLocationId',
-                                            dataType: 'numeric',
-                                            text: 'Location Id',
-                                            hidden: true
-                                        },
-                                        {
-                                            dataIndex: 'strLocationName',
-                                            dataType: 'string',
-                                            text: 'Location Name',
-                                            flex: 1
-                                        },
-                                        {
-                                            dataIndex: 'strLocationType',
-                                            dataType: 'string',
-                                            text: 'Location Type',
-                                            flex: 1
-                                        }
-                                    ],
-                                    itemId: 'cboLocation',
-                                    fieldLabel: 'Location',
-                                    labelWidth: 110,
-                                    displayField: 'strLocationName',
-                                    valueField: 'intCompanyLocationId',
-                                    bind: {
-                                        store: '{Location}'
-                                    }
+                                    dataIndex: 'intCompanyLocationId',
+                                    dataType: 'numeric',
+                                    text: 'Location Id',
+                                    hidden: true
                                 },
                                 {
-                                    xtype: 'numberfield',
-                                    itemId: 'txtSalePrice',
-                                    fieldLabel: 'Sale Price',
-                                    labelWidth: 110,
-                                    fieldStyle: 'text-align:right',
-                                    hideTrigger: true
+                                    dataIndex: 'strLocationName',
+                                    dataType: 'string',
+                                    text: 'Location Name',
+                                    flex: 1
                                 },
                                 {
-                                    xtype: 'numberfield',
-                                    itemId: 'txtRetailPrice',
-                                    fieldLabel: 'Retail Price',
-                                    labelWidth: 110,
-                                    fieldStyle: 'text-align:right',
-                                    hideTrigger: true
-                                },
-                                {
-                                    xtype: 'numberfield',
-                                    itemId: 'txtWholesalePrice',
-                                    fieldLabel: 'Wholesale Price',
-                                    labelWidth: 110,
-                                    fieldStyle: 'text-align:right',
-                                    hideTrigger: true
-                                },
-                                {
-                                    xtype: 'numberfield',
-                                    itemId: 'txtLargeVolumePrice',
-                                    fieldLabel: 'Large Volume Price',
-                                    labelWidth: 110,
-                                    fieldStyle: 'text-align:right',
-                                    hideTrigger: true
-                                },
-                                {
-                                    xtype: 'numberfield',
-                                    itemId: 'txtMsrp',
-                                    fieldLabel: 'MSRP',
-                                    labelWidth: 110,
-                                    fieldStyle: 'text-align:right',
-                                    hideTrigger: true
+                                    dataIndex: 'strLocationType',
+                                    dataType: 'string',
+                                    text: 'Location Type',
+                                    flex: 1
                                 }
-                            ]
+                            ],
+                            itemId: 'cboLocation',
+                            fieldLabel: 'Location',
+                            labelWidth: 110,
+                            displayField: 'strLocationName',
+                            valueField: 'intCompanyLocationId',
+                            bind: {
+                                store: '{Location}'
+                            }
+                        },
+                        {
+                            xtype: 'numberfield',
+                            itemId: 'txtSalePrice',
+                            fieldLabel: 'Sale Price',
+                            labelWidth: 110,
+                            fieldStyle: 'text-align:right',
+                            hideTrigger: true
+                        },
+                        {
+                            xtype: 'numberfield',
+                            itemId: 'txtRetailPrice',
+                            fieldLabel: 'Retail Price',
+                            labelWidth: 110,
+                            fieldStyle: 'text-align:right',
+                            hideTrigger: true
+                        },
+                        {
+                            xtype: 'numberfield',
+                            itemId: 'txtWholesalePrice',
+                            fieldLabel: 'Wholesale Price',
+                            labelWidth: 110,
+                            fieldStyle: 'text-align:right',
+                            hideTrigger: true
+                        },
+                        {
+                            xtype: 'numberfield',
+                            itemId: 'txtLargeVolumePrice',
+                            fieldLabel: 'Large Volume Price',
+                            labelWidth: 110,
+                            fieldStyle: 'text-align:right',
+                            hideTrigger: true
+                        },
+                        {
+                            xtype: 'numberfield',
+                            itemId: 'txtMsrp',
+                            fieldLabel: 'MSRP',
+                            labelWidth: 110,
+                            fieldStyle: 'text-align:right',
+                            hideTrigger: true
                         },
                         {
                             xtype: 'container',
-                            flex: 1,
-                            margin: '0 0 0 5',
+                            margin: '0 0 5 0',
                             layout: {
-                                type: 'vbox',
+                                type: 'hbox',
                                 align: 'stretch'
                             },
                             items: [
                                 {
                                     xtype: 'combobox',
+                                    flex: 1,
                                     itemId: 'cboPricingMethod',
                                     fieldLabel: 'Pricing Method',
                                     labelWidth: 110,
@@ -257,44 +245,53 @@ Ext.define('Inventory.view.ItemPricing', {
                                 },
                                 {
                                     xtype: 'numberfield',
-                                    itemId: 'txtLastCost',
-                                    fieldLabel: 'Last Cost',
-                                    labelWidth: 110,
-                                    fieldStyle: 'text-align:right',
+                                    itemId: 'txtPricingPercent',
+                                    margin: '0 0 0 5',
+                                    width: 115,
+                                    fieldLabel: 'Percent',
+                                    labelWidth: 50,
                                     hideTrigger: true
-                                },
-                                {
-                                    xtype: 'numberfield',
-                                    itemId: 'txtStandardCost',
-                                    fieldLabel: 'Standard Cost',
-                                    labelWidth: 110,
-                                    fieldStyle: 'text-align:right',
-                                    hideTrigger: true
-                                },
-                                {
-                                    xtype: 'numberfield',
-                                    itemId: 'txtAverageCost',
-                                    fieldLabel: 'Average Cost',
-                                    labelWidth: 110,
-                                    fieldStyle: 'text-align:right',
-                                    hideTrigger: true
-                                },
-                                {
-                                    xtype: 'numberfield',
-                                    itemId: 'txtEndofMonthCost',
-                                    fieldLabel: 'End of Month Cost',
-                                    labelWidth: 110,
-                                    fieldStyle: 'text-align:right',
-                                    hideTrigger: true
-                                },
-                                {
-                                    xtype: 'checkboxfield',
-                                    flex: 1,
-                                    itemId: 'chkActive',
-                                    fieldLabel: 'Active',
-                                    labelWidth: 110
                                 }
                             ]
+                        },
+                        {
+                            xtype: 'numberfield',
+                            itemId: 'txtLastCost',
+                            fieldLabel: 'Last Cost',
+                            labelWidth: 110,
+                            fieldStyle: 'text-align:right',
+                            hideTrigger: true
+                        },
+                        {
+                            xtype: 'numberfield',
+                            itemId: 'txtStandardCost',
+                            fieldLabel: 'Standard Cost',
+                            labelWidth: 110,
+                            fieldStyle: 'text-align:right',
+                            hideTrigger: true
+                        },
+                        {
+                            xtype: 'numberfield',
+                            itemId: 'txtAverageCost',
+                            fieldLabel: 'Average Cost',
+                            labelWidth: 110,
+                            fieldStyle: 'text-align:right',
+                            hideTrigger: true
+                        },
+                        {
+                            xtype: 'numberfield',
+                            itemId: 'txtEndofMonthCost',
+                            fieldLabel: 'End of Month Cost',
+                            labelWidth: 110,
+                            fieldStyle: 'text-align:right',
+                            hideTrigger: true
+                        },
+                        {
+                            xtype: 'checkboxfield',
+                            flex: 1,
+                            itemId: 'chkActive',
+                            fieldLabel: 'Active',
+                            labelWidth: 110
                         }
                     ]
                 }
