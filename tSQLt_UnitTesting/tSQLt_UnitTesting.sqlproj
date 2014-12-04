@@ -543,6 +543,12 @@
     <Build Include="testi21Database\Stored Procedures\test uspICProcessLIFO, May 15. Purchase 15 stocks at 27 dollars each.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFO for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFO from zero to negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFO from negative to negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFO from positive stock to negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFO from positive stock to positive stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFO from positive stock to zero stock.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
