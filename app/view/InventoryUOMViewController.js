@@ -123,9 +123,38 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
         var grd = win.down('#grdConversion');
         var col = grd.columns[0];
         var cboUOM = col.getEditor();
-        cboUOM.defaultFilters =
-            [{ dataIndex: 'intUnitMeasureId', value: record.get('intUnitMeasureId'), condition: 'noteq' }
-                , { dataIndex: 'strUnitType', value: record.get('strUnitType'), condition: 'eq', conjunction: 'and'}];
+
+        switch(record.get('strUnitType')){
+            case 'Area':
+            case 'Length':
+                cboUOM.defaultFilters =
+                    [
+                        { dataIndex: 'intUnitMeasureId', value: record.get('intUnitMeasureId'), condition: 'noteq' },
+                        { dataIndex: 'strUnitType', value: 'Area', condition: 'eq', conjunction: 'and'},
+                        { dataIndex: 'strUnitType', value: 'Length', condition: 'eq', conjunction: 'or'}
+                    ];
+                break;
+            case 'Quantity':
+            case 'Volume':
+            case 'Weight':
+                cboUOM.defaultFilters =
+                    [
+                        { dataIndex: 'intUnitMeasureId', value: record.get('intUnitMeasureId'), condition: 'noteq' },
+                        { dataIndex: 'strUnitType', value: 'Quantity', condition: 'eq', conjunction: 'and'},
+                        { dataIndex: 'strUnitType', value: 'Volume', condition: 'eq', conjunction: 'or'},
+                        { dataIndex: 'strUnitType', value: 'Weight', condition: 'eq', conjunction: 'or'}
+                    ];
+                break;
+            case 'Time':
+                cboUOM.defaultFilters =
+                    [
+                        { dataIndex: 'intUnitMeasureId', value: record.get('intUnitMeasureId'), condition: 'noteq' },
+                        { dataIndex: 'strUnitType', value: 'Time', condition: 'eq', conjunction: 'and'}
+                    ];
+                break;
+        };
+
+
     },
 
     onUOMSelect: function(combo, records, eOpts) {

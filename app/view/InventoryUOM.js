@@ -217,7 +217,7 @@ Ext.define('Inventory.view.InventoryUOM', {
                                         xtype: 'gridcolumn',
                                         itemId: 'colConversionStockUOM',
                                         dataIndex: 'string',
-                                        text: 'Stock UOM',
+                                        text: 'Other UOM',
                                         flex: 1,
                                         editor: {
                                             xtype: 'gridcombobox',
@@ -260,7 +260,7 @@ Ext.define('Inventory.view.InventoryUOM', {
                                         itemId: 'colConversionToStockUOM',
                                         width: 98,
                                         dataIndex: 'string',
-                                        text: 'Conversion<br>to Stock UOM',
+                                        text: 'Conversion to',
                                         editor: {
                                             xtype: 'numberfield',
                                             itemId: 'txtConvertToStock'
@@ -271,7 +271,7 @@ Ext.define('Inventory.view.InventoryUOM', {
                                         itemId: 'colConversionFromStockUOM',
                                         width: 98,
                                         dataIndex: 'string',
-                                        text: 'Conversion from<br>Stock UOM',
+                                        text: 'Conversion from',
                                         editor: {
                                             xtype: 'numberfield',
                                             itemId: 'txtConvertFromStock'

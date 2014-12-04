@@ -387,7 +387,7 @@
                                 "dataIndex": "string",
                                 "flex": 1,
                                 "itemId": "colConversionStockUOM",
-                                "text": "Stock UOM",
+                                "text": "Other UOM",
                                 "width": null
                             },
                             "name": "MyColumn2",
@@ -464,7 +464,7 @@
                                 "dataIndex": "string",
                                 "flex": null,
                                 "itemId": "colConversionToStockUOM",
-                                "text": "Conversion<br>to Stock UOM",
+                                "text": "Conversion to",
                                 "width": 98
                             },
                             "name": "MyNumberColumn1",
@@ -496,7 +496,7 @@
                                 "dataIndex": "string",
                                 "flex": null,
                                 "itemId": "colConversionFromStockUOM",
-                                "text": "Conversion from<br>Stock UOM",
+                                "text": "Conversion from",
                                 "width": 98
                             },
                             "name": "MyNumberColumn2",
@@ -569,7 +569,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging13",
+                    "name": "statusbarpaging12",
                     "designerId": "0065255e-fbbc-413c-8c51-8b3ece401ce4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
