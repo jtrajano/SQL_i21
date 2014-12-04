@@ -516,6 +516,33 @@
     <Build Include="testi21Database\Stored Procedures\test uspICGetItemsForItemReceipt for getting the items from PO.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessLIFO for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessLIFO, Jan 1. Purchase 20 stocks @ 20 dollars each.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessLIFO, Feb 10. Purchase 20 stocks at 21 dollars each.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessLIFO, Feb 15. Purchase 20 stocks at 21.75 dollars each.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessLIFO, Mar 1. Sold 40 stocks.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessLIFO, Mar 15. Sold 50 stocks.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessLIFO, Apr 7. Sold 60 stocks.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessLIFO, Apr 12. Purchase 75 stocks at 19 dollars each.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessLIFO, May 15. Purchase 15 stocks at 27 dollars each.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
