@@ -307,7 +307,7 @@ Ext.define('Inventory.view.CategoryViewController', {
         var win = eOpts.window;
         var grdLocation = win.down('#grdLocation');
 
-        grdLocation.store.reload();
+        grdLocation.store.load();
     },
 
     init: function(application) {

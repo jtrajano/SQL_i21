@@ -18,6 +18,8 @@ Ext.define('Inventory.model.CategoryLocation', {
                 inverse: {
                     role: 'tblICCategoryLocations',
                     storeConfig: {
+                        complete: true,
+                        remoteFilter: true,
                         proxy: {
                             type: 'rest',
                             api: {
