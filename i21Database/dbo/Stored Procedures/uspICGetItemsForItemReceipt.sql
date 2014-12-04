@@ -22,7 +22,7 @@ DECLARE @intDirectType AS INT = 3
 IF @strSourceType = @ReceiptType_PurchaseOrder
 BEGIN 
 	SELECT	intItemId = PODetail.intItemId
-			,intLocationId = PODetail.intLocationId
+			,intLocationId = PO.intShipToId -- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
 			,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
 			,dblUnitQty = PODetail.dblQtyOrdered 
 			,dblUOMQty = UOMConversion.dblConversionToStock 

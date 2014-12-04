@@ -210,6 +210,20 @@ BEGIN
 		--ALREADY HAVE PAYMENTS
 		INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT
+			'You cannot unpost this bill. ' + A.strPaymentRecordNum + ' payment was already made on this bill. You must delete the payable first.',
+			'Bill',
+			C.strBillId,
+			@batchId,
+			C.intBillId
+		FROM tblAPPayment A
+			INNER JOIN tblAPPaymentDetail B 
+				ON A.intPaymentId = B.intPaymentId
+			INNER JOIN tblAPBill C
+				ON B.intBillId = C.intBillId
+		WHERE  C.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData)
+
+		INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		SELECT
 			A.strPaymentRecordNum + ' payment was already made on this bill.',
 			'Bill',
 			C.strBillId,
@@ -295,6 +309,7 @@ BEGIN
 			[intTransactionId], 
 			[intAccountId],
 			[strDescription],
+			[strJournalLineDescription],
 			[strReference],
 			[dtmTransactionDate],
 			[dblDebit],
@@ -321,6 +336,7 @@ BEGIN
 			[intTransactionId] = A.intBillId, 
 			[intAccountId] = A.intAccountId,
 			[strDescription] = A.strReference,
+			[strJournalLineDescription] = 'Posted Bill',
 			[strReference] = C.strVendorId,
 			[dtmTransactionDate] = A.dtmDate,
 			[dblDebit]				= CASE WHEN @post = 1 THEN 0 ELSE A.dblTotal END,
@@ -354,6 +370,7 @@ BEGIN
 			[intTransactionId] = A.intBillId, 
 			[intAccountId] = B.intAccountId,
 			[strDescription] = A.strReference,
+			[strJournalLineDescription] = B.strDescription,
 			[strReference] = C.strVendorId,
 			[dtmTransactionDate] = A.dtmDate,
 			[dblDebit]				= CASE WHEN @post = 1 THEN B.dblTotal ELSE 0 END, --Bill Detail
@@ -592,6 +609,7 @@ ELSE
 			,[intTransactionId]
 			,[intAccountId]
 			,[strDescription]
+			,[strJournalLineDescription]
 			,[strReference]	
 			,[dtmTransactionDate]
 			,[dblDebit]
@@ -615,6 +633,7 @@ ELSE
 			[intTransactionId] = A.intBillId,
 			[intAccountId] = A.intAccountId,
 			[strDescription] = A.strReference,
+			[strJournalLineDescription] = 'Posted Bill',
 			[strReference] = C.strVendorId,
 			[dtmTransactionDate] = A.dtmDate,
 			[dblDebit] = CASE  WHEN @post = 1 THEN 0 ELSE A.dblTotal END,
@@ -647,6 +666,7 @@ ELSE
 			[intTransactionId] = A.intBillId,
 			[intAccountId] = B.intAccountId,
 			[strDescription] = A.strReference,
+			[strJournalLineDescription] = B.strDescription,
 			[strReference] = C.strVendorId,
 			[dtmTransactionDate] = A.dtmDate,
 			[dblDebit] = CASE WHEN @post = 1 THEN B.dblTotal ELSE 0 END,
