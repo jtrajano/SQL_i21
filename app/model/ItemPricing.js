@@ -47,6 +47,7 @@ Ext.define('Inventory.model.ItemPricing', {
         { name: 'dblSalePrice', type: 'float'},
         { name: 'dblMSRPPrice', type: 'float'},
         { name: 'strPricingMethod', type: 'string'},
+        { name: 'dblAmountPercent', type: 'float'},
         { name: 'dblLastCost', type: 'float'},
         { name: 'dblStandardCost', type: 'float'},
         { name: 'dblMovingAverageCost', type: 'float'},

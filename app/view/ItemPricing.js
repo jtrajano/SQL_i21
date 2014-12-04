@@ -245,10 +245,10 @@ Ext.define('Inventory.view.ItemPricing', {
                                 },
                                 {
                                     xtype: 'numberfield',
-                                    itemId: 'txtPricingPercent',
+                                    itemId: 'txtAmountPercent',
                                     margin: '0 0 0 5',
                                     width: 115,
-                                    fieldLabel: 'Percent',
+                                    fieldLabel: 'Amount',
                                     labelWidth: 50,
                                     hideTrigger: true
                                 }

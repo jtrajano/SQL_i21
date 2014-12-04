@@ -32,6 +32,11 @@ Ext.define('Inventory.view.ItemPricingViewController', {
                 value: '{current.strPricingMethod}',
                 store: '{PricingMethods}'
             },
+            txtAmountPercent: {
+                value: '{current.dblAmountPercent}',
+                fieldLabel: '{getAmountPercentLabel}',
+                readOnly: '{getAmountPercentReadOnly}'
+            },
             txtLastCost: '{current.dblLastCost}',
             txtStandardCost: '{current.dblStandardCost}',
             txtAverageCost: '{current.dblMovingAverageCost}',

@@ -46,6 +46,25 @@ Ext.define('Inventory.view.ItemPricingViewModel', {
         Location: {
             type: 'companylocationbuffered'
         }
+    },
+
+    formulas: {
+        getAmountPercentLabel: function(get) {
+            if (get('current.strPricingMethod') === 'Markup Standard Cost' || get('current.strPricingMethod') === 'Percent of Margin'){
+                return 'Percent';
+            }
+            else{
+                return 'Amount';
+            }
+        },
+        getAmountPercentReadOnly: function(get) {
+            if (iRely.Functions.isEmpty(get('current.strPricingMethod')) || get('current.strPricingMethod') === 'None'){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
     }
 
 });
