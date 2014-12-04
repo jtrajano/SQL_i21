@@ -549,6 +549,14 @@
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFO from positive stock to negative stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFO from positive stock to positive stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFO from positive stock to zero stock.sql" />
+    <Build Include="testi21Database\Functions\test fnRemoveTimeOnDate for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnRemoveTimeOnDate on a date with time.sql" />
+    <Build Include="testi21Database\Functions\test fnRemoveTimeOnDate on a date without time.sql" />
+    <Build Include="testi21Database\Functions\test fnGetCostingMethodAsTable for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\Fake data for the Costing Method.sql" />
+    <Build Include="testi21Database\Functions\test fnGetCostingMethodAsTable for retrieving the costing method at item level.sql" />
+    <Build Include="testi21Database\Functions\test fnGetCostingMethodAsTable for retrieving the costing method at category level.sql" />
+    <Build Include="testi21Database\Functions\test fnGetCostingMethodAsTable when costing method was not specified.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
