@@ -333,6 +333,7 @@ BEGIN
 			[strTransactionId],
 			[intAccountId],
 			[strDescription],
+			[strJournalLineDescription],
 			[strReference],
 			[dtmTransactionDate],
 			[dblDebit],
@@ -359,6 +360,7 @@ BEGIN
 			,[strPaymentRecordNum]
 			,A.intAccountId--(SELECT intAccountId FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
 			,GLAccnt.strDescription --(SELECT strDescription FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
+			,'Posted Payment'
 			,C.[strVendorId]
 			,A.[dtmDatePaid]
 			,[dblDebit]				= CASE WHEN @post = 1 THEN 0 ELSE A.dblAmountPaid END
@@ -393,6 +395,7 @@ BEGIN
 			,[strPaymentRecordNum]
 			,@WithholdAccount
 			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = @WithholdAccount)
+			,'Posted Payment - Withheld'
 			,B.[strVendorId]
 			,A.[dtmDatePaid]
 			,[dblDebit]				= CASE WHEN @post = 1 THEN 0 ELSE A.dblWithheld END
@@ -424,6 +427,7 @@ BEGIN
 			,[strPaymentRecordNum]
 			,@DiscountAccount
 			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = @DiscountAccount)
+			,'Posted Payment - Discount'
 			,C.[strVendorId]
 			,A.[dtmDatePaid]
 			,[dblDebit]				= SUM(CASE WHEN @post = 1 THEN 0 ELSE B.dblDiscount END)
@@ -461,6 +465,7 @@ BEGIN
 				,[strPaymentRecordNum]
 				,B.[intAccountId]
 				,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = B.[intAccountId])
+				,'Posted Payment - ' + (SELECT strBillId FROM tblAPBill WHERE intBillId = B.intBillId)
 				,D.[strVendorId]
 				,A.dtmDatePaid
 				,[dblDebit]				= CASE WHEN @post = 1 THEN SUM(CASE WHEN (B.dblAmountDue = B.dblPayment) --add discount only if fully paid
@@ -862,6 +867,7 @@ ELSE
 			,[intTransactionId]
 			,[intAccountId]
 			,[strDescription]
+			,[strJournalLineDescription]
 			,[strReference]	
 			,[dtmTransactionDate]
 			,[dblDebit]
@@ -886,6 +892,7 @@ ELSE
 			,A.intPaymentId
 			,A.intAccountId--(SELECT intAccountId FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
 			,GLAccnt.strDescription
+			,'Posted Payment'
 			,C.[strVendorId]
 			,A.[dtmDatePaid]
 			,[dblDebit]				= SUM(CASE WHEN @post = 0 THEN 
@@ -930,6 +937,7 @@ ELSE
 			,A.intPaymentId
 			,@WithholdAccount
 			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = @WithholdAccount)
+			,'Posted Payment - Withheld'
 			,B.[strVendorId]
 			,A.[dtmDatePaid]
 			,[dblDebit]				= CASE WHEN @post = 0 THEN A.dblWithheld ELSE 0 END
@@ -958,6 +966,7 @@ ELSE
 			,A.intPaymentId
 			,@DiscountAccount
 			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = @DiscountAccount)
+			,'Posted Payment - Discount'
 			,C.[strVendorId]
 			,A.[dtmDatePaid]
 			,[dblDebit]				= CASE WHEN @post = 0 THEN B.dblDiscount ELSE 0 END
@@ -1001,6 +1010,7 @@ ELSE
 				,A.intPaymentId
 				,C.[intAccountId]
 				,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = C.[intAccountId])
+				,'Posted Payment - ' + (SELECT strBillId FROM tblAPBill WHERE intBillId = B.intBillId)
 				,D.[strVendorId]
 				,A.dtmDatePaid
 				,[dblDebit]				= SUM(CASE WHEN @post = 0 THEN 0 ELSE 
