@@ -210,6 +210,20 @@ BEGIN
 		--ALREADY HAVE PAYMENTS
 		INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT
+			'You cannot unpost this bill. ' + A.strPaymentRecordNum + ' payment was already made on this bill. You must delete the payable first.',
+			'Bill',
+			C.strBillId,
+			@batchId,
+			C.intBillId
+		FROM tblAPPayment A
+			INNER JOIN tblAPPaymentDetail B 
+				ON A.intPaymentId = B.intPaymentId
+			INNER JOIN tblAPBill C
+				ON B.intBillId = C.intBillId
+		WHERE  C.[intBillId] IN (SELECT [intBillId] FROM #tmpPostBillData)
+
+		INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		SELECT
 			A.strPaymentRecordNum + ' payment was already made on this bill.',
 			'Bill',
 			C.strBillId,
