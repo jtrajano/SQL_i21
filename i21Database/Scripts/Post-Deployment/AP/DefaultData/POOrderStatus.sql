@@ -1,5 +1,7 @@
 ﻿GO
 --NOTE When adding new status please add on the last record.
+DELETE FROM tblPOOrderStatus
+GO
 MERGE INTO tblPOOrderStatus AS Target
 USING (VALUES
   (1, N'Open'),
