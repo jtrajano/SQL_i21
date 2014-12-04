@@ -224,5 +224,6 @@
     <None Include="dbo\Stored Procedures\uspARImportTaxAuthority.sql" />
     <None Include="dbo\Stored Procedures\uspARImportTerm.sql" />
     <None Include="dbo\Stored Procedures\uspSMImportCompanyLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMSyncCompanyLocation.sql" />
   </ItemGroup>
 </Project>
