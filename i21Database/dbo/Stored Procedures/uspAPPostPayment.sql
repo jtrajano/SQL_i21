@@ -505,6 +505,7 @@ BEGIN
 		AND B.dblPayment <> 0
 		GROUP BY A.[strPaymentRecordNum],
 		A.intPaymentId,
+		B.intBillId,
 		D.strVendorId,
 		A.dtmDatePaid,
 		B.intAccountId;
@@ -1046,6 +1047,7 @@ ELSE
 		A.dtmDatePaid,
 		A.dblWithheld,
 		A.intAccountId,
+		B.intBillId,
 		A.dblAmountPaid,
 		--B.dblPayment,
 		--B.dblInterest,
