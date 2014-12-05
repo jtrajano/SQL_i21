@@ -127,6 +127,8 @@
     <None Include="Scripts\AP\TransferImportedTermsData.sql" />
     <None Include="Scripts\AP\TransferImportedVendorData.sql" />
     <None Include="Scripts\AP\UpdateBillPONumber.sql" />
+    <None Include="dbo\Stored Procedures\uspSMImportPaymentMethod.sql" />
+    <None Include="dbo\Stored Procedures\uspSMSyncPaymentMethod.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
