@@ -185,40 +185,32 @@ Ext.define('Inventory.view.ItemPricing', {
                         },
                         {
                             xtype: 'numberfield',
-                            itemId: 'txtSalePrice',
-                            fieldLabel: 'Sale Price',
+                            itemId: 'txtStandardCost',
+                            fieldLabel: 'Standard Cost',
                             labelWidth: 110,
                             fieldStyle: 'text-align:right',
                             hideTrigger: true
                         },
                         {
                             xtype: 'numberfield',
-                            itemId: 'txtRetailPrice',
-                            fieldLabel: 'Retail Price',
+                            itemId: 'txtAverageCost',
+                            fieldLabel: 'Average Cost',
                             labelWidth: 110,
                             fieldStyle: 'text-align:right',
                             hideTrigger: true
                         },
                         {
                             xtype: 'numberfield',
-                            itemId: 'txtWholesalePrice',
-                            fieldLabel: 'Wholesale Price',
+                            itemId: 'txtLastCost',
+                            fieldLabel: 'Last Cost',
                             labelWidth: 110,
                             fieldStyle: 'text-align:right',
                             hideTrigger: true
                         },
                         {
                             xtype: 'numberfield',
-                            itemId: 'txtLargeVolumePrice',
-                            fieldLabel: 'Large Volume Price',
-                            labelWidth: 110,
-                            fieldStyle: 'text-align:right',
-                            hideTrigger: true
-                        },
-                        {
-                            xtype: 'numberfield',
-                            itemId: 'txtMsrp',
-                            fieldLabel: 'MSRP',
+                            itemId: 'txtEndofMonthCost',
+                            fieldLabel: 'End of Month Cost',
                             labelWidth: 110,
                             fieldStyle: 'text-align:right',
                             hideTrigger: true
@@ -256,32 +248,40 @@ Ext.define('Inventory.view.ItemPricing', {
                         },
                         {
                             xtype: 'numberfield',
-                            itemId: 'txtLastCost',
-                            fieldLabel: 'Last Cost',
+                            itemId: 'txtSalePrice',
+                            fieldLabel: 'Sale Price',
                             labelWidth: 110,
                             fieldStyle: 'text-align:right',
                             hideTrigger: true
                         },
                         {
                             xtype: 'numberfield',
-                            itemId: 'txtStandardCost',
-                            fieldLabel: 'Standard Cost',
+                            itemId: 'txtRetailPrice',
+                            fieldLabel: 'Retail Price',
                             labelWidth: 110,
                             fieldStyle: 'text-align:right',
                             hideTrigger: true
                         },
                         {
                             xtype: 'numberfield',
-                            itemId: 'txtAverageCost',
-                            fieldLabel: 'Average Cost',
+                            itemId: 'txtWholesalePrice',
+                            fieldLabel: 'Wholesale Price',
                             labelWidth: 110,
                             fieldStyle: 'text-align:right',
                             hideTrigger: true
                         },
                         {
                             xtype: 'numberfield',
-                            itemId: 'txtEndofMonthCost',
-                            fieldLabel: 'End of Month Cost',
+                            itemId: 'txtLargeVolumePrice',
+                            fieldLabel: 'Large Volume Price',
+                            labelWidth: 110,
+                            fieldStyle: 'text-align:right',
+                            hideTrigger: true
+                        },
+                        {
+                            xtype: 'numberfield',
+                            itemId: 'txtMsrp',
+                            fieldLabel: 'MSRP',
                             labelWidth: 110,
                             fieldStyle: 'text-align:right',
                             hideTrigger: true
