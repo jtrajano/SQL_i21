@@ -891,6 +891,7 @@
     <Build Include="dbo\Functions\fnRemoveTimeOnDate.sql" />
     <None Include="Scripts\Post-Deployment\AP\ClearPostResult.sql" />
     <Build Include="dbo\Views\vyuARInvoiceRecurring.sql" />
+    <Build Include="dbo\Tables\tblTMCOBOLPRICE.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
