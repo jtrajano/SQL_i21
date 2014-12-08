@@ -34,7 +34,7 @@ BEGIN
 		 LTRIM(RTRIM(agtrm_desc)) as strTerm
 		,agtrm_key_n as strTermCode
 		,(CASE 
-			WHEN agtrm_net_rev_dt <> 0  OR agtrm_net_rev_dt <> 0
+			WHEN agtrm_net_rev_dt <> 0  OR agtrm_disc_rev_dt <> 0
 				THEN 'Specific Date'
 			ELSE
 				'Standard'
