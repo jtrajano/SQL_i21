@@ -37,6 +37,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				agcus_state = SUBSTRING(Loc.strState,1,2),
 				agcus_zip = SUBSTRING(Loc.strZipCode,1,10),
 				agcus_country = (CASE WHEN LEN(Loc.strCountry) = 3 THEN Loc.strCountry ELSE '''' END),
+				agcus_terms_cd = (SELECT strTermCode FROM tblSMTerm WHERE intTermID = Loc.intTermsId),
 				--Contact
 				agcus_contact = SUBSTRING((SELECT strName FROM tblEntity WHERE intEntityId = Con.intEntityId),1,20),
 				agcus_phone = (CASE WHEN CHARINDEX(''x'', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,15), 0, CHARINDEX(''x'',Con.strPhone)) ELSE SUBSTRING(Con.strPhone,1,15)END),
@@ -102,6 +103,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				agcus_state,
 				agcus_zip,
 				agcus_country,
+				agcus_terms_cd,
 				--Customer
 				agcus_key,
 				agcus_co_per_ind_cp,
@@ -155,6 +157,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				SUBSTRING(Loc.strState,1,2) as strState,
 				SUBSTRING(Loc.strZipCode,1,10) as strZipCode,
 				(CASE WHEN LEN(Loc.strCountry) = 3 THEN Loc.strCountry ELSE '''' END)as strCountry,
+				(SELECT strTermCode FROM tblSMTerm WHERE intTermID = Loc.intTermsId),
 				--Customer
 				SUBSTRING(Cus.strCustomerNumber,1,10) as strCustomerNumber,
 				(CASE WHEN Cus.strType = ''Company'' THEN ''C'' ELSE ''P'' END) AS strType,
@@ -375,7 +378,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					@strLocationNotes        = NULL,
 					@intShipViaId = NULL,
 					@intTaxCodeId    = NULL,
-					@intTermsId      = NULL,
+					@intTermsId      = (SELECT intTermID FROM tblSMTerm WHERE strTermCode = CAST(agcus_terms_cd AS CHAR(10))),
 					@intWarehouseId  = NULL,
 			
 					--Customer
@@ -386,7 +389,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					@strCurrency			= agcus_dflt_currency, 				
 					@intAccountStatusId		= (SELECT intAccountStatusId FROM tblARAccountStatus WHERE strAccountStatusCode COLLATE Latin1_General_CI_AS = agcus_acct_stat_x_1 COLLATE Latin1_General_CI_AS),			
 					@intSalespersonId		= (SELECT intSalespersonId FROM tblARSalesperson WHERE strSalespersonId COLLATE Latin1_General_CI_AS = agcus_slsmn_id COLLATE Latin1_General_CI_AS),			
-    				@strPricing				= NULL, --agcus_prc_lvl					
+    				@strPricing				= agcus_prc_lvl,					
 					@ysnActive				= CASE WHEN agcus_active_yn = ''Y'' THEN 1 ELSE 0 END,					
 					@ysnPORequired			= CASE WHEN agcus_req_po_yn = ''Y'' THEN 1 ELSE 0 END,									
 					@ysnStatementDetail		= CASE WHEN agcus_stmt_dtl_yn = ''Y'' THEN 1 ELSE 0 END,			
