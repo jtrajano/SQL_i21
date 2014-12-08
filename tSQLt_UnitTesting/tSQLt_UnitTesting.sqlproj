@@ -557,6 +557,9 @@
     <Build Include="testi21Database\Functions\test fnGetCostingMethodAsTable for retrieving the costing method at item level.sql" />
     <Build Include="testi21Database\Functions\test fnGetCostingMethodAsTable for retrieving the costing method at category level.sql" />
     <Build Include="testi21Database\Functions\test fnGetCostingMethodAsTable when costing method was not specified.sql" />
+    <Build Include="testi21Database\Scripts\test the standard collation Latin1_General_CI_AS on all i21 columns.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

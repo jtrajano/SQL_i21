@@ -312,7 +312,7 @@ BEGIN
 					AND TRANS.strBatchId = @strBatchId
 					AND @NewFifoId IS NOT NULL  
 
-		-- Add Auto Negative (if current stock qty is still after adding it) 
+		-- Add Auto Negative (if current stock qty is still negative after adding it) 
 		INSERT INTO dbo.tblICInventoryTransaction (
 				[intItemId] 
 				,[intLocationId] 
