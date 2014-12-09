@@ -971,6 +971,10 @@ Ext.define('Inventory.view.ItemViewController', {
                 var pgePricing = tabPanel.down('#pgePricing');
                 var grdPricing = pgePricing.down('#grdPricing');
                 grdPricing.store.load();
+                var grdPricingLevel = pgePricing.down('#grdPricingLevel');
+                grdPricingLevel.store.load();
+                var grdSpecialPricing = pgePricing.down('#grdSpecialPricing');
+                grdSpecialPricing.store.load();
                 break;
             case 'pgeStock':
                 var pgeStock = tabPanel.down('#pgeStock');
