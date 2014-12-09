@@ -273,13 +273,25 @@ Ext.define('Inventory.view.CategoryViewController', {
     onbtnAddLocationClick: function(button, e, eOpts) {
         var win = button.up('window');
         var me = win.controller;
-        me.openCategoryLocationScreen('new', win);
+        var current = win.viewModel.data.current;
+
+        win.context.data.validator.validateRecord({ window: win }, function(valid) {
+            if (valid) {
+                me.openCategoryLocationScreen('new', win);
+            }
+        });
     },
 
     onbtnEditLocationClick: function(button, e, eOpts) {
         var win = button.up('window');
         var me = win.controller;
-        me.openCategoryLocationScreen('edit', win);
+
+        win.context.data.validator.validateRecord({ window: win }, function(valid) {
+            if (valid) {
+                me.openCategoryLocationScreen('edit', win);
+            }
+        });
+
     },
 
     openCategoryLocationScreen: function (action, window) {
