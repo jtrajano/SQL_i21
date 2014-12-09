@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblPRTemplate](
 	[intTemplateId] [int] IDENTITY(1,1) NOT NULL,
-	[strTemplateName] [nvarchar](50) NOT NULL,
-	[strDescription] [nvarchar](100) NULL,
+	[strTemplateName] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strDescription] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblPRTemplate] PRIMARY KEY ([intTemplateId]), 
     CONSTRAINT [AK_tblPRTemplate_strTemplateName] UNIQUE ([strTemplateName]),
