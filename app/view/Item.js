@@ -4352,7 +4352,7 @@ Ext.define('Inventory.view.Item', {
                                                             ],
                                                             itemId: 'cboBundleUOM',
                                                             displayField: 'strUnitMeasure',
-                                                            valueField: 'intUnitMeasureId'
+                                                            valueField: 'strUnitMeasure'
                                                         }
                                                     },
                                                     {
