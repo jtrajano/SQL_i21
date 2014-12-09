@@ -258,7 +258,8 @@ Ext.define('Inventory.view.InventoryUOM', {
                                     {
                                         xtype: 'numbercolumn',
                                         itemId: 'colConversionToStockUOM',
-                                        width: 98,
+                                        minWidth: 110,
+                                        width: 110,
                                         dataIndex: 'string',
                                         text: 'Conversion to',
                                         editor: {
@@ -269,7 +270,8 @@ Ext.define('Inventory.view.InventoryUOM', {
                                     {
                                         xtype: 'numbercolumn',
                                         itemId: 'colConversionFromStockUOM',
-                                        width: 98,
+                                        minWidth: 110,
+                                        width: 110,
                                         dataIndex: 'string',
                                         text: 'Conversion from',
                                         editor: {
