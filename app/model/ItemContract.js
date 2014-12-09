@@ -34,7 +34,7 @@ Ext.define('Inventory.model.ItemContract', {
                         },
                         sortOnLoad: true,
                         sorters: {
-                            direction: 'ASC',
+                            direction: 'DESC',
                             property: 'intSort'
                         }
                     }

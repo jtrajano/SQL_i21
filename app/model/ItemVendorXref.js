@@ -33,7 +33,7 @@ Ext.define('Inventory.model.ItemVendorXref', {
                         },
                         sortOnLoad: true,
                         sorters: {
-                            direction: 'ASC',
+                            direction: 'DESC',
                             property: 'intSort'
                         }
                     }

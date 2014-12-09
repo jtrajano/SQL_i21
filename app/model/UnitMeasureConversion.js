@@ -22,7 +22,7 @@ Ext.define('Inventory.model.UnitMeasureConversion', {
                         complete: true,
                         sortOnLoad: true,
                         sorters: {
-                            direction: 'ASC',
+                            direction: 'DESC',
                             property: 'intSort'
                         }
                     }

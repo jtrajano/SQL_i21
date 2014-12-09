@@ -33,7 +33,7 @@ Ext.define('Inventory.model.ItemAccount', {
                         },
                         sortOnLoad: true,
                         sorters: {
-                            direction: 'ASC',
+                            direction: 'DESC',
                             property: 'intSort'
                         }
                     }

@@ -920,6 +920,12 @@ Ext.define('Inventory.view.ItemViewController', {
 
     onItemTabChange: function(tabPanel, newCard, oldCard, eOpts) {
         switch(newCard.itemId){
+            case 'pgeDetails':
+                var pgeDetails = tabPanel.down('#pgeDetails');
+                var grdUnitOfMeasure = pgeDetails.down('#grdUnitOfMeasure');
+                grdUnitOfMeasure.store.load();
+                break;
+
             case 'pgeSetup':
                 var pgeLocation = tabPanel.down('#pgeLocation');
                 var grdLocationStore = pgeLocation.down('#grdLocationStore');

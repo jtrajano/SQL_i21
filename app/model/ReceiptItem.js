@@ -23,7 +23,7 @@ Ext.define('Inventory.model.ReceiptItem', {
                         complete: true,
                         sortOnLoad: true,
                         sorters: {
-                            direction: 'ASC',
+                            direction: 'DESC',
                             property: 'intSort'
                         }
                     }

@@ -21,7 +21,7 @@ Ext.define('Inventory.model.ItemManufacturingUOM', {
                         complete: true,
                         sortOnLoad: true,
                         sorters: {
-                            direction: 'ASC',
+                            direction: 'DESC',
                             property: 'intSort'
                         }
                     }

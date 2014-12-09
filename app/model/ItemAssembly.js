@@ -33,7 +33,7 @@ Ext.define('Inventory.model.ItemAssembly', {
                         },
                         sortOnLoad: true,
                         sorters: {
-                            direction: 'ASC',
+                            direction: 'DESC',
                             property: 'intSort'
                         }
                     }

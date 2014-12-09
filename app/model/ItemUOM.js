@@ -20,9 +20,21 @@ Ext.define('Inventory.model.ItemUOM', {
                     role: 'tblICItemUOMs',
                     storeConfig: {
                         complete: true,
+                        remoteFilter: true,
+                        proxy: {
+                            type: 'rest',
+                            api: {
+                                read: '../Inventory/api/ItemUnitMeasure/GetItemUnitMeasures'
+                            },
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data',
+                                messageProperty: 'message'
+                            }
+                        },
                         sortOnLoad: true,
                         sorters: {
-                            direction: 'ASC',
+                            direction: 'DESC',
                             property: 'intSort'
                         }
                     }
