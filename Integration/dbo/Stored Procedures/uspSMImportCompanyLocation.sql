@@ -19,11 +19,9 @@ BEGIN
 			aglocmst AG
 		LEFT OUTER JOIN
 			tblSMCompanyLocation CL
-				ON RTRIM(LTRIM(AG.[agloc_name] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationName] COLLATE Latin1_General_CI_AS)) 
-					AND RTRIM(LTRIM(AG.[agloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS))
-
+				ON RTRIM(LTRIM(AG.[agloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS))										
 		WHERE
-			CL.[strLocationName] IS NULL
+			CL.[strLocationNumber] IS NULL
 				
 		RETURN @Total
 	END	
@@ -434,17 +432,13 @@ BEGIN
 			ON AG.[agloc_ccfee_percent] = CF.strExternalId
 	LEFT OUTER JOIN
 		tblSMCompanyLocation CL
-			ON RTRIM(LTRIM(AG.[agloc_name] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationName] COLLATE Latin1_General_CI_AS)) 
-				AND RTRIM(LTRIM(AG.[agloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS))
+			ON RTRIM(LTRIM(AG.[agloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS))										
 	WHERE
-		CL.[strLocationName] IS NULL
+		CL.[strLocationNumber] IS NULL
 		
 	ORDER BY
 		AG.[agloc_loc_no]
 		,AG.[agloc_name]
 
 		
-END	
-
-
-
+END
