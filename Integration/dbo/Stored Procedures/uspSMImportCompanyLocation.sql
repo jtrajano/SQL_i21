@@ -20,12 +20,7 @@ BEGIN
 		LEFT OUTER JOIN
 			tblSMCompanyLocation CL
 				ON RTRIM(LTRIM(AG.[agloc_name] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationName] COLLATE Latin1_General_CI_AS)) 
-					--AND RTRIM(LTRIM(AG.[agloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS)) -- Uncomment this line once [strLocationNumber] has been added to tblSMCompanyLocation
-		--LEFT JOIN
-		--	(
-		--		SELECT [agloc_loc_no], [agloc_name] FROM aglocmst
-		--	)	AG1														
-		--		ON RTRIM(LTRIM(AG.[agloc_loc_no])) <> RTRIM(LTRIM(AG1.[agloc_loc_no])) AND RTRIM(LTRIM(AG.[agloc_name])) = RTRIM(LTRIM(AG1.[agloc_name]))
+					AND RTRIM(LTRIM(AG.[agloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS))
 
 		WHERE
 			CL.[strLocationName] IS NULL
@@ -34,8 +29,8 @@ BEGIN
 	END	
 		
 	INSERT INTO [tblSMCompanyLocation]
-		--([strLocationNumber] --this must be added to be able to mapped records between [tblSMCompanyLocation] and aglocmst  -- Uncomment this line once [strLocationNumber] has been added to tblSMCompanyLocation
-		([strLocationName]	
+		([strLocationNumber]
+		,[strLocationName]	
 		,[strLocationType]
 		,[strAddress]
 		,[strZipPostalCode]
@@ -131,8 +126,8 @@ BEGIN
 		,[ysnAutomaticCashDepositEntries]
 		,[intConcurrencyId])
 	SELECT
-		--AG.[agloc_loc_no]  -- Uncomment this line once [strLocationNumber] has been added to tblSMCompanyLocation
-		(CASE WHEN EXISTS(SELECT [agloc_loc_no], [agloc_name] FROM aglocmst WHERE RTRIM(LTRIM([agloc_loc_no])) <> RTRIM(LTRIM(AG.[agloc_loc_no])) AND RTRIM(LTRIM([agloc_name])) = RTRIM(LTRIM(AG.[agloc_name])))
+		AG.[agloc_loc_no]
+		,(CASE WHEN EXISTS(SELECT [agloc_loc_no], [agloc_name] FROM aglocmst WHERE RTRIM(LTRIM([agloc_loc_no])) <> RTRIM(LTRIM(AG.[agloc_loc_no])) AND RTRIM(LTRIM([agloc_name])) = RTRIM(LTRIM(AG.[agloc_name])))
 			THEN 
 				RTRIM(LTRIM(AG.[agloc_name])) + ' - ' + RTRIM(LTRIM(AG.[agloc_loc_no]))
 			ELSE
@@ -412,10 +407,7 @@ BEGIN
 		  END)								--<ysnAutomaticCashDepositEntries, bit,>
 		,0
 	FROM
-		aglocmst AG
-	--LEFT JOIN
-	--	tblGLCOACrossReference PC
-	--		ON AG.[agloc_gl_profit_center] = PC.strExternalId 		
+		aglocmst AG	
 	LEFT JOIN
 		tblGLCOACrossReference CA
 			ON AG.[agloc_cash] = CA.strExternalId
@@ -443,13 +435,7 @@ BEGIN
 	LEFT OUTER JOIN
 		tblSMCompanyLocation CL
 			ON RTRIM(LTRIM(AG.[agloc_name] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationName] COLLATE Latin1_General_CI_AS)) 
-				--AND RTRIM(LTRIM(AG.[agloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS)) -- Uncomment this line once [strLocationNumber] has been added to tblSMCompanyLocation
-	--LEFT JOIN
-	--	(
-	--		SELECT [agloc_loc_no], [agloc_name] FROM aglocmst
-	--	)	AG1														
-	--		ON RTRIM(LTRIM(AG.[agloc_loc_no])) <> RTRIM(LTRIM(AG1.[agloc_loc_no])) AND RTRIM(LTRIM(AG.[agloc_name])) = RTRIM(LTRIM(AG1.[agloc_name]))
-
+				AND RTRIM(LTRIM(AG.[agloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS))
 	WHERE
 		CL.[strLocationName] IS NULL
 		
