@@ -122,7 +122,8 @@ BEGIN
 		-- Get the id used in the inventory transaction insert 
 		SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
 
-		-- Repeat call on uspICReduceStockInFIFO until @dblReduceQty is completely distributed to all available fifo buckets or added a new negative bucket. 
+		-- Repeat call on uspICReduceStockInFIFO until @dblReduceQty is completely distributed to all available fifo buckets 
+		-- If there is no avaiable fifo buckets, it will add a new negative bucket. 
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)
 		BEGIN 
 			EXEC dbo.uspICReduceStockInFIFO
