@@ -502,62 +502,214 @@ END
 IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1
 BEGIN
 	EXEC('CREATE PROCEDURE uspSMSyncPaymentMethod
-				@Checking	bit = 0,
-				@UserId		int = 0,
-				@Total		int = 0 OUTPUT
-			AS
+			@ToOrigin			bit				= 0
+			,@PaymentCodes		nvarchar(MAX)	= ''all''
+			,@AddedCount		int				= 0 OUTPUT
+			,@UpdatedCount		int				= 0 OUTPUT
+		AS
+		BEGIN
+
+		DECLARE @RecordsToProcess table(strPaymentMethodCode nvarchar(3))
+		DECLARE @RecordsToAdd table(strPaymentMethodCode varchar(3))
+		DECLARE @RecordsToUpdate table(strPaymentMethodCode varchar(3))
+
+		DELETE FROM @RecordsToProcess
+		DELETE FROM @RecordsToAdd
+		DELETE FROM @RecordsToUpdate
+
+		DECLARE @PrintOptionY nvarchar(50), @PrintOptionN nvarchar(50), @PrintOptionC nvarchar(50)
+
+		SELECT
+			@PrintOptionY	= ''Print on Deposit Slip''
+			,@PrintOptionN	= ''Don''''t Print on Deposit Slip''
+			,@PrintOptionC	= ''Cash Summary on Deposit Slip''
+
+
+		IF(LOWER(@PaymentCodes) = ''all'')
 			BEGIN
+				IF (@ToOrigin = 1)
+					INSERT INTO @RecordsToProcess(strPaymentMethodCode)
+					SELECT [strPaymentMethodCode]
+					FROM tblSMPaymentMethod		
+				ELSE
+					INSERT INTO @RecordsToProcess(strPaymentMethodCode)
+					SELECT [pttyp_pay_type]
+					FROM [pttypmst]									
+			END
+		ELSE
+			BEGIN
+				IF (@ToOrigin = 1)			
+					INSERT INTO @RecordsToProcess(strPaymentMethodCode)
+					SELECT PM.[strPaymentMethodCode]
+					FROM fnGetRowsFromDelimitedValues(@PaymentCodes) T
+					INNER JOIN tblSMPaymentMethod PM ON T.[intID] = PM.[strPaymentMethodCode]
+				ELSE
+					INSERT INTO @RecordsToProcess(strPaymentMethodCode)
+					SELECT PM.[pttyp_pay_type]
+					FROM fnGetRowsFromDelimitedValues(@PaymentCodes) T
+					INNER JOIN [pttypmst] PM ON T.[intID] = PM.[pttyp_pay_type]
+			END		
+	
+		IF (@ToOrigin = 1)
+			INSERT INTO @RecordsToAdd
+			SELECT P.[strPaymentMethodCode]
+			FROM @RecordsToProcess P
+			LEFT OUTER JOIN [pttypmst] PM ON P.[strPaymentMethodCode] = PM.[pttyp_pay_type]
+			WHERE PM.[pttyp_pay_type] IS NULL	
+		ELSE
+			INSERT INTO @RecordsToAdd
+			SELECT P.[strPaymentMethodCode]
+			FROM @RecordsToProcess P
+			LEFT OUTER JOIN tblSMPaymentMethod PM ON P.[strPaymentMethodCode] = PM.[strPaymentMethodCode]
+			WHERE PM.[strPaymentMethodCode] IS NULL		
+	
+	
+	
+	
+		INSERT INTO @RecordsToUpdate
+		SELECT P.[strPaymentMethodCode]
+		FROM @RecordsToProcess P
+		LEFT JOIN @RecordsToAdd A ON P.[strPaymentMethodCode] = A.[strPaymentMethodCode]
+		WHERE A.[strPaymentMethodCode] IS NULL					
+	
 
-			IF(@Checking = 1)
-				BEGIN
-					SELECT
-						@Total = COUNT(P.[pttyp_pay_type])
-					FROM
-						[pttypmst]  P
-					LEFT JOIN
-						tblGLCOACrossReference GL
-							ON P.pttyp_dr_acct_no = GL.strExternalId
-					LEFT OUTER JOIN
-						tblSMPaymentMethod PM
-							ON P.[pttyp_pay_type] = PM.[strPaymentMethodCode]
-					WHERE
-						PM.[strPaymentMethodCode] IS NULL
+		IF(@ToOrigin = 1)
+			BEGIN	
+				
+				INSERT INTO [pttypmst]
+				   ([pttyp_pay_type]
+				   ,[pttyp_desc]
+				   ,[pttyp_on_deposit_slip_ync]
+				   ,[pttyp_use_cash_gl_yn]
+				   ,[pttyp_dr_acct_no])
+				SELECT
+					RTRIM(LTRIM(P.[strPaymentMethodCode]))
+					,RTRIM(LTRIM(P.[strPaymentMethod]))
+					,(CASE P.[strPrintOption]
+							WHEN ''Print on Deposit Slip''		THEN ''Y''
+							WHEN ''Don''''t Print on Deposit Slip'' THEN ''N''
+							WHEN ''Cash Summary on Deposit Slip'' THEN ''C''
+						END)
+					,NULL
+					,ISNULL(GL.[strExternalId],0)
+				FROM
+					tblSMPaymentMethod P
+				INNER JOIN
+					@RecordsToAdd A
+						ON P.[strPaymentMethodCode] = A.[strPaymentMethodCode] 			
+				LEFT JOIN
+					tblGLCOACrossReference GL
+						ON P.[intAccountId] = GL.[inti21Id]
+				LEFT OUTER JOIN
+					[pttypmst] PM
+						ON P.[strPaymentMethodCode] = PM.[pttyp_pay_type]
+				WHERE
+					PM.[pttyp_pay_type] IS NULL
+				ORDER BY
+					P.[strPaymentMethodCode]           
 
-					RETURN @Total;
-				END	
+				SET @AddedCount = @@ROWCOUNT
 
-			INSERT INTO [tblSMPaymentMethod]
-				([strPaymentMethod]
-				,[ysnActive]
-				,[intSort]           
-				,[strPaymentMethodCode]
-				,[intAccountId]
-				,[strPrintOption]
-				,[intConcurrencyId])
-			SELECT 
-				 [pttyp_desc]		--[strPaymentMethod]
-				,1					--[ysnActive]
-				,1					--[intSort]
-				,[pttyp_pay_type]	--[strPaymentMethodCode]
-				,GL.[inti21Id]		--[intAccountId]]
-				,(CASE UPPER([pttyp_on_deposit_slip_ync])
-					WHEN ''Y'' THEN ''Print on Deposit Slip''
-					WHEN ''N'' THEN ''Don''''t Print on Deposit Slip''
-					WHEN ''C'' THEN ''Cash Summary on Deposit Slip''
-					END)			--[strPrintOption]
-				,0
-			FROM
-				[pttypmst]  P
-			LEFT JOIN
-				tblGLCOACrossReference GL
-					ON P.pttyp_dr_acct_no = GL.strExternalId
-			LEFT OUTER JOIN
-				tblSMPaymentMethod PM
-					ON P.[pttyp_pay_type] = PM.[strPaymentMethodCode]
-			WHERE
-				PM.[strPaymentMethodCode] IS NULL
-			ORDER BY
-				P.[pttyp_pay_type]
 
-			END')
+				UPDATE [pttypmst]
+				SET 
+					[pttyp_pay_type] = RTRIM(LTRIM(P.[strPaymentMethodCode]))
+					,[pttyp_desc] = RTRIM(LTRIM(P.[strPaymentMethod]))
+					,[pttyp_on_deposit_slip_ync] = 
+						(CASE P.[strPrintOption]
+							WHEN ''Print on Deposit Slip''		THEN ''Y''
+							WHEN ''Don''''t Print on Deposit Slip'' THEN ''N''
+							WHEN ''Cash Summary on Deposit Slip'' THEN ''C''
+						END)
+					,[pttyp_use_cash_gl_yn] = [pttyp_use_cash_gl_yn]
+					,[pttyp_dr_acct_no] = ISNULL(GL.[strExternalId],0)
+					,[pttyp_sys_code_yno] = [pttyp_sys_code_yno]
+					,[pttyp_def_payment] = [pttyp_def_payment]
+				FROM
+					tblSMPaymentMethod P
+				INNER JOIN
+					@RecordsToUpdate A
+						ON P.[strPaymentMethodCode] = A.[strPaymentMethodCode]
+				LEFT JOIN
+					tblGLCOACrossReference GL
+						ON P.[intAccountId] = GL.[inti21Id]				
+				WHERE
+					 [pttypmst].[pttyp_pay_type] = A.[strPaymentMethodCode]  
+			
+				SET @UpdatedCount = @@ROWCOUNT				
+			END
+		ELSE
+			BEGIN
+	
+				INSERT INTO [tblSMPaymentMethod]
+					([strPaymentMethod]
+					,[ysnActive]
+					,[intSort]           
+					,[strPaymentMethodCode]
+					,[intAccountId]
+					,[strPrintOption]
+					,[intConcurrencyId])
+				SELECT
+					RTRIM(LTRIM(P.[pttyp_desc]))
+					,1
+					,0
+					,RTRIM(LTRIM(P.[pttyp_pay_type]))
+					,ISNULL(GL.[inti21Id],0)
+					,(CASE UPPER([pttyp_on_deposit_slip_ync])
+							WHEN ''Y'' THEN ''Print on Deposit Slip''
+							WHEN ''N'' THEN ''Don''''t Print on Deposit Slip''
+							WHEN ''C'' THEN ''Cash Summary on Deposit Slip''
+						END)
+					,0
+				FROM
+					[pttypmst] P
+				INNER JOIN
+					@RecordsToAdd A
+						ON P.[pttyp_pay_type] = SUBSTRING(RTRIM(LTRIM(A.[strPaymentMethodCode])),0 ,29)
+				LEFT JOIN
+					tblGLCOACrossReference GL
+						ON P.[pttyp_dr_acct_no] = GL.[strExternalId]
+				LEFT OUTER JOIN
+					tblSMPaymentMethod PM
+						ON P.[pttyp_pay_type] = PM.[strPaymentMethodCode]
+				WHERE
+					PM.[strPaymentMethodCode] IS NULL
+				ORDER BY
+					P.[pttyp_pay_type]
+			
+				SET @AddedCount = @@ROWCOUNT	
+		
+		
+				UPDATE [tblSMPaymentMethod]
+				SET
+					[strPaymentMethod] = SUBSTRING(RTRIM(LTRIM(P.[pttyp_desc])),0 ,29)
+					,[ysnActive] = [ysnActive]
+					,[intSort] = [intSort]
+					,[strPaymentMethodCode] = RTRIM(LTRIM(P.[pttyp_pay_type]))
+					,[intAccountId] = ISNULL(GL.[inti21Id],0)
+					,[strPrintOption] = 
+						(CASE UPPER([pttyp_on_deposit_slip_ync])
+							WHEN ''Y'' THEN ''Print on Deposit Slip''
+							WHEN ''N'' THEN ''Don''''t Print on Deposit Slip''
+							WHEN ''C'' THEN ''Cash Summary on Deposit Slip''
+						END)
+				FROM
+					[pttypmst] P
+				INNER JOIN
+					@RecordsToUpdate A
+						ON P.[pttyp_pay_type] = A.[strPaymentMethodCode]
+				LEFT JOIN
+					tblGLCOACrossReference GL
+						ON P.[pttyp_dr_acct_no] = GL.[strExternalId]				
+				WHERE
+					 [tblSMPaymentMethod].[strPaymentMethodCode] = A.[strPaymentMethodCode]  
+			 
+			 
+				SET @UpdatedCount = @@ROWCOUNT			 
+		
+	
+			END
+
+
+		END')
 END

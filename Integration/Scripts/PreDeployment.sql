@@ -14,6 +14,10 @@
 
 -- SYSTEM MANAGER
 :r "..\dbo\Stored Procedures\uspSMMigrateCurrency.sql"
+:r "..\dbo\Stored Procedures\uspSMImportCompanyLocation.sql"
+:r "..\dbo\Stored Procedures\uspSMImportPaymentMethod.sql"
+:r "..\dbo\Stored Procedures\uspSMSyncCompanyLocation.sql"
+:r "..\dbo\Stored Procedures\uspSMSyncPaymentMethod.sql"
 
 -- GENERAL LEDGER
 :r "..\dbo\Stored Procedures\uspGLImportOriginCOA.sql"
