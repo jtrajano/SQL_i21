@@ -1484,4 +1484,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[FK_tblICInventoryReceipt_tblEntityCredential]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="10dbcafd-fc0b-479c-b60b-c7b3b71d7154" ChangeDateTime="12/10/2014 08:34:57">
+    <Property Name="ElementName" Value="[dbo].[tblICEquipmentLength].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICEquipmentLength]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intEquipmentLengthId" />
+  </Operation>
 </Operations>

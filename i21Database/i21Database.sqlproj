@@ -890,6 +890,7 @@
     <Build Include="dbo\Functions\fnGetDiscountBasedOnTerm.sql" />
     <Build Include="dbo\Functions\fnRemoveTimeOnDate.sql" />
     <None Include="Scripts\Post-Deployment\AP\ClearPostResult.sql" />
+    <Build Include="dbo\Tables\tblICEquipmentLength.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
