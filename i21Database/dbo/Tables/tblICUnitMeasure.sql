@@ -4,7 +4,8 @@
     [strUnitMeasure] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strSymbol] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strUnitType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [ysnDefault] BIT NULL DEFAULT ((0)), 
+	[intDecimalDisplay] INT NULL DEFAULT ((2)),
+	[intDecimalCalculation] INT NULL DEFAULT ((2)),
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICUnitMeasure] PRIMARY KEY ([intUnitMeasureId]) 
 )
@@ -46,14 +47,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'strUnitType'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Default Unit of Measure',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICUnitMeasure',
-    @level2type = N'COLUMN',
-    @level2name = N'ysnDefault'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Concurrency Field',
@@ -63,3 +57,21 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICUnitMeasure',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Decimal Places for Display',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICUnitMeasure',
+    @level2type = N'COLUMN',
+    @level2name = N'intDecimalDisplay'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Decimal Places for Calculation',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICUnitMeasure',
+    @level2type = N'COLUMN',
+    @level2name = N'intDecimalCalculation'
