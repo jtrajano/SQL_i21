@@ -9,20 +9,22 @@ Cus.intCustomerId,
 Inv.strTransactionType, 
 Term.strTerm,
 Inv.intTermId, 
+Inv.intAccountId,
 Inv.dtmDate,
 Inv.dtmDueDate, 
 Inv.ysnPosted, 
 Inv.ysnPaid, 
 Inv.dblInvoiceTotal, 
-Inv.dblDiscount, 
-Inv.dblAmountDue, 
-Inv.dblPayment, 
+ISNULL(Inv.dblDiscount,0) AS dblDiscount, 
+ISNULL(Inv.dblAmountDue,0) AS dblAmountDue, 
+ISNULL(Inv.dblPayment, 0) AS dblPayment,
 Inv.intPaymentMethodId, 
 Inv.intCompanyLocationId, 
 Inv.strComments,
 Inv.intCurrencyId,
 CompLoc.strLocationName,
-PayMthd.strPaymentMethod
+PayMthd.strPaymentMethod,
+0.000000 AS dblPaymentAmount
 FROM         
 dbo.tblARInvoice AS Inv INNER JOIN
 dbo.tblARCustomer AS Cus ON Inv.intCustomerId = Cus.intCustomerId INNER JOIN
