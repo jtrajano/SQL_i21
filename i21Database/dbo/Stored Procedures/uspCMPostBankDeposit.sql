@@ -102,11 +102,12 @@ WHERE	strTransactionId = @strTransactionId
 		AND intBankTransactionTypeId = @BANK_TRANSACTION_TYPE_Id
 IF @@ERROR <> 0	GOTO Post_Rollback				
 
--- Read the company preference
+-- Read the user preference
 SELECT	@ysnAllowUserSelfPost = 1
 FROM	dbo.tblSMPreferences 
 WHERE	strPreference = 'AllowUserSelfPost' 
 		AND LOWER(RTRIM(LTRIM(strValue))) = 'true'
+		AND intUserID = @intUserId
 IF @@ERROR <> 0	GOTO Post_Rollback		
 		
 -- Read the detail table and populate the variables. 
