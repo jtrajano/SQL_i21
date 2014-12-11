@@ -2,20 +2,17 @@
 	 @InvoiceId			int
 	,@InvoiceDate		datetime
 	,@UserId			int
-	,@NewInvoiceId		int			= NULL		OUTPUT
+	,@NewInvoiceNumber	nvarchar(25) = NULL		OUTPUT
 AS
 
 BEGIN
-	DECLARE @InvoiceNumber nvarchar(25)
-	EXEC uspSMGetStartingNumber 19, @InvoiceNumber OUT
 
 	DECLARE @EntityId int
 
 	SET @EntityId = ISNULL((SELECT TOP 1 intEntityId FROM tblSMUserSecurity WHERE intUserSecurityID = @UserId), 0)
 
 	INSERT INTO tblARInvoice(
-		strInvoiceNumber
-		,strInvoiceOriginId
+		strInvoiceOriginId
 		,intCustomerId
 		,dtmDate
 		,dtmDueDate
@@ -37,6 +34,7 @@ BEGIN
 		,intPaymentMethodId
 		,strComments
 		,intAccountId
+		,dtmPostDate
 		,ysnPosted
 		,ysnPaid
 		,strShipToAddress
@@ -52,15 +50,14 @@ BEGIN
 		,intConcurrencyId
 		,intEntityId)
 	SELECT 
-		@InvoiceNumber
-		,strInvoiceOriginId
+		strInvoiceOriginId
 		,intCustomerId
 		,@InvoiceDate
 		,dbo.fnGetDueDateBasedOnTerm(@InvoiceDate, intTermId)
 		,intCurrencyId
 		,intCompanyLocationId
 		,intSalespersonId
-		,dtmShipDate
+		,@InvoiceDate
 		,intShipViaId
 		,strPONumber
 		,intTermId
@@ -75,6 +72,7 @@ BEGIN
 		,intPaymentMethodId
 		,strComments
 		,intAccountId
+		,@InvoiceDate
 		,0
 		,0
 		,strShipToAddress
@@ -101,28 +99,34 @@ BEGIN
 
 	INSERT INTO tblARInvoiceDetail(
 		intInvoiceId
+		,intCompanyLocationId
 		,intItemId
 		,strItemDescription
+		,intItemUOMId
 		,dblQtyOrdered
 		,dblQtyShipped
 		,dblPrice
 		,dblTotal
+		,intAccountId
 		,intConcurrencyId)
 	SELECT
 		@NewId
+		,intCompanyLocationId
 		,intItemId
 		,strItemDescription
+		,intItemUOMId
 		,dblQtyOrdered
 		,dblQtyShipped
 		,dblPrice
 		,dblTotal
-		,intConcurrencyId
+		,intAccountId
+		,0
 	FROM
 		tblARInvoiceDetail
 	WHERE
 		intInvoiceId = @InvoiceId	
 
-	SET @NewInvoiceId = @NewId
+	SET  @NewInvoiceNumber = (SELECT strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @NewId)
 
-	Return @NewInvoiceId
+	Return @NewId
 END
