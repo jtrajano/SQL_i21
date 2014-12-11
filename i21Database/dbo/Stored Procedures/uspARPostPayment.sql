@@ -873,7 +873,7 @@ BEGIN
 			WHERE	intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
 
 			UPDATE tblARPaymentDetail
-				SET tblARPaymentDetail.dblAmountDue = (B.dblAmountDue) - (B.dblPayment + B.dblDiscount)
+				   SET tblARPaymentDetail.dblAmountDue = (B.dblInvoiceTotal) - (B.dblPayment + B.dblDiscount)
 			FROM tblARPayment A
 				LEFT JOIN tblARPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
