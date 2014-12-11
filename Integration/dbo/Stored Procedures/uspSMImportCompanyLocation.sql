@@ -464,7 +464,6 @@ BEGIN
 
 				AS
 			BEGIN
-					
-			END
-			')
+					Return 0
+			END')
 END

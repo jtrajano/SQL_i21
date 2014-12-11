@@ -1673,6 +1673,6 @@ BEGIN
 				,@UpdatedCount		int				= 0 OUTPUT
 				AS
 			BEGIN
-			
+				Return 0	
 			END	')
 END
