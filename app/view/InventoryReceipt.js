@@ -1290,10 +1290,32 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                 },
                                                 items: [
                                                     {
-                                                        xtype: 'combobox',
+                                                        xtype: 'gridcombobox',
+                                                        columns: [
+                                                            {
+                                                                dataIndex: 'intEquipmentLengthId',
+                                                                dataType: 'numeric',
+                                                                text: 'Equipment Length Id',
+                                                                hidden: true
+                                                            },
+                                                            {
+                                                                dataIndex: 'strEquipmentLength',
+                                                                dataType: 'string',
+                                                                text: 'Equipment Length',
+                                                                flex: 1
+                                                            },
+                                                            {
+                                                                dataIndex: 'strDescription',
+                                                                dataType: 'string',
+                                                                text: 'Description',
+                                                                flex: 1
+                                                            }
+                                                        ],
                                                         itemId: 'cboTrailerType',
                                                         fieldLabel: 'Trailer Type',
-                                                        labelWidth: 145
+                                                        labelWidth: 145,
+                                                        displayField: 'strEquipmentLength',
+                                                        valueField: 'intEquipmentLengthId'
                                                     },
                                                     {
                                                         xtype: 'datefield',

@@ -167,6 +167,7 @@ namespace iRely.Inventory.Model
         public DbSet<tblICReadingPoint> tblICReadingPoints { get; set; }
         public DbSet<tblICRestriction> tblICRestrictions { get; set; }
         public DbSet<tblICSku> tblICSkus { get; set; }
+        public DbSet<tblICEquipmentLength> tblICEquipmentLengths { get; set; }
 
         public DbSet<tblICInventoryReceipt> tblICInventoryReceipts { get; set; }
         public DbSet<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
@@ -289,6 +290,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICReadingPointMap());
             modelBuilder.Configurations.Add(new tblICRestrictionMap());
             modelBuilder.Configurations.Add(new tblICSkuMap());
+            modelBuilder.Configurations.Add(new tblICEquipmentLengthMap());
 
             modelBuilder.Configurations.Add(new tblICInventoryReceiptMap());
             modelBuilder.Configurations.Add(new tblICInventoryReceiptInspectionMap());

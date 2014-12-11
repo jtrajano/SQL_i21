@@ -18,6 +18,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
     alias: 'viewmodel.inventoryreceipt',
 
     requires: [
+        'Inventory.store.BufferedEquipmentLength',
         'Inventory.store.BufferedCompactItem',
         'Inventory.store.BufferedItemUnitMeasure',
         'Inventory.store.BufferedPackType',
@@ -133,6 +134,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
         freightTerm: {
             type: 'FreightTermsBuffered'
+        },
+        equipmentLength: {
+            type: 'inventorybufferedequipmentlength'
         }
     },
 

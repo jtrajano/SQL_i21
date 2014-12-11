@@ -3051,6 +3051,30 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "columns": [
+                                                    "[",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'intEquipmentLengthId',",
+                                                    "\t\tdataType: 'numeric',",
+                                                    "\t\ttext: 'Equipment Length Id',",
+                                                    "\t\thidden: true",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strEquipmentLength',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Equipment Length',",
+                                                    "\t\tflex: 1",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strDescription',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Description',",
+                                                    "\t\tflex: 1",
+                                                    "\t}",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "displayField": "strEquipmentLength",
                                                 "fieldLabel": "Trailer Type",
                                                 "itemId": "cboTrailerType",
                                                 "labelWidth": 145,
@@ -3058,10 +3082,21 @@
                                                 "layout|margins": null,
                                                 "name": null,
                                                 "readOnly": null,
+                                                "valueField": "intEquipmentLengthId",
                                                 "width": null
                                             },
                                             "name": "MyComboBox12",
-                                            "designerId": "56e02b19-ead2-4f28-bd03-fb27eda0de1c"
+                                            "configAlternates": {
+                                                "columns": "array"
+                                            },
+                                            "designerId": "56e02b19-ead2-4f28-bd03-fb27eda0de1c",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.form.field.Date",

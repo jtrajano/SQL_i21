@@ -138,11 +138,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 //            txtInvoiceMargin: '{current.strMessage}',
 
             // ---- EDI tab
-            cboTrailerType: '{current.intTrailerTypeId}',
+            cboTrailerType: {
+                value: '{current.intTrailerTypeId}',
+                store: '{equipmentLength}'
+            },
             txtTrailerArrivalDate: '{current.dteTrailerArrivalDate}',
             txtTrailerArrivalTime: '{current.dteTrailerArrivalTime}',
             txtSealNo: '{current.strSealNo}',
-            cboSealStatus: '{current.strSealStatus}',
+            cboSealStatus: {
+                value: '{current.strSealStatus}',
+                store: '{sealStatuses}'
+            },
             txtReceiveTime: '{current.dteReceiveTime}',
             txtActualTempReading: '{current.dblActualTempReading}'
 
