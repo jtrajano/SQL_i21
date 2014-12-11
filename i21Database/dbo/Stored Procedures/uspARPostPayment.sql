@@ -423,10 +423,10 @@ BEGIN
 			,GLAccnt.strDescription
 			,C.strCustomerNumber
 			,A.dtmDatePaid
-			,dblDebit			= CASE WHEN @post = 1 THEN A.dblAmountPaid ELSE 0 END
-			,dblCredit			= CASE WHEN @post = 1 THEN 0 ELSE A.dblAmountPaid END
-			,dblDebitUnit		= CASE WHEN @post = 1 THEN ISNULL(A.dblAmountPaid, 0)  * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END
-			,dblCreditUnit		= CASE WHEN @post = 1 THEN 0 ELSE ISNULL(A.dblAmountPaid, 0) * ISNULL(U.dblLbsPerUnit, 0) END
+			,dblDebit			= CASE WHEN @post = 1 THEN SUM(A.dblAmountPaid) ELSE 0 END
+			,dblCredit			= CASE WHEN @post = 1 THEN 0 ELSE SUM(A.dblAmountPaid) END
+			,dblDebitUnit		= CASE WHEN @post = 1 THEN SUM(ISNULL(A.dblAmountPaid, 0)  * ISNULL(U.dblLbsPerUnit, 0)) ELSE 0 END
+			,dblCreditUnit		= CASE WHEN @post = 1 THEN 0 ELSE SUM(ISNULL(A.dblAmountPaid, 0) * ISNULL(U.dblLbsPerUnit, 0)) END
 			,DATEADD(dd, DATEDIFF(dd, 0, A.dtmDatePaid), 0)
 			,CASE WHEN @post = 1 THEN 0 ELSE 1 END
 			,1
@@ -452,7 +452,14 @@ BEGIN
 				ON A.intAccountId = U.intAccountId
 		INNER JOIN
 			#tmpARReceivablePostData P
-				ON A.intPaymentId = P.intPaymentId					
+				ON A.intPaymentId = P.intPaymentId
+		GROUP BY
+			A.intPaymentId
+			,A.strRecordNumber
+			,A.intAccountId
+			,GLAccnt.strDescription
+			,C.strCustomerNumber
+			,A.dtmDatePaid
 		
 		UNION ALL
 		
@@ -464,10 +471,10 @@ BEGIN
 			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = L.intSalesDiscounts)
 			,C.strCustomerNumber
 			,A.dtmDatePaid
-			,dblDebit			= CASE WHEN @post = 1 THEN B.dblDiscount ELSE 0 END
-			,dblCredit			= CASE WHEN @post = 1 THEN 0 ELSE B.dblDiscount  END
-			,dblDebitUnit		= CASE WHEN @post = 1 THEN ISNULL(B.dblDiscount, 0)  * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END
-			,dblCreditUnit		= CASE WHEN @post = 1 THEN 0 ELSE ISNULL(B.dblDiscount, 0) * ISNULL(U.dblLbsPerUnit, 0) END
+			,dblDebit			= CASE WHEN @post = 1 THEN SUM(B.dblDiscount) ELSE 0 END
+			,dblCredit			= CASE WHEN @post = 1 THEN 0 ELSE SUM(B.dblDiscount)  END
+			,dblDebitUnit		= CASE WHEN @post = 1 THEN SUM(ISNULL(B.dblDiscount, 0)  * ISNULL(U.dblLbsPerUnit, 0)) ELSE 0 END
+			,dblCreditUnit		= CASE WHEN @post = 1 THEN 0 ELSE SUM(ISNULL(B.dblDiscount, 0) * ISNULL(U.dblLbsPerUnit, 0)) END
 			,DATEADD(dd, DATEDIFF(dd, 0, A.dtmDatePaid), 0)
 			,CASE WHEN @post = 1 THEN 0 ELSE 1 END
 			,1
@@ -500,6 +507,13 @@ BEGIN
 		WHERE
 			B.dblAmountDue = (B.dblPayment + B.dblDiscount)
 			AND B.dblDiscount <> 0
+		GROUP BY
+			A.intPaymentId
+			,A.strRecordNumber
+			,L.intSalesDiscounts
+			,C.strCustomerNumber
+			,A.dtmDatePaid			
+			
 		
 		--CREDIT
 		UNION ALL 
@@ -510,20 +524,20 @@ BEGIN
 				,D.strCustomerNumber
 				,A.dtmDatePaid
 				,dblDebit			= CASE WHEN @post = 1 THEN 0 
-											ELSE (CASE WHEN (B.dblAmountDue = B.dblPayment + B.dblDiscount) --add discount only if fully paid
+											ELSE SUM((CASE WHEN (B.dblAmountDue = B.dblPayment + B.dblDiscount) --add discount only if fully paid
 												THEN B.dblPayment + B.dblDiscount
-												ELSE B.dblPayment END) END
-				,dblCredit			= CASE WHEN @post = 1 THEN (CASE WHEN (B.dblAmountDue = B.dblPayment + B.dblDiscount) --add discount only if fully paid
+												ELSE B.dblPayment END)) END
+				,dblCredit			= CASE WHEN @post = 1 THEN SUM((CASE WHEN (B.dblAmountDue = B.dblPayment + B.dblDiscount) --add discount only if fully paid
 												THEN B.dblPayment + B.dblDiscount
-												ELSE B.dblPayment END) 
+												ELSE B.dblPayment END))
 											ELSE 0 END 
 				,dblDebitUnit			= CASE WHEN @post = 1 THEN 0
-										  ELSE (CASE WHEN (B.dblAmountDue = B.dblPayment + B.dblDiscount) --add discount only if fully paid
+										  ELSE SUM((CASE WHEN (B.dblAmountDue = B.dblPayment + B.dblDiscount) --add discount only if fully paid
 												THEN B.dblPayment + B.dblDiscount
-												ELSE B.dblPayment END)  * ISNULL(U.dblLbsPerUnit, 0) END
-				,dblCreditUnit		= CASE WHEN @post = 1 THEN (CASE WHEN (B.dblAmountDue = B.dblPayment + B.dblDiscount) --add discount only if fully paid
+												ELSE B.dblPayment END)  * ISNULL(U.dblLbsPerUnit, 0)) END
+				,dblCreditUnit		= CASE WHEN @post = 1 THEN SUM((CASE WHEN (B.dblAmountDue = B.dblPayment + B.dblDiscount) --add discount only if fully paid
 												THEN B.dblPayment + B.dblDiscount
-												ELSE B.dblPayment END) * ISNULL(U.dblLbsPerUnit, 0)
+												ELSE B.dblPayment END) * ISNULL(U.dblLbsPerUnit, 0))
 										  ELSE 0 END
 				,DATEADD(dd, DATEDIFF(dd, 0, A.dtmDatePaid), 0)
 				,CASE WHEN @post = 1 THEN 0 ELSE 1 END
@@ -553,6 +567,12 @@ BEGIN
 				ON A.intPaymentId = P.intPaymentId 
 		WHERE
 			B.dblPayment <> 0
+		GROUP BY
+			A.intPaymentId
+			,A.strRecordNumber
+			,B.intAccountId
+			,D.strCustomerNumber
+			,A.dtmDatePaid				
 
 				
 		UNION ALL	
@@ -565,10 +585,10 @@ BEGIN
 			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = B.intAccountId)
 			,C.strCustomerNumber
 			,A.dtmDatePaid
-			,dblDebit			= CASE WHEN @post = 1 THEN 0 ELSE B.dblDiscount END
-			,dblCredit			= CASE WHEN @post = 1 THEN B.dblDiscount ELSE 0  END
-			,dblDebitUnit		= CASE WHEN @post = 1 THEN 0 ELSE ISNULL(B.dblDiscount, 0)  * ISNULL(U.dblLbsPerUnit, 0) END
-			,dblCreditUnit		= CASE WHEN @post = 1 THEN ISNULL(B.dblDiscount, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END
+			,dblDebit			= CASE WHEN @post = 1 THEN 0 ELSE SUM(B.dblDiscount) END
+			,dblCredit			= CASE WHEN @post = 1 THEN SUM(B.dblDiscount) ELSE 0  END
+			,dblDebitUnit		= CASE WHEN @post = 1 THEN 0 ELSE SUM(ISNULL(B.dblDiscount, 0)  * ISNULL(U.dblLbsPerUnit, 0)) END
+			,dblCreditUnit		= CASE WHEN @post = 1 THEN SUM(ISNULL(B.dblDiscount, 0) * ISNULL(U.dblLbsPerUnit, 0)) ELSE 0 END
 			,DATEADD(dd, DATEDIFF(dd, 0, A.dtmDatePaid), 0)
 			,CASE WHEN @post = 1 THEN 0 ELSE 1 END
 			,1
@@ -598,6 +618,12 @@ BEGIN
 		WHERE
 			B.dblAmountDue = (B.dblPayment + B.dblDiscount) --fully paid
 			AND B.dblDiscount <> 0
+		GROUP BY
+			A.intPaymentId
+			,A.strRecordNumber
+			,B.intAccountId
+			,C.strCustomerNumber
+			,A.dtmDatePaid				
 
 
 --=====================================================================================================================================
@@ -1023,10 +1049,10 @@ ELSE
 			,GLAccnt.strDescription
 			,C.strCustomerNumber
 			,A.dtmDatePaid
-			,dblDebit		= (CASE WHEN @post = 1 THEN A.dblAmountPaid ELSE 0 END)
-			,dblCredit		= (CASE WHEN @post = 1 THEN 0 ELSE A.dblAmountPaid END)
-			,dblDebitUnit	= (CASE WHEN @post = 1 THEN (ISNULL(A.dblAmountPaid, 0))  * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END)
-			,dblCreditUnit	= (CASE WHEN @post = 1 THEN 0 ELSE (ISNULL(A.dblAmountPaid, 0)) * ISNULL(U.dblLbsPerUnit, 0) END)
+			,dblDebit		= (CASE WHEN @post = 1 THEN SUM(A.dblAmountPaid) ELSE 0 END)
+			,dblCredit		= (CASE WHEN @post = 1 THEN 0 ELSE SUM(A.dblAmountPaid) END)
+			,dblDebitUnit	= (CASE WHEN @post = 1 THEN SUM(ISNULL(A.dblAmountPaid, 0)  * ISNULL(U.dblLbsPerUnit, 0)) ELSE 0 END)
+			,dblCreditUnit	= (CASE WHEN @post = 1 THEN 0 ELSE SUM(ISNULL(A.dblAmountPaid, 0) * ISNULL(U.dblLbsPerUnit, 0)) END)
 			,A.dtmDatePaid
 			,CASE WHEN @post = 1 THEN 0 ELSE 1 END
 			,1
@@ -1052,6 +1078,13 @@ ELSE
 		INNER JOIN
 			#tmpARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId	
+		GROUP BY
+			 strRecordNumber
+			,A.intPaymentId
+			,A.intAccountId
+			,GLAccnt.strDescription
+			,C.strCustomerNumber
+			,A.dtmDatePaid							
 
 		--Discount
 		UNION ALL
@@ -1062,10 +1095,10 @@ ELSE
 			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = L.intSalesDiscounts)
 			,C.strCustomerNumber
 			,A.dtmDatePaid
-			,dblDebit			= CASE WHEN @post = 1 THEN B.dblDiscount ELSE 0 END
-			,dblCredit			= CASE WHEN @post = 1 THEN 0 ELSE B.dblDiscount  END
-			,dblDebitUnit		= CASE WHEN @post = 1 THEN ISNULL(B.dblDiscount, 0)  * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END
-			,dblCreditUnit		= CASE WHEN @post = 1 THEN 0 ELSE ISNULL(B.dblDiscount, 0) * ISNULL(U.dblLbsPerUnit, 0) END
+			,dblDebit			= CASE WHEN @post = 1 THEN SUM(B.dblDiscount) ELSE 0 END
+			,dblCredit			= CASE WHEN @post = 1 THEN 0 ELSE SUM(B.dblDiscount)  END
+			,dblDebitUnit		= CASE WHEN @post = 1 THEN SUM(ISNULL(B.dblDiscount, 0)  * ISNULL(U.dblLbsPerUnit, 0)) ELSE 0 END
+			,dblCreditUnit		= CASE WHEN @post = 1 THEN 0 ELSE SUM(ISNULL(B.dblDiscount, 0) * ISNULL(U.dblLbsPerUnit, 0)) END
 			,A.dtmDatePaid
 			,CASE WHEN @post = 1 THEN 0 ELSE 1 END
 			,1
@@ -1099,6 +1132,12 @@ ELSE
 					  WHEN  @post = 0 AND B.dblAmountDue = 0 THEN 1 --fully paid when posted
 					  ELSE 0 END)
 			AND B.dblDiscount <> 0
+		GROUP BY
+			 strRecordNumber
+			,A.intPaymentId
+			,L.intSalesDiscounts
+			,C.strCustomerNumber
+			,A.dtmDatePaid					
 
 		
 		---- CREDIT SIDE
@@ -1110,20 +1149,20 @@ ELSE
 				,D.strCustomerNumber
 				,A.dtmDatePaid
 				,dblDebit			= CASE WHEN @post = 1 THEN 0 
-											ELSE (CASE WHEN (B.dblAmountDue = B.dblPayment + B.dblDiscount) --add discount only if fully paid
+											ELSE SUM((CASE WHEN (B.dblAmountDue = B.dblPayment + B.dblDiscount) --add discount only if fully paid
 												THEN B.dblPayment + B.dblDiscount
-												ELSE B.dblPayment END) END
-				,dblCredit			= CASE WHEN @post = 1 THEN (CASE WHEN (B.dblAmountDue = B.dblPayment + B.dblDiscount) --add discount only if fully paid
+												ELSE B.dblPayment END)) END
+				,dblCredit			= CASE WHEN @post = 1 THEN SUM((CASE WHEN (B.dblAmountDue = B.dblPayment + B.dblDiscount) --add discount only if fully paid
 												THEN B.dblPayment + B.dblDiscount
-												ELSE B.dblPayment END) 
+												ELSE B.dblPayment END))
 											ELSE 0 END 
 				,dblDebitUnit			= CASE WHEN @post = 1 THEN 0
-										  ELSE (CASE WHEN (B.dblAmountDue = B.dblPayment + B.dblDiscount) --add discount only if fully paid
+										  ELSE SUM((CASE WHEN (B.dblAmountDue = B.dblPayment + B.dblDiscount) --add discount only if fully paid
 												THEN B.dblPayment + B.dblDiscount
-												ELSE B.dblPayment END)  * ISNULL(U.dblLbsPerUnit, 0) END
-				,dblCreditUnit		= CASE WHEN @post = 1 THEN (CASE WHEN (B.dblAmountDue = B.dblPayment + B.dblDiscount) --add discount only if fully paid
+												ELSE B.dblPayment END)  * ISNULL(U.dblLbsPerUnit, 0)) END
+				,dblCreditUnit		= CASE WHEN @post = 1 THEN SUM((CASE WHEN (B.dblAmountDue = B.dblPayment + B.dblDiscount) --add discount only if fully paid
 												THEN B.dblPayment + B.dblDiscount
-												ELSE B.dblPayment END) * ISNULL(U.dblLbsPerUnit, 0)
+												ELSE B.dblPayment END) * ISNULL(U.dblLbsPerUnit, 0))
 										  ELSE 0 END
 				,A.dtmDatePaid
 				,CASE WHEN @post = 1 THEN 0 ELSE 1 END
@@ -1152,6 +1191,12 @@ ELSE
 				ON A.intPaymentId = P.intPaymentId 				
 		WHERE
 			B.dblPayment <> 0
+		GROUP BY
+			strRecordNumber
+			,A.intPaymentId
+			,B.intAccountId
+			,D.strCustomerNumber
+			,A.dtmDatePaid					
 		
 		
 		UNION ALL	
@@ -1164,10 +1209,10 @@ ELSE
 			,(SELECT strDescription FROM tblGLAccount WHERE intAccountId = B.intAccountId)
 			,C.strCustomerNumber
 			,A.dtmDatePaid
-			,dblDebit			= CASE WHEN @post = 1 THEN 0 ELSE B.dblDiscount END
-			,dblCredit			= CASE WHEN @post = 1 THEN B.dblDiscount ELSE 0  END
-			,dblDebitUnit		= CASE WHEN @post = 1 THEN 0 ELSE ISNULL(B.dblDiscount, 0)  * ISNULL(U.dblLbsPerUnit, 0) END
-			,dblCreditUnit		= CASE WHEN @post = 1 THEN ISNULL(B.dblDiscount, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END
+			,dblDebit			= CASE WHEN @post = 1 THEN 0 ELSE SUM(B.dblDiscount) END
+			,dblCredit			= CASE WHEN @post = 1 THEN SUM(B.dblDiscount) ELSE 0  END
+			,dblDebitUnit		= CASE WHEN @post = 1 THEN 0 ELSE SUM(ISNULL(B.dblDiscount, 0)  * ISNULL(U.dblLbsPerUnit, 0)) END
+			,dblCreditUnit		= CASE WHEN @post = 1 THEN SUM(ISNULL(B.dblDiscount, 0) * ISNULL(U.dblLbsPerUnit, 0)) ELSE 0 END
 			,DATEADD(dd, DATEDIFF(dd, 0, A.dtmDatePaid), 0)
 			,CASE WHEN @post = 1 THEN 0 ELSE 1 END
 			,1
@@ -1196,6 +1241,12 @@ ELSE
 		WHERE
 			B.dblAmountDue = (B.dblPayment + B.dblDiscount) --fully paid
 			AND B.dblDiscount <> 0
+		GROUP BY
+			A.strRecordNumber
+			,A.intPaymentId
+			,B.intAccountId 
+			,C.strCustomerNumber
+			,A.dtmDatePaid			
 		
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
