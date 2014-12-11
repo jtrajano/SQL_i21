@@ -29,12 +29,12 @@ Ext.define('Inventory.view.Item', {
         'Ext.grid.Panel',
         'Ext.grid.column.Number',
         'Ext.form.field.Number',
+        'Ext.grid.column.Check',
         'Ext.grid.View',
         'Ext.grid.plugin.CellEditing',
         'Ext.selection.CheckboxModel',
         'Ext.form.field.Checkbox',
         'Ext.form.field.Date',
-        'Ext.grid.column.Check',
         'Ext.grid.column.Date',
         'Ext.toolbar.Paging'
     ],
@@ -421,7 +421,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colDetailUnitMeasure',
-                                                        width: 70,
+                                                        minWidth: 100,
                                                         dataIndex: 'intUnitMeasureId',
                                                         text: 'Unit Measure',
                                                         flex: 1.3,
@@ -451,6 +451,18 @@ Ext.define('Inventory.view.Item', {
                                                                     dataType: 'boolean',
                                                                     text: 'Default',
                                                                     flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intDecimalCalculation',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Decimal Places for Calculation',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intDecimalDisplay',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Decimal Places for Display',
+                                                                    hidden: true
                                                                 }
                                                             ],
                                                             itemId: 'cboDetailUnitMeasure',
@@ -502,12 +514,58 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colDetailDescription',
                                                         dataIndex: 'string',
+                                                        itemId: 'colDetailDescription',
+                                                        minWidth: 150,
                                                         text: 'Description',
                                                         flex: 2,
                                                         editor: {
                                                             xtype: 'textfield'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'checkcolumn',
+                                                        itemId: 'colStockUnit',
+                                                        text: 'Stock Unit'
+                                                    },
+                                                    {
+                                                        xtype: 'checkcolumn',
+                                                        itemId: 'colAllowSale',
+                                                        minWidth: 140,
+                                                        text: 'Allow Sale in Stock Unit'
+                                                    },
+                                                    {
+                                                        xtype: 'checkcolumn',
+                                                        itemId: 'colAllowPurchase',
+                                                        minWidth: 150,
+                                                        text: 'Allow Purchase in Stock Unit'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colConvertToStock',
+                                                        minWidth: 150,
+                                                        align: 'right',
+                                                        dataIndex: 'number',
+                                                        text: 'Convert to Stock UOM',
+                                                        format: '0',
+                                                        editor: {
+                                                            xtype: 'numberfield',
+                                                            fieldStyle: 'text-align:right',
+                                                            hideTrigger: true
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colConvertFromStock',
+                                                        minWidth: 150,
+                                                        align: 'right',
+                                                        dataIndex: 'number',
+                                                        text: 'Convert From Stock UOM',
+                                                        format: '0',
+                                                        editor: {
+                                                            xtype: 'numberfield',
+                                                            fieldStyle: 'text-align:right',
+                                                            hideTrigger: true
                                                         }
                                                     },
                                                     {
@@ -569,7 +627,6 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colDetailMaxQty',
-                                                        width: 62,
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Max Qty',

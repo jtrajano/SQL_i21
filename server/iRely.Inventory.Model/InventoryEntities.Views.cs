@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetse2d63178bde3eedd186cebbc262f69f94fc19bf0b91bd76bec0051c5b1c7e323))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets6f7ce6421a8af8b8af4cc0f07b79589bd2c1c284b3feed8c29e2360a48f4b78b))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetse2d63178bde3eedd186cebbc262f69f94fc19bf0b91bd76bec0051c5b1c7e323 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets6f7ce6421a8af8b8af4cc0f07b79589bd2c1c284b3feed8c29e2360a48f4b78b : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "e2d63178bde3eedd186cebbc262f69f94fc19bf0b91bd76bec0051c5b1c7e323"; }
+            get { return "6f7ce6421a8af8b8af4cc0f07b79589bd2c1c284b3feed8c29e2360a48f4b78b"; }
         }
 
         /// <summary>
@@ -1213,14 +1213,15 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICUnitMeasure
-        [CodeFirstDatabaseSchema.tblICUnitMeasure](T1.tblICUnitMeasure_intUnitMeasureId, T1.tblICUnitMeasure_strUnitMeasure, T1.tblICUnitMeasure_strSymbol, T1.tblICUnitMeasure_strUnitType, T1.tblICUnitMeasure_ysnDefault, T1.tblICUnitMeasure_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICUnitMeasure](T1.tblICUnitMeasure_intUnitMeasureId, T1.tblICUnitMeasure_strUnitMeasure, T1.tblICUnitMeasure_strSymbol, T1.tblICUnitMeasure_strUnitType, T1.tblICUnitMeasure_intDecimalDisplay, T1.tblICUnitMeasure_intDecimalCalculation, T1.tblICUnitMeasure_intConcurrencyId)
     FROM (
         SELECT 
             T.intUnitMeasureId AS tblICUnitMeasure_intUnitMeasureId, 
             T.strUnitMeasure AS tblICUnitMeasure_strUnitMeasure, 
             T.strSymbol AS tblICUnitMeasure_strSymbol, 
             T.strUnitType AS tblICUnitMeasure_strUnitType, 
-            T.ysnDefault AS tblICUnitMeasure_ysnDefault, 
+            T.intDecimalDisplay AS tblICUnitMeasure_intDecimalDisplay, 
+            T.intDecimalCalculation AS tblICUnitMeasure_intDecimalCalculation, 
             T.intConcurrencyId AS tblICUnitMeasure_intConcurrencyId, 
             True AS _from0
         FROM InventoryEntities.tblICUnitMeasures AS T
@@ -2928,7 +2929,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemUOM
-        [CodeFirstDatabaseSchema.tblICItemUOM](T1.tblICItemUOM_intItemUOMId, T1.tblICItemUOM_intItemId, T1.tblICItemUOM_intUnitMeasureId, T1.tblICItemUOM_dblUnitQty, T1.tblICItemUOM_dblSellQty, T1.tblICItemUOM_dblWeight, T1.tblICItemUOM_strDescription, T1.tblICItemUOM_dblLength, T1.tblICItemUOM_dblWidth, T1.tblICItemUOM_dblHeight, T1.tblICItemUOM_dblVolume, T1.tblICItemUOM_dblMaxQty, T1.tblICItemUOM_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICItemUOM](T1.tblICItemUOM_intItemUOMId, T1.tblICItemUOM_intItemId, T1.tblICItemUOM_intUnitMeasureId, T1.tblICItemUOM_dblUnitQty, T1.tblICItemUOM_dblSellQty, T1.tblICItemUOM_dblWeight, T1.tblICItemUOM_strDescription, T1.tblICItemUOM_ysnStockUnit, T1.tblICItemUOM_ysnAllowPurchase, T1.tblICItemUOM_ysnAllowSale, T1.tblICItemUOM_dblConvertToStock, T1.tblICItemUOM_dblConvertFromStock, T1.tblICItemUOM_dblLength, T1.tblICItemUOM_dblWidth, T1.tblICItemUOM_dblHeight, T1.tblICItemUOM_dblVolume, T1.tblICItemUOM_dblMaxQty, T1.tblICItemUOM_intConcurrencyId)
     FROM (
         SELECT 
             T.intItemUOMId AS tblICItemUOM_intItemUOMId, 
@@ -2938,6 +2939,11 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblSellQty AS tblICItemUOM_dblSellQty, 
             T.dblWeight AS tblICItemUOM_dblWeight, 
             T.strDescription AS tblICItemUOM_strDescription, 
+            T.ysnStockUnit AS tblICItemUOM_ysnStockUnit, 
+            T.ysnAllowPurchase AS tblICItemUOM_ysnAllowPurchase, 
+            T.ysnAllowSale AS tblICItemUOM_ysnAllowSale, 
+            T.dblConvertToStock AS tblICItemUOM_dblConvertToStock, 
+            T.dblConvertFromStock AS tblICItemUOM_dblConvertFromStock, 
             T.dblLength AS tblICItemUOM_dblLength, 
             T.dblWidth AS tblICItemUOM_dblWidth, 
             T.dblHeight AS tblICItemUOM_dblHeight, 
@@ -3413,14 +3419,15 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICUnitMeasures
-        [iRely.Inventory.Model.tblICUnitMeasure](T1.tblICUnitMeasure_intUnitMeasureId, T1.tblICUnitMeasure_strUnitMeasure, T1.tblICUnitMeasure_strSymbol, T1.tblICUnitMeasure_strUnitType, T1.tblICUnitMeasure_ysnDefault, T1.tblICUnitMeasure_intConcurrencyId)
+        [iRely.Inventory.Model.tblICUnitMeasure](T1.tblICUnitMeasure_intUnitMeasureId, T1.tblICUnitMeasure_strUnitMeasure, T1.tblICUnitMeasure_strSymbol, T1.tblICUnitMeasure_strUnitType, T1.tblICUnitMeasure_intDecimalDisplay, T1.tblICUnitMeasure_intDecimalCalculation, T1.tblICUnitMeasure_intConcurrencyId)
     FROM (
         SELECT 
             T.intUnitMeasureId AS tblICUnitMeasure_intUnitMeasureId, 
             T.strUnitMeasure AS tblICUnitMeasure_strUnitMeasure, 
             T.strSymbol AS tblICUnitMeasure_strSymbol, 
             T.strUnitType AS tblICUnitMeasure_strUnitType, 
-            T.ysnDefault AS tblICUnitMeasure_ysnDefault, 
+            T.intDecimalDisplay AS tblICUnitMeasure_intDecimalDisplay, 
+            T.intDecimalCalculation AS tblICUnitMeasure_intDecimalCalculation, 
             T.intConcurrencyId AS tblICUnitMeasure_intConcurrencyId, 
             True AS _from0
         FROM CodeFirstDatabase.tblICUnitMeasure AS T
@@ -5150,7 +5157,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemUOMs
-        [iRely.Inventory.Model.tblICItemUOM](T1.tblICItemUOM_intItemUOMId, T1.tblICItemUOM_intItemId, T1.tblICItemUOM_intUnitMeasureId, T1.tblICItemUOM_dblUnitQty, T1.tblICItemUOM_dblSellQty, T1.tblICItemUOM_dblWeight, T1.tblICItemUOM_strDescription, T1.tblICItemUOM_dblLength, T1.tblICItemUOM_dblWidth, T1.tblICItemUOM_dblHeight, T1.tblICItemUOM_dblVolume, T1.tblICItemUOM_dblMaxQty, T1.tblICItemUOM_intConcurrencyId)
+        [iRely.Inventory.Model.tblICItemUOM](T1.tblICItemUOM_intItemUOMId, T1.tblICItemUOM_intItemId, T1.tblICItemUOM_intUnitMeasureId, T1.tblICItemUOM_dblUnitQty, T1.tblICItemUOM_dblSellQty, T1.tblICItemUOM_dblWeight, T1.tblICItemUOM_strDescription, T1.tblICItemUOM_ysnStockUnit, T1.tblICItemUOM_ysnAllowPurchase, T1.tblICItemUOM_ysnAllowSale, T1.tblICItemUOM_dblConvertToStock, T1.tblICItemUOM_dblConvertFromStock, T1.tblICItemUOM_dblLength, T1.tblICItemUOM_dblWidth, T1.tblICItemUOM_dblHeight, T1.tblICItemUOM_dblVolume, T1.tblICItemUOM_dblMaxQty, T1.tblICItemUOM_intConcurrencyId)
     FROM (
         SELECT 
             T.intItemUOMId AS tblICItemUOM_intItemUOMId, 
@@ -5160,6 +5167,11 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblSellQty AS tblICItemUOM_dblSellQty, 
             T.dblWeight AS tblICItemUOM_dblWeight, 
             T.strDescription AS tblICItemUOM_strDescription, 
+            T.ysnStockUnit AS tblICItemUOM_ysnStockUnit, 
+            T.ysnAllowPurchase AS tblICItemUOM_ysnAllowPurchase, 
+            T.ysnAllowSale AS tblICItemUOM_ysnAllowSale, 
+            T.dblConvertToStock AS tblICItemUOM_dblConvertToStock, 
+            T.dblConvertFromStock AS tblICItemUOM_dblConvertFromStock, 
             T.dblLength AS tblICItemUOM_dblLength, 
             T.dblWidth AS tblICItemUOM_dblWidth, 
             T.dblHeight AS tblICItemUOM_dblHeight, 

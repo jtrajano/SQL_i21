@@ -620,6 +620,15 @@ Ext.define('Inventory.view.ItemViewModel', {
             ]
         }
 
+    },
+
+    formulas: {
+        formatUOMDisplayDecimal: function (get) {
+            return i21.ModuleMgr.Inventory.createNumberFormat(get('intDecimalDisplay'));
+        },
+        formatUOMCalculationDecimal: function (get) {
+            return i21.ModuleMgr.Inventory.createNumberFormat(get('intDecimalCalculation'));
+        }
     }
 
 });

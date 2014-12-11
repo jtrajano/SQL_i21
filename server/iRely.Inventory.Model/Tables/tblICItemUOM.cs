@@ -18,6 +18,11 @@ namespace iRely.Inventory.Model
         public decimal? dblSellQty { get; set; }
         public decimal? dblWeight { get; set; }
         public string strDescription { get; set; }
+        public bool ysnStockUnit { get; set; }
+        public bool ysnAllowPurchase { get; set; }
+        public bool ysnAllowSale { get; set; }
+        public decimal? dblConvertToStock { get; set; }
+        public decimal? dblConvertFromStock { get; set; }
         public decimal? dblLength { get; set; }
         public decimal? dblWidth { get; set; }
         public decimal? dblHeight { get; set; }
@@ -41,6 +46,38 @@ namespace iRely.Inventory.Model
             set
             {
                 _unitmeasure = value;
+            }
+        }
+        private int _calculation;
+        [NotMapped]
+        public int intDecimalCalculation
+        {
+            get
+            {
+                if (tblICUnitMeasure != null)
+                    return tblICUnitMeasure.intDecimalCalculation;
+                else
+                    return 2;
+            }
+            set
+            {
+                _calculation = value;
+            }
+        }
+        private int _display;
+        [NotMapped]
+        public int intDecimalDisplay
+        {
+            get
+            {
+                if (tblICUnitMeasure != null)
+                    return tblICUnitMeasure.intDecimalDisplay;
+                else
+                    return 2;
+            }
+            set
+            {
+                _display = value;
             }
         }
 

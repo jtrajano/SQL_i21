@@ -76,10 +76,23 @@ Ext.define('Inventory.view.ItemViewController', {
                         store: '{uomUnitMeasure}'
                     }
                 },
-                colDetailUnitQty: 'dblUnitQty',
-                colDetailSellQty: 'dblSellQty',
-                colDetailWeight: 'dblWeight',
+                colDetailUnitQty: {
+                    dataIndex: 'dblUnitQty'
+                },
+                colDetailSellQty: {
+                    dataIndex: 'dblSellQty'
+                },
+                colDetailWeight: {
+                    dataIndex: 'dblWeight'
+                },
                 colDetailDescription: 'strDescription',
+
+                colStockUnit: 'ysnStockUnit',
+                colAllowSale: 'ysnAllowSale',
+                colAllowPurchase: 'ysnAllowPurchase',
+                colConvertToStock: 'dblConvertToStock',
+                colConvertFromStock: 'dblConvertFromStock',
+
                 colDetailLength: 'dblLength',
                 colDetailWidth: 'dblWidth',
                 colDetailHeight: 'dblHeight',
@@ -1216,6 +1229,66 @@ Ext.define('Inventory.view.ItemViewController', {
         if (combo.column.itemId === 'colDetailUnitMeasure')
         {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
+            current.set('intDecimalDisplay', records[0].get('intDecimalDisplay'));
+            current.set('intDecimalCalculation', records[0].get('intDecimalCalculation'));
+
+//            var displayDecimal = records[0].get('intDecimalDisplay');
+            var calculationDecimal = records[0].get('intDecimalCalculation');
+
+            var colConvertToStock = grid.columns[8];
+            if (colConvertToStock.getEditor()) {
+                colConvertToStock.format = '0.00';
+                colConvertToStock.getEditor().decimalPrecision = i21.ModuleMgr.Inventory.createNumberFormat(calculationDecimal);
+            }
+            var colConvertFromStock = grid.columns[9];
+            if (colConvertFromStock.getEditor()) {
+                colConvertFromStock.format = '0.00';
+                colConvertFromStock.getEditor().decimalPrecision = i21.ModuleMgr.Inventory.createNumberFormat(calculationDecimal);
+            }
+
+        }
+    },
+
+    onUOMBeforeCheckChange: function (obj, rowIndex, checked, eOpts) {
+        if (obj.dataIndex === 'ysnAllowPurchase' || obj.dataIndex === 'ysnAllowSale'){
+            var grid = obj.up('grid');
+            var selModel = grid.getSelectionModel();
+
+            if (selModel.hasSelection()){
+                var current = selModel.getSelection()[0];
+                if (current.data.ysnStockUnit !== true){
+                    return false;
+                }
+            }
+            else {
+                return false;
+            }
+        }
+    },
+
+    onUOMStockUnitCheckChange: function (obj, rowIndex, checked, eOpts) {
+        if (obj.dataIndex === 'ysnStockUnit'){
+            var grid = obj.up('grid');
+            var selModel = grid.getSelectionModel();
+
+            var current = selModel.getSelection()[0];
+
+            if (checked === true){
+                var uoms = grid.store.data.items;
+                uoms.forEach(function(uom){
+                    if (uom !== current && uom.dummy !== true){
+                        uom.set('ysnStockUnit', false);
+                        uom.set('ysnAllowPurchase', false);
+                        uom.set('ysnAllowSale', false);
+                    }
+                });
+            }
+            else {
+                if (current){
+                    current.set('ysnAllowPurchase', false);
+                    current.set('ysnAllowSale', false);
+                }
+            }
         }
     },
 
@@ -1795,6 +1868,15 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#tabSetup": {
                 tabchange: this.onItemTabChange
+            },
+            "#colStockUnit": {
+                beforecheckchange: this.onUOMStockUnitCheckChange
+            },
+            "#colAllowSale": {
+                beforecheckchange: this.onUOMBeforeCheckChange
+            },
+            "#colAllowPurchase": {
+                beforecheckchange: this.onUOMBeforeCheckChange
             }
         });
     }
