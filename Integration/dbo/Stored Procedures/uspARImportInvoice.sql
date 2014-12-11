@@ -75,7 +75,7 @@ BEGIN
 				(CASE WHEN ISDATE(agivc_net_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_net_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),--[dtmDueDate]
 				(CASE WHEN ISDATE(agivc_orig_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_orig_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),--[dtmPostDate]
 				ISNULL(Cur.intCurrencyID,0),--[intCurrencyId]
-				NULL,--agivc_loc_no to do [intCompanyLocationId]
+				(SELECT intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber  COLLATE Latin1_General_CI_AS = agivc_loc_no COLLATE Latin1_General_CI_AS),--[intCompanyLocationId]
 				Salesperson.intSalespersonId,--[intSalespersonId]
 				NULL, -- [dtmShipDate]
 				0, --to do [intShipViaId]
