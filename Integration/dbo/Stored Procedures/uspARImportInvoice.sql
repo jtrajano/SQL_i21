@@ -140,7 +140,7 @@ BEGIN
 				agstm_sls 
 			FROM agstmmst
 			INNER JOIN tblARInvoice INV ON INV.strShipToAddress  = LTRIM(RTRIM(agstm_ivc_no)) + LTRIM(RTRIM(agstm_bill_to_cus))
-				
+			WHERE agstm_un IS NOT NULL AND agstm_un_prc IS NOT NULL AND agstm_sls IS NOT NULL	
 				
 			--update strShipToAddress to null 	   
 			UPDATE tblARInvoice SET strShipToAddress = NULL WHERE intInvoiceId > @maxInvoiceId
