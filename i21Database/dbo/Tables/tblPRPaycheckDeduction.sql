@@ -9,7 +9,7 @@
 	[dblTotal] [numeric](18, 6) NULL,
 	[dtmBeginDate] [datetime] NULL,
 	[dtmEndDate] [datetime] NULL,
-	[intAccountId] [nvarchar](40) NULL,
+	[intAccountId] INT NULL,
 	[strPaidBy] [nvarchar](15) COLLATE Latin1_General_CI_AS NULL,
 	[ysnSet] [bit] NOT NULL,
 	[intSort] [int] NULL,
