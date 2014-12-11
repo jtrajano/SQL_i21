@@ -211,7 +211,7 @@ BEGIN
 END 
 
 -- Check Company preference: Allow User Self Post
-IF @ysnAllowUserSelfPost = 1 AND @intUserId <> @intCreatedEntityId AND @ysnRecap = 0 
+IF @ysnAllowUserSelfPost = 1 AND @intEntityId <> @intCreatedEntityId AND @ysnRecap = 0 
 BEGIN 
 	-- 'You cannot %s transactions you did not create. Please contact your local administrator.'
 	IF @ysnPost = 1	
