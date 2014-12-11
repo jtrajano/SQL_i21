@@ -88,10 +88,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 },
                 colDescription: 'strItemDescription',
                 colSubLocation: '',
-                colLotTracking: '',
-                colQtyOrdered: '',
-                colOpenReceive: '',
-                colReceived: '',
+                colLotTracking: 'strLotTracking',
+                colQtyOrdered: 'dblOrderQty',
+                colOpenReceive: 'dblOpenReceive',
+                colReceived: 'dblReceived',
                 colUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
@@ -187,6 +187,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             ]
         });
 
+        var colTaxDetails = grdInventoryReceipt.columns[11];
+        var btnViewTaxDetail = colTaxDetails.items[0];
+        if (btnViewTaxDetail){
+            btnViewTaxDetail.handler = function(grid, rowIndex, colIndex) {
+                var current = grid.store.data.items[rowIndex];
+                me.onViewTaxDetailsClick(current.get('intInventoryReceiptItemId'));
+            }
+        }
+
+
         return win.context;
     },
 
@@ -261,6 +271,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         {
             current.set('intItemId', records[0].get('intItemId'));
             current.set('strItemDescription', records[0].get('strDescription'));
+            current.set('strLotTracking', records[0].get('strLotTracking'));
         }
         else if (combo.column.itemId === 'colUOM')
         {
@@ -270,6 +281,23 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         {
             current.set('intPackTypeId', records[0].get('intPackTypeId'));
         }
+    },
+
+    onViewTaxDetailsClick: function (ReceiptItemId) {
+        var win = window;
+        var me = win.controller;
+        var screenName = 'Inventory.view.InventoryReceiptTaxes';
+
+        Ext.require([
+            screenName,
+                screenName + 'ViewModel',
+                screenName + 'ViewController'
+        ], function() {
+            var screen = screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
+            var view = Ext.create(screenName, { controller: screen.toLowerCase(), viewModel: screen.toLowerCase() });
+            var controller = view.getController();
+            controller.show({ id: ReceiptItemId});
+        });
     },
 
     init: function(application) {

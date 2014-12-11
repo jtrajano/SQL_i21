@@ -134,6 +134,12 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         freightTerm: {
             type: 'FreightTermsBuffered'
         }
+    },
+
+    formulas: {
+        checkReadOnly: function(get) {
+
+        }
     }
 
 });

@@ -161,6 +161,25 @@ namespace iRely.Inventory.Model
                 _itemDescription = value;
             }
         }
+        private string _lotTracking;
+        [NotMapped]
+        public string strLotTracking
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_lotTracking))
+                    if (tblICItem != null)
+                        return tblICItem.strLotTracking;
+                    else
+                        return null;
+                else
+                    return _lotTracking;
+            }
+            set
+            {
+                _lotTracking = value;
+            }
+        }
         private string _uom;
         [NotMapped]
         public string strUnitMeasure

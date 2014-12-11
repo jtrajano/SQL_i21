@@ -1496,6 +1496,12 @@
                                                             "\t\tdataType: 'string',",
                                                             "\t\ttext: 'Description',",
                                                             "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strLotTracking',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Lot Tracking',",
+                                                            "\t\thidden: true",
                                                             "\t}",
                                                             "]"
                                                         ],
@@ -1591,6 +1597,18 @@
                                                     "name": "dataType",
                                                     "type": "string"
                                                 }
+                                            ],
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyNumberField14",
+                                                    "designerId": "21d5f9b5-3eed-449f-ab1f-663a524bca5d"
+                                                }
                                             ]
                                         },
                                         {
@@ -1617,6 +1635,18 @@
                                                     "name": "dataType",
                                                     "type": "string"
                                                 }
+                                            ],
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyNumberField15",
+                                                    "designerId": "87ee2728-6433-4040-b5ae-83e6d3a906a7"
+                                                }
                                             ]
                                         },
                                         {
@@ -1642,6 +1672,18 @@
                                                     "group": "(Custom Properties)",
                                                     "name": "dataType",
                                                     "type": "string"
+                                                }
+                                            ],
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyNumberField16",
+                                                    "designerId": "878aef7e-2946-41f0-bbbf-c8eb87ef8977"
                                                 }
                                             ]
                                         },
@@ -4067,7 +4109,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging11",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

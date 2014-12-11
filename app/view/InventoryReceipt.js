@@ -687,6 +687,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     dataType: 'string',
                                                                     text: 'Description',
                                                                     flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strLotTracking',
+                                                                    dataType: 'string',
+                                                                    text: 'Lot Tracking',
+                                                                    hidden: true
                                                                 }
                                                             ],
                                                             itemId: 'cboItem',
@@ -723,7 +729,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         align: 'right',
                                                         dataIndex: 'dblQtyOrdered',
                                                         text: 'Ordered',
-                                                        format: '0,000.##'
+                                                        format: '0,000.##',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -733,7 +742,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         align: 'right',
                                                         dataIndex: 'dblQtyOrdered',
                                                         text: 'Open to Receive',
-                                                        format: '0,000.##'
+                                                        format: '0,000.##',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -743,7 +755,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         align: 'right',
                                                         dataIndex: 'dblQtyOrdered',
                                                         text: 'Received',
-                                                        format: '0,000.##'
+                                                        format: '0,000.##',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
