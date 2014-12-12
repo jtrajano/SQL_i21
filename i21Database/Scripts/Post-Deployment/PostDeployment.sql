@@ -96,5 +96,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\HD\DefaultData\1_StatusData.sql
 :R .\HD\HDEntryDataFix.sql
 
+--Contract Management
+:R .\CT\1_MasterTables.sql
 
 print 'END POST DEPLOYMENT'
