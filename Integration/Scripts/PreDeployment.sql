@@ -127,3 +127,4 @@
 :r "..\dbo\Stored Procedures\uspARImportTaxAuthority.sql"
 :r "..\dbo\Stored Procedures\uspARImportTerm.sql"
 :r "..\dbo\Stored Procedures\uspARSyncTerms.sql"
+:r "..\dbo\Stored Procedures\uspARImportPayments.sql"

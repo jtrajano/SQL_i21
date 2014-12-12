@@ -6,6 +6,7 @@ GO
 
 
 IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()) = 1
+--IF (1) = 1
 BEGIN
 
 	EXEC('CREATE PROCEDURE uspARImportPayments 
@@ -319,15 +320,16 @@ BEGIN
 END
 
 IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1
+--IF (0) = 1
 BEGIN
 	EXEC('CREATE PROCEDURE uspARImportPayments 
-	@Checking BIT = 0,  
-	@UserId INT = 0,  
-	@Total INT = 0 OUTPUT  
+			@Checking BIT = 0,  
+			@UserId INT = 0,  
+			@Total INT = 0 OUTPUT  
 
-AS  
-BEGIN  
-	SET @Total = 0
-	RETURN @Total
-ÉND')
+		AS  
+		BEGIN  
+			SET @Total = 0
+			RETURN @Total 
+		END')
 END
