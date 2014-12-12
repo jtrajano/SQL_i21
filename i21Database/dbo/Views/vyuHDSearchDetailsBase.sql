@@ -5,7 +5,7 @@
 		,intTicketId = t.intTicketId
 		,strTicketNumber = t.strTicketNumber
 		,strCustomerNumber = t.strCustomerNumber
-		,strDetails = tc.strComment
+		,strDetails = (case when tc.ysnEncoded = 1 then dbo.fnHDDecodeComment(substring(tc.strComment,4,(LEN(tc.strComment)-3))) else tc.strComment end)
 		,strNotes = tn.strNote
 	from
 		tblHDTicket t
