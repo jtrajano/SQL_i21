@@ -8,7 +8,7 @@
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICItemFactoryManufacturingCell] PRIMARY KEY ([intItemFactoryManufacturingCellId]), 
-    CONSTRAINT [FK_tblICItemFactoryManufacturingCell_tblICItemFactory] FOREIGN KEY ([intItemFactoryId]) REFERENCES [tblICItemFactory]([intItemFactoryId]), 
+    CONSTRAINT [FK_tblICItemFactoryManufacturingCell_tblICItemFactory] FOREIGN KEY ([intItemFactoryId]) REFERENCES [tblICItemFactory]([intItemFactoryId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblICItemFactoryManufacturingCell_tblICManufacturingCell] FOREIGN KEY ([intManufacturingCellId]) REFERENCES [tblICManufacturingCell]([intManufacturingCellId])
 )
 

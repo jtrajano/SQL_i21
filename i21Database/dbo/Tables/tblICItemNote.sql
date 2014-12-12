@@ -8,7 +8,7 @@
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICItemNote] PRIMARY KEY ([intItemNoteId]), 
-    CONSTRAINT [FK_tblICItemNote_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
+    CONSTRAINT [FK_tblICItemNote_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblICItemNote_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId])
 )
 
