@@ -3239,9 +3239,15 @@ Ext.define('Inventory.view.Item', {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
+                                                                                    dataIndex: 'intItemId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Item Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
                                                                                     dataIndex: 'intUnitMeasureId',
                                                                                     dataType: 'numeric',
-                                                                                    text: 'Unit Of Measure ID',
+                                                                                    text: 'Unit Of Measure Id',
                                                                                     hidden: true
                                                                                 },
                                                                                 {
@@ -3508,6 +3514,12 @@ Ext.define('Inventory.view.Item', {
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
+                                                                                {
+                                                                                    dataIndex: 'intItemId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Item Id',
+                                                                                    hidden: true
+                                                                                },
                                                                                 {
                                                                                     dataIndex: 'intUnitMeasureId',
                                                                                     dataType: 'numeric',

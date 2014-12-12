@@ -24,6 +24,7 @@ Ext.define('Inventory.view.ItemViewModel', {
         'Inventory.store.BufferedCategory',
         'Inventory.store.BufferedPatronageCategory',
         'Inventory.store.BufferedInventoryTag',
+        'Inventory.store.BufferedItemUnitMeasure',
         'Inventory.store.BufferedUnitMeasure',
         'Inventory.store.BufferedBrand',
         'Inventory.store.BufferedFuelCategory',
@@ -414,7 +415,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             type: 'companylocationbuffered'
         },
         pricingLevelUOM: {
-            type: 'inventorybuffereduom'
+            type: 'inventorybuffereditemunitmeasure'
         },
         pricingMethods: {
             autoLoad: true,
@@ -480,7 +481,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             ]
         },
         specialPricingUOM: {
-            type: 'inventorybuffereduom'
+            type: 'inventorybuffereditemunitmeasure'
         },
         discountsBy:{
             autoLoad: true,

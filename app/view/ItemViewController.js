@@ -416,7 +416,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 colPricingLevelUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
-                        store: '{pricingLevelUOM}'
+                        store: '{pricingLevelUOM}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{current.intItemId}'
+                        }]
                     }
                 },
                 colPricingLevelUnits: 'dblUnit',
@@ -458,7 +462,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 colSpecialPricingUnit: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
-                        store: '{specialPricingUOM}'
+                        store: '{specialPricingUOM}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{current.intItemId}'
+                        }]
                     }
                 },
                 colSpecialPricingQty: 'dblUnit',
