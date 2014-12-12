@@ -131,6 +131,7 @@
     <None Include="dbo\Stored Procedures\uspSMSyncPaymentMethod.sql" />
     <None Include="dbo\Stored Procedures\uspSMSyncCompanyLocation.sql" />
     <None Include="dbo\Stored Procedures\uspARSyncTerms.sql" />
+    <None Include="dbo\Stored Procedures\uspARImportPayments.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
