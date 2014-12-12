@@ -572,7 +572,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 colBundleItem: {
                     dataIndex: 'strItemNo',
                     editor: {
-                        store: '{bundleItem}'
+                        store: '{bundleItem}',
+                        defaultFilters: [{
+                            column: 'strType',
+                            value: 'Inventory Item'
+                        }]
                     }
                 },
                 colBundleQuantity: 'dblQuantity',
