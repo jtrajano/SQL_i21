@@ -18,7 +18,7 @@ Ext.define('Inventory.model.ItemAccount', {
                 inverse: {
                     role: 'tblICItemAccounts',
                     storeConfig: {
-                        complete: true,
+                        complete: false,
                         remoteFilter: true,
                         proxy: {
                             type: 'rest',

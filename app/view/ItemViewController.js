@@ -936,96 +936,168 @@ Ext.define('Inventory.view.ItemViewController', {
             case 'pgeDetails':
                 var pgeDetails = tabPanel.down('#pgeDetails');
                 var grdUnitOfMeasure = pgeDetails.down('#grdUnitOfMeasure');
-                grdUnitOfMeasure.store.load();
+                if (grdUnitOfMeasure.store.complete === true)
+                    grdUnitOfMeasure.getView().refresh();
+                else
+                    grdUnitOfMeasure.store.load();
                 break;
 
             case 'pgeSetup':
-                var pgeLocation = tabPanel.down('#pgeLocation');
-                var grdLocationStore = pgeLocation.down('#grdLocationStore');
-                grdLocationStore.store.load();
-                break;
-
+                var tabSetup = tabPanel.down('#tabSetup');
+                this.onItemTabChange(tabSetup, tabSetup.activeTab);
 
             case 'pgeLocation':
                 var pgeLocation = tabPanel.down('#pgeLocation');
                 var grdLocationStore = pgeLocation.down('#grdLocationStore');
-                grdLocationStore.store.load();
+                if (grdLocationStore.store.complete === true)
+                    grdLocationStore.getView().refresh();
+                else
+                    grdLocationStore.store.load();
                 break;
+
             case 'pgeGLAccounts':
                 var pgeGLAccounts = tabPanel.down('#pgeGLAccounts');
                 var grdGlAccounts = pgeGLAccounts.down('#grdGlAccounts');
-                grdGlAccounts.store.load();
+                if (grdGlAccounts.store.complete === true)
+                    grdGlAccounts.getView().refresh();
+                else
+                    grdGlAccounts.store.load();
                 break;
+
             case 'pgePOS':
                 var pgePOS = tabPanel.down('#pgePOS');
                 var grdCategory = pgePOS.down('#grdCategory');
-                grdCategory.store.load();
+                if (grdCategory.store.complete === true)
+                    grdCategory.getView().refresh();
+                else
+                    grdCategory.store.load();
+
                 var grdServiceLevelAgreement = pgePOS.down('#grdServiceLevelAgreement');
-                grdServiceLevelAgreement.store.load();
+                if (grdServiceLevelAgreement.store.complete === true)
+                    grdServiceLevelAgreement.getView().refresh();
+                else
+                    grdServiceLevelAgreement.store.load();
                 break;
+
             case 'pgeUPC':
                 var pgeUPC = tabPanel.down('#pgeUPC');
                 var grdUPC = pgeUPC.down('#grdUPC');
-                grdUPC.store.load();
+                if (grdUPC.store.complete === true)
+                    grdUPC.getView().refresh();
+                else
+                    grdUPC.store.load();
                 break;
+
             case 'pgeXref':
                 var pgeXref = tabPanel.down('#pgeXref');
                 var grdCustomerXref = pgeXref.down('#grdCustomerXref');
-                grdCustomerXref.store.load();
+                if (grdCustomerXref.store.complete === true)
+                    grdCustomerXref.getView().refresh();
+                else
+                    grdCustomerXref.store.load();
+
                 var grdVendorXref = pgeXref.down('#grdVendorXref');
-                grdVendorXref.store.load();
+                if (grdVendorXref.store.complete === true)
+                    grdVendorXref.getView().refresh();
+                else
+                    grdVendorXref.store.load();
                 break;
+
             case 'pgeContract':
                 var pgeContract = tabPanel.down('#pgeContract');
                 var grdContractItem = pgeContract.down('#grdContractItem');
-                grdContractItem.store.load();
-                var grdDocumentAssociation = pgeContract.down('#grdDocumentAssociation');
-                grdDocumentAssociation.store.load();
+                if (grdContractItem.store.complete === true)
+                    grdContractItem.getView().refresh();
+                else
+                    grdContractItem.store.load();
+
                 var grdCertification = pgeContract.down('#grdCertification');
-                grdCertification.store.load();
+                if (grdCertification.store.complete === true)
+                    grdCertification.getView().refresh();
+                else
+                    grdCertification.store.load();
                 break;
 
 
             case 'pgePricing':
                 var pgePricing = tabPanel.down('#pgePricing');
                 var grdPricing = pgePricing.down('#grdPricing');
-                grdPricing.store.load();
+                if (grdPricing.store.complete === true)
+                    grdPricing.getView().refresh();
+                else
+                    grdPricing.store.load();
+
                 var grdPricingLevel = pgePricing.down('#grdPricingLevel');
-                grdPricingLevel.store.load();
+                if (grdPricingLevel.store.complete === true)
+                    grdPricingLevel.getView().refresh();
+                else
+                    grdPricingLevel.store.load();
+
                 var grdSpecialPricing = pgePricing.down('#grdSpecialPricing');
-                grdSpecialPricing.store.load();
+                if (grdSpecialPricing.store.complete === true)
+                    grdSpecialPricing.getView().refresh();
+                else
+                    grdSpecialPricing.store.load();
                 break;
+
             case 'pgeStock':
                 var pgeStock = tabPanel.down('#pgeStock');
                 var grdStock = pgeStock.down('#grdStock');
-                grdStock.store.load();
+                if (grdStock.store.complete === true)
+                    grdStock.getView().refresh();
+                else
+                    grdStock.store.load();
                 break;
+
             case 'pgeAssembly':
                 var pgeAssembly = tabPanel.down('#pgeAssembly');
                 var grdAssembly = pgeAssembly.down('#grdAssembly');
-                grdAssembly.store.load();
+                if (grdAssembly.store.complete === true)
+                    grdAssembly.getView().refresh();
+                else
+                    grdAssembly.store.load();
                 break;
+
             case 'pgeBundle':
                 var pgeBundle = tabPanel.down('#pgeBundle');
                 var grdBundle = pgeBundle.down('#grdBundle');
-                grdBundle.store.load();
+                if (grdBundle.store.complete === true)
+                    grdBundle.getView().refresh();
+                else
+                    grdBundle.store.load();
                 break;
+
             case 'pgeKit':
                 var pgeKit = tabPanel.down('#pgeKit');
                 var grdKit = pgeKit.down('#grdKit');
-                grdKit.store.load();
-                var grdKitDetails = pgeKit.down('#grdKitDetails');
-                grdKitDetails.store.load();
+                if (grdKit.store.complete === true)
+                    grdKit.getView().refresh();
+                else
+                    grdKit.store.load();
                 break;
+
             case 'pgeFactory':
                 var pgeFactory = tabPanel.down('#pgeFactory');
                 var grdFactory = pgeFactory.down('#grdFactory');
-                grdFactory.store.load();
+                if (grdFactory.store.complete === true)
+                    grdFactory.getView().refresh();
+                else
+                    grdFactory.store.load();
+
+                var grdOwner = pgeFactory.down('#grdOwner');
+                if (grdOwner.store.complete === true)
+                    grdOwner.getView().refresh();
+                else
+                    grdOwner.store.load();
                 break;
+
             case 'pgeNotes':
                 var pgeNotes = tabPanel.down('#pgeNotes');
                 var grdNotes = pgeNotes.down('#grdNotes');
-                grdNotes.store.load();
+                if (grdNotes.store.complete === true)
+                    grdNotes.getView().refresh();
+                else
+                    grdNotes.store.load();
                 break;
         }
     },

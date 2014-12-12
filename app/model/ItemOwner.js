@@ -18,7 +18,6 @@ Ext.define('Inventory.model.ItemOwner', {
                 inverse: {
                     role: 'tblICItemOwners',
                     storeConfig: {
-                        complete: true,
                         remoteFilter: true,
                         proxy: {
                             type: 'rest',

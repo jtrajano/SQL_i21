@@ -18,7 +18,6 @@ Ext.define('Inventory.model.ItemLocation', {
                 inverse: {
                     role: 'tblICItemLocations',
                     storeConfig: {
-                        complete: true,
                         remoteFilter: true,
                         proxy: {
                             type: 'rest',

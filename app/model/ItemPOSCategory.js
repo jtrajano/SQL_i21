@@ -18,7 +18,6 @@ Ext.define('Inventory.model.ItemPOSCategory', {
                 inverse: {
                     role: 'tblICItemPOSCategories',
                     storeConfig: {
-                        complete: true,
                         remoteFilter: true,
                         proxy: {
                             type: 'rest',

@@ -18,7 +18,6 @@ Ext.define('Inventory.model.ItemNote', {
                 inverse: {
                     role: 'tblICItemNotes',
                     storeConfig: {
-                        complete: true,
                         remoteFilter: true,
                         proxy: {
                             type: 'rest',

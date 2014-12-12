@@ -18,7 +18,6 @@ Ext.define('Inventory.model.ItemAssembly', {
                 inverse: {
                     role: 'tblICItemAssemblies',
                     storeConfig: {
-                        complete: true,
                         remoteFilter: true,
                         proxy: {
                             type: 'rest',

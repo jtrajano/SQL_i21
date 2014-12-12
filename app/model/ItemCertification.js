@@ -18,7 +18,6 @@ Ext.define('Inventory.model.ItemCertification', {
                 inverse: {
                     role: 'tblICItemCertifications',
                     storeConfig: {
-                        complete: true,
                         remoteFilter: true,
                         proxy: {
                             type: 'rest',

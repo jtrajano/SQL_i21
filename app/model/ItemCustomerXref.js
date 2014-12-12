@@ -18,7 +18,6 @@ Ext.define('Inventory.model.ItemCustomerXref', {
                 inverse: {
                     role: 'tblICItemCustomerXrefs',
                     storeConfig: {
-                        complete: true,
                         remoteFilter: true,
                         proxy: {
                             type: 'rest',

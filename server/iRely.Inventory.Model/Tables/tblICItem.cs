@@ -14,27 +14,27 @@ namespace iRely.Inventory.Model
     {
         public tblICItem()
         {
-            this.tblICItemUOMs = new List<tblICItemUOM>();
-            this.tblICItemLocations = new List<tblICItemLocation>();
-            this.tblICItemPOSSLAs = new List<tblICItemPOSSLA>();
-            this.tblICItemPOSCategories = new List<tblICItemPOSCategory>();
-            this.tblICItemManufacturingUOMs = new List<tblICItemManufacturingUOM>();
-            this.tblICItemUPCs = new List<tblICItemUPC>();
-            this.tblICItemVendorXrefs = new List<tblICItemVendorXref>();
-            this.tblICItemCustomerXrefs = new List<tblICItemCustomerXref>();
-            this.tblICItemContracts = new List<tblICItemContract>();
-            this.tblICItemCertifications = new List<tblICItemCertification>();
-            this.tblICItemPricings = new List<tblICItemPricing>();
-            this.tblICItemPricingLevels = new List<tblICItemPricingLevel>();
-            this.tblICItemSpecialPricings = new List<tblICItemSpecialPricing>();
-            this.tblICItemStocks = new List<tblICItemStock>();
-            this.tblICItemAccounts = new List<tblICItemAccount>();
-            this.tblICItemNotes = new List<tblICItemNote>();
-            this.tblICItemFactories = new List<tblICItemFactory>();
-            this.tblICItemOwners = new List<tblICItemOwner>();
-            this.tblICItemKits = new List<tblICItemKit>();
-            this.tblICItemAssemblies = new List<tblICItemAssembly>();
-            this.tblICItemBundles = new List<tblICItemBundle>();
+            //this.tblICItemUOMs = new List<tblICItemUOM>();
+            //this.tblICItemLocations = new List<tblICItemLocation>();
+            //this.tblICItemPOSSLAs = new List<tblICItemPOSSLA>();
+            //this.tblICItemPOSCategories = new List<tblICItemPOSCategory>();
+            //this.tblICItemManufacturingUOMs = new List<tblICItemManufacturingUOM>();
+            //this.tblICItemUPCs = new List<tblICItemUPC>();
+            //this.tblICItemVendorXrefs = new List<tblICItemVendorXref>();
+            //this.tblICItemCustomerXrefs = new List<tblICItemCustomerXref>();
+            //this.tblICItemContracts = new List<tblICItemContract>();
+            //this.tblICItemCertifications = new List<tblICItemCertification>();
+            //this.tblICItemPricings = new List<tblICItemPricing>();
+            //this.tblICItemPricingLevels = new List<tblICItemPricingLevel>();
+            //this.tblICItemSpecialPricings = new List<tblICItemSpecialPricing>();
+            //this.tblICItemStocks = new List<tblICItemStock>();
+            //this.tblICItemAccounts = new List<tblICItemAccount>();
+            //this.tblICItemNotes = new List<tblICItemNote>();
+            //this.tblICItemFactories = new List<tblICItemFactory>();
+            //this.tblICItemOwners = new List<tblICItemOwner>();
+            //this.tblICItemKits = new List<tblICItemKit>();
+            //this.tblICItemAssemblies = new List<tblICItemAssembly>();
+            //this.tblICItemBundles = new List<tblICItemBundle>();
         }
 
         public int intItemId { get; set; }

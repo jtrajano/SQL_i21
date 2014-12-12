@@ -19,7 +19,6 @@ Ext.define('Inventory.model.ItemFactory', {
                 inverse: {
                     role: 'tblICItemFactories',
                     storeConfig: {
-                        complete: true,
                         remoteFilter: true,
                         proxy: {
                             type: 'rest',

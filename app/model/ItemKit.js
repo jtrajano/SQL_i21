@@ -19,7 +19,6 @@ Ext.define('Inventory.model.ItemKit', {
                 inverse: {
                     role: 'tblICItemKits',
                     storeConfig: {
-                        complete: true,
                         remoteFilter: true,
                         proxy: {
                             type: 'rest',

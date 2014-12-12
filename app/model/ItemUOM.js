@@ -19,7 +19,6 @@ Ext.define('Inventory.model.ItemUOM', {
                 inverse: {
                     role: 'tblICItemUOMs',
                     storeConfig: {
-                        complete: true,
                         remoteFilter: true,
                         proxy: {
                             type: 'rest',

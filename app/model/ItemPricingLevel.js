@@ -18,7 +18,6 @@ Ext.define('Inventory.model.ItemPricingLevel', {
                 inverse: {
                     role: 'tblICItemPricingLevels',
                     storeConfig: {
-                        complete: true,
                         remoteFilter: true,
                         proxy: {
                             type: 'rest',
