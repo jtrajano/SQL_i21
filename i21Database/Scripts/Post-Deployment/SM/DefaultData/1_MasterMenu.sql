@@ -966,12 +966,259 @@ GO
 
 GO
 
--- /* Recurring Transaction under Common Info */
--- Deferred in 14.4 
+	/* ------------------------------------------------------ */	
+	/* --   Add Common Info Recurring Transactions Menus   -- */
+	/* ------------------------------------------------------ */	
+		IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'System Manager' AND intParentMenuID = 13 AND strMenuName = 'Recurring Transactions')
+		BEGIN
+			INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+			VALUES (N'Recurring Transactions', N'System Manager', 13, N'Recurring Transactions', N'Screen', N'i21.view.RecurringTransaction', N'small-screen', 0, 0, 0, 1, NULL, 1) 
+		END
+	/* ------------------------------------------------------ */
+	/* -- End Add Common Info Recurring Transactions Menus -- */
+	/* ------------------------------------------------------ */
 
---IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'System Manager' AND intParentMenuID = 13 AND strMenuName = 'Recurring Transactions')
---BEGIN
---	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (N'Recurring Transactions', N'System Manager', 13, N'Recurring Transactions', N'Screen', N'i21.view.RecurringTransaction', N'small-screen', 0, 0, 0, 1, NULL, 1) 
---END
+GO
 
---GO
+	/* --------------------------------------------------- */
+	/* --    Create Contract Management Module Menu     -- */
+	/* --------------------------------------------------- */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Contract Management' AND strModuleName = 'Contract Management' AND intParentMenuID = 0)
+	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+	VALUES ('Contract Management', 'Contract Management', 0, 'Contract Management', 'Folder', '', 'small-folder', 1, 0, 0, 0, null, 0)
+
+	DECLARE @ContractManagementModuleId INT
+	SELECT @ContractManagementModuleId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Contract Management' AND strModuleName = 'Contract Management' AND intParentMenuID = 0
+
+		/* ------------------------------------------------ */
+		/* -- Create Contract Management Activities Menu -- */
+		/* ------------------------------------------------ */
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementModuleId)
+		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+		VALUES ('Activities', 'Contract Management', @ContractManagementModuleId, 'Activities', 'Folder', '', 'small-folder', 1, 0, 0, 0, 0, 1)
+
+		DECLARE @ContractManagementActivityId INT
+		SELECT @ContractManagementActivityId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementModuleId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Contract' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementActivityId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Contract', 'Contract Management', @ContractManagementActivityId, 'Contract', 'Screen', 'ContractManagement.view.Contract', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'ContractManagement.view.Contract', intSort = 0
+			WHERE strMenuName = 'Contract' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementActivityId
+		
+
+	/* ------------------------------------------------- */
+	/* -- Create Contract Management Maintenance Menu -- */
+	/* ------------------------------------------------- */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementModuleId)
+	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+	VALUES ('Maintenance', 'Contract Management', @ContractManagementModuleId, 'Maintenance', 'Folder', '', 'small-folder', 1, 0, 0, 0, 0, 1)
+
+	DECLARE @ContractManagementMaintenanceId INT
+	SELECT @ContractManagementMaintenanceId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementModuleId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Contract Options' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Contract Options', 'Contract Management', @ContractManagementMaintenanceId, 'Contract Options', 'Screen', 'ContractManagement.view.ContractOptions', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'ContractManagement.view.ContractOptions', intSort = 0
+			WHERE strMenuName = 'Contract Options' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceId
+			
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Contract Text' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Contract Text', 'Contract Management', @ContractManagementMaintenanceId, 'Contract Text', 'Screen', 'ContractManagement.view.ContractText', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'ContractManagement.view.ContractText', intSort = 0
+			WHERE strMenuName = 'Contract Text' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceId
+			
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Cost Type' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Cost Type', 'Contract Management', @ContractManagementMaintenanceId, 'Cost Type', 'Screen', 'ContractManagement.view.CostTypeNew', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'ContractManagement.view.CostTypeNew', intSort = 0
+			WHERE strMenuName = 'Cost Type' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceId
+				
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Crop Year' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Crop Year', 'Contract Management', @ContractManagementMaintenanceId, 'Crop Year', 'Screen', 'ContractManagement.view.CropYearNew', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'ContractManagement.view.CropYearNew', intSort = 0
+			WHERE strMenuName = 'Crop Year' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceId
+			
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Deferred Payment Rates' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Deferred Payment Rates', 'Contract Management', @ContractManagementMaintenanceId, 'Deferred Payment Rates', 'Screen', 'ContractManagement.view.DeferredPaymentRates', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'ContractManagement.view.DeferredPaymentRates', intSort = 0
+			WHERE strMenuName = 'Deferred Payment Rates' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceId
+			
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Freight Rates' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Freight Rates', 'Contract Management', @ContractManagementMaintenanceId, 'Freight Rates', 'Screen', 'ContractManagement.view.FreightRateNew', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'ContractManagement.view.FreightRateNew', intSort = 0
+			WHERE strMenuName = 'Freight Rates' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceId
+			
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Weight/Grades' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Weight/Grades', 'Contract Management', @ContractManagementMaintenanceId, 'Weight/Grades', 'Screen', 'ContractManagement.view.WeightGradeNew', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'ContractManagement.view.WeightGradeNew', intSort = 0
+			WHERE strMenuName = 'Weight/Grades' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceId
+
+	/* --------------------------------------------------- */
+	/* -- End of Create Contract Management Module Menu -- */
+	/* --------------------------------------------------- */
+	
+GO
+
+	/* --------------------------------------------------- */
+	/* --     Create Notes Receivable Module Menu       -- */
+	/* --------------------------------------------------- */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notes Receivable' AND strModuleName = 'Notes Receivable' AND intParentMenuID = 0)
+	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+	VALUES ('Notes Receivable', 'Notes Receivable', 0, 'Notes Receivable', 'Folder', '', 'small-folder', 1, 0, 0, 0, null, 0)
+
+	DECLARE @NotesReceivableModuleId INT
+	SELECT @NotesReceivableModuleId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Notes Receivable' AND strModuleName = 'Notes Receivable' AND intParentMenuID = 0
+
+	/* ------------------------------------------------- */
+	/* --  Create Notes Receivable Maintenance Menu   -- */
+	/* ------------------------------------------------- */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableModuleId)
+	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+	VALUES ('Maintenance', 'Notes Receivable', @NotesReceivableModuleId, 'Maintenance', 'Folder', '', 'small-folder', 1, 0, 0, 0, 0, 1)
+
+	DECLARE @NotesReceivableMaintenanceId INT
+	SELECT @NotesReceivableMaintenanceId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableModuleId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Note Description' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Note Description', 'Notes Receivable', @NotesReceivableMaintenanceId, 'Note Description', 'Screen', 'NotesReceivable.view.NoteDescription', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'NotesReceivable.view.NoteDescription', intSort = 0
+			WHERE strMenuName = 'Note Description' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableMaintenanceId
+			
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Show Adjustment As' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Show Adjustment As', 'Notes Receivable', @NotesReceivableMaintenanceId, 'Show Adjustment As', 'Screen', 'NotesReceivable.view.ShowAdjustmentAs', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'NotesReceivable.view.ShowAdjustmentAs', intSort = 0
+			WHERE strMenuName = 'Show Adjustment As' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableMaintenanceId
+
+		/* ------------------------------------------------ */
+		/* --  Create Notes Receivable Activities Menu   -- */
+		/* ------------------------------------------------ */
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableModuleId)
+		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+		VALUES ('Activities', 'Notes Receivable', @NotesReceivableModuleId, 'Activities', 'Folder', '', 'small-folder', 1, 0, 0, 0, 0, 1)
+
+		DECLARE @NotesReceivableActivityId INT
+		SELECT @NotesReceivableActivityId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableModuleId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Note Maintenance' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableActivityId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Note Maintenance ', 'Notes Receivable', @NotesReceivableActivityId, 'Note Maintenance', 'Screen', 'NotesReceivable.view.NotesReceivable', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'NotesReceivable.view.NotesReceivable', intSort = 0
+			WHERE strMenuName = 'Note Maintenance' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableActivityId
+			
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Calculate Monthly Interest' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableActivityId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Calculate Monthly Interest', 'Notes Receivable', @NotesReceivableActivityId, 'Calculate Monthly Interest', 'Screen', 'NotesReceivable.view.CalculateMonthlyInterest', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'NotesReceivable.view.CalculateMonthlyInterest', intSort = 0
+			WHERE strMenuName = 'Calculate Monthly Interest' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableActivityId
+
+		/* ------------------------------------------------ */
+		/* --   Create Notes Receivable Reports Menu     -- */
+		/* ------------------------------------------------ */
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableModuleId)
+		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+		VALUES ('Reports', 'Notes Receivable', @NotesReceivableModuleId, 'Reports', 'Folder', '', 'small-folder', 1, 0, 0, 0, 0, 1)
+		
+		DECLARE @NotesReceivableReportsId INT
+		SELECT @NotesReceivableReportsId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableModuleId
+		
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notes Receivable Statement' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Notes Receivable Statement', 'Notes Receivable', @NotesReceivableReportsId, 'Notes Receivable Statement', 'Report', 'Notes Receivable Statement', 'small-report', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Notes Receivable Statement', intSort = 0
+			WHERE strMenuName = 'Notes Receivable Statement' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notes Detail' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Notes Detail', 'Notes Receivable', @NotesReceivableReportsId, 'Notes Detail', 'Report', 'Notes Detail', 'small-report', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Notes Detail', intSort = 0
+			WHERE strMenuName = 'Notes Detail' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notes GL Balancing' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Notes GL Balancing', 'Notes Receivable', @NotesReceivableReportsId, 'Notes GL Balancing', 'Report', 'Notes GL Balancing', 'small-report', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Notes GL Balancing', intSort = 0
+			WHERE strMenuName = 'Notes GL Balancing' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notes Payment by Date' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Notes Payment by Date', 'Notes Receivable', @NotesReceivableReportsId, 'Notes Payment by Date', 'Report', 'Notes Payment by Date', 'small-report', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Notes Payment by Date', intSort = 0
+			WHERE strMenuName = 'Notes Payment by Date' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Open Notes on AS OF Date' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Open Notes on AS OF Date', 'Notes Receivable', @NotesReceivableReportsId, 'Open Notes on AS OF Date', 'Report', 'Open Notes on AS OF Date', 'small-report', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Open Notes on AS OF Date', intSort = 0
+			WHERE strMenuName = 'Open Notes on AS OF Date' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'UCC Tracking' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('UCC Tracking', 'Notes Receivable', @NotesReceivableReportsId, 'UCC Tracking', 'Report', 'UCC Tracking', 'small-report', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'UCC Tracking', intSort = 0
+			WHERE strMenuName = 'UCC Tracking' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Aged Notes Receivable' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Aged Notes Receivable', 'Notes Receivable', @NotesReceivableReportsId, 'Aged Notes Receivable', 'Report', 'Aged Notes Receivable', 'small-report', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Aged Notes Receivable', intSort = 0
+			WHERE strMenuName = 'Aged Notes Receivable' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = '1098' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('1098', 'Notes Receivable', @NotesReceivableReportsId, '1098', 'Report', '1098', 'small-report', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = '1098', intSort = 0
+			WHERE strMenuName = '1098' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId
+
+	/* --------------------------------------------------- */
+	/* --  End of Create Notes Receivable Module Menu   -- */
+	/* --------------------------------------------------- */
+	
+GO
