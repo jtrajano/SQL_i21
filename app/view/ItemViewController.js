@@ -949,10 +949,7 @@ Ext.define('Inventory.view.ItemViewController', {
             case 'pgeLocation':
                 var pgeLocation = tabPanel.down('#pgeLocation');
                 var grdLocationStore = pgeLocation.down('#grdLocationStore');
-                if (grdLocationStore.store.complete === true)
-                    grdLocationStore.getView().refresh();
-                else
-                    grdLocationStore.store.load();
+                grdLocationStore.store.load();
                 break;
 
             case 'pgeGLAccounts':
@@ -1382,7 +1379,15 @@ Ext.define('Inventory.view.ItemViewController', {
     onAddLocationClick: function(button, e, eOpts) {
         var win = button.up('window');
         var me = win.controller;
-        me.openItemLocationScreen('new', win);
+        var vm = win.getViewModel();
+        if (vm.data.current.phantom === true) {
+            win.context.data.saveRecord({ successFn: function(batch, eOpts){
+                me.openItemLocationScreen('new', win);
+            } });
+        }
+        else {
+            me.openItemLocationScreen('new', win);
+        }
     },
 
     onEditLocationClick: function(button, e, eOpts) {
@@ -1415,7 +1420,13 @@ Ext.define('Inventory.view.ItemViewController', {
         var me = eOpts.window.getController();
         var win = eOpts.window;
         var grdLocation = win.down('#grdLocationStore');
+        var vm = win.getViewModel();
+        var itemId = vm.data.current.get('intItemId');
+        var filterItem = grdLocation.store.filters.items[0];
 
+        filterItem.setValue(itemId);
+        filterItem.config.value = itemId;
+        filterItem.initialConfig.value = itemId;
         grdLocation.store.load();
     },
 
@@ -1649,7 +1660,13 @@ Ext.define('Inventory.view.ItemViewController', {
         var me = eOpts.window.getController();
         var win = eOpts.window;
         var grdPricing = win.down('#grdPricing');
+        var vm = win.getViewModel();
+        var itemId = vm.data.current.get('intItemId');
+        var filterItem = grdPricing.store.filters.items[0];
 
+        filterItem.setValue(itemId);
+        filterItem.config.value = itemId;
+        filterItem.initialConfig.value = itemId;
         grdPricing.store.load();
     },
 
