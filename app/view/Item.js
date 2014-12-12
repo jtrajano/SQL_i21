@@ -514,9 +514,9 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
                                                         itemId: 'colDetailDescription',
                                                         minWidth: 150,
+                                                        dataIndex: 'string',
                                                         text: 'Description',
                                                         flex: 2,
                                                         editor: {
@@ -739,7 +739,7 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colLocationCategory',
-                                                                        width: 96,
+                                                                        minWidth: 150,
                                                                         dataIndex: 'string',
                                                                         text: 'Category',
                                                                         flex: 1
@@ -747,21 +747,16 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colLocationVendor',
+                                                                        minWidth: 150,
                                                                         dataIndex: 'string',
                                                                         text: 'Default Vendor'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colLocationCostingMethod',
+                                                                        minWidth: 150,
                                                                         dataIndex: 'string',
                                                                         text: 'Costing Method'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colLocationUOM',
-                                                                        width: 100,
-                                                                        dataIndex: 'string',
-                                                                        text: 'Default UOM'
                                                                     }
                                                                 ],
                                                                 viewConfig: {

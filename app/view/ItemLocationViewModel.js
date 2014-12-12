@@ -66,9 +66,6 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
         category: {
             type: 'inventorybufferedcategory'
         },
-        defaultUOM: {
-            type: 'inventorybuffereditemunitmeasure'
-        },
         issueUOM: {
             type: 'inventorybuffereditemunitmeasure'
         },

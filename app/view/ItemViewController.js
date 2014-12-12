@@ -112,8 +112,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 colLocationPOSDescription: 'strDescription',
                 colLocationCategory: 'strCategory',
                 colLocationVendor: 'strVendorId',
-                colLocationCostingMethod: 'intCostingMethod',
-                colLocationUOM: 'strUnitMeasure'
+                colLocationCostingMethod: 'intCostingMethod'
             },
 
             //--------------//
