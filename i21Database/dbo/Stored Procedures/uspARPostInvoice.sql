@@ -180,7 +180,7 @@ BEGIN
 			#tmpPostInvoiceData B
 				ON A.intInvoiceId = B.intInvoiceId
 		WHERE  
-			A.dblInvoiceTotal <> (SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = A.intInvoiceId)
+			A.dblInvoiceTotal <> ((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = A.intInvoiceId) + ISNULL(A.dblShipping,0.0) + ISNULL(A.dblTax,0.0))
 
 		--ALREADY POSTED
 		INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -214,6 +214,70 @@ BEGIN
 		WHERE  
 			A.intAccountId IS NULL 
 			AND A.intAccountId = 0
+			
+		--Company Location
+		INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		SELECT 
+			'Company location of ' + A.strInvoiceNumber + ' was not set.'
+			,'Invoice'
+			,A.strInvoiceNumber
+			,@batchId
+			,A.intInvoiceId
+		FROM
+			tblARInvoice A
+		INNER JOIN
+			#tmpPostInvoiceData P
+				ON A.intInvoiceId = P.intInvoiceId						 
+		LEFT OUTER JOIN
+			tblSMCompanyLocation L
+				ON A.intCompanyLocationId = L.intCompanyLocationId
+		WHERE L.intCompanyLocationId IS NULL
+		
+		--Freight Expenses Account
+		INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		SELECT 
+			'The Freight Income account of Company Location ' + L.strLocationName + ' was not set.'
+			,'Invoice'
+			,A.strInvoiceNumber
+			,@batchId
+			,A.intInvoiceId
+		FROM
+			tblARInvoice A
+		INNER JOIN
+			#tmpPostInvoiceData P
+				ON A.intInvoiceId = P.intInvoiceId						 
+		INNER JOIN
+			tblSMCompanyLocation L
+				ON A.intCompanyLocationId = L.intCompanyLocationId
+		LEFT OUTER JOIN
+			tblGLAccount G
+				ON L.intFreightIncome = G.intAccountId						
+		WHERE
+			G.intAccountId IS NULL	
+			AND A.dblShipping <> 0.0	
+
+		--Sales Account Account
+		INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		SELECT 
+			'The Sales Account account of Company Location ' + L.strLocationName + ' was not set.'
+			,'Invoice'
+			,A.strInvoiceNumber
+			,@batchId
+			,A.intInvoiceId
+		FROM
+			tblARInvoice A
+		INNER JOIN
+			#tmpPostInvoiceData P
+				ON A.intInvoiceId = P.intInvoiceId						 
+		INNER JOIN
+			tblSMCompanyLocation L
+				ON A.intCompanyLocationId = L.intCompanyLocationId
+		LEFT OUTER JOIN
+			tblGLAccount G
+				ON L.intSalesAccount = G.intAccountId						
+		WHERE
+			G.intAccountId IS NULL
+			AND A.dblTax <> 0.0					
 
 		INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT
@@ -442,6 +506,89 @@ BEGIN
 	INNER JOIN 
 		#tmpPostInvoiceData	P
 			ON A.intInvoiceId = P.intInvoiceId
+			
+
+	UNION ALL 
+	
+	SELECT	
+		strTransactionId = A.strInvoiceNumber, 
+		intTransactionId = A.intInvoiceId, 
+		intAccountId = L.intFreightIncome,
+		strDescription = A.strComments,
+		strReference = C.strCustomerNumber,
+		dtmTransactionDate = A.dtmDate,
+		dblDebit				= CASE WHEN @post = 1 THEN 0 ELSE A.dblShipping  END, 
+		dblCredit				= CASE WHEN @post = 1 THEN A.dblShipping ELSE 0 END, 
+		dblDebitUnit			= CASE WHEN @post = 1 THEN 0 ELSE ISNULL(A.dblShipping, 0)  * ISNULL(U.dblLbsPerUnit, 0) END,
+		dblCreditUnit			= CASE WHEN @post = 1 THEN ISNULL(A.dblShipping, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END,
+		dtmDate = DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+		ysnIsUnposted = CASE WHEN @post = 1 THEN 0 ELSE 1 END,
+		intConcurrencyId = 1,
+		dblExchangeRate		= 1,
+		intUserId			= @userId,
+		intEntityId			= @UserEntityID,
+		dtmDateEntered		= GETDATE(),
+		strBatchID			= @batchId,
+		strCode				= 'AR',
+		strModuleName		= @MODULE_NAME,
+		strTransactionForm = @SCREEN_NAME,
+		strTransactionType = A.strTransactionType
+	FROM
+		tblARInvoice A 
+	LEFT JOIN 
+		tblARCustomer C
+			ON A.intCustomerId = C.intCustomerId
+	LEFT JOIN Units U
+			ON A.intAccountId = U.intAccountId 	
+	INNER JOIN
+		tblSMCompanyLocation L
+			ON A.intCompanyLocationId = L.intCompanyLocationId	
+	INNER JOIN 
+		#tmpPostInvoiceData	P
+			ON A.intInvoiceId = P.intInvoiceId	
+	WHERE
+		A.dblShipping <> 0.0		
+		
+UNION ALL 
+	
+	SELECT	
+		strTransactionId = A.strInvoiceNumber, 
+		intTransactionId = A.intInvoiceId, 
+		intAccountId = L.intSalesAccount,
+		strDescription = A.strComments,
+		strReference = C.strCustomerNumber,
+		dtmTransactionDate = A.dtmDate,
+		dblDebit				= CASE WHEN @post = 1 THEN 0 ELSE A.dblTax  END, 
+		dblCredit				= CASE WHEN @post = 1 THEN A.dblTax ELSE 0 END, 
+		dblDebitUnit			= CASE WHEN @post = 1 THEN 0 ELSE ISNULL(A.dblTax, 0)  * ISNULL(U.dblLbsPerUnit, 0) END,
+		dblCreditUnit			= CASE WHEN @post = 1 THEN ISNULL(A.dblTax, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END,
+		dtmDate = DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+		ysnIsUnposted = CASE WHEN @post = 1 THEN 0 ELSE 1 END,
+		intConcurrencyId = 1,
+		dblExchangeRate		= 1,
+		intUserId			= @userId,
+		intEntityId			= @UserEntityID,
+		dtmDateEntered		= GETDATE(),
+		strBatchID			= @batchId,
+		strCode				= 'AR',
+		strModuleName		= @MODULE_NAME,
+		strTransactionForm = @SCREEN_NAME,
+		strTransactionType = A.strTransactionType
+	FROM
+		tblARInvoice A 
+	LEFT JOIN 
+		tblARCustomer C
+			ON A.intCustomerId = C.intCustomerId
+	LEFT JOIN Units U
+			ON A.intAccountId = U.intAccountId 	
+	INNER JOIN
+		tblSMCompanyLocation L
+			ON A.intCompanyLocationId = L.intCompanyLocationId	
+	INNER JOIN 
+		#tmpPostInvoiceData	P
+			ON A.intInvoiceId = P.intInvoiceId	
+	WHERE
+		A.dblTax <> 0.0				
 
 
 --=====================================================================================================================================
@@ -762,6 +909,7 @@ ELSE
 	
 		--CREDIT
 		UNION ALL 
+		
 		SELECT	
 			strTransactionId = A.strInvoiceNumber, 
 			intTransactionId = A.intInvoiceId,
@@ -799,6 +947,91 @@ ELSE
 		INNER JOIN 
 			#tmpPostInvoiceData	P
 				ON A.intInvoiceId = P.intInvoiceId 
+				
+		UNION ALL 
+		
+		SELECT	
+			strTransactionId = A.strInvoiceNumber, 
+			intTransactionId = A.intInvoiceId,
+			intAccountId = L.intFreightIncome,
+			strDescription = A.strComments,
+			strReference = C.strCustomerNumber,
+			dtmTransactionDate = A.dtmDate,
+			dblDebit = CASE WHEN @post = 1 THEN 0 ELSE A.dblShipping END,
+			dblCredit = CASE WHEN @post = 1 THEN A.dblShipping ELSE 0 END,
+			dblDebitUnit			= ISNULL(A.dblShipping, 0)  * ISNULL(U.dblLbsPerUnit, 0),
+			dblCreditUnit		= ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0),
+			dtmDate = A.dtmDate,
+			ysnIsUnposted = 0,
+			intConcurrencyId = 1,
+			dblExchangeRate		= 1,
+			intUserID			= @userId,
+			intEntityId			= @UserEntityID,
+			dtmDateEntered		= GETDATE(),
+			strBatchID			= @batchId,
+			strCode				= 'AR',
+			strModuleName		= @MODULE_NAME,
+			strTransactionForm = @SCREEN_NAME,
+			strTransactionType = A.strTransactionType 
+		FROM
+			tblARInvoice A 
+		LEFT JOIN 
+			tblARCustomer C
+				ON A.intCustomerId = C.intCustomerId
+		LEFT JOIN Units U
+				ON A.intAccountId = U.intAccountId 	
+		INNER JOIN
+			tblSMCompanyLocation L
+				ON A.intCompanyLocationId = L.intCompanyLocationId	
+		INNER JOIN 
+			#tmpPostInvoiceData	P
+				ON A.intInvoiceId = P.intInvoiceId	
+		WHERE
+			A.dblShipping <> 0.0
+				
+				
+		UNION ALL 
+		
+		SELECT	
+			strTransactionId = A.strInvoiceNumber, 
+			intTransactionId = A.intInvoiceId,
+			intAccountId = L.intFreightIncome,
+			strDescription = A.strComments,
+			strReference = C.strCustomerNumber,
+			dtmTransactionDate = A.dtmDate,
+			dblDebit = CASE WHEN @post = 1 THEN 0 ELSE A.dblTax END,
+			dblCredit = CASE WHEN @post = 1 THEN A.dblTax ELSE 0 END,
+			dblDebitUnit			= ISNULL(A.dblTax, 0)  * ISNULL(U.dblLbsPerUnit, 0),
+			dblCreditUnit		= ISNULL(A.dblTax, 0) * ISNULL(U.dblLbsPerUnit, 0),
+			dtmDate = A.dtmDate,
+			ysnIsUnposted = 0,
+			intConcurrencyId = 1,
+			dblExchangeRate		= 1,
+			intUserID			= @userId,
+			intEntityId			= @UserEntityID,
+			dtmDateEntered		= GETDATE(),
+			strBatchID			= @batchId,
+			strCode				= 'AR',
+			strModuleName		= @MODULE_NAME,
+			strTransactionForm = @SCREEN_NAME,
+			strTransactionType = A.strTransactionType 
+		FROM
+			tblARInvoice A 
+		LEFT JOIN 
+			tblARCustomer C
+				ON A.intCustomerId = C.intCustomerId
+		LEFT JOIN Units U
+				ON A.intAccountId = U.intAccountId 	
+		INNER JOIN
+			tblSMCompanyLocation L
+				ON A.intCompanyLocationId = L.intCompanyLocationId	
+		INNER JOIN 
+			#tmpPostInvoiceData	P
+				ON A.intInvoiceId = P.intInvoiceId	
+		WHERE
+			A.dblTax <> 0.0								
+				
+				
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 

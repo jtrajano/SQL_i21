@@ -53,7 +53,8 @@ BEGIN
 									, '' 
 							)	
 			) AS RecreatedAccount INNER JOIN tblGLAccount 
-				ON RecreatedAccount.strAccountId = tblGLAccount.strAccountId
+				ON RecreatedAccount.strAccountId = tblGLAccount.strAccountId COLLATE Latin1_General_CI_AS
+
 
 	RETURN @intFoundGLAccountId
 END

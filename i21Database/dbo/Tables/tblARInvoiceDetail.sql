@@ -12,7 +12,7 @@
 	[intAccountId]		 INT             NULL,
     [intConcurrencyId]   INT             CONSTRAINT [DF_tblARInvoiceDetail_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARInvoiceDetail] PRIMARY KEY CLUSTERED ([intInvoiceDetailId] ASC),
-    CONSTRAINT [FK_tblARInvoiceDetail_tblARInvoice1] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId])
+    CONSTRAINT [FK_tblARInvoiceDetail_tblARInvoice1] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId]) ON DELETE CASCADE
 );
 
 
