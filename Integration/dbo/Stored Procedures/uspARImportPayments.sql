@@ -92,7 +92,7 @@ BEGIN
 				,[ysnPosted]
 				,[intConcurrencyId]
 				)
-			SELECT	TOP 100
+			SELECT	
 				C.[intCustomerId] 						--[intCustomerId]
 				,CUR.[intCurrencyID]					--[intCurrencyId]
 				,(CASE 
