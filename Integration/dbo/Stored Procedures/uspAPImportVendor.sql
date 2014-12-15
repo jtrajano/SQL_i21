@@ -23,14 +23,14 @@ SET ANSI_WARNINGS OFF
 
 --VALIDATION
 --Do not allow to import if some of the default gl account setup for vendor do not exists in tblGLAccount
-IF EXISTS(SELECT 1 FROM ssvndmst 
-		WHERE NOT EXISTS(
-				(SELECT 1 FROM tblGLCOACrossReference WHERE strExternalId = CONVERT(NVARCHAR(50),ssvnd_gl_pur)))
-			AND ssvnd_gl_pur <> 0 AND ssvnd_gl_pur <> 1)
-BEGIN
-	RAISERROR(''Some of the vendor default expense account do not exists in i21 Accounts.'', 16, 1);
-	RETURN;
-END
+--IF EXISTS(SELECT 1 FROM ssvndmst 
+--		WHERE NOT EXISTS(
+--				(SELECT 1 FROM tblGLCOACrossReference WHERE strExternalId = CONVERT(NVARCHAR(50),ssvnd_gl_pur)))
+--			AND ssvnd_gl_pur <> 0 AND ssvnd_gl_pur <> 1)
+--BEGIN
+--	RAISERROR(''Some of the vendor default expense account do not exists in i21 Accounts.'', 16, 1);
+--	RETURN;
+--END
 
 IF(@Update = 1 AND @VendorId IS NOT NULL)
 BEGIN

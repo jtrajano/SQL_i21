@@ -1,8 +1,8 @@
 ﻿CREATE TABLE [dbo].[tblPRDepartment]
 (
 	[intDepartmentId] INT NOT NULL IDENTITY, 
-    [strDepartment] NVARCHAR(50) NOT NULL, 
-    [strDescription] NVARCHAR(50) NULL, 
+    [strDepartment] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intProfitCenter] INT NULL , 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((1)), 

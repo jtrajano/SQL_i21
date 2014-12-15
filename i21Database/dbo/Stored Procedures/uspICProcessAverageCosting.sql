@@ -79,7 +79,9 @@ BEGIN
 	IF (ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0) < 0)
 	BEGIN 
 		SET @dblReduceQty = ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0)
-		SET @dblCost = dbo.fnGetItemAverageCost(@intItemId, @intLocationId)
+
+		SELECT @dblCost = AverageCost
+		FROM dbo.fnGetItemAverageCostAsTable(@intItemId, @intLocationId)
 
 		-- Insert the inventory transaction record
 		INSERT INTO dbo.tblICInventoryTransaction (
@@ -120,7 +122,8 @@ BEGIN
 		-- Get the id used in the inventory transaction insert 
 		SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
 
-		-- Repeat call on uspICReduceStockInFIFO until @dblReduceQty is completely distributed to all available fifo buckets or added a new negative bucket. 
+		-- Repeat call on uspICReduceStockInFIFO until @dblReduceQty is completely distributed to all available fifo buckets 
+		-- If there is no avaiable fifo buckets, it will add a new negative bucket. 
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)
 		BEGIN 
 			EXEC dbo.uspICReduceStockInFIFO
@@ -137,7 +140,7 @@ BEGIN
 				,@QtyOffset OUTPUT 
 				,@UpdatedFifoId OUTPUT 
 			
-			-- Insert the record the the fifo-out table
+			-- Insert the record to the fifo-out table
 			INSERT INTO dbo.tblICInventoryFIFOOut (
 					intInventoryTransactionId
 					,intInventoryFIFOId
@@ -282,7 +285,7 @@ BEGIN
 			-- Get the id inserted for Revalue-Sold
 			SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
 			
-			-- Insert the record the the fifo-out table
+			-- Insert the record to the fifo-out table
 			INSERT INTO dbo.tblICInventoryFIFOOut (
 					intInventoryTransactionId
 					,intInventoryFIFOId
@@ -308,9 +311,9 @@ BEGIN
 					AND TRANS.intLocationId = @intLocationId
 					AND TRANS.intTransactionId = @intTransactionId
 					AND TRANS.strBatchId = @strBatchId
-		WHERE	@NewFifoId IS NOT NULL 
+					AND @NewFifoId IS NOT NULL  
 
-		-- Add Auto Negative (if current stock qty is still after adding it) 
+		-- Add Auto Negative (if current stock qty is still negative after adding it) 
 		INSERT INTO dbo.tblICInventoryTransaction (
 				[intItemId] 
 				,[intLocationId] 

@@ -21,7 +21,6 @@
 
 	@intUserId - The user who is initiating the post. 
 */
-
 CREATE PROCEDURE [dbo].[uspICPostCosting]
 	@ItemsToPost AS ItemCostingTableType READONLY
 	,@strBatchId AS NVARCHAR(20)
@@ -36,7 +35,8 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 -- Declare the variables to use for the cursor
-DECLARE @intItemId AS INT
+DECLARE @intId AS INT 
+		,@intItemId AS INT
 		,@intLocationId AS INT 
 		,@dtmDate AS DATETIME
 		,@dblUnitQty AS NUMERIC(18, 6) 
@@ -64,7 +64,8 @@ DECLARE @AVERAGECOST AS INT = 1
 -- FAST_FORWARD >> It specifies a FORWARD_ONLY, READ_ONLY cursor with performance optimizations enabled. 
 DECLARE loopItems CURSOR LOCAL FAST_FORWARD
 FOR 
-SELECT  intItemId
+SELECT  intId
+		,intItemId
 		,intLocationId
 		,dtmDate
 		,dblUnitQty
@@ -82,7 +83,7 @@ FROM	@ItemsToPost
 OPEN loopItems;
 
 -- Initial fetch attempt
-FETCH NEXT FROM loopItems INTO @intItemId, @intLocationId, @dtmDate, @dblUnitQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId;
+FETCH NEXT FROM loopItems INTO @intId, @intItemId, @intLocationId, @dtmDate, @dblUnitQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId;
 
 -- Start of the loop
 WHILE @@FETCH_STATUS = 0
@@ -91,7 +92,8 @@ BEGIN
 	SET @CostingMethod = NULL;
 
 	-- Get the costing method of an item 
-	SELECT @CostingMethod = dbo.fnGetCostingMethod(@intItemId, @intLocationId)
+	SELECT	@CostingMethod = CostingMethod 
+	FROM	dbo.fnGetCostingMethodAsTable(@intItemId, @intLocationId)
 
 	--------------------------------------------------------------------------------
 	-- Call the SP that can process the item's costing method
@@ -152,7 +154,7 @@ BEGIN
 	END 
 
 	-- Attempt to fetch the next row from cursor. 
-	FETCH NEXT FROM loopItems INTO @intItemId, @intLocationId, @dtmDate, @dblUnitQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId;
+	FETCH NEXT FROM loopItems INTO @intId, @intItemId, @intLocationId, @dtmDate, @dblUnitQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId
 END;
 -- End of the loop
 

@@ -22,7 +22,6 @@ DECLARE @UseGLAccount_RevalueSold AS NVARCHAR(30) = 'Revalue Sold';
 DECLARE @UseGLAccount_AutoNegative AS NVARCHAR(30) = 'Auto Negative';
 
 DECLARE @GLAccounts AS dbo.ItemGLAccount; 
-DECLARE @GLEntries AS dbo.RecapTableType; 
 
 -- Get the GL Account ids to use
 INSERT INTO @GLAccounts (
@@ -36,16 +35,21 @@ INSERT INTO @GLAccounts (
 )
 SELECT	Query.intItemId
 		,Query.intLocationId
-		,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intLocationId, @UseGLAccount_Inventory)
-		,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intLocationId, @UseGLAccount_ContraInventory)
-		,intWriteOffSoldId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intLocationId, @UseGLAccount_WriteOffSold)
-		,intRevalueSoldId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intLocationId, @UseGLAccount_RevalueSold)
-		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intLocationId, @UseGLAccount_AutoNegative)
-FROM (
-	SELECT DISTINCT intItemId, intLocationId 
-	FROM	dbo.tblICInventoryTransaction TRANS 
-	WHERE	TRANS.strBatchId = @strBatchId
-) Query;
+		,intInventoryId = Inventory.intAccountId
+		,intContraInventoryId = ContraInventory.intAccountId
+		,intWriteOffSoldId = WriteOffSold.intAccountId
+		,intRevalueSoldId = RevalueSold.intAccountId
+		,intAutoNegativeId = AutoNegative.intAccountId
+FROM	(
+			SELECT DISTINCT intItemId, intLocationId 
+			FROM	dbo.tblICInventoryTransaction TRANS 
+			WHERE	TRANS.strBatchId = @strBatchId
+		) Query
+		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intLocationId, @UseGLAccount_Inventory) Inventory
+		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intLocationId, @UseGLAccount_ContraInventory) ContraInventory
+		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intLocationId, @UseGLAccount_WriteOffSold) WriteOffSold
+		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intLocationId, @UseGLAccount_RevalueSold) RevalueSold
+		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intLocationId, @UseGLAccount_AutoNegative) AutoNegative;
 
 -- Generate the G/L Entries here: 
 WITH ForGLEntries_CTE (
@@ -77,35 +81,8 @@ AS
 	FROM	dbo.tblICInventoryTransaction TRANS 
 	WHERE	TRANS.strBatchId = @strBatchId
 )
---INSERT INTO @GLEntries (
---		dtmDate
---		,strBatchId
---		,intAccountId
---		,dblDebit
---		,dblCredit
---		,dblDebitUnit
---		,dblCreditUnit
---		,strDescription
---		,strCode
---		,strReference
---		,intCurrencyId
---		,dblExchangeRate
---		,dtmDateEntered
---		,dtmTransactionDate
---		,strJournalLineDescription
---		,intJournalLineNo
---		,ysnIsUnposted
---		,intUserId
---		,intEntityId
---		,strTransactionId
---		,intTransactionId
---		,strTransactionType
---		,strTransactionForm
---		,strModuleName
---		,intConcurrencyId
---)
 -------------------------------------------------------------------------------------------
--- This part if for the usual G/L entries for Inventory Account and its contra account 
+-- This part is for the usual G/L entries for Inventory Account and its contra account 
 -------------------------------------------------------------------------------------------
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -177,7 +154,7 @@ FROM	ForGLEntries_CTE
 WHERE	intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE)
 
 -----------------------------------------------------------------------------------
--- This part for the Write-Off Sold 
+-- This part is for the Write-Off Sold 
 -----------------------------------------------------------------------------------
 UNION ALL  
 SELECT	
@@ -393,6 +370,3 @@ FROM	ForGLEntries_CTE
 		CROSS APPLY dbo.fnGetCredit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Credit
 WHERE	intTransactionTypeId  = @AUTO_NEGATIVE
 ;
-
----- Query the GL Entries table
---SELECT * FROM @GLEntries;

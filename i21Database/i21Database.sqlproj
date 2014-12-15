@@ -138,6 +138,7 @@
     <Folder Include="Scripts\Post-Deployment\IC" />
     <Folder Include="Scripts\Post-Deployment\Optional Run\Reports" />
     <Folder Include="Scripts\Post-Deployment\AP\DefaultData" />
+    <Folder Include="Scripts\Post-Deployment\CT" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -865,7 +866,7 @@
     <Build Include="dbo\Stored Procedures\uspICReduceStockInLIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICProcessLIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspARDuplicateInvoice.sql" />
-    <Build Include="dbo\Functions\fnGetDueDateBasedonTerm.sql" />
+    <Build Include="dbo\Functions\fnGetDueDateBasedOnTerm.sql" />
     <Build Include="dbo\Tables\tblPOOrderStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemsForItemReceipt.sql" />
     <Build Include="dbo\Tables\tblICItemFactory.sql" />
@@ -881,12 +882,26 @@
     <Build Include="dbo\Stored Procedures\uspGLCreateRecurringJournal.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateAccountIDDivider.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateAccountIDStructure.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostInvoice.sql" />
+    <Build Include="dbo\Functions\fnGetItemGLAccountAsTable.sql" />
+    <Build Include="dbo\Views\vyuSMContacts.sql" />
+    <Build Include="dbo\Views\vyuHDSearchDetailsDetails.sql" />
+    <Build Include="dbo\Views\vyuHDSearchDetailsNotes.sql" />
+    <Build Include="dbo\Views\vyuHDSearchDetails.sql" />
+    <Build Include="dbo\Views\vyuHDSearchDetailsBase.sql" />
+    <Build Include="dbo\Functions\fnGetCostingMethodAsTable.sql" />
+    <Build Include="dbo\Functions\fnGetItemAverageCostAsTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspPOProcessItemReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAddPurchaseOrderToItemReceipt.sql" />
+    <Build Include="dbo\Functions\fnGetDiscountBasedOnTerm.sql" />
+    <Build Include="dbo\Functions\fnRemoveTimeOnDate.sql" />
+    <None Include="Scripts\Post-Deployment\AP\ClearPostResult.sql" />
+    <Build Include="dbo\Tables\tblICEquipmentLength.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="C:\SharedAssemblyInfo.cs" >
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
@@ -898,13 +913,14 @@
     <None Include="Scripts\Post-Deployment\HD\DefaultData\1_StatusData.sql" />
     <None Include="Scripts\Post-Deployment\HD\HDEntryDataFix.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\11_FreightTerms.sql" />
-    <None Include="dbo\Views\vyuPREmployee.sql" />
+    <Build Include="dbo\Views\vyuPREmployee.sql" />
     <None Include="Scripts\Post-Deployment\IC\2_MaterialNMFC.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillBatch.sql" />
     <Build Include="dbo\Tables\tblFRAccountMonitor.sql" />
     <None Include="Scripts\Post-Deployment\AP\FixPaymentRecordStatus.sql" />
     <None Include="Scripts\Post-Deployment\AP\FixstrBillId.sql" />
     <None Include="Scripts\Post-Deployment\IC\3_DefaultData.sql" />
+    <None Include="Scripts\Post-Deployment\CT\1_MasterTables.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

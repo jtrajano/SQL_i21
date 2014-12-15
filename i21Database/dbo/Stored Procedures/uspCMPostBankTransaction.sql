@@ -118,11 +118,12 @@ FROM	[dbo].tblCMBankTransaction
 WHERE	strTransactionId = @strTransactionId 
 IF @@ERROR <> 0	GOTO Post_Rollback		
 
--- Read the company preference
+-- Read the user preference
 SELECT	@ysnAllowUserSelfPost = 1
 FROM	dbo.tblSMPreferences 
 WHERE	strPreference = 'AllowUserSelfPost' 
-		AND LOWER(RTRIM(LTRIM(strValue))) = 'true'		
+		AND LOWER(RTRIM(LTRIM(strValue))) = 'true'
+		AND intUserID = @intUserId
 IF @@ERROR <> 0	GOTO Post_Rollback		
 		
 -- Read the detail table and populate the variables. 
@@ -211,7 +212,7 @@ BEGIN
 END 
 
 -- Check Company preference: Allow User Self Post
-IF @ysnAllowUserSelfPost = 1 AND @intUserId <> @intCreatedEntityId AND @ysnRecap = 0 
+IF @ysnAllowUserSelfPost = 1 AND @intEntityId <> @intCreatedEntityId AND @ysnRecap = 0 
 BEGIN 
 	-- 'You cannot %s transactions you did not create. Please contact your local administrator.'
 	IF @ysnPost = 1	
@@ -288,7 +289,7 @@ BEGIN
 			,[dblExchangeRate]		= 1
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
-			,[strJournalLineDescription] = NULL 
+			,[strJournalLineDescription] = GLAccnt.strDescription
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId
@@ -321,7 +322,7 @@ BEGIN
 			,[dblExchangeRate]		= 1
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
-			,[strJournalLineDescription] = NULL 
+			,[strJournalLineDescription] = GLAccnt.strDescription
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId

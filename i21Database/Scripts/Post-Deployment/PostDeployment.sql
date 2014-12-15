@@ -82,6 +82,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\FixPaymentRecordStatus.sql
 --:r .\AP\FixstrBillId.sql
 :r .\AP\DefaultData\POOrderStatus.sql
+:r .\AP\ClearPostResult.sql
 
 -- Inventory 
 :r .\IC\1_InventoryTransactionTypes.sql 
@@ -95,5 +96,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\HD\DefaultData\1_StatusData.sql
 :R .\HD\HDEntryDataFix.sql
 
+--Contract Management
+:R .\CT\1_MasterTables.sql
 
 print 'END POST DEPLOYMENT'

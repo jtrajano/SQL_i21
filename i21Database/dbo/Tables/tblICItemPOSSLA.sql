@@ -7,5 +7,5 @@
     [ysnServiceWarranty] BIT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICItemPOSSLA] PRIMARY KEY ([intItemPOSSLAId]), 
-    CONSTRAINT [FK_tblICItemPOSSLA_tblICItemPOS] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
+    CONSTRAINT [FK_tblICItemPOSSLA_tblICItemPOS] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE
 )

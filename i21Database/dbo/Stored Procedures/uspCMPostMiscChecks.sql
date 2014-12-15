@@ -105,11 +105,12 @@ FROM	[dbo].tblCMBankTransactionDetail
 WHERE	intTransactionId = @intTransactionId 
 IF @@ERROR <> 0	GOTO Post_Rollback		
 
--- Read the company preference
+-- Read the user preference
 SELECT	@ysnAllowUserSelfPost = 1
 FROM	dbo.tblSMPreferences 
 WHERE	strPreference = 'AllowUserSelfPost' 
 		AND LOWER(RTRIM(LTRIM(strValue))) = 'true'		
+		AND intUserID = @intUserId
 IF @@ERROR <> 0	GOTO Post_Rollback	
 
 --=====================================================================================================================================
@@ -279,7 +280,7 @@ BEGIN
 			,[dblExchangeRate]		= 1
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
-			,[strJournalLineDescription] = NULL 
+			,[strJournalLineDescription] = GLAccnt.strDescription
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId
@@ -312,7 +313,7 @@ BEGIN
 			,[dblExchangeRate]		= 1
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
-			,[strJournalLineDescription] = NULL 
+			,[strJournalLineDescription] = GLAccnt.strDescription
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intUserId]			= A.intLastModifiedUserId

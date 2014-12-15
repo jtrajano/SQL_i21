@@ -42,6 +42,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@intTransactionId AS INT
 		,@intBankStatementImportId AS INT
 		,@dblAmount AS NUMERIC(18,6)
+		,@strPayee AS NVARCHAR(300)
 		,@dtmDate AS DATETIME
 		,@ysnMatchFound AS BIT
 
@@ -55,6 +56,7 @@ SELECT	A.intTransactionId
 		,A.intBankTransactionTypeId
 		,A.dtmDate
 		,A.dblAmount
+		,A.strPayee
 		,ysnTagged = CAST(0 AS BIT)
 INTO	#tmp_list_of_transactions
 FROM	dbo.tblCMBankTransaction A INNER JOIN dbo.tblCMBankStatementImport B
@@ -88,6 +90,7 @@ BEGIN
 			@intBankStatementImportId = intBankStatementImportId
 			,@dblAmount = dblAmount
 			,@dtmDate = dtmDate
+			,@strPayee = strPayee
 	FROM	#tmp_list_of_imported_record
 	IF @@ERROR <> 0	GOTO _ROLLBACK
 	
@@ -110,6 +113,9 @@ BEGIN
 		SELECT  @ysnMatchFound = 1
 		FROM	#tmp_list_of_transactions A
 		WHERE	A.intTransactionId = @intTransactionId
+				AND 1 = CASE	WHEN (@strPayee IS NOT NULL) THEN 
+									CASE WHEN (LTRIM(RTRIM(ISNULL(A.strPayee, ''))) = LTRIM(RTRIM(ISNULL(@strPayee, '')))) THEN 1 ELSE 0 END
+								ELSE 1 END
 				AND 1 =	CASE	WHEN A.intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT) THEN
 									CASE WHEN ABS(A.dblAmount) = ABS(@dblAmount) THEN 1 ELSE 0 END 							
 								WHEN A.intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT) THEN

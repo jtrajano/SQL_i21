@@ -141,4 +141,9 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\2_DropProcedureUspCMPostMessages.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\1_TM\5_1430_to_1440.sql">
+      <CopyToOutputDirectory>DoNotCopy</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

@@ -101,7 +101,7 @@ BEGIN
 				[dtmBillDate],
 				[dtmDueDate], 
 				[intAccountId], 
-				[strDescription], 
+				[strReference], 
 				[strPONumber],
 				[dblTotal], 
 				[dblAmountDue],
@@ -127,7 +127,7 @@ BEGIN
 				[dtmBillDate] 			=	CASE WHEN ISDATE(A.aptrx_sys_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 				[dtmDueDate] 			=	CASE WHEN ISDATE(A.aptrx_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 				[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
-				[strDescription] 		=	A.aptrx_comment,
+				[strReference] 		=	A.aptrx_comment,
 				[strPONumber]			=	A.aptrx_pur_ord_no,
 				[dblTotal] 				=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
 				[dblAmountDue]			=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
@@ -164,7 +164,7 @@ BEGIN
 				[dtmBillDate] 			=	CASE WHEN ISDATE(A.apivc_ivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_ivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 				[dtmDueDate] 			=	CASE WHEN ISDATE(A.apivc_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 				[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
-				[strDescription] 		=	A.apivc_comment,
+				[strReference] 		=	A.apivc_comment,
 				[strPONumber]			=	A.apivc_pur_ord_no,
 				[dblTotal] 				=	CASE WHEN A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'' THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END,
 				[dblAmountDue]			=	CASE WHEN A.apivc_status_ind = ''P'' THEN 0 ELSE 
@@ -202,7 +202,7 @@ BEGIN
 			)
 			SELECT 
 				A.intBillId,
-				A.strDescription,
+				A.strReference,
 				1,
 				1,
 				ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.apegl_gl_acct), 0),
@@ -231,7 +231,7 @@ BEGIN
 			)
 			SELECT 
 				A.intBillId,
-				A.strDescription,
+				A.strReference,
 				1,
 				1,
 				ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.aphgl_gl_acct), 0),
@@ -485,7 +485,7 @@ BEGIN
 				[dtmBillDate], 
 				[dtmDueDate], 
 				[intAccountId], 
-				[strDescription], 
+				[strReference], 
 				[strPONumber],
 				[dblTotal], 
 				[dblAmountDue],
@@ -511,7 +511,7 @@ BEGIN
 				[dtmBillDate] 			=	CASE WHEN ISDATE(A.aptrx_sys_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 				[dtmDueDate] 			=	CASE WHEN ISDATE(A.aptrx_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 				[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
-				[strDescription] 		=	A.aptrx_comment,
+				[strReference] 		=	A.aptrx_comment,
 				[strPONumber]			=	A.aptrx_pur_ord_no,
 				[dblTotal] 				=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
 				[dblAmountDue]			=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
@@ -550,7 +550,7 @@ BEGIN
 			)
 			SELECT 
 				A.intBillId,
-				A.strDescription,
+				A.strReference,
 				1,
 				1,
 				ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.apegl_gl_acct), 0),

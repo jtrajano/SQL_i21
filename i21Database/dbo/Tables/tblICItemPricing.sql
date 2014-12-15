@@ -6,6 +6,7 @@
     [dblRetailPrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblWholesalePrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblLargeVolumePrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+	[dblAmountPercent] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblSalePrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblMSRPPrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [strPricingMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
@@ -17,7 +18,7 @@
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICItemPricing] PRIMARY KEY ([intItemPricingId]), 
-    CONSTRAINT [FK_tblICItemPricing_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
+    CONSTRAINT [FK_tblICItemPricing_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblICItemPricing_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId])
 )
 
@@ -167,3 +168,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICItemPricing',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Amount/Percent',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemPricing',
+    @level2type = N'COLUMN',
+    @level2name = N'dblAmountPercent'

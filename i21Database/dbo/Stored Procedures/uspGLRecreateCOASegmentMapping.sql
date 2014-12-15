@@ -10,7 +10,7 @@ BEGIN
 	WHILE EXISTS(SELECT 1 FROM #tempGLAccount)
 	BEGIN
 		
-		SELECT * INTO #Structure FROM tblGLAccountStructure WHERE strType <> 'Divider' ORDER BY intSort DESC
+		SELECT * INTO #Structure FROM tblGLAccountStructure WHERE strType <> 'Divider'
 		
 		DECLARE @intAccountId INT = (SELECT TOP 1 intAccountId FROM #tempGLAccount)	
 		DECLARE @strAccountId VARCHAR(200) = (SELECT TOP 1 strAccountId FROM #tempGLAccount)	
@@ -22,7 +22,7 @@ BEGIN
 
 		WHILE EXISTS(SELECT 1 FROM #Structure)
 		BEGIN
-			SELECT @strType = strType, @intAccountStructureId = intAccountStructureId FROM #Structure
+			SELECT TOP 1 @strType = strType, @intAccountStructureId = intAccountStructureId FROM #Structure ORDER BY intSort
 			IF @strType = 'Primary' 
 				BEGIN
 					SET @segmentCODE = SUBSTRING(@strAccountId, @segmentCount, PATINDEX('%' + @DIVIdER + '%',@strAccountId))			

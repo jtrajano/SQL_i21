@@ -70,10 +70,12 @@ INSERT INTO #TempCannedPanels VALUES (6, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Sub
 INSERT INTO #TempCannedPanels VALUES (8, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Subpanel', N'iRely AG - Inventory Available for Sale Detail', N'Grid', N'', N'iRely AG - Inventory Available for Sale Detail', N'', N'', N'', N'i21 AG - Demo Test', N'None', N'', N'', N'', N'Select agitmmst.agitm_no, agitmmst.agitm_loc_no, agitmmst.agitm_desc, agitmmst.agitm_class, agitmmst.agitm_un_desc, agitmmst.agitm_un_on_hand, agitmmst.agitm_un_pend_ivcs, agitmmst.agitm_un_on_order, agitmmst.agitm_un_mfg_in_prs, agitmmst.agitm_un_fert_committed, agitmmst.agitm_un_ord_committed, agitmmst.agitm_un_cnt_committed,  agitmmst.agitm_un_on_hand-agitmmst.agitm_un_pend_ivcs+agitmmst.agitm_un_on_order+agitmmst.agitm_un_mfg_in_prs-agitmmst.agitm_un_fert_committed-agitmmst.agitm_un_cnt_committed-agitmmst.agitm_un_ord_committed As [Available] From agitmmst', N'', N'', N'', N'', N'', N'iRely AG - Inventory Available for Sale Detail', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, NULL, 0, 0, NULL, NULL, N'14.2.2', NULL, 1, 53, NULL)
 
 
-INSERT INTO #TempCannedPanels VALUES (1, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Subpanel', N'iRely AG - Invoice Margins Below 0 - Detail', N'Grid', N'', N'iRely AG - Invoice Margins Below 0 - Detail', N'', N'', N'', N'FortBooks', N'All Dates', N'All Dates', N'agstmmst.agstm_ship_rev_dt', N'', N'Select agstmmst.agstm_bill_to_cus, agstmmst.agstm_ivc_no, agstmmst.agstm_ship_rev_dt, agstmmst.agstm_itm_no, agstmmst.agstm_loc_no, agstmmst.agstm_class, agstmmst.agstm_un, agstmmst.agstm_un_prc, agstmmst.agstm_sls, agstmmst.agstm_un_cost, agstmmst.agstm_cgs, agstmmst.agstm_slsmn_id, agstmmst.agstm_pak_desc, agstmmst.agstm_un_desc, agstmmst.agstm_un_prc - agstmmst.agstm_un_cost As ''unit margins'', agstmmst.agstm_sls - agstmmst.agstm_cgs As ''Profit Amount'', (agstmmst.agstm_sls - agstmmst.agstm_cgs) / agstmmst.agstm_sls*100 As ''Profit Percent'' From agstmmst Where agstmmst.agstm_itm_no Is Not Null And agstmmst.agstm_sls <> 0 And (agstmmst.agstm_sls - agstmmst.agstm_cgs) / agstmmst.agstm_sls Is Not Null And @DATE@ And (agstmmst.agstm_sls - agstmmst.agstm_cgs) / agstmmst.agstm_sls*100 <''0'' Order By (agstmmst.agstm_sls - agstmmst.agstm_cgs) / agstmmst.agstm_sls', N'', N'@DATE@', N'', N'', N'', N'iRely AG - Invoice Margins Below 0 - Detail', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, NULL, 0, 0, NULL, NULL, N'14.2.3', NULL, 1, 49, NULL)
+
+INSERT INTO #TempCannedPanels VALUES (1, 0, 20, 0, 0, 0, 0, 0, 0, 4, 1, 0, N'Subpanel', N'iRely Petro - Invoice Margins Below 0 - Detail', N'Grid', N'', N'iRely Petro - Invoice Margins Below 0 - Detail', N'', N'', N'', N'i21 PT - Berry Oil ', N'All Dates', N'All Dates', N'ptstmmst.ptstm_rev_dt', N'', N'Select ptstmmst.ptstm_bill_to_cus, ptstm_ivc_no, ptstmmst.ptstm_ship_rev_dt, ptstmmst.ptstm_itm_no, ptstmmst.ptstm_loc_no, ptstmmst.ptstm_class, ptstmmst.ptstm_un, ptstmmst.ptstm_un_prc, ptstmmst.ptstm_net, ptstmmst.ptstm_cgs, ptstmmst.ptstm_slsmn_id, ptstmmst.ptstm_pak_desc, ptstmmst.ptstm_un_desc, ptstmmst.ptstm_net - ptstmmst.ptstm_cgs As ''Profit Amount'', (ptstmmst.ptstm_net - ptstmmst.ptstm_cgs) / ptstmmst.ptstm_net*100 As ''Profit Percent'' From ptstmmst Where (ptstmmst.ptstm_net - ptstmmst.ptstm_cgs) / ptstmmst.ptstm_net Is Not Null And @DATE@ And ptstmmst.ptstm_net <> 0 And (ptstmmst.ptstm_net - ptstmmst.ptstm_cgs) / ptstmmst.ptstm_net*100 < ''0'' Order By (ptstmmst.ptstm_net - ptstmmst.ptstm_cgs) / ptstmmst.ptstm_net', N'', N'@DATE@', N'', N'', N'', N'iRely Petro - Invoice Margins Below 0 - Detail', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, NULL, 0, 0, NULL, NULL, N'14.1', NULL, 1, 49, NULL)
 
 
 INSERT INTO #TempCannedPanels VALUES (7, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Subpanel', N'iRely GL - General Ledger History Detail', N'Grid', N'', N'iRely GL - General Ledger History Detail', N'', N'', N'', N'i21 PT - Berry Oil ', N'Last Month', N'Last Month', N'glhstmst.glhst_trans_dt', N'', N'Select glhstmst.glhst_acct1_8, glhstmst.glhst_acct9_16, glhstmst.glhst_period, glhstmst.glhst_trans_dt, glhstmst.glhst_src_id, glhstmst.glhst_src_seq, glhstmst.glhst_dr_cr_ind, glhstmst.glhst_jrnl_no, glhstmst.glhst_ref, glhstmst.glhst_doc, Case When glhstmst.glhst_dr_cr_ind = ''C'' Then glhstmst.glhst_amt * -1 When glhstmst.glhst_dr_cr_ind = ''D'' Then glhstmst.glhst_amt End As Amount, glhstmst.glhst_units, glhstmst.glhst_date From glhstmst Where @DATE@', N'', N'@DATE@', N'', N'', N'', N'iRely GL - General Ledger History Detail', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, NULL, 0, 0, NULL, NULL, N'14.2.2', NULL, 1, 26, NULL)
+
 
 INSERT INTO #TempCannedPanels VALUES (9, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely AG - A/R Customers 120 Days Past Due', N'Grid', N'', N'iRely AG - A/R Customers 120 Days Past Due **MUST REAGE DAILY TO BE ACCURATELY UPDATED**', N'', N'', N'', N'i21 AG - Demo Test', N'None', N'', N'', N'', N'select agcusmst.agcus_last_name, agcusmst.agcus_first_name, agcusmst.agcus_key,
 agcusmst.agcus_ar_per5 as ''Amount''
@@ -391,6 +393,9 @@ order by Month(Convert(date,Convert(char(8),glhstmst.glhst_trans_dt),112))', N'S
 
 INSERT INTO #TempCannedPanels VALUES (72, 0, 5, 100, 400, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely GL - Assets/Liabilities Chart - Monthly', N'Chart', N'', N'iRely GL - Assets/Liabilities Chart - Monthly', N'Column', N'outside', N'Sky', N'i21 PT - Berry Oil ', N'This Year', N'This Year', N'glhstmst.glhst_trans_dt', N'glhstmst.glhst_trans_dt', N'Select Month(Convert(date,Convert(char(8),glhstmst.glhst_trans_dt),112)) As ''Month'', Sum(Case When glactmst.glact_normal_value = ''C'' And glhstmst.glhst_dr_cr_ind = ''C'' Then glhstmst.glhst_amt When glactmst.glact_normal_value = ''C'' And glhstmst.glhst_dr_cr_ind = ''D'' Then glhstmst.glhst_amt * -1 When glactmst.glact_normal_value = ''D'' And glhstmst.glhst_dr_cr_ind = ''C'' Then glhstmst.glhst_amt * -1 When glactmst.glact_normal_value = ''D'' And glhstmst.glhst_dr_cr_ind = ''D'' Then glhstmst.glhst_amt End) As Amount From glhstmst Left Join glactmst ON glhstmst.glhst_acct1_8 = glactmst.glact_acct1_8 And glhstmst.glhst_acct9_16 = glactmst.glact_acct9_16 Where (glactmst.glact_type = ''A'' And @DATE@) Group By Month(Convert(date,Convert(char(8),glhstmst.glhst_trans_dt),112)) Order By Month(Convert(date,Convert(char(8),glhstmst.glhst_trans_dt),112))', N'Select Month(Convert(date,Convert(char(8),glhstmst.glhst_trans_dt),112)) As ''Month'', Sum(Case When glactmst.glact_normal_value = ''C'' And glhstmst.glhst_dr_cr_ind = ''C'' Then glhstmst.glhst_amt When glactmst.glact_normal_value = ''C'' And glhstmst.glhst_dr_cr_ind = ''D'' Then glhstmst.glhst_amt * -1 When glactmst.glact_normal_value = ''D'' And glhstmst.glhst_dr_cr_ind = ''C'' Then glhstmst.glhst_amt * -1 When glactmst.glact_normal_value = ''D'' And glhstmst.glhst_dr_cr_ind = ''D'' Then glhstmst.glhst_amt End) As Amount From glhstmst Left Join glactmst ON glhstmst.glhst_acct1_8 = glactmst.glact_acct1_8 And glhstmst.glhst_acct9_16 = glactmst.glact_acct9_16 Where (glactmst.glact_type = ''L'' And @DATE@) Group By Month(Convert(date,Convert(char(8),glhstmst.glhst_trans_dt),112)) Order By Month(Convert(date,Convert(char(8),glhstmst.glhst_trans_dt),112))', N'@DATE@', N'@DATE@', N'', N'', N'iRely GL - Assets/Liabilities Chart - Monthly', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, NULL, 1, 0, NULL, NULL, N'14.1', NULL, 1, 41, NULL)
 
+INSERT INTO #TempCannedPanels VALUES (163, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely AG - Customers Over Credit Limit', N'Grid', N'', N'iRely AG - Customers Over Credit Limit', N'', N'', N'', N'i21 AG - Demo Test', N'None', N'', N'', N'', N'Select agcusmst.agcus_key, agcusmst.agcus_last_name, agcusmst.agcus_first_name, agcusmst.agcus_cred_limit, 
+agcusmst.agcus_ar_future+agcusmst.agcus_ar_per1+agcusmst.agcus_ar_per3+agcusmst.agcus_ar_per2+agcusmst.agcus_ar_per4+agcusmst.agcus_ar_per5-agcusmst.agcus_cred_reg-agcusmst.agcus_cred_ppd As ''Total Balance'', agcusmst.agcus_cred_limit-(agcusmst.agcus_ar_future+agcusmst.agcus_ar_per1+agcusmst.agcus_ar_per3+agcusmst.agcus_ar_per2+agcusmst.agcus_ar_per4+agcusmst.agcus_ar_per5-agcusmst.agcus_cred_reg-agcusmst.agcus_cred_ppd) As ''Overage'' From agcusmst Where agcusmst.agcus_active_yn = ''Y'' And agcusmst.agcus_last_stmt_bal <> 0 And agcusmst.agcus_cred_limit-(agcusmst.agcus_ar_future+agcusmst.agcus_ar_per1+agcusmst.agcus_ar_per3+agcusmst.agcus_ar_per2+agcusmst.agcus_ar_per4+agcusmst.agcus_ar_per5-agcusmst.agcus_cred_reg-agcusmst.agcus_cred_ppd) < 0', N'', N'', N'', N'', N'', N'iRely AG - Customers Over Credit Limit', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, NULL, 0, 0, NULL, NULL, N'14.1.3', NULL, 1, 86, NULL)
+
 INSERT INTO #TempCannedPanels VALUES (166, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'i21 Data Dictionary', N'Grid', N'', N'i21 Data Dictionary', N'', N'', N'', N'AG/Grain - Demo - i21', N'None', N'', N'', N'', N'SELECT 
         col.TABLE_NAME
         , col.COLUMN_NAME
@@ -411,13 +416,244 @@ INSERT INTO #TempCannedPanels VALUES (166, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Ma
     FROM 
         INFORMATION_SCHEMA.COLUMNS col
         inner join vyuFRMColumnDescription colDes on col.TABLE_NAME = colDes.TABLE_NAME and col.COLUMN_NAME = colDes.COLUMN_NAME
-    order by col.TABLE_NAME', N'', N'', N'', N'', N'', N'i21 Data Dictionary', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.5', NULL, 1, 86, NULL)
+    order by col.TABLE_NAME', N'', N'', N'', N'', N'', N'i21 Data Dictionary', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.5', NULL, 1, 87, NULL)
 
 INSERT INTO #TempCannedPanels VALUES (168, 0, 5, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely Grain - Deposit Register', N'Grid', N'', N'Rely Grain - Deposit Register', N'', N'', N'', N'AG/Grain - Demo - i21', N'None', N'', N'', N'', N'select gaaudpay_pmt_audit_no, gaaud_pur_sls_ind, gaaud_trans_type, gaaud_in_type,
 gaaud_key_filler1, gaaudpay_pmt_rev_dt, gaaudpay_chk_no, gaaudpay_stl_amt, 
 gaaudstl_stl_amt, gaaudstl_ivc_no, gaaudpay_cus_ref_no from gaeodmst where gaaud_pur_sls_ind= ''S''
 and gaaud_in_type <> ''D0'' and gaaud_in_type <> ''J0'' and gaaud_trans_type in (''OS'', ''PY'')
-', N'', N'', N'', N'', N'', N'iRely Grain - Deposit Register', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.3', NULL, 1, 87, NULL)
+', N'', N'', N'', N'', N'', N'iRely Grain - Deposit Register', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.3', NULL, 1, 88, NULL)
+
+INSERT INTO #TempCannedPanels VALUES (176, 0, 15, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely Store - Cash Over and Short', N'Grid', N'', N'iRely Store - Cash Over and Short', N'', N'', N'', N'i21 Demo', N'This Month', N'', N'sthss_rev_dt', N'', N'Select sthssmst.sthss_store_name, 
+	sthssmst.sthss_rev_dt, 
+	CONVERT(datetime, CAST(sthssmst.sthss_rev_dt AS CHAR(8)), 101) as FormattedDate, 
+	sthssmst.sthss_tot_cash_overshort, 
+	sthssmst.sthss_rec_type 
+From sthssmst 
+Where sthssmst.sthss_rec_type = ''TOT'' 
+And @DATE@', N'', N'@DATE@', N'', N'', N'Track your daily Cash Over and Short for each store for any timeframe.    -C-Store Module-', N'', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.4', NULL, 1, 89, NULL)
+
+INSERT INTO #TempCannedPanels VALUES (178, 0, 5, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely Store - Cash Over and Short Totals', N'Chart', N'', N'iRely Store - Cash Over and Short Totals', N'Column Stacked', N'insideEnd', N'', N'i21 Demo', N'All Dates', N'All Dates', N'sthssmst.sthss_rev_dt', N'', N'SELECT sthssmst.sthss_store_name AS ''Store'', 
+	Sum(sthssmst.sthss_tot_cash_overshort) AS ''Cash Over / Short Amount'', 
+	sthssmst.sthss_rec_type
+FROM sthssmst
+WHERE @DATE@
+GROUP BY sthssmst.sthss_store_name, sthssmst.sthss_rec_type
+HAVING (sthssmst.sthss_rec_type=''TOT'')', N'', N'@DATE@', N'', N'', N'Compare and view your total cash over/short for total time period.
+-C-Store Module-', N'Store - Cash Over and Short Totals', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 1, 0, NULL, NULL, N'14.3.1', NULL, 1, 90, NULL)
+
+INSERT INTO #TempCannedPanels VALUES (180, 0, 5, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely Store - Customer Count by Store', N'Grid', N'', N'iRely Store - Customer Count by Store', N'', N'', N'', N'i21 Demo', N'Last Month', N'', N'sthss_rev_dt', N'', N'select sthss_store_name as ''Store Name'', 
+	sthss_rev_dt as ''Date'', 
+	sum(sthss_key_cust_count) as ''Total Customers''
+from sthssmst
+where sthss_rec_type=''KEY'' 
+and @DATE@
+group by sthss_store_name, sthss_rev_dt', N'', N'@DATE@', N'', N'', N'Track your customer count by store for each individual day.
+-C-Store Module-', N'', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.2', NULL, 1, 91, NULL)
+
+INSERT INTO #TempCannedPanels VALUES (183, 0, 5, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely Store - Dept Sales by Individual Day', N'Grid', N'', N'Store - Dept Sales by Individual Day', N'', N'', N'', N'i21 Demo', N'Last Month', N'', N'sthssmst.sthss_rev_dt', N'', N'select sthssmst.sthss_store_name, 
+	sthssmst.sthss_rev_dt, 
+	sthssmst.sthss_key_deptno, 
+	sthssmst.sthss_key_desc,  
+	sthssmst.sthss_key_total_sales
+from sthssmst
+where @DATE@', N'', N'@DATE@', N'', N'', N'Display your each department sales for each day.
+-C-Store Module-', N'', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.3', NULL, 1, 92, NULL)
+
+INSERT INTO #TempCannedPanels VALUES (185, 0, 5, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely Store - Fuel Inventory Levels', N'Grid', N'', N'iRely Store - Fuel Inventory Levels', N'', N'', N'', N'i21 Demo', N'None', N'', N'', N'', N'SELECT stpbkmst.stpbk_store_name AS ''Store #'', 
+	stpbkmst.stpbk_upcno AS ''UPC #'', 
+	stpbkmst.stpbk_item_desc AS ''Item Desc'', 
+	stpbkmst.stpbk_vnd_id AS ''Vendor ID'', 
+	stpbkmst.stpbk_deptno AS ''Dept #'', 
+	stpbkmst.stpbk_family AS ''Family'', 
+	stpbkmst.stpbk_class AS ''Class'', 
+	stpbkmst.stpbk_casecost AS ''Case Cost'', 
+	stpbkmst.stpbk_price AS ''Retail Price'', 
+	stpbkmst.stpbk_last_price AS ''Last Price'', 
+	stpbkmst.stpbk_min_qty AS ''Min Qty'', 
+	stpbkmst.stpbk_sug_qty AS ''Sug Qty'', 
+	stpbkmst.stpbk_min_ord_qty AS ''Min Order Qty'', 
+	stpbkmst.stpbk_on_hnd_qty AS ''On-Hand Qty'', 
+	stpbkmst.stpbk_on_ord_qty AS ''On Order Qty'', 
+	stpbkmst.stpbk_qty_sold AS ''Qty Sold''
+FROM stpbkmst
+where stpbk_pumped_yn=''P''', N'', N'', N'', N'', N'iRely Store - Fuel Inventory Levels', N'', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.4', NULL, 1, 93, NULL)
+
+INSERT INTO #TempCannedPanels VALUES (187, 0, 5, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely Store - Fuel Margins by Store', N'Grid', N'', N'iRely Store - Fuel Margins by Store', N'', N'', N'', N'i21 Demo', N'Last Month', N'', N'sthssmst.sthss_rev_dt', N'', N'SELECT sthssmst.sthss_store_name, 
+	sthssmst.sthss_pmp_id, 
+	sthssmst.sthss_pmp_prc - sthssmst.sthss_pmp_cost as ''c''
+FROM sthssmst
+WHERE sthssmst.sthss_rec_type=''PMP''
+AND @DATE@', N'', N'@DATE@', N'', N'', N'See your fuel margins (price-costs) for each product at each store.
+-C-Store Module-', N'', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.3', NULL, 1, 94, NULL)
+
+INSERT INTO #TempCannedPanels VALUES (189, 0, 5, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely Store - Fuel Sales by Store and Product', N'Grid', N'', N'iRely Store - Fuel Sales by Store and Product', N'', N'', N'', N'i21 Demo', N'Last Month', N'', N'sthssmst.sthss_rev_dt', N'', N'SELECT sthssmst.sthss_store_name, 
+	sthssmst.sthss_pmp_desc, 
+	Sum(sthssmst.sthss_pmp_amt) as ''c''
+FROM sthssmst
+WHERE (sthssmst.sthss_pmp_amt>0.000) 
+and @DATE@
+GROUP BY sthssmst.sthss_store_name, sthssmst.sthss_pmp_desc', N'', N'@DATE@', N'', N'', N'See your total sales of fuel for each store and product.
+-C-Store Module-', N'', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.3', NULL, 1, 95, NULL)
+
+INSERT INTO #TempCannedPanels VALUES (191, 5000, 5, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely Store - Gallons by Store', N'Grid', N'', N'iRely Store - Gallons by Store', N'', N'', N'', N'i21 Demo', N'Last Month', N'', N'sthssmst.sthss_rev_dt', N'', N'SELECT sthssmst.sthss_store_name, 
+	sthssmst.sthss_pmp_id, 
+	Sum(sthssmst.sthss_pmp_qty) as c, 
+	sthssmst.sthss_rec_type
+FROM sthssmst
+WHERE @DATE@
+GROUP BY sthssmst.sthss_store_name, sthssmst.sthss_pmp_id, sthssmst.sthss_rec_type
+HAVING (sthssmst.sthss_rec_type=''PMP'')', N'', N'@DATE@', N'', N'', N'Track your gallons sold of each fuel product for any timeframe.  
+-C-Store Module-', N'', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.2', NULL, 1, 96, NULL)
+
+INSERT INTO #TempCannedPanels VALUES (193, 0, 5, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely Store - Gross Profit by Store', N'Grid', N'', N'iRely Store - Gross Profit by Store', N'', N'', N'', N'i21 Demo', N'Last Month', N'', N'sthssmst.sthss_rev_dt', N'', N'select sthss_store_name as ''Store Name'', 
+	sthss_key_deptno as ''Dept #'', 
+	sum((sthss_key_total_sales * sthss_key_gp_pct) / 100) as ''Gross Profit''
+from sthssmst
+where sthss_rec_type = ''KEY'' 
+and @DATE@
+group by sthss_store_name, sthss_key_deptno', N'', N'@DATE@', N'', N'', N'View and compare your gross profit by store.
+-C-Store Module-', N'', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.2', NULL, 1, 97, NULL)
+
+INSERT INTO #TempCannedPanels VALUES (195, 0, 10, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely Store - Item Movement Detail', N'Pivot Grid', N'', N'iRely Store - Item Movement Detail', N'', N'', N'', N'i21 Demo', N'Last Week', N'', N'stithmst.stith_trx_rev_dt', N'', N'Select stithmst.stith_upcno As ''UPC #'', 
+	stithmst.stith_trx_rev_dt As ''Trans Dt'', 
+	stithmst.stith_rec_type As ''Purchase / Sale'', 
+	stithmst.stith_store_name As ''Store'', 
+	stithmst.stith_ivc_no As ''Inv #'', 
+	stithmst.stith_dpt_id As ''Department'', 
+	stithmst.stith_trx_qty As ''Purchase Qty'', 
+	stithmst.stith_cst_un As ''Units Cost'', 
+	stithmst.stith_rtl_un As ''Retail Price'', 
+	stithmst.stith_wtd_qty_sold As ''Qty Sold'', 
+	stithmst.stith_wtd_amt_sold As ''Amount Sold'',
+	Month(CONVERT(datetime, CAST(stithmst.stith_trx_rev_dt AS CHAR(8)), 101)) As ''Month'',  
+	stpbkmst.stpbk_item_desc As ''UPC Desc'', 
+	stpbkmst.stpbk_family As ''Family'', 
+	stpbkmst.stpbk_class As ''Class'' 
+From stithmst 
+Inner Join stpbkmst On stithmst.stith_upcno = stpbkmst.stpbk_upcno 
+	And stithmst.stith_store_name = stpbkmst.stpbk_store_name 
+Where @DATE@', N'', N'@DATE@', N'', N'', N'iRely Store - Item Movement Detail', N'', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.4', NULL, 1, 98, NULL)
+
+INSERT INTO #TempCannedPanels VALUES (201, 0, 10, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Subpanel', N'iRely Store - Inventory Re-Order', N'Grid', N'', N'Store - Inventory Re-Order', N'', N'', N'', N'i21 Demo', N'None', N'', N'', N'', N'SELECT stpbkmst.stpbk_store_name AS ''Store #'', 
+	stpbkmst.stpbk_upcno AS ''UPC #'', 
+	stpbkmst.stpbk_item_desc AS ''Item Desc'', 
+	stpbkmst.stpbk_min_qty AS ''Min Qty'', 
+	stpbkmst.stpbk_on_hnd_qty AS ''On-Hand Qty''
+FROM stpbkmst', N'', N'', N'', N'', N'Track those products that need reordered.
+-C-Store Module-', N'', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.2', NULL, 1, 99, NULL)
+
+INSERT INTO #TempCannedPanels VALUES (203, 10000, 10, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely Store - No Sales Transactions', N'Grid', N'', N'iRely Store - No Sales Transactions', N'', N'', N'', N'i21 Demo', N'Last Month', N'', N'sthssmst.sthss_rev_dt', N'', N'SELECT sthssmst.sthss_store_name AS ''Store'', 
+	sthssmst.sthss_rev_dt AS ''Date'', 
+	sthssmst.sthss_tot_no_nosales AS ''No Sale Transactions''
+FROM sthssmst
+WHERE @DATE@', N'', N'@DATE@', N'', N'', N'Display only the NO Sales Transactions with this exception panel.
+-C-Store Module-', N'', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.2', NULL, 1, 100, NULL)
+
+INSERT INTO #TempCannedPanels VALUES (205, 0, 10, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely Store - On Sale Items', N'Grid', N'', N'iRely Store - On Sale Items', N'', N'', N'', N'i21 Demo', N'Last Month', N'', N'stpbkmst.stpbk_sale_startdate', N'', N'SELECT stpbkmst.stpbk_store_name AS ''Store #'', 
+	stpbkmst.stpbk_upcno AS ''UPC #'', 
+	stpbkmst.stpbk_item_desc AS ''Item Desc'', 
+	stpbkmst.stpbk_sale_startdate as ''Start Date'', 
+	stpbkmst.stpbk_sale_enddate as ''End Date'', 
+	stpbkmst.stpbk_sale_price as ''Sale Price''
+from stpbkmst
+WHERE stpbkmst.stpbk_sale_startdate > 0
+and @DATE@
+ORDER BY stpbkmst.stpbk_sale_startdate', N'', N'@DATE@', N'', N'', N'View your on-sale items marked in the iRely software  
+-C-Store Module-', N'', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.4', NULL, 1, 101, NULL)
+
+INSERT INTO #TempCannedPanels VALUES (207, 100, 10, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Subpanel', N'iRely Store - Pricebook Detail', N'Grid', N'', N'iRely Store - Pricebook Detail', N'', N'', N'', N'i21 Demo', N'None', N'', N'', N'', N'SELECT stpbkmst.stpbk_store_name AS ''Store #'', 
+	stpbkmst.stpbk_upcno AS ''UPC #'', 
+	stpbkmst.stpbk_item_desc AS ''Item Desc'', 
+	stpbkmst.stpbk_vnd_id AS ''Vendor ID'', 
+	stpbkmst.stpbk_deptno AS ''Dept #'', 
+	stpbkmst.stpbk_family AS ''Family'', 
+	stpbkmst.stpbk_class AS ''Class'', 
+	stpbkmst.stpbk_casecost AS ''Case Cost'', 
+	stpbkmst.stpbk_price AS ''Retail Price'', 
+	stpbkmst.stpbk_last_price AS ''Last Price'', 
+	stpbkmst.stpbk_min_qty AS ''Min Qty'', 
+	stpbkmst.stpbk_sug_qty AS ''Sug Qty'', 
+	stpbkmst.stpbk_min_ord_qty AS ''Min Order Qty'', 
+	stpbkmst.stpbk_on_hnd_qty AS ''On-Hand Qty'', 
+	stpbkmst.stpbk_on_ord_qty AS ''On Order Qty'', 
+	stpbkmst.stpbk_qty_sold AS ''Qty Sold''
+FROM stpbkmst', N'', N'', N'', N'', N'Display your pricebook information in this sortable, filterable grid.
+-C-Store Module-', N'', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.3', NULL, 1, 102, NULL)
+
+INSERT INTO #TempCannedPanels VALUES (209, 0, 15, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely Store - Dept Refund Totals', N'Grid', N'', N'iRely Store - Dept Refund Totals', N'', N'', N'', N'i21 Demo', N'Last Month', N'', N'sthssmst.sthss_rev_dt', N'', N'SELECT sthssmst.sthss_store_name AS ''Store'', 
+	sthssmst.sthss_rev_dt AS ''Date'', 
+	sthssmst.sthss_key_refund_amt AS ''Refund Amount''
+FROM  sthssmst
+WHERE sthssmst.sthss_key_refund_amt <> 0
+and @DATE@', N'', N'@DATE@', N'', N'', N'See only your department refund totals for each store.
+-C-Store Module-', N'', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.4', NULL, 1, 103, NULL)
+
+INSERT INTO #TempCannedPanels VALUES (211, 0, 5, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely Store - Sales by Store', N'Grid', N'', N'iRely Store - Sales by Store', N'', N'', N'', N'i21 Demo', N'Last Month', N'', N'sthssmst.sthss_rev_dt', N'', N'select sthssmst.sthss_store_name as ''store name'', 
+	sthssmst.sthss_key_deptno as ''dept #'', 
+	sum(sthssmst.sthss_key_total_sales) as ''total sales''
+from sthssmst
+where @DATE@
+group by sthssmst.sthss_store_name, sthssmst.sthss_key_deptno', N'', N'@DATE@', N'', N'', N'Track and compare each sales by store and  each department.
+-C-Store Module-', N'', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.4', NULL, 1, 104, NULL)
+
+INSERT INTO #TempCannedPanels VALUES (213, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely Store - Shift Physicals Overview', N'Grid', N'', N'iRely Store - Shift Physicals Overview', N'', N'', N'', N'i21 Demo', N'None', N'', N'', N'', N'Select stphymst.stphy_store_name, 
+	stphymst.stphy_rev_dt, 
+	stphymst.stphy_shift_no, 
+	stphymst.stphy_itm_id, 
+	stphymst.stphy_upc_modno, 
+	stphymst.stphy_itm_desc, 
+	stphymst.stphy_cnt_what_cd, 
+	stphymst.stphy_beg_qty, 
+	stphymst.stphy_pur_qty, 
+	stphymst.stphy_sls_qty, 
+	stphymst.stphy_end_qty, 
+	stphymst.stphy_diff_qty, 
+	stphymst.stphy_beg_ser_no, 
+	stphymst.stphy_end_ser_no, 
+	stphymst.stphy_stick_rdg, 
+	stphymst.stphy_posted_yn, 
+	stphymst.stphy_pending_qty, 
+	stphymst.stphy_entered_qty, 
+	stphymst.stphy_deptno, 
+	stphymst.stphy_price, 
+	stphymst.stphy_binloc 
+From stphymst', N'', N'', N'', N'', N'', N'', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.3', NULL, 1, 105, NULL)
+
+INSERT INTO #TempCannedPanels VALUES (215, 0, 5, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely Store - Item Movement Purchases Monthly', N'Chart', N'', N'iRely Store - Item Movement Purchases Monthly', N'Column Stacked', N'insideEnd', N'Base', N'i21 Demo', N'This Year', N'This Year', N'stithmst.stith_trx_rev_dt', N'', N'SELECT 
+	Month(CONVERT(datetime, CAST(stithmst.stith_trx_rev_dt AS CHAR(8)), 101))  as ''Trans Dt'', 
+	Sum(stithmst.stith_trx_qty) as ''Purchase Qty''
+FROM stithmst
+WHERE @DATE@
+GROUP BY Month(CONVERT(datetime, CAST(stithmst.stith_trx_rev_dt AS CHAR(8)), 101)) 
+ORDER BY Month(CONVERT(datetime, CAST(stithmst.stith_trx_rev_dt AS CHAR(8)), 101))', N'', N'@DATE@', N'', N'', N'iRely Store - Item Movement Purchases Monthly', N'Store - Item Movement Purchases Monthly', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 1, 0, NULL, NULL, N'14.3.2', NULL, 1, 109, NULL)
+
+INSERT INTO #TempCannedPanels VALUES (217, 0, 5, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely Store - Item Movement Sales Monthly', N'Chart', N'', N'iRely Store - Item Movement Sales Monthly', N'Column Stacked', N'insideEnd', N'Base', N'i21 Demo', N'This Year', N'This Year', N'stithmst.stith_trx_rev_dt', N'', N'SELECT 
+	Month(CONVERT(datetime, CAST(stithmst.stith_trx_rev_dt AS CHAR(8)), 101)) as ''Trans Dt'', 
+	Sum(stithmst.stith_wtd_amt_sold) as ''Amount Sold''
+FROM stithmst
+WHERE @DATE@
+GROUP BY Month(CONVERT(datetime, CAST(stithmst.stith_trx_rev_dt AS CHAR(8)), 101))
+ORDER BY Month(CONVERT(datetime, CAST(stithmst.stith_trx_rev_dt AS CHAR(8)), 101))', N'', N'@DATE@', N'', N'', N'iRely Store - Item Movement Sales Monthly', N'Store - Item Movement Sales Monthly', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 1, 0, NULL, NULL, N'14.3.2', NULL, 1, 106, NULL)
+
+INSERT INTO #TempCannedPanels VALUES (219, 0, 5, 0, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely Store - Monthly Sales', N'Chart', N'', N'iRely Store - Monthly Sales', N'Line', N'under', N'Base', N'i21 Demo', N'This Year', N'This Year', N'sthssmst.sthss_rev_dt', N'', N'select 
+	Month(CONVERT(datetime, CAST(sthssmst.sthss_rev_dt AS CHAR(8)), 101)) as ''Month'', 
+	Sum(sthssmst.sthss_key_total_sales) as ''Total Sales''
+from sthssmst
+where @DATE@
+GROUP BY Month(CONVERT(datetime, CAST(sthssmst.sthss_rev_dt AS CHAR(8)), 101))
+ORDER BY Month(CONVERT(datetime, CAST(sthssmst.sthss_rev_dt AS CHAR(8)), 101))', N'', N'@DATE@', N'', N'', N'Use this line graph to display your monthly sales for any or all stores.
+-C-Store Module-', N'Store - Monthly Sales', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 1, 0, NULL, NULL, N'14.3.3', NULL, 1, 107, NULL)
+
+INSERT INTO #TempCannedPanels VALUES (221, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'i21 Dashboard - Active Panel Users', N'Grid', N'', N'i21 Dashboard - Active Panel Users', N'', N'', N'', N'AG/Grain - Demo - i21', N'None', N'', N'', N'', N'Select 
+	tblDBPanel.strPanelName, 
+	tblDBPanelUser.intUserId, 
+	tblSMUserSecurity.intUserSecurityID, 
+	tblSMUserSecurity.strUserName,
+	tblSMUserSecurity.strFullName
+From tblDBPanel
+Inner Join tblDBPanelUser on tblDBPanel.intPanelId = tblDBPanelUser.intPanelId
+Inner Join tblSMUserSecurity on tblDBPanelUser.intUserId = tblSMUserSecurity.intUserSecurityID', N'', N'', N'', N'', N'Lists Users of all i21 Dashboard Active Panels, by Panel Name', N'i21 Dashboard - Active Panel Users', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.7', NULL, 1, 108, NULL)
 
 print('/*******************  END INSERTING canned panels on temporary panel table  *******************/')
 

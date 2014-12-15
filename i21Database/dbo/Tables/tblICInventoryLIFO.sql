@@ -23,13 +23,8 @@ CREATE CLUSTERED INDEX [IDX_tblICInventoryLIFO]
     ON [dbo].[tblICInventoryLIFO]([dtmDate] DESC, [intItemId] ASC, [intLocationId] ASC, [intInventoryLIFOId] DESC);
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFO_intItemId]
-    ON [dbo].[tblICInventoryLIFO]([intItemId] ASC);
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFO_intItemId_intLocationId]
+    ON [dbo].[tblICInventoryLIFO]([intItemId] ASC, [intLocationId] ASC)
+    INCLUDE (dblStockIn, dblStockOut, dblCost);
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFO_intLocationId]
-    ON [dbo].[tblICInventoryLIFO]([intLocationId] ASC);
-GO
-
-CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFO_intInventoryLIFOId]
-    ON [dbo].[tblICInventoryLIFO]([intInventoryLIFOId] ASC);

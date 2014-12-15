@@ -3,32 +3,25 @@
 	[intInventoryReceiptId] INT NOT NULL IDENTITY, 
     [strReceiptNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [dtmReceiptDate] DATETIME NOT NULL, 
-    [intVendorId] INT NOT NULL, 
+    [intVendorId] INT NULL, 
     [strReceiptType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intSourceId] INT NULL, 
     [intBlanketRelease] INT NULL DEFAULT ((0)), 
-    [intLocationId] INT NOT NULL, 
-    [intWarehouseId] INT NULL, 
+    [intLocationId] INT NULL, 
     [strVendorRefNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strBillOfLading] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [intShipViaId] INT NULL, 
-    [intReceiptSequenceNo] INT NOT NULL, 
-    [intBatchNo] INT NULL, 
-    [intTermId] INT NOT NULL, 
     [intProductOrigin] INT NULL, 
-    [strReceiver] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
-    [intCurrencyId] INT NOT NULL, 
+    [intReceiverId] INT NULL, 
+    [intCurrencyId] INT NULL, 
     [strVessel] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [strAPAccount] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [strBillingStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [strOrderNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intFreightTermId] INT NULL, 
     [strDeliveryPoint] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strAllocateFreight] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT ('No'), 
     [strFreightBilledBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT ('No'), 
     [intShiftNumber] INT NULL, 
     [strNotes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
-	[strCalculationBasis] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+	[strCalculationBasis] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [dblUnitWeightMile] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblFreightRate] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblFuelSurcharge] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -50,8 +43,8 @@
     CONSTRAINT [FK_tblICInventoryReceipt_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblICInventoryReceipt_tblSMFreightTerm] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]), 
     CONSTRAINT [FK_tblICInventoryReceipt_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intShipViaID]), 
-    CONSTRAINT [FK_tblICInventoryReceipt_tblSMTerm] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID]), 
-    CONSTRAINT [FK_tblICInventoryReceipt_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
+    CONSTRAINT [FK_tblICInventoryReceipt_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]), 
+    CONSTRAINT [FK_tblICInventoryReceipt_tblEntity] FOREIGN KEY ([intReceiverId]) REFERENCES [tblEntity]([intEntityId])
 )
 
 GO
@@ -127,14 +120,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'intLocationId'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Warehouse Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryReceipt',
-    @level2type = N'COLUMN',
-    @level2name = N'intWarehouseId'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Vendor Reference Number',
@@ -163,32 +149,11 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'intShipViaId'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Receipt Sequence Number',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryReceipt',
-    @level2type = N'COLUMN',
-    @level2name = N'intReceiptSequenceNo'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Batch Number',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryReceipt',
-    @level2type = N'COLUMN',
-    @level2name = N'intBatchNo'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Term Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryReceipt',
-    @level2type = N'COLUMN',
-    @level2name = N'intTermId'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Product Origin',
@@ -206,7 +171,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblICInventoryReceipt',
     @level2type = N'COLUMN',
-    @level2name = N'strReceiver'
+    @level2name = 'intReceiverId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Currency Id',
@@ -226,32 +191,11 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'strVessel'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'AP Account',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryReceipt',
-    @level2type = N'COLUMN',
-    @level2name = N'strAPAccount'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Billing Status',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryReceipt',
-    @level2type = N'COLUMN',
-    @level2name = N'strBillingStatus'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Order Number',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryReceipt',
-    @level2type = N'COLUMN',
-    @level2name = N'strOrderNumber'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Freight Terms',

@@ -3,8 +3,17 @@ AS
 BEGIN
 	-- Arrange
 	BEGIN 
-		DECLARE @intItemId AS INT
-		DECLARE @intLocationId AS INT
+		-- Declare the variables for grains (item)
+		DECLARE @WetGrains AS INT = 1
+				,@StickyGrains AS INT = 2
+				,@PremiumGrains AS INT = 3
+				,@ColdGrains AS INT = 4
+				,@HotGrains AS INT = 5
+
+		-- Declare the variables for location
+		DECLARE @Default_Location AS INT = 1
+				,@NewHaven AS INT = 2
+				,@BetterHaven AS INT = 3
 
 		DECLARE @actual AS INT;
 		DECLARE @expected AS INT;
@@ -21,9 +30,7 @@ BEGIN
 	-- Get the base account from the item level 
 	-- Must return account id 12040-1000 (INVENTORY WHEAT-)	
 	BEGIN 
-		SET @intItemId = 1; -- WET GRAINS
-
-		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@intItemId, @intLocationId, @InventoryDescription);
+		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@WetGrains, NULL, @InventoryDescription);
 
 		-- Assert
 		SET @expected = 1000;
@@ -33,9 +40,7 @@ BEGIN
 	
 	-- Must return account id 40100-1001 (COST OF GOODS WHEAT-)
 	BEGIN 
-		SET @intItemId = 1; -- WET GRAINS
-                                                                                                                                                                                                                                                                               
-		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@intItemId, @intLocationId, @CostOfGoodsDescription);
+		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@WetGrains, NULL, @CostOfGoodsDescription);
 
 		-- Assert
 		SET @expected = 2000;
@@ -45,9 +50,7 @@ BEGIN
 	
 	-- Must return account id 50110-1001 (PURCHASES WHEAT-)
 	BEGIN 
-		SET @intItemId = 1; -- WET GRAINS
-                                                                                                                                                                                                                                                                               
-		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@intItemId, @intLocationId, @PurchasesDescription);
+		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@WetGrains, NULL, @PurchasesDescription);
 
 		-- Assert
 		SET @expected = 3000;
@@ -57,9 +60,7 @@ BEGIN
 
 	-- Must return account id 12040-1001 (INVENTORY WHEAT-NEW HAVEN GRAIN)
 	BEGIN 
-		SET @intItemId = 2; -- STICKY GRAINS
-                                                                                                                                                                                                                                                                               
-		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@intItemId, @intLocationId, @InventoryDescription);
+		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@StickyGrains, NULL, @InventoryDescription);
 
 		-- Assert
 		SET @expected = 1001;
@@ -69,9 +70,7 @@ BEGIN
 
 	-- Must return account id 40100-1001 (COST OF GOODS WHEAT-NEW HAVEN GRAIN)
 	BEGIN 
-		SET @intItemId = 2; -- STICKY GRAINS
-                                                                                                                                                                                                                                                                               
-		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@intItemId, @intLocationId, @CostOfGoodsDescription);
+		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@StickyGrains, NULL, @CostOfGoodsDescription);
 
 		-- Assert
 		SET @expected = 2001;
@@ -81,9 +80,7 @@ BEGIN
 
 	-- Must return account id 50110-1001 (PURCHASES WHEAT-NEW HAVEN GRAIN)
 	BEGIN 
-		SET @intItemId = 2; -- STICKY GRAINS
-                                                                                                                                                                                                                                                                               
-		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@intItemId, @intLocationId, @PurchasesDescription);
+		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@StickyGrains, NULL, @PurchasesDescription);
 
 		-- Assert
 		SET @expected = 3001;
@@ -93,9 +90,7 @@ BEGIN
 
 	-- Must return account id 12040-1002 (INVENTORY WHEAT-NEW HAVEN GRAIN)
 	BEGIN 
-		SET @intItemId = 3; -- PREMIUM GRAINS
-                                                                                                                                                                                                                                                                               
-		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@intItemId, @intLocationId, @InventoryDescription);
+		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@PremiumGrains, NULL, @InventoryDescription);
 
 		-- Assert
 		SET @expected = 1002;
@@ -105,9 +100,7 @@ BEGIN
 
 	-- Must return account id 40100-1002 (COST OF GOODS WHEAT-NEW HAVEN GRAIN)
 	BEGIN 
-		SET @intItemId = 3; -- PREMIUM  GRAINS
-                                                                                                                                                                                                                                                                               
-		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@intItemId, @intLocationId, @CostOfGoodsDescription);
+		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@PremiumGrains, NULL, @CostOfGoodsDescription);
 
 		-- Assert
 		SET @expected = 2002;
@@ -117,13 +110,11 @@ BEGIN
 
 	-- Must return account id 50110-1002 (PURCHASES WHEAT-NEW HAVEN GRAIN)
 	BEGIN 
-		SET @intItemId = 3; -- PREMIUM  GRAINS
-                                                                                                                                                                                                                                                                               
-		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@intItemId, @intLocationId, @PurchasesDescription);
+		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@PremiumGrains, NULL, @PurchasesDescription);
 
 		-- Assert
 		SET @expected = 3002;
 		EXEC tSQLt.AssertEquals @expected, @actual; 
 
 	END
-END 
+END

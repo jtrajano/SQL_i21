@@ -19,19 +19,16 @@
 	[intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICItemStock] PRIMARY KEY ([intItemStockId]), 
-    CONSTRAINT [FK_tblICItemStock_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
+    CONSTRAINT [FK_tblICItemStock_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblICItemStock_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblICItemStock_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
     CONSTRAINT [FK_tblICItemStock_tblICCountGroup] FOREIGN KEY ([intInventoryGroupId]) REFERENCES [tblICCountGroup]([intCountGroupId])
 )
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblICItemStock_intItemId]
-    ON [dbo].[tblICItemStock]([intItemId] ASC);
-GO
-
-CREATE NONCLUSTERED INDEX [IX_tblICItemStock_intLocationId]
-    ON [dbo].[tblICItemStock]([intLocationId] ASC);
+CREATE NONCLUSTERED INDEX [IX_tblICItemStock_intItemId_intLocationId]
+    ON [dbo].[tblICItemStock]([intItemId] ASC, [intLocationId] ASC)
+	INCLUDE(dblUnitOnHand, dblAverageCost);
 GO
 
 GO

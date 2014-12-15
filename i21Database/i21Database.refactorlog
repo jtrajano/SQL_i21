@@ -1442,4 +1442,53 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strInventoryTracking" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="fc9dc5a0-301c-4cf8-a1ce-3bb81f0427cb" ChangeDateTime="11/27/2014 02:29:56">
+    <Property Name="ElementName" Value="[dbo].[tblSMRecurringTransaction].[intRecurringID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMRecurringTransaction]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intRecurringId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4823ef93-a9fe-49d0-8a7d-62b42fce23f2" ChangeDateTime="11/27/2014 02:30:05">
+    <Property Name="ElementName" Value="[dbo].[tblSMRecurringTransaction].[intTransactionID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMRecurringTransaction]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTransactionId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="f212eb0d-d5d2-46bc-b652-a5d04c3386a5" ChangeDateTime="12/01/2014 09:08:33">
+    <Property Name="ElementName" Value="[dbo].[tblAPBill].[strDescription]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPBill]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strReference]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="f6842a41-fceb-4281-8a5b-a58bc7cc8e81" ChangeDateTime="12/03/2014 04:00:52">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryReceipt].[strReceiver]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryReceipt]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="int" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3b6a1579-79db-4cfb-82cd-62e5a35100da" ChangeDateTime="12/03/2014 04:01:11">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryReceipt].[int]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryReceipt]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intReceiverId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="31e7ad3c-2986-4e61-a74c-c51e987c70ba" ChangeDateTime="12/03/2014 04:39:00">
+    <Property Name="ElementName" Value="[dbo].[FK_tblICInventoryReceipt_tblSMEntityCredential]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryReceipt]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblICInventoryReceipt_tblEntityCredential]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="10dbcafd-fc0b-479c-b60b-c7b3b71d7154" ChangeDateTime="12/10/2014 08:34:57">
+    <Property Name="ElementName" Value="[dbo].[tblICEquipmentLength].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICEquipmentLength]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intEquipmentLengthId" />
+  </Operation>
 </Operations>

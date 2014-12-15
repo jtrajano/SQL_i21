@@ -13,4 +13,16 @@
     CONSTRAINT [FK_tblGLAccountSegment_tblGLAccountGroup] FOREIGN KEY ([intAccountGroupId]) REFERENCES [dbo].[tblGLAccountGroup] ([intAccountGroupId]),
     CONSTRAINT [FK_tblGLAccountSegment_tblGLAccountStructure] FOREIGN KEY ([intAccountStructureId]) REFERENCES [dbo].[tblGLAccountStructure] ([intAccountStructureId])
 );
+GO
 
+CREATE NONCLUSTERED INDEX [IX_tblGLAccountSegment_strCode]
+    ON [dbo].[tblGLAccountSegment]([strCode] ASC);
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblGLAccountSegment_intAccountStructureId]
+    ON [dbo].[tblGLAccountSegment]([intAccountStructureId] ASC);
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblGLAccountSegment_intAccountGroupId]
+    ON [dbo].[tblGLAccountSegment]([intAccountGroupId] ASC);
+GO

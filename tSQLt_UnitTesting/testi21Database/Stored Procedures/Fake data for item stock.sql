@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [testi21Database].[Fake data for item stock]
 AS
 BEGIN
+		DROP VIEW vyuAPRptPurchase
 		EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;
 
 		-- Declare the variables for grains (item)

@@ -1,4 +1,7 @@
 ﻿GO
+--NOTE When adding new status please add on the last record.
+DELETE FROM tblPOOrderStatus
+GO
 MERGE INTO tblPOOrderStatus AS Target
 USING (VALUES
   (1, N'Open'),
@@ -6,7 +9,8 @@ USING (VALUES
   (3, N'Closed'),
   (4, N'Cancelled'),
   (5, N'Washed Out'),
-  (6, N'Short Closed')
+  (6, N'Short Closed'),
+  (7, N'Pending')
 )
 AS Source (intOrderStatusId, strStatus)
 ON Target.intOrderStatusId = Source.intOrderStatusId AND Target.strStatus = Source.strStatus
