@@ -1484,4 +1484,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[FK_tblICInventoryReceipt_tblEntityCredential]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="4e4f8126-e5a6-4448-8ba6-7ed9d2bfb5f0" ChangeDateTime="12/13/2014 18:43:28">
+    <Property Name="ElementName" Value="[dbo].[tblSMRecurringTransaction].[intRecurringGroup]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMRecurringTransaction]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intRecurringGroupId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="6e29ce2d-ab58-4be7-8436-27757f735a8b" ChangeDateTime="12/13/2014 18:44:14">
+    <Property Name="ElementName" Value="[dbo].[tblSMRecurringHistory].[strTransactionType]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMRecurringHistory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTransactionTypeId" />
+  </Operation>
 </Operations>
