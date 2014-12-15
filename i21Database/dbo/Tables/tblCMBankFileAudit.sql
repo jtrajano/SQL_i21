@@ -1,9 +1,9 @@
 ﻿CREATE TABLE [dbo].[tblCMBankFileAudit](
 	[intBankFileAuditId] [int] IDENTITY(1,1) NOT NULL,
-	[intBankAccountId] [nvarchar](100) NULL,
+	[intBankAccountId] INT NULL,
 	[intUserId] [int] NULL,
 	[dtmDate] [datetime] NULL,
-	[strFileName][nvarchar](200) NULL,
+	[strFileName][nvarchar](200) COLLATE Latin1_General_CI_AS NULL,
 	[blbBankFile] [varbinary](max) NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
  CONSTRAINT [PK_tblCMBankFileAudit] PRIMARY KEY CLUSTERED 
