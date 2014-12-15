@@ -138,12 +138,6 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         equipmentLength: {
             type: 'inventorybufferedequipmentlength'
         }
-    },
-
-    formulas: {
-        checkReadOnly: function(get) {
-
-        }
     }
 
 });

@@ -109,8 +109,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         store: '{itemPackType}'
                     }
                 },
-                colUnitCost: 'dblUnitCost',
-                colUnitRetail: 'dblUnitRetail'
+                colUnitCost: 'dblUnitCost'
             },
 
 
@@ -119,10 +118,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 value: '{current.strCalculationBasis}',
                 store: '{calculationBasis}'
             },
-            txtUnitsWeightMiles: '{current.dblUnitWeightMile}',
+            txtUnitsWeightMiles: {
+                value: '{current.dblUnitWeightMile}'
+            },
             txtFreightRate: '{current.dblFreightRate}',
             txtFuelSurcharge: '{current.dblFuelSurcharge}',
-//            txtCalculatedFreight: '{current.strMessage}',
+            txtCalculatedFreight: '{getCalculatedFreight}',
+
 //            txtCalculatedAmount: '{current.strMessage}',
             txtInvoiceAmount: '{current.dblInvoiceAmount}',
 //            txtDifference: '{current.strMessage}',
@@ -200,6 +202,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 var current = grid.store.data.items[rowIndex];
                 me.onViewTaxDetailsClick(current.get('intInventoryReceiptItemId'));
             }
+        }
+
+        var colReceived = grdInventoryReceipt.columns[6];
+        var txtReceived = colReceived.getEditor();
+        if (txtReceived){
+            txtReceived.on('change', me.onCalculateTotalAmount);
+        }
+        var colUnitCost = grdInventoryReceipt.columns[10];
+        var txtUnitCost = colUnitCost.getEditor();
+        if (txtUnitCost){
+            txtUnitCost.on('change', me.onCalculateTotalAmount);
         }
 
 
@@ -306,6 +319,61 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         });
     },
 
+    onCalculationBasisChange: function(obj, newValue, oldValue, eOpts) {
+        var win = obj.up('window');
+        var txtUnitsWeightMiles = win.down('#txtUnitsWeightMiles');
+        switch (newValue) {
+            case 'Per Ton':
+                txtUnitsWeightMiles.setFieldLabel('Weight');
+                break;
+            case 'Per Miles':
+                txtUnitsWeightMiles.setFieldLabel('Miles');
+                break;
+            default:
+                txtUnitsWeightMiles.setFieldLabel('Unit');
+                break;
+        }
+    },
+
+    onFreightCalculationChange: function(obj, newValue, oldValue, eOpts) {
+        var win = obj.up('window');
+        var txtUnitsWeightMiles = win.down('#txtUnitsWeightMiles');
+        var txtFreightRate = win.down('#txtFreightRate');
+        var txtFuelSurcharge = win.down('#txtFuelSurcharge');
+        var txtCalculatedFreight = win.down('#txtCalculatedFreight');
+
+        var unitRate = (txtUnitsWeightMiles.getValue() * txtFreightRate.getValue());
+        var unitRateSurcharge = (unitRate * txtFuelSurcharge.getValue());
+
+        txtCalculatedFreight.setValue(unitRate + unitRateSurcharge);
+    },
+
+    onCalculateTotalAmount: function(obj, newValue, oldValue, eOpts) {
+        var win = obj.up('window');
+        var txtCalculatedAmount = win.down('#txtCalculatedAmount');
+        var txtInvoiceAmount = win.down('#txtInvoiceAmount');
+        var txtDifference = win.down('#txtDifference');
+        var grid = obj.up('grid');
+        var data = grid.store.data;
+
+        if (data){
+            var calculatedTotal = 0
+            Ext.Array.each(data.items, function(row) {
+                var dblReceived = row.get('dblReceived');
+                var dblUnitCost = row.get('dblUnitCost');
+                if (obj.column.itemId === 'colReceived')
+                    dblReceived = newValue;
+                else if (obj.column.itemId === 'colUnitCost')
+                    dblUnitCost = newValue;
+                var rowTotal = dblReceived * dblUnitCost;
+                calculatedTotal += rowTotal;
+            })
+            txtCalculatedAmount.setValue(calculatedTotal);
+            var difference = calculatedTotal - (txtInvoiceAmount.getValue());
+            txtDifference.setValue(difference);
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboVendor": {
@@ -322,6 +390,21 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#cboItemPackType": {
                 select: this.onReceiptItemSelect
+            },
+            "#cboCalculationBasis": {
+                change: this.onCalculationBasisChange
+            },
+            "#txtUnitsWeightMiles": {
+                change: this.onFreightCalculationChange
+            },
+            "#txtFreightRate": {
+                change: this.onFreightCalculationChange
+            },
+            "#txtFuelSurcharge": {
+                change: this.onFreightCalculationChange
+            },
+            "#txtInvoiceAmount": {
+                change: this.onCalculateTotalAmount
             }
         })
     }
