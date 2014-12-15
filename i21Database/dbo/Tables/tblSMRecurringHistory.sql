@@ -7,7 +7,7 @@
     [strReference] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL, 
     [dtmNextProcess] DATETIME NOT NULL, 
     [dtmLastProcess] DATETIME NOT NULL, 
-    [intTransactionTypeId] INT NOT NULL,
+    [strTransactionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT 0, 
     PRIMARY KEY CLUSTERED ([intRecurringHistoryId] ASC),
 )
