@@ -936,7 +936,8 @@
     <Build Include="dbo\Stored Procedures\uspICUnpostAverageCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostFIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostLIFO.sql" />
-    <Build Include="dbo\Views\vyuHDAgentDetail.sql" />
+	<Build Include="dbo\Views\vyuHDAgentDetail.sql" />
+	<Build Include="dbo\Stored Procedures\uspICPostInventoryReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
