@@ -56,7 +56,7 @@ SELECT	A.intTransactionId
 		,A.intBankTransactionTypeId
 		,A.dtmDate
 		,A.dblAmount
-		,A.strPayee
+		,strPayee = CASE WHEN A.intBankTransactionTypeId IN (@BANK_TRANSACTION) THEN A.strMemo ELSE A.strPayee END
 		,ysnTagged = CAST(0 AS BIT)
 INTO	#tmp_list_of_transactions
 FROM	dbo.tblCMBankTransaction A INNER JOIN dbo.tblCMBankStatementImport B
@@ -121,17 +121,18 @@ BEGIN
 								WHEN A.intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT) THEN
 									CASE WHEN ABS(A.dblAmount) = ABS(@dblAmount) THEN 1 ELSE 0 END 
 								WHEN A.intBankTransactionTypeId IN (@BANK_TRANSACTION) THEN 
-									CASE WHEN EXISTS (	SELECT	1 
-														FROM	tblCMBankTransactionDetail C 
-														WHERE	C.intTransactionId = A.intTransactionId
-														HAVING	(
-																	(ISNULL(SUM(ISNULL(C.dblCredit, 0)), 0) - ISNULL(SUM(ISNULL(C.dblDebit, 0)), 0) = @dblAmount AND @dblAmount > 0)
-																	OR (ISNULL(SUM(ISNULL(C.dblCredit, 0)), 0) - ISNULL(SUM(ISNULL(C.dblDebit, 0)), 0) = @dblAmount AND @dblAmount < 0)
-																)
+									CASE WHEN ABS(A.dblAmount) = ABS(@dblAmount) THEN 1 ELSE 0 END 
+									--CASE WHEN EXISTS (	SELECT	1 
+									--					FROM	tblCMBankTransactionDetail C 
+									--					WHERE	C.intTransactionId = A.intTransactionId
+									--					HAVING	(
+									--								(ISNULL(SUM(ISNULL(C.dblCredit, 0)), 0) - ISNULL(SUM(ISNULL(C.dblDebit, 0)), 0) = @dblAmount AND @dblAmount > 0)
+									--								OR (ISNULL(SUM(ISNULL(C.dblCredit, 0)), 0) - ISNULL(SUM(ISNULL(C.dblDebit, 0)), 0) = @dblAmount AND @dblAmount < 0)
+									--							)
 																
-													) THEN 1 
-										ELSE 0
-									END								
+									--				) THEN 1 
+									--	ELSE 0
+									--END								
 								ELSE 0
 						END 
 		IF @@ERROR <> 0	GOTO _ROLLBACK
