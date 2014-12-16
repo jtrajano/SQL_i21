@@ -933,6 +933,7 @@
     <Build Include="dbo\Functions\fnRemoveTimeOnDate.sql" />
     <None Include="Scripts\Post-Deployment\AP\ClearPostResult.sql" />
     <Build Include="dbo\Tables\tblICEquipmentLength.sql" />
+    <Build Include="dbo\Tables\tblMFQAProperty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -1491,4 +1491,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intEquipmentLengthId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="e0661a42-4aad-47e3-af49-bb24b09a4fc4" ChangeDateTime="12/16/2014 00:54:08">
+    <Property Name="ElementName" Value="[dbo].[tblMFQAProperty].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMFQAProperty]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intQAPropertyId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4f77e0a6-7cc0-4774-be86-e1a50273bc46" ChangeDateTime="12/16/2014 00:55:07">
+    <Property Name="ElementName" Value="[dbo].[tblMFQAProperty].[strAnalysis]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMFQAProperty]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strAnalysisType" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4a1df41f-d766-4a45-a668-f224e1eca549" ChangeDateTime="12/16/2014 00:56:28">
+    <Property Name="ElementName" Value="[dbo].[tblMFQAProperty].[ysnMandatory]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMFQAProperty]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strMandatory" />
+  </Operation>
 </Operations>
