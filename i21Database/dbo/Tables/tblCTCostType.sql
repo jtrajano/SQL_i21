@@ -2,7 +2,7 @@ CREATE TABLE [dbo].[tblCTCostType](
 	[intCostTypeId] [int] IDENTITY(1,1) NOT NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	[intFreightTermId] [int] NULL,
-	[strCostTypeName] [nvarchar](30) NOT NULL,
+	[strCostTypeName] [nvarchar](30) COLLATE Latin1_General_CI_AS NOT NULL,
 	[ysnInventoryCost] [bit] NOT NULL CONSTRAINT [DF_tblCTCostType_ysnInventoryCost]  DEFAULT ((0)),
 	[ysnAccrue] [bit] NOT NULL CONSTRAINT [DF_tblCTCostType_ysnAccrue]  DEFAULT ((0)),
 	[ysnMTM] [bit] NOT NULL CONSTRAINT [DF_tblCTCostType_ysnMTM]  DEFAULT ((0)),
