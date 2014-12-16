@@ -2,12 +2,12 @@
 (
 	[intScaleDeviceId] INT NOT NULL IDENTITY, 
     [intPhysicalEquipmentId] INT NOT NULL, 
-    [strDeviceDescription] NVARCHAR(30) NULL, 
+    [strDeviceDescription] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL, 
     [intDeviceTypeId] INT NOT NULL, 
     [intConnectionMethod] INT NOT NULL, 
-    [strFilePath] NVARCHAR(250) NULL, 
-    [strFileName] NVARCHAR(50) NULL, 
-    [strIPAddress] NVARCHAR(30) NULL, 
+    [strFilePath] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL, 
+    [strFileName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strIPAddress] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL, 
     [intIPPort] INT NULL, 
     [intComPort] INT NULL, 
     [intBaudRate] INT NULL, 
@@ -22,20 +22,20 @@
     [ysnDateTimeFixedLocation] BIT NULL, 
     [intDateTimeStartingLocation] INT NULL, 
     [intDateTimeLength] INT NULL, 
-    [strDateTimeValidationString] NVARCHAR(10) NULL, 
+    [strDateTimeValidationString] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
     [ysnMotionDetection] BIT NULL, 
     [ysnMotionFixedLocation] BIT NULL, 
     [intMotionStartingLocation] INT NULL, 
     [intMotionLength] INT NULL, 
-    [strMotionValidationString] NVARCHAR(10) NULL, 
+    [strMotionValidationString] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
     [intWeightStabilityCheck] INT NULL, 
     [ysnWeightFixedLocation] BIT NULL, 
     [intWeightStartingLocation] INT NULL, 
     [intWeightLength] INT NULL, 
-    [strNTEPCapacity] NVARCHAR(40) NULL, 
+    [strNTEPCapacity] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSCScaleDevice_intScaleDeviceId] PRIMARY KEY ([intScaleDeviceId]), 
-    CONSTRAINT [UK_tblSCScaleDevice_intPhysicalEquipmentId] UNIQUE (intPhysicalEquipmentId) 
+    CONSTRAINT [UK_tblSCScaleDevice_intPhysicalEquipmentId_intDeviceTypeId] UNIQUE ([intPhysicalEquipmentId],[intDeviceTypeId]) 
 )
 
 GO
