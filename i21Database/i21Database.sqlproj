@@ -787,7 +787,7 @@
     <Build Include="dbo\Tables\tblSTSubcategoryClass.sql" />
     <Build Include="dbo\Tables\tblSTSubcategoryFamily.sql" />
     <Build Include="dbo\Tables\tblSTSubcategoryRegProd.sql" />
-    <Build Include="dbo\Stored Procedures\uspICProcessFIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostFIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInFIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInFIFO.sql" />
     <Build Include="dbo\Tables\tblGRStorageType.sql" />
@@ -824,7 +824,7 @@
     <Build Include="dbo\Tables\tblICInventoryFIFOOut.sql" />
     <Build Include="dbo\Tables\tblSTPromotionItemList.sql" />
     <Build Include="dbo\Tables\tblSTPromotionSalesList.sql" />
-    <Build Include="dbo\Stored Procedures\uspICProcessAverageCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostAverageCosting.sql" />
     <Build Include="dbo\Tables\tblARTaxAuthority.sql" />
     <Build Include="dbo\Tables\tblICStorageLocation.sql" />
     <Build Include="dbo\Tables\tblICStorageLocationMeasurement.sql" />
@@ -900,7 +900,7 @@
     <Build Include="dbo\Stored Procedures\uspICValidateProcessToItemReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInLIFO.sql" />
-    <Build Include="dbo\Stored Procedures\uspICProcessLIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostLIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspARDuplicateInvoice.sql" />
     <Build Include="dbo\Functions\fnGetDueDateBasedOnTerm.sql" />
     <Build Include="dbo\Tables\tblPOOrderStatus.sql" />

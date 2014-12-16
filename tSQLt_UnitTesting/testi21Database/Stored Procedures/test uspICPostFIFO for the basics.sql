@@ -1,42 +1,13 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICProcessLIFO, Jan 1. Purchase 20 stocks @ 20 dollars each]
+﻿
+CREATE PROCEDURE [testi21Database].[test uspICPostFIFO for the basics]
 AS
 BEGIN
 	-- Arrange 
 	BEGIN 
-		-- Generate the fake data for the item stock table
-		EXEC [testi21Database].[Fake data for item stock]
-
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLIFO', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLIFOOut', @Identity = 1;
-
-		CREATE CLUSTERED INDEX [Fake_IDX_tblICInventoryLIFO]
-			ON [dbo].[tblICInventoryLIFO]([dtmDate] DESC, [intItemId] ASC, [intLocationId] ASC, [intInventoryLIFOId] DESC);
-				
-		-- Declare the variables for grains (item)
-		DECLARE @WetGrains AS INT = 1
-				,@StickyGrains AS INT = 2
-				,@PremiumGrains AS INT = 3
-				,@ColdGrains AS INT = 4
-				,@HotGrains AS INT = 5
-				,@InvalidItem AS INT = -1
-
-		-- Declare the variables for location
-		DECLARE @Default_Location AS INT = 1
-				,@NewHaven AS INT = 2
-				,@BetterHaven AS INT = 3
-				,@InvalidLocation AS INT = -1
-
-		-- Declare the variables for the Unit of Measure
-		DECLARE @EACH AS INT = 1;
-
-		-- Declare the variables for the currencies
-		DECLARE @USD AS INT = 1;
-
-		-- Declare the variables for the transaction types
-		DECLARE @PurchaseTransactionType AS INT = 1;
-
-		-- Declare the variables used in uspICProcessLIFO
+		EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOOut', @Identity = 1;
+		
 		DECLARE 
 			@intItemId AS INT
 			,@intLocationId AS INT
@@ -52,21 +23,6 @@ BEGIN
 			,@strBatchId AS NVARCHAR(20)
 			,@intTransactionTypeId AS INT
 			,@intUserId AS INT
-
-		SET	@intItemId = @WetGrains
-		SET @intLocationId = @NewHaven
-		SET @dtmDate = 'January 1, 2014'
-		SET @dblUnitQty = 20
-		SET @dblUOMQty = @EACH 
-		SET @dblCost = 20.00
-		SET @dblSalesPrice = 0
-		SET @intCurrencyId = @USD
-		SET @dblExchangeRate = 1
-		SET @intTransactionId = 1
-		SET @strTransactionId = 'PURCHASE-00001'
-		SET @strBatchId = 'BATCH-00001'
-		SET @intTransactionTypeId = @PurchaseTransactionType
-		SET @intUserId = 1
 
 		CREATE TABLE expected (
 			[intInventoryTransactionId] INT NOT NULL, 
@@ -84,6 +40,7 @@ BEGIN
 			[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
 			[intTransactionTypeId] INT NOT NULL, 
 			[intLotId] INT NULL, 
+			[dtmCreated] DATETIME NULL, 
 			[intCreatedUserId] INT NULL, 
 			[intConcurrencyId] INT NOT NULL DEFAULT 1, 		
 		)
@@ -104,58 +61,16 @@ BEGIN
 			[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
 			[intTransactionTypeId] INT NOT NULL, 
 			[intLotId] INT NULL, 
+			[dtmCreated] DATETIME NULL, 
 			[intCreatedUserId] INT NULL, 
-			[intConcurrencyId] INT NOT NULL DEFAULT 1, 	
+			[intConcurrencyId] INT NOT NULL DEFAULT 1, 		
 		)
-		
-		CREATE TABLE ExpectedInventoryLIFOOut (
-			intId INT
-			,intInventoryLIFOId INT 
-			,intInventoryTransactionId INT
-			,dblQty NUMERIC(18,6)
-		)
-
-		INSERT INTO expected (
-				[intInventoryTransactionId]
-				,[intItemId]
-				,[intLocationId]
-				,[dtmDate]
-				,[dblUnitQty]
-				,[dblCost]
-				,[dblValue]
-				,[dblSalesPrice]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[intTransactionId]
-				,[strTransactionId]
-				,[strBatchId]
-				,[intTransactionTypeId]
-				,[intLotId]
-				,[intCreatedUserId]
-				,[intConcurrencyId]
-		)
-		SELECT	[intInventoryTransactionId] = 1
-				,[intItemId] = @intItemId
-				,[intLocationId] = @NewHaven
-				,[dtmDate] = @dtmDate
-				,[dblUnitQty] = (@dblUnitQty * @dblUOMQty)
-				,[dblCost] = @dblCost
-				,[dblValue] = NULL 
-				,[dblSalesPrice] = @dblSalesPrice
-				,[intCurrencyId] = @USD
-				,[dblExchangeRate] = 1
-				,[intTransactionId] = @intTransactionId
-				,[strTransactionId] = @strTransactionId
-				,[strBatchId] = @strBatchId
-				,[intTransactionTypeId] = @PurchaseTransactionType
-				,[intLotId] = NULL 
-				,[intCreatedUserId] = @intUserId
-				,[intConcurrencyId]	= 1
 	END 
 	
 	-- Act 
+	-- Try to use the SP with NULL arguments on all parameters
 	BEGIN 
-		EXEC dbo.uspICProcessLIFO
+		EXEC dbo.uspICPostFIFO
 			@intItemId
 			,@intLocationId
 			,@dtmDate
@@ -170,11 +85,7 @@ BEGIN
 			,@strBatchId
 			,@intTransactionTypeId
 			,@intUserId
-	END 
 
-	-- Assert
-	BEGIN
-		-- Check the transaction table 
 		INSERT INTO actual (
 				[intInventoryTransactionId]
 				,[intItemId]
@@ -191,6 +102,7 @@ BEGIN
 				,[strBatchId]
 				,[intTransactionTypeId]
 				,[intLotId]
+				,[dtmCreated]
 				,[intCreatedUserId]
 				,[intConcurrencyId]
 		)
@@ -209,17 +121,18 @@ BEGIN
 				,[strBatchId]
 				,[intTransactionTypeId]
 				,[intLotId]
+				,[dtmCreated]
 				,[intCreatedUserId]
-				,[intConcurrencyId]	
+				,[intConcurrencyId]		
 		FROM	tblICInventoryTransaction
 		WHERE	intItemId = @intItemId
-			AND intLocationId = @intLocationId		
+				AND intLocationId = @intLocationId
+	END 
 
-		-- Assert the expected data for tblICInventoryTransaction is built correctly. 
+	-- Assert
+	BEGIN
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
-		
-		-- Assert the expected data for tblICInventoryLIFOOut is built correctly. 
-		EXEC tSQLt.AssertEqualsTable 'ExpectedInventoryLIFOOut', 'tblICInventoryLIFOOut'
+		EXEC tSQLt.AssertEmptyTable 'tblICInventoryTransaction';
 	END 
 
 	-- Clean-up: remove the tables used in the unit test
@@ -228,7 +141,4 @@ BEGIN
 
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
-		
-	IF OBJECT_ID('ExpectedInventoryLIFOOut') IS NOT NULL 
-		DROP TABLE dbo.ExpectedInventoryLIFOOut
-END
+END 

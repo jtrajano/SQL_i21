@@ -1,13 +1,49 @@
-﻿
-CREATE PROCEDURE [testi21Database].[test uspICProcessFIFO for the basics]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostAverageCosting for the basics]
 AS
 BEGIN
 	-- Arrange 
 	BEGIN 
+			-- Generate the fake data for the item stock table
+		EXEC [testi21Database].[Fake data for item stock]
+
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOOut', @Identity = 1;
+
+		-- Create the variables for the internal transaction types used by costing. 
+		DECLARE @WRITE_OFF_SOLD AS INT = -1
+		DECLARE @REVALUE_SOLD AS INT = -2
+		DECLARE @AUTO_NEGATIVE AS INT = -3
+
+		-- Declare the variables for grains (item)
+		DECLARE @WetGrains AS INT = 1
+				,@StickyGrains AS INT = 2
+				,@PremiumGrains AS INT = 3
+				,@ColdGrains AS INT = 4
+				,@HotGrains AS INT = 5
+				,@InvalidItem AS INT = -1
+
+		-- Declare the variables for location
+		DECLARE @Default_Location AS INT = 1
+				,@NewHaven AS INT = 2
+				,@BetterHaven AS INT = 3
+				,@InvalidLocation AS INT = -1
+
+		-- Declare the variables for the Unit of Measure
+		DECLARE @EACH AS INT = 1;
+
+		-- Declare the variables for the currencies
+		DECLARE @USD AS INT = 1;
+
+		-- Declare the variables for the transaction types
+		DECLARE @PurchaseTransactionType AS INT = 1;
+		DECLARE @SalesTransactionType AS INT = 2;
+
+		-- Declare the variables to check the average cost. 
+		DECLARE @dblAverageCost_Expected AS NUMERIC(18,6)
+		DECLARE @dblAverageCost_Actual AS NUMERIC(18,6)
 		
+		-- Declare the variables used in uspICPostAverageCosting
 		DECLARE 
 			@intItemId AS INT
 			,@intLocationId AS INT
@@ -65,12 +101,19 @@ BEGIN
 			[intCreatedUserId] INT NULL, 
 			[intConcurrencyId] INT NOT NULL DEFAULT 1, 		
 		)
+
+		CREATE TABLE ExpectedInventoryFIFOOut (
+			intId INT IDENTITY 
+			,intInventoryFIFOId INT 
+			,intInventoryTransactionId INT
+			,dblQty NUMERIC(18,6)
+		)
 	END 
 	
 	-- Act 
 	-- Try to use the SP with NULL arguments on all parameters
 	BEGIN 
-		EXEC dbo.uspICProcessFIFO
+		EXEC dbo.uspICPostAverageCosting
 			@intItemId
 			,@intLocationId
 			,@dtmDate
@@ -131,8 +174,11 @@ BEGIN
 
 	-- Assert
 	BEGIN
+		-- Assert the expected data for tblICInventoryTransaction is built correctly. 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
-		EXEC tSQLt.AssertEmptyTable 'tblICInventoryTransaction';
+		
+		-- Assert the expected data for tblICInventoryFIFOOut is built correctly. 
+		EXEC tSQLt.AssertEqualsTable 'ExpectedInventoryFIFOOut', 'tblICInventoryFIFOOut'
 	END 
 
 	-- Clean-up: remove the tables used in the unit test
@@ -141,4 +187,7 @@ BEGIN
 
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
-END 
+		
+	IF OBJECT_ID('ExpectedInventoryFIFOOut') IS NOT NULL 
+		DROP TABLE dbo.ExpectedInventoryFIFOOut
+END

@@ -101,7 +101,7 @@ BEGIN
 	-- Moving Average Cost
 	IF (@CostingMethod = @AVERAGECOST)
 	BEGIN 
-		EXEC dbo.uspICProcessAverageCosting
+		EXEC dbo.uspICPostAverageCosting
 			@intItemId
 			,@intLocationId
 			,@dtmDate
@@ -121,7 +121,7 @@ BEGIN
 	-- FIFO 
 	IF (@CostingMethod = @FIFO)
 	BEGIN 
-		EXEC dbo.uspICProcessFIFO
+		EXEC dbo.uspICPostFIFO
 			@intItemId
 			,@intLocationId
 			,@dtmDate
