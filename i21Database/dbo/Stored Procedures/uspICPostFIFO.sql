@@ -2,7 +2,7 @@
 	Write the description of the stored procedure here 
 */
 
-CREATE PROCEDURE [dbo].[uspICProcessFIFO]
+CREATE PROCEDURE [dbo].[uspICPostFIFO]
 	@intItemId AS INT
 	,@intLocationId AS INT
 	,@dtmDate AS DATETIME

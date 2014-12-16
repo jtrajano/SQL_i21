@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICProcessAverageCosting, Jan 1. Purchase 20 stocks @ 20 dollars each]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostAverageCosting, Jan 1. Purchase 20 stocks @ 20 dollars each]
 AS
 BEGIN
 	-- Arrange 
@@ -39,7 +39,7 @@ BEGIN
 		DECLARE @PurchaseTransactionType AS INT = 1;
 		DECLARE @SalesTransactionType AS INT = 2;
 
-		-- Declare the variables used in uspICProcessAverageCosting
+		-- Declare the variables used in uspICPostAverageCosting
 		DECLARE 
 			@intItemId AS INT
 			,@intLocationId AS INT
@@ -167,7 +167,7 @@ BEGIN
 	
 	-- Act 
 	BEGIN 
-		EXEC dbo.uspICProcessAverageCosting
+		EXEC dbo.uspICPostAverageCosting
 			@intItemId
 			,@intLocationId
 			,@dtmDate

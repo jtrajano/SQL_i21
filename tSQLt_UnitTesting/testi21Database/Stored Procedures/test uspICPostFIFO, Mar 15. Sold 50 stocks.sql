@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICProcessFIFO, Mar 15. Sold 50 stocks]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostFIFO, Mar 15. Sold 50 stocks]
 AS
 BEGIN
 	-- Arrange 
@@ -34,7 +34,7 @@ BEGIN
 		DECLARE @PurchaseTransactionType AS INT = 1;
 		DECLARE @SalesTransactionType AS INT = 2;
 
-		-- Declare the variables used in uspICProcessFIFO
+		-- Declare the variables used in uspICPostFIFO
 		DECLARE 
 			@intItemId AS INT
 			,@intLocationId AS INT
@@ -703,7 +703,7 @@ BEGIN
 	
 	-- Act 
 	BEGIN 
-		EXEC dbo.uspICProcessFIFO
+		EXEC dbo.uspICPostFIFO
 			@intItemId
 			,@intLocationId
 			,@dtmDate

@@ -58,10 +58,21 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@LIFO AS INT = 3
 		,@STANDARDCOST AS INT = 4 	
 
+
+-----------------------------------------------------------------------------------------------------------------------------
+-- Do the Validation
+-----------------------------------------------------------------------------------------------------------------------------
+BEGIN 
+	EXEC [dbo].[uspICValidateCostingOnPost] 
+		@ItemsToValidate = @ItemsToPost
+END
+
+-----------------------------------------------------------------------------------------------------------------------------
 -- Create the cursor
 -- Make sure the following options are used: 
 -- LOCAL >> It specifies that the scope of the cursor is local to the stored procedure where it was created. The cursor name is only valid within this scope. 
 -- FAST_FORWARD >> It specifies a FORWARD_ONLY, READ_ONLY cursor with performance optimizations enabled. 
+-----------------------------------------------------------------------------------------------------------------------------
 DECLARE loopItems CURSOR LOCAL FAST_FORWARD
 FOR 
 SELECT  intId
@@ -85,7 +96,9 @@ OPEN loopItems;
 -- Initial fetch attempt
 FETCH NEXT FROM loopItems INTO @intId, @intItemId, @intLocationId, @dtmDate, @dblUnitQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId;
 
+-----------------------------------------------------------------------------------------------------------------------------
 -- Start of the loop
+-----------------------------------------------------------------------------------------------------------------------------
 WHILE @@FETCH_STATUS = 0
 BEGIN 
 	-- Initialize the costing method and negative inventory option. 
@@ -101,7 +114,7 @@ BEGIN
 	-- Moving Average Cost
 	IF (@CostingMethod = @AVERAGECOST)
 	BEGIN 
-		EXEC dbo.uspICProcessAverageCosting
+		EXEC dbo.uspICPostAverageCosting
 			@intItemId
 			,@intLocationId
 			,@dtmDate
@@ -121,7 +134,7 @@ BEGIN
 	-- FIFO 
 	IF (@CostingMethod = @FIFO)
 	BEGIN 
-		EXEC dbo.uspICProcessFIFO
+		EXEC dbo.uspICPostFIFO
 			@intItemId
 			,@intLocationId
 			,@dtmDate
@@ -156,7 +169,9 @@ BEGIN
 	-- Attempt to fetch the next row from cursor. 
 	FETCH NEXT FROM loopItems INTO @intId, @intItemId, @intLocationId, @dtmDate, @dblUnitQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId
 END;
+-----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop
+-----------------------------------------------------------------------------------------------------------------------------
 
 CLOSE loopItems;
 DEALLOCATE loopItems;

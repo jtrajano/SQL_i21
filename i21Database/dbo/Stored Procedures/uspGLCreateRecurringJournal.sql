@@ -1,4 +1,9 @@
-﻿CREATE PROCEDURE [dbo].[uspGLCreateRecurringJournal] 
+﻿-- =============================================
+-- Author:		Trajano, Jeffrey
+-- Create date: 12-11-2014
+-- Description:	Creates recurring journal via delimited ids
+-- =============================================
+CREATE PROCEDURE [dbo].[uspGLCreateRecurringJournal] 
 	@delimitedIds  varchar (max), 
 	@delimiter nvarchar(1),
 	@entityid  int

@@ -31,7 +31,7 @@ BEGIN
 		END
 		ELSE IF (EXISTS(SELECT TOP 1 1 FROM glactmst WHERE glact_acct9_16 NOT IN (SELECT glprc_sub_acct FROM glprcmst)) and @ysnOverride = 0)
 		BEGIN	
-			SET @result = ''Some profit center does not exists at profit center master table. <br/> Kindly verify at Origin.''
+			SET @result = ''Some location does not exists at location master table. <br/> Kindly verify at Origin.''
 		END
 		ELSE
 		BEGIN
@@ -54,7 +54,7 @@ BEGIN
 				INSERT tblGLAccountStructure (intStructureType,strStructureName,strType,intLength,strMask,intSort,ysnBuild,intStartingPosition)
 										VALUES (2,''Hypen/Separator'',''Divider'', 1,''-'',1,0,0)							
 				INSERT tblGLAccountStructure (intStructureType,strStructureName,strType,intLength,strMask,intSort,ysnBuild,intStartingPosition)
-										VALUES (3,''Profit Center'',''Segment'', @SegmentLength,''0'',2,0,9 - @SegmentLength)
+										VALUES (3,''Location'',''Segment'', @SegmentLength,''0'',2,0,9 - @SegmentLength)
 			END	
 
 			-- IMPORT PRIMARY ACCOUNT

@@ -1,4 +1,6 @@
-﻿CREATE TABLE [dbo].[tblTempError](
+﻿/* used by Import Budget CSV as temporary table*/
+CREATE TABLE [dbo].[tblTempError]
+(
 	[intId] [int] IDENTITY(1,1) NOT NULL,
 	[guidSessionId] [uniqueidentifier] NOT NULL,
 	[strTitle] [nvarchar](50) NULL,

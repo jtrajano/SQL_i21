@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICProcessFIFO, Mar 1. Sold 40 stocks]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostLIFO, Mar 15. Sold 50 stocks]
 AS
 BEGIN
 	-- Arrange 
@@ -7,9 +7,12 @@ BEGIN
 		EXEC [testi21Database].[Fake data for item stock]
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOOut', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLIFO', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLIFOOut', @Identity = 1;
 		
+		CREATE CLUSTERED INDEX [Fake_IDX_tblICInventoryLIFO]
+			ON [dbo].[tblICInventoryLIFO]([dtmDate] DESC, [intItemId] ASC, [intLocationId] ASC, [intInventoryLIFOId] DESC);	
+				
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
 				,@StickyGrains AS INT = 2
@@ -34,7 +37,7 @@ BEGIN
 		DECLARE @PurchaseTransactionType AS INT = 1;
 		DECLARE @SalesTransactionType AS INT = 2;
 
-		-- Declare the variables used in uspICProcessFIFO
+		-- Declare the variables used in uspICPostLIFO
 		DECLARE 
 			@intItemId AS INT
 			,@intLocationId AS INT
@@ -91,9 +94,9 @@ BEGIN
 			[intConcurrencyId] INT NOT NULL DEFAULT 1, 	
 		)
 
-		CREATE TABLE ExpectedInventoryFIFOOut (
+		CREATE TABLE ExpectedInventoryLIFOOut (
 			intId INT IDENTITY 
-			,intInventoryFIFOId INT 
+			,intInventoryLIFOId INT 
 			,intInventoryTransactionId INT
 			,dblQty NUMERIC(18,6)
 		)
@@ -114,7 +117,7 @@ BEGIN
 			SET @strBatchId = 'BATCH-00001'
 			SET @intTransactionTypeId = @PurchaseTransactionType
 			SET @intUserId = 1
-
+	
 			INSERT INTO expected (
 					[intInventoryTransactionId]
 					,[intItemId]
@@ -135,7 +138,7 @@ BEGIN
 					,[intConcurrencyId]
 			)
 			SELECT	[intInventoryTransactionId] = 1
-					,[intItemId] = @WetGrains
+					,[intItemId] = @intItemId
 					,[intLocationId] = @NewHaven
 					,[dtmDate] = @dtmDate
 					,[dblUnitQty] = (@dblUnitQty * @dblUOMQty)
@@ -171,7 +174,7 @@ BEGIN
 					,[intCreatedUserId]
 					,[intConcurrencyId]
 			)
-			SELECT	[intItemId] = @WetGrains
+			SELECT	[intItemId] = @intItemId
 					,[intLocationId] = @NewHaven
 					,[dtmDate] = @dtmDate
 					,[dblUnitQty] = (@dblUnitQty * @dblUOMQty)
@@ -192,11 +195,12 @@ BEGIN
 			UPDATE	tblICItemStock
 			SET		dblAverageCost = 20
 					,dblUnitOnHand = 20
+					,intConcurrencyId += 1
 			WHERE	intItemId = @intItemId
 					AND intLocationId = @intLocationId
-			
-			-- Add the fake data for tblICInventoryFIFO
-			INSERT INTO tblICInventoryFIFO (
+
+			-- Add the fake data for tblICInventoryLIFO
+			INSERT INTO dbo.tblICInventoryLIFO (
 					intItemId
 					,intLocationId
 					,dtmDate
@@ -213,7 +217,7 @@ BEGIN
 					,dblStockOut = 0
 					,dblCost = 20 
 					,intCreatedUserId = @intUserId
-					,intConcurrencyId = 1
+					,intConcurrencyId = 2
 		END 
 
 		-- 2. Feb 10. Purchase 20 stocks at 21 dollars each
@@ -310,11 +314,12 @@ BEGIN
 			UPDATE	tblICItemStock
 			SET		dblAverageCost = 20.50
 					,dblUnitOnHand = 40
+					,intConcurrencyId += 1
 			WHERE	intItemId = @intItemId
 					AND intLocationId = @intLocationId
-					
-			-- Add the fake data for tblICInventoryFIFO
-			INSERT INTO tblICInventoryFIFO (
+
+			-- Add the fake data for tblICInventoryLIFO
+			INSERT INTO tblICInventoryLIFO (
 					intItemId
 					,intLocationId
 					,dtmDate
@@ -331,7 +336,7 @@ BEGIN
 					,dblStockOut = 0
 					,dblCost = 21 
 					,intCreatedUserId = @intUserId
-					,intConcurrencyId = 1						
+					,intConcurrencyId = 2
 		END 
 
 		-- 3. Feb 15. Purchase 20 stocks at $21.75 each
@@ -428,11 +433,12 @@ BEGIN
 			UPDATE	tblICItemStock
 			SET		dblAverageCost = 20.916667
 					,dblUnitOnHand = 60
+					,intConcurrencyId += 1
 			WHERE	intItemId = @intItemId
 					AND intLocationId = @intLocationId
-					
-			-- Add the fake data for tblICInventoryFIFO
-			INSERT INTO tblICInventoryFIFO (
+
+			-- Add the fake data for tblICInventoryLIFO
+			INSERT INTO tblICInventoryLIFO (
 					intItemId
 					,intLocationId
 					,dtmDate
@@ -449,7 +455,7 @@ BEGIN
 					,dblStockOut = 0
 					,dblCost = 21.75 
 					,intCreatedUserId = @intUserId
-					,intConcurrencyId = 1							
+					,intConcurrencyId = 1
 		END
 
 		-- 4. Mar 1. Sold 40 stocks. 
@@ -459,7 +465,7 @@ BEGIN
 			SET @dtmDate = 'March 1, 2014'
 			SET @dblUnitQty = -40
 			SET @dblUOMQty = @EACH 
-			SET @dblCost = 45.00
+			SET @dblCost = 0
 			SET @dblSalesPrice = 50.00
 			SET @intCurrencyId = @USD
 			SET @dblExchangeRate = 1
@@ -493,7 +499,7 @@ BEGIN
 					,[intLocationId] = @NewHaven
 					,[dtmDate] = @dtmDate
 					,[dblUnitQty] = -20
-					,[dblCost] = 20
+					,[dblCost] = 21.75
 					,[dblValue] = NULL 
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
@@ -505,7 +511,7 @@ BEGIN
 					,[intLotId] = NULL 
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId]	= 1
-			UNION ALL
+			UNION ALL 
 			SELECT	[intInventoryTransactionId] = 5
 					,[intItemId] = @intItemId
 					,[intLocationId] = @NewHaven
@@ -524,26 +530,194 @@ BEGIN
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId]	= 1
 
-			-- Insert expected data for tblICInventoryFIFOOut
-			INSERT INTO ExpectedInventoryFIFOOut (
+			-- Re-insert the expected data in tblICInventoryTransaction
+			INSERT INTO tblICInventoryTransaction (
+					[intItemId]
+					,[intLocationId]
+					,[dtmDate]
+					,[dblUnitQty]
+					,[dblCost]
+					,[dblValue]
+					,[dblSalesPrice]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[intTransactionId]
+					,[strTransactionId]
+					,[strBatchId]
+					,[intTransactionTypeId]
+					,[intLotId]
+					,[intCreatedUserId]
+					,[intConcurrencyId]
+			)
+			SELECT	[intItemId] = @intItemId
+					,[intLocationId] = @NewHaven
+					,[dtmDate] = @dtmDate
+					,[dblUnitQty] = -20
+					,[dblCost] = 21.75
+					,[dblValue] = NULL 
+					,[dblSalesPrice] = @dblSalesPrice
+					,[intCurrencyId] = @USD
+					,[dblExchangeRate] = 1
+					,[intTransactionId] = @intTransactionId
+					,[strTransactionId] = @strTransactionId
+					,[strBatchId] = @strBatchId
+					,[intTransactionTypeId] = @intTransactionTypeId
+					,[intLotId] = NULL 
+					,[intCreatedUserId] = @intUserId
+					,[intConcurrencyId]	= 1
+			UNION ALL
+			SELECT	[intItemId] = @intItemId
+					,[intLocationId] = @NewHaven
+					,[dtmDate] = @dtmDate
+					,[dblUnitQty] = -20
+					,[dblCost] = 21
+					,[dblValue] = NULL 
+					,[dblSalesPrice] = @dblSalesPrice
+					,[intCurrencyId] = @USD
+					,[dblExchangeRate] = 1
+					,[intTransactionId] = @intTransactionId
+					,[strTransactionId] = @strTransactionId
+					,[strBatchId] = @strBatchId
+					,[intTransactionTypeId] = @intTransactionTypeId
+					,[intLotId] = NULL 
+					,[intCreatedUserId] = @intUserId
+					,[intConcurrencyId]	= 1
+			
+			-- Update expected data in tblICItemStock
+			UPDATE	tblICItemStock
+			SET		dblAverageCost = 20.916667
+					,dblUnitOnHand = 20
+					,intConcurrencyId += 1
+			WHERE	intItemId = @intItemId
+					AND intLocationId = @intLocationId
+
+			-- Insert expected data for tblICInventoryLIFOOut
+			INSERT INTO tblICInventoryLIFOOut (
 				intInventoryTransactionId 
-				,intInventoryFIFOId
+				,intInventoryLIFOId
 				,dblQty
 			)
 			SELECT	intInventoryTransactionId = 4
-					,intInventoryFIFOId = 1
+					,intInventoryLIFOId = 3
 					,dblQty = 20
 			UNION ALL 
 			SELECT	intInventoryTransactionId = 5
-					,intInventoryFIFOId = 2
+					,intInventoryLIFOId = 2
 					,dblQty = 20
+			
+			-- Insert expected data for ExpectedInventoryLIFOOut
+			INSERT INTO ExpectedInventoryLIFOOut (
+				intInventoryTransactionId 
+				,intInventoryLIFOId
+				,dblQty
+			)
+			SELECT	intInventoryTransactionId = 4
+					,intInventoryLIFOId = 3
+					,dblQty = 20
+			UNION ALL 
+			SELECT	intInventoryTransactionId = 5
+					,intInventoryLIFOId = 2
+					,dblQty = 20
+					
+			-- Update the expected data for tblICInventoryLIFO
+			UPDATE	tblICInventoryLIFO
+			SET		dblStockOut += 20
+			WHERE	intInventoryLIFOId = 3
 
+			-- Update the expected data for tblICInventoryLIFO
+			UPDATE	tblICInventoryLIFO
+			SET		dblStockOut += 20
+			WHERE	intInventoryLIFOId = 2					
+		END
+
+		-- 5. Mar 15. Sold 50 stocks. 
+		BEGIN 
+			SET	@intItemId = @WetGrains
+			SET @intLocationId = @NewHaven
+			SET @dtmDate = 'March 15, 2014'
+			SET @dblUnitQty = -50
+			SET @dblUOMQty = @EACH
+			SET @dblCost = 20.50 -- Simulate last cost
+			SET @dblSalesPrice = 52.00
+			SET @intCurrencyId = @USD
+			SET @dblExchangeRate = 1
+			SET @intTransactionId = 1
+			SET @strTransactionId = 'SALES-00002'
+			SET @strBatchId = 'BATCH-00005'
+			SET @intTransactionTypeId = @SalesTransactionType
+			SET @intUserId = 3
+
+			INSERT INTO expected (
+					[intInventoryTransactionId]
+					,[intItemId]
+					,[intLocationId]
+					,[dtmDate]
+					,[dblUnitQty]
+					,[dblCost]
+					,[dblValue]
+					,[dblSalesPrice]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[intTransactionId]
+					,[strTransactionId]
+					,[strBatchId]
+					,[intTransactionTypeId]
+					,[intLotId]
+					,[intCreatedUserId]
+					,[intConcurrencyId]
+			)
+			SELECT	[intInventoryTransactionId] = 6
+					,[intItemId] = @intItemId
+					,[intLocationId] = @NewHaven
+					,[dtmDate] = @dtmDate
+					,[dblUnitQty] = -20
+					,[dblCost] = 20
+					,[dblValue] = NULL 
+					,[dblSalesPrice] = @dblSalesPrice
+					,[intCurrencyId] = @USD
+					,[dblExchangeRate] = 1
+					,[intTransactionId] = @intTransactionId
+					,[strTransactionId] = @strTransactionId
+					,[strBatchId] = @strBatchId
+					,[intTransactionTypeId] = @intTransactionTypeId
+					,[intLotId] = NULL 
+					,[intCreatedUserId] = @intUserId
+					,[intConcurrencyId]	= 1
+			UNION ALL 
+			SELECT	[intInventoryTransactionId] = 7
+					,[intItemId] = @intItemId
+					,[intLocationId] = @NewHaven
+					,[dtmDate] = @dtmDate
+					,[dblUnitQty] = -30
+					,[dblCost] = 20.50 -- Cost was provided by the calling module. Typically, it should be the last cost. 
+					,[dblValue] = NULL 
+					,[dblSalesPrice] = @dblSalesPrice
+					,[intCurrencyId] = @USD
+					,[dblExchangeRate] = 1
+					,[intTransactionId] = @intTransactionId
+					,[strTransactionId] = @strTransactionId
+					,[strBatchId] = @strBatchId
+					,[intTransactionTypeId] = @intTransactionTypeId
+					,[intLotId] = NULL 
+					,[intCreatedUserId] = @intUserId
+					,[intConcurrencyId]	= 1
+
+			-- Insert expected data for ExpectedInventoryLIFOOut
+			INSERT INTO ExpectedInventoryLIFOOut (
+				intInventoryTransactionId 
+				,intInventoryLIFOId
+				,dblQty
+			)
+			SELECT	intInventoryTransactionId = 6
+					,intInventoryLIFOId = 1
+					,dblQty = 20			
 		END
 	END 
 	
+	
 	-- Act 
 	BEGIN 
-		EXEC dbo.uspICProcessFIFO
+		EXEC dbo.uspICPostLIFO
 			@intItemId
 			,@intLocationId
 			,@dtmDate
@@ -559,7 +733,7 @@ BEGIN
 			,@intTransactionTypeId
 			,@intUserId
 	END 
-
+	
 	-- Assert
 	BEGIN
 		-- Check the transaction table 
@@ -602,12 +776,12 @@ BEGIN
 		FROM	tblICInventoryTransaction
 		WHERE	intItemId = @intItemId
 				AND intLocationId = @intLocationId
-				
+
 		-- Assert the expected data for tblICInventoryTransaction is built correctly. 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 		
-		-- Assert the expected data for tblICInventoryFIFOOut is built correctly. 
-		EXEC tSQLt.AssertEqualsTable 'ExpectedInventoryFIFOOut', 'tblICInventoryFIFOOut'
+		-- Assert the expected data for tblICInventoryLIFOOut is built correctly. 
+		EXEC tSQLt.AssertEqualsTable 'ExpectedInventoryLIFOOut', 'tblICInventoryLIFOOut'
 	END 
 
 	-- Clean-up: remove the tables used in the unit test
@@ -617,6 +791,6 @@ BEGIN
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
 		
-	IF OBJECT_ID('ExpectedInventoryFIFOOut') IS NOT NULL 
-		DROP TABLE dbo.ExpectedInventoryFIFOOut
+	IF OBJECT_ID('ExpectedInventoryLIFOOut') IS NOT NULL 
+		DROP TABLE dbo.ExpectedInventoryLIFOOut
 END

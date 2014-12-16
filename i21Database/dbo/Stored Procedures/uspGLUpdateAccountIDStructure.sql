@@ -1,14 +1,14 @@
-﻿CREATE PROCEDURE [dbo].[uspGLUpdateAccountIDStructure] 
-	-- Add the parameters for the stored procedure here
-	
+﻿-- =============================================
+-- Author:		Trajano, Jeffrey
+-- Create date: 12-11-2014
+-- Description:	Updates the GL account structure
+-- =============================================
+CREATE PROCEDURE [dbo].[uspGLUpdateAccountIDStructure] 
 AS
 BEGIN
-	-- SET NOCOUNT ON added to prevent extra result sets from
-	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 	DECLARE @cnt INT
 	DECLARE @divider varchar(3)
-	
 	SELECT @cnt = COUNT(1) FROM tblGLAccountStructure WHERE strType <> 'Divider' 
 	SELECT @divider = strMask FROM tblGLAccountStructure WHERE strType = 'Divider' 
 	DECLARE @i INT = 0
@@ -17,10 +17,8 @@ BEGIN
 	DECLARE @modifiedSorting BIT = 0
 	DECLARE @transaction varchar(30)
 
-	
 	BEGIN TRY
 			BEGIN TRANSACTION
-			
 			DECLARE cursor_accountId CURSOR FOR SELECT intAccountId FROM tblGLAccount 
 			DECLARE @_accountId INT,@newAccountId varchar(30),@newAccountDesc varchar(150),@segmentId varchar(30),@segmentDesc varchar(100)
 			OPEN cursor_accountId
@@ -41,6 +39,7 @@ BEGIN
 						x.intAccountSegmentId = p.intAccountSegmentId
 						WHERE x.intAccountStructureId = @y
 						and p.intAccountId = @_accountId
+						
 						SET @newAccountId += @segmentId + @divider
 						SET @newAccountDesc += @segmentDesc + @divider
 						SET @i = @i +1

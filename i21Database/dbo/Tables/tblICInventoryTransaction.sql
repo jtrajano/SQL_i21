@@ -30,6 +30,8 @@ CREATE TABLE [dbo].[tblICInventoryTransaction]
 	[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[intTransactionTypeId] INT NOT NULL, 
     [intLotId] INT NULL, 
+	[ysnIsUnposted] BIT NULL,
+	[intRelatedInventoryTransactionId] INT NULL,
     [dtmCreated] DATETIME NULL, 
     [intCreatedUserId] INT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 

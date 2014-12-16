@@ -1,4 +1,9 @@
-﻿CREATE FUNCTION [dbo].[fnCreateTableFromDelimitedValues]
+﻿-- =============================================
+-- Author:		Trajano, Jeffrey
+-- Create date: 12-11-2014
+-- Description:	Creates table variable for delimited string (used by uspGLUpdateAccountStructure)
+-- =============================================
+CREATE FUNCTION [dbo].[fnCreateTableFromDelimitedValues]
 (@strParam NVARCHAR(MAX),@delimiter NVARCHAR(1))
 RETURNS @IntegerTable TABLE 
 	(
@@ -7,7 +12,6 @@ RETURNS @IntegerTable TABLE
 	)
 AS
 BEGIN
-
 	WITH ValuesCTE AS (
 	  SELECT 
 		  CASE
@@ -42,6 +46,5 @@ BEGIN
 
 	INSERT INTO @IntegerTable
 		SELECT CAST([dbo].fnTrimX(Value) AS INT) FROM ValuesCTE OPTION (MAXRECURSION 0)
-
 	RETURN
 END

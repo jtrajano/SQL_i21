@@ -1,9 +1,12 @@
-﻿CREATE PROCEDURE [dbo].[uspGLUpdateAccountIDDivider] 
+﻿-- =============================================
+-- Author:		Trajano, Jeffrey
+-- Create date: 12-11-2014
+-- Description:	Updates the GL account divider
+-- =============================================
+CREATE PROCEDURE [dbo].[uspGLUpdateAccountIDDivider] 
 	@divider varchar(3)
-AS
+AS 
 BEGIN
-	-- SET NOCOUNT ON added to prevent extra result sets from
-	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 	DECLARE @cnt INT
 	DECLARE @strMask VARCHAR(3)

@@ -1,8 +1,35 @@
 ﻿/*
-	Write the description of the stored procedure here 
+	This is the stored procedure that handles the moving average costing method. 
+	
+	Parameters: 
+	@intItemId - The item to process
+
+	@intLocationId - The location where the item is being process. 
+	
+	@dtmDate - The date used in the transaction and posting. 
+
+	@dblUnitQty - A positive qty indicates an increase of stock. A negative qty indicates a decrease in stock. 
+
+	@dblUOMQty - The base qty associated with a UOM. For example, a box may have 10 pieces of an item. In this case, UOM qty will be 10. 
+
+	@dblCost - The cost per base qty of the item. 
+
+	@dblSalesPrice - The sales price of an item sold to the customer. 
+
+	@intCurrencyId - The foreign currency associated with the transaction. 
+
+	@dblExchangeRate - The conversion factor between the base currency and the foreign currency. 
+
+	@intTransactionId - The primary key id used in a transaction. 
+
+	@strTransactionId - The string value of a transaction id. 
+
+	@strBatchId - The batch id to use in generating the g/l entries. 
+
+	@intUserId - The user who initiated or called this stored procedure. 
 */
 
-CREATE PROCEDURE [dbo].[uspICProcessLIFO]
+CREATE PROCEDURE [dbo].[uspICPostAverageCosting]
 	@intItemId AS INT
 	,@intLocationId AS INT
 	,@dtmDate AS DATETIME
@@ -41,11 +68,11 @@ DECLARE @TotalQtyOffset AS NUMERIC(18,6);
 
 DECLARE @InventoryTransactionIdentityId AS INT
 
-DECLARE @NewLIFOId AS INT
-DECLARE @UpdatedLIFOId AS INT 
+DECLARE @NewFifoId AS INT
+DECLARE @UpdatedFifoId AS INT 
 
 -------------------------------------------------
--- 1. Process the LIFO Cost buckets
+-- 1. Process the Fifo Cost buckets
 -------------------------------------------------
 BEGIN 
 	-- Reduce stock 
@@ -53,10 +80,53 @@ BEGIN
 	BEGIN 
 		SET @dblReduceQty = ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0)
 
-		-- Repeat call on uspICReduceStockInLIFO until @dblReduceQty is completely distributed to all available LIFO buckets or added a new negative bucket. 
+		SELECT @dblCost = AverageCost
+		FROM dbo.fnGetItemAverageCostAsTable(@intItemId, @intLocationId)
+
+		-- Insert the inventory transaction record
+		INSERT INTO dbo.tblICInventoryTransaction (
+			[intItemId] 
+			,[intLocationId] 
+			,[dtmDate] 
+			,[dblUnitQty] 
+			,[dblCost] 
+			,[dblValue]
+			,[dblSalesPrice] 
+			,[intCurrencyId] 
+			,[dblExchangeRate] 
+			,[intTransactionId] 
+			,[strTransactionId] 
+			,[strBatchId] 
+			,[intTransactionTypeId] 
+			,[dtmCreated] 
+			,[intCreatedUserId] 
+			,[intConcurrencyId] 
+		)			
+		SELECT	[intItemId] = @intItemId
+				,[intLocationId] = @intLocationId
+				,[dtmDate] = @dtmDate
+				,[dblUnitQty] = @dblReduceQty
+				,[dblCost] = @dblCost
+				,[dblValue] = NULL 
+				,[dblSalesPrice] = @dblSalesPrice
+				,[intCurrencyId] = @intCurrencyId
+				,[dblExchangeRate] = @dblExchangeRate
+				,[intTransactionId] = @intTransactionId
+				,[strTransactionId] = @strTransactionId
+				,[strBatchId] = @strBatchId
+				,[intTransactionTypeId] = @intTransactionTypeId
+				,[dtmCreated] = GETDATE()
+				,[intCreatedUserId] = @intUserId
+				,[intConcurrencyId] = 1
+
+		-- Get the id used in the inventory transaction insert 
+		SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
+
+		-- Repeat call on uspICReduceStockInFIFO until @dblReduceQty is completely distributed to all available fifo buckets 
+		-- If there is no avaiable fifo buckets, it will add a new negative bucket. 
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)
 		BEGIN 
-			EXEC dbo.uspICReduceStockInLIFO
+			EXEC dbo.uspICReduceStockInFIFO
 				@intItemId
 				,@intLocationId
 				,@dtmDate
@@ -68,60 +138,21 @@ BEGIN
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT 
 				,@QtyOffset OUTPUT 
-				,@UpdatedLIFOId OUTPUT 
-
-			-- Insert the inventory transaction record
-			INSERT INTO dbo.tblICInventoryTransaction (
-				[intItemId] 
-				,[intLocationId] 
-				,[dtmDate] 
-				,[dblUnitQty] 
-				,[dblCost] 
-				,[dblValue]
-				,[dblSalesPrice] 
-				,[intCurrencyId] 
-				,[dblExchangeRate] 
-				,[intTransactionId] 
-				,[strTransactionId] 
-				,[strBatchId] 
-				,[intTransactionTypeId] 
-				,[dtmCreated] 
-				,[intCreatedUserId] 
-				,[intConcurrencyId] 
-			)			
-			SELECT	[intItemId] = @intItemId
-					,[intLocationId] = @intLocationId
-					,[dtmDate] = @dtmDate
-					,[dblUnitQty] = @dblReduceQty - ISNULL(@RemainingQty, 0) 
-					,[dblCost] = ISNULL(@CostUsed, @dblCost)
-					,[dblValue] = NULL 
-					,[dblSalesPrice] = @dblSalesPrice
-					,[intCurrencyId] = @intCurrencyId
-					,[dblExchangeRate] = @dblExchangeRate
-					,[intTransactionId] = @intTransactionId
-					,[strTransactionId] = @strTransactionId
-					,[strBatchId] = @strBatchId
-					,[intTransactionTypeId] = @intTransactionTypeId
-					,[dtmCreated] = GETDATE()
-					,[intCreatedUserId] = @intUserId
-					,[intConcurrencyId] = 1
-
-			-- Get the id used in the inventory transaction insert 
-			SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
+				,@UpdatedFifoId OUTPUT 
 			
-			-- Insert the record the the LIFO-out table
-			INSERT INTO dbo.tblICInventoryLIFOOut (
+			-- Insert the record to the fifo-out table
+			INSERT INTO dbo.tblICInventoryFIFOOut (
 					intInventoryTransactionId
-					,intInventoryLIFOId
+					,intInventoryFIFOId
 					,dblQty
 			)
 			SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
-					,intInventoryLIFOId = @UpdatedLIFOId
+					,intInventoryFIFOId = @UpdatedFifoId
 					,dblQty = @QtyOffset
 			WHERE	@InventoryTransactionIdentityId IS NOT NULL
-					AND @UpdatedLIFOId IS NOT NULL 
+					AND @UpdatedFifoId IS NOT NULL 
 					AND @QtyOffset IS NOT NULL 
-			
+
 			-- Reduce the remaining qty
 			SET @dblReduceQty = @RemainingQty;
 		END 
@@ -171,10 +202,10 @@ BEGIN
 				,[intCreatedUserId] = @intUserId
 				,[intConcurrencyId] = 1		
 
-		-- Repeat call on uspICIncreaseStockInLIFO until @dblAddQty is completely distributed to the negative cost LIFO buckets or added as a new bucket. 
+		-- Repeat call on uspICIncreaseStockInFIFO until @dblAddQty is completely distributed to the negative cost fifo buckets or added as a new bucket. 
 		WHILE (ISNULL(@dblAddQty, 0) > 0)
 		BEGIN 
-			EXEC dbo.uspICIncreaseStockInLIFO
+			EXEC dbo.uspICIncreaseStockInFIFO
 				@intItemId
 				,@intLocationId
 				,@dtmDate
@@ -188,8 +219,8 @@ BEGIN
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT
 				,@QtyOffset OUTPUT 
-				,@NewLIFOId OUTPUT 
-				,@UpdatedLIFOId OUTPUT 
+				,@NewFifoId OUTPUT 
+				,@UpdatedFifoId OUTPUT 
 
 			SET @dblAddQty = @RemainingQty;
 			SET @TotalQtyOffset += ISNULL(@QtyOffset, 0)
@@ -213,13 +244,13 @@ BEGIN
 				,[intCreatedUserId] 
 				,[intConcurrencyId] 
 			)
-			-- Add Write-Off Sold
+			-- Add Write-Off Sold (using the current average cost)
 			SELECT	[intItemId] = @intItemId
 					,[intLocationId] = @intLocationId
 					,[dtmDate] = @dtmDate
 					,[dblUnitQty] = 0
 					,[dblCost] = 0
-					,[dblValue] = @QtyOffset * @CostUsed
+					,[dblValue] = @QtyOffset * dbo.fnGetItemAverageCost(@intItemId, @intLocationId)
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @intCurrencyId
 					,[dblExchangeRate] = @dblExchangeRate
@@ -231,7 +262,7 @@ BEGIN
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId] = 1
 			WHERE	@QtyOffset IS NOT NULL 			
-			-- Add Revalue sold
+			-- Add Revalue Sold (to the new cost)
 			UNION ALL 
 			SELECT	[intItemId] = @intItemId
 					,[intLocationId] = @intLocationId
@@ -251,35 +282,78 @@ BEGIN
 					,[intConcurrencyId] = 1
 			WHERE	@QtyOffset IS NOT NULL 
 
-			-- Get the id used in the inventory transaction insert 
+			-- Get the id inserted for Revalue-Sold
 			SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
 			
-			-- Insert the record the the LIFO-out table
-			INSERT INTO dbo.tblICInventoryLIFOOut (
+			-- Insert the record to the fifo-out table
+			INSERT INTO dbo.tblICInventoryFIFOOut (
 					intInventoryTransactionId
-					,intInventoryLIFOId
+					,intInventoryFIFOId
 					,dblQty
 			)
 			SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
-					,intInventoryLIFOId = NULL 
+					,intInventoryFIFOId = NULL 
 					,dblQty = @QtyOffset
 			WHERE	@InventoryTransactionIdentityId IS NOT NULL
-					AND @UpdatedLIFOId IS NOT NULL 
+					AND @UpdatedFifoId IS NOT NULL 
 					AND @QtyOffset IS NOT NULL 
 
 			SET @dblAddQty = @RemainingQty;
 		END 
 
-		-- Update the LIFO out table and assign the correct LIFO id. 
-		UPDATE	LIFOOut
-		SET		LIFOOut.intInventoryLIFOId = @NewLIFOId
-		FROM	dbo.tblICInventoryLIFOOut LIFOOut INNER JOIN dbo.tblICInventoryTransaction TRANS
-					ON LIFOOut.intInventoryTransactionId = TRANS.intInventoryTransactionId 
-					AND LIFOOut.intInventoryLIFOId IS NULL 
+		-- Update the fifo out table and assign the correct fifo id. 
+		UPDATE	FifoOut
+		SET		FifoOut.intInventoryFIFOId = @NewFifoId
+		FROM	dbo.tblICInventoryFIFOOut FifoOut INNER JOIN dbo.tblICInventoryTransaction TRANS
+					ON FifoOut.intInventoryTransactionId = TRANS.intInventoryTransactionId 
+					AND FifoOut.intInventoryFIFOId IS NULL 
 					AND TRANS.intItemId = @intItemId
 					AND TRANS.intLocationId = @intLocationId
 					AND TRANS.intTransactionId = @intTransactionId
 					AND TRANS.strBatchId = @strBatchId
-		WHERE	@NewLIFOId IS NOT NULL 
+					AND @NewFifoId IS NOT NULL  
+
+		-- Add Auto Negative (if current stock qty is still negative after adding it) 
+		INSERT INTO dbo.tblICInventoryTransaction (
+				[intItemId] 
+				,[intLocationId] 
+				,[dtmDate] 
+				,[dblUnitQty] 
+				,[dblCost] 
+				,[dblValue]
+				,[dblSalesPrice] 
+				,[intCurrencyId] 
+				,[dblExchangeRate] 
+				,[intTransactionId] 
+				,[strTransactionId] 
+				,[strBatchId] 
+				,[intTransactionTypeId] 
+				,[dtmCreated] 
+				,[intCreatedUserId] 
+				,[intConcurrencyId] 
+		)
+		SELECT	[intItemId] = @intItemId
+				,[intLocationId] = @intLocationId
+				,[dtmDate] = @dtmDate
+				,[dblUnitQty] = 0
+				,[dblCost] = 0
+				,[dblValue] = 
+							(((@dblUnitQty * @dblUOMQty) + Stock.dblUnitOnHand) * @dblCost) 
+							- [dbo].[fnGetItemTotalValueFromTransactions](@intItemId, @intLocationId)
+				,[dblSalesPrice] = @dblSalesPrice
+				,[intCurrencyId] = @intCurrencyId
+				,[dblExchangeRate] = @dblExchangeRate
+				,[intTransactionId] = @intTransactionId
+				,[strTransactionId] = @strTransactionId
+				,[strBatchId] = @strBatchId
+				,[intTransactionTypeId] = @AUTO_NEGATIVE
+				,[dtmCreated] = GETDATE()
+				,[intCreatedUserId] = @intUserId
+				,[intConcurrencyId] = 1
+		FROM	[dbo].[tblICItemStock] Stock
+		WHERE	(@dblUnitQty * @dblUOMQty) + Stock.dblUnitOnHand < 0 
+				AND (@dblUnitQty * @dblUOMQty) > 0 
+				AND Stock.intItemId = @intItemId
+				AND Stock.intLocationId = @intLocationId	
 	END 
 END 

@@ -1,35 +1,7 @@
 ﻿/*
 	This is the stored procedure that handles the moving average costing method. 
-	
-	Parameters: 
-	@intItemId - The item to process
-
-	@intLocationId - The location where the item is being process. 
-	
-	@dtmDate - The date used in the transaction and posting. 
-
-	@dblUnitQty - A positive qty indicates an increase of stock. A negative qty indicates a decrease in stock. 
-
-	@dblUOMQty - The base qty associated with a UOM. For example, a box may have 10 pieces of an item. In this case, UOM qty will be 10. 
-
-	@dblCost - The cost per base qty of the item. 
-
-	@dblSalesPrice - The sales price of an item sold to the customer. 
-
-	@intCurrencyId - The foreign currency associated with the transaction. 
-
-	@dblExchangeRate - The conversion factor between the base currency and the foreign currency. 
-
-	@intTransactionId - The primary key id used in a transaction. 
-
-	@strTransactionId - The string value of a transaction id. 
-
-	@strBatchId - The batch id to use in generating the g/l entries. 
-
-	@intUserId - The user who initiated or called this stored procedure. 
 */
-
-CREATE PROCEDURE [dbo].[uspICProcessAverageCosting]
+CREATE PROCEDURE [dbo].[uspICUnpostAverageCosting]
 	@intItemId AS INT
 	,@intLocationId AS INT
 	,@dtmDate AS DATETIME
@@ -356,4 +328,4 @@ BEGIN
 				AND Stock.intItemId = @intItemId
 				AND Stock.intLocationId = @intLocationId	
 	END 
-END 
+END
