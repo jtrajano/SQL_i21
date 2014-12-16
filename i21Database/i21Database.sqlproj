@@ -893,6 +893,7 @@
     <Build Include="dbo\Views\vyuARInvoiceRecurring.sql" />
     <Build Include="dbo\Tables\tblTMCOBOLPRICE.sql" />
     <Build Include="dbo\Tables\tblSMRecurringHistory.sql" />
+    <Build Include="dbo\Views\vyuHDAgentDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
