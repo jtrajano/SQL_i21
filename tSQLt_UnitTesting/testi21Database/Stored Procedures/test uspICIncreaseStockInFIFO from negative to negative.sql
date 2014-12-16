@@ -25,7 +25,7 @@ BEGIN
 		-- Create a fake data for tblICInventoryFIFO
 			/***************************************************************************************************************************************************************************************************************
 			The initial data in tblICInventoryFIFO
-			intItemId   intLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
+			intItemId   intLocationId	  dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
 			----------- ----------------- ----------------------- --------------------------------------- --------------------------------------- --------------------------------------- ---------------- ----------------
 			3           3                 2014-01-13 00:00:00.000 0.000000                                77.000000                               13.000000                               1                1
 			3           3                 2014-01-14 00:00:00.000 0.000000                                56.000000                               14.000000                               1                1
@@ -41,6 +41,8 @@ BEGIN
 			,[dtmCreated]
 			,[intCreatedUserId]
 			,[intConcurrencyId]
+			,[strTransactionId]
+			,[intTransactionId]
 		)
 		-- Sold to negative
 		SELECT	[intItemId] = @PremiumGrains
@@ -52,6 +54,9 @@ BEGIN
 				,[dtmCreated] = GETDATE()
 				,[intCreatedUserId] = 1
 				,[intConcurrencyId] = 1
+				,[strTransactionId] = 'JanuaryStock-00015'
+				,[intTransactionId] = 1
+
 		-- Sold to negative
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
@@ -63,6 +68,8 @@ BEGIN
 				,[dtmCreated] = GETDATE()
 				,[intCreatedUserId] = 1
 				,[intConcurrencyId] = 1
+				,[strTransactionId] = 'JanuaryStock-00014'
+				,[intTransactionId] = 2
 		-- Sold to negative
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
@@ -74,6 +81,8 @@ BEGIN
 				,[dtmCreated] = GETDATE()
 				,[intCreatedUserId] = 1
 				,[intConcurrencyId] = 1
+				,[strTransactionId] = 'JanuaryStock-00013'
+				,[intTransactionId] = 3
 
 		CREATE TABLE expected (
 			[intItemId] INT 
@@ -98,12 +107,12 @@ BEGIN
 		)
 
 		-- Create the variables used by uspICIncreaseStockInFIFO
-		DECLARE @intItemId AS INT				= @PremiumGrains
-				,@intLocationId AS INT		= @BetterHaven
-				,@dtmDate AS DATETIME			= 'January 16, 2014'
-				,@dblQty NUMERIC(18,6)			= 100
-				,@dblCost AS NUMERIC(18,6)		= 22
-				,@intUserId AS INT				= 1
+		DECLARE @intItemId AS INT = @PremiumGrains
+				,@intLocationId AS INT = @BetterHaven
+				,@dtmDate AS DATETIME = 'January 16, 2014'
+				,@dblQty NUMERIC(18,6) = 100
+				,@dblCost AS NUMERIC(18,6) = 22
+				,@intUserId AS INT = 1
 				,@FullQty AS NUMERIC(18,6)
 				,@strTransactionId AS NVARCHAR(40)
 				,@intTransactionId AS INT
@@ -113,6 +122,8 @@ BEGIN
 				,@QtyOffset AS NUMERIC(18,6)
 				,@NewFifoId AS INT 
 				,@UpdatedFifoId AS INT 
+				,@strRelatedTransactionId AS NVARCHAR(40)
+				,@intRelatedTransactionId AS INT 
 
 		-- Setup the expected values 
 		INSERT INTO expected (
@@ -204,6 +215,8 @@ BEGIN
 				,@QtyOffset OUTPUT 
 				,@NewFifoId OUTPUT 
 				,@UpdatedFifoId OUTPUT 
+				,@strRelatedTransactionId OUTPUT 
+				,@intRelatedTransactionId OUTPUT 
 
 			-- Assert on first pass:
 			-- the cost to offset is $13
@@ -213,6 +226,8 @@ BEGIN
 				EXEC tSQLt.AssertEquals 13.00, @CostUsed
 				EXEC tSQLt.AssertEquals 77, @QtyOffset
 				EXEC tSQLt.AssertEquals 3, @UpdatedFifoId
+				EXEC tSQLt.AssertEquals 'JanuaryStock-00013', @strRelatedTransactionId
+				EXEC tSQLt.AssertEquals 3, @intRelatedTransactionId
 			END 
 				
 			-- Assert on 2nd pass
@@ -223,6 +238,9 @@ BEGIN
 				EXEC tSQLt.AssertEquals 14.00, @CostUsed
 				EXEC tSQLt.AssertEquals 23, @QtyOffset
 				EXEC tSQLt.AssertEquals 2, @UpdatedFifoId			
+				EXEC tSQLt.AssertEquals 'JanuaryStock-00014', @strRelatedTransactionId
+				EXEC tSQLt.AssertEquals 2, @intRelatedTransactionId
+
 			END 
 
 			SET @dblQty = @RemainingQty;

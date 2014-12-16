@@ -45,12 +45,12 @@ BEGIN
 		)
 
 		-- Create the variables used by uspICIncreaseStockInFIFO
-		DECLARE @intItemId AS INT				= @PremiumGrains
-				,@intLocationId AS INT		= @BetterHaven
-				,@dtmDate AS DATETIME			= 'January 2, 2014'
-				,@dblQty NUMERIC(18,6)			= 40
-				,@dblCost AS NUMERIC(18,6)		= 88.77
-				,@intUserId AS INT				= 1
+		DECLARE @intItemId AS INT = @PremiumGrains
+				,@intLocationId AS INT = @BetterHaven
+				,@dtmDate AS DATETIME = 'January 2, 2014'
+				,@dblQty NUMERIC(18,6) = 40
+				,@dblCost AS NUMERIC(18,6) = 88.77
+				,@intUserId AS INT = 1
 				,@FullQty AS NUMERIC(18,6)
 				,@strTransactionId AS NVARCHAR(40)
 				,@intTransactionId AS INT
@@ -60,6 +60,8 @@ BEGIN
 				,@QtyOffset AS NUMERIC(18,6)
 				,@NewFifoId AS INT 
 				,@UpdatedFifoId AS INT 
+				,@strRelatedTransactionId AS NVARCHAR(40)
+				,@intRelatedTransactionId AS INT 
 
 		-- Setup the expected values 
 		INSERT INTO expected (
@@ -117,6 +119,8 @@ BEGIN
 				,@QtyOffset OUTPUT 
 				,@NewFifoId OUTPUT 
 				,@UpdatedFifoId OUTPUT 
+				,@strRelatedTransactionId OUTPUT 
+				,@intRelatedTransactionId OUTPUT 
 
 			SET @dblQty = @RemainingQty;
 			SET @TotalQtyOffset += ISNULL(@QtyOffset, 0)

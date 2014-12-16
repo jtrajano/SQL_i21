@@ -151,7 +151,25 @@ BEGIN
 			,@intUserId;
 	END
 
-	-- LIFO -- TODO
+	-- LIFO 
+	IF (@CostingMethod = @LIFO)
+	BEGIN 
+		EXEC dbo.uspICPostLIFO
+			@intItemId
+			,@intLocationId
+			,@dtmDate
+			,@dblUnitQty
+			,@dblUOMQty
+			,@dblCost
+			,@dblSalesPrice
+			,@intCurrencyId
+			,@dblExchangeRate
+			,@intTransactionId
+			,@strTransactionId
+			,@strBatchId
+			,@intTransactionTypeId
+			,@intUserId;
+	END
 
 	--------------------------------------------------
 	-- Adjust the average cost and units on hand. 

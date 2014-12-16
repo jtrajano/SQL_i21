@@ -933,6 +933,9 @@
     <None Include="Scripts\Post-Deployment\AP\ClearPostResult.sql" />
     <Build Include="dbo\Tables\tblICEquipmentLength.sql" />
     <Build Include="dbo\Tables\tblMFQAProperty.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostAverageCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostFIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostLIFO.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

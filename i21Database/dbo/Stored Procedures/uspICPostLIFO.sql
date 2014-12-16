@@ -43,6 +43,8 @@ DECLARE @InventoryTransactionIdentityId AS INT
 
 DECLARE @NewLIFOId AS INT
 DECLARE @UpdatedLIFOId AS INT 
+DECLARE @strRelatedTransactionId AS NVARCHAR(40)
+DECLARE @intRelatedTransactionId AS INT 
 
 -------------------------------------------------
 -- 1. Process the LIFO Cost buckets
@@ -190,6 +192,8 @@ BEGIN
 				,@QtyOffset OUTPUT 
 				,@NewLIFOId OUTPUT 
 				,@UpdatedLIFOId OUTPUT 
+				,@strRelatedTransactionId OUTPUT
+				,@intRelatedTransactionId OUTPUT 
 
 			SET @dblAddQty = @RemainingQty;
 			SET @TotalQtyOffset += ISNULL(@QtyOffset, 0)
@@ -209,6 +213,8 @@ BEGIN
 				,[strTransactionId] 
 				,[strBatchId] 
 				,[intTransactionTypeId] 
+				,[strRelatedInventoryTransactionId]
+				,[intRelatedInventoryTransactionId]
 				,[dtmCreated] 
 				,[intCreatedUserId] 
 				,[intConcurrencyId] 
@@ -227,6 +233,8 @@ BEGIN
 					,[strTransactionId] = @strTransactionId
 					,[strBatchId] = @strBatchId
 					,[intTransactionTypeId] = @WRITE_OFF_SOLD
+					,[strRelatedInventoryTransactionId] = @strRelatedTransactionId
+					,[intRelatedInventoryTransactionId] = @intRelatedTransactionId
 					,[dtmCreated] = GETDATE()
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId] = 1
@@ -246,6 +254,8 @@ BEGIN
 					,[strTransactionId] = @strTransactionId
 					,[strBatchId] = @strBatchId
 					,[intTransactionTypeId] = @REVALUE_SOLD
+					,[strRelatedInventoryTransactionId] = @strRelatedTransactionId
+					,[intRelatedInventoryTransactionId] = @intRelatedTransactionId
 					,[dtmCreated] = GETDATE()
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId] = 1
@@ -259,13 +269,15 @@ BEGIN
 					intInventoryTransactionId
 					,intInventoryLIFOId
 					,dblQty
-			)
+					,intRevalueLifoId
+			)		
 			SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
 					,intInventoryLIFOId = NULL 
 					,dblQty = @QtyOffset
+					,intRevalueLifoId = @UpdatedLIFOId
 			WHERE	@InventoryTransactionIdentityId IS NOT NULL
 					AND @UpdatedLIFOId IS NOT NULL 
-					AND @QtyOffset IS NOT NULL 
+					AND @QtyOffset IS NOT NULL
 
 			SET @dblAddQty = @RemainingQty;
 		END 

@@ -43,6 +43,8 @@ DECLARE @InventoryTransactionIdentityId AS INT
 
 DECLARE @NewFifoId AS INT
 DECLARE @UpdatedFifoId AS INT 
+DECLARE @strRelatedTransactionId AS NVARCHAR(40)
+DECLARE @intRelatedTransactionId AS INT 
 
 -------------------------------------------------
 -- 1. Process the Fifo Cost buckets
@@ -190,6 +192,8 @@ BEGIN
 				,@QtyOffset OUTPUT 
 				,@NewFifoId OUTPUT 
 				,@UpdatedFifoId OUTPUT 
+				,@strRelatedTransactionId OUTPUT
+				,@intRelatedTransactionId OUTPUT 
 
 			SET @dblAddQty = @RemainingQty;
 			SET @TotalQtyOffset += ISNULL(@QtyOffset, 0)
@@ -209,6 +213,8 @@ BEGIN
 				,[strTransactionId] 
 				,[strBatchId] 
 				,[intTransactionTypeId] 
+				,[strRelatedInventoryTransactionId]
+				,[intRelatedInventoryTransactionId]
 				,[dtmCreated] 
 				,[intCreatedUserId] 
 				,[intConcurrencyId] 
@@ -227,6 +233,8 @@ BEGIN
 					,[strTransactionId] = @strTransactionId
 					,[strBatchId] = @strBatchId
 					,[intTransactionTypeId] = @WRITE_OFF_SOLD
+					,[strRelatedInventoryTransactionId] = @strRelatedTransactionId
+					,[intRelatedInventoryTransactionId] = @intRelatedTransactionId
 					,[dtmCreated] = GETDATE()
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId] = 1
@@ -246,6 +254,8 @@ BEGIN
 					,[strTransactionId] = @strTransactionId
 					,[strBatchId] = @strBatchId
 					,[intTransactionTypeId] = @REVALUE_SOLD
+					,[strRelatedInventoryTransactionId] = @strRelatedTransactionId
+					,[intRelatedInventoryTransactionId] = @intRelatedTransactionId
 					,[dtmCreated] = GETDATE()
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId] = 1
@@ -259,10 +269,12 @@ BEGIN
 					intInventoryTransactionId
 					,intInventoryFIFOId
 					,dblQty
+					,intRevalueFifoId
 			)
 			SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
 					,intInventoryFIFOId = NULL 
 					,dblQty = @QtyOffset
+					,intRevalueFifoId = @UpdatedFifoId
 			WHERE	@InventoryTransactionIdentityId IS NOT NULL
 					AND @UpdatedFifoId IS NOT NULL 
 					AND @QtyOffset IS NOT NULL 
