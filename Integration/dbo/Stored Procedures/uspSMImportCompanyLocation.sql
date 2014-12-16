@@ -143,10 +143,10 @@ BEGIN
 				  END)								--<strLocationName, nvarchar(50),>
 				,''Office''							--<strLocationType, nvarchar(50),>
 				,(CASE 
-					WHEN RTRIM(LTRIM(AG.[agloc_addr])) = '''' 
+					WHEN RTRIM(LTRIM(ISNULL(AG.[agloc_addr],''''))) = '''' 
 						THEN AG.[agloc_addr2]
 					ELSE
-						RTRIM(LTRIM(AG.[agloc_addr])) + (CHAR(13) + CHAR(10)) + RTRIM(LTRIM(AG.[agloc_addr2]))
+						RTRIM(LTRIM(ISNULL(AG.[agloc_addr],''''))) + (CHAR(13) + CHAR(10)) + RTRIM(LTRIM(ISNULL(AG.[agloc_addr2],'''')))
 				  END)								--<strAddress, nvarchar(max),>
 				,[agloc_zip]						--<strZipPostalCode, nvarchar(50),>
 				,[agloc_city]						--<strCity, nvarchar(50),>
