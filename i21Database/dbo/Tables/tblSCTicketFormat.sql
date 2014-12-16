@@ -1,12 +1,12 @@
 ﻿CREATE TABLE [dbo].[tblSCTicketFormat]
 (
 	[intTicketFormatId] INT NOT NULL IDENTITY, 
-    [strTicketFormat] NVARCHAR(25) NOT NULL, 
+    [strTicketFormat] NVARCHAR(25) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intTicketFormatSelection] INT NOT NULL, 
     [ysnSuppressCompanyName] BIT NULL, 
     [ysnFormFeedEachCopy] BIT NULL, 
-    [strTicketHeader] NVARCHAR(396) NULL, 
-    [strTicketFooter] NVARCHAR(396) NULL, 
+    [strTicketHeader] NVARCHAR(396) COLLATE Latin1_General_CI_AS NULL, 
+    [strTicketFooter] NVARCHAR(396) COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblSCTicketFormat_intTicketFormatId] PRIMARY KEY ([intTicketFormatId]), 
     CONSTRAINT [UK_tblSCTicketFormat_strTicketFormat] UNIQUE ([strTicketFormat]) 
