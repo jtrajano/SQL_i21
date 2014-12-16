@@ -12,17 +12,17 @@ BEGIN
 
 	DECLARE @tablename NVARCHAR(100)
 	
-	SELECT [Table_Name]
+	SELECT TABLE_NAME
 	INTO #tmpGLTables
 	FROM INFORMATION_SCHEMA.COLUMNS
-	WHERE [Column_Name] = 'intEntityId'
-	AND [Table_Name] LIKE 'tbl' + @Module + '%'
+	WHERE COLUMN_NAME = 'intEntityId'
+	AND TABLE_NAME LIKE 'tbl' + @Module + '%'
 	
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpGLTables)
 	BEGIN
 		SELECT TOP 1 @tablename = [Table_Name] FROM #tmpGLTables
 		
-		IF EXISTS(SELECT * FROM sys.columns WHERE Name = N'intUserId' AND OBJECT_ID = OBJECT_ID(@tablename))
+		IF EXISTS(SELECT * FROM sys.columns WHERE name = N'intUserId' AND object_id = OBJECT_ID(@tablename))
 		BEGIN
 			EXEC('UPDATE ' + @tablename + ' SET intEntityId = dbo.fnGetEntityIdFromUser(intUserId) WHERE ISNULL(intEntityId, -1) = -1')
 		END

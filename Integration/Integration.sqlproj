@@ -224,6 +224,14 @@
     <None Include="dbo\Stored Procedures\uspARImportTaxAuthority.sql" />
     <None Include="dbo\Stored Procedures\uspARImportTerm.sql" />
     <None Include="dbo\Stored Procedures\uspSMImportCompanyLocation.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMSyncCompanyLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMSyncCompanyLocation.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+  </ItemGroup>
+  <ItemGroup>
+    <SqlCmdVariable Include="i21Database">
+      <DefaultValue>i21Database</DefaultValue>
+      <Value>$(SqlCmdVar__1)</Value>
+    </SqlCmdVariable>
   </ItemGroup>
 </Project>
