@@ -32,7 +32,8 @@ Ext.application({
         'QAProperties',
         'Catalog',
         'LineOfBusiness',
-        'EditCatalog'
+        'EditCatalog',
+        'InventoryShipment'
     ],
     name: 'Inventory',
 

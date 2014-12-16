@@ -1111,7 +1111,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     {
                                                         xtype: 'checkcolumn',
                                                         width: 65,
-                                                        text: 'Select'
+                                                        text: 'Inspect'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
@@ -1222,6 +1222,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         fieldLabel: 'Difference',
                                                         labelWidth: 130,
                                                         readOnly: true
+                                                    },
+                                                    {
+                                                        xtype: 'checkboxfield',
+                                                        itemId: 'chkPrePaid',
+                                                        fieldLabel: 'Pre Paid',
+                                                        labelWidth: 130
                                                     },
                                                     {
                                                         xtype: 'checkboxfield',
@@ -1628,6 +1634,84 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     {
                                                         ptype: 'cellediting',
                                                         pluginId: 'FuelCodePlugin',
+                                                        clicksToEdit: 1
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        title: 'Notes',
+                                        layout: {
+                                            type: 'vbox',
+                                            align: 'stretch'
+                                        },
+                                        items: [
+                                            {
+                                                xtype: 'advancefiltergrid',
+                                                flex: 1,
+                                                itemId: 'grdNotes',
+                                                margin: -1,
+                                                dockedItems: [
+                                                    {
+                                                        xtype: 'toolbar',
+                                                        dock: 'top',
+                                                        itemId: 'tlbGridOptions',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            padding: '0 0 0 1'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnDeleteNotes',
+                                                                iconCls: 'small-delete',
+                                                                text: 'Delete'
+                                                            },
+                                                            {
+                                                                xtype: 'tbseparator'
+                                                            },
+                                                            {
+                                                                xtype: 'filter1'
+                                                            }
+                                                        ]
+                                                    }
+                                                ],
+                                                columns: [
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colNoteLocation',
+                                                        dataIndex: 'string',
+                                                        text: 'Location',
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colNoteType',
+                                                        dataIndex: 'string',
+                                                        text: 'Note Type',
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colNote',
+                                                        dataIndex: 'string',
+                                                        text: 'Notes',
+                                                        flex: 3
+                                                    }
+                                                ],
+                                                viewConfig: {
+                                                    itemId: 'grvNotes'
+                                                },
+                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                    selType: 'checkboxmodel'
+                                                }),
+                                                plugins: [
+                                                    {
+                                                        ptype: 'cellediting',
+                                                        pluginId: 'cepNote',
                                                         clicksToEdit: 1
                                                     }
                                                 ]
