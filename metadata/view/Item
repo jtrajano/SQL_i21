@@ -981,7 +981,7 @@
                                                 "flex": 2,
                                                 "itemId": "colDetailDescription",
                                                 "minWidth": 150,
-                                                "text": "Description"
+                                                "text": "Package Description"
                                             },
                                             "name": "MyColumn1",
                                             "designerId": "6e79ead5-5b76-4b2d-a512-96881c3fab79",

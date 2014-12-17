@@ -517,7 +517,7 @@ Ext.define('Inventory.view.Item', {
                                                         itemId: 'colDetailDescription',
                                                         minWidth: 150,
                                                         dataIndex: 'string',
-                                                        text: 'Description',
+                                                        text: 'Package Description',
                                                         flex: 2,
                                                         editor: {
                                                             xtype: 'textfield'
