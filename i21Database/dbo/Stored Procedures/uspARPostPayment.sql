@@ -505,8 +505,7 @@ BEGIN
 			#tmpARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId
 		WHERE
-			B.dblAmountDue = (B.dblPayment + B.dblDiscount)
-			AND B.dblDiscount <> 0
+			B.dblDiscount <> 0
 		GROUP BY
 			A.intPaymentId
 			,A.strRecordNumber
@@ -616,8 +615,7 @@ BEGIN
 			#tmpARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId
 		WHERE
-			B.dblAmountDue = (B.dblPayment + B.dblDiscount) --fully paid
-			AND B.dblDiscount <> 0
+			B.dblDiscount <> 0
 		GROUP BY
 			A.intPaymentId
 			,A.strRecordNumber
@@ -1128,10 +1126,7 @@ ELSE
 			#tmpARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId					
 		WHERE
-			1 = (CASE WHEN @post = 1 AND B.dblAmountDue = (B.dblPayment + B.dblDiscount) THEN  1--fully paid when unposted
-					  WHEN  @post = 0 AND B.dblAmountDue = 0 THEN 1 --fully paid when posted
-					  ELSE 0 END)
-			AND B.dblDiscount <> 0
+			B.dblDiscount <> 0
 		GROUP BY
 			 strRecordNumber
 			,A.intPaymentId
@@ -1239,8 +1234,7 @@ ELSE
 			#tmpARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId
 		WHERE
-			B.dblAmountDue = (B.dblPayment + B.dblDiscount) --fully paid
-			AND B.dblDiscount <> 0
+			B.dblDiscount <> 0
 		GROUP BY
 			A.strRecordNumber
 			,A.intPaymentId
