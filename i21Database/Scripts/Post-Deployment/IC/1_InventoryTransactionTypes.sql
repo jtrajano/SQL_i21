@@ -13,5 +13,10 @@ SELECT
 	[intTransactionTypeId] = 1,
 	[strName] = 'Inventory Adjustment'
 WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblICInventoryTransactionType] WHERE [intTransactionTypeId] = 1)
+UNION ALL 
+SELECT 
+	[intTransactionTypeId] = 2,
+	[strName] = 'Inventory Receipt'
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblICInventoryTransactionType] WHERE [intTransactionTypeId] = 2)
 
 print('/*******************  END Populate Inventory Transaction Types *******************/')

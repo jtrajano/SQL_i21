@@ -687,7 +687,6 @@
     <Build Include="dbo\Tables\tblICInventoryFIFO.sql" />
     <Build Include="dbo\Tables\tblICInventoryLIFO.sql" />
     <Build Include="dbo\Tables\tblICItemLocation.sql" />
-    <Build Include="dbo\Stored Procedures\uspICProcessCosting.sql" />
     <Build Include="dbo\User Defined Types\ItemCostingTableType.sql" />
     <Build Include="dbo\Tables\tblICInventoryTransactionType.sql" />
     <None Include="Scripts\Post-Deployment\IC\1_InventoryTransactionTypes.sql" />
@@ -787,7 +786,7 @@
     <Build Include="dbo\Tables\tblSTSubcategoryClass.sql" />
     <Build Include="dbo\Tables\tblSTSubcategoryFamily.sql" />
     <Build Include="dbo\Tables\tblSTSubcategoryRegProd.sql" />
-    <Build Include="dbo\Stored Procedures\uspICProcessFIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostFIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInFIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInFIFO.sql" />
     <Build Include="dbo\Tables\tblGRStorageType.sql" />
@@ -824,7 +823,7 @@
     <Build Include="dbo\Tables\tblICInventoryFIFOOut.sql" />
     <Build Include="dbo\Tables\tblSTPromotionItemList.sql" />
     <Build Include="dbo\Tables\tblSTPromotionSalesList.sql" />
-    <Build Include="dbo\Stored Procedures\uspICProcessAverageCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostAverageCosting.sql" />
     <Build Include="dbo\Tables\tblARTaxAuthority.sql" />
     <Build Include="dbo\Tables\tblICStorageLocation.sql" />
     <Build Include="dbo\Tables\tblICStorageLocationMeasurement.sql" />
@@ -900,7 +899,7 @@
     <Build Include="dbo\Stored Procedures\uspICValidateProcessToItemReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInLIFO.sql" />
-    <Build Include="dbo\Stored Procedures\uspICProcessLIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostLIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspARDuplicateInvoice.sql" />
     <Build Include="dbo\Functions\fnGetDueDateBasedOnTerm.sql" />
     <Build Include="dbo\Tables\tblPOOrderStatus.sql" />
@@ -934,7 +933,11 @@
     <None Include="Scripts\Post-Deployment\AP\ClearPostResult.sql" />
     <Build Include="dbo\Tables\tblICEquipmentLength.sql" />
     <Build Include="dbo\Tables\tblMFQAProperty.sql" />
-    <Build Include="dbo\Tables\tblICLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostAverageCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostFIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostLIFO.sql" />
+	<Build Include="dbo\Views\vyuHDAgentDetail.sql" />
+	<Build Include="dbo\Stored Procedures\uspICPostInventoryReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -22,6 +22,8 @@ CREATE PROCEDURE dbo.uspICIncreaseStockInFIFO
 	,@QtyOffset AS NUMERIC(18,6) OUTPUT 
 	,@NewFifoId AS INT OUTPUT 
 	,@UpdatedFifoId AS INT OUTPUT 
+	,@strRelatedTransactionId AS NVARCHAR(40) OUTPUT
+	,@intRelatedTransactionId AS INT OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -39,6 +41,8 @@ SET @CostUsed = NULL;
 SET @QtyOffset = NULL;
 SET @NewFifoId = NULL;
 SET @UpdatedFifoId = NULL;
+SET @strRelatedTransactionId = NULL;
+SET @intRelatedTransactionId = NULL;
 
 -- Upsert (update or insert) a record into the cost bucket.
 MERGE	TOP(1)
@@ -78,6 +82,8 @@ WHEN MATCHED THEN
 					END 
 
 		,@UpdatedFifoId = fifo_bucket.intInventoryFIFOId
+		,@strRelatedTransactionId = fifo_bucket.strTransactionId
+		,@intRelatedTransactionId = fifo_bucket.intTransactionId
 
 -- Insert a new fifo bucket if there is no negative stock to offset. 
 WHEN NOT MATCHED AND @FullQty > 0 THEN 
