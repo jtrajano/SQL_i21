@@ -1512,4 +1512,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strMandatory" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="42fb6d77-dcf2-4427-a8d8-2e770cacd946" ChangeDateTime="12/17/2014 02:14:32">
+    <Property Name="ElementName" Value="[dbo].[tblICLot].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICLot]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intLotId" />
+  </Operation>
 </Operations>
