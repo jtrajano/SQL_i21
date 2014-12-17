@@ -28,8 +28,8 @@ Ext.define('Inventory.model.ReceiptItemLot', {
                 }
             }
         },
-        { name: 'strParentLotId', type: 'string'},
-        { name: 'strLotId', type: 'string'},
+        { name: 'intParentLotId', type: 'int'},
+        { name: 'intLotId', type: 'int'},
         { name: 'strContainerNo', type: 'string'},
         { name: 'dblQuantity', type: 'float'},
         { name: 'intUnits', type: 'int'},

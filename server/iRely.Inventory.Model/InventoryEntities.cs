@@ -160,6 +160,7 @@ namespace iRely.Inventory.Model
         public DbSet<tblICTag> tblICTags { get; set; }
         public DbSet<tblICUnitMeasure> tblICUnitMeasures { get; set; }
         public DbSet<tblICUnitMeasureConversion> tblICUnitMeasureConversions { get; set; }
+        public DbSet<tblICLot> tblICLots { get; set; }
 
         public DbSet<tblICContainer> tblICContainers { get; set; }
         public DbSet<tblICContainerType> tblICContainerTypes { get; set; }
@@ -269,6 +270,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICTagMap());
             modelBuilder.Configurations.Add(new tblICUnitMeasureMap());
             modelBuilder.Configurations.Add(new tblICUnitMeasureConversionMap());
+            modelBuilder.Configurations.Add(new tblICLotMap());
 
             modelBuilder.Entity<tblICCommodityAttribute>().Map<tblICCommodityClassVariant>(p => p.Requires("strType").HasValue("Class"));
             modelBuilder.Entity<tblICCommodityAttribute>().Map<tblICCommodityGrade>(p => p.Requires("strType").HasValue("Grade"));

@@ -233,20 +233,20 @@ namespace iRely.Inventory.Model
     {
         public int intInventoryReceiptItemLotId { get; set; }
         public int intInventoryReceiptItemId { get; set; }
-        public string strParentLotId { get; set; }
-        public string strLotId { get; set; }
+        public int? intParentLotId { get; set; }
+        public int? intLotId { get; set; }
         public string strContainerNo { get; set; }
         public decimal? dblQuantity { get; set; }
         public int intUnits { get; set; }
-        public int intUnitUOMId { get; set; }
+        public int? intUnitUOMId { get; set; }
         public int intUnitPallet { get; set; }
         public decimal? dblGrossWeight { get; set; }
         public decimal? dblTareWeight { get; set; }
-        public int intWeightUOMId { get; set; }
+        public int? intWeightUOMId { get; set; }
         public decimal? dblStatedGrossPerUnit { get; set; }
         public decimal? dblStatedTarePerUnit { get; set; }
         public int? intStorageBinId { get; set; }
-        public int intGarden { get; set; }
+        public int? intGarden { get; set; }
         public string strGrade { get; set; }
         public int? intOriginId { get; set; }
         public int intSeasonCropYear { get; set; }
@@ -256,6 +256,7 @@ namespace iRely.Inventory.Model
         public int intSort { get; set; }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
+        public tblICLot tblICLot { get; set; }
     }
 
     public class tblICInventoryReceiptItemTax : BaseEntity
