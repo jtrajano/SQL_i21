@@ -18,7 +18,6 @@ Ext.define('Inventory.model.ItemPOSCategory', {
                 inverse: {
                     role: 'tblICItemPOSCategories',
                     storeConfig: {
-                        complete: true,
                         remoteFilter: true,
                         proxy: {
                             type: 'rest',
@@ -33,7 +32,7 @@ Ext.define('Inventory.model.ItemPOSCategory', {
                         },
                         sortOnLoad: true,
                         sorters: {
-                            direction: 'ASC',
+                            direction: 'DESC',
                             property: 'intSort'
                         }
                     }

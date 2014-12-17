@@ -167,6 +167,7 @@ namespace iRely.Inventory.Model
         public DbSet<tblICReadingPoint> tblICReadingPoints { get; set; }
         public DbSet<tblICRestriction> tblICRestrictions { get; set; }
         public DbSet<tblICSku> tblICSkus { get; set; }
+        public DbSet<tblICEquipmentLength> tblICEquipmentLengths { get; set; }
 
         public DbSet<tblICInventoryReceipt> tblICInventoryReceipts { get; set; }
         public DbSet<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
@@ -193,6 +194,8 @@ namespace iRely.Inventory.Model
         public DbSet<vyuICGetItemStock> vyuICGetItemStocks { get; set; }
         public DbSet<tblSMStartingNumber> tblSMStartingNumbers { get; set; }
         public DbSet<tblSMFreightTerm> tblSMFreightTerms { get; set; }
+
+        public DbSet<tblMFQAProperty> tblMFQAProperties { get; set; }
         
         protected override void OnModelCreating(DbModelBuilder modelBuilder) 
         {
@@ -289,6 +292,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICReadingPointMap());
             modelBuilder.Configurations.Add(new tblICRestrictionMap());
             modelBuilder.Configurations.Add(new tblICSkuMap());
+            modelBuilder.Configurations.Add(new tblICEquipmentLengthMap());
 
             modelBuilder.Configurations.Add(new tblICInventoryReceiptMap());
             modelBuilder.Configurations.Add(new tblICInventoryReceiptInspectionMap());
@@ -316,6 +320,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetItemStockMap());
             modelBuilder.Configurations.Add(new tblSMStartingNumberMap());
             modelBuilder.Configurations.Add(new tblSMFreightTermMap());
+            modelBuilder.Configurations.Add(new tblMFQAPropertyMap());
         }
     }
 }

@@ -546,63 +546,6 @@
                                         ],
                                         "designer|createAlias": "gridcombobox",
                                         "displayField": "strUnitMeasure",
-                                        "fieldLabel": "Default UOM",
-                                        "itemId": "cboDefaultUom",
-                                        "labelWidth": 105,
-                                        "layout|flex": null,
-                                        "valueField": "intUnitMeasureId"
-                                    },
-                                    "name": "MyComboBox22",
-                                    "configAlternates": {
-                                        "columns": "array"
-                                    },
-                                    "designerId": "f56d43cc-e1d8-4979-939d-18f546029773",
-                                    "customConfigs": [
-                                        {
-                                            "group": "(Custom Properties)",
-                                            "name": "columns",
-                                            "type": "string"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "type": "Ext.form.field.ComboBox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "columns": [
-                                            "[",
-                                            "\t{",
-                                            "\t\tdataIndex: 'intUnitMeasureId',",
-                                            "\t\tdataType: 'numeric',",
-                                            "\t\ttext: 'Unit Of Measure ID',",
-                                            "\t\thidden: true",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'strUnitMeasure',",
-                                            "\t\tdataType: 'string',",
-                                            "\t\ttext: 'Unit Measure',",
-                                            "\t\tflex: 1",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'strUnitType',",
-                                            "\t\tdataType: 'string',",
-                                            "\t\ttext: 'Unit Type',",
-                                            "\t\tflex: 1",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'ysnDefault',",
-                                            "\t\tdataType: 'boolean',",
-                                            "\t\ttext: 'Default',",
-                                            "\t\tflex: 1",
-                                            "\t}",
-                                            "]"
-                                        ],
-                                        "designer|createAlias": "gridcombobox",
-                                        "displayField": "strUnitMeasure",
                                         "fieldLabel": "Issue UOM",
                                         "itemId": "cboIssueUom",
                                         "labelWidth": 105,
@@ -1745,7 +1688,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging114",
+                    "name": "statusbarpaging13",
                     "designerId": "3812557b-eaf0-4f41-b444-7da5890f9c89",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

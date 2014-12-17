@@ -88,10 +88,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 },
                 colDescription: 'strItemDescription',
                 colSubLocation: '',
-                colLotTracking: '',
-                colQtyOrdered: '',
-                colOpenReceive: '',
-                colReceived: '',
+                colLotTracking: 'strLotTracking',
+                colQtyOrdered: 'dblOrderQty',
+                colOpenReceive: 'dblOpenReceive',
+                colReceived: 'dblReceived',
                 colUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
@@ -109,23 +109,30 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         store: '{itemPackType}'
                     }
                 },
-                colUnitCost: 'dblUnitCost',
-                colUnitRetail: 'dblUnitRetail'
+                colUnitCost: 'dblUnitCost'
             },
 
+            grdIncomingInspection: {
+                colInspect: 'ysnSelected',
+                colQualityPropertyName: 'strPropertyName'
+            },
 
             // ---- Freight and Invoice Tab
             cboCalculationBasis: {
                 value: '{current.strCalculationBasis}',
                 store: '{calculationBasis}'
             },
-            txtUnitsWeightMiles: '{current.dblUnitWeightMile}',
+            txtUnitsWeightMiles: {
+                value: '{current.dblUnitWeightMile}'
+            },
             txtFreightRate: '{current.dblFreightRate}',
             txtFuelSurcharge: '{current.dblFuelSurcharge}',
-//            txtCalculatedFreight: '{current.strMessage}',
+            txtCalculatedFreight: '{getCalculatedFreight}',
+
 //            txtCalculatedAmount: '{current.strMessage}',
             txtInvoiceAmount: '{current.dblInvoiceAmount}',
 //            txtDifference: '{current.strMessage}',
+            chkPrepaid: '{current.ysnPrepaid}',
             chkInvoicePaid: '{current.ysnInvoicePaid}',
             txtCheckNo: {
                 value: '{current.intCheckNo}',
@@ -138,11 +145,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 //            txtInvoiceMargin: '{current.strMessage}',
 
             // ---- EDI tab
-            cboTrailerType: '{current.intTrailerTypeId}',
+            cboTrailerType: {
+                value: '{current.intTrailerTypeId}',
+                store: '{equipmentLength}'
+            },
             txtTrailerArrivalDate: '{current.dteTrailerArrivalDate}',
             txtTrailerArrivalTime: '{current.dteTrailerArrivalTime}',
             txtSealNo: '{current.strSealNo}',
-            cboSealStatus: '{current.strSealStatus}',
+            cboSealStatus: {
+                value: '{current.strSealStatus}',
+                store: '{sealStatuses}'
+            },
             txtReceiveTime: '{current.dteReceiveTime}',
             txtActualTempReading: '{current.dblActualTempReading}'
 
@@ -156,6 +169,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             store = Ext.create('Inventory.store.Receipt', { pageSize: 1 });
 
         var grdInventoryReceipt = win.down('#grdInventoryReceipt'),
+            grdIncomingInspection = win.down('#grdIncomingInspection'),
             grdLotTracking = win.down('#grdLotTracking');
 
         win.context = Ext.create('iRely.mvvm.Engine', {
@@ -183,9 +197,37 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             })
                         }
                     ]
+                },
+                {
+                    key: 'tblICInventoryReceiptInspections',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdIncomingInspection,
+                        position: 'none'
+                    })
                 }
             ]
         });
+
+        var colTaxDetails = grdInventoryReceipt.columns[11];
+        var btnViewTaxDetail = colTaxDetails.items[0];
+        if (btnViewTaxDetail){
+            btnViewTaxDetail.handler = function(grid, rowIndex, colIndex) {
+                var current = grid.store.data.items[rowIndex];
+                me.onViewTaxDetailsClick(current.get('intInventoryReceiptItemId'));
+            }
+        }
+
+        var colReceived = grdInventoryReceipt.columns[6];
+        var txtReceived = colReceived.getEditor();
+        if (txtReceived){
+            txtReceived.on('change', me.onCalculateTotalAmount);
+        }
+        var colUnitCost = grdInventoryReceipt.columns[10];
+        var txtUnitCost = colUnitCost.getEditor();
+        if (txtUnitCost){
+            txtUnitCost.on('change', me.onCalculateTotalAmount);
+        }
+
 
         return win.context;
     },
@@ -223,9 +265,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var record = Ext.create('Inventory.model.Receipt');
         if (app.DefaultLocation > 0)
             record.set('intLocationId', app.DefaultLocation);
+        record.set('dtmReceiptDate', today);
+        record.set('dtmReceiptDate', today);
 
-        record.set('dtmReceiptDate', today);
-        record.set('dtmReceiptDate', today);
+
+
+        record.tblICInventoryReceiptInspections().add();
+
         action(record);
     },
 
@@ -261,6 +307,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         {
             current.set('intItemId', records[0].get('intItemId'));
             current.set('strItemDescription', records[0].get('strDescription'));
+            current.set('strLotTracking', records[0].get('strLotTracking'));
         }
         else if (combo.column.itemId === 'colUOM')
         {
@@ -269,6 +316,79 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         else if (combo.column.itemId === 'colPackageType')
         {
             current.set('intPackTypeId', records[0].get('intPackTypeId'));
+        }
+    },
+
+    onViewTaxDetailsClick: function (ReceiptItemId) {
+        var win = window;
+        var me = win.controller;
+        var screenName = 'Inventory.view.InventoryReceiptTaxes';
+
+        Ext.require([
+            screenName,
+                screenName + 'ViewModel',
+                screenName + 'ViewController'
+        ], function() {
+            var screen = screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
+            var view = Ext.create(screenName, { controller: screen.toLowerCase(), viewModel: screen.toLowerCase() });
+            var controller = view.getController();
+            controller.show({ id: ReceiptItemId});
+        });
+    },
+
+    onCalculationBasisChange: function(obj, newValue, oldValue, eOpts) {
+        var win = obj.up('window');
+        var txtUnitsWeightMiles = win.down('#txtUnitsWeightMiles');
+        switch (newValue) {
+            case 'Per Ton':
+                txtUnitsWeightMiles.setFieldLabel('Weight');
+                break;
+            case 'Per Miles':
+                txtUnitsWeightMiles.setFieldLabel('Miles');
+                break;
+            default:
+                txtUnitsWeightMiles.setFieldLabel('Unit');
+                break;
+        }
+    },
+
+    onFreightCalculationChange: function(obj, newValue, oldValue, eOpts) {
+        var win = obj.up('window');
+        var txtUnitsWeightMiles = win.down('#txtUnitsWeightMiles');
+        var txtFreightRate = win.down('#txtFreightRate');
+        var txtFuelSurcharge = win.down('#txtFuelSurcharge');
+        var txtCalculatedFreight = win.down('#txtCalculatedFreight');
+
+        var unitRate = (txtUnitsWeightMiles.getValue() * txtFreightRate.getValue());
+        var unitRateSurcharge = (unitRate * txtFuelSurcharge.getValue());
+
+        txtCalculatedFreight.setValue(unitRate + unitRateSurcharge);
+    },
+
+    onCalculateTotalAmount: function(obj, newValue, oldValue, eOpts) {
+        var win = obj.up('window');
+        var txtCalculatedAmount = win.down('#txtCalculatedAmount');
+        var txtInvoiceAmount = win.down('#txtInvoiceAmount');
+        var txtDifference = win.down('#txtDifference');
+        var grid = win.down('#grdInventoryReceipt');
+        var store = grid.store;
+
+        if (store){
+            var data = store.data;
+            var calculatedTotal = 0
+            Ext.Array.each(data.items, function(row) {
+                var dblReceived = row.get('dblReceived');
+                var dblUnitCost = row.get('dblUnitCost');
+                if (obj.column.itemId === 'colReceived')
+                    dblReceived = newValue;
+                else if (obj.column.itemId === 'colUnitCost')
+                    dblUnitCost = newValue;
+                var rowTotal = dblReceived * dblUnitCost;
+                calculatedTotal += rowTotal;
+            })
+            txtCalculatedAmount.setValue(calculatedTotal);
+            var difference = calculatedTotal - (txtInvoiceAmount.getValue());
+            txtDifference.setValue(difference);
         }
     },
 
@@ -288,6 +408,21 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#cboItemPackType": {
                 select: this.onReceiptItemSelect
+            },
+            "#cboCalculationBasis": {
+                change: this.onCalculationBasisChange
+            },
+            "#txtUnitsWeightMiles": {
+                change: this.onFreightCalculationChange
+            },
+            "#txtFreightRate": {
+                change: this.onFreightCalculationChange
+            },
+            "#txtFuelSurcharge": {
+                change: this.onFreightCalculationChange
+            },
+            "#txtInvoiceAmount": {
+                change: this.onCalculateTotalAmount
             }
         })
     }

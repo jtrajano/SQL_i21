@@ -135,7 +135,7 @@ namespace iRely.Invetory.WebAPI.Controllers
             {
                 if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItemAccount'"))
                 {
-                    errMessage = "Account Description must be unique.";
+                    errMessage = "Account Category must be unique.";
                 }
             }
 
@@ -166,7 +166,7 @@ namespace iRely.Invetory.WebAPI.Controllers
             {
                 if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItemAccount'"))
                 {
-                    errMessage = "Account Description must be unique.";
+                    errMessage = "Account Category must be unique.";
                 }
             }
 

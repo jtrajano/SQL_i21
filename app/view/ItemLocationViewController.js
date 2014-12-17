@@ -38,10 +38,6 @@ Ext.define('Inventory.view.ItemLocationViewController', {
             txtDescription: '{current.strDescription}',
             txtRow: '{current.strRow}',
             txtBin: '{current.strBin}',
-            cboDefaultUom: {
-                value: '{current.intDefaultUOMId}',
-                store: '{defaultUOM}'
-            },
             cboIssueUom: {
                 value: '{current.intIssueUOMId}',
                 store: '{issueUOM}'
@@ -142,10 +138,8 @@ Ext.define('Inventory.view.ItemLocationViewController', {
         });
 
         var filter = [{ dataIndex: 'intItemId', value: options.itemId, condition: 'eq' }];
-        var cboDefaultUom = win.down('#cboDefaultUom');
         var cboIssueUom = win.down('#cboIssueUom');
         var cboReceiveUom = win.down('#cboReceiveUom');
-        cboDefaultUom.defaultFilters = filter;
         cboIssueUom.defaultFilters = filter;
         cboReceiveUom.defaultFilters = filter;
 

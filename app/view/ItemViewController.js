@@ -76,10 +76,23 @@ Ext.define('Inventory.view.ItemViewController', {
                         store: '{uomUnitMeasure}'
                     }
                 },
-                colDetailUnitQty: 'dblUnitQty',
-                colDetailSellQty: 'dblSellQty',
-                colDetailWeight: 'dblWeight',
+                colDetailUnitQty: {
+                    dataIndex: 'dblUnitQty'
+                },
+                colDetailSellQty: {
+                    dataIndex: 'dblSellQty'
+                },
+                colDetailWeight: {
+                    dataIndex: 'dblWeight'
+                },
                 colDetailDescription: 'strDescription',
+
+                colStockUnit: 'ysnStockUnit',
+                colAllowSale: 'ysnAllowSale',
+                colAllowPurchase: 'ysnAllowPurchase',
+                colConvertToStock: 'dblConvertToStock',
+                colConvertFromStock: 'dblConvertFromStock',
+
                 colDetailLength: 'dblLength',
                 colDetailWidth: 'dblWidth',
                 colDetailHeight: 'dblHeight',
@@ -99,8 +112,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 colLocationPOSDescription: 'strDescription',
                 colLocationCategory: 'strCategory',
                 colLocationVendor: 'strVendorId',
-                colLocationCostingMethod: 'intCostingMethod',
-                colLocationUOM: 'strUnitMeasure'
+                colLocationCostingMethod: 'intCostingMethod'
             },
 
             //--------------//
@@ -404,7 +416,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 colPricingLevelUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
-                        store: '{pricingLevelUOM}'
+                        store: '{pricingLevelUOM}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{current.intItemId}'
+                        }]
                     }
                 },
                 colPricingLevelUnits: 'dblUnit',
@@ -446,7 +462,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 colSpecialPricingUnit: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
-                        store: '{specialPricingUOM}'
+                        store: '{specialPricingUOM}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{current.intItemId}'
+                        }]
                     }
                 },
                 colSpecialPricingQty: 'dblUnit',
@@ -552,7 +572,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 colBundleItem: {
                     dataIndex: 'strItemNo',
                     editor: {
-                        store: '{bundleItem}'
+                        store: '{bundleItem}',
+                        defaultFilters: [{
+                            column: 'strType',
+                            value: 'Inventory Item'
+                        }]
                     }
                 },
                 colBundleQuantity: 'dblQuantity',
@@ -920,89 +944,168 @@ Ext.define('Inventory.view.ItemViewController', {
 
     onItemTabChange: function(tabPanel, newCard, oldCard, eOpts) {
         switch(newCard.itemId){
-            case 'pgeSetup':
-                var pgeLocation = tabPanel.down('#pgeLocation');
-                var grdLocationStore = pgeLocation.down('#grdLocationStore');
-                grdLocationStore.store.load();
+            case 'pgeDetails':
+                var pgeDetails = tabPanel.down('#pgeDetails');
+                var grdUnitOfMeasure = pgeDetails.down('#grdUnitOfMeasure');
+                if (grdUnitOfMeasure.store.complete === true)
+                    grdUnitOfMeasure.getView().refresh();
+                else
+                    grdUnitOfMeasure.store.load();
                 break;
 
+            case 'pgeSetup':
+                var tabSetup = tabPanel.down('#tabSetup');
+                this.onItemTabChange(tabSetup, tabSetup.activeTab);
 
             case 'pgeLocation':
                 var pgeLocation = tabPanel.down('#pgeLocation');
                 var grdLocationStore = pgeLocation.down('#grdLocationStore');
                 grdLocationStore.store.load();
                 break;
+
             case 'pgeGLAccounts':
                 var pgeGLAccounts = tabPanel.down('#pgeGLAccounts');
                 var grdGlAccounts = pgeGLAccounts.down('#grdGlAccounts');
-                grdGlAccounts.store.load();
+                if (grdGlAccounts.store.complete === true)
+                    grdGlAccounts.getView().refresh();
+                else
+                    grdGlAccounts.store.load();
                 break;
+
             case 'pgePOS':
                 var pgePOS = tabPanel.down('#pgePOS');
                 var grdCategory = pgePOS.down('#grdCategory');
-                grdCategory.store.load();
+                if (grdCategory.store.complete === true)
+                    grdCategory.getView().refresh();
+                else
+                    grdCategory.store.load();
+
                 var grdServiceLevelAgreement = pgePOS.down('#grdServiceLevelAgreement');
-                grdServiceLevelAgreement.store.load();
+                if (grdServiceLevelAgreement.store.complete === true)
+                    grdServiceLevelAgreement.getView().refresh();
+                else
+                    grdServiceLevelAgreement.store.load();
                 break;
+
             case 'pgeUPC':
                 var pgeUPC = tabPanel.down('#pgeUPC');
                 var grdUPC = pgeUPC.down('#grdUPC');
-                grdUPC.store.load();
+                if (grdUPC.store.complete === true)
+                    grdUPC.getView().refresh();
+                else
+                    grdUPC.store.load();
                 break;
+
             case 'pgeXref':
                 var pgeXref = tabPanel.down('#pgeXref');
                 var grdCustomerXref = pgeXref.down('#grdCustomerXref');
-                grdCustomerXref.store.load();
+                if (grdCustomerXref.store.complete === true)
+                    grdCustomerXref.getView().refresh();
+                else
+                    grdCustomerXref.store.load();
+
                 var grdVendorXref = pgeXref.down('#grdVendorXref');
-                grdVendorXref.store.load();
+                if (grdVendorXref.store.complete === true)
+                    grdVendorXref.getView().refresh();
+                else
+                    grdVendorXref.store.load();
                 break;
+
             case 'pgeContract':
                 var pgeContract = tabPanel.down('#pgeContract');
                 var grdContractItem = pgeContract.down('#grdContractItem');
-                grdContractItem.store.load();
-                var grdDocumentAssociation = pgeContract.down('#grdDocumentAssociation');
-                grdDocumentAssociation.store.load();
+                if (grdContractItem.store.complete === true)
+                    grdContractItem.getView().refresh();
+                else
+                    grdContractItem.store.load();
+
                 var grdCertification = pgeContract.down('#grdCertification');
-                grdCertification.store.load();
+                if (grdCertification.store.complete === true)
+                    grdCertification.getView().refresh();
+                else
+                    grdCertification.store.load();
                 break;
 
 
             case 'pgePricing':
                 var pgePricing = tabPanel.down('#pgePricing');
                 var grdPricing = pgePricing.down('#grdPricing');
-                grdPricing.store.load();
+                if (grdPricing.store.complete === true)
+                    grdPricing.getView().refresh();
+                else
+                    grdPricing.store.load();
+
+                var grdPricingLevel = pgePricing.down('#grdPricingLevel');
+                if (grdPricingLevel.store.complete === true)
+                    grdPricingLevel.getView().refresh();
+                else
+                    grdPricingLevel.store.load();
+
+                var grdSpecialPricing = pgePricing.down('#grdSpecialPricing');
+                if (grdSpecialPricing.store.complete === true)
+                    grdSpecialPricing.getView().refresh();
+                else
+                    grdSpecialPricing.store.load();
                 break;
+
             case 'pgeStock':
                 var pgeStock = tabPanel.down('#pgeStock');
                 var grdStock = pgeStock.down('#grdStock');
-                grdStock.store.load();
+                if (grdStock.store.complete === true)
+                    grdStock.getView().refresh();
+                else
+                    grdStock.store.load();
                 break;
+
             case 'pgeAssembly':
                 var pgeAssembly = tabPanel.down('#pgeAssembly');
                 var grdAssembly = pgeAssembly.down('#grdAssembly');
-                grdAssembly.store.load();
+                if (grdAssembly.store.complete === true)
+                    grdAssembly.getView().refresh();
+                else
+                    grdAssembly.store.load();
                 break;
+
             case 'pgeBundle':
                 var pgeBundle = tabPanel.down('#pgeBundle');
                 var grdBundle = pgeBundle.down('#grdBundle');
-                grdBundle.store.load();
+                if (grdBundle.store.complete === true)
+                    grdBundle.getView().refresh();
+                else
+                    grdBundle.store.load();
                 break;
+
             case 'pgeKit':
                 var pgeKit = tabPanel.down('#pgeKit');
                 var grdKit = pgeKit.down('#grdKit');
-                grdKit.store.load();
-                var grdKitDetails = pgeKit.down('#grdKitDetails');
-                grdKitDetails.store.load();
+                if (grdKit.store.complete === true)
+                    grdKit.getView().refresh();
+                else
+                    grdKit.store.load();
                 break;
+
             case 'pgeFactory':
                 var pgeFactory = tabPanel.down('#pgeFactory');
                 var grdFactory = pgeFactory.down('#grdFactory');
-                grdFactory.store.load();
+                if (grdFactory.store.complete === true)
+                    grdFactory.getView().refresh();
+                else
+                    grdFactory.store.load();
+
+                var grdOwner = pgeFactory.down('#grdOwner');
+                if (grdOwner.store.complete === true)
+                    grdOwner.getView().refresh();
+                else
+                    grdOwner.store.load();
                 break;
+
             case 'pgeNotes':
                 var pgeNotes = tabPanel.down('#pgeNotes');
                 var grdNotes = pgeNotes.down('#grdNotes');
-                grdNotes.store.load();
+                if (grdNotes.store.complete === true)
+                    grdNotes.getView().refresh();
+                else
+                    grdNotes.store.load();
                 break;
         }
     },
@@ -1206,6 +1309,66 @@ Ext.define('Inventory.view.ItemViewController', {
         if (combo.column.itemId === 'colDetailUnitMeasure')
         {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
+            current.set('intDecimalDisplay', records[0].get('intDecimalDisplay'));
+            current.set('intDecimalCalculation', records[0].get('intDecimalCalculation'));
+
+//            var displayDecimal = records[0].get('intDecimalDisplay');
+            var calculationDecimal = records[0].get('intDecimalCalculation');
+
+            var colConvertToStock = grid.columns[8];
+            if (colConvertToStock.getEditor()) {
+                colConvertToStock.format = '0.00';
+                colConvertToStock.getEditor().decimalPrecision = i21.ModuleMgr.Inventory.createNumberFormat(calculationDecimal);
+            }
+            var colConvertFromStock = grid.columns[9];
+            if (colConvertFromStock.getEditor()) {
+                colConvertFromStock.format = '0.00';
+                colConvertFromStock.getEditor().decimalPrecision = i21.ModuleMgr.Inventory.createNumberFormat(calculationDecimal);
+            }
+
+        }
+    },
+
+    onUOMBeforeCheckChange: function (obj, rowIndex, checked, eOpts) {
+        if (obj.dataIndex === 'ysnAllowPurchase' || obj.dataIndex === 'ysnAllowSale'){
+            var grid = obj.up('grid');
+            var selModel = grid.getSelectionModel();
+
+            if (selModel.hasSelection()){
+                var current = selModel.getSelection()[0];
+                if (current.data.ysnStockUnit !== true){
+                    return false;
+                }
+            }
+            else {
+                return false;
+            }
+        }
+    },
+
+    onUOMStockUnitCheckChange: function (obj, rowIndex, checked, eOpts) {
+        if (obj.dataIndex === 'ysnStockUnit'){
+            var grid = obj.up('grid');
+            var selModel = grid.getSelectionModel();
+
+            var current = selModel.getSelection()[0];
+
+            if (checked === true){
+                var uoms = grid.store.data.items;
+                uoms.forEach(function(uom){
+                    if (uom !== current && uom.dummy !== true){
+                        uom.set('ysnStockUnit', false);
+                        uom.set('ysnAllowPurchase', false);
+                        uom.set('ysnAllowSale', false);
+                    }
+                });
+            }
+            else {
+                if (current){
+                    current.set('ysnAllowPurchase', false);
+                    current.set('ysnAllowSale', false);
+                }
+            }
         }
     },
 
@@ -1227,7 +1390,15 @@ Ext.define('Inventory.view.ItemViewController', {
     onAddLocationClick: function(button, e, eOpts) {
         var win = button.up('window');
         var me = win.controller;
-        me.openItemLocationScreen('new', win);
+        var vm = win.getViewModel();
+        if (vm.data.current.phantom === true) {
+            win.context.data.saveRecord({ successFn: function(batch, eOpts){
+                me.openItemLocationScreen('new', win);
+            } });
+        }
+        else {
+            me.openItemLocationScreen('new', win);
+        }
     },
 
     onEditLocationClick: function(button, e, eOpts) {
@@ -1260,7 +1431,13 @@ Ext.define('Inventory.view.ItemViewController', {
         var me = eOpts.window.getController();
         var win = eOpts.window;
         var grdLocation = win.down('#grdLocationStore');
+        var vm = win.getViewModel();
+        var itemId = vm.data.current.get('intItemId');
+        var filterItem = grdLocation.store.filters.items[0];
 
+        filterItem.setValue(itemId);
+        filterItem.config.value = itemId;
+        filterItem.initialConfig.value = itemId;
         grdLocation.store.load();
     },
 
@@ -1494,7 +1671,13 @@ Ext.define('Inventory.view.ItemViewController', {
         var me = eOpts.window.getController();
         var win = eOpts.window;
         var grdPricing = win.down('#grdPricing');
+        var vm = win.getViewModel();
+        var itemId = vm.data.current.get('intItemId');
+        var filterItem = grdPricing.store.filters.items[0];
 
+        filterItem.setValue(itemId);
+        filterItem.config.value = itemId;
+        filterItem.initialConfig.value = itemId;
         grdPricing.store.load();
     },
 
@@ -1785,6 +1968,15 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#tabSetup": {
                 tabchange: this.onItemTabChange
+            },
+            "#colStockUnit": {
+                beforecheckchange: this.onUOMStockUnitCheckChange
+            },
+            "#colAllowSale": {
+                beforecheckchange: this.onUOMBeforeCheckChange
+            },
+            "#colAllowPurchase": {
+                beforecheckchange: this.onUOMBeforeCheckChange
             }
         });
     }

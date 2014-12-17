@@ -23,10 +23,9 @@ Ext.define('Inventory.view.InventoryUOM', {
         'Ext.button.Button',
         'Ext.toolbar.Separator',
         'Ext.form.field.ComboBox',
-        'Ext.form.field.Checkbox',
+        'Ext.form.field.Number',
         'Ext.grid.Panel',
         'Ext.grid.column.Number',
-        'Ext.form.field.Number',
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
         'Ext.grid.plugin.CellEditing',
@@ -36,7 +35,7 @@ Ext.define('Inventory.view.InventoryUOM', {
     height: 542,
     hidden: false,
     minHeight: 500,
-    width: 434,
+    width: 508,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
@@ -155,32 +154,66 @@ Ext.define('Inventory.view.InventoryUOM', {
                                 fieldLabel: 'Unit Measure'
                             },
                             {
-                                xtype: 'textfield',
-                                itemId: 'txtSymbol',
-                                fieldLabel: 'Symbol'
-                            },
-                            {
                                 xtype: 'container',
-                                margin: '0 0 10 0',
                                 layout: {
                                     type: 'hbox',
                                     align: 'stretch'
                                 },
                                 items: [
                                     {
-                                        xtype: 'combobox',
+                                        xtype: 'container',
                                         flex: 1,
-                                        itemId: 'cboUnitType',
-                                        fieldLabel: 'Unit Type',
-                                        displayField: 'strDescription',
-                                        valueField: 'strDescription'
+                                        layout: {
+                                            type: 'vbox',
+                                            align: 'stretch'
+                                        },
+                                        items: [
+                                            {
+                                                xtype: 'textfield',
+                                                flex: 1,
+                                                itemId: 'txtSymbol',
+                                                fieldLabel: 'Symbol'
+                                            },
+                                            {
+                                                xtype: 'combobox',
+                                                flex: 1,
+                                                itemId: 'cboUnitType',
+                                                fieldLabel: 'Unit Type',
+                                                displayField: 'strDescription',
+                                                valueField: 'strDescription'
+                                            }
+                                        ]
                                     },
                                     {
-                                        xtype: 'checkboxfield',
-                                        itemId: 'chkDefault',
-                                        margin: '0 0 0 5',
-                                        fieldLabel: 'Default',
-                                        labelWidth: 50
+                                        xtype: 'container',
+                                        flex: 1,
+                                        layout: {
+                                            type: 'vbox',
+                                            align: 'stretch',
+                                            padding: '0 0 0 5'
+                                        },
+                                        items: [
+                                            {
+                                                xtype: 'numberfield',
+                                                flex: 1,
+                                                itemId: 'txtDecimalDisplay',
+                                                fieldLabel: 'Decimal Places To Display',
+                                                labelWidth: 165,
+                                                allowDecimals: false,
+                                                maxValue: 4,
+                                                minValue: 1
+                                            },
+                                            {
+                                                xtype: 'numberfield',
+                                                flex: 1,
+                                                itemId: 'txtDecimalCalculation',
+                                                fieldLabel: 'Decimal Places for Calculation',
+                                                labelWidth: 165,
+                                                allowDecimals: false,
+                                                maxValue: 4,
+                                                minValue: 1
+                                            }
+                                        ]
                                     }
                                 ]
                             },
@@ -258,7 +291,8 @@ Ext.define('Inventory.view.InventoryUOM', {
                                     {
                                         xtype: 'numbercolumn',
                                         itemId: 'colConversionToStockUOM',
-                                        width: 98,
+                                        minWidth: 110,
+                                        width: 110,
                                         dataIndex: 'string',
                                         text: 'Conversion to',
                                         editor: {
@@ -269,7 +303,8 @@ Ext.define('Inventory.view.InventoryUOM', {
                                     {
                                         xtype: 'numbercolumn',
                                         itemId: 'colConversionFromStockUOM',
-                                        width: 98,
+                                        minWidth: 110,
+                                        width: 110,
                                         dataIndex: 'string',
                                         text: 'Conversion from',
                                         editor: {

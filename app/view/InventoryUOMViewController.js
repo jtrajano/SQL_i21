@@ -28,8 +28,7 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
                 {dataIndex: 'intUnitMeasureId',text: "UOM Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
                 {dataIndex: 'strUnitMeasure', text: 'UOM Name', flex: 2,  dataType: 'string'},
                 {dataIndex: 'strSymbol', text: 'Symbol', flex: 1,  dataType: 'string'},
-                {dataIndex: 'strUnitType', text: 'Unit Type', flex: 2,  dataType: 'string'},
-                {dataIndex: 'ysnDefault', text: 'Default', flex: 1,  dataType: 'boolean', xtype: 'checkcolumn'}
+                {dataIndex: 'strUnitType', text: 'Unit Type', flex: 2,  dataType: 'string'}
             ]
         },
         binding: {
@@ -39,7 +38,8 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
                 value: '{current.strUnitType}',
                 store: '{unitTypes}'
             },
-            chkDefault: '{current.ysnDefault}',
+            txtDecimalDisplay: '{current.intDecimalDisplay}',
+            txtDecimalCalculation: '{current.intDecimalCalculation}',
 
             grdConversion: {
                 colConversionStockUOM: {
@@ -185,10 +185,30 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
         }
     },
 
+    onDecimalCalculationChange: function(obj, newValue, oldValue, eOpts) {
+        var win = obj.up('window');
+        var grdConversion = win.down('#grdConversion');
+        var colConversionToStockUOM = grdConversion.columns[1];
+        var colConversionFromStockUOM = grdConversion.columns[2];
+
+        colConversionToStockUOM.format = i21.ModuleMgr.Inventory.createNumberFormat(newValue);
+        colConversionFromStockUOM.format = i21.ModuleMgr.Inventory.createNumberFormat(newValue);
+
+        if (colConversionToStockUOM.getEditor()){
+            colConversionToStockUOM.getEditor().decimalPrecision = newValue;
+        }
+        if (colConversionFromStockUOM.getEditor()){
+            colConversionFromStockUOM.getEditor().decimalPrecision = newValue;
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboStockUom": {
                 select: this.onUOMSelect
+            },
+            "#txtDecimalCalculation": {
+                change: this.onDecimalCalculationChange
             }
         });
     }

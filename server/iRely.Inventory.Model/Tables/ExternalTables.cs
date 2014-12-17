@@ -267,4 +267,19 @@ namespace iRely.Inventory.Model
         public ICollection<tblICInventoryReceipt> tblICInventoryReceipts { get; set; }
     }
 
+    public class tblMFQAProperty : BaseEntity
+    {
+        public int intQAPropertyId { get; set; }
+        public string strPropertyName { get; set; }
+        public string strDescription { get; set; }
+        public string strAnalysisType { get; set; }
+        public string strDataType { get; set; }
+        public string strListName { get; set; }
+        public int intDecimalPlaces { get; set; }
+        public string strMandatory { get; set; }
+        public bool ysnActive { get; set; }
+
+        public ICollection<tblICInventoryReceiptInspection> tblICInventoryReceiptInspections { get; set; }
+    }
+
 }

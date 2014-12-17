@@ -48,6 +48,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strVendorRefNo).HasColumnName("strVendorRefNo");
             this.Property(t => t.strVessel).HasColumnName("strVessel");
             this.Property(t => t.ysnInvoicePaid).HasColumnName("ysnInvoicePaid");
+            this.Property(t => t.ysnPrepaid).HasColumnName("ysnPrepaid");
 
             this.HasOptional(p => p.vyuAPVendor)
                 .WithMany(p => p.tblICInventoryReceipts)
@@ -160,6 +161,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intQAPropertyId).HasColumnName("intQAPropertyId");
             this.Property(t => t.intSort).HasColumnName("intSort");
             this.Property(t => t.ysnSelected).HasColumnName("ysnSelected");
+
+            this.HasOptional(t => t.tblMFQAProperty)
+                .WithMany(t => t.tblICInventoryReceiptInspections)
+                .HasForeignKey(t => t.intQAPropertyId);
         }
     }
 }

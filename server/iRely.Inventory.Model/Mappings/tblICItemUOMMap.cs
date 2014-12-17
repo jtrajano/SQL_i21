@@ -20,6 +20,13 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblVolume).HasColumnName("dblVolume");
             this.Property(t => t.dblWeight).HasColumnName("dblWeight");
             this.Property(t => t.dblWidth).HasColumnName("dblWidth");
+            
+            this.Property(t => t.ysnStockUnit).HasColumnName("ysnStockUnit");
+            this.Property(t => t.ysnAllowPurchase).HasColumnName("ysnAllowPurchase");
+            this.Property(t => t.ysnAllowSale).HasColumnName("ysnAllowSale");
+            this.Property(t => t.dblConvertToStock).HasColumnName("dblConvertToStock");
+            this.Property(t => t.dblConvertFromStock).HasColumnName("dblConvertFromStock");
+
             this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
             this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");

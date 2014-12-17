@@ -19,7 +19,6 @@ Ext.define('Inventory.model.ItemContract', {
                 inverse: {
                     role: 'tblICItemContracts',
                     storeConfig: {
-                        complete: true,
                         remoteFilter: true,
                         proxy: {
                             type: 'rest',
@@ -34,7 +33,7 @@ Ext.define('Inventory.model.ItemContract', {
                         },
                         sortOnLoad: true,
                         sorters: {
-                            direction: 'ASC',
+                            direction: 'DESC',
                             property: 'intSort'
                         }
                     }

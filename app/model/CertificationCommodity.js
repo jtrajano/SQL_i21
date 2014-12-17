@@ -21,7 +21,7 @@ Ext.define('Inventory.model.CertificationCommodity', {
                         complete: true,
                         sortOnLoad: true,
                         sorters: {
-                            direction: 'ASC',
+                            direction: 'DESC',
                             property: 'intSort'
                         }
                     }

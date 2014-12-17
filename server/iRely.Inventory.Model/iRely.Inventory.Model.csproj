@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="InventoryEntities.cs" />
     <Compile Include="InventoryEntities.Views.cs" />
+    <Compile Include="Mappings\tblICEquipmentLengthMap.cs" />
     <Compile Include="Mappings\tblICItemFactoryMap.cs" />
     <Compile Include="Mappings\tblICItemOwnerMap.cs" />
     <Compile Include="Mappings\tblICContainerMap.cs" />
@@ -122,6 +123,8 @@
     <Compile Include="Mappings\tblICUnitMeasureMap.cs" />
     <Compile Include="Mappings\tblICStorageUnitTypeMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Stored Procedures\Posting\PostInventoryReceipt.cs" />
+    <Compile Include="Tables\tblICEquipmentLength.cs" />
     <Compile Include="Tables\tblICItemFactory.cs" />
     <Compile Include="Tables\tblICItemOwner.cs" />
     <Compile Include="Tables\tblICSku.cs" />

@@ -43,5 +43,9 @@ Ext.define('i21.controller.Inventory', {
             url: '../Inventory/api/Item/GetEmpty',
             method: 'GET'
         });
+    },
+
+    createNumberFormat: function (precision) {
+        return "0." + Ext.String.repeat('0', precision);
     }
 });

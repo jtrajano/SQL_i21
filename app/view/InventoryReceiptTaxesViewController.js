@@ -19,10 +19,13 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
 
     setupContext: function () {
         "use strict";
+
+        var me = this;
         var win = this.getView();
         win.context = Ext.create('iRely.mvvm.Engine', {
             window: win,
-            store: Ext.create('Inventory.store.Brand'),
+            createRecord : me.createRecord,
+            store: Ext.create('Inventory.store.ReceiptItemTax'),
             singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
                 grid: win.down('grid'),
                 title: 'Inventory Receipt Taxes',
@@ -84,12 +87,28 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
         return win.context;
     },
 
-    show: function () {
+    show: function (config) {
         "use strict";
         var me = this;
         me.getView().show();
         var context = me.setupContext();
-        context.data.load();
+        if (config.id) {
+            me.intInventoryReceiptItemId = config.id;
+            config.filters = [{
+                column: 'intInventoryReceiptItemId',
+                value: config.id
+            }];
+        }
+        context.data.load({
+            filters: config.filters
+        });
+    },
+
+    createRecord: function(config, action) {
+        var me = this;
+        var record = Ext.create('Inventory.model.ReceiptItemTax');
+        record.set('intInventoryReceiptItemId', me.intInventoryReceiptItemId);
+        action(record);
     }
 
 //    onCboManufacturerSelect: function(combo, records, eOpts) {

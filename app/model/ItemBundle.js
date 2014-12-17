@@ -18,7 +18,6 @@ Ext.define('Inventory.model.ItemBundle', {
                 inverse: {
                     role: 'tblICItemBundles',
                     storeConfig: {
-                        complete: true,
                         remoteFilter: true,
                         proxy: {
                             type: 'rest',
@@ -33,7 +32,7 @@ Ext.define('Inventory.model.ItemBundle', {
                         },
                         sortOnLoad: true,
                         sorters: {
-                            direction: 'ASC',
+                            direction: 'DESC',
                             property: 'intSort'
                         }
                     }

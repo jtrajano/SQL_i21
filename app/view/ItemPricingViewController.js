@@ -93,6 +93,7 @@ Ext.define('Inventory.view.ItemPricingViewController', {
         var me = this;
         var record = Ext.create('Inventory.model.ItemPricing');
         record.set('intItemId', me.intItemId);
+        record.set('ysnActive', true);
         if (app.DefaultLocation > 0)
             record.set('intLocationId', app.DefaultLocation);
         action(record);

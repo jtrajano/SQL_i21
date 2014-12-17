@@ -43,6 +43,7 @@ namespace iRely.Inventory.Model
         public decimal? dblFreightRate { get; set; }
         public decimal? dblFuelSurcharge { get; set; }
         public decimal? dblInvoiceAmount { get; set; }
+        public bool ysnPrepaid { get; set; }
         public bool ysnInvoicePaid { get; set; }
         public int? intCheckNo { get; set; }
         public DateTime? dteCheckDate { get; set; }
@@ -161,6 +162,25 @@ namespace iRely.Inventory.Model
                 _itemDescription = value;
             }
         }
+        private string _lotTracking;
+        [NotMapped]
+        public string strLotTracking
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_lotTracking))
+                    if (tblICItem != null)
+                        return tblICItem.strLotTracking;
+                    else
+                        return null;
+                else
+                    return _lotTracking;
+            }
+            set
+            {
+                _lotTracking = value;
+            }
+        }
         private string _uom;
         [NotMapped]
         public string strUnitMeasure
@@ -253,10 +273,50 @@ namespace iRely.Inventory.Model
     {
         public int intInventoryReceiptInspectionId { get; set; }
         public int intInventoryReceiptId { get; set; }
-        public int intQAPropertyId { get; set; }
+        public int? intQAPropertyId { get; set; }
         public bool ysnSelected { get; set; }
         public int intSort { get; set; }
 
+        private string _propertyName;
+        [NotMapped]
+        public string strPropertyName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_propertyName))
+                    if (tblMFQAProperty != null)
+                        return tblMFQAProperty.strPropertyName;
+                    else
+                        return null;
+                else
+                    return _propertyName;
+            }
+            set
+            {
+                _propertyName = value;
+            }
+        }
+        private string _description;
+        [NotMapped]
+        public string strDescription
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_description))
+                    if (tblMFQAProperty != null)
+                        return tblMFQAProperty.strDescription;
+                    else
+                        return null;
+                else
+                    return _description;
+            }
+            set
+            {
+                _description = value;
+            }
+        }
+
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
+        public tblMFQAProperty tblMFQAProperty { get; set; }
     }
 }
