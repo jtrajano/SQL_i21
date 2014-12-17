@@ -126,6 +126,10 @@ Ext.define('Inventory.model.Item', {
     ],
 
     validators: [
-        {type: 'presence', field: 'strItemNo'}
+        {type: 'presence', field: 'strItemNo'},
+        {type: 'presence', field: 'strType'},
+        {type: 'presence', field: 'strStatus'},
+        {type: 'presence', field: 'strInventoryTracking'},
+        {type: 'presence', field: 'strLotTracking'}
     ]
 });

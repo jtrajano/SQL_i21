@@ -481,7 +481,8 @@ Ext.define('Inventory.view.Item', {
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             fieldStyle: 'text-align:right',
-                                                            hideTrigger: true
+                                                            hideTrigger: true,
+                                                            minValue: 1
                                                         }
                                                     },
                                                     {

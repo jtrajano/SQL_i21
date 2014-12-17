@@ -910,6 +910,8 @@ Ext.define('Inventory.view.ItemViewController', {
         var me = this;
         var record = Ext.create('Inventory.model.Item');
         record.set('strStatus', 'Active');
+        record.set('strType', 'Inventory Item');
+        record.set('strLotTracking', 'No');
         action(record);
     },
 
