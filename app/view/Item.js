@@ -524,6 +524,17 @@ Ext.define('Inventory.view.Item', {
                                                         }
                                                     },
                                                     {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colDetailUpcCode',
+                                                        minWidth: 150,
+                                                        dataIndex: 'string',
+                                                        text: 'UPC Code',
+                                                        flex: 2,
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
+                                                    },
+                                                    {
                                                         xtype: 'checkcolumn',
                                                         itemId: 'colStockUnit',
                                                         text: 'Stock Unit'

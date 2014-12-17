@@ -45,6 +45,7 @@ Ext.define('Inventory.model.ItemUOM', {
         { name: 'dblSellQty', type: 'float'},
         { name: 'dblWeight', type: 'float'},
         { name: 'strDescription', type: 'string'},
+        { name: 'strUpcCode', type: 'string'},
         { name: 'ysnStockUnit', type: 'boolean'},
         { name: 'ysnAllowPurchase', type: 'boolean'},
         { name: 'ysnAllowSale', type: 'boolean'},

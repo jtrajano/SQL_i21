@@ -86,7 +86,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     dataIndex: 'dblWeight'
                 },
                 colDetailDescription: 'strDescription',
-
+                colDetailUpcCode: 'strUpcCode',
                 colStockUnit: 'ysnStockUnit',
                 colAllowSale: 'ysnAllowSale',
                 colAllowPurchase: 'ysnAllowPurchase',
