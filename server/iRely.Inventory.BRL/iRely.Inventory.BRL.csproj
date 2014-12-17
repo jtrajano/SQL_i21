@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Activities\Receipts\Receipt_Posting.cs" />
+    <Compile Include="Common\QAProperty.cs" />
     <Compile Include="Maintenance\Category.cs" />
     <Compile Include="Maintenance\Commodity.cs" />
     <Compile Include="Maintenance\Brand.cs" />
@@ -71,8 +72,8 @@
     <Compile Include="Maintenance\Catalog.cs" />
     <Compile Include="Maintenance\CommodityUnitMeasure.cs" />
     <Compile Include="Common\Common.cs" />
-    <Compile Include="Maintenance\ContainerType.cs" />
-    <Compile Include="Maintenance\EquipmentLength.cs" />
+    <Compile Include="Common\ContainerType.cs" />
+    <Compile Include="Common\EquipmentLength.cs" />
     <Compile Include="Activities\Receipts\ReceiptItemTax.cs" />
     <Compile Include="Maintenance\ItemContract.cs" />
     <Compile Include="Maintenance\ItemCertification.cs" />
@@ -86,23 +87,23 @@
     <Compile Include="Maintenance\ItemKit.cs" />
     <Compile Include="Maintenance\ItemBundle.cs" />
     <Compile Include="Maintenance\ItemAssembly.cs" />
-    <Compile Include="Maintenance\Measurement.cs" />
-    <Compile Include="Maintenance\ReadingPoint.cs" />
-    <Compile Include="Maintenance\Restriction.cs" />
-    <Compile Include="Maintenance\Sku.cs" />
-    <Compile Include="Maintenance\Container.cs" />
+    <Compile Include="Common\Measurement.cs" />
+    <Compile Include="Common\ReadingPoint.cs" />
+    <Compile Include="Common\Restriction.cs" />
+    <Compile Include="Common\Sku.cs" />
+    <Compile Include="Common\Container.cs" />
     <Compile Include="Maintenance\StorageLocation.cs" />
     <Compile Include="Maintenance\ItemUnitMeasure.cs" />
     <Compile Include="Maintenance\StorageType.cs" />
-    <Compile Include="Maintenance\StoreTables.cs" />
+    <Compile Include="Common\StoreTables.cs" />
     <Compile Include="Maintenance\LotStatus.cs" />
     <Compile Include="Maintenance\LineOfBusiness.cs" />
-    <Compile Include="Maintenance\ManufacturingCell.cs" />
+    <Compile Include="Common\ManufacturingCell.cs" />
     <Compile Include="Maintenance\PackType.cs" />
     <Compile Include="Maintenance\ItemPricing.cs" />
     <Compile Include="Maintenance\ItemLocation.cs" />
     <Compile Include="Maintenance\CountGroup.cs" />
-    <Compile Include="Maintenance\MaterialNMFC.cs" />
+    <Compile Include="Common\MaterialNMFC.cs" />
     <Compile Include="Maintenance\FuelTaxClass.cs" />
     <Compile Include="Activities\Receipts\Receipt.cs" />
     <Compile Include="Maintenance\Document.cs" />

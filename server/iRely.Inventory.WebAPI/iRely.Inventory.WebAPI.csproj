@@ -136,6 +136,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\Common\QAPropertyController.cs" />
     <Compile Include="Controllers\Maintenance\BrandController.cs" />
     <Compile Include="Controllers\Maintenance\CatalogController.cs" />
     <Compile Include="Controllers\Maintenance\CategoryController.cs" />
@@ -144,8 +145,8 @@
     <Compile Include="Controllers\Maintenance\CommodityAttributeController.cs" />
     <Compile Include="Controllers\Maintenance\CommodityController.cs" />
     <Compile Include="Controllers\Maintenance\CommodityUnitMeasureController.cs" />
-    <Compile Include="Controllers\Maintenance\ContainerTypeController.cs" />
-    <Compile Include="Controllers\Maintenance\EquipmentLengthController.cs" />
+    <Compile Include="Controllers\Common\ContainerTypeController.cs" />
+    <Compile Include="Controllers\Common\EquipmentLengthController.cs" />
     <Compile Include="Controllers\Activities\Receipts\ReceiptItemTaxController.cs" />
     <Compile Include="Controllers\Maintenance\ItemStockController.cs" />
     <Compile Include="Controllers\Maintenance\ItemCertificationController.cs" />
@@ -159,11 +160,11 @@
     <Compile Include="Controllers\Maintenance\ItemKitController.cs" />
     <Compile Include="Controllers\Maintenance\ItemFactoryController.cs" />
     <Compile Include="Controllers\Maintenance\ItemAssemblyController.cs" />
-    <Compile Include="Controllers\Maintenance\MeasurementController.cs" />
-    <Compile Include="Controllers\Maintenance\ReadingPointController.cs" />
-    <Compile Include="Controllers\Maintenance\RestrictionController.cs" />
-    <Compile Include="Controllers\Maintenance\SkuController.cs" />
-    <Compile Include="Controllers\Maintenance\ContainerController.cs" />
+    <Compile Include="Controllers\Common\MeasurementController.cs" />
+    <Compile Include="Controllers\Common\ReadingPointController.cs" />
+    <Compile Include="Controllers\Common\RestrictionController.cs" />
+    <Compile Include="Controllers\Common\SkuController.cs" />
+    <Compile Include="Controllers\Common\ContainerController.cs" />
     <Compile Include="Controllers\Maintenance\CountGroupController.cs" />
     <Compile Include="Controllers\Maintenance\DocumentController.cs" />
     <Compile Include="Controllers\Maintenance\FuelTaxClassController.cs" />
@@ -174,8 +175,8 @@
     <Compile Include="Controllers\Maintenance\LineOfBusinessController.cs" />
     <Compile Include="Controllers\Maintenance\LotStatusController.cs" />
     <Compile Include="Controllers\Maintenance\ManufacturerController.cs" />
-    <Compile Include="Controllers\Maintenance\ManufacturingCellController.cs" />
-    <Compile Include="Controllers\Maintenance\MaterialNMFCController.cs" />
+    <Compile Include="Controllers\Common\ManufacturingCellController.cs" />
+    <Compile Include="Controllers\Common\MaterialNMFCController.cs" />
     <Compile Include="Controllers\Maintenance\PackTypeController.cs" />
     <Compile Include="Controllers\Activities\Receipts\ReceiptController.cs" />
     <Compile Include="Controllers\Maintenance\RIN\RinFeedStockUOMController.cs" />
@@ -185,14 +186,12 @@
     <Compile Include="Controllers\Maintenance\RIN\RinFuelTypeController.cs" />
     <Compile Include="Controllers\Maintenance\StorageLocationController.cs" />
     <Compile Include="Controllers\Maintenance\StorageTypeController.cs" />
-    <Compile Include="Controllers\Maintenance\StoreController.cs" />
+    <Compile Include="Controllers\Common\StoreController.cs" />
     <Compile Include="Controllers\Maintenance\TagController.cs" />
-    <Compile Include="Controllers\Maintenance\HomeController.cs" />
     <Compile Include="Controllers\Maintenance\ItemController.cs" />
     <Compile Include="Controllers\Maintenance\PatronageCategoryController.cs" />
     <Compile Include="Controllers\Maintenance\UnitMeasureController.cs" />
     <Compile Include="Controllers\Maintenance\UnitTypeController.cs" />
-    <Compile Include="Controllers\Maintenance\ValuesController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -300,7 +299,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Controllers\Common\" />
     <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
