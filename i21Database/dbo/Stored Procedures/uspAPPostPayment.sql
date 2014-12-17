@@ -233,7 +233,34 @@ BEGIN
 					ON B.intBillId = C.intBillId
 			WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData)
 			AND B.dblPayment <> 0 AND C.ysnPaid = 0 AND C.dblAmountDue < (B.dblPayment + B.dblDiscount)
+
+			INSERT INTO #tmpPayableInvalidData
+			SELECT 
+				'You cannot post with negative amount if payment method is not a Refund.',
+				'Payable',
+				A.strPaymentRecordNum,
+				@batchId,
+				A.intPaymentId
+			FROM tblAPPayment A
+			WHERE A.dblAmountPaid < 0 
+			AND (SELECT TOP 1 strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId) != 'Refund'
+			AND A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData)
 			
+			INSERT INTO #tmpPayableInvalidData
+			SELECT 
+				C.strBillId + ' belongs to other vendor.',
+				'Payable',
+				A.strPaymentRecordNum,
+				@batchId,
+				A.intPaymentId
+			FROM tblAPPayment A
+			INNER JOIN tblAPPaymentDetail B
+				ON A.intPaymentId = B.intPaymentId
+			INNER JOIN tblAPBill C
+				ON B.intBillId = C.intBillId
+			WHERE C.intVendorId <> A.intVendorId
+			AND A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData)
+
 		END
 
 	--UNPOSTING VALIDATIONS
@@ -367,8 +394,12 @@ BEGIN
 			,'Posted Payment'
 			,C.[strVendorId]
 			,A.[dtmDatePaid]
-			,[dblDebit]				= CASE WHEN @post = 1 THEN 0 ELSE A.dblAmountPaid END
-			,[dblCredit]			= CASE WHEN @post = 1 THEN A.dblAmountPaid ELSE 0 END
+			,[dblDebit]				= CASE WHEN @post = 1 AND A.dblAmountPaid >= 0 THEN 0 
+											ELSE --Apply refund if negative
+												CASE WHEN A.dblAmountPaid < 0 THEN A.dblAmountPaid * -1
+													ELSE A.dblAmountPaid END
+											END
+			,[dblCredit]			= CASE WHEN @post = 1 AND A.dblAmountPaid >= 0 THEN A.dblAmountPaid ELSE 0 END
 			,[dblDebitUnit]			= CASE WHEN @post = 1 THEN ISNULL(A.[dblAmountPaid], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0) ELSE 0 END
 			,[dblCreditUnit]		= CASE WHEN @post = 1 THEN ISNULL(A.[dblAmountPaid], 0) * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0) ELSE 0 END
 			,DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0)
@@ -472,14 +503,17 @@ BEGIN
 				,'Posted Payment - ' + (SELECT strBillId FROM tblAPBill WHERE intBillId = B.intBillId)
 				,D.[strVendorId]
 				,A.dtmDatePaid
-				,[dblDebit]				= CASE WHEN @post = 1 THEN SUM(CASE WHEN (B.dblAmountDue = B.dblPayment) --add discount only if fully paid
+				,[dblDebit]				= CASE WHEN @post = 1 AND A.dblAmountPaid >= 0 THEN SUM(CASE WHEN (B.dblAmountDue = B.dblPayment) --add discount only if fully paid
 												THEN B.dblPayment + B.dblDiscount
 												ELSE B.dblPayment END) 
-											ELSE 0 END
-				,[dblCredit]			= CASE WHEN @post = 1 THEN 0 
+											ELSE 0 END --Apply refund
+				,[dblCredit]			= CASE WHEN @post = 1 AND A.dblAmountPaid >= 0 THEN 0 
 											ELSE SUM(CASE WHEN (B.dblAmountDue = B.dblPayment) --add discount only if fully paid
-												THEN B.dblPayment + B.dblDiscount
-												ELSE B.dblPayment END)
+												THEN 
+													CASE WHEN A.dblAmountPaid < 0 THEN (B.dblPayment + B.dblDiscount) * -1 ELSE (B.dblPayment + B.dblDiscount) END
+												ELSE 
+													CASE WHEN A.dblAmountPaid < 0 THEN B.dblPayment * -1 ELSE B.dblPayment END
+												END)
 											END 
 				,[dblDebitUnit]			= CASE WHEN @post = 1 THEN SUM(CASE WHEN (B.dblAmountDue = B.dblPayment) --add discount only if fully paid
 												THEN B.dblPayment + B.dblDiscount
@@ -512,6 +546,7 @@ BEGIN
 		B.intBillId,
 		D.strVendorId,
 		A.dtmDatePaid,
+		A.dblAmountPaid,
 		B.intAccountId;
 
 --=====================================================================================================================================
@@ -683,7 +718,7 @@ END
 			SET tblGLDetail.ysnIsUnposted = 1
 		FROM tblAPPayment A
 			INNER JOIN tblGLDetail B
-				ON A.strPaymentRecordNum = B.strTransactionId
+				ON A.intPaymentId = B.intTransactionId
 		WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		-- Creating the temp table:
