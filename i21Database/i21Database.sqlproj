@@ -938,6 +938,7 @@
     <Build Include="dbo\Stored Procedures\uspICUnpostLIFO.sql" />
 	<Build Include="dbo\Views\vyuHDAgentDetail.sql" />
 	<Build Include="dbo\Stored Procedures\uspICPostInventoryReceipt.sql" />
+    <Build Include="dbo\Tables\tblICLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
