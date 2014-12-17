@@ -11,4 +11,9 @@
     CONSTRAINT [PK_tblGLSummary] PRIMARY KEY CLUSTERED ([intSummaryId] ASC),
     CONSTRAINT [FK_tblGLSummary_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 );
+GO
 
+CREATE NONCLUSTERED INDEX [IX_tblGLSummary_intAccountId_dtmDate_strCode]
+    ON [dbo].[tblGLSummary]([intAccountId] ASC, [dtmDate] ASC, [strCode] ASC)
+    INCLUDE (dblDebit, dblCredit, dblDebitUnit, dblCreditUnit);
+GO
