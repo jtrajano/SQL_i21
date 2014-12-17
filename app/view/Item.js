@@ -2167,6 +2167,10 @@ Ext.define('Inventory.view.Item', {
                                                         itemId: 'pgeUPC',
                                                         layout: 'fit',
                                                         title: 'UPC',
+                                                        tabConfig: {
+                                                            xtype: 'tab',
+                                                            hidden: true
+                                                        },
                                                         items: [
                                                             {
                                                                 xtype: 'advancefiltergrid',
