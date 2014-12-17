@@ -15,5 +15,5 @@
 
 Ext.define('Inventory.view.SampleTypeViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.sampletype'
+    alias: 'controller.icsampletype'
 });

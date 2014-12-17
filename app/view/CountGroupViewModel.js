@@ -15,5 +15,5 @@
 
 Ext.define('Inventory.view.CountGroupViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.countgroup'
+    alias: 'viewmodel.iccountgroup'
 });

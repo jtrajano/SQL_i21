@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.FuelType', {
     extend: 'Ext.window.Window',
-    alias: 'widget.fueltype',
+    alias: 'widget.icfueltype',
 
     requires: [
         'Inventory.view.StatusbarPaging1',

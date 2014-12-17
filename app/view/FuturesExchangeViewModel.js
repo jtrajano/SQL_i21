@@ -15,6 +15,6 @@
 
 Ext.define('Inventory.view.FuturesExchangeViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.futuresexchange'
+    alias: 'viewmodel.icfuturesexchange'
 
 });

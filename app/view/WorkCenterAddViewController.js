@@ -15,5 +15,5 @@
 
 Ext.define('Inventory.view.WorkCenterAddViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.workcenteradd'
+    alias: 'controller.icworkcenteradd'
 });

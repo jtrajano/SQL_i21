@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.InventoryReceiptTaxes', {
     extend: 'GlobalComponentEngine.view.GridTemplate',
-    alias: 'widget.inventoryreceipttaxes',
+    alias: 'widget.icinventoryreceipttaxes',
 
     requires: [
         'GlobalComponentEngine.view.GridTemplate',

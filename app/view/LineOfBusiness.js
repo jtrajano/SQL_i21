@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.LineOfBusiness', {
     extend: 'GlobalComponentEngine.view.GridTemplate',
-    alias: 'widget.lineofbusiness',
+    alias: 'widget.iclineofbusiness',
 
     requires: [
         'GlobalComponentEngine.view.GridTemplate',

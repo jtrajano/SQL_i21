@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.CategoryViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.category',
+    alias: 'viewmodel.iccategory',
 
     requires: [
         'Inventory.store.BufferedUnitMeasure',

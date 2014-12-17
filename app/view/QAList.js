@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.QAList', {
     extend: 'Ext.window.Window',
-    alias: 'widget.qalist',
+    alias: 'widget.icqalist',
 
     requires: [
         'Inventory.view.QAListViewModel',

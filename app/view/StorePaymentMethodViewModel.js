@@ -15,6 +15,6 @@
 
 Ext.define('Inventory.view.StorePaymentMethodViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.storepaymentmethod'
+    alias: 'viewmodel.icstorepaymentmethod'
 
 });

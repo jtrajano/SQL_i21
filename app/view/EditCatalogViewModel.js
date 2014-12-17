@@ -15,5 +15,5 @@
 
 Ext.define('Inventory.view.EditCatalogViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.editcatalog'
+    alias: 'viewmodel.iceditcatalog'
 });

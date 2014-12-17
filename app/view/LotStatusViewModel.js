@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.LotStatusViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.lotstatus',
+    alias: 'viewmodel.iclotstatus',
 
     stores: {
         primaryStatus: {

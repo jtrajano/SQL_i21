@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.FuelTank', {
     extend: 'Ext.window.Window',
-    alias: 'widget.fueltank',
+    alias: 'widget.icfueltank',
 
     requires: [
         'Inventory.view.Filter1',

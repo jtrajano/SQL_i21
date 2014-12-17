@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.StorePaymentMethod', {
     extend: 'Ext.window.Window',
-    alias: 'widget.storepaymentmethod',
+    alias: 'widget.icstorepaymentmethod',
 
     requires: [
         'Inventory.view.StatusbarPaging1',

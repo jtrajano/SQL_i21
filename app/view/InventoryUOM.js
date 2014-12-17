@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.InventoryUOM', {
     extend: 'Ext.window.Window',
-    alias: 'widget.inventoryuom',
+    alias: 'widget.icinventoryuom',
 
     requires: [
         'Inventory.view.StatusbarPaging1',

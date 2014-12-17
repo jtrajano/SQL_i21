@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.CertificationProgramViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.certificationprogram',
+    alias: 'controller.iccertificationprogram',
 
     config: {
         searchConfig: {

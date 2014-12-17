@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.PatronageCategoryViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.patronagecategory',
+    alias: 'controller.icpatronagecategory',
 
     setupContext: function () {
         "use strict";

@@ -15,6 +15,6 @@
 
 Ext.define('Inventory.view.QualityTemplateViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.qualitytemplate'
+    alias: 'viewmodel.icqualitytemplate'
 
 });

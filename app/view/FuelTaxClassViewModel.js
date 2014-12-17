@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.FuelTaxClassViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.fueltaxclass',
+    alias: 'viewmodel.icfueltaxclass',
 
     stores: {
         states: {

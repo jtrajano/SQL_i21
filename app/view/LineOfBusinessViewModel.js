@@ -15,6 +15,6 @@
 
 Ext.define('Inventory.view.LineOfBusinessViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.lineofbusiness'
+    alias: 'viewmodel.iclineofbusiness'
 
 });

@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.FuelCode', {
     extend: 'GlobalComponentEngine.view.GridTemplate',
-    alias: 'widget.fuelcode',
+    alias: 'widget.icfuelcode',
 
     requires: [
         'GlobalComponentEngine.view.GridTemplate',

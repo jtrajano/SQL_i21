@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.SubCategory', {
     extend: 'Ext.window.Window',
-    alias: 'widget.subcategory',
+    alias: 'widget.icsubcategory',
 
     requires: [
         'Inventory.view.Filter1',

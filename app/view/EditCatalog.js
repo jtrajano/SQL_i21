@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.EditCatalog', {
     extend: 'Ext.window.Window',
-    alias: 'widget.editcatalog',
+    alias: 'widget.iceditcatalog',
 
     requires: [
         'Inventory.view.Statusbar1',

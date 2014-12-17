@@ -15,5 +15,5 @@
 
 Ext.define('Inventory.view.PromotionItemListViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.promotionitemlist'
+    alias: 'controller.icpromotionitemlist'
 });

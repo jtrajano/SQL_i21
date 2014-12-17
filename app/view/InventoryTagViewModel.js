@@ -15,6 +15,6 @@
 
 Ext.define('Inventory.view.InventoryTagViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.inventorytag'
+    alias: 'viewmodel.icinventorytag'
 
 });

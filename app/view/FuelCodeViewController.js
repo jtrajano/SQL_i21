@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.FuelCodeViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.fuelcode',
+    alias: 'controller.icfuelcode',
 
     setupContext: function () {
         "use strict";

@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.ItemViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.item',
+    alias: 'controller.icitem',
 
     config: {
         searchConfig: {

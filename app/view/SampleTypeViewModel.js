@@ -15,6 +15,6 @@
 
 Ext.define('Inventory.view.SampleTypeViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.sampletype'
+    alias: 'viewmodel.icsampletype'
 
 });

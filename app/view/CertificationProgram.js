@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.CertificationProgram', {
     extend: 'Ext.window.Window',
-    alias: 'widget.certificationprogram',
+    alias: 'widget.iccertificationprogram',
 
     requires: [
         'Inventory.view.Filter1',

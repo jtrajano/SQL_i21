@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.CountGroupViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.countgroup',
+    alias: 'controller.iccountgroup',
 
     setupContext: function () {
         "use strict";

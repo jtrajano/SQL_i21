@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.CatalogViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.catalog',
+    alias: 'viewmodel.iccatalog',
 
     requires: [
         'Inventory.store.Catalog'

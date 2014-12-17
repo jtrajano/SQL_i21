@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.PromotionItemList', {
     extend: 'Ext.window.Window',
-    alias: 'widget.promotionitemlist',
+    alias: 'widget.icpromotionitemlist',
 
     requires: [
         'Inventory.view.StatusbarPaging1',

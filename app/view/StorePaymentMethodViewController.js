@@ -15,5 +15,5 @@
 
 Ext.define('Inventory.view.StorePaymentMethodViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.storepaymentmethod'
+    alias: 'controller.icstorepaymentmethod'
 });

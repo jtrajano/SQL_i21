@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.ItemPricingViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.itempricing',
+    alias: 'controller.icitempricing',
 
     config: {
         binding: {

@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.InventoryReceiptTaxesViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.inventoryreceipttaxes',
+    alias: 'viewmodel.icinventoryreceipttaxes',
 
     requires: [
 

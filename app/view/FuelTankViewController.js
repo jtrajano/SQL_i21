@@ -15,5 +15,5 @@
 
 Ext.define('Inventory.view.FuelTankViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.fueltank'
+    alias: 'controller.icfueltank'
 });

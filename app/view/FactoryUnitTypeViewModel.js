@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.FactoryUnitTypeViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.factoryunittype',
+    alias: 'viewmodel.icfactoryunittype',
 
     requires: [
         'Inventory.store.BufferedUnitMeasure'

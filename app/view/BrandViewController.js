@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.BrandViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.brand',
+    alias: 'controller.icbrand',
 
     setupContext: function () {
         "use strict";

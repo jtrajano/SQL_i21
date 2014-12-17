@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.Brand', {
     extend: 'GlobalComponentEngine.view.GridTemplate',
-    alias: 'widget.brand',
+    alias: 'widget.icbrand',
 
     requires: [
         'GlobalComponentEngine.view.GridTemplate',

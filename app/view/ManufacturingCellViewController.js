@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.ManufacturingCellViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.manufacturingcell',
+    alias: 'controller.icmanufacturingcell',
 
     config: {
         searchConfig: {

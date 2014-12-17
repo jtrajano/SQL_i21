@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.WorkCenterAdd', {
     extend: 'Ext.window.Window',
-    alias: 'widget.workcenteradd',
+    alias: 'widget.icworkcenteradd',
 
     requires: [
         'Inventory.view.Filter1',

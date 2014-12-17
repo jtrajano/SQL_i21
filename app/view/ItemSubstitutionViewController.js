@@ -15,5 +15,5 @@
 
 Ext.define('Inventory.view.ItemSubstitutionViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.itemsubstitution'
+    alias: 'controller.icitemsubstitution'
 });

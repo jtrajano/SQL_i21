@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.PackTypeViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.packtype',
+    alias: 'viewmodel.icpacktype',
 
     requires: [
         'Inventory.store.BufferedUnitMeasure'

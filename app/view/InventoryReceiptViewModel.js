@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.InventoryReceiptViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.inventoryreceipt',
+    alias: 'viewmodel.icinventoryreceipt',
 
     requires: [
         'Inventory.store.BufferedEquipmentLength',

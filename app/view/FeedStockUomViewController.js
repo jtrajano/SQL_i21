@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.FeedStockUomViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.feedstockuom',
+    alias: 'controller.icfeedstockuom',
 
     setupContext: function () {
         "use strict";

@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.ItemPricingViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.itempricing',
+    alias: 'viewmodel.icitempricing',
 
     requires: [
         'i21.store.CompanyLocationBuffered'

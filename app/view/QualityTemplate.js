@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.QualityTemplate', {
     extend: 'Ext.window.Window',
-    alias: 'widget.qualitytemplate',
+    alias: 'widget.icqualitytemplate',
 
     requires: [
         'Inventory.view.QualityTemplateViewModel',

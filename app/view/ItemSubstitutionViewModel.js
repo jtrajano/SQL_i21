@@ -15,6 +15,6 @@
 
 Ext.define('Inventory.view.ItemSubstitutionViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.itemsubstitution'
+    alias: 'viewmodel.icitemsubstitution'
 
 });

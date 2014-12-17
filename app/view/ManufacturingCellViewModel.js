@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.ManufacturingCellViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.manufacturingcell',
+    alias: 'viewmodel.icmanufacturingcell',
 
     requires: [
         'i21.store.CompanyLocationBuffered',

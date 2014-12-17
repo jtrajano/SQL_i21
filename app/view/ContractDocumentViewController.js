@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.ContractDocumentViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.contractdocument',
+    alias: 'controller.iccontractdocument',
 
     config: {
         searchConfig: {

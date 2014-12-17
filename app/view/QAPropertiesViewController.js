@@ -15,5 +15,5 @@
 
 Ext.define('Inventory.view.QAPropertiesViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.qaproperties'
+    alias: 'controller.icqaproperties'
 });

@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.LineOfBusinessViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.lineofbusiness',
+    alias: 'controller.iclineofbusiness',
 
     setupContext : function(){
         "use strict";

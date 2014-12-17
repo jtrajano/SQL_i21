@@ -15,6 +15,6 @@
 
 Ext.define('Inventory.view.QATestViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.qatest'
+    alias: 'viewmodel.icqatest'
 
 });

@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.LotStatus', {
     extend: 'GlobalComponentEngine.view.GridTemplate',
-    alias: 'widget.lotstatus',
+    alias: 'widget.iclotstatus',
 
     requires: [
         'GlobalComponentEngine.view.GridTemplate',

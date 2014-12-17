@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.LotStatusViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.lotstatus',
+    alias: 'controller.iclotstatus',
 
 
     setupContext: function () {

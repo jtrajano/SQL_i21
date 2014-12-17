@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.FeedStockUomViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.feedstockuom',
+    alias: 'viewmodel.icfeedstockuom',
 
     requires: [
         'Inventory.store.BufferedUnitMeasure'

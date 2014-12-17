@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.FuelTypeViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.fueltype',
+    alias: 'controller.icfueltype',
 
     config: {
         searchConfig: {

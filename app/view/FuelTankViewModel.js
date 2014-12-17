@@ -15,6 +15,6 @@
 
 Ext.define('Inventory.view.FuelTankViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.fueltank'
+    alias: 'viewmodel.icfueltank'
 
 });

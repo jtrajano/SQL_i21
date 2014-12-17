@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.EditCatalogViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.editcatalog',
+    alias: 'controller.iceditcatalog',
 
     show : function(config) {
         "use strict";

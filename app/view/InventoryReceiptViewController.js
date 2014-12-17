@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.InventoryReceiptViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.inventoryreceipt',
+    alias: 'controller.icinventoryreceipt',
 
     config: {
         searchConfig: {

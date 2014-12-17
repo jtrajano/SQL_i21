@@ -15,6 +15,6 @@
 
 Ext.define('Inventory.view.ManufacturerViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.manufacturer'
+    alias: 'viewmodel.icmanufacturer'
 
 });

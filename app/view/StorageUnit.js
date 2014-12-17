@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.StorageUnit', {
     extend: 'Ext.window.Window',
-    alias: 'widget.storageunit',
+    alias: 'widget.icstorageunit',
 
     requires: [
         'Inventory.view.Filter1',

@@ -15,5 +15,5 @@
 
 Ext.define('Inventory.view.SubCategoryViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.subcategory'
+    alias: 'controller.icsubcategory'
 });

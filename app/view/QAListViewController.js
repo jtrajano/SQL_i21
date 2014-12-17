@@ -15,5 +15,5 @@
 
 Ext.define('Inventory.view.QAListViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.qalist'
+    alias: 'controller.icqalist'
 });

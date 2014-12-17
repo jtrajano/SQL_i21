@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.ManufacturingCell', {
     extend: 'Ext.window.Window',
-    alias: 'widget.manufacturingcell',
+    alias: 'widget.icmanufacturingcell',
 
     requires: [
         'Inventory.view.Filter1',

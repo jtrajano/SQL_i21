@@ -15,6 +15,6 @@
 
 Ext.define('Inventory.view.ReasonViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.reason'
+    alias: 'viewmodel.icreason'
 
 });

@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.StorageUnitViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.storageunit',
+    alias: 'viewmodel.icstorageunit',
 
     requires: [
         'Inventory.store.BufferedUnitMeasure',

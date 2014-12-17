@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.SampleType', {
     extend: 'Ext.window.Window',
-    alias: 'widget.sampletype',
+    alias: 'widget.icsampletype',
 
     requires: [
         'Inventory.view.SampleTypeViewModel',

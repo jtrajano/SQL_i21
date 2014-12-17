@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.ContractDocument', {
     extend: 'Ext.window.Window',
-    alias: 'widget.contractdocument',
+    alias: 'widget.iccontractdocument',
 
     requires: [
         'Inventory.view.StatusbarPaging1',

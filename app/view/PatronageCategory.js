@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.PatronageCategory', {
     extend: 'GlobalComponentEngine.view.GridTemplate',
-    alias: 'widget.patronagecategory',
+    alias: 'widget.icpatronagecategory',
 
     requires: [
         'GlobalComponentEngine.view.GridTemplate',

@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.FuturesExchange', {
     extend: 'Ext.window.Window',
-    alias: 'widget.futuresexchange',
+    alias: 'widget.icfuturesexchange',
 
     requires: [
         'Inventory.view.StatusbarPaging1',

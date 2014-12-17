@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.CategoryLocationViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.categorylocation',
+    alias: 'controller.iccategorylocation',
 
     config: {
         binding: {

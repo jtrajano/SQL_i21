@@ -15,5 +15,5 @@
 
 Ext.define('Inventory.view.QualityTemplateViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.qualitytemplate'
+    alias: 'controller.icqualitytemplate'
 });

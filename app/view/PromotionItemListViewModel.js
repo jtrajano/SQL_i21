@@ -15,6 +15,6 @@
 
 Ext.define('Inventory.view.PromotionItemListViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.promotionitemlist'
+    alias: 'viewmodel.icpromotionitemlist'
 
 });

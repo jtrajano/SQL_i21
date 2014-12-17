@@ -15,5 +15,5 @@
 
 Ext.define('Inventory.view.ReasonViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.reason'
+    alias: 'controller.icreason'
 });

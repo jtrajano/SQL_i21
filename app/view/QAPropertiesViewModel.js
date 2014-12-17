@@ -15,6 +15,6 @@
 
 Ext.define('Inventory.view.QAPropertiesViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.qaproperties'
+    alias: 'viewmodel.icqaproperties'
 
 });

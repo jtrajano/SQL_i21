@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.PackType', {
     extend: 'Ext.window.Window',
-    alias: 'widget.packtype',
+    alias: 'widget.icpacktype',
 
     requires: [
         'Inventory.view.Filter1',

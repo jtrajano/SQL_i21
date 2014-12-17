@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.QAProperties', {
     extend: 'Ext.window.Window',
-    alias: 'widget.qaproperties',
+    alias: 'widget.icqaproperties',
 
     requires: [
         'Inventory.view.QAPropertiesViewModel',

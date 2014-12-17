@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.ProcessCodeViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.processcode',
+    alias: 'controller.icprocesscode',
 
     setupContext: function () {
         "use strict";

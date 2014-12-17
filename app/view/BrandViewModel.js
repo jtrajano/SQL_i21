@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.BrandViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.brand',
+    alias: 'viewmodel.icbrand',
 
     requires: [
         'Inventory.store.BufferedManufacturer'

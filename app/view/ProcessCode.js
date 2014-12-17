@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.ProcessCode', {
     extend: 'GlobalComponentEngine.view.GridTemplate',
-    alias: 'widget.processcode',
+    alias: 'widget.icprocesscode',
 
     requires: [
         'GlobalComponentEngine.view.GridTemplate',

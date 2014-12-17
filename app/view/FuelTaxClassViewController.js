@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.FuelTaxClassViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.fueltaxclass',
+    alias: 'controller.icfueltaxclass',
 
     config: {
         searchConfig: {

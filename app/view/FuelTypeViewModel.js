@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.FuelTypeViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.fueltype',
+    alias: 'viewmodel.icfueltype',
 
     requires: [
         'Inventory.store.BufferedFeedStockCode',

@@ -15,6 +15,6 @@
 
 Ext.define('Inventory.view.FeedStockCodeViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.feedstockcode'
+    alias: 'viewmodel.icfeedstockcode'
 
 });

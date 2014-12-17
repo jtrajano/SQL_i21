@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.ItemLocation', {
     extend: 'Ext.window.Window',
-    alias: 'widget.itemlocation',
+    alias: 'widget.icitemlocation',
 
     requires: [
         'Inventory.view.StatusbarPaging1',

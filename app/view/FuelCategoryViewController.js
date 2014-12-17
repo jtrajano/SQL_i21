@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.FuelCategoryViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.fuelcategory',
+    alias: 'controller.icfuelcategory',
 
     setupContext: function () {
         "use strict";

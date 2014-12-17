@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.FactoryUnitTypeViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.factoryunittype',
+    alias: 'controller.icfactoryunittype',
 
     config: {
         searchConfig: {

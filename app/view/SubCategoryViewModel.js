@@ -15,6 +15,6 @@
 
 Ext.define('Inventory.view.SubCategoryViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.subcategory'
+    alias: 'viewmodel.icsubcategory'
 
 });

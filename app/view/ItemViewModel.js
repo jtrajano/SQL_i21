@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.ItemViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.item',
+    alias: 'viewmodel.icitem',
 
     requires: [
         'Inventory.store.BufferedCompactItem',

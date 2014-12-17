@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.FuelTaxClass', {
     extend: 'Ext.window.Window',
-    alias: 'widget.fueltaxclass',
+    alias: 'widget.icfueltaxclass',
 
     requires: [
         'Inventory.view.Filter1',

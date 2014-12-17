@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.CommodityViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.commodity',
+    alias: 'viewmodel.iccommodity',
 
     requires: [
         'Inventory.store.BufferedPatronageCategory',

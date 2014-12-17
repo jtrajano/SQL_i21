@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.FactoryUnitType', {
     extend: 'Ext.window.Window',
-    alias: 'widget.factoryunittype',
+    alias: 'widget.icfactoryunittype',
 
     requires: [
         'Inventory.view.StatusbarPaging1',

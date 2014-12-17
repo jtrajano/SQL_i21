@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.StorageUnitViewController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.storageunit',
+    alias: 'controller.icstorageunit',
 
     config: {
         searchConfig: {

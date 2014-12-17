@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.InventoryTag', {
     extend: 'Ext.window.Window',
-    alias: 'widget.inventorytag',
+    alias: 'widget.icinventorytag',
 
     requires: [
         'Inventory.view.StatusbarPaging1',

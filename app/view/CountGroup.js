@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.CountGroup', {
     extend: 'GlobalComponentEngine.view.GridTemplate',
-    alias: 'widget.countgroup',
+    alias: 'widget.iccountgroup',
 
     requires: [
         'GlobalComponentEngine.view.GridTemplate',

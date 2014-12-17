@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.CertificationProgramViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.certificationprogram',
+    alias: 'viewmodel.iccertificationprogram',
 
     requires: [
         'i21.store.CountryBuffered',

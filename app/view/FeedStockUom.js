@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.FeedStockUom', {
     extend: 'GlobalComponentEngine.view.GridTemplate',
-    alias: 'widget.feedstockuom',
+    alias: 'widget.icfeedstockuom',
 
     requires: [
         'GlobalComponentEngine.view.GridTemplate',

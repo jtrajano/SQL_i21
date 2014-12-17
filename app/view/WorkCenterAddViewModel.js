@@ -15,6 +15,6 @@
 
 Ext.define('Inventory.view.WorkCenterAddViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.workcenteradd'
+    alias: 'viewmodel.icworkcenteradd'
 
 });

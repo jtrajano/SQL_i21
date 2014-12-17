@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.CategoryLocationViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.categorylocation',
+    alias: 'viewmodel.iccategorylocation',
 
     requires: [
         'i21.store.CompanyLocationBuffered',

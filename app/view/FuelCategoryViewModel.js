@@ -15,6 +15,6 @@
 
 Ext.define('Inventory.view.FuelCategoryViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.fuelcategory'
+    alias: 'viewmodel.icfuelcategory'
 
 });

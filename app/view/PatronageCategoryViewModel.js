@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.PatronageCategoryViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.patronagecategory',
+    alias: 'viewmodel.icpatronagecategory',
 
     stores: {
         purchaseSales: {

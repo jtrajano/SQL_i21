@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.Catalog', {
     extend: 'Ext.window.Window',
-    alias: 'widget.catalog',
+    alias: 'widget.iccatalog',
 
     requires: [
         'Inventory.view.Filter1',

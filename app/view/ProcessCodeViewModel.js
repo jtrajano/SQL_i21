@@ -15,6 +15,6 @@
 
 Ext.define('Inventory.view.ProcessCodeViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.processcode'
+    alias: 'viewmodel.icprocesscode'
 
 });
