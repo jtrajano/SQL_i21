@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedSku', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedsku',
+    alias: 'store.icbufferedsku',
 
     requires: [
         'Inventory.model.Sku'

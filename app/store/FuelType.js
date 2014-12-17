@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.FuelType', {
     extend: 'Ext.data.Store',
-    alias: 'store.inventoryfueltype',
+    alias: 'store.icfueltype',
 
     requires: [
         'Inventory.model.FuelType'

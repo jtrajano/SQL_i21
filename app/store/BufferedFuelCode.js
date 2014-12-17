@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedFuelCode', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedfuelcode',
+    alias: 'store.icbufferedfuelcode',
 
     requires: [
         'Inventory.model.FuelCode'

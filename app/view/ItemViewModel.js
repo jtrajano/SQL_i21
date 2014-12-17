@@ -98,10 +98,10 @@ Ext.define('Inventory.view.ItemViewModel', {
             ]
         },
         manufacturer: {
-            type: 'inventorybufferedmanufacturer'
+            type: 'icbufferedmanufacturer'
         },
         brand: {
-            type: 'inventorybufferedbrand'
+            type: 'icbufferedbrand'
         },
         itemStatuses: {
             autoLoad: true,
@@ -163,7 +163,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             ]
         },
         uomUnitMeasure: {
-            type: 'inventorybuffereduom'
+            type: 'icbuffereduom'
         },
 
 
@@ -201,10 +201,10 @@ Ext.define('Inventory.view.ItemViewModel', {
 
 
         patronage: {
-            type: 'inventorybufferedpatronagecategory'
+            type: 'icbufferedpatronagecategory'
         },
         taxClass: {
-            type: 'inventorybufferedfueltaxclass'
+            type: 'icbufferedfueltaxclass'
         },
         barcodePrints: {
             autoLoad: true,
@@ -264,21 +264,21 @@ Ext.define('Inventory.view.ItemViewModel', {
             ]
         },
         fuelCategory: {
-            type: 'inventorybufferedfuelcategory'
+            type: 'icbufferedfuelcategory'
         },
         medicationTag: {
-            type: 'inventorybufferedtag'
+            type: 'icbufferedtag'
         },
         ingredientTag: {
-            type: 'inventorybufferedtag'
+            type: 'icbufferedtag'
         },
         physicalItem: {
-            type: 'inventorybufferedcompactitem'
+            type: 'icbufferedcompactitem'
         },
 
 
         posUom: {
-            type: 'inventorybuffereduom'
+            type: 'icbuffereduom'
         },
         wicCodes: {
             autoLoad: true,
@@ -300,7 +300,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             ]
         },
         agCategory: {
-            type: 'inventorybufferedcategory'
+            type: 'icbufferedcategory'
         },
         countCodes: {
             autoLoad: true,
@@ -320,7 +320,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             ]
         },
         posCategory: {
-            type: 'inventorybufferedcategory'
+            type: 'icbufferedcategory'
         },
 
 
@@ -365,18 +365,18 @@ Ext.define('Inventory.view.ItemViewModel', {
             ]
         },
         materialNMFC: {
-            type: 'inventorybufferedmaterialnmfc'
+            type: 'icbufferedmaterialnmfc'
         },
         mfgDimensionUom: {
-            type: 'inventorybuffereduom'
+            type: 'icbuffereduom'
         },
         mfgWeightUom: {
-            type: 'inventorybuffereduom'
+            type: 'icbuffereduom'
         },
 
 
         upcUom: {
-            type: 'inventorybuffereduom'
+            type: 'icbuffereduom'
         },
 
 
@@ -393,7 +393,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             type: 'vendorbuffered'
         },
         vendorXrefUom: {
-            type: 'inventorybuffereduom'
+            type: 'icbuffereduom'
         },
 
 
@@ -404,10 +404,10 @@ Ext.define('Inventory.view.ItemViewModel', {
             type: 'countrybuffered'
         },
         document: {
-            type: 'inventorybuffereddocument'
+            type: 'icbuffereddocument'
         },
         certification: {
-            type: 'inventorybufferedcertification'
+            type: 'icbufferedcertification'
         },
 
 
@@ -415,7 +415,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             type: 'companylocationbuffered'
         },
         pricingLevelUOM: {
-            type: 'inventorybuffereditemunitmeasure'
+            type: 'icbuffereditemunitmeasure'
         },
         pricingMethods: {
             autoLoad: true,
@@ -481,7 +481,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             ]
         },
         specialPricingUOM: {
-            type: 'inventorybuffereditemunitmeasure'
+            type: 'icbuffereditemunitmeasure'
         },
         discountsBy:{
             autoLoad: true,
@@ -504,30 +504,30 @@ Ext.define('Inventory.view.ItemViewModel', {
             type: 'companylocationbuffered'
         },
         stockUOM: {
-            type: 'inventorybuffereduom'
+            type: 'icbuffereduom'
         },
 
 
         commodity: {
-            type: 'inventorybufferedcommodity'
+            type: 'icbufferedcommodity'
         },
         originAttribute: {
-            type: 'inventorybufferedoriginattribute'
+            type: 'icbufferedoriginattribute'
         },
         productTypeAttribute: {
-            type: 'inventorybufferedproducttypeattribute'
+            type: 'icbufferedproducttypeattribute'
         },
         regionAttribute: {
-            type: 'inventorybufferedregionattribute'
+            type: 'icbufferedregionattribute'
         },
         seasonAttribute: {
-            type: 'inventorybufferedseasonattribute'
+            type: 'icbufferedseasonattribute'
         },
         classAttribute: {
-            type: 'inventorybufferedclassattribute'
+            type: 'icbufferedclassattribute'
         },
         productLineAttribute: {
-            type: 'inventorybufferedproductlineattribute'
+            type: 'icbufferedproductlineattribute'
         },
         marketValuations:{
             autoLoad: true,
@@ -547,18 +547,18 @@ Ext.define('Inventory.view.ItemViewModel', {
 
 
         assemblyItem: {
-            type: 'inventorybufferedcompactitem'
+            type: 'icbufferedcompactitem'
         },
         assemblyUOM: {
-            type: 'inventorybuffereduom'
+            type: 'icbuffereduom'
         },
 
 
         bundleItem: {
-            type: 'inventorybufferedcompactitem'
+            type: 'icbufferedcompactitem'
         },
         bundleUOM: {
-            type: 'inventorybuffereduom'
+            type: 'icbuffereduom'
         },
 
 
@@ -584,17 +584,17 @@ Ext.define('Inventory.view.ItemViewModel', {
             ]
         },
         kitItem: {
-            type: 'inventorybufferedcompactitem'
+            type: 'icbufferedcompactitem'
         },
         kitUOM: {
-            type: 'inventorybuffereduom'
+            type: 'icbuffereduom'
         },
 
         factory: {
             type: 'companylocationbuffered'
         },
         factoryManufacturingCell: {
-            type: 'inventorybufferedmanufacturingcell'
+            type: 'icbufferedmanufacturingcell'
         },
         owner: {
             type: 'customerbuffered'

@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedRestriction', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedrestriction',
+    alias: 'store.icbufferedrestriction',
 
     requires: [
         'Inventory.model.Restriction'

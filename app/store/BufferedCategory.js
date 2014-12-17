@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedCategory', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedcategory',
+    alias: 'store.icbufferedcategory',
 
     requires: [
         'Inventory.model.Category'

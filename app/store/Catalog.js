@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.Catalog', {
     extend: 'Ext.data.TreeStore',
-    alias: 'store.inventorycatalog',
+    alias: 'store.iccatalog',
 
     requires: [
         'Inventory.model.Catalog'

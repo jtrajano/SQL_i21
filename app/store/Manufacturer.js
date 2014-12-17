@@ -4,7 +4,7 @@
 
 Ext.define('Inventory.store.Manufacturer', {
     extend: 'Ext.data.Store',
-    alias: 'store.inventorymanufacturer',
+    alias: 'store.icmanufacturer',
 
     requires: [
         'Inventory.model.Manufacturer'

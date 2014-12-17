@@ -118,13 +118,13 @@ Ext.define('Inventory.view.CommodityViewModel', {
             ]
         },
         patronageCategory: {
-            type: 'inventorybufferedpatronagecategory'
+            type: 'icbufferedpatronagecategory'
         },
         directPatronageCategory: {
-            type: 'inventorybufferedpatronagecategory'
+            type: 'icbufferedpatronagecategory'
         },
         unitMeasure: {
-            type: 'inventorybuffereduom'
+            type: 'icbuffereduom'
         },
         glAccount: {
             type: 'bufAccountid'
@@ -133,7 +133,7 @@ Ext.define('Inventory.view.CommodityViewModel', {
             type: 'companylocationbuffered'
         },
         autoScaleDist: {
-            type: 'inventorybufferedstoragetype'
+            type: 'icbufferedstoragetype'
         }
     }
 

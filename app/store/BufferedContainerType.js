@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedContainerType', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedcontainertype',
+    alias: 'store.icbufferedcontainertype',
 
     requires: [
         'Inventory.model.ContainerType'

@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.Certification', {
     extend: 'Ext.data.Store',
-    alias: 'store.inventorycertification',
+    alias: 'store.iccertification',
 
     requires: [
         'Inventory.model.Certification'

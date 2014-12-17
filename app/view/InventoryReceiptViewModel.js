@@ -113,13 +113,13 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             }
         },
         items: {
-            type: 'inventorybufferedcompactitem'
+            type: 'icbufferedcompactitem'
         },
         itemUOM: {
-            type: 'inventorybuffereditemunitmeasure'
+            type: 'icbuffereditemunitmeasure'
         },
         itemPackType: {
-            type: 'inventorybufferedpacktype'
+            type: 'icbufferedpacktype'
         },
         vendor: {
             type: 'vendorbuffered'
@@ -137,10 +137,10 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             type: 'FreightTermsBuffered'
         },
         equipmentLength: {
-            type: 'inventorybufferedequipmentlength'
+            type: 'icbufferedequipmentlength'
         },
         qaProperty: {
-            type: 'inventorybufferedqaproperty'
+            type: 'icbufferedqaproperty'
         }
     }
 

@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.PackType', {
     extend: 'Ext.data.Store',
-    alias: 'store.inventorypacktype',
+    alias: 'store.icpacktype',
 
     requires: [
         'Inventory.model.PackType'

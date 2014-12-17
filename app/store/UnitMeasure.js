@@ -4,7 +4,7 @@
 
 Ext.define('Inventory.store.UnitMeasure', {
     extend: 'Ext.data.Store',
-    alias: 'store.inventoryuom',
+    alias: 'store.icuom',
 
     requires: [
         'Inventory.model.UnitMeasure'

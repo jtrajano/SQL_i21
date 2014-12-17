@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.Document', {
     extend: 'Ext.data.Store',
-    alias: 'store.inventorydocument',
+    alias: 'store.icdocument',
 
     requires: [
         'Inventory.model.Document'

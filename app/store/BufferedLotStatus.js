@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedLotStatus', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedlotstatus',
+    alias: 'store.icbufferedlotstatus',
 
     requires: [
         'Inventory.model.LotStatus'

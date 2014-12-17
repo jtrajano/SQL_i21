@@ -23,7 +23,7 @@ Ext.define('Inventory.view.ContractDocumentViewModel', {
 
     stores: {
         commodity: {
-            type: 'inventorybufferedcommodity'
+            type: 'icbufferedcommodity'
         }
     }
 

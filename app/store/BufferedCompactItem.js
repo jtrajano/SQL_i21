@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedCompactItem', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedcompactitem',
+    alias: 'store.icbufferedcompactitem',
 
     requires: [
         'Inventory.model.CompactItem'

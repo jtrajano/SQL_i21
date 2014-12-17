@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedProductLineAttribute', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedproductlineattribute',
+    alias: 'store.icbufferedproductlineattribute',
 
     requires: [
         'Inventory.model.CommodityProductLine'

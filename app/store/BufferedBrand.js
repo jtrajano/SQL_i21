@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedBrand', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedbrand',
+    alias: 'store.icbufferedbrand',
 
     requires: [
         'Inventory.model.Brand'

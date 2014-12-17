@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedReadingPoint', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedreadingpoint',
+    alias: 'store.icbufferedreadingpoint',
 
     requires: [
         'Inventory.model.ReadingPoint'

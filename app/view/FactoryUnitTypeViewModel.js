@@ -92,10 +92,10 @@ Ext.define('Inventory.view.FactoryUnitTypeViewModel', {
             ]
         },
         capacityUOM: {
-            type: 'inventorybuffereduom'
+            type: 'icbuffereduom'
         },
         dimensionUOM: {
-            type: 'inventorybuffereduom'
+            type: 'icbuffereduom'
         }
     }
 

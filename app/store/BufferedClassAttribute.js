@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedClassAttribute', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedclassattribute',
+    alias: 'store.icbufferedclassattribute',
 
     requires: [
         'Inventory.model.CommodityClass'

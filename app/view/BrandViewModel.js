@@ -23,7 +23,7 @@ Ext.define('Inventory.view.BrandViewModel', {
 
     stores: {
         manufacturer:{
-            type: 'inventorybufferedmanufacturer'
+            type: 'icbufferedmanufacturer'
         }
     }
 

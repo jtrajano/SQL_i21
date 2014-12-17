@@ -64,13 +64,13 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
             ]
         },
         category: {
-            type: 'inventorybufferedcategory'
+            type: 'icbufferedcategory'
         },
         issueUOM: {
-            type: 'inventorybuffereditemunitmeasure'
+            type: 'icbuffereditemunitmeasure'
         },
         receiveUOM: {
-            type: 'inventorybuffereditemunitmeasure'
+            type: 'icbuffereditemunitmeasure'
         },
         family: {
             type: 'storefamily'
@@ -145,7 +145,7 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
             ]
         },
         countGroup: {
-            type: 'inventorybufferedcountgroup'
+            type: 'icbufferedcountgroup'
         }
     }
 

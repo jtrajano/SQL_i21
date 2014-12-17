@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.CompactItem', {
     extend: 'Ext.data.Store',
-    alias: 'store.inventorycompactitem',
+    alias: 'store.iccompactitem',
 
     requires: [
         'Inventory.model.CompactItem'

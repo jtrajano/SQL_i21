@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedEquipmentLength', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedequipmentlength',
+    alias: 'store.icbufferedequipmentlength',
 
     requires: [
         'Inventory.model.EquipmentLength'

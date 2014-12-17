@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.ReceiptItemTax', {
     extend: 'Ext.data.Store',
-    alias: 'store.inventoryreceiptitemtax',
+    alias: 'store.icreceiptitemtax',
 
     requires: [
         'Inventory.model.ReceiptItemTax'

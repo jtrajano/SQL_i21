@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.LineOfBusiness', {
     extend: 'Ext.data.Store',
-    alias: 'store.inventorylineofbusiness',
+    alias: 'store.iclineofbusiness',
 
     requires: [
         'Inventory.model.LineOfBusiness'

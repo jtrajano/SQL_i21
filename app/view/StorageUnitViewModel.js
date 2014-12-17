@@ -29,25 +29,25 @@ Ext.define('Inventory.view.StorageUnitViewModel', {
 
     stores: {
         batchSizeUOM: {
-            type: 'inventorybuffereduom'
+            type: 'icbuffereduom'
         },
         categoryAllowed: {
-            type: 'inventorybufferedcategory'
+            type: 'icbufferedcategory'
         },
         storageUnitType: {
-            type: 'inventorybufferedfactoryunittype'
+            type: 'icbufferedfactoryunittype'
         },
         commodity: {
-            type: 'inventorybufferedcommodity'
+            type: 'icbufferedcommodity'
         },
         restriction: {
-            type: 'inventorybufferedrestriction'
+            type: 'icbufferedrestriction'
         },
         measurement: {
-            type: 'inventorybufferedmeasurement'
+            type: 'icbufferedmeasurement'
         },
         readingPoint: {
-            type: 'inventorybufferedreadingpoint'
+            type: 'icbufferedreadingpoint'
         }
     }
 

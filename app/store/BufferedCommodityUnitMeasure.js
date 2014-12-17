@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedCommodityUnitMeasure', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedcommodityunitmeasure',
+    alias: 'store.icbufferedcommodityunitmeasure',
 
     requires: [
         'Inventory.model.CommodityUnitMeasure'

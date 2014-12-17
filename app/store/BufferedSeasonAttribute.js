@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedSeasonAttribute', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedseasonattribute',
+    alias: 'store.icbufferedseasonattribute',
 
     requires: [
         'Inventory.model.CommoditySeason'

@@ -44,7 +44,7 @@ Ext.define('Inventory.view.InventoryUOMViewModel', {
             }
         },
         unitMeasure: {
-            type: 'inventorybuffereduom'
+            type: 'icbuffereduom'
         }
     }
 

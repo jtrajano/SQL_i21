@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedCertification', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedcertification',
+    alias: 'store.icbufferedcertification',
 
     requires: [
         'Inventory.model.Certification'

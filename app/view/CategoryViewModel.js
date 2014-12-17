@@ -30,7 +30,7 @@ Ext.define('Inventory.view.CategoryViewModel', {
 
     stores: {
         linesOfBusiness: {
-            type: 'inventorybufferedlineofbusiness'
+            type: 'icbufferedlineofbusiness'
         },
         costingMethods: {
             autoLoad: true,
@@ -115,13 +115,13 @@ Ext.define('Inventory.view.CategoryViewModel', {
             ]
         },
         unitMeasures:{
-            type: 'inventorybuffereduom'
+            type: 'icbuffereduom'
         },
         materialItem:{
-            type: 'inventorybufferedcompactitem'
+            type: 'icbufferedcompactitem'
         },
         freightItem:{
-            type: 'inventorybufferedcompactitem'
+            type: 'icbufferedcompactitem'
         },
         glAccount: {
             type: 'bufAccountid'

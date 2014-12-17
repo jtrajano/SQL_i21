@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.CategoryLocation', {
     extend: 'Ext.data.Store',
-    alias: 'store.inventorycategorylocation',
+    alias: 'store.iccategorylocation',
 
     requires: [
         'Inventory.model.CategoryLocation'

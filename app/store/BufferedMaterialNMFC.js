@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedMaterialNMFC', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedmaterialnmfc',
+    alias: 'store.icbufferedmaterialnmfc',
 
     requires: [
         'Inventory.model.MaterialNMFC'

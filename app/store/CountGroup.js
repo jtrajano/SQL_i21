@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.CountGroup', {
     extend: 'Ext.data.Store',
-    alias: 'store.inventorycountgroup',
+    alias: 'store.iccountgroup',
 
     requires: [
         'Inventory.model.CountGroup'

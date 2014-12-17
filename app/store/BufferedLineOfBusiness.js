@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedLineOfBusiness', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedlineofbusiness',
+    alias: 'store.icbufferedlineofbusiness',
 
     requires: [
         'Inventory.model.LineOfBusiness'

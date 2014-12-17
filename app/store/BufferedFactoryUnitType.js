@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedFactoryUnitType', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedfactoryunittype',
+    alias: 'store.icbufferedfactoryunittype',
 
     requires: [
         'Inventory.model.FactoryUnitType'

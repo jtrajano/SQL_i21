@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedPackType', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedpacktype',
+    alias: 'store.icbufferedpacktype',
 
     requires: [
         'Inventory.model.PackType'

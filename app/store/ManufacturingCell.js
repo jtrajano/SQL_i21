@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.ManufacturingCell', {
     extend: 'Ext.data.Store',
-    alias: 'store.inventorymanufacturingcell',
+    alias: 'store.icmanufacturingcell',
 
     requires: [
         'Inventory.model.ManufacturingCell'

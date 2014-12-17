@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedCountGroup', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedcountgroup',
+    alias: 'store.icbufferedcountgroup',
 
     requires: [
         'Inventory.model.CountGroup'

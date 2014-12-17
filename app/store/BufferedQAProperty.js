@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedQAProperty', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedqaproperty',
+    alias: 'store.icbufferedqaproperty',
 
     requires: [
         'Inventory.model.QAProperty'

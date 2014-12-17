@@ -25,22 +25,22 @@ Ext.define('Inventory.view.ManufacturingCellViewModel', {
 
     stores: {
         capacityUOM: {
-            type: 'inventorybuffereduom'
+            type: 'icbuffereduom'
         },
         capacityRateUOM: {
-            type: 'inventorybuffereduom'
+            type: 'icbuffereduom'
         },
         location: {
             type: 'companylocationbuffered'
         },
         packType: {
-            type: 'inventorybufferedpacktype'
+            type: 'icbufferedpacktype'
         },
         packTypeCapacityUOM: {
-            type: 'inventorybuffereduom'
+            type: 'icbuffereduom'
         },
         packTypeCapacityRateUOM: {
-            type: 'inventorybuffereduom'
+            type: 'icbuffereduom'
         }
     }
 

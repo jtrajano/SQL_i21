@@ -29,13 +29,13 @@ Ext.define('Inventory.view.CertificationProgramViewModel', {
             type: 'countrybuffered'
         },
         commodity: {
-            type: 'inventorybufferedcommodity'
+            type: 'icbufferedcommodity'
         },
         currency: {
             type: 'currencybuffered'
         },
         perUOM: {
-            type: 'inventorybuffereduom'
+            type: 'icbuffereduom'
         }
     }
 

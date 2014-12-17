@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedOriginAttribute', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedoriginattribute',
+    alias: 'store.icbufferedoriginattribute',
 
     requires: [
         'Inventory.model.CommodityOrigin'

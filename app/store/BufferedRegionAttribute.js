@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedRegionAttribute', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedregionattribute',
+    alias: 'store.icbufferedregionattribute',
 
     requires: [
         'Inventory.model.CommodityRegion'

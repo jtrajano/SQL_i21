@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedProcessCode', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedprocesscode',
+    alias: 'store.icbufferedprocesscode',
 
     requires: [
         'Inventory.model.ProcessCode'

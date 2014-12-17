@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedFeedStockCode', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedfeedstockcode',
+    alias: 'store.icbufferedfeedstockcode',
 
     requires: [
         'Inventory.model.FeedStockCode'

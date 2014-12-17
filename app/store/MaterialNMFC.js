@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.MaterialNMFC', {
     extend: 'Ext.data.Store',
-    alias: 'store.inventorymaterialnmfc',
+    alias: 'store.icmaterialnmfc',
 
     requires: [
         'Inventory.model.MaterialNMFC'

@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedItemStockView', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybuffereditemstockview',
+    alias: 'store.icbuffereditemstockview',
 
     requires: [
         'Inventory.model.ItemStockView'

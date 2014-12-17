@@ -27,19 +27,19 @@ Ext.define('Inventory.view.FuelTypeViewModel', {
 
     stores: {
         feedStock: {
-            type: 'inventorybufferedfeedstockcode'
+            type: 'icbufferedfeedstockcode'
         },
         feedStockUom: {
-            type: 'inventorybufferedfeedstockuom'
+            type: 'icbufferedfeedstockuom'
         },
         fuelCategory: {
-            type: 'inventorybufferedfuelcategory'
+            type: 'icbufferedfuelcategory'
         },
         fuelCode: {
-            type: 'inventorybufferedfuelcode'
+            type: 'icbufferedfuelcode'
         },
         productionProcess: {
-            type: 'inventorybufferedprocesscode'
+            type: 'icbufferedprocesscode'
         }
     }
 

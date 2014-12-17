@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.LotStatus', {
     extend: 'Ext.data.Store',
-    alias: 'store.inventorylotstatus',
+    alias: 'store.iclotstatus',
 
     requires: [
         'Inventory.model.LotStatus'

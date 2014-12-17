@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.FeedStockUom', {
     extend: 'Ext.data.Store',
-    alias: 'store.inventoryfeedstockuom',
+    alias: 'store.icfeedstockuom',
 
     requires: [
         'Inventory.model.FeedStockUom'

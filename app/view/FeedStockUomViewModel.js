@@ -23,7 +23,7 @@ Ext.define('Inventory.view.FeedStockUomViewModel', {
 
     stores: {
         unitMeasure: {
-            type: 'inventorybuffereduom'
+            type: 'icbuffereduom'
         }
     }
 

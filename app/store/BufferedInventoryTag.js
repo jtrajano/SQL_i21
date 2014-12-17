@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedInventoryTag', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedtag',
+    alias: 'store.icbufferedtag',
 
     requires: [
         'Inventory.model.InventoryTag'

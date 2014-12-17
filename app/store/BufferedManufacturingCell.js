@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedManufacturingCell', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybufferedmanufacturingcell',
+    alias: 'store.icbufferedmanufacturingcell',
 
     requires: [
         'Inventory.model.ManufacturingCell'

@@ -23,10 +23,10 @@ Ext.define('Inventory.view.PackTypeViewModel', {
 
     stores: {
         sourceUnitMeasure: {
-            type: 'inventorybuffereduom'
+            type: 'icbuffereduom'
         },
         targetUnitMeasure: {
-            type: 'inventorybuffereduom'
+            type: 'icbuffereduom'
         }
     }
 

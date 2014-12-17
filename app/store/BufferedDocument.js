@@ -3,7 +3,7 @@
  */
 Ext.define('Inventory.store.BufferedDocument', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.inventorybuffereddocument',
+    alias: 'store.icbuffereddocument',
 
     requires: [
         'Inventory.model.Document'
