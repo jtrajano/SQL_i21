@@ -71,6 +71,7 @@
     <Compile Include="CommodityUnitMeasure.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="ContainerType.cs" />
+    <Compile Include="QAProperty.cs" />
     <Compile Include="EquipmentLength.cs" />
     <Compile Include="ReceiptItemTax.cs" />
     <Compile Include="ItemContract.cs" />

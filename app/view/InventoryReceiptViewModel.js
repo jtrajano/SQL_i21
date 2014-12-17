@@ -19,6 +19,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
 
     requires: [
         'Inventory.store.BufferedEquipmentLength',
+        'Inventory.store.BufferedQAProperty',
         'Inventory.store.BufferedCompactItem',
         'Inventory.store.BufferedItemUnitMeasure',
         'Inventory.store.BufferedPackType',
@@ -137,6 +138,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
         equipmentLength: {
             type: 'inventorybufferedequipmentlength'
+        },
+        qaProperty: {
+            type: 'inventorybufferedqaproperty'
         }
     }
 

@@ -194,6 +194,8 @@ namespace iRely.Inventory.Model
         public DbSet<vyuICGetItemStock> vyuICGetItemStocks { get; set; }
         public DbSet<tblSMStartingNumber> tblSMStartingNumbers { get; set; }
         public DbSet<tblSMFreightTerm> tblSMFreightTerms { get; set; }
+
+        public DbSet<tblMFQAProperty> tblMFQAProperties { get; set; }
         
         protected override void OnModelCreating(DbModelBuilder modelBuilder) 
         {
@@ -318,6 +320,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetItemStockMap());
             modelBuilder.Configurations.Add(new tblSMStartingNumberMap());
             modelBuilder.Configurations.Add(new tblSMFreightTermMap());
+            modelBuilder.Configurations.Add(new tblMFQAPropertyMap());
         }
     }
 }

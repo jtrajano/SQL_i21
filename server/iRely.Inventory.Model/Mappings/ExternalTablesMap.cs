@@ -248,4 +248,25 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class tblMFQAPropertyMap : EntityTypeConfiguration<tblMFQAProperty>
+    {
+        public tblMFQAPropertyMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intQAPropertyId);
+
+            // Table & Column Mappings
+            this.ToTable("tblMFQAProperty");
+            this.Property(t => t.intDecimalPlaces).HasColumnName("intDecimalPlaces");
+            this.Property(t => t.intQAPropertyId).HasColumnName("intQAPropertyId");
+            this.Property(t => t.strAnalysisType).HasColumnName("strAnalysisType");
+            this.Property(t => t.strDataType).HasColumnName("strDataType");
+            this.Property(t => t.strDescription).HasColumnName("strDescription");
+            this.Property(t => t.strListName).HasColumnName("strListName");
+            this.Property(t => t.strMandatory).HasColumnName("strMandatory");
+            this.Property(t => t.strPropertyName).HasColumnName("strPropertyName");
+            this.Property(t => t.ysnActive).HasColumnName("ysnActive");
+        }
+    }
+
 }

@@ -112,6 +112,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colUnitCost: 'dblUnitCost'
             },
 
+            grdIncomingInspection: {
+                colInspect: 'ysnSelected',
+                colQualityPropertyName: 'strPropertyName'
+            },
 
             // ---- Freight and Invoice Tab
             cboCalculationBasis: {
@@ -128,6 +132,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 //            txtCalculatedAmount: '{current.strMessage}',
             txtInvoiceAmount: '{current.dblInvoiceAmount}',
 //            txtDifference: '{current.strMessage}',
+            chkPrepaid: '{current.ysnPrepaid}',
             chkInvoicePaid: '{current.ysnInvoicePaid}',
             txtCheckNo: {
                 value: '{current.intCheckNo}',
@@ -164,6 +169,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             store = Ext.create('Inventory.store.Receipt', { pageSize: 1 });
 
         var grdInventoryReceipt = win.down('#grdInventoryReceipt'),
+            grdIncomingInspection = win.down('#grdIncomingInspection'),
             grdLotTracking = win.down('#grdLotTracking');
 
         win.context = Ext.create('iRely.mvvm.Engine', {
@@ -191,6 +197,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             })
                         }
                     ]
+                },
+                {
+                    key: 'tblICInventoryReceiptInspections',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdIncomingInspection,
+                        position: 'none'
+                    })
                 }
             ]
         });
@@ -252,9 +265,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var record = Ext.create('Inventory.model.Receipt');
         if (app.DefaultLocation > 0)
             record.set('intLocationId', app.DefaultLocation);
+        record.set('dtmReceiptDate', today);
+        record.set('dtmReceiptDate', today);
 
-        record.set('dtmReceiptDate', today);
-        record.set('dtmReceiptDate', today);
+
+
+        record.tblICInventoryReceiptInspections().add();
+
         action(record);
     },
 
@@ -353,10 +370,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var txtCalculatedAmount = win.down('#txtCalculatedAmount');
         var txtInvoiceAmount = win.down('#txtInvoiceAmount');
         var txtDifference = win.down('#txtDifference');
-        var grid = obj.up('grid');
-        var data = grid.store.data;
+        var grid = win.down('#grdInventoryReceipt');
+        var store = grid.store;
 
-        if (data){
+        if (store){
+            var data = store.data;
             var calculatedTotal = 0
             Ext.Array.each(data.items, function(row) {
                 var dblReceived = row.get('dblReceived');

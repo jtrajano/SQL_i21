@@ -54,6 +54,7 @@ namespace iRely.Inventory.BRL
                 .Include("tblICInventoryReceiptItems.tblICPackType")
                 .Include("tblICInventoryReceiptItems.tblICInventoryReceiptItemLots")
                 .Include("tblICInventoryReceiptItems.tblICInventoryReceiptItemTaxes")
+                .Include("tblICInventoryReceiptInspections.tblMFQAProperty")
                 .Where(w => query.Where(predicate).Any(a => a.intInventoryReceiptId == w.intInventoryReceiptId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)
                 .Skip(start)

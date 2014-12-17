@@ -2611,7 +2611,8 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "text": "Select",
+                                                "itemId": "colInspect",
+                                                "text": "Inspect",
                                                 "width": 65
                                             },
                                             "name": "MyCheck7",
@@ -2656,7 +2657,8 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "clicksToEdit": 1,
-                                                "pluginId": "FuelCodePlugin"
+                                                "designer|displayName": "cepInspection",
+                                                "pluginId": "cepInspection"
                                             },
                                             "name": "MyCellEditingPlugin",
                                             "designerId": "7e85a388-1fdf-4628-a09e-4897e78efe2c"
@@ -2900,6 +2902,23 @@
                                             },
                                             "name": "MyNumberField7",
                                             "designerId": "c3f8deb9-81ca-402f-93a2-7bd669f8050a"
+                                        },
+                                        {
+                                            "type": "Ext.form.field.Checkbox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "boxLabel": null,
+                                                "fieldLabel": "Prepaid",
+                                                "itemId": "chkPrepaid",
+                                                "labelWidth": 130,
+                                                "layout|flex": null
+                                            },
+                                            "name": "MyCheckbox",
+                                            "designerId": "cc3d24af-932c-4965-b0b3-147385167630"
                                         },
                                         {
                                             "type": "Ext.form.field.Checkbox",
@@ -3266,6 +3285,7 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "hidden": true,
                                 "layout": "fit",
                                 "title": "Put Away"
                             },
@@ -3765,299 +3785,6 @@
                                             },
                                             "name": "MyCellEditingPlugin",
                                             "designerId": "e866d359-9837-41f1-9949-82374a356a0d"
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "type": "Ext.panel.Panel",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "container|align": "stretch",
-                                "layout": "vbox",
-                                "title": "Tax Detail"
-                            },
-                            "name": "MyPanel9",
-                            "designerId": "2e283805-aaa6-4476-bf13-bd10f4d095b1",
-                            "cn": [
-                                {
-                                    "type": "Ext.tab.Tab",
-                                    "reference": {
-                                        "name": "tabConfig",
-                                        "type": "object"
-                                    },
-                                    "codeClass": null,
-                                    "name": "TabConfig3",
-                                    "designerId": "cbff6aab-bce1-49bf-b26d-d5ccae14e206"
-                                },
-                                {
-                                    "type": "Ext.container.Container",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "container|align": "stretch",
-                                        "designer|displayName": "container",
-                                        "layout": "hbox",
-                                        "layout|flex": null,
-                                        "margin": "10 5"
-                                    },
-                                    "name": "MyContainer12",
-                                    "designerId": "c70959bc-9ae9-469e-bcdb-af0a26ab0c56",
-                                    "cn": [
-                                        {
-                                            "type": "Ext.form.field.Text",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "fieldLabel": "Receipt Number",
-                                                "itemId": "txtTDReceiptNumber",
-                                                "labelWidth": 95,
-                                                "layout|flex": 1,
-                                                "readOnly": true
-                                            },
-                                            "name": "MyTextField18",
-                                            "designerId": "eaf5d3cc-63ee-44b8-ba5c-2a01088eae22"
-                                        },
-                                        {
-                                            "type": "Ext.form.field.Text",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "fieldLabel": "Item Line No",
-                                                "itemId": "txtTDLineNo",
-                                                "labelWidth": 80,
-                                                "layout|flex": 1,
-                                                "margin": "0 5",
-                                                "readOnly": true
-                                            },
-                                            "name": "MyTextField19",
-                                            "designerId": "d2d912cf-4b98-4e01-b740-af45dc51074c"
-                                        },
-                                        {
-                                            "type": "Ext.form.field.Text",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "fieldLabel": "Item ID",
-                                                "itemId": "txtTDItemId",
-                                                "labelWidth": 50,
-                                                "layout|flex": 1,
-                                                "readOnly": true
-                                            },
-                                            "name": "MyTextField20",
-                                            "designerId": "36aff5ad-0b40-4e65-a672-00dedbec354f"
-                                        },
-                                        {
-                                            "type": "Ext.form.field.Text",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "fieldLabel": "Total",
-                                                "itemId": "txtTDTotal",
-                                                "labelWidth": 40,
-                                                "layout|flex": 1,
-                                                "margin": "0 0 0 5",
-                                                "readOnly": true
-                                            },
-                                            "name": "MyTextField21",
-                                            "designerId": "a565a15d-76b2-4be1-9a93-965d77a311aa"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "type": "Ext.grid.Panel",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "itemId": "grdTaxDetail",
-                                        "layout|flex": 1,
-                                        "margin": -1,
-                                        "title": null
-                                    },
-                                    "name": "MyGridPanel5",
-                                    "designerId": "8abef1ac-e410-4f19-877a-f263879352f6",
-                                    "cn": [
-                                        {
-                                            "type": "Ext.toolbar.Toolbar",
-                                            "reference": {
-                                                "name": "dockedItems",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "container|padding": "0 0 0 1",
-                                                "dock": "top",
-                                                "itemId": "tlbGridOptions"
-                                            },
-                                            "name": "MyToolbar51",
-                                            "designerId": "eb9cf134-4b6e-4074-ac61-4a607567c53d",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.button.Button",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "icon": null,
-                                                        "iconCls": "small-delete",
-                                                        "itemId": "btnDeleteTaxDetail",
-                                                        "layout|flex": null,
-                                                        "tabIndex": -1,
-                                                        "text": "Delete"
-                                                    },
-                                                    "name": "MyButton163",
-                                                    "designerId": "97f5b932-7590-46d2-91fd-c806b3f8292b"
-                                                },
-                                                {
-                                                    "type": "Ext.toolbar.Separator",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "designer|displayName": "separator",
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "MySeparator51",
-                                                    "designerId": "d6bd8160-c94e-4044-b291-53a9ad3377dc"
-                                                },
-                                                {
-                                                    "type": "linkedinstance",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "filter14",
-                                                    "designerId": "4228a31b-bb4e-45e0-9af0-fd9778808126",
-                                                    "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "flex": 1,
-                                                "text": "Tax Code",
-                                                "width": 75
-                                            },
-                                            "name": "MyColumn34",
-                                            "designerId": "9d95915e-f84f-4a78-8ab0-b8b58ccfc24f"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Check",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "text": "Select",
-                                                "width": 75
-                                            },
-                                            "name": "MyCheck8",
-                                            "designerId": "f718f4ad-81dd-4507-b948-60861deb2f31"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "flex": 1,
-                                                "text": "Tax Rate",
-                                                "width": 75
-                                            },
-                                            "name": "MyNumberColumn23",
-                                            "designerId": "7d77d912-3f6e-4602-b390-1eda4a442e29"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "flex": 1,
-                                                "text": "Tax Amount",
-                                                "width": 75
-                                            },
-                                            "name": "MyNumberColumn22",
-                                            "designerId": "ca922836-10f9-4ebb-bf4d-971e0cfc5916"
-                                        },
-                                        {
-                                            "type": "Ext.grid.View",
-                                            "reference": {
-                                                "name": "viewConfig",
-                                                "type": "object"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "itemId": "grvTaxDetail"
-                                            },
-                                            "name": "MyGridView41",
-                                            "designerId": "747db0b1-d2f2-4641-b10b-2ea3b2eab0a5"
-                                        },
-                                        {
-                                            "type": "Ext.selection.CheckboxModel",
-                                            "reference": {
-                                                "name": "selModel",
-                                                "type": "object"
-                                            },
-                                            "codeClass": "Ext.selection.CheckboxModel",
-                                            "name": "MyCheckboxSelectionModel31",
-                                            "designerId": "3cb4302a-e80a-4116-8fb5-21f6365376fa"
-                                        },
-                                        {
-                                            "type": "Ext.grid.plugin.CellEditing",
-                                            "reference": {
-                                                "name": "plugins",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "clicksToEdit": 1,
-                                                "pluginId": "FuelCodePlugin"
-                                            },
-                                            "name": "MyCellEditingPlugin",
-                                            "designerId": "e521ba8e-028d-4372-b395-1f5305807275"
                                         }
                                     ]
                                 }

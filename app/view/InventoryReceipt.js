@@ -1125,14 +1125,15 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                 columns: [
                                                     {
                                                         xtype: 'checkcolumn',
+                                                        itemId: 'colInspect',
                                                         width: 65,
-                                                        text: 'Select'
+                                                        text: 'Inspect'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        dataIndex: 'string',
                                                         itemId: 'colQualityPropertyName',
                                                         width: 82,
-                                                        dataIndex: 'string',
                                                         text: 'Quality Property Name',
                                                         flex: 1
                                                     }
@@ -1143,7 +1144,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                 plugins: [
                                                     {
                                                         ptype: 'cellediting',
-                                                        pluginId: 'FuelCodePlugin',
+                                                        pluginId: 'cepInspection',
                                                         clicksToEdit: 1
                                                     }
                                                 ]
@@ -1237,6 +1238,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         fieldLabel: 'Difference',
                                                         labelWidth: 130,
                                                         readOnly: true
+                                                    },
+                                                    {
+                                                        xtype: 'checkboxfield',
+                                                        itemId: 'chkPrepaid',
+                                                        fieldLabel: 'Prepaid',
+                                                        labelWidth: 130
                                                     },
                                                     {
                                                         xtype: 'checkboxfield',
@@ -1370,6 +1377,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        hidden: true,
                                         layout: 'fit',
                                         title: 'Put Away',
                                         items: [
@@ -1533,130 +1541,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                 ],
                                                 viewConfig: {
                                                     itemId: 'grvPutAway'
-                                                },
-                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                    selType: 'checkboxmodel'
-                                                }),
-                                                plugins: [
-                                                    {
-                                                        ptype: 'cellediting',
-                                                        pluginId: 'FuelCodePlugin',
-                                                        clicksToEdit: 1
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        xtype: 'panel',
-                                        title: 'Tax Detail',
-                                        layout: {
-                                            type: 'vbox',
-                                            align: 'stretch'
-                                        },
-                                        items: [
-                                            {
-                                                xtype: 'container',
-                                                margin: '10 5',
-                                                layout: {
-                                                    type: 'hbox',
-                                                    align: 'stretch'
-                                                },
-                                                items: [
-                                                    {
-                                                        xtype: 'textfield',
-                                                        flex: 1,
-                                                        itemId: 'txtTDReceiptNumber',
-                                                        fieldLabel: 'Receipt Number',
-                                                        labelWidth: 95,
-                                                        readOnly: true
-                                                    },
-                                                    {
-                                                        xtype: 'textfield',
-                                                        flex: 1,
-                                                        itemId: 'txtTDLineNo',
-                                                        margin: '0 5',
-                                                        fieldLabel: 'Item Line No',
-                                                        labelWidth: 80,
-                                                        readOnly: true
-                                                    },
-                                                    {
-                                                        xtype: 'textfield',
-                                                        flex: 1,
-                                                        itemId: 'txtTDItemId',
-                                                        fieldLabel: 'Item ID',
-                                                        labelWidth: 50,
-                                                        readOnly: true
-                                                    },
-                                                    {
-                                                        xtype: 'textfield',
-                                                        flex: 1,
-                                                        itemId: 'txtTDTotal',
-                                                        margin: '0 0 0 5',
-                                                        fieldLabel: 'Total',
-                                                        labelWidth: 40,
-                                                        readOnly: true
-                                                    }
-                                                ]
-                                            },
-                                            {
-                                                xtype: 'gridpanel',
-                                                flex: 1,
-                                                itemId: 'grdTaxDetail',
-                                                margin: -1,
-                                                dockedItems: [
-                                                    {
-                                                        xtype: 'toolbar',
-                                                        dock: 'top',
-                                                        itemId: 'tlbGridOptions',
-                                                        layout: {
-                                                            type: 'hbox',
-                                                            padding: '0 0 0 1'
-                                                        },
-                                                        items: [
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnDeleteTaxDetail',
-                                                                iconCls: 'small-delete',
-                                                                text: 'Delete'
-                                                            },
-                                                            {
-                                                                xtype: 'tbseparator'
-                                                            },
-                                                            {
-                                                                xtype: 'filter1'
-                                                            }
-                                                        ]
-                                                    }
-                                                ],
-                                                columns: [
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        width: 75,
-                                                        text: 'Tax Code',
-                                                        flex: 1
-                                                    },
-                                                    {
-                                                        xtype: 'checkcolumn',
-                                                        width: 75,
-                                                        text: 'Select'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        width: 75,
-                                                        text: 'Tax Rate',
-                                                        flex: 1
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        width: 75,
-                                                        text: 'Tax Amount',
-                                                        flex: 1
-                                                    }
-                                                ],
-                                                viewConfig: {
-                                                    itemId: 'grvTaxDetail'
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'

@@ -39,6 +39,7 @@ Ext.define('Inventory.model.Receipt', {
         { name: 'dblFreightRate', type: 'float'},
         { name: 'dblFuelSurcharge', type: 'float'},
         { name: 'dblInvoiceAmount', type: 'float'},
+        { name: 'ysnPrepaid', type: 'boolean'},
         { name: 'ysnInvoicePaid', type: 'boolean'},
         { name: 'intCheckNo', type: 'int'},
         { name: 'dteCheckDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d'},

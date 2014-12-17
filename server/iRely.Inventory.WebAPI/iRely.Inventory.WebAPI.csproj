@@ -145,6 +145,7 @@
     <Compile Include="Controllers\CommodityController.cs" />
     <Compile Include="Controllers\CommodityUnitMeasureController.cs" />
     <Compile Include="Controllers\ContainerTypeController.cs" />
+    <Compile Include="Controllers\QAPropertyController.cs" />
     <Compile Include="Controllers\EquipmentLengthController.cs" />
     <Compile Include="Controllers\ReceiptItemTaxController.cs" />
     <Compile Include="Controllers\ItemStockController.cs" />
